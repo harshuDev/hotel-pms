@@ -1,8 +1,8 @@
+import { HouseBoard } from "@/components/dashboard/house-board";
 import { HouseStrip } from "@/components/dashboard/house-strip";
 import { LiveFeed } from "@/components/dashboard/live-feed";
 import { Movements } from "@/components/dashboard/movements";
 import { Pace } from "@/components/dashboard/pace";
-import { RoomRack } from "@/components/dashboard/room-rack";
 import {
   getActivity,
   getArrivals,
@@ -41,7 +41,7 @@ export default async function DashboardPage() {
       <HouseStrip s={house} />
       <div className="grid gap-3 xl:grid-cols-[minmax(0,1.9fr)_minmax(0,1fr)]">
         <div className="space-y-3">
-          <RoomRack rooms={rooms} />
+          <HouseBoard rooms={rooms} />
           <Pace occupancy={occupancy} revenue={revenue} today={today} />
         </div>
         <div className="space-y-3">
