@@ -62,7 +62,7 @@ const SECTIONS: Section[] = [
   { label: "Meeting Rooms", href: "/meeting-rooms" },
 ];
 
-export function SideNav({ businessDate }: { businessDate: string }) {
+export function SideNav() {
   const pathname = usePathname();
   const [expanded, setExpanded] = useState<string | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -76,14 +76,7 @@ export function SideNav({ businessDate }: { businessDate: string }) {
 
   const body = (
     <>
-      <div className="px-5 pb-6 pt-5">
-        <p className="font-display text-[15px] font-600 leading-none tracking-tightest text-white">
-          Grand Ferndale
-        </p>
-        <p className="mt-1.5 text-2xs text-white/40">{businessDate}</p>
-      </div>
-
-      <nav className="flex-1 overflow-y-auto px-2.5 pb-4">
+      <nav className="flex-1 overflow-y-auto px-2.5 pb-4 pt-5">
         {SECTIONS.map((s) => {
           const isActive = active(s);
           const isOpen = expanded === s.label || (isActive && !!s.items);
