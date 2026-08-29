@@ -1,4 +1,3 @@
-import { format, parseISO } from "date-fns";
 import { HouseStrip } from "@/components/dashboard/house-strip";
 import { LiveFeed } from "@/components/dashboard/live-feed";
 import { Movements } from "@/components/dashboard/movements";
@@ -36,9 +35,7 @@ export default async function DashboardPage() {
           <h1 className="font-display text-[26px] font-semibold leading-none tracking-tightest text-ink">
             Dashboard
           </h1>
-          <p className="mt-1.5 text-[13px] text-ink-muted">
-            {format(parseISO(today), "EEEE d MMMM yyyy")} · business day open
-          </p>
+          <p className="mt-1.5 text-[13px] text-ink-muted">business day open</p>
         </div>
       </div>
       <HouseStrip s={house} />
