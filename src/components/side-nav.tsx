@@ -12,20 +12,8 @@ interface Section {
 }
 
 const SECTIONS: Section[] = [
-  { label: "Front Desk", href: "/dashboard" },
-  { label: "Cashier", href: "/cashier" },
+  { label: "Dashboard", href: "/dashboard" },
   { label: "Calendar", href: "/calendar" },
-  {
-    label: "Bookings",
-    items: [
-      { label: "All bookings", href: "/bookings" },
-      { label: "New booking", href: "/bookings/new" },
-      { label: "Arrivals", href: "/bookings/arrivals" },
-      { label: "Departures", href: "/bookings/departures" },
-      { label: "In house", href: "/bookings/in-house" },
-    ],
-  },
-  { label: "Customers", href: "/customers" },
   {
     label: "Inventory",
     items: [
@@ -40,7 +28,17 @@ const SECTIONS: Section[] = [
       { label: "Close out", href: "/inventory/close-out" },
     ],
   },
-  { label: "Offers", href: "/offers" },
+  {
+    label: "Bookings",
+    items: [
+      { label: "All bookings", href: "/bookings" },
+      { label: "New booking", href: "/bookings/new" },
+      { label: "Arrivals", href: "/bookings/arrivals" },
+      { label: "Departures", href: "/bookings/departures" },
+      { label: "In house", href: "/bookings/in-house" },
+    ],
+  },
+  { label: "Promotions", href: "/offers" },
   {
     label: "Reports",
     items: [
@@ -59,6 +57,9 @@ const SECTIONS: Section[] = [
       { label: "Reservations", href: "/reports/reservations" },
     ],
   },
+  { label: "Customers", href: "/customers" },
+  { label: "Cashier", href: "/cashier" },
+  { label: "Meeting Rooms", href: "/meeting-rooms" },
 ];
 
 export function SideNav({ businessDate }: { businessDate: string }) {
@@ -157,7 +158,7 @@ export function SideNav({ businessDate }: { businessDate: string }) {
 
       <div className="border-t border-white/[0.07] px-5 py-3.5">
         <p className="text-[13px] text-white">Shekher</p>
-        <p className="text-2xs text-white/35">Front desk · on shift</p>
+        <p className="text-2xs text-white/35">Reception · on shift</p>
       </div>
     </>
   );
