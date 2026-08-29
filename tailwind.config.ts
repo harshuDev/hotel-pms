@@ -5,16 +5,18 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Chrome — deep, cool, desaturated. Reads as night shift, not "dark mode".
-        chrome: { 900: "#0D1319", 800: "#151E27", 700: "#1F2C38", 600: "#2C3D4D" },
+        // Chrome — dark blue. Reservation Centric palette.
+        chrome: { 900: "#08203A", 800: "#0E2C4D", 700: "#153B63", 600: "#1F4F80" },
         // Content
-        ink: { DEFAULT: "#0F1720", muted: "#576672", faint: "#8B98A5" },
-        line: { DEFAULT: "#E3E8ED", strong: "#CBD4DD" },
-        shell: "#F1F4F7",
-        // Single accent: brass. Hotel key tags, bell pulls, door numbers.
-        brass: { DEFAULT: "#B4813C", light: "#E8D7B8", wash: "#FBF6EC" },
+        ink: { DEFAULT: "#0F1B2A", muted: "#546578", faint: "#8A99A9" },
+        line: { DEFAULT: "#E2E8F0", strong: "#C9D5E2" },
+        shell: "#F4F7FB",
+        // Single accent: blue. Active nav, revenue line, today's marker, key figures.
+        brass: { DEFAULT: "#1D6FE0", light: "#BBD6F7", wash: "#EFF6FF" },
+        // Due-out status. Was brass; split out so it doesn't collide with the accent.
+        warn: { DEFAULT: "#D97706", light: "#FBDCA9", wash: "#FEF7EC" },
         // Legacy tokens kept so existing pages compile unchanged
-        nav: { DEFAULT: "#1F2C38", dark: "#151E27", light: "#2C3D4D" },
+        nav: { DEFAULT: "#153B63", dark: "#0E2C4D", light: "#1F4F80" },
       },
       fontFamily: {
         sans: ["var(--font-body)", "system-ui", "sans-serif"],
@@ -26,8 +28,8 @@ export default {
       },
       letterSpacing: { tightest: "-0.03em" },
       boxShadow: {
-        card: "0 1px 2px rgba(15,23,32,0.05), 0 1px 1px rgba(15,23,32,0.03)",
-        lift: "0 8px 24px -6px rgba(15,23,32,0.16)",
+        card: "0 1px 2px rgba(8,32,58,0.06), 0 1px 1px rgba(8,32,58,0.04)",
+        lift: "0 8px 24px -6px rgba(8,32,58,0.18)",
       },
       keyframes: {
         rise: {
