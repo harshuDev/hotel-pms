@@ -15,9 +15,10 @@ import {
   getRooms,
 } from "@/lib/mock/queries";
 
+export const metadata = { title: "Grand Ferndale — Dashboard" };
+
 export default async function DashboardPage() {
   const today = await getBusinessDate();
-
   const [activity, arrivals, departures, occupancy, revenue, rooms, house] =
     await Promise.all([
       getActivity(),
@@ -28,22 +29,19 @@ export default async function DashboardPage() {
       getRooms(),
       getHouseSummary(),
     ]);
-
   return (
     <div className="space-y-3">
       <div className="flex flex-wrap items-end justify-between gap-2">
         <div>
           <h1 className="font-display text-[26px] font-semibold leading-none tracking-tightest text-ink">
-            Front desk
+            Dashboard
           </h1>
           <p className="mt-1.5 text-[13px] text-ink-muted">
             {format(parseISO(today), "EEEE d MMMM yyyy")} · business day open
           </p>
         </div>
       </div>
-
       <HouseStrip s={house} />
-
       <div className="grid gap-3 xl:grid-cols-[minmax(0,1.9fr)_minmax(0,1fr)]">
         <div className="space-y-3">
           <RoomRack rooms={rooms} />
