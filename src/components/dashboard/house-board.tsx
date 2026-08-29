@@ -55,10 +55,10 @@ const STATES: {
   },
 ];
 
-const PILL = Object.fromEntries(STATES.map((s) => [s.key, s.pill])) as Record
-  RoomState,
-  string
->;
+const PILL: Record<RoomState, string> = STATES.reduce(
+  (acc, s) => ({ ...acc, [s.key]: s.pill }),
+  {} as Record<RoomState, string>,
+);
 
 const PAGE = 240;
 
