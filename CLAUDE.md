@@ -32,10 +32,24 @@ current design, not as drift.
    survives only as a booking channel value in mock data — do not rename that.
 3. **Promotions, not Offers.** The nav label is "Promotions"; the route is
    still `/offers`. Renaming the route is optional and has not been done.
-4. **Headline at the top.** The property name and business date live in
-   `src/components/top-bar.tsx`, rendered by `src/app/(app)/layout.tsx`. The
-   sidebar no longer carries a brand block and `SideNav` takes no props. Each
-   page still prints its own title below the top bar.
+4. **Navigation is horizontal, across the top. There is no sidebar.** The
+   client confirmed this is what "move the main headline to the top" meant.
+   `src/components/side-nav.tsx` is deleted — do not reintroduce it, and do
+   not restore a sidebar layout when touching `src/app/(app)/layout.tsx`.
+   - `src/components/top-nav.tsx` is the blue bar: logo slot, nine sections,
+     search button, user menu. Sticky at `top-0`, `h-14`.
+   - `src/components/top-bar.tsx` is a slim strip below it with the property
+     name and business date. Sticky at `top-14` — that offset is what stops
+     the two bars overlapping on scroll. Do not change it to `top-0`.
+   - `src/lib/nav.ts` is the single source of nav sections, read by both the
+     desktop bar and the mobile drawer. Add or reorder sections there, never
+     inline in a component.
+   - `src/components/menu.tsx` is the shared dropdown primitive — hover
+     intent, click-outside, Escape, arrow keys. Inventory, Bookings, Reports
+     and the user menu all use it. Do not hand-roll another one.
+   - The logo is a placeholder until the client sends an asset, search renders
+     disabled until the lookup is built, and the user menu items are disabled
+     until auth exists. None of these are bugs.
 5. **No per-room grid.** See the house board note in the design system section.
 
 ## Stack
