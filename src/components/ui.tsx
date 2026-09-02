@@ -50,7 +50,10 @@ export function Card({
 }
 
 const STATUS_STYLE: Record<BookingStatus, string> = {
-  pending: "bg-brass-wash text-brass ring-brass-light",
+  // `warn`, not `brass` — pending sat on the accent token and read as pale
+  // blue next to `confirmed`. `warn-deep` for text: `warn` DEFAULT on the
+  // wash is only ~3:1, too low for the 10.5px badge.
+  pending: "bg-warn-wash text-warn-deep ring-warn-light",
   confirmed: "bg-sky-50 text-sky-700 ring-sky-200",
   checked_in: "bg-emerald-50 text-emerald-700 ring-emerald-200",
   checked_out: "bg-slate-100 text-slate-500 ring-slate-200",
