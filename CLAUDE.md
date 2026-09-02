@@ -210,6 +210,34 @@ anywhere else. Collapsed height must stay constant regardless of room count.
   never reveal the expected figure before the counted amount is entered.
 - Property scale: assume up to ~1,800 rooms per property. Any UI that renders
   one element per room, or any query that returns every room, is a bug.
+- **Meeting rooms are a separate booking module, confirmed with the client.**
+  Purpose is availability visibility: staff see at a glance which meeting room
+  is free or booked on which date. Meeting room names are configured per
+  property (Meeting Room A, Meeting Room B). The Meeting Rooms screen shows
+  those rooms and their calendars; clicking a date opens a booking with event
+  name and guest count required, comments and payment optional.
+- **Meeting rooms never go in `rooms`, and their bookings never go in
+    `bookings` or `booking_room_nights`.** Occupancy, ADR and RevPAR all
+    aggregate over those tables. A meeting room in `rooms` would silently
+    inflate every one of those figures. Use `meeting_rooms` and
+    `meeting_room_bookings`.
+- **Payment reuses the folio path.** `meeting_room_bookings.folio_id` is
+    null when no money is taken. When there is a payment it posts
+    `folio_items` and `payments` like any other charge, so append-only,
+    `signed_amount_cents` and `affects_drawer` all keep applying. Never add an
+    amount column to the booking row — that creates a second money system the
+    cashier drawer cannot see.
+- **Double-booking is prevented in Postgres, not in application code:**
+    `exclude using gist (meeting_room_id with =, daterange(starts_on, ends_on,
+    '[]') with &&) where (status = 'confirmed')`. Needs
+    `create extension if not exists btree_gist` in the same migration.
+- **The ~1,800 room rule does not apply here.** A property has a handful of
+    meeting rooms, so a row-per-room calendar grid is correct. Do not build a
+    house board for six meeting rooms.
+- Currently assumed whole-day booking (`starts_on` / `ends_on`, dates). If
+    the client wants hourly or half-day slots, these become `starts_at` /
+    `ends_at` timestamps and the constraint becomes `tstzrange` — a migration
+    plus a calendar rewrite. Confirm before building.
 
 ## Commands
 
@@ -235,7 +263,9 @@ pnpm supabase migration new <name>
   Project setup and the front end are already done. Remaining: migrations
   0001–0005, seed data, auth and roles, then the swap.
 - **Phase 2** — calendar grid, booking create and edit, inventory restrictions
-  UI, promotions.
+  UI, promotions, then meeting rooms. Meeting rooms come after the calendar
+  grid — they reuse it — and need a property settings screen for room names,
+  which depends on Phase 1 auth.
 - **Phase 3** — cashier wired to real data, reports, hardening.
 
 Out of scope right now: calendar, booking creation, rate editing, promotions,
@@ -257,10 +287,6 @@ than proceeding.
 4. **Paid-out default.** Assumed recharged to the guest folio by default, with
    an explicit toggle for house expense.
 5. **Denomination counting at close.** Assumed not needed in v1.
-6. **Meeting rooms.** Scope unknown. The nav entry and placeholder route exist;
-   nothing else. Whether this means bookable function space with its own rate
-   plans, or a simple internal room-booking calendar, changes the schema
-   materially. Ask before designing tables.
-7. **Room scale.** The ~1,800 figure came from a passing remark in client
+6. **Room scale.** The ~1,800 figure came from a passing remark in client
    feedback and has not been confirmed. It now drives the house board design
    and two query signatures, so confirm it before writing migrations.
