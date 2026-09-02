@@ -157,9 +157,16 @@ Defined in `tailwind.config.ts`. New UI must use these tokens.
   The token is still named `brass` for historical reasons and no longer
   describes its colour. Renaming it to `accent` is a safe, mechanical change
   and would be an improvement — but only as its own commit.
-- **Due out** uses `warn` (#D97706), not the accent. These were the same colour
-  before the palette change, which made a due-out room indistinguishable from
-  the active nav marker. Keep them separate.
+- **`warn`** (#D97706) carries two statuses that never appear on the same
+  object: due-out rooms on the house board, and pending bookings in the
+  bookings list. Both were previously on the accent — due-out became
+  indistinguishable from the active nav marker, and pending read as pale blue
+  next to `confirmed`. Do not "tidy" this by splitting `warn` into two tokens,
+  and do not move `pending` back to `brass`. One amber for two unrelated
+  object types is deliberate.
+- **`warn-deep`** (#92400E) is the text shade. `warn` DEFAULT on `warn-wash` is
+  about 3:1, unreadable at the 10.5px `text-xxs` badge size. Use `warn-deep`
+  for text on a wash, `warn` DEFAULT for fills and dots.  
 - **Status colours stay semantic** — emerald ready, `warn` due out, rose owing,
   slate departed. These carry meaning; don't restyle them decoratively.
 - **Type** `font-display` (Archivo) for headings and figures with
@@ -254,6 +261,6 @@ than proceeding.
    nothing else. Whether this means bookable function space with its own rate
    plans, or a simple internal room-booking calendar, changes the schema
    materially. Ask before designing tables.
-7. **Headline placement.** The property name moved to the top bar; per-page
-   titles stayed in place. If the client meant page titles should move up
-   instead, that touches every route — confirm before building it.
+7. **Room scale.** The ~1,800 figure came from a passing remark in client
+   feedback and has not been confirmed. It now drives the house board design
+   and two query signatures, so confirm it before writing migrations.
