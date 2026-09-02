@@ -25,7 +25,7 @@ The client compared this build against their reference system (Reservation
 Centric) and asked for five changes. All five are shipped. Treat them as the
 current design, not as drift.
 
-1. **Nav order and labels.** Sidebar order is fixed: Dashboard, Calendar,
+1. **Nav order and labels.** Section order is fixed: Dashboard, Calendar,
    Inventory, Bookings, Promotions, Reports, Customers, Cashier, Meeting Rooms.
 2. **Dashboard, not Front Desk.** The route `/dashboard` is labelled
    "Dashboard" in the nav, the page `<h1>` and the page title. "Front Desk"
