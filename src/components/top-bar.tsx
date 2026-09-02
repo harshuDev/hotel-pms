@@ -6,15 +6,16 @@ export function TopBar({
   businessDate: string;
 }) {
   return (
-    <header className="sticky top-0 z-20 hidden h-14 items-center justify-between border-b border-line bg-white px-5 lg:flex">
-      <p className="font-display text-[15px] font-semibold tracking-tightest text-ink">
+    <div className="sticky top-14 z-30 flex h-9 items-center justify-between border-b border-line bg-white px-4 lg:px-5">
+      <p className="font-display text-[13.5px] font-medium tracking-tightest text-ink">
         {propertyName}
       </p>
-      <div className="flex items-center gap-5 text-[13px]">
-        <span className="text-ink-muted">{businessDate}</span>
-        <span className="h-4 w-px bg-line" />
-        <span className="text-ink">Shekher</span>
-      </div>
-    </header>
+      <p className="text-[12.5px] text-ink-muted">
+        Business date{" "}
+        <span className="font-medium tabular-nums text-ink">
+          {businessDate}
+        </span>
+      </p>
+    </div>
   );
 }
