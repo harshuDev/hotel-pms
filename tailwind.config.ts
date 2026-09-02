@@ -6,15 +6,28 @@ export default {
     extend: {
       colors: {
         // Chrome — dark blue. Reservation Centric palette.
-        chrome: { 900: "#08203A", 800: "#0E2C4D", 700: "#153B63", 600: "#1F4F80" },
+        chrome: {
+          900: "#08203A",
+          800: "#0E2C4D",
+          700: "#153B63",
+          600: "#1F4F80",
+        },
         // Content
         ink: { DEFAULT: "#0F1B2A", muted: "#546578", faint: "#8A99A9" },
         line: { DEFAULT: "#E2E8F0", strong: "#C9D5E2" },
         shell: "#F4F7FB",
         // Single accent: blue. Active nav, revenue line, today's marker, key figures.
         brass: { DEFAULT: "#1D6FE0", light: "#BBD6F7", wash: "#EFF6FF" },
-        // Due-out status. Was brass; split out so it doesn't collide with the accent.
-        warn: { DEFAULT: "#D97706", light: "#FBDCA9", wash: "#FEF7EC" },
+        // Carries two statuses that never appear on the same object: due-out
+        // rooms on the house board, and pending bookings in the bookings list.
+        // `deep` is the text shade — DEFAULT on `wash` is only ~3:1, which is
+        // unreadable at the 10.5px badge size.
+        warn: {
+          DEFAULT: "#D97706",
+          deep: "#92400E",
+          light: "#FBDCA9",
+          wash: "#FEF7EC",
+        },
         // Legacy tokens kept so existing pages compile unchanged
         nav: { DEFAULT: "#153B63", dark: "#0E2C4D", light: "#1F4F80" },
       },
