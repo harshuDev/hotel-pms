@@ -17,6 +17,15 @@ import { Card } from "@/components/ui";
 import { formatMoney, formatMoneyShort } from "@/lib/money";
 import type { SeriesPoint } from "@/lib/types";
 
+// Recharts takes SVG colour props, not Tailwind classes, so these have to be
+// literal hex. Keep them in sync with `tailwind.config.ts` by hand — a search
+// for a stale palette hex will not find them inside JSX attributes otherwise.
+const ACCENT = "#1D6FE0"; // brass.DEFAULT — revenue line, today's marker
+const BAR_SOLD = "#153B63"; // chrome-700 — nights already sold
+const BAR_ONBOOKS = "#C9D5E2"; // line-strong — rooms on the books
+const GRID = "#E2E8F0"; // line.DEFAULT
+const AXIS_TEXT = "#8A99A9"; // ink-faint
+
 interface Row {
   date: string;
   occupancy: number;
@@ -113,12 +122,12 @@ export function Pace({
       <div className="h-[210px]">
         <ResponsiveContainer width="100%" height="100%">
           <ComposedChart data={rows} margin={{ top: 8, right: 8, bottom: 0, left: -22 }}>
-            <CartesianGrid vertical={false} stroke="#EDF1F5" />
+            <CartesianGrid vertical={false} stroke={GRID} />
             <XAxis
               dataKey="date"
               tickLine={false}
               axisLine={false}
-              tick={{ fontSize: 10, fill: "#8B98A5" }}
+              tick={{ fontSize: 10, fill: AXIS_TEXT }}
               tickFormatter={(d: string) => format(parseISO(d), "d MMM")}
               interval={6}
             />
@@ -126,34 +135,34 @@ export function Pace({
               yAxisId="occ"
               tickLine={false}
               axisLine={false}
-              tick={{ fontSize: 10, fill: "#8B98A5" }}
+              tick={{ fontSize: 10, fill: AXIS_TEXT }}
               tickFormatter={(v: number) => `${v}%`}
               domain={[0, 100]}
             />
             <YAxis yAxisId="rev" orientation="right" hide />
-            <Tooltip content={<Tip />} cursor={{ fill: "rgba(15,23,32,0.04)" }} />
+            <Tooltip content={<Tip />} cursor={{ fill: "rgba(8,32,58,0.04)" }} />
             <ReferenceLine
               yAxisId="occ"
               x={today}
-              stroke="#B4813C"
+              stroke={ACCENT}
               strokeDasharray="3 3"
               label={{
                 value: "today",
                 position: "insideTopRight",
                 fontSize: 10,
-                fill: "#B4813C",
+                fill: ACCENT,
               }}
             />
             <Bar yAxisId="occ" dataKey="occupancy" radius={[2, 2, 0, 0]} maxBarSize={11}>
               {rows.map((r) => (
-                <Cell key={r.date} fill={r.future ? "#D8E0E8" : "#1F2C38"} />
+                <Cell key={r.date} fill={r.future ? BAR_ONBOOKS : BAR_SOLD} />
               ))}
             </Bar>
             <Line
               yAxisId="rev"
               type="monotone"
               dataKey="revenue"
-              stroke="#B4813C"
+              stroke={ACCENT}
               strokeWidth={1.75}
               dot={false}
               isAnimationActive={false}
@@ -163,7 +172,7 @@ export function Pace({
       </div>
       <p className="mt-1 px-1 text-xs text-ink-faint">
         Solid bars are nights already sold. Pale bars are rooms on the books for
-        nights still to come. The brass line is room revenue.
+        nights still to come. The blue line is room revenue.
       </p>
     </Card>
   );
