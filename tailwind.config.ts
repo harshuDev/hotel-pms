@@ -5,15 +5,15 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Chrome. Deep navy, drawn from the Reservation Centric wordmark but
-        // taken darker so white nav text clears 16:1. The logo navy #003965
-        // sits at 11.8:1 and drops the muted /60 links to about 5:1, which is
-        // too close to the floor for a screen read at a front desk.
+        // Chrome. Reservation Centric blue. White text on 900 sits at 4.77:1,
+        // so nav labels must be full white. Any faded shade drops under 4.2:1
+        // and stops being readable, which is why top-nav.tsx no longer uses
+        // text-white/60 for inactive links.
         chrome: {
-          900: "#08203A",
-          800: "#0E2C4D",
-          700: "#153B63",
-          600: "#1F4F80",
+          900: "#1D6FE0",
+          800: "#1A63C9",
+          700: "#1757B2",
+          600: "#144B9B",
         },
 
         // Content
@@ -21,27 +21,17 @@ export default {
         line: { DEFAULT: "#E2E8F0", strong: "#C9D5E2" },
         shell: "#F4F7FB",
 
-        // Accent. One hue, two weights, split by what it sits on.
-        //   DEFAULT  on light content. Revenue line, key figures, links.
-        //            #009FEA only reaches 2.73:1 on shell, so it cannot be
-        //            used here. This is the same blue family, taken deeper.
-        //   bright   the logo cyan itself. Only ever on chrome, where it
-        //            reaches 5.59:1 against the 3.44:1 of DEFAULT.
-        //   light    pale tint for active items inside the dark drawer.
-        //   wash     tinted panel fill on light backgrounds.
+        // Accent on light content only. Revenue line, key figures, links.
+        // This is the same blue as chrome-900, so it must never be used as a
+        // marker sitting on chrome. Those markers are white now.
         brass: {
           DEFAULT: "#1D6FE0",
-          bright: "#009FEA",
           light: "#BBD6F7",
           wash: "#EFF6FF",
         },
 
-        // Brand reference. Not for UI chrome, use for the marketing surfaces,
-        // the login screen, printed folios and any PDF the guest sees.
-        brand: {
-          cyan: "#009FEA",
-          navy: "#003965",
-        },
+        // Brand reference. Marketing surfaces, login screen, printed folios.
+        brand: { cyan: "#009FEA", navy: "#003965" },
 
         // Carries two statuses that never appear on the same object: due-out
         // rooms on the house board, and pending bookings in the bookings list.
@@ -55,7 +45,7 @@ export default {
         },
 
         // Legacy tokens kept so existing pages compile unchanged
-        nav: { DEFAULT: "#153B63", dark: "#0E2C4D", light: "#1F4F80" },
+        nav: { DEFAULT: "#1757B2", dark: "#1A63C9", light: "#144B9B" },
       },
 
       fontFamily: {
