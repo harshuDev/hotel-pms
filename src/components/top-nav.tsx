@@ -51,23 +51,22 @@ export function TopNav({ propertyName, onSearchClick }: TopNavProps) {
         </button>
 
         {/*
-          Logo slot. The property name is deliberately not repeated here —
-          TopBar shows it directly below. Once the client sends an asset,
-          drop it in /public and replace the span with:
-            <img src="/logo.svg" alt="" className="h-[26px] w-[26px]" />
-          Keep the same 26px box so the bar height doesn't shift.
+          Logo. /public/logo-white.png is the Reservation Centric lockup with the
+          navy wordmark recoloured white so it reads on bg-chrome-900. The mark
+          stays brand cyan. Aspect is 5.69:1, so h-26px renders ~148px wide.
+          Swap the src to /logo-mark.png for the compact mark-only version.
         */}
         <Link
           href="/dashboard"
-          aria-label={`${propertyName} — dashboard`}
+          aria-label={`${propertyName} dashboard`}
           className="flex shrink-0 items-center rounded p-1 outline-none focus-visible:ring-1 focus-visible:ring-white/40"
         >
-          <span
+          <img
+            src="/logo-white.png"
+            alt=""
             aria-hidden="true"
-            className="grid h-[26px] w-[26px] place-items-center rounded-[5px] bg-brass font-display text-[11px] font-medium tracking-tightest text-white"
-          >
-            {initials(propertyName)}
-          </span>
+            className="h-[26px] w-auto"
+          />
         </Link>
 
         <nav aria-label="Main" className="ml-2 hidden items-center lg:flex">
@@ -188,9 +187,13 @@ export function TopNav({ propertyName, onSearchClick }: TopNavProps) {
             className="flex h-full w-[268px] flex-col bg-chrome-900"
             onClick={(e) => e.stopPropagation()}
           >
-            <p className="border-b border-white/[0.07] px-4 py-3.5 font-display text-sm tracking-tightest text-white">
-              {propertyName}
-            </p>
+            <div className="border-b border-white/[0.07] px-4 py-3.5">
+              <img
+                src="/logo-white.png"
+                alt={propertyName}
+                className="h-[24px] w-auto"
+              />
+            </div>
             <nav
               aria-label="Main"
               className="flex-1 overflow-y-auto px-2.5 pb-4 pt-3"
@@ -264,13 +267,4 @@ export function TopNav({ propertyName, onSearchClick }: TopNavProps) {
       )}
     </header>
   );
-}
-
-function initials(name: string): string {
-  return name
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((w) => w[0]?.toUpperCase() ?? "")
-    .join("");
 }
