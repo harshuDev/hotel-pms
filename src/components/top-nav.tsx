@@ -51,10 +51,10 @@ export function TopNav({ propertyName, onSearchClick }: TopNavProps) {
         </button>
 
         {/*
-          Logo. /public/logo-white.png is the Reservation Centric lockup with the
-          navy wordmark recoloured white so it reads on bg-chrome-900. The mark
-          stays brand cyan. Aspect is 5.69:1, so h-26px renders ~148px wide.
-          Swap the src to /logo-mark.png for the compact mark-only version.
+          Logo. Client asked for the mark only, no wordmark — it was taking up
+          too much bar width. /public/logo-mark.png is the brand-blue droplet
+          with the RC lettering reversed to white, same as the mark supplied
+          in _RC_LOGO.pdf. Aspect is ~1.18:1, so h-32px renders ~38px wide.
         */}
         <Link
           href="/dashboard"
@@ -62,10 +62,10 @@ export function TopNav({ propertyName, onSearchClick }: TopNavProps) {
           className="flex shrink-0 items-center rounded p-1 outline-none focus-visible:ring-1 focus-visible:ring-white/40"
         >
           <img
-            src="/logo-white.png"
+            src="/logo-mark.png"
             alt=""
             aria-hidden="true"
-            className="h-[26px] w-auto"
+            className="h-8 w-auto"
           />
         </Link>
 
@@ -189,9 +189,9 @@ export function TopNav({ propertyName, onSearchClick }: TopNavProps) {
           >
             <div className="border-b border-white/[0.07] px-4 py-3.5">
               <img
-                src="/logo-white.png"
+                src="/logo-mark.png"
                 alt={propertyName}
-                className="h-[24px] w-auto"
+                className="h-7 w-auto"
               />
             </div>
             <nav
