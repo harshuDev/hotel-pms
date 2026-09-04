@@ -35,7 +35,7 @@ export function TopNav({ propertyName, onSearchClick }: TopNavProps) {
           type="button"
           onClick={() => setDrawerOpen(true)}
           aria-label="Open navigation"
-          className="mr-1 grid h-8 w-8 place-items-center rounded text-white transition-colors hover:bg-white/[0.16] lg:hidden"
+          className="mr-1 grid h-8 w-8 place-items-center rounded text-white/70 transition-colors hover:bg-white/[0.08] hover:text-white lg:hidden"
         >
           <svg
             viewBox="0 0 18 18"
@@ -52,14 +52,14 @@ export function TopNav({ propertyName, onSearchClick }: TopNavProps) {
 
         {/*
           Logo. /public/logo-white.png is the Reservation Centric lockup with the
-          navy wordmark recoloured white. On the #1D6FE0 chrome the cyan mark
-          sits at only 1.6:1 against the bar, so the plate below keeps it
-          legible. Aspect is 5.69:1, so h-26px renders ~148px wide.
+          navy wordmark recoloured white so it reads on bg-chrome-900. The mark
+          stays brand cyan. Aspect is 5.69:1, so h-26px renders ~148px wide.
+          Swap the src to /logo-mark.png for the compact mark-only version.
         */}
         <Link
           href="/dashboard"
           aria-label={`${propertyName} dashboard`}
-          className="flex shrink-0 items-center rounded p-1 outline-none focus-visible:ring-1 focus-visible:ring-white/70"
+          className="flex shrink-0 items-center rounded p-1 outline-none focus-visible:ring-1 focus-visible:ring-white/40"
         >
           <img
             src="/logo-white.png"
@@ -84,8 +84,9 @@ export function TopNav({ propertyName, onSearchClick }: TopNavProps) {
                   onOpenChange={(o) => setOpenMenu(o ? s.label : null)}
                   triggerClassName={cn(
                     TRIGGER,
-                    "text-white",
-                    active ? "font-medium" : "font-normal",
+                    active
+                      ? "font-medium text-white"
+                      : "text-white/60 hover:text-white",
                   )}
                 >
                   {s.items.map((i) => (
@@ -105,13 +106,15 @@ export function TopNav({ propertyName, onSearchClick }: TopNavProps) {
                 href={s.href}
                 className={cn(
                   TRIGGER,
-                  "text-white outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-white/70",
-                  active ? "font-medium" : "font-normal",
+                  "outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-white/40",
+                  active
+                    ? "font-medium text-white"
+                    : "text-white/60 hover:text-white",
                 )}
               >
                 {s.label}
                 {active && (
-                  <span className="absolute inset-x-2.5 bottom-0 h-[2px] rounded-full bg-white" />
+                  <span className="absolute inset-x-2.5 bottom-0 h-[2px] rounded-full bg-brass" />
                 )}
               </Link>
             );
@@ -124,7 +127,7 @@ export function TopNav({ propertyName, onSearchClick }: TopNavProps) {
             onClick={onSearchClick}
             disabled={!onSearchClick}
             aria-label="Search bookings and guests"
-            className="grid h-8 w-8 place-items-center rounded text-white outline-none transition-colors hover:bg-white/[0.16] focus-visible:ring-1 focus-visible:ring-white/70 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:bg-transparent"
+            className="grid h-8 w-8 place-items-center rounded text-white/60 outline-none transition-colors hover:bg-white/[0.08] hover:text-white focus-visible:ring-1 focus-visible:ring-white/40 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent"
           >
             <svg
               viewBox="0 0 20 20"
@@ -145,10 +148,10 @@ export function TopNav({ propertyName, onSearchClick }: TopNavProps) {
             align="end"
             open={openMenu === USER_MENU}
             onOpenChange={(o) => setOpenMenu(o ? USER_MENU : null)}
-            triggerClassName="relative flex h-14 items-center gap-2 px-1.5 text-[13px] text-white transition-colors"
+            triggerClassName="relative flex h-14 items-center gap-2 px-1.5 text-[13px] text-white/70 transition-colors hover:text-white"
             triggerContent={
               <>
-                <span className="grid h-7 w-7 place-items-center rounded-full bg-white/[0.22] text-[11px] font-medium text-white">
+                <span className="grid h-7 w-7 place-items-center rounded-full bg-white/[0.14] text-[11px] font-medium text-white">
                   S
                 </span>
                 <span className="hidden text-[13px] sm:inline">Shekher</span>
@@ -184,7 +187,7 @@ export function TopNav({ propertyName, onSearchClick }: TopNavProps) {
             className="flex h-full w-[268px] flex-col bg-chrome-900"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="border-b border-white/20 px-4 py-3.5">
+            <div className="border-b border-white/[0.07] px-4 py-3.5">
               <img
                 src="/logo-white.png"
                 alt={propertyName}
@@ -207,24 +210,26 @@ export function TopNav({ propertyName, onSearchClick }: TopNavProps) {
                         onClick={() => setExpanded(isOpen ? null : s.label)}
                         aria-expanded={isOpen}
                         className={cn(
-                          "flex w-full items-center justify-between rounded px-3 py-2 text-[13.5px] text-white transition-colors hover:bg-white/[0.1]",
-                          active ? "font-medium" : "font-normal",
+                          "flex w-full items-center justify-between rounded px-3 py-2 text-[13.5px] transition-colors",
+                          active
+                            ? "font-medium text-white"
+                            : "text-white/55 hover:bg-white/[0.04] hover:text-white/90",
                         )}
                       >
                         {s.label}
                         <Chevron open={isOpen} />
                       </button>
                       {isOpen && (
-                        <div className="mb-1.5 ml-3 border-l border-white/25 pl-2.5">
+                        <div className="mb-1.5 ml-3 border-l border-white/10 pl-2.5">
                           {s.items.map((i) => (
                             <Link
                               key={i.href}
                               href={i.href}
                               className={cn(
-                                "block rounded px-2.5 py-1.5 text-[12.5px] text-white transition-colors hover:bg-white/[0.1]",
+                                "block rounded px-2.5 py-1.5 text-[12.5px] transition-colors",
                                 isHrefActive(i.href, pathname)
-                                  ? "font-medium"
-                                  : "font-normal",
+                                  ? "text-brass-light"
+                                  : "text-white/40 hover:text-white/80",
                               )}
                             >
                               {i.label}
@@ -243,12 +248,14 @@ export function TopNav({ propertyName, onSearchClick }: TopNavProps) {
                     key={s.label}
                     href={s.href}
                     className={cn(
-                      "relative mb-0.5 block rounded px-3 py-2 text-[13.5px] text-white transition-colors hover:bg-white/[0.1]",
-                      active ? "bg-white/[0.16] font-medium" : "font-normal",
+                      "relative mb-0.5 block rounded px-3 py-2 text-[13.5px] transition-colors",
+                      active
+                        ? "bg-white/[0.07] font-medium text-white"
+                        : "text-white/55 hover:bg-white/[0.04] hover:text-white/90",
                     )}
                   >
                     {active && (
-                      <span className="absolute inset-y-1.5 left-0 w-[3px] rounded-full bg-white" />
+                      <span className="absolute inset-y-1.5 left-0 w-[3px] rounded-full bg-brass" />
                     )}
                     {s.label}
                   </Link>
@@ -261,3 +268,4 @@ export function TopNav({ propertyName, onSearchClick }: TopNavProps) {
     </header>
   );
 }
+
