@@ -9,12 +9,13 @@ export default {
         // so nav labels must be full white. Any faded shade drops under 4.2:1
         // and stops being readable, which is why top-nav.tsx no longer uses
         // text-white/60 for inactive links.
+        
         chrome: {
-          900: "#1D6FE0",
-          800: "#1A63C9",
-          700: "#1757B2",
-          600: "#144B9B",
-        },
+          900: "#08203A",
+          800: "#0E2C4D",
+          700: "#153B63",
+          600: "#1F4F80",
+},
 
         // Content
         ink: { DEFAULT: "#0F1B2A", muted: "#546578", faint: "#8A99A9" },
