@@ -5,11 +5,10 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Chrome. Reservation Centric blue. White text on 900 sits at 4.77:1,
-        // so nav labels must be full white. Any faded shade drops under 4.2:1
-        // and stops being readable, which is why top-nav.tsx no longer uses
-        // text-white/60 for inactive links.
-        
+        // Chrome. Deep navy, drawn from the Reservation Centric wordmark but
+        // taken darker so white nav text clears 16:1. The logo navy #003965
+        // sits at 11.8:1 and drops the muted /60 links to about 5:1, which is
+        // too close to the floor for a screen read at a front desk.
         chrome: {
           900: "#08203A",
           800: "#0E2C4D",
@@ -46,7 +45,7 @@ export default {
         },
 
         // Legacy tokens kept so existing pages compile unchanged
-        nav: { DEFAULT: "#1757B2", dark: "#1A63C9", light: "#144B9B" },
+        nav: { DEFAULT: "#153B63", dark: "#0E2C4D", light: "#1F4F80" },
       },
 
       fontFamily: {
