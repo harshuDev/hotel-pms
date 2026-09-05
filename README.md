@@ -13,10 +13,11 @@ Open http://localhost:3000
 
 ## What is real and what is not
 
-Everything on screen renders from `src/lib/mock/` — a deterministic generator
-producing 140 bookings, 64 customers, 28 days of occupancy and revenue, and an
-open cashier shift. There is no database yet.
-
+Everything on screen still renders from `src/lib/mock/` — a deterministic
+generator producing 140 bookings, 64 customers, 28 days of occupancy and
+revenue, and an open cashier shift. Layer 1 of the Supabase schema is now in
+`supabase/migrations/0001_core.sql`; the mock-to-live data swap is a later
+Phase 1 step.
 **This is not throwaway code.** Every page reads through
 `src/lib/mock/queries.ts`, whose functions are async and return exactly the
 shape the Supabase queries will return:
