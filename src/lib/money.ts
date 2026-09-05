@@ -1,8 +1,8 @@
-export const CURRENCY = "INR";
-export const LOCALE = "en-IN";
+export const CURRENCY = "GBP";
+export const LOCALE = "en-GB";
 
 /**
- * All currency in this app is stored as integer minor units (cents/paise).
+ * All currency in this app is stored as integer minor units (pence).
  * This is the ONLY place currency becomes a string. Never format inline.
  */
 export function formatMoney(cents: number, currency: string = CURRENCY): string {
@@ -38,5 +38,9 @@ export function parseMoney(input: string): number {
   if (!cleaned || !/^-?\d*\.?\d{0,2}$/.test(cleaned)) {
     throw new Error(`Not a valid amount: ${input}`);
   }
-  return Math.round(parseFloat(cleaned) * 100);
-}
+  const negative = cleaned.startsWith("-");
+  const unsigned = negative ? cleaned.slice(1) : cleaned;
+  const [whole = "0", fraction = ""] = unsigned.split(".");
+  // Convert digits directly to minor units; never round a floating-point value.
+  const pence = Number(`${whole || "0"}${fraction.padEnd(2, "0")}`);
+  return negative ? -pence : pence;}
