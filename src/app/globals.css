@@ -2,14 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Keep builds self-contained: external Google-font fetching during `next build`
-   makes deployments dependent on network access. The system fallbacks preserve the
-   existing compact sans/display hierarchy without a remote build-time dependency. */
-:root {
-  --font-body: "Segoe UI", system-ui, sans-serif;
-  --font-display: Arial, "Helvetica Neue", sans-serif;
-}
-
 @layer base {
   body {
     @apply bg-shell font-sans text-ink antialiased;
