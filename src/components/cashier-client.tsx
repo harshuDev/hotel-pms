@@ -188,8 +188,7 @@ export function CashierClient({
         <Stat
           label="Expected in drawer"
           value={formatMoney(totals.expected)}
-          hint="Cash only — card and UPI excluded"
-        />
+          hint="Cash only — non-cash payments excluded"        />
       </div>
 
       <div className="grid gap-3 xl:grid-cols-2">
