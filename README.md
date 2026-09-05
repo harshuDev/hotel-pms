@@ -39,6 +39,26 @@ To go live: create `src/lib/queries.ts` with the same signatures backed by
 Supabase, change the imports in the page files, delete `src/lib/mock/`.
 No component changes.
 
+Supabase schema
+
+Supabase configuration lives in `supabase/config.toml` and schema changes are
+versioned in `supabase/migrations/`. To run the database locally, install the
+[Supabase CLI](https://supabase.com/docs/guides/local-development/cli/getting-started),
+then:
+
+```bash
+cp .env.example .env.local
+pnpm supabase start
+pnpm supabase db reset
+pnpm supabase gen types typescript --local > src/lib/database.types.ts
+```
+
+`business_dates` is the source of truth for a property's operating day. It is
+not derived from the server date: a partial unique index permits exactly one
+open date per property. Tenant tables carry `property_id`, use property-scoped
+RLS policies, and room status history plus activity log records are written by
+security-definer audit triggers rather than application clients.
+
 ## Money
 
 All currency is integer minor units (paise). `src/lib/money.ts` is the only
