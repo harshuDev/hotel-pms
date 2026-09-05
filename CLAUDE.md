@@ -7,7 +7,8 @@ channel-connected bookings, and a cashier shift/drawer feature.
 
 The front end is **built and deployed**. Dashboard, bookings list, customers
 list and the cashier shift screen all work, running on generated mock data.
-There is no database yet.
+Layer 1 of the Supabase schema lives in `supabase/migrations/0001_core.sql`;
+the front end has not yet been swapped from mock data to database reads.
 
 A client revision round has been applied on top of the original build: the
 palette moved from brass/slate to the client's white/blue/dark-blue scheme, the
@@ -260,8 +261,8 @@ pnpm supabase migration new <name>
 ## Phase plan
 
 - **Phase 1** — schema, auth, and swapping the mock layer for Supabase.
-  Project setup and the front end are already done. Remaining: migrations
-  0001–0005, seed data, auth and roles, then the swap.
+  Project setup, the front end, and core migration 0001 are done. Remaining:
+  migrations 0002–0005, seed data, auth and roles, then the swap.
 - **Phase 2** — calendar grid, booking create and edit, inventory restrictions
   UI, promotions, then meeting rooms. Meeting rooms come after the calendar
   grid — they reuse it — and need a property settings screen for room names,
