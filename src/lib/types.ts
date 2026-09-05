@@ -158,3 +158,60 @@ export interface HouseSummary {
   outstandingCents: number;
   adrCents: number;
 }
+
+/** Financial ledger shapes used by the eventual Supabase query layer. Amounts
+ * are integer minor units; UI formatting remains centralized in money.ts. */
+export type FolioStatus = "open" | "closed" | "cancelled";
+export type FolioSettlementStatus =
+  | "open"
+  | "partially_paid"
+  | "settled"
+  | "credit_balance"
+  | "closed"
+  | "cancelled";
+export type FolioItemType =
+  | "room_charge"
+  | "tax"
+  | "food_beverage"
+  | "laundry"
+  | "minibar"
+  | "transport"
+  | "miscellaneous"
+  | "discount"
+  | "adjustment"
+  | "reversal";
+export type FinancialPaymentMethod =
+  | "cash"
+  | "card"
+  | "bank_transfer"
+  | "upi"
+  | "ota_prepaid"
+  | "virtual_card"
+  | "complimentary"
+  | "other";
+
+export interface FolioBalance {
+  folioId: string;
+  bookingId: string;
+  totalChargesCents: bigint;
+  totalPaymentsCents: bigint;
+  outstandingCents: bigint;
+  settlementStatus: FolioSettlementStatus;
+}
+
+export interface FolioItem {
+  id: string;
+  folioId: string;
+  bookingId: string;
+  businessDate: string;
+  itemType: FolioItemType;
+  description: string;
+  quantity: number;
+  unitAmountCents: bigint;
+  netAmountCents: bigint;
+  taxAmountCents: bigint;
+  amountCents: bigint;
+  signedAmountCents: bigint;
+  reversesId: string | null;
+  postedAt: string;
+}
