@@ -614,8 +614,8 @@ function CloseShiftModal({
     }
   })();
   const variance = declared - expected;
-  const needsNote = Math.abs(variance) > 20000; // ₹200
-
+  const needsNote = Math.abs(variance) > 20000; // £200
+  
   return (
     <Modal title="Close shift" onClose={onCancel}>
       {step === "count" ? (
@@ -697,8 +697,7 @@ function CloseShiftModal({
                 }}
                 rows={3}
                 className={inputCls}
-                placeholder="Short of ₹300 — suspect an unrecorded taxi paid-out."
-              />
+                placeholder="Short of £300 — suspect an unrecorded taxi paid-out."              />
             </div>
           )}
 
