@@ -5,7 +5,14 @@ export const LOCALE = "en-GB";
  * All currency in this app is stored as integer minor units (pence).
  * This is the ONLY place currency becomes a string. Never format inline.
  */
+function assertMinorUnits(pence: number): void {
+  if (!Number.isSafeInteger(pence)) {
+    throw new Error("Money must be a safe integer number of pence");
+  }
+}
+
 export function formatMoney(cents: number, currency: string = CURRENCY): string {
+    assertMinorUnits(cents);
   return new Intl.NumberFormat(LOCALE, {
     style: "currency",
     currency,
@@ -16,6 +23,7 @@ export function formatMoney(cents: number, currency: string = CURRENCY): string 
 
 /** Compact form for chart axes and headline totals. */
 export function formatMoneyShort(cents: number, currency: string = CURRENCY): string {
+    assertMinorUnits(cents);
   return new Intl.NumberFormat(LOCALE, {
     style: "currency",
     currency,
@@ -35,7 +43,7 @@ export function formatDue(balanceCents: number, currency: string = CURRENCY): st
 
 export function parseMoney(input: string): number {
   const cleaned = input.replace(/[^0-9.-]/g, "");
-  if (!cleaned || !/^-?\d*\.?\d{0,2}$/.test(cleaned)) {
+  if (!/^-?(?:\d+(?:\.\d{0,2})?|\.\d{1,2})$/.test(cleaned)) {    
     throw new Error(`Not a valid amount: ${input}`);
   }
   const negative = cleaned.startsWith("-");
