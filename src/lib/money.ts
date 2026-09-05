@@ -1,14 +1,16 @@
-export const CURRENCY = "GBP";
-export const LOCALE = "en-GB";
-
+export const CURRENCY = "INR";
+export const LOCALE = "en-IN";
 /**
  * All currency in this app is stored as integer minor units (pence).
  * This is the ONLY place currency becomes a string. Never format inline.
  */
-function assertMinorUnits(pence: number): void {
-  if (!Number.isSafeInteger(pence)) {
-    throw new Error("Money must be a safe integer number of pence");
-  }
+export function formatMoney(cents: number, currency: string = CURRENCY): string {
+  return new Intl.NumberFormat(LOCALE, {
+    style: "currency",
+    currency,
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(cents / 100);
 }
 
 export function formatMoney(cents: number, currency: string = CURRENCY): string {
@@ -46,9 +48,4 @@ export function parseMoney(input: string): number {
   if (!/^-?(?:\d+(?:\.\d{0,2})?|\.\d{1,2})$/.test(cleaned)) {    
     throw new Error(`Not a valid amount: ${input}`);
   }
-  const negative = cleaned.startsWith("-");
-  const unsigned = negative ? cleaned.slice(1) : cleaned;
-  const [whole = "0", fraction = ""] = unsigned.split(".");
-  // Convert digits directly to minor units; never round a floating-point value.
-  const pence = Number(`${whole || "0"}${fraction.padEnd(2, "0")}`);
-  return negative ? -pence : pence;}
+  return Math.round(parseFloat(cleaned) * 100);
