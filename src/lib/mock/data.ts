@@ -73,9 +73,8 @@ export const CHANNELS: Channel[] = [
 export const PAYMENT_METHODS: PaymentMethod[] = [
   { id: "pm1", name: "Cash", affectsDrawer: true },
   { id: "pm2", name: "Card", affectsDrawer: false },
-  { id: "pm3", name: "UPI", affectsDrawer: false },
-  { id: "pm4", name: "Bank Transfer", affectsDrawer: false },
-  { id: "pm5", name: "OTA Prepaid", affectsDrawer: false },
+  { id: "pm3", name: "Bank Transfer", affectsDrawer: false },
+  { id: "pm4", name: "OTA Prepaid", affectsDrawer: false },
 ];
 
 const FIRST = [
