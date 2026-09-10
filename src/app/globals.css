@@ -2,6 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --font-body: "Segoe UI", system-ui, sans-serif;
+  --font-display: Arial, "Helvetica Neue", sans-serif;
+}
+
 /*
  * Keep builds self-contained: do not use next/font/google or external
  * stylesheet imports here. These local fallbacks preserve the existing
