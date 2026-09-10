@@ -128,6 +128,26 @@ export interface Shift {
   paidOuts: PaidOut[];
 }
 
+/** Read model returned by the Phase 4 cashier summary view/RPC. */
+export interface CashierShiftSummary {
+  shiftId: string;
+  propertyId: string;
+  cashierId: string;
+  businessDate: string;
+  status: "open" | "closing" | "closed";
+  openedAt: string;
+  closedAt: string | null;
+  openingBalanceCents: bigint;
+  cashPaymentsCents: bigint;
+  cashAddedCents: bigint;
+  paidOutsCents: bigint;
+  cashDropsCents: bigint;
+  adjustmentsCents: bigint;
+  expectedCashCents: bigint;
+  countedCashCents: bigint | null;
+  varianceCents: bigint | null;
+}
+
 export type RoomState =
   | "occupied"
   | "due_out"
@@ -184,7 +204,6 @@ export type FinancialPaymentMethod =
   | "cash"
   | "card"
   | "bank_transfer"
-  | "upi"
   | "ota_prepaid"
   | "virtual_card"
   | "complimentary"
