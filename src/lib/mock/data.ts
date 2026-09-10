@@ -52,7 +52,7 @@ const iso = (d: Date) => format(d, "yyyy-MM-dd");
 export const PROPERTY = {
   name: "Grand Ferndale",
   timezone: "Europe/London",
-  currency: "GBP",,
+  currency: "GBP",
 };
 
 export const ROOM_TYPES: RoomType[] = [
