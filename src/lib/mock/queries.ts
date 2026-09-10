@@ -140,6 +140,30 @@ export async function getOpenShift(): Promise<Shift> {
   return openShift();
 }
 
+/** Phase 4 query names. These preserve the mock swap point until Supabase is configured. */
+export async function getCurrentCashierShift(): Promise<Shift> {
+  return getOpenShift();
+}
+
+export async function getCashierShiftTransactions() {
+  const shift = await getOpenShift();
+  return shift.payments;
+}
+
+export async function getCashMovements() {
+  const shift = await getOpenShift();
+  return shift.paidOuts;
+}
+
+export async function getRecentCashPayments() {
+  const shift = await getOpenShift();
+  return shift.payments.filter((payment) => payment.affectsDrawer);
+}
+
+export async function getCashierShiftHistory(): Promise<Shift[]> {
+  return [];
+}
+
 export async function searchBookingsForPayment(q: string): Promise<Booking[]> {
   if (!q.trim()) return [];
   const term = q.toLowerCase();
