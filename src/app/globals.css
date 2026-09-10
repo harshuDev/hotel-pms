@@ -2,10 +2,21 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+ * Keep builds self-contained: do not use next/font/google or external
+ * stylesheet imports here. These local fallbacks preserve the existing
+ * display/body font variables used by the Tailwind configuration.
+ */
+:root {
+  --font-body: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-display: Arial, "Helvetica Neue", sans-serif;
+}
+
 @layer base {
   body {
     @apply bg-shell font-sans text-ink antialiased;
   }
+
   :focus-visible {
     @apply outline-none ring-2 ring-brass ring-offset-2 ring-offset-white;
   }
@@ -16,6 +27,7 @@
   .tnum {
     font-variant-numeric: tabular-nums;
   }
+
   /* Out-of-order rooms get a physical, struck-through texture. */
   .hatch {
     background-image: repeating-linear-gradient(
