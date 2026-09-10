@@ -404,8 +404,12 @@ begin
       jsonb_build_object('booking_id', new.booking_id, 'folio_id', new.folio_id, 'amount_cents', new.amount_cents, 'item_type', new.item_type));
   else
     select * into v_method from public.payment_methods where id = new.payment_method_id;
-    v_action := case when new.reverses_id is null then 'payment_received' else 'payment_reversed' end;
-    insert into public.activity_log(property_id, actor_id, entity_type, entity_id, action, summary, metadata)
+ v_action := case
+      when new.reverses_id is not null then 'payment_reversed'
+      when v_method.affects_drawer then 'cash_payment_received'
+      else 'payment_received'
+    end;
+insert into public.activity_log(property_id, actor_id, entity_type, entity_id, action, summary, metadata)
     values(new.property_id, new.received_by, 'payment', new.id, v_action,
       case when new.reverses_id is null then format('Payment received via %s', v_method.name) else format('Payment reversed via %s', v_method.name) end,
       jsonb_build_object('booking_id', new.booking_id, 'folio_id', new.folio_id, 'amount_cents', new.amount_cents, 'payment_method', v_method.kind));
