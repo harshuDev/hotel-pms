@@ -23,6 +23,7 @@ create table public.cashier_shifts (
   constraint cashier_shifts_opening_nonnegative check (opening_balance_cents >= 0),
   constraint cashier_shifts_close_snapshot check ((status <> 'closed' and counted_cash_cents is null and expected_cash_at_close_cents is null and variance_cents is null and closed_at is null) or (status = 'closed' and counted_cash_cents is not null and expected_cash_at_close_cents is not null and variance_cents is not null and closed_at is not null))
 );
+
 create unique index cashier_shifts_one_open_per_cashier_date on public.cashier_shifts(property_id, cashier_id, business_date_id) where status in ('open', 'closing');
 
 alter table public.payments add constraint payments_shift_property_fk foreign key (shift_id, property_id) references public.cashier_shifts(id, property_id) on delete restrict;
@@ -42,6 +43,7 @@ create table public.cash_movements (
   constraint cash_movements_direction_valid check ((movement_type in ('paid_out','cash_drop') and direction = 'out') or (movement_type = 'cash_added' and direction = 'in') or (movement_type in ('cash_adjustment','correction'))),
   constraint cash_movements_approval_required check (movement_type not in ('cash_adjustment','correction') or approved_by is not null)
 );
+
 create index cash_movements_shift_created_idx on public.cash_movements(property_id, shift_id, created_at desc);
 
 create function public.cashier_shift_expected(p_shift_id uuid)
@@ -68,7 +70,7 @@ create function public.open_cashier_shift(p_opening_balance_cents bigint, p_open
 returns uuid language plpgsql security definer set search_path=public,auth as $$
 declare v_property uuid:=current_property_id(); v_date business_dates; v_id uuid;
 begin
-  if auth.uid() is null or current_role() not in ('admin','manager','front_desk','cashier') then raise exception 'Not authorised to open a cashier shift'; end if;
+  if auth.uid() is null or public.current_role() not in ('admin','manager','front_desk','cashier') then raise exception 'Not authorised to open a cashier shift'; end if;
   if p_opening_balance_cents < 0 then raise exception 'Opening balance must be non-negative'; end if;
   select * into v_date from business_dates where property_id=v_property and status='open' for update;
   if not found then raise exception 'No open business date for property'; end if;
@@ -81,10 +83,10 @@ create function public.record_cash_movement(p_shift_id uuid,p_movement_type publ
 returns uuid language plpgsql security definer set search_path=public,auth as $$
 declare s cashier_shifts; v_id uuid; d cash_movement_direction;
 begin
-  if current_role() not in ('admin','manager','front_desk','cashier') then raise exception 'Not authorised'; end if;
+  if public.current_role() not in ('admin','manager','front_desk','cashier') then raise exception 'Not authorised'; end if;
   select * into s from cashier_shifts where id=p_shift_id and property_id=current_property_id() and status='open' for update;
   if not found then raise exception 'Open cashier shift not found'; end if;
-  if s.cashier_id <> auth.uid() and current_role() not in ('admin','manager') then raise exception 'Cannot post to another cashier drawer'; end if;
+  if s.cashier_id <> auth.uid() and public.current_role() not in ('admin','manager') then raise exception 'Cannot post to another cashier drawer'; end if;
   d:=coalesce(p_direction,case when p_movement_type='cash_added' then 'in'::cash_movement_direction else 'out'::cash_movement_direction end);
   if p_amount_cents<=0 or btrim(p_reason)='' then raise exception 'Amount and reason are required'; end if;
   insert into cash_movements(property_id,shift_id,business_date_id,movement_type,direction,amount_cents,reason,reference,created_by,approved_by) values(s.property_id,s.id,s.business_date_id,p_movement_type,d,p_amount_cents,p_reason,p_reference,auth.uid(),case when p_movement_type in ('cash_adjustment','correction') then auth.uid() end) returning id into v_id;
@@ -97,7 +99,7 @@ declare s cashier_shifts; e record;
 begin
   if p_counted_cash_cents<0 then raise exception 'Counted cash must be non-negative'; end if;
   select * into s from cashier_shifts where id=p_shift_id and property_id=current_property_id() and status='open' for update;
-  if not found or (s.cashier_id<>auth.uid() and current_role() not in ('admin','manager')) then raise exception 'Open cashier shift not found or not authorised'; end if;
+  if not found or (s.cashier_id<>auth.uid() and public.current_role() not in ('admin','manager')) then raise exception 'Open cashier shift not found or not authorised'; end if;
   select * into e from cashier_shift_expected(s.id);
   update cashier_shifts set status='closed',counted_cash_cents=p_counted_cash_cents,expected_cash_at_close_cents=e.expected_cash_cents,variance_cents=p_counted_cash_cents-e.expected_cash_cents,closing_notes=p_closing_notes,closed_at=now(),updated_at=now() where id=s.id;
   insert into activity_log(property_id,actor_id,entity_type,entity_id,action,summary,metadata) values(s.property_id,auth.uid(),'cashier_shift',s.id,'cashier_shift_closed','Cashier shift closed',jsonb_build_object('counted_cash_cents',p_counted_cash_cents,'expected_cash_cents',e.expected_cash_cents,'variance_cents',p_counted_cash_cents-e.expected_cash_cents));
@@ -108,9 +110,13 @@ end; $$;
 create function public.validate_cash_payment_shift() returns trigger language plpgsql security definer set search_path=public as $$
 declare s cashier_shifts; m payment_methods;
 begin select * into m from payment_methods where id=new.payment_method_id and property_id=new.property_id; if m.affects_drawer then if new.shift_id is null then raise exception 'Cash payments require a cashier shift'; end if; select * into s from cashier_shifts where id=new.shift_id and property_id=new.property_id and status='open'; if not found or s.business_date_id <> (select id from business_dates where property_id=new.property_id and business_date=new.business_date) then raise exception 'Cash payment must use an open shift on its business date'; end if; elsif new.shift_id is not null then raise exception 'Only cash payments may reference a cashier shift'; end if; return new; end; $$;
+
 create trigger payments_validate_cash_shift before insert on public.payments for each row execute function public.validate_cash_payment_shift();
+
 create function public.prevent_cashier_mutation() returns trigger language plpgsql as $$ begin raise exception '% is append-only',tg_table_name; end; $$;
+
 create trigger cash_movements_immutable before update or delete on public.cash_movements for each row execute function public.prevent_cashier_mutation();
+
 create function public.protect_cashier_shift() returns trigger language plpgsql as $$
 begin
   if tg_op = 'DELETE' or old.status = 'closed' then raise exception 'Closed cashier shifts are immutable'; end if;
@@ -119,10 +125,16 @@ begin
   end if;
   return new;
 end; $$;
+
 create trigger cashier_shifts_protect_before_write before update or delete on public.cashier_shifts for each row execute function public.protect_cashier_shift();
 
-alter table public.cashier_shifts enable row level security; alter table public.cash_movements enable row level security;
+alter table public.cashier_shifts enable row level security;
+alter table public.cash_movements enable row level security;
+
 create policy cashier_shifts_select_property on public.cashier_shifts for select using(property_id=current_property_id());
 create policy cash_movements_select_property on public.cash_movements for select using(property_id=current_property_id());
-revoke all on public.cashier_shifts,public.cash_movements from anon,authenticated; grant select on public.cashier_shifts,public.cash_movements,public.cashier_shift_summaries to authenticated;
+
+revoke all on public.cashier_shifts,public.cash_movements from anon,authenticated;
+grant select on public.cashier_shifts,public.cash_movements,public.cashier_shift_summaries to authenticated;
+
 grant execute on function public.open_cashier_shift(bigint,text),public.record_cash_movement(uuid,public.cash_movement_type,bigint,text,text,public.cash_movement_direction),public.close_cashier_shift(uuid,bigint,text) to authenticated;
