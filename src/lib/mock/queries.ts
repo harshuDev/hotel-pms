@@ -1,27 +1,4 @@
-/**
- * ============================================================================
- * THE SWAP POINT
- * ============================================================================
- * Every function below is async and returns exactly the shape the real
- * Supabase query will return. When Phase 1 database work is done, create
- * src/lib/queries.ts with the same signatures backed by Supabase, change the
- * imports in the pages, and delete src/lib/mock/ entirely.
- *
- * No component reads mock data directly. That is the whole point.
- * ============================================================================
- */
-
-import {
-  BOOKINGS,
-  CUSTOMERS,
-  activityFeed,
-  occupancySeries,
-  openShift,
-  revenueSeries,
-  PROPERTY,
-  TODAY,
-  iso,
-} from "@/lib/mock/data";
+import { createClient } from "@/lib/supabase/server";
 import type {
   ActivityItem,
   Booking,
