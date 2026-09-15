@@ -21,11 +21,15 @@ export default async function AppLayout({
   return (
     <div className="min-h-screen">
       <TopNav propertyName={property.name} />
+
       <TopBar
         propertyName={property.name}
         businessDate={businessDate}
       />
-      <main className="p-3 sm:p-5">{children}</main>
+
+      <main className="p-3 sm:p-5">
+        {children}
+      </main>
     </div>
   );
 }
