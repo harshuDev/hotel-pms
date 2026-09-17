@@ -5,10 +5,18 @@ channel-connected bookings, and a cashier shift/drawer feature.
 
 ## Where this project currently stands
 
-The front end is **built and deployed**. Dashboard, bookings list, customers
-list and the cashier shift screen all work, running on generated mock data.
-Layer 1 of the Supabase schema lives in `supabase/migrations/0001_core.sql`;
-the front end has not yet been swapped from mock data to database reads.
+The front end is **built and deployed**, and every read and write in it goes to
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0020` are
+applied to the hosted database.
+
+Working on real data: dashboard (house board, movements, pace, activity feed),
+bookings list, customers, cashier (open a shift, take payments, record
+paid-outs, blind close), check-in and check-out, the night audit that advances
+the business date, and two reports — occupancy and debtors.
+
+The hosted database holds one property, one staff user, an open business date
+and seven payment methods. **It has no rooms, customers or bookings**, so most
+screens render correctly and empty until data is imported.
 
 A client revision round has been applied on top of the original build: the
 palette moved from brass/slate to the client's white/blue/dark-blue scheme, the
@@ -16,9 +24,7 @@ per-room grid on the dashboard was replaced with a compact house board, the
 property name moved from the sidebar into a top bar, and several nav items were
 renamed and reordered. See "Client revision round" below before changing any UI.
 
-**Do not rebuild or restyle existing screens unless asked.** The remaining
-Phase 1 work is the Supabase schema and swapping the data layer underneath the
-components that already exist.
+**Do not rebuild or restyle existing screens unless asked.**
 
 ## Client revision round — do not revert these
 
@@ -260,18 +266,31 @@ pnpm supabase migration new <name>
 
 ## Phase plan
 
-- **Phase 1** — schema, auth, and swapping the mock layer for Supabase.
-  Project setup, the front end, and core migration 0001 are done. Remaining:
-  migrations 0002–0005, seed data, auth and roles, then the swap.
-- **Phase 2** — calendar grid, booking create and edit, inventory restrictions
-  UI, promotions, then meeting rooms. Meeting rooms come after the calendar
-  grid — they reuse it — and need a property settings screen for room names,
-  which depends on Phase 1 auth.
-- **Phase 3** — cashier wired to real data, reports, hardening.
+- **Phase 1 — done.** Schema, auth, roles, and the swap from mock to Supabase.
+- **Phase 3 — mostly done.** Cashier on real data, check-in and check-out, the
+  night audit, hardening, and the first two reports.
+- **Phase 2 — in progress.** Calendar grid, booking create and edit, inventory
+  restrictions, promotions, meeting rooms.
 
-Out of scope right now: calendar, booking creation, rate editing, promotions,
-reports, meeting rooms. Those routes render `<ComingSoon />` and should stay
-that way.
+### What still renders `<ComingSoon />`
+
+Buildable on the schema as it stands:
+
+- `/bookings/arrivals`, `/bookings/departures`, `/bookings/in-house` — list
+  views over data that already exists
+- `/calendar` — a room-by-night grid over `booking_room_nights`
+- `/bookings/new` — booking creation
+- Ten of the remaining reports: Payments, Daily checkout, Booking,
+  Cancellation, Housekeeping, Channel, Extras, Financial, In house,
+  Reservations
+
+Blocked on a schema that does not exist yet, and on a decision (see below):
+
+- **Inventory** — all nine routes. There is no rate, availability or
+  restriction model anywhere in the schema.
+- **Promotions** (`/offers`) — no model.
+- **Meeting Rooms** — no `meeting_rooms` or `meeting_room_bookings` tables.
+- **Reports → Meal** — no meal plan, board type or rate plan exists.
 
 ## Open decisions — do not silently choose
 
@@ -291,3 +310,19 @@ than proceeding.
 6. **Room scale.** The ~1,800 figure came from a passing remark in client
    feedback and has not been confirmed. It now drives the house board design
    and two query signatures, so confirm it before writing migrations.
+7. **Rate model.** Nothing stores a rate. `booking_room_nights.room_rate_cents`
+   is written per night with no rate plan behind it, so Inventory has nothing
+   to edit. A rate plan per room type per date, with restrictions layered on
+   top, is a schema design, not a screen.
+8. **Promotions.** No model. What a promotion adjusts — rate, length of stay,
+   a fixed discount — decides the shape.
+9. **Meeting room granularity.** Still whole-day (`starts_on` / `ends_on`) as
+   assumed. Hourly or half-day slots make these `starts_at` / `ends_at` and the
+   exclusion constraint a `tstzrange`. Confirm before the tables are written,
+   because it is a migration plus a calendar rewrite afterwards.
+10. **Tax rate and inclusion.** `tax_rates` is empty. 20% is easy; whether the
+    property quotes VAT-inclusive or exclusive is a policy decision that
+    changes every charge by a sixth.
+11. **No-show policy at night audit.** `close_business_date()` deliberately
+    leaves unarrived bookings alone. Marking them no-show writes off revenue,
+    so it needs saying out loud first.
