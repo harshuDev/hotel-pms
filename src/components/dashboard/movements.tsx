@@ -3,6 +3,10 @@
 import { useState } from "react";
 import { Card, EmptyState, cn } from "@/components/ui";
 import { formatMoney } from "@/lib/money";
+import {
+  CheckInAction,
+  CheckOutAction,
+} from "@/components/dashboard/movement-actions";
 import type { Booking } from "@/lib/types";
 
 type Tab = "arrivals" | "departures";
@@ -10,9 +14,11 @@ type Tab = "arrivals" | "departures";
 export function Movements({
   arrivals,
   departures,
+  canMoveGuests,
 }: {
   arrivals: Booking[];
   departures: Booking[];
+  canMoveGuests: boolean;
 }) {
   const [tab, setTab] = useState<Tab>("arrivals");
   const rows = tab === "arrivals" ? arrivals : departures;
@@ -94,6 +100,17 @@ export function Movements({
                   {b.adults + b.children} pax
                 </p>
               </div>
+              {/* A guest can only move one way, and only from the right state:
+                  an arrival that has already checked in has nothing to do
+                  here, and neither does a departure that has left. */}
+              {canMoveGuests &&
+                tab === "arrivals" &&
+                (b.status === "pending" || b.status === "confirmed") && (
+                  <CheckInAction booking={b} />
+                )}
+              {canMoveGuests &&
+                tab === "departures" &&
+                b.status === "checked_in" && <CheckOutAction booking={b} />}
             </li>
           ))}
         </ul>
