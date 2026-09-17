@@ -30,9 +30,10 @@ export default async function AppLayout({
             No staff account
           </h1>
           <p className="mt-2 text-[13px] leading-relaxed text-ink-muted">
-            Your sign-in worked, but it is not linked to a staff account at any
-            property, so there is nothing to show. An administrator needs to add
-            you before you can use the system.
+            Your sign-in worked, but it is not linked to an active staff
+            account, so there is nothing to show. Either the account was never
+            set up or it has been deactivated. An administrator can sort it
+            out.
           </p>
           <form action={signOut}>
             <button
