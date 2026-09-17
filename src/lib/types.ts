@@ -752,3 +752,50 @@ export interface MeetingRoomBooking {
   bookedBy: string | null;
   createdAt: string;
 }
+
+/* -------------------------------------------------------------------------- */
+/* Property settings                                                          */
+/* -------------------------------------------------------------------------- */
+
+export interface PropertySettings {
+  id: string;
+  name: string;
+  timezone: string;
+  currency: string;
+  checkInTime: string | null;
+  checkOutTime: string | null;
+}
+
+export interface RoomTypeSetting {
+  id: string;
+  code: string;
+  name: string;
+  baseOccupancy: number;
+  maxOccupancy: number;
+  sortOrder: number;
+  roomCount: number;
+}
+
+export interface TaxRateSetting {
+  id: string;
+  name: string;
+  rateBps: number;
+  inclusion: "inclusive" | "exclusive";
+  isActive: boolean;
+}
+
+export interface ChannelSetting {
+  id: string;
+  code: string;
+  name: string;
+  kind: ChannelKind;
+  commissionBps: number;
+  isActive: boolean;
+}
+
+export interface StaffSetting {
+  id: string;
+  fullName: string;
+  role: StaffRole;
+  isActive: boolean;
+}

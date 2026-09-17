@@ -183,7 +183,7 @@ export function TopNav({
             <div className="pt-1">
               <MenuItem disabled>Profile</MenuItem>
               <MenuItem disabled>Guest booking page</MenuItem>
-              <MenuItem disabled>Settings</MenuItem>
+              <MenuItem href="/settings">Settings</MenuItem>
               <MenuItem disabled>Clear cache</MenuItem>
               <MenuItem disabled>Language</MenuItem>
               <MenuItem onSelect={() => void signOut()}>Log out</MenuItem>

@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0029` are
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0030` are
 applied to the hosted database.
 
 Working on real data: dashboard (house board, movements, pace, activity feed),
@@ -14,13 +14,20 @@ bookings list, customers, the availability calendar, cashier (open a shift,
 take payments, record paid-outs, blind close), check-in and check-out, the
 night audit that advances the business date, taking a booking, all nine
 Inventory screens, the booking screen with edit and cancel, promotions,
-meeting rooms, and twelve reports — occupancy, debtors, payments,
+meeting rooms, property settings, and twelve reports — occupancy, debtors, payments,
 financial, extras, daily checkout, booking, reservations, cancellation,
 channel, housekeeping and in house.
 
 The hosted database holds one property, one staff user, an open business date
-and seven payment methods. **It has no rooms, customers or bookings**, so most
-screens render correctly and empty until data is imported.
+and seven payment methods. **It has no room types, rooms, channels, rate plans
+or tax rates yet** — but as of 0030 all of those can be created from
+`/settings` rather than by hand in SQL, so the property can be set up from the
+application. Until a channel exists, no booking can be taken at all: every
+booking must have a source.
+
+The open business date is behind real time. The night audit advances it one
+day at a time and posts that night's room charges, so it is run once per day
+rather than caught up automatically.
 
 A client revision round has been applied on top of the original build: the
 palette moved from brass/slate to the client's white/blue/dark-blue scheme, the
@@ -116,6 +123,11 @@ Each read is a Postgres view or RPC, never aggregation in the client:
 | `getPromotions()`                   | `promotions_list()`               |
 | `getMeetingRoomCalendar(from, n)`   | `meeting_room_calendar(from, n)`  |
 | `getMeetingRoomBooking(id)`         | `meeting_room_booking_detail(id)` |
+| `getPropertySettings()`             | `properties` row                  |
+| `getRoomTypeSettings()`             | `room_types` with room counts     |
+| `getChannelSettings()`              | `channels`                        |
+| `getTaxRateSettings()`              | `tax_rates`                       |
+| `getStaffSettings()`                | `staff_users`                     |
 
 **Two signatures carry the room-count rule.** The client operates properties
 with up to ~1,800 rooms, so no query may return every room and no screen may
@@ -359,6 +371,31 @@ anywhere else. Collapsed height must stay constant regardless of room count.
   sixty-four percent off and nobody notices until the month end.
 - **A hand-priced room line gets no promotion.** Somebody has already decided
   what that room costs, and a discount on top would be a second reduction.
+- **A property is set up from `/settings`, not from SQL.** Room types, rooms,
+  booking sources, tax rates and the property itself are all written through
+  RPCs in `src/lib/actions/settings.ts`. Settings lives in the user menu, not
+  the nav bar: the client fixed the nine top-level sections and this is not one
+  of them.
+- **Rooms are created in runs**, because a property may hold ~1,800 of them and
+  entering those one at a time is not a thing anyone would do. A run is capped
+  at 500 and refuses by name if it would collide with rooms that already exist,
+  before anything is written.
+- **`set_room_status()` is how a room is marked clean**, and housekeeping can
+  call it. Until 0030 `rooms.status` was only ever set by check-in and
+  check-out, so a room went dirty on departure and stayed dirty for ever — the
+  housekeeping report showed the work with no way to record it done. Occupied
+  is not settable by hand in either direction: a room is occupied because a
+  guest is in it, and check-in and check-out are what move it.
+- **A tax rate that has posted charges against it cannot be moved.** It renames
+  and retires freely, but the rate and its inclusion are frozen, because a
+  folio item records which rate it used and changing it would restate history.
+  Retire it and add a new one.
+- **Creating a login is not in the application.** `staff_users.id` references
+  `auth.users`, so a new member of staff needs an auth account before a row can
+  point at one. Settings manages the staff who already exist — name, role, and
+  the `is_active` flag that 0016 made withdraw access everywhere. An
+  administrator cannot demote or deactivate themselves, because that locks the
+  property out of its own settings.
 - Cashier scope: take payments, record paid-outs (money leaving the drawer,
   optionally recharged to a guest folio), close the shift with a blind cash
   count, next receptionist opens a fresh one. Shift close is a blind count —
@@ -435,8 +472,9 @@ pnpm supabase migration new <name>
 ## Phase plan
 
 - **Phase 1 — done.** Schema, auth, roles, and the swap from mock to Supabase.
-- **Phase 3 — mostly done.** Cashier on real data, check-in and check-out, the
-  night audit, hardening, and the first two reports.
+- **Phase 3 — done.** Cashier on real data, check-in and check-out, the night
+  audit, hardening, all the reports, and the property settings that let a
+  property be set up without hand-written SQL.
 - **Phase 2 — done.** Availability calendar, booking creation, the booking
   screen with edit and cancel, all nine Inventory screens, promotions and
   meeting rooms.
@@ -500,3 +538,9 @@ than proceeding.
     join to. The balance shows on the meeting room booking itself. Widening the
     report means it returns two different kinds of thing, which is a reporting
     decision rather than a bug to fix quietly.
+
+15. **Inviting a new member of staff.** Creating an auth account needs either
+    the Supabase dashboard or a server action holding the service-role key.
+    The second bypasses RLS, which the brief discourages, so it has not been
+    built. Until it is, a new person is invited in Supabase Auth and then
+    appears in Settings to be named and given a role.
