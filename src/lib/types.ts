@@ -163,6 +163,9 @@ export interface CashierShiftSummary {
   varianceCents: bigint | null;
 }
 
+/** The stored housekeeping status. RoomState derives due_out and arriving on top. */
+export type RoomStatus = "vacant_clean" | "vacant_dirty" | "occupied" | "ooo";
+
 export type RoomState =
   | "occupied"
   | "due_out"
@@ -298,6 +301,10 @@ export type FinancialPaymentMethod =
   | "cash"
   | "card"
   | "bank_transfer"
+  // The property is UK-based and never offers UPI, but payment_method_kind
+  // still carries the value, so the type has to admit it or a stray row
+  // arrives mistyped.
+  | "upi"
   | "ota_prepaid"
   | "virtual_card"
   | "complimentary"
@@ -327,4 +334,179 @@ export interface FolioItem {
   signedAmountCents: bigint;
   reversesId: string | null;
   postedAt: string;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Reports                                                                    */
+/* -------------------------------------------------------------------------- */
+
+export interface PaymentRow {
+  paymentId: string;
+  businessDate: string;
+  paidAt: string;
+  methodName: string;
+  methodKind: FinancialPaymentMethod;
+  affectsDrawer: boolean;
+  bookingId: string;
+  reference: string;
+  guestName: string;
+  receivedBy: string | null;
+  externalReference: string | null;
+  isReversal: boolean;
+  /** Already signed: a reversal is negative. */
+  amountCents: number;
+}
+
+export interface PaymentMethodTotal {
+  methodName: string;
+  methodKind: FinancialPaymentMethod;
+  affectsDrawer: boolean;
+  paymentCount: number;
+  reversalCount: number;
+  netCents: number;
+}
+
+export interface ExtrasRow {
+  itemType: FolioItemType;
+  itemCount: number;
+  reversalCount: number;
+  netCents: number;
+  taxCents: number;
+  grossCents: number;
+}
+
+export interface CheckoutRow {
+  bookingId: string;
+  reference: string;
+  guestName: string;
+  roomNumbers: string | null;
+  channelName: string | null;
+  checkIn: string;
+  checkOut: string;
+  nights: number;
+  chargesCents: number;
+  paymentsCents: number;
+  outstandingCents: number;
+}
+
+export interface FinancialRow {
+  businessDate: string;
+  roomRevenueCents: number;
+  extrasRevenueCents: number;
+  /** Negative: a discount reduces what is charged. */
+  discountsCents: number;
+  taxCents: number;
+  chargesCents: number;
+  paymentsCents: number;
+  drawerPaymentsCents: number;
+}
+
+export interface BookingProductionRow {
+  bookingId: string;
+  reference: string;
+  guestName: string;
+  channelName: string | null;
+  channelKind: ChannelKind | null;
+  status: BookingStatus;
+  settlement: Settlement;
+  bookedOn: string;
+  checkIn: string;
+  checkOut: string;
+  nights: number;
+  roomCount: number;
+  roomNights: number;
+  valueCents: number;
+}
+
+export interface ChannelProductionRow {
+  channelName: string;
+  channelKind: ChannelKind | null;
+  commissionBps: number;
+  bookingCount: number;
+  canceledCount: number;
+  roomNights: number;
+  valueCents: number;
+}
+
+export interface ReservationsRow {
+  arrivalDate: string;
+  bookingCount: number;
+  pendingCount: number;
+  roomCount: number;
+  adults: number;
+  children: number;
+  roomNights: number;
+  valueCents: number;
+}
+
+export interface CancellationRow {
+  bookingId: string;
+  reference: string;
+  guestName: string;
+  channelName: string | null;
+  status: BookingStatus;
+  bookedOn: string;
+  /** Null when the status change left no activity row to date it by. */
+  cancelledOn: string | null;
+  checkIn: string;
+  checkOut: string;
+  nights: number;
+  roomCount: number;
+  roomNights: number;
+  lostValueCents: number;
+}
+
+export interface ChannelRevenueRow {
+  channelName: string;
+  channelKind: ChannelKind | null;
+  commissionBps: number;
+  bookingCount: number;
+  roomNights: number;
+  roomRevenueCents: number;
+  commissionCents: number;
+  netRevenueCents: number;
+}
+
+export interface HousekeepingFloor {
+  floor: number | null;
+  roomCount: number;
+  vacantClean: number;
+  vacantDirty: number;
+  occupied: number;
+  dueOut: number;
+  arriving: number;
+  ooo: number;
+}
+
+export interface HousekeepingRoom {
+  roomId: string;
+  number: string;
+  floor: number | null;
+  roomTypeName: string;
+  housekeepingStatus: RoomStatus;
+  state: RoomState;
+  guestName: string | null;
+  nightsLeft: number | null;
+}
+
+export interface HousekeepingRoomsPage {
+  rooms: HousekeepingRoom[];
+  totalCount: number;
+}
+
+export interface InHouseRow {
+  bookingId: string;
+  reference: string;
+  guestName: string;
+  roomNumber: string | null;
+  roomTypeName: string;
+  channelName: string | null;
+  checkIn: string;
+  checkOut: string;
+  nights: number;
+  nightsStayed: number;
+  nightsLeft: number;
+  adults: number;
+  children: number;
+  balanceCents: number;
 }

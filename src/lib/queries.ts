@@ -33,6 +33,23 @@ import type {
   OccupancySummary,
   DebtorRow,
   AvailabilityCell,
+  BookingProductionRow,
+  CancellationRow,
+  ChannelKind,
+  ChannelProductionRow,
+  ChannelRevenueRow,
+  CheckoutRow,
+  ExtrasRow,
+  FinancialPaymentMethod,
+  FinancialRow,
+  FolioItemType,
+  HousekeepingFloor,
+  HousekeepingRoomsPage,
+  InHouseRow,
+  PaymentMethodTotal,
+  PaymentRow,
+  ReservationsRow,
+  RoomStatus,
   HouseStateCounts,
   HouseSummary,
   Room,
@@ -942,5 +959,524 @@ export async function getCalendarAvailability(
     sellable: row.sellable,
     sold: row.sold,
     available: row.available,
+  }));
+}
+
+/* -------------------------------------------------------------------------- */
+/* Reports                                                                    */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * The money reports raise this rather than returning an empty page, so that
+ * housekeeping is told it has no access instead of being shown a hotel that
+ * appears to have taken nothing.
+ *
+ * The string is raised by require_money_reports() in migration 0022. If it is
+ * reworded there, reword it here.
+ */
+export class ReportAccessError extends Error {
+  constructor() {
+    super("Your role does not have access to the revenue reports.");
+    this.name = "ReportAccessError";
+  }
+}
+
+function rethrow(error: { message: string }, what: string): never {
+  if (error.message.includes("REPORT_ACCESS_DENIED")) {
+    throw new ReportAccessError();
+  }
+  throw new Error(`Failed to load the ${what}: ${error.message}`);
+}
+
+/** Every payment taken in the range, reversals signed negative. */
+export async function getPaymentsReport(
+  from: string,
+  to: string,
+): Promise<PaymentRow[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("payments_report", {
+    p_from: from,
+    p_to: to,
+  });
+  if (error) rethrow(error, "payments report");
+
+  return (
+    (data ?? []) as {
+      payment_id: string;
+      business_date: string;
+      paid_at: string;
+      method_name: string;
+      method_kind: FinancialPaymentMethod;
+      affects_drawer: boolean;
+      booking_id: string;
+      reference: string;
+      guest_name: string | null;
+      received_by: string | null;
+      external_reference: string | null;
+      is_reversal: boolean;
+      amount_cents: number;
+    }[]
+  ).map((row) => ({
+    paymentId: row.payment_id,
+    businessDate: row.business_date,
+    paidAt: row.paid_at,
+    methodName: row.method_name,
+    methodKind: row.method_kind,
+    affectsDrawer: row.affects_drawer,
+    bookingId: row.booking_id,
+    reference: row.reference,
+    guestName: row.guest_name ?? "Unnamed guest",
+    receivedBy: row.received_by,
+    externalReference: row.external_reference,
+    isReversal: row.is_reversal,
+    amountCents: row.amount_cents,
+  }));
+}
+
+/** The same payments, totalled by method. */
+export async function getPaymentsByMethod(
+  from: string,
+  to: string,
+): Promise<PaymentMethodTotal[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("payments_report_by_method", {
+    p_from: from,
+    p_to: to,
+  });
+  if (error) rethrow(error, "payment totals");
+
+  return (
+    (data ?? []) as {
+      method_name: string;
+      method_kind: FinancialPaymentMethod;
+      affects_drawer: boolean;
+      payment_count: number;
+      reversal_count: number;
+      net_cents: number;
+    }[]
+  ).map((row) => ({
+    methodName: row.method_name,
+    methodKind: row.method_kind,
+    affectsDrawer: row.affects_drawer,
+    paymentCount: row.payment_count,
+    reversalCount: row.reversal_count,
+    netCents: row.net_cents,
+  }));
+}
+
+/** Charges that are not the room, by type. */
+export async function getExtrasReport(
+  from: string,
+  to: string,
+): Promise<ExtrasRow[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("extras_report", {
+    p_from: from,
+    p_to: to,
+  });
+  if (error) rethrow(error, "extras report");
+
+  return (
+    (data ?? []) as {
+      item_type: FolioItemType;
+      item_count: number;
+      reversal_count: number;
+      net_cents: number;
+      tax_cents: number;
+      gross_cents: number;
+    }[]
+  ).map((row) => ({
+    itemType: row.item_type,
+    itemCount: row.item_count,
+    reversalCount: row.reversal_count,
+    netCents: row.net_cents,
+    taxCents: row.tax_cents,
+    grossCents: row.gross_cents,
+  }));
+}
+
+/** Departures on one business date and what they left owing. */
+export async function getDailyCheckout(date: string): Promise<CheckoutRow[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("daily_checkout_report", {
+    p_date: date,
+  });
+  if (error) rethrow(error, "checkout report");
+
+  return (
+    (data ?? []) as {
+      booking_id: string;
+      reference: string;
+      guest_name: string | null;
+      room_numbers: string | null;
+      channel_name: string | null;
+      check_in: string;
+      check_out: string;
+      nights: number;
+      charges_cents: number;
+      payments_cents: number;
+      outstanding_cents: number;
+    }[]
+  ).map((row) => ({
+    bookingId: row.booking_id,
+    reference: row.reference,
+    guestName: row.guest_name ?? "Unnamed guest",
+    roomNumbers: row.room_numbers,
+    channelName: row.channel_name,
+    checkIn: row.check_in,
+    checkOut: row.check_out,
+    nights: row.nights,
+    chargesCents: row.charges_cents,
+    paymentsCents: row.payments_cents,
+    outstandingCents: row.outstanding_cents,
+  }));
+}
+
+/** Revenue posted and money received, business date by business date. */
+export async function getFinancialReport(
+  from: string,
+  to: string,
+): Promise<FinancialRow[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("financial_report", {
+    p_from: from,
+    p_to: to,
+  });
+  if (error) rethrow(error, "financial report");
+
+  return (
+    (data ?? []) as {
+      business_date: string;
+      room_revenue_cents: number;
+      extras_revenue_cents: number;
+      discounts_cents: number;
+      tax_cents: number;
+      charges_cents: number;
+      payments_cents: number;
+      drawer_payments_cents: number;
+    }[]
+  ).map((row) => ({
+    businessDate: row.business_date,
+    roomRevenueCents: row.room_revenue_cents,
+    extrasRevenueCents: row.extras_revenue_cents,
+    discountsCents: row.discounts_cents,
+    taxCents: row.tax_cents,
+    chargesCents: row.charges_cents,
+    paymentsCents: row.payments_cents,
+    drawerPaymentsCents: row.drawer_payments_cents,
+  }));
+}
+
+/** Bookings made in the range — production, dated by when they were booked. */
+export async function getBookingReport(
+  from: string,
+  to: string,
+): Promise<BookingProductionRow[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("booking_report", {
+    p_from: from,
+    p_to: to,
+  });
+  if (error) throw new Error(`Failed to load the booking report: ${error.message}`);
+
+  return (
+    (data ?? []) as {
+      booking_id: string;
+      reference: string;
+      guest_name: string | null;
+      channel_name: string | null;
+      channel_kind: ChannelKind | null;
+      status: BookingStatus;
+      settlement: Settlement;
+      booked_on: string;
+      check_in: string;
+      check_out: string;
+      nights: number;
+      room_count: number;
+      room_nights: number;
+      value_cents: number;
+    }[]
+  ).map((row) => ({
+    bookingId: row.booking_id,
+    reference: row.reference,
+    guestName: row.guest_name ?? "Unnamed guest",
+    channelName: row.channel_name,
+    channelKind: row.channel_kind,
+    status: row.status,
+    settlement: row.settlement,
+    bookedOn: row.booked_on,
+    checkIn: row.check_in,
+    checkOut: row.check_out,
+    nights: row.nights,
+    roomCount: row.room_count,
+    roomNights: row.room_nights,
+    valueCents: row.value_cents,
+  }));
+}
+
+/** The same production, totalled by channel. */
+export async function getBookingByChannel(
+  from: string,
+  to: string,
+): Promise<ChannelProductionRow[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("booking_report_by_channel", {
+    p_from: from,
+    p_to: to,
+  });
+  if (error) throw new Error(`Failed to load the channel totals: ${error.message}`);
+
+  return (
+    (data ?? []) as {
+      channel_name: string;
+      channel_kind: ChannelKind | null;
+      commission_bps: number;
+      booking_count: number;
+      canceled_count: number;
+      room_nights: number;
+      value_cents: number;
+    }[]
+  ).map((row) => ({
+    channelName: row.channel_name,
+    channelKind: row.channel_kind,
+    commissionBps: row.commission_bps,
+    bookingCount: row.booking_count,
+    canceledCount: row.canceled_count,
+    roomNights: row.room_nights,
+    valueCents: row.value_cents,
+  }));
+}
+
+/** What is on the books to arrive, arrival date by arrival date. */
+export async function getReservationsReport(
+  from: string,
+  to: string,
+): Promise<ReservationsRow[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("reservations_report", {
+    p_from: from,
+    p_to: to,
+  });
+  if (error) throw new Error(`Failed to load the reservations report: ${error.message}`);
+
+  return (
+    (data ?? []) as {
+      arrival_date: string;
+      booking_count: number;
+      pending_count: number;
+      room_count: number;
+      adults: number;
+      children: number;
+      room_nights: number;
+      value_cents: number;
+    }[]
+  ).map((row) => ({
+    arrivalDate: row.arrival_date,
+    bookingCount: row.booking_count,
+    pendingCount: row.pending_count,
+    roomCount: row.room_count,
+    adults: row.adults,
+    children: row.children,
+    roomNights: row.room_nights,
+    valueCents: row.value_cents,
+  }));
+}
+
+/** Cancellations and no-shows, by the date they were due to arrive. */
+export async function getCancellationReport(
+  from: string,
+  to: string,
+): Promise<CancellationRow[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("cancellation_report", {
+    p_from: from,
+    p_to: to,
+  });
+  if (error) throw new Error(`Failed to load the cancellation report: ${error.message}`);
+
+  return (
+    (data ?? []) as {
+      booking_id: string;
+      reference: string;
+      guest_name: string | null;
+      channel_name: string | null;
+      status: BookingStatus;
+      booked_on: string;
+      cancelled_on: string | null;
+      check_in: string;
+      check_out: string;
+      nights: number;
+      room_count: number;
+      room_nights: number;
+      lost_value_cents: number;
+    }[]
+  ).map((row) => ({
+    bookingId: row.booking_id,
+    reference: row.reference,
+    guestName: row.guest_name ?? "Unnamed guest",
+    channelName: row.channel_name,
+    status: row.status,
+    bookedOn: row.booked_on,
+    cancelledOn: row.cancelled_on,
+    checkIn: row.check_in,
+    checkOut: row.check_out,
+    nights: row.nights,
+    roomCount: row.room_count,
+    roomNights: row.room_nights,
+    lostValueCents: row.lost_value_cents,
+  }));
+}
+
+/** Room nights and revenue by channel, over the nights stayed. */
+export async function getChannelReport(
+  from: string,
+  to: string,
+): Promise<ChannelRevenueRow[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("channel_report", {
+    p_from: from,
+    p_to: to,
+  });
+  if (error) throw new Error(`Failed to load the channel report: ${error.message}`);
+
+  return (
+    (data ?? []) as {
+      channel_name: string;
+      channel_kind: ChannelKind | null;
+      commission_bps: number;
+      booking_count: number;
+      room_nights: number;
+      room_revenue_cents: number;
+      commission_cents: number;
+      net_revenue_cents: number;
+    }[]
+  ).map((row) => ({
+    channelName: row.channel_name,
+    channelKind: row.channel_kind,
+    commissionBps: row.commission_bps,
+    bookingCount: row.booking_count,
+    roomNights: row.room_nights,
+    roomRevenueCents: row.room_revenue_cents,
+    commissionCents: row.commission_cents,
+    netRevenueCents: row.net_revenue_cents,
+  }));
+}
+
+/** House state by floor. Floors are a handful whatever the room count. */
+export async function getHousekeepingSummary(): Promise<HousekeepingFloor[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("housekeeping_summary");
+  if (error) throw new Error(`Failed to load the housekeeping summary: ${error.message}`);
+
+  return (
+    (data ?? []) as {
+      floor: number | null;
+      room_count: number;
+      vacant_clean: number;
+      vacant_dirty: number;
+      occupied: number;
+      due_out: number;
+      arriving: number;
+      ooo: number;
+    }[]
+  ).map((row) => ({
+    floor: row.floor,
+    roomCount: row.room_count,
+    vacantClean: row.vacant_clean,
+    vacantDirty: row.vacant_dirty,
+    occupied: row.occupied,
+    dueOut: row.due_out,
+    arriving: row.arriving,
+    ooo: row.ooo,
+  }));
+}
+
+export const HOUSEKEEPING_PAGE_SIZE = 120;
+
+/**
+ * A page of rooms for a housekeeper to walk. Paginated in Postgres: a property
+ * may run around 1,800 rooms and no query here returns all of them.
+ */
+export async function getHousekeepingRooms(filters: {
+  floor?: number | null;
+  state?: RoomState | null;
+  page?: number;
+}): Promise<HousekeepingRoomsPage> {
+  const supabase = await createClient();
+  const page = Math.max(filters.page ?? 1, 1);
+
+  const { data, error } = await supabase.rpc("housekeeping_rooms", {
+    p_floor: filters.floor ?? null,
+    p_state: filters.state ?? null,
+    p_limit: HOUSEKEEPING_PAGE_SIZE,
+    p_offset: (page - 1) * HOUSEKEEPING_PAGE_SIZE,
+  });
+  if (error) throw new Error(`Failed to load the room list: ${error.message}`);
+
+  const rows = (data ?? []) as {
+    room_id: string;
+    number: string;
+    floor: number | null;
+    room_type_name: string;
+    housekeeping_status: RoomStatus;
+    state: RoomState;
+    guest_name: string | null;
+    nights_left: number | null;
+    total_count: number;
+  }[];
+
+  return {
+    rooms: rows.map((row) => ({
+      roomId: row.room_id,
+      number: row.number,
+      floor: row.floor,
+      roomTypeName: row.room_type_name,
+      housekeepingStatus: row.housekeeping_status,
+      state: row.state,
+      guestName: row.guest_name,
+      nightsLeft: row.nights_left,
+    })),
+    totalCount: rows[0]?.total_count ?? 0,
+  };
+}
+
+/** Everyone staying tonight. */
+export async function getInHouseReport(): Promise<InHouseRow[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("in_house_report");
+  if (error) throw new Error(`Failed to load the in house report: ${error.message}`);
+
+  return (
+    (data ?? []) as {
+      booking_id: string;
+      reference: string;
+      guest_name: string | null;
+      room_number: string | null;
+      room_type_name: string;
+      channel_name: string | null;
+      check_in: string;
+      check_out: string;
+      nights: number;
+      nights_stayed: number;
+      nights_left: number;
+      adults: number;
+      children: number;
+      balance_cents: number;
+    }[]
+  ).map((row) => ({
+    bookingId: row.booking_id,
+    reference: row.reference,
+    guestName: row.guest_name ?? "Unnamed guest",
+    roomNumber: row.room_number,
+    roomTypeName: row.room_type_name,
+    channelName: row.channel_name,
+    checkIn: row.check_in,
+    checkOut: row.check_out,
+    nights: row.nights,
+    nightsStayed: row.nights_stayed,
+    nightsLeft: row.nights_left,
+    adults: row.adults,
+    children: row.children,
+    balanceCents: row.balance_cents,
   }));
 }

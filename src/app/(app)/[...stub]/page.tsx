@@ -3,7 +3,6 @@ import { ComingSoon } from "@/components/ui";
 const PHASES: Record<string, string> = {
   inventory: "Phase 2",
   offers: "Phase 2",
-  reports: "Phase 3",
   bookings: "Phase 2",
 };
 

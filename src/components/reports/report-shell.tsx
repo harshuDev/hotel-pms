@@ -12,12 +12,15 @@ export function ReportShell({
   subtitle,
   action,
   range,
+  date,
   children,
 }: {
   title: string;
   subtitle: string;
   action?: string;
   range?: DateRange;
+  /** For a report that runs for one day rather than a range. */
+  date?: string;
   children: React.ReactNode;
 }) {
   return (
@@ -26,7 +29,28 @@ export function ReportShell({
         title={title}
         subtitle={subtitle}
         action={
-          range && action ? (
+          date && action ? (
+            <form action={action} className="flex flex-wrap items-end gap-2">
+              <div>
+                <label
+                  htmlFor="date"
+                  className="mb-1 block text-xxs font-semibold uppercase tracking-[0.1em] text-ink-faint"
+                >
+                  Business date
+                </label>
+                <input
+                  id="date"
+                  type="date"
+                  name="date"
+                  defaultValue={date}
+                  className="tnum rounded-md border border-line px-3 py-1.5 text-[13px]"
+                />
+              </div>
+              <button className="rounded-md bg-chrome-800 px-5 py-2 text-[13px] font-medium text-white hover:bg-chrome-900">
+                Run
+              </button>
+            </form>
+          ) : range && action ? (
             <form action={action} className="flex flex-wrap items-end gap-2">
               <div>
                 <label
@@ -69,6 +93,11 @@ export function ReportShell({
         <p className="mb-3 text-xs text-ink-faint">
           {format(parseISO(range.from), "d MMM yyyy")} to{" "}
           {format(parseISO(range.to), "d MMM yyyy")}
+        </p>
+      )}
+      {date && !range && (
+        <p className="mb-3 text-xs text-ink-faint">
+          {format(parseISO(date), "EEEE d MMMM yyyy")}
         </p>
       )}
       {children}
