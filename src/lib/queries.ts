@@ -432,6 +432,9 @@ export async function getPaymentMethods(): Promise<PaymentMethod[]> {
   const { data, error } = await supabase
     .from("payment_methods")
     .select("id, name, affects_drawer")
+    // is_active is how a method is retired; a retired one must stop being
+    // offered without disturbing the payments already posted against it.
+    .eq("is_active", true)
     .order("name");
 
   if (error) {
