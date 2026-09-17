@@ -13,8 +13,9 @@ Working on real data: dashboard (house board, movements, pace, activity feed),
 bookings list, customers, the availability calendar, cashier (open a shift,
 take payments, record paid-outs, blind close), check-in and check-out, the
 night audit that advances the business date, taking a booking, all nine
-Inventory screens, and twelve reports — occupancy, debtors, payments, financial, extras, daily checkout,
-booking, reservations, cancellation, channel, housekeeping and in house.
+Inventory screens, and twelve reports — occupancy, debtors, payments,
+financial, extras, daily checkout, booking, reservations, cancellation,
+channel, housekeeping and in house.
 
 The hosted database holds one property, one staff user, an open business date
 and seven payment methods. **It has no rooms, customers or bookings**, so most
