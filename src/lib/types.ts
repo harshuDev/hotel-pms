@@ -159,16 +159,41 @@ export type RoomState =
 export interface Room {
   id: string;
   number: string;
-  floor: number;
+  /** `rooms.floor` is nullable; not every property numbers by floor. */
+  floor: number | null;
   typeName: string;
   state: RoomState;
   guestName: string | null;
   nightsLeft: number | null;
 }
 
+/** One count per house-board segment. The six always sum to `totalRooms`. */
+export type HouseStateCounts = Record<RoomState, number>;
+
+export interface RoomFilters {
+  q?: string;
+  state?: RoomState | null;
+  page?: number;
+  perPage?: number;
+}
+
+/** Rooms are paged in Postgres — a property may have ~1,800 of them. */
+export interface RoomsPage {
+  rows: Room[];
+  total: number;
+  page: number;
+  perPage: number;
+}
+
 export interface HouseSummary {
   sellable: number;
+  /** Physically occupied: includes rooms due out today. */
   occupied: number;
+  /**
+   * Reservation movements for the business date, not room states. Most
+   * arrivals have no room assigned yet, so these count booking rooms and are
+   * deliberately larger than `states.arriving` / `states.due_out`.
+   */
   arrivals: number;
   departures: number;
   vacantDirty: number;
@@ -177,6 +202,9 @@ export interface HouseSummary {
   drawerCents: number;
   outstandingCents: number;
   adrCents: number;
+  totalRooms: number;
+  /** Lets the collapsed house board render without loading any room rows. */
+  states: HouseStateCounts;
 }
 
 /** Financial ledger shapes used by the eventual Supabase query layer. Amounts

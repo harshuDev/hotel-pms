@@ -1,8 +1,9 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Card, cn } from "@/components/ui";
-import type { Room, RoomState } from "@/lib/types";
+import { loadRooms } from "@/lib/actions/rooms";
+import type { HouseStateCounts, Room, RoomState } from "@/lib/types";
 
 const STATES: {
   key: RoomState;
@@ -62,46 +63,82 @@ const PILL: Record<RoomState, string> = STATES.reduce(
 
 const PAGE = 240;
 
-export function HouseBoard({ rooms }: { rooms: Room[] }) {
+/**
+ * The bar and legend render from counts alone, so a collapsed board costs no
+ * room rows at any property size. The room list is fetched a page at a time,
+ * filtered and searched in Postgres, only while it is expanded.
+ */
+export function HouseBoard({
+  counts,
+  total,
+}: {
+  counts: HouseStateCounts;
+  total: number;
+}) {
   const [filter, setFilter] = useState<RoomState | null>(null);
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState("");
-  const [limit, setLimit] = useState(PAGE);
+  const [needle, setNeedle] = useState("");
 
-  const total = rooms.length || 1;
+  const [rooms, setRooms] = useState<Room[]>([]);
+  const [matches, setMatches] = useState(0);
+  const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const counts = useMemo(
-    () =>
-      STATES.map((s) => ({
-        ...s,
-        n: rooms.filter((r) => r.state === s.key).length,
-      })),
-    [rooms],
+  const segments = STATES.map((s) => ({ ...s, n: counts[s.key] ?? 0 }));
+  const denominator = total || 1;
+
+  useEffect(() => {
+    const timer = setTimeout(() => setNeedle(q.trim()), 250);
+    return () => clearTimeout(timer);
+  }, [q]);
+
+  // Only the newest request may write to state; typing races otherwise.
+  const request = useRef(0);
+
+  const fetchPage = useCallback(
+    async (target: number, append: boolean) => {
+      const id = ++request.current;
+      setLoading(true);
+      setError(null);
+
+      try {
+        const result = await loadRooms({
+          q: needle,
+          state: filter,
+          page: target,
+          perPage: PAGE,
+        });
+
+        if (id !== request.current) return;
+
+        setRooms((prev) => (append ? [...prev, ...result.rows] : result.rows));
+        setMatches(result.total);
+        setPage(result.page);
+      } catch {
+        if (id !== request.current) return;
+        setError(
+          "The room list did not load. Check your connection, then try again.",
+        );
+      } finally {
+        if (id === request.current) setLoading(false);
+      }
+    },
+    [needle, filter],
   );
 
-  const matches = useMemo(() => {
-    const needle = q.trim().toLowerCase();
-    return rooms
-      .filter(
-        (r) =>
-          (!filter || r.state === filter) &&
-          (!needle ||
-            String(r.number).toLowerCase().includes(needle) ||
-            (r.guestName ?? "").toLowerCase().includes(needle) ||
-            r.typeName.toLowerCase().includes(needle)),
-      )
-      .sort((a, b) =>
-        String(a.number).localeCompare(String(b.number), undefined, {
-          numeric: true,
-        }),
-      );
-  }, [rooms, filter, q]);
+  useEffect(() => {
+    if (!open) return;
+    void fetchPage(1, false);
+  }, [open, fetchPage]);
 
   const pick = (key: RoomState) => {
     setFilter((f) => (f === key ? null : key));
-    setLimit(PAGE);
     setOpen(true);
   };
+
+  const remaining = matches - rooms.length;
 
   return (
     <Card
@@ -113,19 +150,19 @@ export function HouseBoard({ rooms }: { rooms: Room[] }) {
           onClick={() => setOpen((o) => !o)}
           className="rounded-md border border-line px-3 py-1.5 text-xs text-ink-muted transition-colors hover:bg-shell hover:text-ink"
         >
-          {open ? "Hide rooms" : `View rooms (${rooms.length})`}
+          {open ? "Hide rooms" : `View rooms (${total})`}
         </button>
       }
     >
       <div className="flex h-2.5 w-full overflow-hidden rounded-full bg-line">
-        {counts
+        {segments
           .filter((s) => s.n > 0)
           .map((s) => (
             <button
               key={s.key}
               onClick={() => pick(s.key)}
               title={`${s.label} · ${s.n}`}
-              style={{ width: `${(s.n / total) * 100}%` }}
+              style={{ width: `${(s.n / denominator) * 100}%` }}
               className={cn(
                 "h-full transition-opacity",
                 s.bar,
@@ -136,7 +173,7 @@ export function HouseBoard({ rooms }: { rooms: Room[] }) {
       </div>
 
       <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2">
-        {counts.map((s) => (
+        {segments.map((s) => (
           <button
             key={s.key}
             onClick={() => pick(s.key)}
@@ -158,10 +195,7 @@ export function HouseBoard({ rooms }: { rooms: Room[] }) {
             <input
               type="search"
               value={q}
-              onChange={(e) => {
-                setQ(e.target.value);
-                setLimit(PAGE);
-              }}
+              onChange={(e) => setQ(e.target.value)}
               placeholder="Room number, guest or room type"
               className="min-w-[220px] flex-1 rounded-md border border-line px-3 py-1.5 text-[13px] placeholder:text-ink-faint"
             />
@@ -174,18 +208,32 @@ export function HouseBoard({ rooms }: { rooms: Room[] }) {
               </button>
             )}
             <p className="tnum text-xs text-ink-faint">
-              {matches.length} of {rooms.length}
+              {matches} of {total}
             </p>
           </div>
 
-          {matches.length === 0 ? (
+          {error ? (
+            <div className="py-6 text-center">
+              <p className="text-[13px] text-ink-muted">{error}</p>
+              <button
+                onClick={() => void fetchPage(1, false)}
+                className="mt-2 rounded-md border border-line px-2.5 py-1.5 text-xs text-ink-muted hover:bg-shell"
+              >
+                Try again
+              </button>
+            </div>
+          ) : loading && rooms.length === 0 ? (
+            <p className="py-6 text-center text-[13px] text-ink-faint">
+              Loading rooms…
+            </p>
+          ) : rooms.length === 0 ? (
             <p className="py-6 text-center text-[13px] text-ink-muted">
               No rooms match. Clear the search box or pick a different state.
             </p>
           ) : (
             <>
               <div className="flex max-h-[320px] flex-wrap gap-1.5 overflow-y-auto">
-                {matches.slice(0, limit).map((r) => (
+                {rooms.map((r) => (
                   <span
                     key={r.id}
                     title={`${r.number} · ${r.typeName}${r.guestName ? ` · ${r.guestName}` : ""}`}
@@ -198,12 +246,15 @@ export function HouseBoard({ rooms }: { rooms: Room[] }) {
                   </span>
                 ))}
               </div>
-              {matches.length > limit && (
+              {remaining > 0 && (
                 <button
-                  onClick={() => setLimit((l) => l + PAGE)}
-                  className="mt-3 w-full rounded-md border border-line py-2 text-xs text-ink-muted hover:bg-shell"
+                  onClick={() => void fetchPage(page + 1, true)}
+                  disabled={loading}
+                  className="mt-3 w-full rounded-md border border-line py-2 text-xs text-ink-muted hover:bg-shell disabled:opacity-60"
                 >
-                  Show {Math.min(PAGE, matches.length - limit)} more
+                  {loading
+                    ? "Loading…"
+                    : `Show ${Math.min(PAGE, remaining)} more`}
                 </button>
               )}
             </>

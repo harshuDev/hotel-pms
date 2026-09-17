@@ -19,8 +19,8 @@
  * - Bookings: MOCK
  * - Customers: MOCK
  * - Cashier: MOCK
- * - Rooms: MOCK
- * - House summary: MOCK
+ * - Rooms: REAL Supabase
+ * - House summary: REAL Supabase
  * ============================================================================
  */
 
@@ -33,8 +33,6 @@ import {
   occupancySeries,
   openShift,
   revenueSeries,
-  ROOMS,
-  houseSummary,
 } from "@/lib/mock/data";
 
 import type {
@@ -43,8 +41,12 @@ import type {
   Customer,
   SeriesPoint,
   Shift,
+  HouseStateCounts,
   HouseSummary,
   Room,
+  RoomFilters,
+  RoomsPage,
+  RoomState,
 } from "@/lib/types";
 
 /* -------------------------------------------------------------------------- */
@@ -286,13 +288,132 @@ export async function searchBookingsForPayment(
 }
 
 /* -------------------------------------------------------------------------- */
-/* Rooms and house state — currently mock-backed                              */
+/* Rooms and house state                                                      */
 /* -------------------------------------------------------------------------- */
 
-export async function getRooms(): Promise<Room[]> {
-  return ROOMS;
+/** Rows returned by the rooms_page RPC. */
+interface RoomsPageRow {
+  room_id: string;
+  number: string;
+  floor: number | null;
+  room_type_name: string;
+  state: RoomState;
+  guest_name: string | null;
+  nights_left: number | null;
+  total_count: number;
 }
 
+/** Row returned by the house_summary RPC. */
+interface HouseSummaryRow {
+  business_date: string | null;
+  total_rooms: number;
+  sellable_rooms: number;
+  occupied_rooms: number;
+  due_out_rooms: number;
+  arriving_rooms: number;
+  vacant_clean_rooms: number;
+  vacant_dirty_rooms: number;
+  ooo_rooms: number;
+  expected_arrivals: number;
+  expected_departures: number;
+  occupancy_pct: number;
+  adr_cents: number;
+  drawer_cents: number;
+  outstanding_cents: number;
+}
+
+/** Kept local: importing this module from a client component would pull in
+ * next/headers. The house board holds its own matching page size. */
+const ROOMS_PER_PAGE = 240;
+
+/**
+ * Filtered, paginated room list for the open business date.
+ *
+ * Every part of the filter runs in Postgres. A property may have ~1,800
+ * rooms, so this is only ever called when the house board's room list is
+ * expanded — the collapsed board reads its counts from getHouseSummary().
+ */
+export async function getRooms(filters: RoomFilters = {}): Promise<RoomsPage> {
+  const supabase = await createClient();
+
+  const perPage = filters.perPage ?? ROOMS_PER_PAGE;
+  const page = Math.max(1, filters.page ?? 1);
+
+  const { data, error } = await supabase.rpc("rooms_page", {
+    p_q: filters.q?.trim() || null,
+    p_state: filters.state ?? null,
+    p_limit: perPage,
+    p_offset: (page - 1) * perPage,
+  });
+
+  if (error) {
+    throw new Error(`Failed to load rooms: ${error.message}`);
+  }
+
+  const rows = (data ?? []) as RoomsPageRow[];
+
+  return {
+    rows: rows.map(
+      (row): Room => ({
+        id: row.room_id,
+        number: row.number,
+        floor: row.floor,
+        typeName: row.room_type_name,
+        state: row.state,
+        guestName: row.guest_name,
+        nightsLeft: row.nights_left,
+      }),
+    ),
+    // count(*) over () on the full filtered set; absent when the page is empty.
+    total: rows[0]?.total_count ?? 0,
+    page,
+    perPage,
+  };
+}
+
+/**
+ * House state and the dashboard's headline figures for the open business
+ * date. One row, aggregated in Postgres, no room list.
+ */
 export async function getHouseSummary(): Promise<HouseSummary> {
-  return houseSummary();
+  const supabase = await createClient();
+
+  const { data, error } = await supabase.rpc("house_summary");
+
+  if (error) {
+    throw new Error(`Failed to load house summary: ${error.message}`);
+  }
+
+  const row = ((data ?? []) as HouseSummaryRow[])[0];
+
+  if (!row) {
+    throw new Error(
+      "House summary returned no rows. Check that the property has an open business date.",
+    );
+  }
+
+  const states: HouseStateCounts = {
+    occupied: row.occupied_rooms,
+    due_out: row.due_out_rooms,
+    arriving: row.arriving_rooms,
+    vacant_clean: row.vacant_clean_rooms,
+    vacant_dirty: row.vacant_dirty_rooms,
+    ooo: row.ooo_rooms,
+  };
+
+  return {
+    sellable: row.sellable_rooms,
+    // Physical occupancy: a room due out is still occupied until check-out.
+    occupied: row.occupied_rooms + row.due_out_rooms,
+    arrivals: row.expected_arrivals,
+    departures: row.expected_departures,
+    vacantDirty: row.vacant_dirty_rooms,
+    ooo: row.ooo_rooms,
+    occupancyPct: Number(row.occupancy_pct),
+    drawerCents: row.drawer_cents,
+    outstandingCents: row.outstanding_cents,
+    adrCents: row.adr_cents,
+    totalRooms: row.total_rooms,
+    states,
+  };
 }
