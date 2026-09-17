@@ -44,6 +44,7 @@ export default async function DashboardPage() {
 
   const staff = await getCurrentStaffUser();
   const canCloseDay = staff?.role === "admin" || staff?.role === "manager";
+  const canMoveGuests = canCloseDay || staff?.role === "front_desk";
 
   return (
     <div className="space-y-3">
@@ -75,6 +76,7 @@ export default async function DashboardPage() {
           <Movements
             arrivals={arrivals}
             departures={departures}
+            canMoveGuests={canMoveGuests}
           />
           <LiveFeed items={activity} />
         </div>
