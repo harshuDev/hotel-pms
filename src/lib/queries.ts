@@ -27,6 +27,8 @@ import type {
   PaymentMethod,
   Shift,
   ShiftPayment,
+  StaffRole,
+  StaffUser,
   HouseStateCounts,
   HouseSummary,
   Room,
@@ -58,6 +60,41 @@ export async function getProperty() {
   }
 
   return data;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Staff                                                                      */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * The signed-in member of staff. RLS restricts staff_users to the caller's
+ * own property, and auth.uid() narrows it to the one row.
+ */
+export async function getCurrentStaffUser(): Promise<StaffUser | null> {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) return null;
+
+  const { data, error } = await supabase
+    .from("staff_users")
+    .select("id, full_name, role")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(`Failed to load the signed-in user: ${error.message}`);
+  }
+  if (!data) return null;
+
+  return {
+    id: data.id,
+    fullName: data.full_name,
+    role: data.role as StaffRole,
+  };
 }
 
 /* -------------------------------------------------------------------------- */

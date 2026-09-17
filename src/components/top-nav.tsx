@@ -6,6 +6,16 @@ import { useEffect, useState } from "react";
 import { cn } from "@/components/ui";
 import { Chevron, Menu, MenuItem } from "@/components/menu";
 import { SECTIONS, isHrefActive, isSectionActive } from "@/lib/nav";
+import { signOut } from "@/lib/actions/auth";
+import type { StaffRole } from "@/lib/types";
+
+const ROLE_LABEL: Record<StaffRole, string> = {
+  admin: "Administrator",
+  manager: "Manager",
+  front_desk: "Front desk",
+  cashier: "Cashier",
+  housekeeping: "Housekeeping",
+};
 
 const USER_MENU = "__user";
 
@@ -14,10 +24,17 @@ const TRIGGER =
 
 interface TopNavProps {
   propertyName: string;
+  staffName: string;
+  staffRole: StaffRole;
   onSearchClick?: () => void;
 }
 
-export function TopNav({ propertyName, onSearchClick }: TopNavProps) {
+export function TopNav({
+  propertyName,
+  staffName,
+  staffRole,
+  onSearchClick,
+}: TopNavProps) {
   const pathname = usePathname();
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -144,7 +161,7 @@ export function TopNav({ propertyName, onSearchClick }: TopNavProps) {
           </button>
 
           <Menu
-            label="Shekher"
+            label={staffName}
             align="end"
             open={openMenu === USER_MENU}
             onOpenChange={(o) => setOpenMenu(o ? USER_MENU : null)}
@@ -152,16 +169,16 @@ export function TopNav({ propertyName, onSearchClick }: TopNavProps) {
             triggerContent={
               <>
                 <span className="grid h-7 w-7 place-items-center rounded-full bg-white/[0.14] text-[11px] font-medium text-white">
-                  S
+                  {staffName.slice(0, 1).toUpperCase()}
                 </span>
-                <span className="hidden text-[13px] sm:inline">Shekher</span>
+                <span className="hidden text-[13px] sm:inline">{staffName}</span>
                 <Chevron open={openMenu === USER_MENU} />
               </>
             }
           >
             <div className="border-b border-line px-2.5 pb-2 pt-1">
-              <p className="text-[13px] text-ink">Shekher</p>
-              <p className="text-2xs text-ink-faint">Reception · on shift</p>
+              <p className="text-[13px] text-ink">{staffName}</p>
+              <p className="text-2xs text-ink-faint">{ROLE_LABEL[staffRole]}</p>
             </div>
             <div className="pt-1">
               <MenuItem disabled>Profile</MenuItem>
@@ -169,10 +186,10 @@ export function TopNav({ propertyName, onSearchClick }: TopNavProps) {
               <MenuItem disabled>Settings</MenuItem>
               <MenuItem disabled>Clear cache</MenuItem>
               <MenuItem disabled>Language</MenuItem>
-              <MenuItem disabled>Log out</MenuItem>
+              <MenuItem onSelect={() => void signOut()}>Log out</MenuItem>
             </div>
             <p className="border-t border-line px-2.5 pb-1 pt-2 text-2xs text-ink-faint">
-              These open once accounts are switched on.
+              Profile and settings arrive with Phase 2.
             </p>
           </Menu>
         </div>
