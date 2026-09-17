@@ -6,14 +6,15 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0021` are
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0023` are
 applied to the hosted database.
 
 Working on real data: dashboard (house board, movements, pace, activity feed),
 bookings list, customers, the availability calendar, cashier (open a shift,
 take payments, record paid-outs, blind close), check-in and check-out, the
-night audit that advances the business date, and two reports — occupancy and
-debtors.
+night audit that advances the business date, and twelve reports — occupancy,
+debtors, payments, financial, extras, daily checkout, booking, reservations,
+cancellation, channel, housekeeping and in house.
 
 The hosted database holds one property, one staff user, an open business date
 and seven payment methods. **It has no rooms, customers or bookings**, so most
@@ -92,6 +93,16 @@ Each read is a Postgres view or RPC, never aggregation in the client:
 | `getCalendarAvailability(from, n)`  | `calendar_availability(from, n)`  |
 | `getOccupancyReport(from, to)`      | `occupancy_report(from, to)`      |
 | `getDebtorsReport()`                | `debtors_report()`                |
+| `getPaymentsReport(from, to)`       | `payments_report(from, to)`       |
+| `getFinancialReport(from, to)`      | `financial_report(from, to)`      |
+| `getExtrasReport(from, to)`         | `extras_report(from, to)`         |
+| `getDailyCheckout(date)`            | `daily_checkout_report(date)`     |
+| `getBookingReport(from, to)`        | `booking_report(from, to)`        |
+| `getReservationsReport(from, to)`   | `reservations_report(from, to)`   |
+| `getCancellationReport(from, to)`   | `cancellation_report(from, to)`   |
+| `getChannelReport(from, to)`        | `channel_report(from, to)`        |
+| `getHousekeepingRooms(filters)`     | `housekeeping_rooms(...)`         |
+| `getInHouseReport()`                | `in_house_report()`               |
 
 **Two signatures carry the room-count rule.** The client operates properties
 with up to ~1,800 rooms, so no query may return every room and no screen may
@@ -103,7 +114,9 @@ draw one element per room:
   called only when the room list is expanded.
 
 The calendar follows the same rule from the other side: its rows are room
-types, not rooms, so the grid is the same height at 40 rooms and at 1,800.
+types, not rooms, so the grid is the same height at 40 rooms and at 1,800. The
+housekeeping report follows it too: a floor summary, which is a handful of rows
+whatever the hotel, plus a room list paged in Postgres.
 
 If a screen seems to need a shape the query does not return, fix the query, not
 the component.
@@ -153,6 +166,28 @@ the component.
   `pnpm supabase gen types typescript --local > src/lib/database.types.ts`
 - Every tenant table has `property_id` and an RLS policy. A new table without a
   policy is a bug, not a TODO.
+
+**Reports**
+
+- Every report groups by `business_date`. `created_at` and `paid_at` are
+  wall-clock and never the axis.
+- Read `folio_item_lines`, not `folio_items`, when splitting revenue by type.
+  `reverse_charge()` posts its row as `item_type = 'reversal'` rather than the
+  type it reverses, and `post_discount()` also sets `reverses_id`, so filtering
+  `folio_items.item_type` directly attributes both to the wrong bucket. The
+  view untangles them into `effective_item_type`.
+- Sum `signed_net_amount_cents` and `signed_tax_amount_cents`, never the
+  unsigned columns. They carry the reversal sign the same way
+  `signed_amount_cents` does.
+- The revenue and payment reports are gated by `require_money_reports()`, which
+  raises `REPORT_ACCESS_DENIED` for housekeeping. `src/lib/queries.ts` turns
+  that into a `ReportAccessError` and the page renders `<ReportNoAccess />`.
+  The string is matched on, so renaming it means changing both ends.
+  **Table RLS is still property isolation only** — the gate is on the report
+  entry points, not on `payments`. Narrowing the policy itself is worth doing
+  and would touch the cashier screen, so it has not been done here.
+- Reservation value is rate less discount over the booked nights, excluding
+  tax, so it matches the occupancy report rather than the folio.
 
 **Data access**
 
@@ -279,17 +314,13 @@ pnpm supabase migration new <name>
   night audit, hardening, and the first two reports.
 - **Phase 2 — in progress.** Availability calendar is built. Remaining: booking
   create and edit, inventory restrictions, promotions, meeting rooms.
+- **Reports — done** except Meal, which has no schema behind it.
 
 ### What still renders `<ComingSoon />`
 
 Buildable on the schema as it stands:
 
-- `/bookings/arrivals`, `/bookings/departures`, `/bookings/in-house` — list
-  views over data that already exists
 - `/bookings/new` — booking creation
-- Ten of the remaining reports: Payments, Daily checkout, Booking,
-  Cancellation, Housekeeping, Channel, Extras, Financial, In house,
-  Reservations
 
 Blocked on a schema that does not exist yet, and on a decision (see below):
 
@@ -333,3 +364,12 @@ than proceeding.
 11. **No-show policy at night audit.** `close_business_date()` deliberately
     leaves unarrived bookings alone. Marking them no-show writes off revenue,
     so it needs saying out loud first.
+12. **Cancellation dating.** `bookings` has no `cancelled_at`. The cancellation
+    report is therefore ranged on arrival date and shows a cancelled-on column
+    read from the activity log, which is blank for any status change made
+    outside the application. If the client wants "cancellations received this
+    week", that is a column plus a backfill, not a screen.
+13. **Channel commission.** The channel report works commission out from
+    `channels.commission_bps` on the room revenue. Nothing records a commission
+    being invoiced or paid, so the figure is what is owed, never a balance. A
+    real channel ledger is its own model.
