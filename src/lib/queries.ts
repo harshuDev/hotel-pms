@@ -32,6 +32,7 @@ import type {
   OccupancyRow,
   OccupancySummary,
   DebtorRow,
+  AvailabilityCell,
   HouseStateCounts,
   HouseSummary,
   Room,
@@ -888,5 +889,58 @@ export async function getDebtorsReport(): Promise<DebtorRow[]> {
     paymentsCents: row.payments_cents,
     outstandingCents: row.outstanding_cents,
     daysOverdue: row.days_overdue,
+  }));
+}
+
+/* -------------------------------------------------------------------------- */
+/* Calendar                                                                    */
+/* -------------------------------------------------------------------------- */
+
+export const CALENDAR_NIGHTS = 14;
+
+/**
+ * Rooms available per room type per night.
+ *
+ * By type rather than by room: a property may run ~1,800 rooms, and neither a
+ * query that returns all of them nor a grid that draws one row each is
+ * allowed. A handful of types is the same size whatever the hotel.
+ */
+export async function getCalendarAvailability(
+  from: string,
+  days: number = CALENDAR_NIGHTS,
+): Promise<AvailabilityCell[]> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase.rpc("calendar_availability", {
+    p_from: from,
+    p_days: days,
+  });
+
+  if (error) {
+    throw new Error(`Failed to load the calendar: ${error.message}`);
+  }
+
+  return (
+    (data ?? []) as {
+      stay_date: string;
+      room_type_id: string;
+      room_type_code: string;
+      room_type_name: string;
+      total_rooms: number;
+      out_of_order: number;
+      sellable: number;
+      sold: number;
+      available: number;
+    }[]
+  ).map((row) => ({
+    date: row.stay_date,
+    roomTypeId: row.room_type_id,
+    roomTypeCode: row.room_type_code,
+    roomTypeName: row.room_type_name,
+    totalRooms: row.total_rooms,
+    outOfOrder: row.out_of_order,
+    sellable: row.sellable,
+    sold: row.sold,
+    available: row.available,
   }));
 }

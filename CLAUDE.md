@@ -6,13 +6,14 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0020` are
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0021` are
 applied to the hosted database.
 
 Working on real data: dashboard (house board, movements, pace, activity feed),
-bookings list, customers, cashier (open a shift, take payments, record
-paid-outs, blind close), check-in and check-out, the night audit that advances
-the business date, and two reports — occupancy and debtors.
+bookings list, customers, the availability calendar, cashier (open a shift,
+take payments, record paid-outs, blind close), check-in and check-out, the
+night audit that advances the business date, and two reports — occupancy and
+debtors.
 
 The hosted database holds one property, one staff user, an open business date
 and seven payment methods. **It has no rooms, customers or bookings**, so most
@@ -67,38 +68,45 @@ current design, not as drift.
 - Recharts, date-fns
 - pnpm
 
-## The swap point — read this before touching data
+## The query layer — read this before touching data
 
-Every page reads through `src/lib/mock/queries.ts`. Those functions are async
-and return exactly the shape the real Supabase queries will return:
+`src/lib/mock/` is deleted. Every page reads through `src/lib/queries.ts`, and
+every write goes through a Server Action in `src/lib/actions/`. Reads are
+Server Components calling Supabase with the signed-in user's session, so RLS
+does the filtering; nothing bypasses it.
 
-| Function                 | Becomes                           |
-| ------------------------ | --------------------------------- |
-| `getArrivals(date)`      | `dashboard_arrivals(p_date)`      |
-| `getDepartures(date)`    | `dashboard_departures(p_date)`    |
-| `getOccupancyForecast()` | `occupancy_forecast(from, 28)`    |
-| `getRevenueSeries()`     | `revenue_series(from, 28)`        |
-| `getActivity()`          | paginated read of `activity_log`  |
-| `getBookings(filters)`   | paginated `booking_totals` query  |
-| `getCustomers(filters)`  | paginated `customer_stats` query  |
-| `getRooms()`             | `rooms` joined to `booking_rooms` |
-| `getHouseSummary()`      | house state aggregate             |
-| `getOpenShift()`         | open row in `cashier_shifts`      |
+Each read is a Postgres view or RPC, never aggregation in the client:
 
-To go live: create `src/lib/queries.ts` with identical signatures backed by
-Supabase, change the imports in the page files, delete `src/lib/mock/`.
-**No component changes.** If a swap seems to require changing a component, the
-query is returning the wrong shape — fix the query, not the component.
+| Query layer                         | Postgres                          |
+| ----------------------------------- | --------------------------------- |
+| `getArrivals(date)`                 | `dashboard_arrivals(p_date)`      |
+| `getDepartures(date)`               | `dashboard_departures(p_date)`    |
+| `getOccupancyForecast()`            | `occupancy_forecast(from, 28)`    |
+| `getRevenueSeries()`                | `revenue_series(from, 28)`        |
+| `getActivity()`                     | `activity_feed(limit, offset)`    |
+| `getBookings(filters)`              | `bookings_page(...)`              |
+| `getCustomers(filters)`             | `customers_page(...)`             |
+| `getRooms({ q, state, page })`      | `rooms_page(...)`                 |
+| `getHouseSummary()`                 | `house_summary()`                 |
+| `getOpenShift()`                    | `current_cashier_shift()`         |
+| `getCalendarAvailability(from, n)`  | `calendar_availability(from, n)`  |
+| `getOccupancyReport(from, to)`      | `occupancy_report(from, to)`      |
+| `getDebtorsReport()`                | `debtors_report()`                |
 
-**Two signatures must change during the swap, for room-count scale.** The
-client operates properties with up to ~1,800 rooms. `getRooms()` currently
-returns every room and the dashboard filters in the browser, which is fine on
-mock data and wrong against Postgres:
+**Two signatures carry the room-count rule.** The client operates properties
+with up to ~1,800 rooms, so no query may return every room and no screen may
+draw one element per room:
 
-- `getHouseSummary()` must return the six room-state counts, so the collapsed
-  house board needs no room list at all.
-- `getRooms({ q, state, page })` must be filtered and paginated server-side,
+- `getHouseSummary()` returns the six room-state counts, so the collapsed house
+  board needs no room list at all.
+- `getRooms({ q, state, page })` is filtered and paginated in Postgres, and is
   called only when the room list is expanded.
+
+The calendar follows the same rule from the other side: its rows are room
+types, not rooms, so the grid is the same height at 40 rooms and at 1,800.
+
+If a screen seems to need a shape the query does not return, fix the query, not
+the component.
 
 ## Non-negotiable rules
 
@@ -269,8 +277,8 @@ pnpm supabase migration new <name>
 - **Phase 1 — done.** Schema, auth, roles, and the swap from mock to Supabase.
 - **Phase 3 — mostly done.** Cashier on real data, check-in and check-out, the
   night audit, hardening, and the first two reports.
-- **Phase 2 — in progress.** Calendar grid, booking create and edit, inventory
-  restrictions, promotions, meeting rooms.
+- **Phase 2 — in progress.** Availability calendar is built. Remaining: booking
+  create and edit, inventory restrictions, promotions, meeting rooms.
 
 ### What still renders `<ComingSoon />`
 
@@ -278,7 +286,6 @@ Buildable on the schema as it stands:
 
 - `/bookings/arrivals`, `/bookings/departures`, `/bookings/in-house` — list
   views over data that already exists
-- `/calendar` — a room-by-night grid over `booking_room_nights`
 - `/bookings/new` — booking creation
 - Ten of the remaining reports: Payments, Daily checkout, Booking,
   Cancellation, Housekeeping, Channel, Extras, Financial, In house,
