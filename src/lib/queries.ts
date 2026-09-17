@@ -279,6 +279,7 @@ export async function getActivity(limit = 40): Promise<ActivityItem[]> {
       summary: string;
       emphasis: string[] | null;
       created_at: string;
+      unread: boolean;
     }[]
   ).map((row) => ({
     id: row.id,
@@ -286,9 +287,8 @@ export async function getActivity(limit = 40): Promise<ActivityItem[]> {
     summary: row.summary,
     emphasis: row.emphasis ?? [],
     createdAt: row.created_at,
-    // Nothing tracks per-user read state yet, so no row can honestly claim to
-    // be unread. Needs a last-seen timestamp per staff user.
-    unread: false,
+    // Measured against this staff user's own last clear.
+    unread: row.unread,
   }));
 }
 
@@ -371,6 +371,7 @@ export interface CustomerFilters {
 
 interface CustomerRow {
   customer_id: string;
+  customer_number: number;
   kind: CustomerKind;
   name: string | null;
   national_id_number: string | null;
@@ -419,9 +420,7 @@ export async function getCustomers(
     rows: rows.map(
       (row): Customer => ({
         id: row.customer_id,
-        // There is no customer number column; this is the head of the id,
-        // which is stable and unique but not something staff can quote.
-        ref: row.customer_id.slice(0, 8).toUpperCase(),
+        ref: String(row.customer_number),
         kind: row.kind,
         name: row.name ?? "Unnamed customer",
         nationalIdNumber: row.national_id_number,

@@ -1,8 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { formatDistanceToNowStrict } from "date-fns";
 import { Card, FeedDot, cn } from "@/components/ui";
+import { markActivitySeen } from "@/lib/actions/activity";
 import type { ActivityItem } from "@/lib/types";
 
 function Emphasised({ text, terms }: { text: string; terms: string[] }) {
@@ -28,7 +30,24 @@ function Emphasised({ text, terms }: { text: string; terms: string[] }) {
 }
 
 export function LiveFeed({ items }: { items: ActivityItem[] }) {
+  const router = useRouter();
+  const [pending, startTransition] = useTransition();
+  // Cleared optimistically so the highlight goes at once; the server decides
+  // what is unread on the next read.
   const [read, setRead] = useState(false);
+  const [error, setError] = useState("");
+
+  const anyUnread = items.some((item) => item.unread);
+
+  const clear = () => {
+    setError("");
+    startTransition(async () => {
+      const result = await markActivitySeen();
+      if (!result.ok) return setError(result.error);
+      setRead(true);
+      router.refresh();
+    });
+  };
 
   return (
     <Card
@@ -38,14 +57,19 @@ export function LiveFeed({ items }: { items: ActivityItem[] }) {
       bodyClassName="overflow-y-auto"
       action={
         <button
-          onClick={() => setRead(true)}
-          disabled={read}
+          onClick={clear}
+          disabled={pending || read || !anyUnread}
           className="text-xs text-brass hover:underline disabled:text-ink-faint disabled:no-underline"
         >
-          {read ? "All read" : "Mark all read"}
+          {pending ? "Clearing…" : read || !anyUnread ? "All read" : "Mark all read"}
         </button>
       }
     >
+      {error && (
+        <p className="mx-5 mb-2 rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-700">
+          {error}
+        </p>
+      )}
       <ul className="px-5">
         {items.map((item, i) => (
           <li key={item.id} className="relative flex gap-3 pb-4">
