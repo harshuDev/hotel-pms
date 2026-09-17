@@ -18,7 +18,9 @@ import type {
   ActivityItem,
   ActivityKind,
   Booking,
+  BookableRoomType,
   BookingStatus,
+  Channel,
   Customer,
   CustomerKind,
   SeriesPoint,
@@ -57,6 +59,7 @@ import type {
   RoomsPage,
   RoomState,
   Settlement,
+  TaxRate,
 } from "@/lib/types";
 
 /* -------------------------------------------------------------------------- */
@@ -1478,5 +1481,111 @@ export async function getInHouseReport(): Promise<InHouseRow[]> {
     adults: row.adults,
     children: row.children,
     balanceCents: row.balance_cents,
+  }));
+}
+
+/* -------------------------------------------------------------------------- */
+/* Taking a booking                                                           */
+/* -------------------------------------------------------------------------- */
+
+/** Active booking sources, for the new booking form. */
+export async function getChannels(): Promise<Channel[]> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("channels")
+    .select("id, name, kind, commission_bps")
+    .eq("is_active", true)
+    .order("kind")
+    .order("name");
+
+  if (error) {
+    throw new Error(`Failed to load the booking sources: ${error.message}`);
+  }
+
+  return (
+    (data ?? []) as {
+      id: string;
+      name: string;
+      kind: ChannelKind;
+      commission_bps: number;
+    }[]
+  ).map((row) => ({
+    id: row.id,
+    name: row.name,
+    kind: row.kind,
+    commissionBps: row.commission_bps,
+  }));
+}
+
+/** Active tax rates. Empty until the property's VAT policy is settled. */
+export async function getTaxRates(): Promise<TaxRate[]> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("tax_rates")
+    .select("id, name, rate_bps, inclusion")
+    .eq("is_active", true)
+    .order("name");
+
+  if (error) {
+    throw new Error(`Failed to load the tax rates: ${error.message}`);
+  }
+
+  return (
+    (data ?? []) as {
+      id: string;
+      name: string;
+      rate_bps: number;
+      inclusion: "inclusive" | "exclusive";
+    }[]
+  ).map((row) => ({
+    id: row.id,
+    name: row.name,
+    rateBps: row.rate_bps,
+    inclusion: row.inclusion,
+  }));
+}
+
+/**
+ * Room types and how many of each are free for a whole stay.
+ *
+ * The figure is the tightest night in the range, not the average: a type with
+ * four free on Monday and none on Tuesday can sell nothing for a two-night
+ * stay, and an average would say two.
+ */
+export async function getBookableRoomTypes(
+  from: string,
+  to: string,
+): Promise<BookableRoomType[]> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase.rpc("bookable_room_types", {
+    p_from: from,
+    p_to: to,
+  });
+
+  if (error) {
+    throw new Error(`Failed to load what can be sold: ${error.message}`);
+  }
+
+  return (
+    (data ?? []) as {
+      room_type_id: string;
+      code: string;
+      name: string;
+      base_occupancy: number;
+      max_occupancy: number;
+      total_rooms: number;
+      available: number;
+    }[]
+  ).map((row) => ({
+    roomTypeId: row.room_type_id,
+    code: row.code,
+    name: row.name,
+    baseOccupancy: row.base_occupancy,
+    maxOccupancy: row.max_occupancy,
+    totalRooms: row.total_rooms,
+    available: row.available,
   }));
 }

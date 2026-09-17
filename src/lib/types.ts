@@ -510,3 +510,25 @@ export interface InHouseRow {
   children: number;
   balanceCents: number;
 }
+
+/* -------------------------------------------------------------------------- */
+/* Taking a booking                                                           */
+/* -------------------------------------------------------------------------- */
+
+export interface BookableRoomType {
+  roomTypeId: string;
+  code: string;
+  name: string;
+  baseOccupancy: number;
+  maxOccupancy: number;
+  totalRooms: number;
+  /** Free for the whole stay — the tightest night in it, not the average. */
+  available: number;
+}
+
+export interface TaxRate {
+  id: string;
+  name: string;
+  rateBps: number;
+  inclusion: "inclusive" | "exclusive";
+}
