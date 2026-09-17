@@ -1,3 +1,4 @@
+import { format, parseISO, subDays } from "date-fns";
 import { HouseBoard } from "@/components/dashboard/house-board";
 import { HouseStrip } from "@/components/dashboard/house-strip";
 import { LiveFeed } from "@/components/dashboard/live-feed";
@@ -11,12 +12,21 @@ import {
   getHouseSummary,
   getOccupancyForecast,
   getRevenueSeries,
+  PACE_DAYS,
 } from "@/lib/queries";
 
 export const metadata = { title: "The Grand Hotel — Dashboard" };
 
 export default async function DashboardPage() {
   const today = await getBusinessDate();
+
+  // The pace chart reads backwards and forwards from the business date:
+  // revenue for the 28 nights up to and including it, occupancy for the 28
+  // starting on it.
+  const revenueFrom = format(
+    subDays(parseISO(today), PACE_DAYS - 1),
+    "yyyy-MM-dd",
+  );
 
   // No room list here: the house board renders from counts and loads rooms
   // only when it is expanded.
@@ -25,8 +35,8 @@ export default async function DashboardPage() {
       getActivity(),
       getArrivals(today),
       getDepartures(today),
-      getOccupancyForecast(),
-      getRevenueSeries(),
+      getOccupancyForecast(today),
+      getRevenueSeries(revenueFrom),
       getHouseSummary(),
     ]);
 

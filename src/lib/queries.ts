@@ -13,11 +13,11 @@
  * - Business date: REAL Supabase
  * - Arrivals: REAL Supabase
  * - Departures: REAL Supabase
- * - Occupancy forecast: MOCK
- * - Revenue series: MOCK
- * - Activity: MOCK
+ * - Occupancy forecast: REAL Supabase
+ * - Revenue series: REAL Supabase
+ * - Activity: REAL Supabase
  * - Bookings: REAL Supabase
- * - Customers: MOCK
+ * - Customers: REAL Supabase
  * - Cashier: MOCK
  * - Rooms: REAL Supabase
  * - House summary: REAL Supabase
@@ -26,20 +26,16 @@
 
 import { createClient } from "@/lib/supabase/server";
 
-import {
-  BOOKINGS,
-  CUSTOMERS,
-  activityFeed,
-  occupancySeries,
-  openShift,
-  revenueSeries,
-} from "@/lib/mock/data";
+// The cashier is the last mock-backed area; it needs writes, not reads.
+import { BOOKINGS, openShift } from "@/lib/mock/data";
 
 import type {
   ActivityItem,
+  ActivityKind,
   Booking,
   BookingStatus,
   Customer,
+  CustomerKind,
   SeriesPoint,
   Shift,
   HouseStateCounts,
@@ -184,19 +180,90 @@ export async function getDepartures(date: string): Promise<Booking[]> {
   return ((data ?? []) as BookingRow[]).map(toBooking);
 }
 
-/** Mirrors occupancy_forecast(p_from, 28) */
-export async function getOccupancyForecast(): Promise<SeriesPoint[]> {
-  return occupancySeries();
+export const PACE_DAYS = 28;
+
+/**
+ * Occupancy for the 28 nights starting on the business date.
+ *
+ * `from` is the business date, never a date derived from server time.
+ */
+export async function getOccupancyForecast(
+  from: string,
+  days: number = PACE_DAYS,
+): Promise<SeriesPoint[]> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase.rpc("occupancy_forecast", {
+    p_from: from,
+    p_days: days,
+  });
+
+  if (error) {
+    throw new Error(`Failed to load the occupancy forecast: ${error.message}`);
+  }
+
+  return (
+    (data ?? []) as { series_date: string; occupancy_pct: number }[]
+  ).map((row) => ({ date: row.series_date, value: Number(row.occupancy_pct) }));
 }
 
-/** Mirrors revenue_series(p_from, 28) */
-export async function getRevenueSeries(): Promise<SeriesPoint[]> {
-  return revenueSeries();
+/**
+ * Room revenue for the 28 nights ending on the business date.
+ *
+ * Rate less discount, excluding tax, so this does not match a booking's Total
+ * on the bookings list — that figure is what the guest is billed.
+ */
+export async function getRevenueSeries(
+  from: string,
+  days: number = PACE_DAYS,
+): Promise<SeriesPoint[]> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase.rpc("revenue_series", {
+    p_from: from,
+    p_days: days,
+  });
+
+  if (error) {
+    throw new Error(`Failed to load the revenue series: ${error.message}`);
+  }
+
+  return (
+    (data ?? []) as { series_date: string; revenue_cents: number }[]
+  ).map((row) => ({ date: row.series_date, value: row.revenue_cents }));
 }
 
-/** Mirrors a paginated read of activity_log */
-export async function getActivity(): Promise<ActivityItem[]> {
-  return activityFeed();
+/** Paginated read of activity_log, classified in Postgres. */
+export async function getActivity(limit = 40): Promise<ActivityItem[]> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase.rpc("activity_feed", {
+    p_limit: limit,
+    p_offset: 0,
+  });
+
+  if (error) {
+    throw new Error(`Failed to load activity: ${error.message}`);
+  }
+
+  return (
+    (data ?? []) as {
+      id: string;
+      kind: ActivityKind;
+      summary: string;
+      emphasis: string[] | null;
+      created_at: string;
+    }[]
+  ).map((row) => ({
+    id: row.id,
+    kind: row.kind,
+    summary: row.summary,
+    emphasis: row.emphasis ?? [],
+    createdAt: row.created_at,
+    // Nothing tracks per-user read state yet, so no row can honestly claim to
+    // be unread. Needs a last-seen timestamp per staff user.
+    unread: false,
+  }));
 }
 
 /* -------------------------------------------------------------------------- */
@@ -266,7 +333,7 @@ export async function getBookings(
 }
 
 /* -------------------------------------------------------------------------- */
-/* Customers — currently mock-backed                                           */
+/* Customers                                                                   */
 /* -------------------------------------------------------------------------- */
 
 export interface CustomerFilters {
@@ -274,6 +341,26 @@ export interface CustomerFilters {
   kind?: string;
   page?: number;
   perPage?: number;
+}
+
+interface CustomerRow {
+  customer_id: string;
+  kind: CustomerKind;
+  name: string | null;
+  national_id_number: string | null;
+  email: string | null;
+  phone: string | null;
+  exclude_from_email: boolean;
+  booking_count: number;
+  last_booking_date: string | null;
+  total_revenue_cents: number;
+  balance_cents: number;
+  total_count: number;
+}
+
+/** Same guard as the bookings list: an unknown kind is no filter. */
+function toKindFilter(kind: string | undefined): CustomerKind | null {
+  return kind === "personal" || kind === "company" ? kind : null;
 }
 
 export async function getCustomers(
@@ -284,31 +371,44 @@ export async function getCustomers(
   page: number;
   perPage: number;
 }> {
+  const supabase = await createClient();
+
   const perPage = filters.perPage ?? 25;
   const page = Math.max(1, filters.page ?? 1);
-  let rows = CUSTOMERS;
 
-  if (filters.kind && filters.kind !== "all") {
-    rows = rows.filter((c) => c.kind === filters.kind);
+  const { data, error } = await supabase.rpc("customers_page", {
+    p_q: filters.q?.trim() || null,
+    p_kind: toKindFilter(filters.kind),
+    p_limit: perPage,
+    p_offset: (page - 1) * perPage,
+  });
+
+  if (error) {
+    throw new Error(`Failed to load customers: ${error.message}`);
   }
 
-  if (filters.q) {
-    const q = filters.q.toLowerCase();
-
-    rows = rows.filter(
-      (c) =>
-        c.name.toLowerCase().includes(q) ||
-        (c.email ?? "").toLowerCase().includes(q) ||
-        (c.phone ?? "").includes(q),
-    );
-  }
-
-  const total = rows.length;
-  const start = (page - 1) * perPage;
+  const rows = (data ?? []) as CustomerRow[];
 
   return {
-    rows: rows.slice(start, start + perPage),
-    total,
+    rows: rows.map(
+      (row): Customer => ({
+        id: row.customer_id,
+        // There is no customer number column; this is the head of the id,
+        // which is stable and unique but not something staff can quote.
+        ref: row.customer_id.slice(0, 8).toUpperCase(),
+        kind: row.kind,
+        name: row.name ?? "Unnamed customer",
+        nationalIdNumber: row.national_id_number,
+        email: row.email,
+        phone: row.phone,
+        excludeFromEmail: row.exclude_from_email,
+        bookingCount: row.booking_count,
+        totalRevenueCents: row.total_revenue_cents,
+        lastBookingDate: row.last_booking_date,
+        balanceCents: row.balance_cents,
+      }),
+    ),
+    total: rows[0]?.total_count ?? 0,
     page,
     perPage,
   };
