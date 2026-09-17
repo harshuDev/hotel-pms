@@ -6,7 +6,6 @@ import { createClient } from "@/lib/supabase/client";
 
 export default function LoginPage() {
   const router = useRouter();
-  const supabase = createClient();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -17,6 +16,11 @@ export default function LoginPage() {
     event.preventDefault();
     setError("");
     setLoading(true);
+
+    // Built here rather than during render: this page is prerendered at build
+    // time, and creating the client up there makes every build depend on the
+    // Supabase environment variables being present.
+    const supabase = createClient();
 
     const { error } = await supabase.auth.signInWithPassword({
       email,
