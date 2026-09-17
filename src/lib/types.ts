@@ -10,6 +10,20 @@ export type ChannelKind = "direct" | "ota" | "wholesaler" | "gds" | "offline";
 export type Settlement = "at_property" | "prepaid_to_channel" | "virtual_card";
 export type CustomerKind = "personal" | "company";
 
+export type StaffRole =
+  | "admin"
+  | "manager"
+  | "front_desk"
+  | "cashier"
+  | "housekeeping";
+
+/** The signed-in member of staff. `staff_users`, never "profile". */
+export interface StaffUser {
+  id: string;
+  fullName: string;
+  role: StaffRole;
+}
+
 export type ActivityKind =
   | "BOOKING"
   | "CANCELLATION"
