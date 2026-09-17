@@ -65,12 +65,14 @@ export function CashierClient({
   payableBookings,
   businessDate,
   suggestedFloatCents,
+  canSeeExpected,
 }: {
   shift: Shift | null;
   methods: PaymentMethod[];
   payableBookings: Booking[];
   businessDate: string;
   suggestedFloatCents: number | null;
+  canSeeExpected: boolean;
 }) {
   const [modal, setModal] = useState<null | "payment" | "paidout" | "close">(
     null,
@@ -173,8 +175,12 @@ export function CashierClient({
         />
         <Stat
           label="Expected in drawer"
-          value={formatMoney(totals.expected)}
-          hint="Cash only — non-cash payments excluded"
+          value={canSeeExpected ? formatMoney(totals.expected) : "—"}
+          hint={
+            canSeeExpected
+              ? "Cash only — non-cash payments excluded"
+              : "You count it blind; the figure appears at close"
+          }
         />
       </div>
 

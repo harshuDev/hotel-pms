@@ -65,8 +65,12 @@ export function HouseStrip({ s }: { s: HouseSummary }) {
       />
       <Metric
         label="In the drawer"
-        value={formatMoney(s.drawerCents)}
-        detail="Cash only, this shift"
+        value={s.drawerCents === null ? "—" : formatMoney(s.drawerCents)}
+        detail={
+          s.drawerCents === null
+            ? "Counted blind at close"
+            : "Cash only, this shift"
+        }
       />
       <Metric
         label="Outstanding"

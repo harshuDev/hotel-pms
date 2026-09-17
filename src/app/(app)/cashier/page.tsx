@@ -1,6 +1,7 @@
 import { CashierClient } from "@/components/cashier-client";
 import {
   getBusinessDate,
+  getCanSeeDrawerTotal,
   getOpenShift,
   getPayableBookings,
   getPaymentMethods,
@@ -8,13 +9,14 @@ import {
 } from "@/lib/queries";
 
 export default async function CashierPage() {
-  const [shift, methods, payable, businessDate, suggestedFloat] =
+  const [shift, methods, payable, businessDate, suggestedFloat, canSeeExpected] =
     await Promise.all([
       getOpenShift(),
       getPaymentMethods(),
       getPayableBookings(),
       getBusinessDate(),
       getSuggestedOpeningFloat(),
+      getCanSeeDrawerTotal(),
     ]);
 
   return (
@@ -24,6 +26,7 @@ export default async function CashierPage() {
       payableBookings={payable}
       businessDate={businessDate}
       suggestedFloatCents={suggestedFloat}
+      canSeeExpected={canSeeExpected}
     />
   );
 }

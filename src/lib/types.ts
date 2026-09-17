@@ -200,7 +200,8 @@ export interface HouseSummary {
   vacantDirty: number;
   ooo: number;
   occupancyPct: number;
-  drawerCents: number;
+  /** Null when the viewer may not see a drawer total before it is counted. */
+  drawerCents: number | null;
   outstandingCents: number;
   adrCents: number;
   totalRooms: number;
