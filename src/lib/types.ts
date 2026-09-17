@@ -532,3 +532,51 @@ export interface TaxRate {
   rateBps: number;
   inclusion: "inclusive" | "exclusive";
 }
+
+/* -------------------------------------------------------------------------- */
+/* Inventory                                                                  */
+/* -------------------------------------------------------------------------- */
+
+export interface RatePlan {
+  id: string;
+  code: string;
+  name: string;
+  description: string | null;
+  isDefault: boolean;
+  isActive: boolean;
+}
+
+/** One room type on one night: price, stay rules and what is sellable. */
+export interface InventoryCell {
+  date: string;
+  roomTypeId: string;
+  roomTypeCode: string;
+  roomTypeName: string;
+  /** Null means no rate is loaded, which is not the same as free. */
+  rateCents: number | null;
+  minStayThrough: number | null;
+  minStayArrival: number | null;
+  maxStay: number | null;
+  closedToArrival: boolean;
+  closedToDeparture: boolean;
+  stopSell: boolean;
+  /** Null means as many as exist. */
+  allotment: number | null;
+  closeOut: boolean;
+  physicalRooms: number;
+  outOfOrder: number;
+  sold: number;
+  sellable: number;
+}
+
+/** The nine things an Inventory screen can set. */
+export type InventoryField =
+  | "rate"
+  | "min_stay_through"
+  | "min_stay_arrival"
+  | "max_stay"
+  | "closed_to_arrival"
+  | "closed_to_departure"
+  | "stop_sell"
+  | "allotment"
+  | "close_out";

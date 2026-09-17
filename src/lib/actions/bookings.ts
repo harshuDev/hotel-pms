@@ -18,8 +18,9 @@ import type { BookableRoomType, BookingStatus, Settlement } from "@/lib/types";
 
 export interface RoomLine {
   roomTypeId: string;
+  /** Null takes the nightly rate off the rate plan, which varies by night. */
+  rateCents: number | null;
   quantity: number;
-  rateCents: number;
   adults: number;
   children: number;
 }
@@ -46,7 +47,11 @@ export interface NewBooking {
   guestNotes: string;
   internalNotes: string;
   externalReference: string;
+  /** Sell a room the house does not have. */
   allowOverbook: boolean;
+  ratePlanId: string | null;
+  /** Sell against a stop sell, a closed date or a stay rule. */
+  ignoreRestrictions: boolean;
 }
 
 export interface BookingTaken {
@@ -54,9 +59,25 @@ export interface BookingTaken {
   reference: string;
 }
 
+/**
+ * Why create_booking() refused, when the refusal is one a person can wave
+ * through. Postgres raises these as custom SQLSTATEs rather than message text,
+ * so the wording can change without breaking the form.
+ */
+export type BookingBlock = "overbook" | "restriction";
+
+const BLOCK_BY_SQLSTATE: Record<string, BookingBlock> = {
+  HP001: "overbook",
+  HP002: "restriction",
+};
+
+export type CreateBookingResult =
+  | { ok: true; data: BookingTaken }
+  | { ok: false; error: string; block?: BookingBlock };
+
 export async function createBooking(
   input: NewBooking,
-): Promise<ActionResult<BookingTaken>> {
+): Promise<CreateBookingResult> {
   // Cheap checks first, so an obviously wrong form comes back without a round
   // trip. Postgres repeats every one of them — these are for speed, not safety.
   if (input.checkOut <= input.checkIn) {
@@ -72,8 +93,15 @@ export async function createBooking(
     if (!Number.isSafeInteger(line.quantity) || line.quantity < 1) {
       return { ok: false, error: "Each room line needs a whole number of rooms." };
     }
-    if (!Number.isSafeInteger(line.rateCents) || line.rateCents < 0) {
-      return { ok: false, error: "A nightly rate cannot be negative." };
+    if (line.rateCents !== null) {
+      if (!Number.isSafeInteger(line.rateCents) || line.rateCents < 0) {
+        return { ok: false, error: "A nightly rate cannot be negative." };
+      }
+    } else if (!input.ratePlanId) {
+      return {
+        ok: false,
+        error: "Give a nightly rate, or pick a rate plan that has one loaded.",
+      };
     }
   }
 
@@ -110,12 +138,19 @@ export async function createBooking(
     p_internal_notes: input.internalNotes || null,
     p_external_reference: input.externalReference || null,
     p_allow_overbook: input.allowOverbook,
+    p_rate_plan_id: input.ratePlanId,
+    p_ignore_restrictions: input.ignoreRestrictions,
   });
 
   if (error) {
     // Postgres raises these with the message worth showing; it already reads
-    // as a sentence, so it is not wrapped in one.
-    return { ok: false, error: error.message };
+    // as a sentence, so it is not wrapped in one. The SQLSTATE says whether
+    // the form should offer to wave it through.
+    return {
+      ok: false,
+      error: error.message,
+      block: BLOCK_BY_SQLSTATE[error.code ?? ""],
+    };
   }
 
   const row = ((data ?? []) as { booking_id: string; reference: string }[])[0];
