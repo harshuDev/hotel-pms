@@ -29,6 +29,9 @@ import type {
   ShiftPayment,
   StaffRole,
   StaffUser,
+  OccupancyRow,
+  OccupancySummary,
+  DebtorRow,
   HouseStateCounts,
   HouseSummary,
   Room,
@@ -756,4 +759,134 @@ export async function getHouseSummary(): Promise<HouseSummary> {
     totalRooms: row.total_rooms,
     states,
   };
+}
+
+/* -------------------------------------------------------------------------- */
+/* Reports                                                                     */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Occupancy, ADR and RevPAR per night.
+ *
+ * Room revenue is rate less discount and excludes tax, so it will not match a
+ * booking's Total on the bookings list — that figure is what the guest is
+ * billed.
+ */
+export async function getOccupancyReport(
+  from: string,
+  to: string,
+): Promise<OccupancyRow[]> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase.rpc("occupancy_report", {
+    p_from: from,
+    p_to: to,
+  });
+
+  if (error) {
+    throw new Error(`Failed to load the occupancy report: ${error.message}`);
+  }
+
+  return (
+    (data ?? []) as {
+      stay_date: string;
+      rooms_sold: number;
+      sellable_rooms: number;
+      occupancy_pct: number;
+      room_revenue_cents: number;
+      adr_cents: number;
+      revpar_cents: number;
+    }[]
+  ).map((row) => ({
+    date: row.stay_date,
+    roomsSold: row.rooms_sold,
+    sellableRooms: row.sellable_rooms,
+    occupancyPct: Number(row.occupancy_pct),
+    roomRevenueCents: row.room_revenue_cents,
+    adrCents: row.adr_cents,
+    revparCents: row.revpar_cents,
+  }));
+}
+
+/**
+ * Period totals, which are not the averages of the rows: ADR over a period is
+ * total revenue over total rooms sold, never the mean of each night's ADR.
+ */
+export async function getOccupancySummary(
+  from: string,
+  to: string,
+): Promise<OccupancySummary> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase.rpc("occupancy_report_summary", {
+    p_from: from,
+    p_to: to,
+  });
+
+  if (error) {
+    throw new Error(`Failed to load the occupancy totals: ${error.message}`);
+  }
+
+  const row = (
+    (data ?? []) as {
+      nights: number;
+      rooms_sold: number;
+      room_nights_available: number;
+      occupancy_pct: number;
+      room_revenue_cents: number;
+      adr_cents: number;
+      revpar_cents: number;
+    }[]
+  )[0];
+
+  if (!row) {
+    throw new Error("The occupancy totals came back empty.");
+  }
+
+  return {
+    nights: row.nights,
+    roomsSold: row.rooms_sold,
+    roomNightsAvailable: row.room_nights_available,
+    occupancyPct: Number(row.occupancy_pct),
+    roomRevenueCents: row.room_revenue_cents,
+    adrCents: row.adr_cents,
+    revparCents: row.revpar_cents,
+  };
+}
+
+/** Bookings with money still owed, largest first. */
+export async function getDebtorsReport(): Promise<DebtorRow[]> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase.rpc("debtors_report");
+
+  if (error) {
+    throw new Error(`Failed to load the debtors report: ${error.message}`);
+  }
+
+  return (
+    (data ?? []) as {
+      booking_id: string;
+      reference: string;
+      customer_name: string | null;
+      status: BookingStatus;
+      check_in: string;
+      check_out: string;
+      charges_cents: number;
+      payments_cents: number;
+      outstanding_cents: number;
+      days_overdue: number;
+    }[]
+  ).map((row) => ({
+    bookingId: row.booking_id,
+    reference: row.reference,
+    customerName: row.customer_name ?? "Unnamed guest",
+    status: row.status,
+    checkIn: row.check_in,
+    checkOut: row.check_out,
+    chargesCents: row.charges_cents,
+    paymentsCents: row.payments_cents,
+    outstandingCents: row.outstanding_cents,
+    daysOverdue: row.days_overdue,
+  }));
 }
