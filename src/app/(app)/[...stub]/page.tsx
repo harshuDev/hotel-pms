@@ -1,7 +1,6 @@
 import { ComingSoon } from "@/components/ui";
 
 const PHASES: Record<string, string> = {
-  calendar: "Phase 2",
   inventory: "Phase 2",
   offers: "Phase 2",
   reports: "Phase 3",

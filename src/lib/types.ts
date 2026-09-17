@@ -247,6 +247,19 @@ export interface OccupancySummary {
   revparCents: number;
 }
 
+export interface AvailabilityCell {
+  date: string;
+  roomTypeId: string;
+  roomTypeCode: string;
+  roomTypeName: string;
+  totalRooms: number;
+  outOfOrder: number;
+  sellable: number;
+  sold: number;
+  /** Negative means the night is overbooked. */
+  available: number;
+}
+
 export interface DebtorRow {
   bookingId: string;
   reference: string;
