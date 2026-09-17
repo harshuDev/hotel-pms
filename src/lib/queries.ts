@@ -11,12 +11,12 @@
  * Migration status:
  * - Property: REAL Supabase
  * - Business date: REAL Supabase
- * - Arrivals: MOCK
- * - Departures: MOCK
+ * - Arrivals: REAL Supabase
+ * - Departures: REAL Supabase
  * - Occupancy forecast: MOCK
  * - Revenue series: MOCK
  * - Activity: MOCK
- * - Bookings: MOCK
+ * - Bookings: REAL Supabase
  * - Customers: MOCK
  * - Cashier: MOCK
  * - Rooms: REAL Supabase
@@ -38,6 +38,7 @@ import {
 import type {
   ActivityItem,
   Booking,
+  BookingStatus,
   Customer,
   SeriesPoint,
   Shift,
@@ -47,6 +48,7 @@ import type {
   RoomFilters,
   RoomsPage,
   RoomState,
+  Settlement,
 } from "@/lib/types";
 
 /* -------------------------------------------------------------------------- */
@@ -100,27 +102,86 @@ export async function getBusinessDate(): Promise<string> {
 }
 
 /* -------------------------------------------------------------------------- */
-/* Dashboard — currently mock-backed                                          */
+/* Dashboard movements and charts                                             */
 /* -------------------------------------------------------------------------- */
 
-/** Mirrors dashboard_arrivals(p_date) */
-export async function getArrivals(date: string): Promise<Booking[]> {
-  return BOOKINGS.filter(
-    (b) =>
-      b.arrivalDate === date &&
-      b.status !== "canceled" &&
-      b.status !== "no_show",
-  ).sort((a, b) => a.customerName.localeCompare(b.customerName));
+/** A row of the booking_totals view, as the three booking RPCs return it. */
+interface BookingRow {
+  booking_id: string;
+  reference: string;
+  status: BookingStatus;
+  settlement: Settlement;
+  customer_id: string;
+  customer_name: string | null;
+  channel_name: string;
+  check_in: string;
+  check_out: string;
+  nights: number;
+  adults: number;
+  children: number;
+  booked_at: string;
+  booked_on: string;
+  room_count: number;
+  room_type_name: string | null;
+  room_number: string | null;
+  total_cents: number;
+  balance_cents: number;
 }
 
-/** Mirrors dashboard_departures(p_date) */
+function toBooking(row: BookingRow): Booking {
+  return {
+    id: row.booking_id,
+    reference: row.reference,
+    customerId: row.customer_id,
+    customerName: row.customer_name ?? "Unnamed guest",
+    channelName: row.channel_name,
+    settlement: row.settlement,
+    status: row.status,
+    arrivalDate: row.check_in,
+    departureDate: row.check_out,
+    // The property-local calendar date, not the raw timestamp: the column
+    // renders a date and must not shift with the server's timezone.
+    bookedAt: row.booked_on,
+    nights: row.nights,
+    roomCount: row.room_count,
+    roomTypeName: row.room_type_name ?? "Unassigned",
+    roomNumber: row.room_number,
+    adults: row.adults,
+    children: row.children,
+    totalCents: row.total_cents,
+    balanceCents: row.balance_cents,
+  };
+}
+
+/** Guests arriving on the business date. Canceled and no-show reservations
+ * are not movements, and the RPC already excludes them. */
+export async function getArrivals(date: string): Promise<Booking[]> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase.rpc("dashboard_arrivals", {
+    p_date: date,
+  });
+
+  if (error) {
+    throw new Error(`Failed to load arrivals: ${error.message}`);
+  }
+
+  return ((data ?? []) as BookingRow[]).map(toBooking);
+}
+
+/** Guests departing on the business date. */
 export async function getDepartures(date: string): Promise<Booking[]> {
-  return BOOKINGS.filter(
-    (b) =>
-      b.departureDate === date &&
-      b.status !== "canceled" &&
-      b.status !== "no_show",
-  ).sort((a, b) => a.customerName.localeCompare(b.customerName));
+  const supabase = await createClient();
+
+  const { data, error } = await supabase.rpc("dashboard_departures", {
+    p_date: date,
+  });
+
+  if (error) {
+    throw new Error(`Failed to load departures: ${error.message}`);
+  }
+
+  return ((data ?? []) as BookingRow[]).map(toBooking);
 }
 
 /** Mirrors occupancy_forecast(p_from, 28) */
@@ -139,7 +200,7 @@ export async function getActivity(): Promise<ActivityItem[]> {
 }
 
 /* -------------------------------------------------------------------------- */
-/* Bookings — currently mock-backed                                            */
+/* Bookings                                                                    */
 /* -------------------------------------------------------------------------- */
 
 export interface BookingFilters {
@@ -147,6 +208,26 @@ export interface BookingFilters {
   status?: string;
   page?: number;
   perPage?: number;
+}
+
+const BOOKING_STATUSES: readonly BookingStatus[] = [
+  "pending",
+  "confirmed",
+  "checked_in",
+  "checked_out",
+  "canceled",
+  "no_show",
+];
+
+/**
+ * Status arrives from the query string, so an unrecognised value would reach
+ * Postgres as an invalid enum and fail the page. Anything unknown is simply
+ * no filter.
+ */
+function toStatusFilter(status: string | undefined): BookingStatus | null {
+  return BOOKING_STATUSES.includes(status as BookingStatus)
+    ? (status as BookingStatus)
+    : null;
 }
 
 export async function getBookings(
@@ -157,30 +238,28 @@ export async function getBookings(
   page: number;
   perPage: number;
 }> {
+  const supabase = await createClient();
+
   const perPage = filters.perPage ?? 25;
   const page = Math.max(1, filters.page ?? 1);
-  let rows = BOOKINGS;
 
-  if (filters.status && filters.status !== "all") {
-    rows = rows.filter((b) => b.status === filters.status);
+  const { data, error } = await supabase.rpc("bookings_page", {
+    p_q: filters.q?.trim() || null,
+    p_status: toStatusFilter(filters.status),
+    p_limit: perPage,
+    p_offset: (page - 1) * perPage,
+  });
+
+  if (error) {
+    throw new Error(`Failed to load bookings: ${error.message}`);
   }
 
-  if (filters.q) {
-    const q = filters.q.toLowerCase();
-
-    rows = rows.filter(
-      (b) =>
-        b.reference.toLowerCase().includes(q) ||
-        b.customerName.toLowerCase().includes(q),
-    );
-  }
-
-  const total = rows.length;
-  const start = (page - 1) * perPage;
+  const rows = (data ?? []) as (BookingRow & { total_count: number })[];
 
   return {
-    rows: rows.slice(start, start + perPage),
-    total,
+    rows: rows.map(toBooking),
+    // count(*) over () on the full filtered set; absent when the page is empty.
+    total: rows[0]?.total_count ?? 0,
     page,
     perPage,
   };

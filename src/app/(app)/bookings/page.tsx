@@ -2,7 +2,7 @@ import Link from "next/link";
 import { format, parseISO } from "date-fns";
 import { EmptyState, PageHeader, StatusBadge, cn } from "@/components/ui";
 import { formatDue, formatMoney } from "@/lib/money";
-import { getBookings } from "@/lib/mock/queries";
+import { getBookings } from "@/lib/queries";
 
 const STATUSES = [
   "all",
