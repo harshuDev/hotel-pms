@@ -1,33 +1,18 @@
 /**
  * ============================================================================
- * THE SWAP POINT
+ * THE QUERY LAYER
  * ============================================================================
- * Real Supabase-backed queries for the PMS application.
+ * Every read in the application, backed by Supabase.
  *
- * During the migration, functions that have not yet been converted remain
- * backed by the mock data. This lets us migrate the application incrementally
- * without changing the UI all at once.
+ * RLS decides what each query can see; none of these functions filter by
+ * property themselves. Aggregation happens in Postgres views and RPCs, never
+ * here. Money stays in integer pence all the way to money.ts.
  *
- * Migration status:
- * - Property: REAL Supabase
- * - Business date: REAL Supabase
- * - Arrivals: REAL Supabase
- * - Departures: REAL Supabase
- * - Occupancy forecast: REAL Supabase
- * - Revenue series: REAL Supabase
- * - Activity: REAL Supabase
- * - Bookings: REAL Supabase
- * - Customers: REAL Supabase
- * - Cashier: MOCK
- * - Rooms: REAL Supabase
- * - House summary: REAL Supabase
+ * Writes do not live here — they are Server Actions in src/lib/actions.
  * ============================================================================
  */
 
 import { createClient } from "@/lib/supabase/server";
-
-// The cashier is the last mock-backed area; it needs writes, not reads.
-import { BOOKINGS, openShift } from "@/lib/mock/data";
 
 import type {
   ActivityItem,
@@ -37,7 +22,11 @@ import type {
   Customer,
   CustomerKind,
   SeriesPoint,
+  PaidOut,
+  PaidOutCategory,
+  PaymentMethod,
   Shift,
+  ShiftPayment,
   HouseStateCounts,
   HouseSummary,
   Room,
@@ -415,55 +404,171 @@ export async function getCustomers(
 }
 
 /* -------------------------------------------------------------------------- */
-/* Cashier — currently mock-backed                                             */
+/* Cashier                                                                     */
 /* -------------------------------------------------------------------------- */
 
-export async function getOpenShift(): Promise<Shift> {
-  return openShift();
+/** Payment methods configured for the property. `affects_drawer` is the only
+ * thing that decides whether a payment touches physical cash. */
+export async function getPaymentMethods(): Promise<PaymentMethod[]> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("payment_methods")
+    .select("id, name, affects_drawer")
+    .order("name");
+
+  if (error) {
+    throw new Error(`Failed to load payment methods: ${error.message}`);
+  }
+
+  return (
+    (data ?? []) as { id: string; name: string; affects_drawer: boolean }[]
+  ).map((row) => ({
+    id: row.id,
+    name: row.name,
+    affectsDrawer: row.affects_drawer,
+  }));
+}
+
+/** Bookings with something still owed, for the payment and recharge pickers. */
+export async function getPayableBookings(limit = 20): Promise<Booking[]> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("booking_totals")
+    .select("*")
+    .gt("balance_cents", 0)
+    .order("check_in")
+    .limit(limit);
+
+  if (error) {
+    throw new Error(`Failed to load payable bookings: ${error.message}`);
+  }
+
+  return ((data ?? []) as BookingRow[]).map(toBooking);
 }
 
 /**
- * Phase 4 query names.
- * These preserve the mock swap point until Supabase cashier queries
- * are migrated.
+ * The signed-in cashier's own open shift, with everything posted against it.
+ *
+ * Null when they have none — the screen then offers to open one. The expected
+ * drawer figure is deliberately absent: close_cashier_shift() is the only
+ * thing that reveals it, after the count is in.
  */
-export async function getCurrentCashierShift(): Promise<Shift> {
-  return getOpenShift();
+export async function getOpenShift(): Promise<Shift | null> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase.rpc("current_cashier_shift");
+
+  if (error) {
+    throw new Error(`Failed to load the cashier shift: ${error.message}`);
+  }
+
+  const header = (
+    (data ?? []) as {
+      shift_id: string;
+      cashier_name: string;
+      business_date: string;
+      status: Shift["status"];
+      opened_at: string;
+      opening_balance_cents: number;
+    }[]
+  )[0];
+
+  if (!header) return null;
+
+  const [paymentsResult, paidOutsResult] = await Promise.all([
+    supabase.rpc("cashier_shift_payments", { p_shift_id: header.shift_id }),
+    supabase.rpc("cashier_shift_paid_outs", { p_shift_id: header.shift_id }),
+  ]);
+
+  if (paymentsResult.error) {
+    throw new Error(
+      `Failed to load shift payments: ${paymentsResult.error.message}`,
+    );
+  }
+  if (paidOutsResult.error) {
+    throw new Error(
+      `Failed to load shift paid-outs: ${paidOutsResult.error.message}`,
+    );
+  }
+
+  const payments: ShiftPayment[] = (
+    (paymentsResult.data ?? []) as {
+      payment_id: string;
+      booking_reference: string;
+      guest_name: string | null;
+      payment_method_id: string;
+      method_name: string;
+      affects_drawer: boolean;
+      amount_cents: number;
+      paid_at: string;
+    }[]
+  ).map((row) => ({
+    id: row.payment_id,
+    bookingRef: row.booking_reference,
+    guestName: row.guest_name ?? "Unnamed guest",
+    methodId: row.payment_method_id,
+    methodName: row.method_name,
+    affectsDrawer: row.affects_drawer,
+    // Signed, so a reversed payment subtracts rather than double-counting.
+    amountCents: row.amount_cents,
+    createdAt: row.paid_at,
+  }));
+
+  const paidOuts: PaidOut[] = (
+    (paidOutsResult.data ?? []) as {
+      movement_id: string;
+      amount_cents: number;
+      category: PaidOutCategory;
+      reason: string;
+      payee: string | null;
+      recharge_booking_reference: string | null;
+      created_at: string;
+    }[]
+  ).map((row) => ({
+    id: row.movement_id,
+    amountCents: row.amount_cents,
+    category: row.category,
+    reason: row.reason,
+    payee: row.payee ?? "—",
+    rechargeBookingRef: row.recharge_booking_reference,
+    createdAt: row.created_at,
+  }));
+
+  return {
+    id: header.shift_id,
+    userName: header.cashier_name,
+    businessDate: header.business_date,
+    openedAt: header.opened_at,
+    openingFloatCents: header.opening_balance_cents,
+    status: header.status,
+    payments,
+    paidOuts,
+  };
 }
 
-export async function getCashierShiftTransactions() {
-  const shift = await getOpenShift();
-  return shift.payments;
-}
+/**
+ * The float the last shift opened at, offered as the default for the next one.
+ *
+ * CLAUDE.md assumes a fixed float. Nothing in the schema stores that amount,
+ * so this carries the previous shift's figure forward rather than inventing a
+ * number. A property setting would make it authoritative.
+ */
+export async function getSuggestedOpeningFloat(): Promise<number | null> {
+  const supabase = await createClient();
 
-export async function getCashMovements() {
-  const shift = await getOpenShift();
-  return shift.paidOuts;
-}
+  const { data, error } = await supabase
+    .from("cashier_shifts")
+    .select("opening_balance_cents")
+    .order("opened_at", { ascending: false })
+    .limit(1);
 
-export async function getRecentCashPayments() {
-  const shift = await getOpenShift();
+  if (error) {
+    throw new Error(`Failed to load the previous float: ${error.message}`);
+  }
 
-  return shift.payments.filter((payment) => payment.affectsDrawer);
-}
-
-export async function getCashierShiftHistory(): Promise<Shift[]> {
-  return [];
-}
-
-export async function searchBookingsForPayment(
-  q: string,
-): Promise<Booking[]> {
-  if (!q.trim()) return [];
-
-  const term = q.toLowerCase();
-
-  return BOOKINGS.filter(
-    (b) =>
-      b.balanceCents > 0 &&
-      (b.reference.toLowerCase().includes(term) ||
-        b.customerName.toLowerCase().includes(term)),
-  ).slice(0, 6);
+  return (data ?? [])[0]?.opening_balance_cents ?? null;
 }
 
 /* -------------------------------------------------------------------------- */
