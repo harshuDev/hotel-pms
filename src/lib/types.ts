@@ -223,6 +223,43 @@ export interface HouseSummary {
   states: HouseStateCounts;
 }
 
+/* ------------------------------------------------------------------ */
+/* Reports                                                             */
+/* ------------------------------------------------------------------ */
+
+export interface OccupancyRow {
+  date: string;
+  roomsSold: number;
+  sellableRooms: number;
+  occupancyPct: number;
+  roomRevenueCents: number;
+  adrCents: number;
+  revparCents: number;
+}
+
+export interface OccupancySummary {
+  nights: number;
+  roomsSold: number;
+  roomNightsAvailable: number;
+  occupancyPct: number;
+  roomRevenueCents: number;
+  adrCents: number;
+  revparCents: number;
+}
+
+export interface DebtorRow {
+  bookingId: string;
+  reference: string;
+  customerName: string;
+  status: BookingStatus;
+  checkIn: string;
+  checkOut: string;
+  chargesCents: number;
+  paymentsCents: number;
+  outstandingCents: number;
+  daysOverdue: number;
+}
+
 /** Financial ledger shapes used by the eventual Supabase query layer. Amounts
  * are integer minor units; UI formatting remains centralized in money.ts. */
 export type FolioStatus = "open" | "closed" | "cancelled";
