@@ -703,3 +703,52 @@ export interface Promotion {
   bookingsTaken: number;
   discountGivenCents: number;
 }
+
+/* -------------------------------------------------------------------------- */
+/* Meeting rooms                                                              */
+/* -------------------------------------------------------------------------- */
+
+export type MeetingRoomStatus = "pending" | "confirmed" | "canceled";
+
+/** One meeting room on one day. The booking fields are null when it is free. */
+export interface MeetingRoomCell {
+  meetingRoomId: string;
+  meetingRoomName: string;
+  capacity: number | null;
+  date: string;
+  bookingId: string | null;
+  reference: string | null;
+  eventName: string | null;
+  guestCount: number | null;
+  customerName: string | null;
+  status: MeetingRoomStatus | null;
+  startsOn: string | null;
+  endsOn: string | null;
+  /** True on the day the booking starts, which is where the label is drawn. */
+  isFirstDay: boolean | null;
+}
+
+export interface MeetingRoomBooking {
+  bookingId: string;
+  reference: string;
+  meetingRoomId: string;
+  meetingRoomName: string;
+  eventName: string;
+  guestCount: number;
+  customerId: string | null;
+  customerName: string | null;
+  startsOn: string;
+  /** Inclusive: a room booked to Wednesday is occupied on the Wednesday. */
+  endsOn: string;
+  days: number;
+  status: MeetingRoomStatus;
+  comments: string | null;
+  /** Null when no money has been taken. */
+  folioId: string | null;
+  folioNumber: number | null;
+  chargesCents: number;
+  paymentsCents: number;
+  balanceCents: number;
+  bookedBy: string | null;
+  createdAt: string;
+}

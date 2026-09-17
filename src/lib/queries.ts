@@ -53,6 +53,9 @@ import type {
   HousekeepingRoomsPage,
   FolioLine,
   InventoryCell,
+  MeetingRoomBooking,
+  MeetingRoomCell,
+  MeetingRoomStatus,
   Promotion,
   PromotionKind,
   RatePlan,
@@ -2007,4 +2010,129 @@ export async function getRoomTypes(): Promise<
 
   if (error) throw new Error(`Failed to load the room types: ${error.message}`);
   return (data ?? []) as { id: string; code: string; name: string }[];
+}
+
+/* -------------------------------------------------------------------------- */
+/* Meeting rooms                                                              */
+/* -------------------------------------------------------------------------- */
+
+/** How many days the meeting room calendar shows at once. */
+export const MEETING_ROOM_DAYS = 14;
+
+/**
+ * One row per meeting room per day.
+ *
+ * The ~1,800 room rule does not apply here: a property has a handful of
+ * meeting rooms, so a cell per room per day is the right shape and is what the
+ * client asked for.
+ */
+export async function getMeetingRoomCalendar(
+  from: string,
+  days: number = MEETING_ROOM_DAYS,
+): Promise<MeetingRoomCell[]> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase.rpc("meeting_room_calendar", {
+    p_from: from,
+    p_days: days,
+  });
+
+  if (error) {
+    throw new Error(`Failed to load the meeting rooms: ${error.message}`);
+  }
+
+  return (
+    (data ?? []) as {
+      meeting_room_id: string;
+      meeting_room_name: string;
+      capacity: number | null;
+      stay_date: string;
+      booking_id: string | null;
+      reference: string | null;
+      event_name: string | null;
+      guest_count: number | null;
+      customer_name: string | null;
+      status: MeetingRoomStatus | null;
+      starts_on: string | null;
+      ends_on: string | null;
+      is_first_day: boolean | null;
+    }[]
+  ).map((row) => ({
+    meetingRoomId: row.meeting_room_id,
+    meetingRoomName: row.meeting_room_name,
+    capacity: row.capacity,
+    date: row.stay_date,
+    bookingId: row.booking_id,
+    reference: row.reference,
+    eventName: row.event_name,
+    guestCount: row.guest_count,
+    customerName: row.customer_name,
+    status: row.status,
+    startsOn: row.starts_on,
+    endsOn: row.ends_on,
+    isFirstDay: row.is_first_day,
+  }));
+}
+
+export async function getMeetingRoomBooking(
+  bookingId: string,
+): Promise<MeetingRoomBooking | null> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("meeting_room_booking_detail", {
+    p_booking_id: bookingId,
+  });
+
+  if (error) {
+    throw new Error(`Failed to load the booking: ${error.message}`);
+  }
+
+  const row = (
+    (data ?? []) as {
+      booking_id: string;
+      reference: string;
+      meeting_room_id: string;
+      meeting_room_name: string;
+      event_name: string;
+      guest_count: number;
+      customer_id: string | null;
+      customer_name: string | null;
+      starts_on: string;
+      ends_on: string;
+      days: number;
+      status: MeetingRoomStatus;
+      comments: string | null;
+      folio_id: string | null;
+      folio_number: number | null;
+      charges_cents: number;
+      payments_cents: number;
+      balance_cents: number;
+      booked_by: string | null;
+      created_at: string;
+    }[]
+  )[0];
+
+  if (!row) return null;
+
+  return {
+    bookingId: row.booking_id,
+    reference: row.reference,
+    meetingRoomId: row.meeting_room_id,
+    meetingRoomName: row.meeting_room_name,
+    eventName: row.event_name,
+    guestCount: row.guest_count,
+    customerId: row.customer_id,
+    customerName: row.customer_name,
+    startsOn: row.starts_on,
+    endsOn: row.ends_on,
+    days: row.days,
+    status: row.status,
+    comments: row.comments,
+    folioId: row.folio_id,
+    folioNumber: row.folio_number,
+    chargesCents: row.charges_cents,
+    paymentsCents: row.payments_cents,
+    balanceCents: row.balance_cents,
+    bookedBy: row.booked_by,
+    createdAt: row.created_at,
+  };
 }
