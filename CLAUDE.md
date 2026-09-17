@@ -6,13 +6,14 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0023` are
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0024` are
 applied to the hosted database.
 
 Working on real data: dashboard (house board, movements, pace, activity feed),
 bookings list, customers, the availability calendar, cashier (open a shift,
 take payments, record paid-outs, blind close), check-in and check-out, the
-night audit that advances the business date, and twelve reports — occupancy,
+night audit that advances the business date, taking a booking, and twelve
+reports — occupancy,
 debtors, payments, financial, extras, daily checkout, booking, reservations,
 cancellation, channel, housekeeping and in house.
 
@@ -103,6 +104,7 @@ Each read is a Postgres view or RPC, never aggregation in the client:
 | `getChannelReport(from, to)`        | `channel_report(from, to)`        |
 | `getHousekeepingRooms(filters)`     | `housekeeping_rooms(...)`         |
 | `getInHouseReport()`                | `in_house_report()`               |
+| `getBookableRoomTypes(from, to)`    | `bookable_room_types(from, to)`   |
 
 **Two signatures carry the room-count rule.** The client operates properties
 with up to ~1,800 rooms, so no query may return every room and no screen may
@@ -254,6 +256,23 @@ anywhere else. Collapsed height must stay constant regardless of room count.
 - `booking_room_nights` holds one row per room per night at that night's rate.
   Occupancy, ADR, RevPAR and the revenue chart all derive from it with a
   GROUP BY. Generate these rows on booking create and modify.
+- **Taking a booking goes through `create_booking()` and nothing else.** One
+  transaction resolves or creates the customer, allocates the reference, writes
+  the booking, writes one `booking_rooms` row per room and puts the rate on the
+  nights `sync_booking_room_nights()` generates. A booking assembled from
+  several calls leaves a half-made booking behind on any failure, holding
+  inventory with no guest against it.
+- **Availability is checked inside that transaction, not in the form.** A form
+  can only check what it loaded; two receptionists selling the last room at the
+  same moment both see it free. Overbooking is allowed but has to be asked for
+  with `p_allow_overbook`, and the calendar then shows the night as negative.
+- **Availability for a stay is its tightest night**, never an average. A room
+  type with four free on Monday and none on Tuesday can sell nothing for a
+  two-night stay.
+- `bookings.reference` is the hotel's own, from `next_booking_reference()`
+  (`BK-000123`). A channel's reference goes in `external_reference`.
+- No room is assigned when a booking is taken. `assign_room()` does that, at
+  check-in.
 - Cashier scope: take payments, record paid-outs (money leaving the drawer,
   optionally recharged to a guest folio), close the shift with a blind cash
   count, next receptionist opens a fresh one. Shift close is a blind count —
@@ -312,15 +331,17 @@ pnpm supabase migration new <name>
 - **Phase 1 — done.** Schema, auth, roles, and the swap from mock to Supabase.
 - **Phase 3 — mostly done.** Cashier on real data, check-in and check-out, the
   night audit, hardening, and the first two reports.
-- **Phase 2 — in progress.** Availability calendar is built. Remaining: booking
-  create and edit, inventory restrictions, promotions, meeting rooms.
+- **Phase 2 — in progress.** Availability calendar and booking creation are
+  built. Remaining: booking edit, inventory restrictions, promotions, meeting
+  rooms.
 - **Reports — done** except Meal, which has no schema behind it.
 
 ### What still renders `<ComingSoon />`
 
 Buildable on the schema as it stands:
 
-- `/bookings/new` — booking creation
+- Booking edit. `create_booking()` takes a booking; changing one afterwards
+  still means going through the tables.
 
 Blocked on a schema that does not exist yet, and on a decision (see below):
 
