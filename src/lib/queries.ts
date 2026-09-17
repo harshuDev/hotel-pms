@@ -47,6 +47,8 @@ import type {
   FolioItemType,
   HousekeepingFloor,
   HousekeepingRoomsPage,
+  InventoryCell,
+  RatePlan,
   InHouseRow,
   PaymentMethodTotal,
   PaymentRow,
@@ -1587,5 +1589,112 @@ export async function getBookableRoomTypes(
     maxOccupancy: row.max_occupancy,
     totalRooms: row.total_rooms,
     available: row.available,
+  }));
+}
+
+/* -------------------------------------------------------------------------- */
+/* Inventory                                                                  */
+/* -------------------------------------------------------------------------- */
+
+/** How many nights an Inventory screen shows at once. */
+export const INVENTORY_NIGHTS = 28;
+
+/** The rate plans this property sells, default first. */
+export async function getRatePlans(): Promise<RatePlan[]> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("rate_plans")
+    .select("id, code, name, description, is_default, is_active")
+    .eq("is_active", true)
+    .order("is_default", { ascending: false })
+    .order("sort_order")
+    .order("name");
+
+  if (error) {
+    throw new Error(`Failed to load the rate plans: ${error.message}`);
+  }
+
+  return (
+    (data ?? []) as {
+      id: string;
+      code: string;
+      name: string;
+      description: string | null;
+      is_default: boolean;
+      is_active: boolean;
+    }[]
+  ).map((row) => ({
+    id: row.id,
+    code: row.code,
+    name: row.name,
+    description: row.description,
+    isDefault: row.is_default,
+    isActive: row.is_active,
+  }));
+}
+
+/**
+ * The inventory grid: one row per room type per night.
+ *
+ * All nine Inventory screens read this. They are the same grid with a
+ * different column brought forward, so a separate query each would be nine
+ * ways to disagree about the same night.
+ */
+export async function getInventoryGrid(
+  ratePlanId: string | null,
+  from: string,
+  days: number = INVENTORY_NIGHTS,
+): Promise<InventoryCell[]> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase.rpc("inventory_grid", {
+    p_rate_plan_id: ratePlanId,
+    p_from: from,
+    p_days: days,
+  });
+
+  if (error) {
+    throw new Error(`Failed to load the inventory: ${error.message}`);
+  }
+
+  return (
+    (data ?? []) as {
+      stay_date: string;
+      room_type_id: string;
+      room_type_code: string;
+      room_type_name: string;
+      rate_cents: number | null;
+      min_stay_through: number | null;
+      min_stay_arrival: number | null;
+      max_stay: number | null;
+      closed_to_arrival: boolean;
+      closed_to_departure: boolean;
+      stop_sell: boolean;
+      allotment: number | null;
+      close_out: boolean;
+      physical_rooms: number;
+      out_of_order: number;
+      sold: number;
+      sellable: number;
+    }[]
+  ).map((row) => ({
+    date: row.stay_date,
+    roomTypeId: row.room_type_id,
+    roomTypeCode: row.room_type_code,
+    roomTypeName: row.room_type_name,
+    rateCents: row.rate_cents,
+    minStayThrough: row.min_stay_through,
+    minStayArrival: row.min_stay_arrival,
+    maxStay: row.max_stay,
+    closedToArrival: row.closed_to_arrival,
+    closedToDeparture: row.closed_to_departure,
+    stopSell: row.stop_sell,
+    allotment: row.allotment,
+    closeOut: row.close_out,
+    physicalRooms: row.physical_rooms,
+    outOfOrder: row.out_of_order,
+    sold: row.sold,
+    sellable: row.sellable,
   }));
 }

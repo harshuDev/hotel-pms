@@ -6,6 +6,7 @@ import {
   getBusinessDate,
   getChannels,
   getCurrentStaffUser,
+  getRatePlans,
   getTaxRates,
 } from "@/lib/queries";
 
@@ -36,9 +37,10 @@ export default async function NewBookingPage() {
   const businessDate = await getBusinessDate();
   const tomorrow = format(addDays(parseISO(businessDate), 1), "yyyy-MM-dd");
 
-  const [channels, taxRates, types] = await Promise.all([
+  const [channels, taxRates, ratePlans, types] = await Promise.all([
     getChannels(),
     getTaxRates(),
+    getRatePlans(),
     getBookableRoomTypes(businessDate, tomorrow),
   ]);
 
@@ -52,6 +54,7 @@ export default async function NewBookingPage() {
         businessDate={businessDate}
         channels={channels}
         taxRates={taxRates}
+        ratePlans={ratePlans}
         initialTypes={types}
       />
     </div>

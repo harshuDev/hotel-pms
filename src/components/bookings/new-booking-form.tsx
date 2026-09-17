@@ -13,9 +13,11 @@ import {
 import type {
   BookableRoomType,
   Channel,
+  RatePlan,
   Settlement,
   TaxRate,
 } from "@/lib/types";
+import type { BookingBlock } from "@/lib/actions/bookings";
 
 interface Line {
   /** Local key, so two lines of the same room type stay distinct while editing. */
@@ -40,11 +42,13 @@ export function NewBookingForm({
   businessDate,
   channels,
   taxRates,
+  ratePlans,
   initialTypes,
 }: {
   businessDate: string;
   channels: Channel[];
   taxRates: TaxRate[];
+  ratePlans: RatePlan[];
   initialTypes: BookableRoomType[];
 }) {
   const router = useRouter();
@@ -74,6 +78,9 @@ export function NewBookingForm({
   });
 
   const [channelId, setChannelId] = useState(channels[0]?.id ?? "");
+  const [ratePlanId, setRatePlanId] = useState(
+    ratePlans.find((p) => p.isDefault)?.id ?? ratePlans[0]?.id ?? "",
+  );
   const [status, setStatus] = useState<"pending" | "confirmed">("confirmed");
   const [settlement, setSettlement] = useState<Settlement>("at_property");
   const [taxRateId, setTaxRateId] = useState("");
@@ -83,8 +90,11 @@ export function NewBookingForm({
   const [internalNotes, setInternalNotes] = useState("");
   const [externalReference, setExternalReference] = useState("");
   const [allowOverbook, setAllowOverbook] = useState(false);
+  const [ignoreRestrictions, setIgnoreRestrictions] = useState(false);
 
   const [error, setError] = useState<string | null>(null);
+  // Set when Postgres refuses something a person is allowed to wave through.
+  const [block, setBlock] = useState<BookingBlock | null>(null);
   const [taken, setTaken] = useState<{ reference: string } | null>(null);
 
   const nights =
@@ -171,7 +181,11 @@ export function NewBookingForm({
     );
   }
 
-  /** Rate in pence, or null when the field is empty or nonsense. */
+  /**
+   * Rate in pence, or null. Null is a real answer once a rate plan is picked:
+   * it means "use the plan's rate", which varies night by night and is the
+   * reason daily rates exist. Without a plan it means the line has no price.
+   */
   function rateCents(line: Line): number | null {
     if (line.rate.trim() === "") return null;
     try {
@@ -181,15 +195,31 @@ export function NewBookingForm({
     }
   }
 
+  /** True when the box holds something that is not an amount at all. */
+  function rateIsNonsense(line: Line) {
+    if (line.rate.trim() === "") return false;
+    try {
+      parseMoney(line.rate);
+      return false;
+    } catch {
+      return true;
+    }
+  }
+
   const total = lines.reduce((sum, l) => {
     const cents = rateCents(l);
     return cents === null ? sum : sum + cents * l.quantity * nights;
   }, 0);
 
-  const oversold = lines.some((l) => remaining(l.roomTypeId, l.key) < l.quantity);
+  // The form predicts overselling from what it loaded; Postgres decides it for
+  // real, inside the transaction. Either is reason to offer the tickbox.
+  const oversold =
+    lines.some((l) => remaining(l.roomTypeId, l.key) < l.quantity) ||
+    block === "overbook";
 
   function submit() {
     setError(null);
+    setBlock(null);
 
     if (nights < 1) {
       setError("The departure date must be after the arrival date.");
@@ -200,9 +230,14 @@ export function NewBookingForm({
       return;
     }
     for (const line of lines) {
-      if (rateCents(line) === null) {
+      const name = typeById.get(line.roomTypeId)?.name ?? "this room";
+      if (rateIsNonsense(line)) {
+        setError(`The rate for ${name} is not an amount. Try 120 or 120.50.`);
+        return;
+      }
+      if (rateCents(line) === null && !ratePlanId) {
         setError(
-          `Enter a nightly rate for ${typeById.get(line.roomTypeId)?.name ?? "each room"}.`,
+          `Enter a nightly rate for ${name}, or pick a rate plan that has one loaded.`,
         );
         return;
       }
@@ -233,7 +268,7 @@ export function NewBookingForm({
         rooms: lines.map((l) => ({
           roomTypeId: l.roomTypeId,
           quantity: l.quantity,
-          rateCents: rateCents(l) ?? 0,
+          rateCents: rateCents(l),
           adults: l.adults,
           children: l.children,
         })),
@@ -249,10 +284,13 @@ export function NewBookingForm({
         internalNotes,
         externalReference,
         allowOverbook,
+        ratePlanId: ratePlanId || null,
+        ignoreRestrictions,
       });
 
       if (!result.ok) {
         setError(result.error);
+        setBlock(result.block ?? null);
         return;
       }
 
@@ -486,7 +524,7 @@ export function NewBookingForm({
                         <input
                           type="text"
                           inputMode="decimal"
-                          placeholder="0.00"
+                          placeholder={ratePlanId ? "From the plan" : "0.00"}
                           value={line.rate}
                           onChange={(e) => setLine(line.key, { rate: e.target.value })}
                           className={cn(field, "tnum")}
@@ -544,13 +582,27 @@ export function NewBookingForm({
             )}
 
             {lines.length > 0 && nights > 0 && (
-              <p className="mt-3 text-[13px] text-ink-muted">
-                <span className="tnum font-medium text-ink">{formatMoney(total)}</span>{" "}
-                for the stay, before tax
-                {taxRateId
-                  ? " — the tax rate below is applied when the booking is taken"
-                  : ""}
-                .
+              <p className="mt-3 text-[13px] leading-relaxed text-ink-muted">
+                {lines.every((l) => l.rate.trim() === "") && ratePlanId ? (
+                  <>
+                    Priced from the rate plan, night by night — a Friday is not
+                    a Tuesday. Type a rate to override it for the whole stay.
+                  </>
+                ) : (
+                  <>
+                    <span className="tnum font-medium text-ink">
+                      {formatMoney(total)}
+                    </span>{" "}
+                    for the stay, before tax
+                    {lines.some((l) => l.rate.trim() === "") && ratePlanId
+                      ? ", counting only the lines you priced by hand"
+                      : ""}
+                    {taxRateId
+                      ? " — the tax rate below is applied when the booking is taken"
+                      : ""}
+                    .
+                  </>
+                )}
               </p>
             )}
           </>
@@ -722,6 +774,24 @@ export function NewBookingForm({
         </h2>
         <div className="grid gap-4 sm:grid-cols-4">
           <div>
+            <label htmlFor="rate-plan" className={label}>
+              Rate plan
+            </label>
+            <select
+              id="rate-plan"
+              value={ratePlanId}
+              onChange={(e) => setRatePlanId(e.target.value)}
+              className={field}
+            >
+              <option value="">No plan — type the rate</option>
+              {ratePlans.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
             <label htmlFor="channel" className={label}>
               Came from
             </label>
@@ -839,6 +909,21 @@ export function NewBookingForm({
           <p className="mb-4 rounded-md bg-rose-50 px-3 py-2.5 text-[13px] leading-relaxed text-rose-700">
             {error}
           </p>
+        )}
+        {block === "restriction" && (
+          <label className="mb-4 flex items-start gap-2.5 rounded-md border border-warn/40 bg-warn-wash px-3 py-2.5">
+            <input
+              type="checkbox"
+              checked={ignoreRestrictions}
+              onChange={(e) => setIgnoreRestrictions(e.target.checked)}
+              className="mt-0.5"
+            />
+            <span className="text-[13px] leading-relaxed text-warn-deep">
+              Take this booking against the restriction above. Somebody closed
+              that date or set that rule on purpose, so only override it if you
+              know why.
+            </span>
+          </label>
         )}
         {oversold && (
           <label className="mb-4 flex items-start gap-2.5 rounded-md border border-warn/40 bg-warn-wash px-3 py-2.5">

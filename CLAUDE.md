@@ -6,15 +6,16 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0024` are
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0026` are
 applied to the hosted database.
 
 Working on real data: dashboard (house board, movements, pace, activity feed),
 bookings list, customers, the availability calendar, cashier (open a shift,
 take payments, record paid-outs, blind close), check-in and check-out, the
-night audit that advances the business date, taking a booking, and twelve
-reports — occupancy, debtors, payments, financial, extras, daily checkout,
-booking, reservations, cancellation, channel, housekeeping and in house.
+night audit that advances the business date, taking a booking, all nine
+Inventory screens, and twelve reports — occupancy, debtors, payments,
+financial, extras, daily checkout, booking, reservations, cancellation,
+channel, housekeeping and in house.
 
 The hosted database holds one property, one staff user, an open business date
 and seven payment methods. **It has no rooms, customers or bookings**, so most
@@ -104,6 +105,8 @@ Each read is a Postgres view or RPC, never aggregation in the client:
 | `getHousekeepingRooms(filters)`     | `housekeeping_rooms(...)`         |
 | `getInHouseReport()`                | `in_house_report()`               |
 | `getBookableRoomTypes(from, to)`    | `bookable_room_types(from, to)`   |
+| `getInventoryGrid(plan, from, n)`   | `inventory_grid(plan, from, n)`   |
+| `getRatePlans()`                    | `rate_plans` where active         |
 
 **Two signatures carry the room-count rule.** The client operates properties
 with up to ~1,800 rooms, so no query may return every room and no screen may
@@ -255,12 +258,51 @@ anywhere else. Collapsed height must stay constant regardless of room count.
 - `booking_room_nights` holds one row per room per night at that night's rate.
   Occupancy, ADR, RevPAR and the revenue chart all derive from it with a
   GROUP BY. Generate these rows on booking create and modify.
+- **The rate model is three tables.** `rate_plans` is what the hotel sells
+  (Best Available, Corporate), changed rarely. `rate_plan_days` holds the price
+  and the stay rules for one plan, one room type, one night — changed
+  constantly, in bulk. `room_type_days` holds an allotment cap and a close-out
+  for the room type itself, independent of any plan, because closing a room
+  type has to close every rate on it.
+- **Rate and restrictions share `rate_plan_days` on purpose.** They share a key
+  exactly — plan, type, night — and every screen reads the same grid. Two
+  tables would mean two upserts and two joins to show one cell.
+- **Null means "no rule" everywhere in the inventory.** That is what lets a
+  screen clear a restriction by writing null instead of needing a delete path,
+  and it keeps "min stay of one" distinct from "no min stay". A null
+  `rate_cents` means no rate is loaded, which is not the same as free: a
+  booking against it is refused.
+- **All nine Inventory screens are one grid with a different column brought
+  forward.** `inventory_grid()` reads it, `src/components/inventory/` renders
+  it, and `SCREENS` in `field-spec.ts` says what each one shows and sets. Do
+  not build a tenth screen by copying a ninth.
+- **Inventory is edited in bulk or not at all.** Every setter takes a date
+  range, a set of room types and an optional set of weekdays, because "min stay
+  two on every Friday and Saturday until March" is the actual job. Setting one
+  cell is that with a one-day range; there is no second path for it.
+- **There are nine setters, one per screen, and no generic one.** The field
+  comes from the browser, so it selects a named RPC from a table in
+  `src/lib/actions/inventory.ts`. Nothing is interpolated into SQL.
+- **Rates are `is_revenue_staff()` — admin and manager.** Front desk reads them
+  to quote a price and reads the restrictions to know why a stay will not sell.
 - **Taking a booking goes through `create_booking()` and nothing else.** One
   transaction resolves or creates the customer, allocates the reference, writes
   the booking, writes one `booking_rooms` row per room and puts the rate on the
   nights `sync_booking_room_nights()` generates. A booking assembled from
   several calls leaves a half-made booking behind on any failure, holding
   inventory with no guest against it.
+- **A booking is priced per night off the rate plan**, not once for the stay: a
+  Friday is not a Tuesday, and one figure across the stay is what daily rates
+  exist to stop. A room line may name its own `rate_cents` instead, which then
+  holds for every night. Neither means there is no price, and a booking with no
+  price is a bill nobody can settle.
+- **`create_booking()` enforces the inventory**, and says which refusal it is
+  with a SQLSTATE rather than message text: `HP001` would oversell, `HP002`
+  breaks a stay rule or a closed date. Both can be overridden, by
+  `p_allow_overbook` and `p_ignore_restrictions` respectively — two different
+  decisions, two different flags. One tickbox covering both would hide that
+  selling a room that does not exist and selling against a commercial
+  instruction are not the same act.
 - **Availability is checked inside that transaction, not in the form.** A form
   can only check what it loaded; two receptionists selling the last room at the
   same moment both see it free. Overbooking is allowed but has to be asked for
@@ -330,9 +372,9 @@ pnpm supabase migration new <name>
 - **Phase 1 — done.** Schema, auth, roles, and the swap from mock to Supabase.
 - **Phase 3 — mostly done.** Cashier on real data, check-in and check-out, the
   night audit, hardening, and the first two reports.
-- **Phase 2 — in progress.** Availability calendar and booking creation are
-  built. Remaining: booking edit, inventory restrictions, promotions, meeting
-  rooms.
+- **Phase 2 — in progress.** Availability calendar, booking creation and all
+  nine Inventory screens are built. Remaining: booking edit, promotions,
+  meeting rooms.
 - **Reports — done** except Meal, which has no schema behind it.
 
 ### What still renders `<ComingSoon />`
@@ -344,8 +386,6 @@ Buildable on the schema as it stands:
 
 Blocked on a schema that does not exist yet, and on a decision (see below):
 
-- **Inventory** — all nine routes. There is no rate, availability or
-  restriction model anywhere in the schema.
 - **Promotions** (`/offers`) — no model.
 - **Meeting Rooms** — no `meeting_rooms` or `meeting_room_bookings` tables.
 - **Reports → Meal** — no meal plan, board type or rate plan exists.
@@ -368,16 +408,17 @@ than proceeding.
 6. **Room scale.** The ~1,800 figure came from a passing remark in client
    feedback and has not been confirmed. It now drives the house board design
    and two query signatures, so confirm it before writing migrations.
-7. **Rate model.** Nothing stores a rate. `booking_room_nights.room_rate_cents`
-   is written per night with no rate plan behind it, so Inventory has nothing
-   to edit. A rate plan per room type per date, with restrictions layered on
-   top, is a schema design, not a screen.
+7. **Rate model — settled.** A rate plan per room type per date, with
+   restrictions layered on top: `rate_plans`, `rate_plan_days`,
+   `room_type_days`. See the inventory notes above.
 8. **Promotions.** No model. What a promotion adjusts — rate, length of stay,
-   a fixed discount — decides the shape.
-9. **Meeting room granularity.** Still whole-day (`starts_on` / `ends_on`) as
-   assumed. Hourly or half-day slots make these `starts_at` / `ends_at` and the
-   exclusion constraint a `tstzrange`. Confirm before the tables are written,
-   because it is a migration plus a calendar rewrite afterwards.
+   a fixed discount — decides the shape. There is now a rate plan to hang one
+   off, so the likely answer is a plan that derives from another, but that is
+   still a decision rather than an inference.
+9. **Meeting room granularity — settled: whole day.** `starts_on` / `ends_on`
+   as dates, with the exclusion constraint on a `daterange`. Confirmed, so
+   build it that way. Hourly or half-day slots would be a migration plus a
+   calendar rewrite, so raise it again rather than assuming.
 10. **Tax rate and inclusion.** `tax_rates` is empty. 20% is easy; whether the
     property quotes VAT-inclusive or exclusive is a policy decision that
     changes every charge by a sixth.
