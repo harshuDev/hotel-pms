@@ -2,7 +2,7 @@ import Link from "next/link";
 import { format, parseISO } from "date-fns";
 import { EmptyState, PageHeader, cn } from "@/components/ui";
 import { formatDue, formatMoney } from "@/lib/money";
-import { getCustomers } from "@/lib/mock/queries";
+import { getCustomers } from "@/lib/queries";
 
 const TABS = [
   { key: "all", label: "All" },
