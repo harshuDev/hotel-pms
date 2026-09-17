@@ -123,7 +123,8 @@ export interface Shift {
   businessDate: string;
   openedAt: string;
   openingFloatCents: number;
-  status: "open" | "closed" | "approved";
+  /** Mirrors the cashier_shift_status enum. */
+  status: "open" | "closing" | "closed";
   payments: ShiftPayment[];
   paidOuts: PaidOut[];
 }

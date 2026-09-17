@@ -1,16 +1,21 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { format, parseISO } from "date-fns";
 import { Card, cn } from "@/components/ui";
 import { formatMoney, parseMoney } from "@/lib/money";
+import {
+  closeShift,
+  openShift,
+  recordPaidOut,
+  takePayment,
+} from "@/lib/actions/cashier";
 import type {
   Booking,
-  PaidOut,
   PaidOutCategory,
   PaymentMethod,
   Shift,
-  ShiftPayment,
 } from "@/lib/types";
 
 const CATEGORIES: { key: PaidOutCategory; label: string }[] = [
@@ -21,6 +26,9 @@ const CATEGORIES: { key: PaidOutCategory; label: string }[] = [
   { key: "staff_advance", label: "Staff advance" },
   { key: "other", label: "Other" },
 ];
+
+/** A variance past this gets called out on the closing receipt. */
+const LARGE_VARIANCE_CENTS = 20000;
 
 function Stat({
   label,
@@ -52,27 +60,39 @@ function Stat({
 }
 
 export function CashierClient({
-  initialShift,
+  shift,
   methods,
   payableBookings,
+  businessDate,
+  suggestedFloatCents,
 }: {
-  initialShift: Shift;
+  shift: Shift | null;
   methods: PaymentMethod[];
   payableBookings: Booking[];
+  businessDate: string;
+  suggestedFloatCents: number | null;
 }) {
-  const [shift, setShift] = useState<Shift>(initialShift);
-  const [modal, setModal] = useState<null | "payment" | "paidout" | "close">(null);
+  const [modal, setModal] = useState<null | "payment" | "paidout" | "close">(
+    null,
+  );
   const [closed, setClosed] = useState<{
-    declared: number;
+    counted: number;
     expected: number;
+    variance: number;
   } | null>(null);
 
   const totals = useMemo(() => {
+    if (!shift) return { drawerIn: 0, allIn: 0, out: 0, expected: 0 };
+
     const drawerIn = shift.payments
       .filter((p) => p.affectsDrawer)
       .reduce((s, p) => s + p.amountCents, 0);
     const allIn = shift.payments.reduce((s, p) => s + p.amountCents, 0);
     const out = shift.paidOuts.reduce((s, p) => s + p.amountCents, 0);
+
+    // A running figure from what is on this screen. The authoritative number
+    // comes from the database when the shift closes, and also counts cash
+    // drops and adjustments, which this screen cannot create.
     return {
       drawerIn,
       allIn,
@@ -81,57 +101,21 @@ export function CashierClient({
     };
   }, [shift]);
 
-  const addPayment = (p: ShiftPayment) =>
-    setShift((s) => ({ ...s, payments: [p, ...s.payments] }));
-  const addPaidOut = (p: PaidOut) =>
-    setShift((s) => ({ ...s, paidOuts: [p, ...s.paidOuts] }));
-
   if (closed) {
-    const variance = closed.declared - closed.expected;
     return (
-      <div className="mx-auto max-w-lg rounded-lg border border-line bg-white p-8 text-center shadow-sm">
-        <h1 className="font-display text-[26px] font-semibold tracking-tightest text-ink">Shift closed</h1>
-        <p className="mt-1 text-sm text-ink-muted">
-          {shift.userName} · {format(parseISO(shift.businessDate), "d MMM yyyy")}
-        </p>
-        <dl className="mt-6 space-y-2 text-sm">
-          {[
-            ["Expected in drawer", formatMoney(closed.expected)],
-            ["Counted", formatMoney(closed.declared)],
-          ].map(([k, v]) => (
-            <div key={k} className="flex justify-between border-b border-line pb-2">
-              <dt className="text-ink-muted">{k}</dt>
-              <dd className="tnum font-medium">{v}</dd>
-            </div>
-          ))}
-          <div className="flex justify-between pt-1">
-            <dt className="font-medium">Variance</dt>
-            <dd
-              className={cn(
-                "tnum font-semibold",
-                variance === 0 && "text-emerald-600",
-                variance !== 0 && "text-rose-600",
-              )}
-            >
-              {variance > 0 ? "+" : ""}
-              {formatMoney(variance)}
-            </dd>
-          </div>
-        </dl>
-        <p className="mt-6 text-xs leading-relaxed text-ink-faint">
-          The next receptionist can now open a shift. This one is locked — no
-          payment or paid-out can be posted against it.
-        </p>
-        <button
-          onClick={() => {
-            setClosed(null);
-            setShift(initialShift);
-          }}
-          className="mt-6 rounded bg-chrome-800 px-5 py-2 text-sm font-medium text-white hover:bg-chrome-900"
-        >
-          Open a new shift
-        </button>
-      </div>
+      <ClosedReceipt
+        closed={closed}
+        onOpenAnother={() => setClosed(null)}
+      />
+    );
+  }
+
+  if (!shift) {
+    return (
+      <OpenShiftPanel
+        businessDate={businessDate}
+        suggestedFloatCents={suggestedFloatCents}
+      />
     );
   }
 
@@ -139,7 +123,9 @@ export function CashierClient({
     <div className="space-y-4">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="font-display text-[26px] font-semibold tracking-tightest text-ink">Cashier</h1>
+          <h1 className="font-display text-[26px] font-semibold tracking-tightest text-ink">
+            Cashier
+          </h1>
           <p className="mt-1 text-sm text-ink-muted">
             {shift.userName} · opened{" "}
             {format(parseISO(shift.openedAt), "h:mm a")} · business date{" "}
@@ -188,61 +174,74 @@ export function CashierClient({
         <Stat
           label="Expected in drawer"
           value={formatMoney(totals.expected)}
-          hint="Cash only — non-cash payments excluded"        />
+          hint="Cash only — non-cash payments excluded"
+        />
       </div>
 
       <div className="grid gap-3 xl:grid-cols-2">
         <Card title="Payments this shift">
-          <table className="w-full text-[13px]">
-            <tbody className="divide-y divide-line">
-              {shift.payments.map((p) => (
-                <tr key={p.id} className="hover:bg-shell">
-                  <td className="px-4 py-2.5">
-                    <p className="font-medium text-ink">{p.guestName}</p>
-                    <p className="text-xxs text-ink-faint">{p.bookingRef}</p>
-                  </td>
-                  <td className="px-2 py-2.5">
-                    <span
-                      className={cn(
-                        "rounded px-2 py-0.5 text-xxs ring-1 ring-inset",
-                        p.affectsDrawer
-                          ? "bg-emerald-50 text-emerald-700 ring-emerald-200"
-                          : "bg-slate-100 text-slate-600 ring-slate-200",
-                      )}
-                    >
-                      {p.methodName}
-                    </span>
-                  </td>
-                  <td className="tnum px-4 py-2.5 text-right font-medium text-ink">
-                    {formatMoney(p.amountCents)}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          {shift.payments.length === 0 ? (
+            <p className="px-4 py-6 text-center text-[13px] text-ink-muted">
+              No payments yet. Take one with the button above.
+            </p>
+          ) : (
+            <table className="w-full text-[13px]">
+              <tbody className="divide-y divide-line">
+                {shift.payments.map((p) => (
+                  <tr key={p.id} className="hover:bg-shell">
+                    <td className="px-4 py-2.5">
+                      <p className="font-medium text-ink">{p.guestName}</p>
+                      <p className="text-xxs text-ink-faint">{p.bookingRef}</p>
+                    </td>
+                    <td className="px-2 py-2.5">
+                      <span
+                        className={cn(
+                          "rounded px-2 py-0.5 text-xxs ring-1 ring-inset",
+                          p.affectsDrawer
+                            ? "bg-emerald-50 text-emerald-700 ring-emerald-200"
+                            : "bg-slate-100 text-slate-600 ring-slate-200",
+                        )}
+                      >
+                        {p.methodName}
+                      </span>
+                    </td>
+                    <td className="tnum px-4 py-2.5 text-right font-medium text-ink">
+                      {formatMoney(p.amountCents)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </Card>
 
         <Card title="Paid-outs this shift">
-          <table className="w-full text-[13px]">
-            <tbody className="divide-y divide-line">
-              {shift.paidOuts.map((p) => (
-                <tr key={p.id} className="hover:bg-shell">
-                  <td className="px-4 py-2.5">
-                    <p className="font-medium text-ink">{p.reason}</p>
-                    <p className="text-xxs text-ink-faint">
-                      {p.payee} ·{" "}
-                      {p.rechargeBookingRef
-                        ? `recharged to ${p.rechargeBookingRef}`
-                        : "house expense"}
-                    </p>
-                  </td>
-                  <td className="tnum px-4 py-2.5 text-right font-medium text-rose-600">
-                    −{formatMoney(p.amountCents)}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          {shift.paidOuts.length === 0 ? (
+            <p className="px-4 py-6 text-center text-[13px] text-ink-muted">
+              Nothing has left the drawer this shift.
+            </p>
+          ) : (
+            <table className="w-full text-[13px]">
+              <tbody className="divide-y divide-line">
+                {shift.paidOuts.map((p) => (
+                  <tr key={p.id} className="hover:bg-shell">
+                    <td className="px-4 py-2.5">
+                      <p className="font-medium text-ink">{p.reason}</p>
+                      <p className="text-xxs text-ink-faint">
+                        {p.payee} ·{" "}
+                        {p.rechargeBookingRef
+                          ? `recharged to ${p.rechargeBookingRef}`
+                          : "house expense"}
+                      </p>
+                    </td>
+                    <td className="tnum px-4 py-2.5 text-right font-medium text-rose-600">
+                      −{formatMoney(p.amountCents)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </Card>
       </div>
 
@@ -250,29 +249,24 @@ export function CashierClient({
         <PaymentModal
           methods={methods}
           bookings={payableBookings}
+          shiftId={shift.id}
+          businessDate={shift.businessDate}
           onClose={() => setModal(null)}
-          onSave={(p) => {
-            addPayment(p);
-            setModal(null);
-          }}
         />
       )}
       {modal === "paidout" && (
         <PaidOutModal
           bookings={payableBookings}
+          shiftId={shift.id}
           onClose={() => setModal(null)}
-          onSave={(p) => {
-            addPaidOut(p);
-            setModal(null);
-          }}
         />
       )}
       {modal === "close" && (
         <CloseShiftModal
-          expected={totals.expected}
+          shiftId={shift.id}
           onCancel={() => setModal(null)}
-          onConfirm={(declared) => {
-            setClosed({ declared, expected: totals.expected });
+          onClosed={(result) => {
+            setClosed(result);
             setModal(null);
           }}
         />
@@ -282,6 +276,139 @@ export function CashierClient({
 }
 
 /* ------------------------------------------------------------------ */
+
+function ClosedReceipt({
+  closed,
+  onOpenAnother,
+}: {
+  closed: { counted: number; expected: number; variance: number };
+  onOpenAnother: () => void;
+}) {
+  const large = Math.abs(closed.variance) > LARGE_VARIANCE_CENTS;
+
+  return (
+    <div className="mx-auto max-w-lg rounded-lg border border-line bg-white p-8 text-center shadow-sm">
+      <h1 className="font-display text-[26px] font-semibold tracking-tightest text-ink">
+        Shift closed
+      </h1>
+      <dl className="mt-6 space-y-2 text-sm">
+        {[
+          ["Expected in drawer", formatMoney(closed.expected)],
+          ["Counted", formatMoney(closed.counted)],
+        ].map(([k, v]) => (
+          <div key={k} className="flex justify-between border-b border-line pb-2">
+            <dt className="text-ink-muted">{k}</dt>
+            <dd className="tnum font-medium">{v}</dd>
+          </div>
+        ))}
+        <div className="flex justify-between pt-1">
+          <dt className="font-medium">Variance</dt>
+          <dd
+            className={cn(
+              "tnum font-semibold",
+              closed.variance === 0 && "text-emerald-600",
+              closed.variance !== 0 && "text-rose-600",
+            )}
+          >
+            {closed.variance > 0 ? "+" : ""}
+            {formatMoney(closed.variance)}
+          </dd>
+        </div>
+      </dl>
+
+      {large && (
+        <p className="mt-4 rounded-md border border-rose-200 bg-rose-50 px-3 py-2.5 text-xs text-rose-700">
+          That is over {formatMoney(LARGE_VARIANCE_CENTS)} out. A manager should
+          look at this shift before the drawer is used again.
+        </p>
+      )}
+
+      <p className="mt-6 text-xs leading-relaxed text-ink-faint">
+        The next receptionist can now open a shift. This one is locked — no
+        payment or paid-out can be posted against it.
+      </p>
+      <button
+        onClick={onOpenAnother}
+        className="mt-6 rounded bg-chrome-800 px-5 py-2 text-sm font-medium text-white hover:bg-chrome-900"
+      >
+        Open a new shift
+      </button>
+    </div>
+  );
+}
+
+function OpenShiftPanel({
+  businessDate,
+  suggestedFloatCents,
+}: {
+  businessDate: string;
+  suggestedFloatCents: number | null;
+}) {
+  const router = useRouter();
+  const [pending, startTransition] = useTransition();
+  const [float, setFloat] = useState(
+    suggestedFloatCents === null ? "" : String(suggestedFloatCents / 100),
+  );
+  const [error, setError] = useState("");
+
+  const submit = () => {
+    let cents: number;
+    try {
+      cents = parseMoney(float);
+    } catch {
+      return setError("Enter the float like 500 or 500.00");
+    }
+    if (cents < 0) return setError("The float cannot be negative.");
+
+    startTransition(async () => {
+      const result = await openShift(cents);
+      if (!result.ok) return setError(result.error);
+      router.refresh();
+    });
+  };
+
+  return (
+    <div className="mx-auto max-w-lg rounded-lg border border-line bg-white p-8 shadow-sm">
+      <h1 className="font-display text-[26px] font-semibold tracking-tightest text-ink">
+        Open a shift
+      </h1>
+      <p className="mt-1.5 text-sm text-ink-muted">
+        Business date {format(parseISO(businessDate), "d MMM yyyy")}. Nothing
+        can be taken or paid out until a shift is open.
+      </p>
+
+      <div className="mt-6">
+        <label className={labelCls}>Opening float</label>
+        <input
+          value={float}
+          onChange={(e) => {
+            setFloat(e.target.value);
+            setError("");
+          }}
+          placeholder="0.00"
+          inputMode="decimal"
+          autoFocus
+          className={cn(inputCls, "tnum text-lg")}
+        />
+        <p className="mt-1.5 text-xxs text-ink-faint">
+          {suggestedFloatCents === null
+            ? "Count the float into the drawer and enter the total."
+            : `The last shift opened at ${formatMoney(suggestedFloatCents)}.`}
+        </p>
+      </div>
+
+      {error && <p className="mt-3 text-xs text-rose-600">{error}</p>}
+
+      <button
+        onClick={submit}
+        disabled={pending}
+        className="mt-6 w-full rounded bg-chrome-800 px-5 py-2.5 text-sm font-medium text-white hover:bg-chrome-900 disabled:opacity-60"
+      >
+        {pending ? "Opening…" : "Open shift"}
+      </button>
+    </div>
+  );
+}
 
 function Modal({
   title,
@@ -318,16 +445,20 @@ const labelCls = "mb-1 block text-xs font-medium text-ink-muted";
 function PaymentModal({
   methods,
   bookings,
+  shiftId,
+  businessDate,
   onClose,
-  onSave,
 }: {
   methods: PaymentMethod[];
   bookings: Booking[];
+  shiftId: string;
+  businessDate: string;
   onClose: () => void;
-  onSave: (p: ShiftPayment) => void;
 }) {
+  const router = useRouter();
+  const [pending, startTransition] = useTransition();
   const [bookingId, setBookingId] = useState(bookings[0]?.id ?? "");
-  const [methodId, setMethodId] = useState(methods[0].id);
+  const [methodId, setMethodId] = useState(methods[0]?.id ?? "");
   const [amount, setAmount] = useState("");
   const [error, setError] = useState("");
 
@@ -335,6 +466,7 @@ function PaymentModal({
 
   const submit = () => {
     if (!booking) return setError("Choose a booking first.");
+    if (!methodId) return setError("Choose a payment method.");
     let cents: number;
     try {
       cents = parseMoney(amount);
@@ -342,16 +474,18 @@ function PaymentModal({
       return setError("Enter an amount like 2500 or 2500.50");
     }
     if (cents <= 0) return setError("Amount must be more than zero.");
-    const m = methods.find((x) => x.id === methodId)!;
-    onSave({
-      id: `sp-${Date.now()}`,
-      bookingRef: booking.reference,
-      guestName: booking.customerName,
-      methodId: m.id,
-      methodName: m.name,
-      affectsDrawer: m.affectsDrawer,
-      amountCents: cents,
-      createdAt: new Date().toISOString(),
+
+    startTransition(async () => {
+      const result = await takePayment({
+        bookingId: booking.id,
+        paymentMethodId: methodId,
+        amountCents: cents,
+        businessDate,
+        shiftId,
+      });
+      if (!result.ok) return setError(result.error);
+      router.refresh();
+      onClose();
     });
   };
 
@@ -360,17 +494,23 @@ function PaymentModal({
       <div className="space-y-4">
         <div>
           <label className={labelCls}>Booking</label>
-          <select
-            value={bookingId}
-            onChange={(e) => setBookingId(e.target.value)}
-            className={inputCls}
-          >
-            {bookings.map((b) => (
-              <option key={b.id} value={b.id}>
-                {b.reference} — {b.customerName}
-              </option>
-            ))}
-          </select>
+          {bookings.length === 0 ? (
+            <p className="text-[13px] text-ink-muted">
+              No booking has an outstanding balance right now.
+            </p>
+          ) : (
+            <select
+              value={bookingId}
+              onChange={(e) => setBookingId(e.target.value)}
+              className={inputCls}
+            >
+              {bookings.map((b) => (
+                <option key={b.id} value={b.id}>
+                  {b.reference} — {b.customerName}
+                </option>
+              ))}
+            </select>
+          )}
           {booking && (
             <p className="mt-1 text-xxs text-ink-faint">
               Outstanding balance {formatMoney(booking.balanceCents)}
@@ -436,9 +576,10 @@ function PaymentModal({
           </button>
           <button
             onClick={submit}
-            className="rounded bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700"
+            disabled={pending}
+            className="rounded bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-60"
           >
-            Take payment
+            {pending ? "Taking…" : "Take payment"}
           </button>
         </div>
       </div>
@@ -448,18 +589,20 @@ function PaymentModal({
 
 function PaidOutModal({
   bookings,
+  shiftId,
   onClose,
-  onSave,
 }: {
   bookings: Booking[];
+  shiftId: string;
   onClose: () => void;
-  onSave: (p: PaidOut) => void;
 }) {
+  const router = useRouter();
+  const [pending, startTransition] = useTransition();
   const [amount, setAmount] = useState("");
   const [category, setCategory] = useState<PaidOutCategory>("taxi");
   const [reason, setReason] = useState("");
   const [payee, setPayee] = useState("");
-  const [recharge, setRecharge] = useState(true);
+  const [recharge, setRecharge] = useState(bookings.length > 0);
   const [bookingId, setBookingId] = useState(bookings[0]?.id ?? "");
   const [error, setError] = useState("");
 
@@ -472,16 +615,22 @@ function PaidOutModal({
     }
     if (cents <= 0) return setError("Amount must be more than zero.");
     if (!reason.trim()) return setError("Say what the money was for.");
-    onSave({
-      id: `po-${Date.now()}`,
-      amountCents: cents,
-      category,
-      reason: reason.trim(),
-      payee: payee.trim() || "—",
-      rechargeBookingRef: recharge
-        ? (bookings.find((b) => b.id === bookingId)?.reference ?? null)
-        : null,
-      createdAt: new Date().toISOString(),
+    if (recharge && !bookingId) {
+      return setError("Choose the booking to charge, or untick the box.");
+    }
+
+    startTransition(async () => {
+      const result = await recordPaidOut({
+        shiftId,
+        amountCents: cents,
+        category,
+        reason,
+        payee,
+        rechargeBookingId: recharge ? bookingId : null,
+      });
+      if (!result.ok) return setError(result.error);
+      router.refresh();
+      onClose();
     });
   };
 
@@ -546,17 +695,20 @@ function PaidOutModal({
             <input
               type="checkbox"
               checked={recharge}
+              disabled={bookings.length === 0}
               onChange={(e) => setRecharge(e.target.checked)}
               className="mt-0.5 h-4 w-4 accent-brass"
             />
             <span className="text-sm">
               Charge this back to a guest
               <span className="mt-0.5 block text-xxs text-ink-faint">
-                Unticked, the hotel absorbs it as a house expense.
+                {bookings.length === 0
+                  ? "No booking has an open balance, so this must be a house expense."
+                  : "Unticked, the hotel absorbs it as a house expense."}
               </span>
             </span>
           </label>
-          {recharge && (
+          {recharge && bookings.length > 0 && (
             <select
               value={bookingId}
               onChange={(e) => setBookingId(e.target.value)}
@@ -582,9 +734,10 @@ function PaidOutModal({
           </button>
           <button
             onClick={submit}
-            className="rounded bg-brass px-4 py-2 text-sm font-medium text-white hover:bg-[#9C6F32]"
+            disabled={pending}
+            className="rounded bg-brass px-4 py-2 text-sm font-medium text-white hover:bg-[#9C6F32] disabled:opacity-60"
           >
-            Record paid-out
+            {pending ? "Recording…" : "Record paid-out"}
           </button>
         </div>
       </div>
@@ -592,137 +745,104 @@ function PaidOutModal({
   );
 }
 
+/**
+ * The count goes in, the close happens, and only then does the database say
+ * what the drawer should have held. There is no step in between where the
+ * expected figure could be read, which is the whole point of a blind count.
+ */
 function CloseShiftModal({
-  expected,
+  shiftId,
   onCancel,
-  onConfirm,
+  onClosed,
 }: {
-  expected: number;
+  shiftId: string;
   onCancel: () => void;
-  onConfirm: (declared: number) => void;
+  onClosed: (result: {
+    counted: number;
+    expected: number;
+    variance: number;
+  }) => void;
 }) {
-  const [step, setStep] = useState<"count" | "reveal">("count");
+  const router = useRouter();
+  const [pending, startTransition] = useTransition();
   const [counted, setCounted] = useState("");
   const [note, setNote] = useState("");
   const [error, setError] = useState("");
 
-  const declared = (() => {
+  const submit = () => {
+    let cents: number;
     try {
-      return parseMoney(counted);
+      cents = parseMoney(counted);
     } catch {
-      return NaN;
+      return setError("Enter the counted total, e.g. 18400");
     }
-  })();
-  const variance = declared - expected;
-  const needsNote = Math.abs(variance) > 20000; // £200
-  
+    if (cents < 0) return setError("The counted total cannot be negative.");
+
+    startTransition(async () => {
+      const result = await closeShift({
+        shiftId,
+        countedCents: cents,
+        notes: note,
+      });
+      if (!result.ok) return setError(result.error);
+      router.refresh();
+      onClosed({
+        counted: cents,
+        expected: result.data.expectedCents,
+        variance: result.data.varianceCents,
+      });
+    });
+  };
+
   return (
     <Modal title="Close shift" onClose={onCancel}>
-      {step === "count" ? (
-        <div className="space-y-4">
-          <p className="text-sm leading-relaxed text-ink-muted">
-            Count the cash in the drawer and enter the total. The expected
-            figure stays hidden until you have — a blind count is the only way a
-            real discrepancy ever surfaces.
-          </p>
-          <div>
-            <label className={labelCls}>Cash counted</label>
-            <input
-              value={counted}
-              onChange={(e) => {
-                setCounted(e.target.value);
-                setError("");
-              }}
-              placeholder="0.00"
-              inputMode="decimal"
-              autoFocus
-              className={cn(inputCls, "tnum text-lg")}
-            />
-          </div>
-          {error && <p className="text-xs text-rose-600">{error}</p>}
-          <div className="flex justify-end gap-2">
-            <button
-              onClick={onCancel}
-              className="rounded border border-line px-4 py-2 text-sm hover:bg-shell"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={() =>
-                Number.isNaN(declared)
-                  ? setError("Enter the counted total, e.g. 18400")
-                  : setStep("reveal")
-              }
-              className="rounded bg-chrome-800 px-4 py-2 text-sm font-medium text-white hover:bg-chrome-900"
-            >
-              Continue
-            </button>
-          </div>
+      <div className="space-y-4">
+        <p className="text-sm leading-relaxed text-ink-muted">
+          Count the cash in the drawer and enter the total. The expected figure
+          is not worked out until you have — a blind count is the only way a
+          real discrepancy ever surfaces.
+        </p>
+        <div>
+          <label className={labelCls}>Cash counted</label>
+          <input
+            value={counted}
+            onChange={(e) => {
+              setCounted(e.target.value);
+              setError("");
+            }}
+            placeholder="0.00"
+            inputMode="decimal"
+            autoFocus
+            className={cn(inputCls, "tnum text-lg")}
+          />
         </div>
-      ) : (
-        <div className="space-y-4">
-          <dl className="space-y-2 text-sm">
-            <div className="flex justify-between">
-              <dt className="text-ink-muted">Expected</dt>
-              <dd className="tnum">{formatMoney(expected)}</dd>
-            </div>
-            <div className="flex justify-between border-b border-line pb-2">
-              <dt className="text-ink-muted">Counted</dt>
-              <dd className="tnum">{formatMoney(declared)}</dd>
-            </div>
-            <div className="flex justify-between">
-              <dt className="font-medium">Variance</dt>
-              <dd
-                className={cn(
-                  "tnum font-semibold",
-                  variance === 0 ? "text-emerald-600" : "text-rose-600",
-                )}
-              >
-                {variance > 0 ? "+" : ""}
-                {formatMoney(variance)}
-              </dd>
-            </div>
-          </dl>
-
-          {needsNote && (
-            <div>
-              <label className={labelCls}>
-                Explain the variance (required over {formatMoney(20000)})
-              </label>
-              <textarea
-                value={note}
-                onChange={(e) => {
-                  setNote(e.target.value);
-                  setError("");
-                }}
-                rows={3}
-                className={inputCls}
-                placeholder="Short of £300 — suspect an unrecorded taxi paid-out."              />
-            </div>
-          )}
-
-          {error && <p className="text-xs text-rose-600">{error}</p>}
-
-          <div className="flex justify-end gap-2">
-            <button
-              onClick={() => setStep("count")}
-              className="rounded border border-line px-4 py-2 text-sm hover:bg-shell"
-            >
-              Back
-            </button>
-            <button
-              onClick={() =>
-                needsNote && !note.trim()
-                  ? setError("A note is required for this variance.")
-                  : onConfirm(declared)
-              }
-              className="rounded bg-chrome-800 px-4 py-2 text-sm font-medium text-white hover:bg-chrome-900"
-            >
-              Close shift
-            </button>
-          </div>
+        <div>
+          <label className={labelCls}>Note (optional)</label>
+          <textarea
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+            rows={2}
+            className={inputCls}
+            placeholder="Anything the next shift or a manager should know."
+          />
         </div>
-      )}
+        {error && <p className="text-xs text-rose-600">{error}</p>}
+        <div className="flex justify-end gap-2">
+          <button
+            onClick={onCancel}
+            className="rounded border border-line px-4 py-2 text-sm hover:bg-shell"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={submit}
+            disabled={pending}
+            className="rounded bg-chrome-800 px-4 py-2 text-sm font-medium text-white hover:bg-chrome-900 disabled:opacity-60"
+          >
+            {pending ? "Closing…" : "Close shift"}
+          </button>
+        </div>
+      </div>
     </Modal>
   );
 }
