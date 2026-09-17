@@ -407,6 +407,23 @@ export async function getCustomers(
 /* Cashier                                                                     */
 /* -------------------------------------------------------------------------- */
 
+/**
+ * Whether this staff user may see a drawer's expected cash before it is
+ * counted. Admins and managers may; anyone who can operate a drawer may not,
+ * because that figure is the answer to their own blind count.
+ */
+export async function getCanSeeDrawerTotal(): Promise<boolean> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase.rpc("can_see_drawer_total");
+
+  if (error) {
+    throw new Error(`Failed to read drawer permissions: ${error.message}`);
+  }
+
+  return data === true;
+}
+
 /** Payment methods configured for the property. `affects_drawer` is the only
  * thing that decides whether a payment touches physical cash. */
 export async function getPaymentMethods(): Promise<PaymentMethod[]> {
@@ -602,7 +619,7 @@ interface HouseSummaryRow {
   expected_departures: number;
   occupancy_pct: number;
   adr_cents: number;
-  drawer_cents: number;
+  drawer_cents: number | null;
   outstanding_cents: number;
 }
 
