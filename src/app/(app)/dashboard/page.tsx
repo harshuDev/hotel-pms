@@ -4,10 +4,12 @@ import { HouseStrip } from "@/components/dashboard/house-strip";
 import { LiveFeed } from "@/components/dashboard/live-feed";
 import { Movements } from "@/components/dashboard/movements";
 import { Pace } from "@/components/dashboard/pace";
+import { CloseDay } from "@/components/dashboard/close-day";
 import {
   getActivity,
   getArrivals,
   getBusinessDate,
+  getCurrentStaffUser,
   getDepartures,
   getHouseSummary,
   getOccupancyForecast,
@@ -40,6 +42,9 @@ export default async function DashboardPage() {
       getHouseSummary(),
     ]);
 
+  const staff = await getCurrentStaffUser();
+  const canCloseDay = staff?.role === "admin" || staff?.role === "manager";
+
   return (
     <div className="space-y-3">
       <div className="flex flex-wrap items-end justify-between gap-2">
@@ -51,6 +56,7 @@ export default async function DashboardPage() {
             business day open
           </p>
         </div>
+        {canCloseDay && <CloseDay businessDate={today} />}
       </div>
 
       <HouseStrip s={house} />
