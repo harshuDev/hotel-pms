@@ -421,7 +421,12 @@ export { TODAY, iso };
 /* Room rack — the state of the house right now                        */
 /* ------------------------------------------------------------------ */
 
-import type { HouseSummary, Room, RoomState } from "@/lib/types";
+import type {
+  HouseStateCounts,
+  HouseSummary,
+  Room,
+  RoomState,
+} from "@/lib/types";
 
 export function buildRooms(): Room[] {
   const rack = mulberry32(881122);
@@ -491,16 +496,27 @@ export function houseSummary(): HouseSummary {
       )
     : 0;
 
+  const states: HouseStateCounts = {
+    occupied: ROOMS.filter((x) => x.state === "occupied").length,
+    due_out: departures,
+    arriving: arrivals,
+    vacant_clean: ROOMS.filter((x) => x.state === "vacant_clean").length,
+    vacant_dirty: ROOMS.filter((x) => x.state === "vacant_dirty").length,
+    ooo: ROOMS.filter((x) => x.state === "ooo").length,
+  };
+
   return {
     sellable,
     occupied,
     arrivals,
     departures,
-    vacantDirty: ROOMS.filter((x) => x.state === "vacant_dirty").length,
-    ooo: ROOMS.filter((x) => x.state === "ooo").length,
+    vacantDirty: states.vacant_dirty,
+    ooo: states.ooo,
     occupancyPct: Math.round((occupied / sellable) * 1000) / 10,
     drawerCents,
     outstandingCents,
     adrCents,
+    totalRooms: ROOMS.length,
+    states,
   };
 }

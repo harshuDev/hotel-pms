@@ -11,7 +11,6 @@ import {
   getHouseSummary,
   getOccupancyForecast,
   getRevenueSeries,
-  getRooms,
 } from "@/lib/queries";
 
 export const metadata = { title: "The Grand Hotel — Dashboard" };
@@ -19,23 +18,17 @@ export const metadata = { title: "The Grand Hotel — Dashboard" };
 export default async function DashboardPage() {
   const today = await getBusinessDate();
 
-  const [
-    activity,
-    arrivals,
-    departures,
-    occupancy,
-    revenue,
-    rooms,
-    house,
-  ] = await Promise.all([
-    getActivity(),
-    getArrivals(today),
-    getDepartures(today),
-    getOccupancyForecast(),
-    getRevenueSeries(),
-    getRooms(),
-    getHouseSummary(),
-  ]);
+  // No room list here: the house board renders from counts and loads rooms
+  // only when it is expanded.
+  const [activity, arrivals, departures, occupancy, revenue, house] =
+    await Promise.all([
+      getActivity(),
+      getArrivals(today),
+      getDepartures(today),
+      getOccupancyForecast(),
+      getRevenueSeries(),
+      getHouseSummary(),
+    ]);
 
   return (
     <div className="space-y-3">
@@ -54,7 +47,7 @@ export default async function DashboardPage() {
 
       <div className="grid gap-3 xl:grid-cols-[minmax(0,1.9fr)_minmax(0,1fr)]">
         <div className="space-y-3">
-          <HouseBoard rooms={rooms} />
+          <HouseBoard counts={house.states} total={house.totalRooms} />
           <Pace
             occupancy={occupancy}
             revenue={revenue}

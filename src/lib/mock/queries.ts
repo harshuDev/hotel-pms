@@ -44,7 +44,8 @@ import type {
   SeriesPoint,
   Shift,
   HouseSummary,
-  Room,
+  RoomFilters,
+  RoomsPage,
 } from "@/lib/types";
 
 /* -------------------------------------------------------------------------- */
@@ -289,8 +290,32 @@ export async function searchBookingsForPayment(
 /* Rooms and house state — currently mock-backed                              */
 /* -------------------------------------------------------------------------- */
 
-export async function getRooms(): Promise<Room[]> {
-  return ROOMS;
+export async function getRooms(
+  filters: RoomFilters = {},
+): Promise<RoomsPage> {
+  const perPage = filters.perPage ?? 240;
+  const page = Math.max(1, filters.page ?? 1);
+  const needle = filters.q?.trim().toLowerCase() ?? "";
+
+  const rows = ROOMS.filter(
+    (r) =>
+      (!filters.state || r.state === filters.state) &&
+      (!needle ||
+        r.number.toLowerCase().includes(needle) ||
+        (r.guestName ?? "").toLowerCase().includes(needle) ||
+        r.typeName.toLowerCase().includes(needle)),
+  ).sort((a, b) =>
+    a.number.localeCompare(b.number, undefined, { numeric: true }),
+  );
+
+  const start = (page - 1) * perPage;
+
+  return {
+    rows: rows.slice(start, start + perPage),
+    total: rows.length,
+    page,
+    perPage,
+  };
 }
 
 export async function getHouseSummary(): Promise<HouseSummary> {
