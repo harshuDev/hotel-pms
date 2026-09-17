@@ -6,14 +6,15 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0026` are
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0028` are
 applied to the hosted database.
 
 Working on real data: dashboard (house board, movements, pace, activity feed),
 bookings list, customers, the availability calendar, cashier (open a shift,
 take payments, record paid-outs, blind close), check-in and check-out, the
 night audit that advances the business date, taking a booking, all nine
-Inventory screens, and twelve reports — occupancy, debtors, payments,
+Inventory screens, the booking screen with edit and cancel, promotions, and
+twelve reports — occupancy, debtors, payments,
 financial, extras, daily checkout, booking, reservations, cancellation,
 channel, housekeeping and in house.
 
@@ -107,6 +108,12 @@ Each read is a Postgres view or RPC, never aggregation in the client:
 | `getBookableRoomTypes(from, to)`    | `bookable_room_types(from, to)`   |
 | `getInventoryGrid(plan, from, n)`   | `inventory_grid(plan, from, n)`   |
 | `getRatePlans()`                    | `rate_plans` where active         |
+| `getBookingDetail(id)`              | `booking_detail(id)`              |
+| `getBookingRoomLines(id)`           | `booking_room_lines(id)`          |
+| `getBookingNights(id)`              | `booking_nights(id)`              |
+| `getBookingFolioLines(id)`          | `booking_folio_lines(id)`         |
+| `getBookingActivity(id)`            | `booking_activity(id)`            |
+| `getPromotions()`                   | `promotions_list()`               |
 
 **Two signatures carry the room-count rule.** The client operates properties
 with up to ~1,800 rooms, so no query may return every room and no screen may
@@ -314,6 +321,42 @@ anywhere else. Collapsed height must stay constant regardless of room count.
   (`BK-000123`). A channel's reference goes in `external_reference`.
 - No room is assigned when a booking is taken. `assign_room()` does that, at
   check-in.
+- **Changing a booking never touches posted money.** `update_booking()`
+  refuses to drop a night the night audit has already charged, and
+  `set_booking_room_rate()` leaves a charged night's rate alone. The folio is
+  what the guest owes; moving the night underneath it would put the two out of
+  step. A charge that should not stand is reversed on the folio, deliberately.
+- **The arrival date is history once the guest arrives; the departure date is
+  not.** Extending an in-house stay is the commonest change a front desk makes,
+  and `sync_booking_room_nights()` already adds and removes only the nights
+  that changed, leaving the rates on the rest alone. That is why a date change
+  does not silently re-price a stay — and why extended nights arrive at zero
+  and need a rate before the night audit runs.
+- **Cancelling frees the inventory and does not write off the balance.** The
+  rooms and their nights go to `canceled`, which every availability query
+  excludes, and the outstanding amount is returned rather than cleared: a
+  cancellation fee is a real charge and somebody still has to chase it.
+- **A promotion reduces a stay; it is not a second price list.** The rate plan
+  still says what a room is worth. A promotion writes
+  `booking_room_nights.discount_cents`, which has existed since 0002 and which
+  the occupancy report and every revenue figure already net off, so nothing
+  about how revenue is counted changes.
+- **Three promotion kinds, and the shape takes a fourth.** `percent_off` and
+  `amount_off` reduce every covered night; `free_nights` zeroes the cheapest
+  qualifying nights and leaves the rest. That is a real difference in mechanic,
+  which is why `promotion_night_discounts()` has a branch per kind rather than
+  one formula pretending they are the same. Adding a kind is a value column, a
+  check, and a branch. Inclusions ("rate includes breakfast") are not a kind:
+  an inclusion posts to the folio rather than taking money off a night.
+- **A promotion carries a code or it does not.** No code means it applies by
+  itself to any qualifying stay; a code means somebody has to quote it, which
+  is how a private or negotiated offer is run. A quoted code that matches
+  nothing is refused rather than ignored.
+- **Promotions never stack — the best single one wins**, by largest saving with
+  `priority` as the tiebreak. Two forty percent offers applying together is
+  sixty-four percent off and nobody notices until the month end.
+- **A hand-priced room line gets no promotion.** Somebody has already decided
+  what that room costs, and a discount on top would be a second reduction.
 - Cashier scope: take payments, record paid-outs (money leaving the drawer,
   optionally recharged to a guest folio), close the shift with a blind cash
   count, next receptionist opens a fresh one. Shift close is a blind count —
@@ -372,23 +415,17 @@ pnpm supabase migration new <name>
 - **Phase 1 — done.** Schema, auth, roles, and the swap from mock to Supabase.
 - **Phase 3 — mostly done.** Cashier on real data, check-in and check-out, the
   night audit, hardening, and the first two reports.
-- **Phase 2 — in progress.** Availability calendar, booking creation and all
-  nine Inventory screens are built. Remaining: booking edit, promotions,
-  meeting rooms.
+- **Phase 2 — nearly done.** Availability calendar, booking creation, the
+  booking screen with edit and cancel, all nine Inventory screens and
+  promotions are built. Remaining: meeting rooms.
 - **Reports — done** except Meal, which has no schema behind it.
 
 ### What still renders `<ComingSoon />`
 
-Buildable on the schema as it stands:
-
-- Booking edit. `create_booking()` takes a booking; changing one afterwards
-  still means going through the tables.
-
-Blocked on a schema that does not exist yet, and on a decision (see below):
-
-- **Promotions** (`/offers`) — no model.
-- **Meeting Rooms** — no `meeting_rooms` or `meeting_room_bookings` tables.
-- **Reports → Meal** — no meal plan, board type or rate plan exists.
+- **Meeting Rooms** — no `meeting_rooms` or `meeting_room_bookings` tables yet.
+  Fully specified above and the granularity is settled, so it is buildable.
+- **Reports → Meal** — no meal plan or board type exists. It needs the same
+  inclusions model a "rate includes breakfast" promotion would.
 
 ## Open decisions — do not silently choose
 
@@ -411,10 +448,11 @@ than proceeding.
 7. **Rate model — settled.** A rate plan per room type per date, with
    restrictions layered on top: `rate_plans`, `rate_plan_days`,
    `room_type_days`. See the inventory notes above.
-8. **Promotions.** No model. What a promotion adjusts — rate, length of stay,
-   a fixed discount — decides the shape. There is now a rate plan to hang one
-   off, so the likely answer is a plan that derives from another, but that is
-   still a decision rather than an inference.
+8. **Promotions — settled.** A discount (percentage or amount) or free nights,
+   optionally behind a code, best single one wins. See the promotion notes
+   above. Still open within it: **inclusions** — "rate includes breakfast" —
+   which are a different mechanic because they post to the folio rather than
+   reducing a night, and which would also unblock the Meal report.
 9. **Meeting room granularity — settled: whole day.** `starts_on` / `ends_on`
    as dates, with the exclusion constraint on a `daterange`. Confirmed, so
    build it that way. Hourly or half-day slots would be a migration plus a

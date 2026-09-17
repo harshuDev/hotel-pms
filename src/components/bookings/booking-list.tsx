@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { format, parseISO } from "date-fns";
 import { EmptyState, StatusBadge, cn } from "@/components/ui";
 import { formatDue, formatMoney } from "@/lib/money";
@@ -64,7 +65,12 @@ export function BookingList({
             {rows.map((b) => (
               <tr key={b.id} className="hover:bg-shell">
                 <td className="whitespace-nowrap px-3 py-3 font-medium text-ink">
-                  {b.reference}
+                  <Link
+                    href={`/bookings/${b.id}`}
+                    className="underline-offset-2 hover:underline focus-visible:underline"
+                  >
+                    {b.reference}
+                  </Link>
                   <span className="block text-xxs font-normal text-ink-faint">
                     {b.customerName}
                   </span>

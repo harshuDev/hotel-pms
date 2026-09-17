@@ -19,6 +19,10 @@ import type {
   ActivityKind,
   Booking,
   BookableRoomType,
+  BookingActivityItem,
+  BookingDetail,
+  BookingNight,
+  BookingRoomLine,
   BookingStatus,
   Channel,
   Customer,
@@ -47,7 +51,10 @@ import type {
   FolioItemType,
   HousekeepingFloor,
   HousekeepingRoomsPage,
+  FolioLine,
   InventoryCell,
+  Promotion,
+  PromotionKind,
   RatePlan,
   InHouseRow,
   PaymentMethodTotal,
@@ -1697,4 +1704,307 @@ export async function getInventoryGrid(
     sold: row.sold,
     sellable: row.sellable,
   }));
+}
+
+/* -------------------------------------------------------------------------- */
+/* One booking                                                                */
+/* -------------------------------------------------------------------------- */
+
+/** Everything the booking screen shows above its tabs. Null when not found. */
+export async function getBookingDetail(
+  bookingId: string,
+): Promise<BookingDetail | null> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("booking_detail", {
+    p_booking_id: bookingId,
+  });
+
+  if (error) throw new Error(`Failed to load the booking: ${error.message}`);
+
+  const row = (
+    (data ?? []) as {
+      booking_id: string;
+      reference: string;
+      status: BookingStatus;
+      settlement: Settlement;
+      customer_id: string;
+      customer_name: string | null;
+      customer_email: string | null;
+      customer_phone: string | null;
+      channel_id: string;
+      channel_name: string | null;
+      check_in: string;
+      check_out: string;
+      nights: number;
+      adults: number;
+      children: number;
+      arrival_time: string | null;
+      departure_time: string | null;
+      guest_notes: string | null;
+      internal_notes: string | null;
+      external_reference: string | null;
+      booked_on: string;
+      booked_by: string | null;
+      room_count: number;
+      rooms_assigned: number;
+      reservation_value_cents: number;
+      charges_cents: number;
+      payments_cents: number;
+      balance_cents: number;
+      business_date: string | null;
+    }[]
+  )[0];
+
+  if (!row) return null;
+
+  return {
+    bookingId: row.booking_id,
+    reference: row.reference,
+    status: row.status,
+    settlement: row.settlement,
+    customerId: row.customer_id,
+    customerName: row.customer_name ?? "Unnamed guest",
+    customerEmail: row.customer_email,
+    customerPhone: row.customer_phone,
+    channelId: row.channel_id,
+    channelName: row.channel_name,
+    checkIn: row.check_in,
+    checkOut: row.check_out,
+    nights: row.nights,
+    adults: row.adults,
+    children: row.children,
+    arrivalTime: row.arrival_time,
+    departureTime: row.departure_time,
+    guestNotes: row.guest_notes,
+    internalNotes: row.internal_notes,
+    externalReference: row.external_reference,
+    bookedOn: row.booked_on,
+    bookedBy: row.booked_by,
+    roomCount: row.room_count,
+    roomsAssigned: row.rooms_assigned,
+    reservationValueCents: row.reservation_value_cents,
+    chargesCents: row.charges_cents,
+    paymentsCents: row.payments_cents,
+    balanceCents: row.balance_cents,
+    businessDate: row.business_date,
+  };
+}
+
+export async function getBookingRoomLines(
+  bookingId: string,
+): Promise<BookingRoomLine[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("booking_room_lines", {
+    p_booking_id: bookingId,
+  });
+  if (error) throw new Error(`Failed to load the rooms: ${error.message}`);
+
+  return (
+    (data ?? []) as {
+      booking_room_id: string;
+      room_type_id: string;
+      room_type_name: string;
+      room_id: string | null;
+      room_number: string | null;
+      status: BookingStatus;
+      check_in: string;
+      check_out: string;
+      nights: number;
+      adults: number;
+      children: number;
+      value_cents: number;
+      tax_cents: number;
+      discount_cents: number;
+      nights_charged: number;
+    }[]
+  ).map((row) => ({
+    bookingRoomId: row.booking_room_id,
+    roomTypeId: row.room_type_id,
+    roomTypeName: row.room_type_name,
+    roomId: row.room_id,
+    roomNumber: row.room_number,
+    status: row.status,
+    checkIn: row.check_in,
+    checkOut: row.check_out,
+    nights: row.nights,
+    adults: row.adults,
+    children: row.children,
+    valueCents: row.value_cents,
+    taxCents: row.tax_cents,
+    discountCents: row.discount_cents,
+    nightsCharged: row.nights_charged,
+  }));
+}
+
+export async function getBookingNights(
+  bookingId: string,
+): Promise<BookingNight[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("booking_nights", {
+    p_booking_id: bookingId,
+  });
+  if (error) throw new Error(`Failed to load the nights: ${error.message}`);
+
+  return (
+    (data ?? []) as {
+      booking_room_id: string;
+      room_type_name: string;
+      room_number: string | null;
+      stay_date: string;
+      room_rate_cents: number;
+      tax_cents: number;
+      discount_cents: number;
+      status: BookingStatus;
+      charged: boolean;
+    }[]
+  ).map((row) => ({
+    bookingRoomId: row.booking_room_id,
+    roomTypeName: row.room_type_name,
+    roomNumber: row.room_number,
+    stayDate: row.stay_date,
+    roomRateCents: row.room_rate_cents,
+    taxCents: row.tax_cents,
+    discountCents: row.discount_cents,
+    status: row.status,
+    charged: row.charged,
+  }));
+}
+
+export async function getBookingFolioLines(
+  bookingId: string,
+): Promise<FolioLine[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("booking_folio_lines", {
+    p_booking_id: bookingId,
+  });
+  if (error) throw new Error(`Failed to load the folio: ${error.message}`);
+
+  return (
+    (data ?? []) as {
+      line_id: string;
+      folio_id: string;
+      folio_number: number;
+      business_date: string;
+      posted_at: string;
+      kind: "charge" | "payment";
+      description: string;
+      is_reversal: boolean;
+      amount_cents: number;
+    }[]
+  ).map((row) => ({
+    lineId: row.line_id,
+    folioId: row.folio_id,
+    folioNumber: row.folio_number,
+    businessDate: row.business_date,
+    postedAt: row.posted_at,
+    kind: row.kind,
+    description: row.description,
+    isReversal: row.is_reversal,
+    amountCents: row.amount_cents,
+  }));
+}
+
+export async function getBookingActivity(
+  bookingId: string,
+): Promise<BookingActivityItem[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("booking_activity", {
+    p_booking_id: bookingId,
+  });
+  if (error) throw new Error(`Failed to load the activity: ${error.message}`);
+
+  return (
+    (data ?? []) as {
+      activity_id: string;
+      action: string;
+      summary: string;
+      actor: string | null;
+      created_at: string;
+    }[]
+  ).map((row) => ({
+    activityId: row.activity_id,
+    action: row.action,
+    summary: row.summary,
+    actor: row.actor,
+    createdAt: row.created_at,
+  }));
+}
+
+/* -------------------------------------------------------------------------- */
+/* Promotions                                                                 */
+/* -------------------------------------------------------------------------- */
+
+export async function getPromotions(): Promise<Promotion[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("promotions_list");
+  if (error) throw new Error(`Failed to load the promotions: ${error.message}`);
+
+  return (
+    (data ?? []) as {
+      promotion_id: string;
+      code: string | null;
+      name: string;
+      description: string | null;
+      kind: PromotionKind;
+      percent_bps: number | null;
+      amount_off_cents: number | null;
+      free_nights: number | null;
+      paid_nights: number | null;
+      sell_from: string | null;
+      sell_to: string | null;
+      stay_from: string | null;
+      stay_to: string | null;
+      min_nights: number | null;
+      max_nights: number | null;
+      min_advance_days: number | null;
+      max_advance_days: number | null;
+      arrival_days_of_week: number[] | null;
+      priority: number;
+      is_active: boolean;
+      rate_plan_names: string | null;
+      room_type_names: string | null;
+      bookings_taken: number;
+      discount_given_cents: number;
+    }[]
+  ).map((row) => ({
+    promotionId: row.promotion_id,
+    code: row.code,
+    name: row.name,
+    description: row.description,
+    kind: row.kind,
+    percentBps: row.percent_bps,
+    amountOffCents: row.amount_off_cents,
+    freeNights: row.free_nights,
+    paidNights: row.paid_nights,
+    sellFrom: row.sell_from,
+    sellTo: row.sell_to,
+    stayFrom: row.stay_from,
+    stayTo: row.stay_to,
+    minNights: row.min_nights,
+    maxNights: row.max_nights,
+    minAdvanceDays: row.min_advance_days,
+    maxAdvanceDays: row.max_advance_days,
+    arrivalDaysOfWeek: row.arrival_days_of_week,
+    priority: row.priority,
+    isActive: row.is_active,
+    ratePlanNames: row.rate_plan_names,
+    roomTypeNames: row.room_type_names,
+    bookingsTaken: row.bookings_taken,
+    discountGivenCents: row.discount_given_cents,
+  }));
+}
+
+/** Room types, for the promotion form's scoping. */
+export async function getRoomTypes(): Promise<
+  { id: string; code: string; name: string }[]
+> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("room_types")
+    .select("id, code, name")
+    .order("sort_order")
+    .order("name");
+
+  if (error) throw new Error(`Failed to load the room types: ${error.message}`);
+  return (data ?? []) as { id: string; code: string; name: string }[];
 }
