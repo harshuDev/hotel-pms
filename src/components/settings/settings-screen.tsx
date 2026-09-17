@@ -1,0 +1,1049 @@
+"use client";
+
+import { useState, useTransition } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { cn } from "@/components/ui";
+import {
+  createRooms,
+  saveChannel,
+  saveProperty,
+  saveRoomType,
+  saveStaffUser,
+  saveTaxRate,
+} from "@/lib/actions/settings";
+import type {
+  ChannelKind,
+  ChannelSetting,
+  PropertySettings,
+  RoomTypeSetting,
+  StaffRole,
+  StaffSetting,
+  TaxRateSetting,
+} from "@/lib/types";
+
+export type SettingsTab =
+  | "property"
+  | "room-types"
+  | "rooms"
+  | "channels"
+  | "tax"
+  | "staff";
+
+const TABS: { id: SettingsTab; label: string }[] = [
+  { id: "property", label: "Property" },
+  { id: "room-types", label: "Room types" },
+  { id: "rooms", label: "Rooms" },
+  { id: "channels", label: "Booking sources" },
+  { id: "tax", label: "Tax rates" },
+  { id: "staff", label: "Staff" },
+];
+
+const CHANNEL_KINDS: { value: ChannelKind; label: string }[] = [
+  { value: "direct", label: "Direct" },
+  { value: "ota", label: "OTA" },
+  { value: "wholesaler", label: "Wholesaler" },
+  { value: "gds", label: "GDS" },
+  { value: "offline", label: "Offline" },
+];
+
+const ROLES: { value: StaffRole; label: string; note: string }[] = [
+  { value: "admin", label: "Administrator", note: "Everything, including staff" },
+  { value: "manager", label: "Manager", note: "Rates, settings, the night audit, the drawer total" },
+  { value: "front_desk", label: "Front desk", note: "Bookings, check-in and out, payments" },
+  { value: "cashier", label: "Cashier", note: "Payments and the drawer" },
+  { value: "housekeeping", label: "Housekeeping", note: "Room status, and no money at all" },
+];
+
+const label =
+  "mb-1 block text-xxs font-semibold uppercase tracking-[0.1em] text-ink-faint";
+const field =
+  "w-full rounded-md border border-line px-3 py-2 text-[13px] text-ink focus:border-brass focus:outline-none focus:ring-1 focus:ring-brass";
+const card = "rounded-lg border border-line bg-white p-5 shadow-card";
+const primary =
+  "rounded-md bg-chrome-800 px-5 py-2 text-[13px] font-medium text-white hover:bg-chrome-900 disabled:opacity-50";
+const secondary =
+  "rounded-md border border-line px-4 py-2 text-[13px] text-ink-muted hover:bg-shell hover:text-ink";
+
+function Note({ children }: { children: React.ReactNode }) {
+  return (
+    <p className="mt-3 text-xs leading-relaxed text-ink-faint">{children}</p>
+  );
+}
+
+export function SettingsScreen({
+  tab,
+  property,
+  roomTypes,
+  channels,
+  taxRates,
+  staff,
+  meId,
+  canEdit,
+  isAdmin,
+}: {
+  tab: SettingsTab;
+  property: PropertySettings;
+  roomTypes: RoomTypeSetting[];
+  channels: ChannelSetting[];
+  taxRates: TaxRateSetting[];
+  staff: StaffSetting[];
+  meId: string | null;
+  canEdit: boolean;
+  isAdmin: boolean;
+}) {
+  const router = useRouter();
+  const [pending, startTransition] = useTransition();
+  const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
+
+  function run(fn: () => Promise<{ ok: boolean; error?: string }>, done: string) {
+    setMessage(null);
+    startTransition(async () => {
+      const result = await fn();
+      if (!result.ok) {
+        setMessage({ ok: false, text: result.error ?? "That did not work." });
+        return;
+      }
+      setMessage({ ok: true, text: done });
+      router.refresh();
+    });
+  }
+
+  /* -- Property ------------------------------------------------------- */
+  const [prop, setProp] = useState({
+    name: property.name,
+    timezone: property.timezone,
+    currency: property.currency,
+    checkInTime: property.checkInTime?.slice(0, 5) ?? "15:00",
+    checkOutTime: property.checkOutTime?.slice(0, 5) ?? "11:00",
+  });
+
+  /* -- Room types ----------------------------------------------------- */
+  const [rt, setRt] = useState<{
+    id: string | null;
+    code: string;
+    name: string;
+    baseOccupancy: string;
+    maxOccupancy: string;
+  } | null>(null);
+
+  /* -- Rooms ---------------------------------------------------------- */
+  const [run_, setRun] = useState({
+    roomTypeId: roomTypes[0]?.id ?? "",
+    first: "",
+    last: "",
+    floor: "",
+    prefix: "",
+  });
+
+  /* -- Channels ------------------------------------------------------- */
+  const [ch, setCh] = useState<{
+    id: string | null;
+    code: string;
+    name: string;
+    kind: ChannelKind;
+    commission: string;
+    isActive: boolean;
+  } | null>(null);
+
+  /* -- Tax ------------------------------------------------------------ */
+  const [tx, setTx] = useState<{
+    id: string | null;
+    name: string;
+    percent: string;
+    inclusion: "inclusive" | "exclusive";
+    isActive: boolean;
+  } | null>(null);
+
+  return (
+    <div className="space-y-3">
+      <div className="flex flex-wrap gap-1.5 rounded-lg border border-line bg-white p-2 shadow-card">
+        {TABS.map((t) => (
+          <Link
+            key={t.id}
+            href={`/settings?tab=${t.id}`}
+            className={cn(
+              "rounded-md px-3.5 py-2 text-[13px]",
+              t.id === tab
+                ? "bg-chrome-800 font-medium text-white"
+                : "text-ink-muted hover:bg-shell hover:text-ink",
+            )}
+          >
+            {t.label}
+          </Link>
+        ))}
+      </div>
+
+      {message && (
+        <p
+          className={cn(
+            "rounded-md px-3 py-2.5 text-[13px] leading-relaxed",
+            message.ok ? "bg-emerald-50 text-emerald-800" : "bg-rose-50 text-rose-700",
+          )}
+        >
+          {message.text}
+        </p>
+      )}
+
+      {!canEdit && (
+        <p className={cn(card, "text-[13px] leading-relaxed text-ink-muted")}>
+          You can read the settings but not change them. Rooms, rates and
+          booking sources are set by managers and administrators.
+        </p>
+      )}
+
+      {/* Property ------------------------------------------------------ */}
+      {tab === "property" && (
+        <div className={card}>
+          <h2 className="mb-4 font-display text-[15px] font-semibold tracking-tightest text-ink">
+            The property
+          </h2>
+          <div className="grid gap-4 sm:grid-cols-3">
+            <div className="sm:col-span-2">
+              <label htmlFor="p-name" className={label}>Name</label>
+              <input
+                id="p-name"
+                value={prop.name}
+                disabled={!canEdit}
+                onChange={(e) => setProp({ ...prop, name: e.target.value })}
+                className={field}
+              />
+            </div>
+            <div>
+              <label htmlFor="p-cur" className={label}>Currency</label>
+              <input
+                id="p-cur"
+                value={prop.currency}
+                maxLength={3}
+                disabled={!canEdit}
+                onChange={(e) => setProp({ ...prop, currency: e.target.value.toUpperCase() })}
+                className={cn(field, "uppercase")}
+              />
+            </div>
+            <div>
+              <label htmlFor="p-tz" className={label}>Timezone</label>
+              <input
+                id="p-tz"
+                value={prop.timezone}
+                disabled={!canEdit}
+                onChange={(e) => setProp({ ...prop, timezone: e.target.value })}
+                className={field}
+              />
+            </div>
+            <div>
+              <label htmlFor="p-in" className={label}>Check-in from</label>
+              <input
+                id="p-in"
+                type="time"
+                value={prop.checkInTime}
+                disabled={!canEdit}
+                onChange={(e) => setProp({ ...prop, checkInTime: e.target.value })}
+                className={cn(field, "tnum")}
+              />
+            </div>
+            <div>
+              <label htmlFor="p-out" className={label}>Check-out by</label>
+              <input
+                id="p-out"
+                type="time"
+                value={prop.checkOutTime}
+                disabled={!canEdit}
+                onChange={(e) => setProp({ ...prop, checkOutTime: e.target.value })}
+                className={cn(field, "tnum")}
+              />
+            </div>
+          </div>
+          <Note>
+            The timezone decides every business date this property computes, so
+            an unknown one is refused rather than stored. Changing the currency
+            does not restate money already posted — amounts are held in minor
+            units and only the symbol moves.
+          </Note>
+          {canEdit && (
+            <div className="mt-4 flex justify-end">
+              <button
+                onClick={() => run(() => saveProperty(prop), "Property saved.")}
+                disabled={pending}
+                className={primary}
+              >
+                Save
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Room types ---------------------------------------------------- */}
+      {tab === "room-types" && (
+        <>
+          <div className={card}>
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="font-display text-[15px] font-semibold tracking-tightest text-ink">
+                Room types
+              </h2>
+              {canEdit && (
+                <button
+                  onClick={() =>
+                    setRt({ id: null, code: "", name: "", baseOccupancy: "2", maxOccupancy: "2" })
+                  }
+                  className={secondary}
+                >
+                  New room type
+                </button>
+              )}
+            </div>
+
+            {roomTypes.length === 0 ? (
+              <p className="py-6 text-center text-[13px] text-ink-muted">
+                None yet. A room type is what you sell — Double, Twin, Suite —
+                and rooms belong to one. Add these before anything else.
+              </p>
+            ) : (
+              <table className="w-full text-[13px]">
+                <thead>
+                  <tr className="border-b border-line text-left text-ink-faint">
+                    {["Code", "Name", "Sleeps", "Rooms", ""].map((c, i) => (
+                      <th
+                        key={c || i}
+                        className="whitespace-nowrap px-3 pb-2.5 text-xxs font-semibold uppercase tracking-[0.1em]"
+                      >
+                        {c}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-line">
+                  {roomTypes.map((t) => (
+                    <tr key={t.id}>
+                      <td className="px-3 py-2.5 font-medium text-ink">{t.code}</td>
+                      <td className="px-3 py-2.5 text-ink">{t.name}</td>
+                      <td className="tnum px-3 py-2.5 text-ink-muted">
+                        {t.baseOccupancy}
+                        {t.maxOccupancy > t.baseOccupancy && `–${t.maxOccupancy}`}
+                      </td>
+                      <td
+                        className={cn(
+                          "tnum px-3 py-2.5",
+                          t.roomCount === 0 ? "text-warn-deep" : "text-ink-muted",
+                        )}
+                      >
+                        {t.roomCount === 0 ? "none yet" : t.roomCount}
+                      </td>
+                      <td className="px-3 py-2.5 text-right">
+                        {canEdit && (
+                          <button
+                            onClick={() =>
+                              setRt({
+                                id: t.id,
+                                code: t.code,
+                                name: t.name,
+                                baseOccupancy: String(t.baseOccupancy),
+                                maxOccupancy: String(t.maxOccupancy),
+                              })
+                            }
+                            className="text-ink-muted underline-offset-2 hover:text-ink hover:underline"
+                          >
+                            Edit
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+            <Note>
+              A room type cannot be deleted once bookings reference it. Rename
+              it or stop selling it on the rate plan instead.
+            </Note>
+          </div>
+
+          {rt && (
+            <div className={card}>
+              <h3 className="mb-4 font-display text-[15px] font-semibold tracking-tightest text-ink">
+                {rt.id ? "Edit room type" : "New room type"}
+              </h3>
+              <div className="grid gap-4 sm:grid-cols-4">
+                <div>
+                  <label htmlFor="rt-code" className={label}>Code</label>
+                  <input
+                    id="rt-code"
+                    value={rt.code}
+                    placeholder="DBL"
+                    onChange={(e) => setRt({ ...rt, code: e.target.value.toUpperCase() })}
+                    className={cn(field, "uppercase")}
+                  />
+                </div>
+                <div className="sm:col-span-2">
+                  <label htmlFor="rt-name" className={label}>Name</label>
+                  <input
+                    id="rt-name"
+                    value={rt.name}
+                    placeholder="Double"
+                    onChange={(e) => setRt({ ...rt, name: e.target.value })}
+                    className={field}
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <div>
+                    <label htmlFor="rt-base" className={label}>Sleeps</label>
+                    <input
+                      id="rt-base"
+                      inputMode="numeric"
+                      value={rt.baseOccupancy}
+                      onChange={(e) => setRt({ ...rt, baseOccupancy: e.target.value })}
+                      className={cn(field, "tnum")}
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="rt-max" className={label}>Max</label>
+                    <input
+                      id="rt-max"
+                      inputMode="numeric"
+                      value={rt.maxOccupancy}
+                      onChange={(e) => setRt({ ...rt, maxOccupancy: e.target.value })}
+                      className={cn(field, "tnum")}
+                    />
+                  </div>
+                </div>
+              </div>
+              <div className="mt-4 flex justify-end gap-2">
+                <button onClick={() => setRt(null)} className={secondary}>Cancel</button>
+                <button
+                  onClick={() =>
+                    run(
+                      () =>
+                        saveRoomType({
+                          id: rt.id,
+                          code: rt.code,
+                          name: rt.name,
+                          baseOccupancy: Number(rt.baseOccupancy) || 1,
+                          maxOccupancy: Number(rt.maxOccupancy) || 1,
+                        }),
+                      `${rt.name || "Room type"} saved.`,
+                    )
+                  }
+                  disabled={pending}
+                  className={primary}
+                >
+                  Save
+                </button>
+              </div>
+            </div>
+          )}
+        </>
+      )}
+
+      {/* Rooms --------------------------------------------------------- */}
+      {tab === "rooms" && (
+        <div className={card}>
+          <h2 className="mb-4 font-display text-[15px] font-semibold tracking-tightest text-ink">
+            Add rooms
+          </h2>
+
+          {roomTypes.length === 0 ? (
+            <p className="py-6 text-center text-[13px] text-ink-muted">
+              Add a room type first — every room belongs to one.
+            </p>
+          ) : (
+            <>
+              <div className="grid gap-4 sm:grid-cols-5">
+                <div className="sm:col-span-2">
+                  <label htmlFor="r-type" className={label}>Room type</label>
+                  <select
+                    id="r-type"
+                    value={run_.roomTypeId}
+                    disabled={!canEdit}
+                    onChange={(e) => setRun({ ...run_, roomTypeId: e.target.value })}
+                    className={field}
+                  >
+                    {roomTypes.map((t) => (
+                      <option key={t.id} value={t.id}>{t.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label htmlFor="r-first" className={label}>From</label>
+                  <input
+                    id="r-first"
+                    inputMode="numeric"
+                    placeholder="101"
+                    value={run_.first}
+                    disabled={!canEdit}
+                    onChange={(e) => setRun({ ...run_, first: e.target.value })}
+                    className={cn(field, "tnum")}
+                  />
+                </div>
+                <div>
+                  <label htmlFor="r-last" className={label}>To</label>
+                  <input
+                    id="r-last"
+                    inputMode="numeric"
+                    placeholder="120"
+                    value={run_.last}
+                    disabled={!canEdit}
+                    onChange={(e) => setRun({ ...run_, last: e.target.value })}
+                    className={cn(field, "tnum")}
+                  />
+                </div>
+                <div>
+                  <label htmlFor="r-floor" className={label}>Floor</label>
+                  <input
+                    id="r-floor"
+                    inputMode="numeric"
+                    placeholder="1"
+                    value={run_.floor}
+                    disabled={!canEdit}
+                    onChange={(e) => setRun({ ...run_, floor: e.target.value })}
+                    className={cn(field, "tnum")}
+                  />
+                </div>
+              </div>
+              <Note>
+                Rooms are made in runs because a property can run well over a
+                thousand of them. &ldquo;Double, floor 1, 101 to 120&rdquo;
+                makes twenty rooms, all vacant and clean. Up to 500 at a time,
+                and a run that would collide with a room that already exists is
+                refused by name before anything is written.
+              </Note>
+              {canEdit && (
+                <div className="mt-4 flex items-center justify-between gap-3">
+                  <p className="text-xs text-ink-faint">
+                    Manage individual rooms — status, floor, type — from the
+                    housekeeping report and the house board.
+                  </p>
+                  <button
+                    onClick={() =>
+                      run(
+                        () =>
+                          createRooms({
+                            roomTypeId: run_.roomTypeId,
+                            first: Number(run_.first),
+                            last: Number(run_.last),
+                            floor: run_.floor.trim() === "" ? null : Number(run_.floor),
+                            prefix: run_.prefix,
+                          }),
+                        "Rooms added.",
+                      )
+                    }
+                    disabled={pending || run_.first === "" || run_.last === ""}
+                    className={primary}
+                  >
+                    {pending ? "Adding…" : "Add the run"}
+                  </button>
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      )}
+
+      {/* Channels ------------------------------------------------------ */}
+      {tab === "channels" && (
+        <>
+          <div className={card}>
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="font-display text-[15px] font-semibold tracking-tightest text-ink">
+                Booking sources
+              </h2>
+              {canEdit && (
+                <button
+                  onClick={() =>
+                    setCh({
+                      id: null,
+                      code: "",
+                      name: "",
+                      kind: "direct",
+                      commission: "0",
+                      isActive: true,
+                    })
+                  }
+                  className={secondary}
+                >
+                  New source
+                </button>
+              )}
+            </div>
+
+            {channels.length === 0 ? (
+              <p className="rounded-md bg-warn-wash px-3 py-3 text-center text-[13px] leading-relaxed text-warn-deep">
+                None yet — and every booking must have one, so no booking can be
+                taken at all until there is. Add at least &ldquo;Direct&rdquo;.
+              </p>
+            ) : (
+              <table className="w-full text-[13px]">
+                <thead>
+                  <tr className="border-b border-line text-left text-ink-faint">
+                    {["Code", "Name", "Kind", "Commission", "", ""].map((c, i) => (
+                      <th
+                        key={c || i}
+                        className="whitespace-nowrap px-3 pb-2.5 text-xxs font-semibold uppercase tracking-[0.1em]"
+                      >
+                        {c}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-line">
+                  {channels.map((c) => (
+                    <tr key={c.id} className={cn(!c.isActive && "opacity-55")}>
+                      <td className="px-3 py-2.5 font-medium text-ink">{c.code}</td>
+                      <td className="px-3 py-2.5 text-ink">{c.name}</td>
+                      <td className="px-3 py-2.5 text-ink-muted">{c.kind}</td>
+                      <td className="tnum px-3 py-2.5 text-ink-muted">
+                        {c.commissionBps === 0 ? "—" : `${(c.commissionBps / 100).toFixed(2)}%`}
+                      </td>
+                      <td className="px-3 py-2.5 text-xxs text-ink-faint">
+                        {c.isActive ? "" : "retired"}
+                      </td>
+                      <td className="px-3 py-2.5 text-right">
+                        {canEdit && (
+                          <button
+                            onClick={() =>
+                              setCh({
+                                id: c.id,
+                                code: c.code,
+                                name: c.name,
+                                kind: c.kind,
+                                commission: String(c.commissionBps / 100),
+                                isActive: c.isActive,
+                              })
+                            }
+                            className="text-ink-muted underline-offset-2 hover:text-ink hover:underline"
+                          >
+                            Edit
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+            <Note>
+              Commission is what the channel report works out as owed on the
+              room revenue. Nothing records it being invoiced or paid, so the
+              figure is what is owed, never a balance.
+            </Note>
+          </div>
+
+          {ch && (
+            <div className={card}>
+              <h3 className="mb-4 font-display text-[15px] font-semibold tracking-tightest text-ink">
+                {ch.id ? "Edit booking source" : "New booking source"}
+              </h3>
+              <div className="grid gap-4 sm:grid-cols-4">
+                <div>
+                  <label htmlFor="c-code" className={label}>Code</label>
+                  <input
+                    id="c-code"
+                    value={ch.code}
+                    placeholder="DIR"
+                    onChange={(e) => setCh({ ...ch, code: e.target.value.toUpperCase() })}
+                    className={cn(field, "uppercase")}
+                  />
+                </div>
+                <div>
+                  <label htmlFor="c-name" className={label}>Name</label>
+                  <input
+                    id="c-name"
+                    value={ch.name}
+                    placeholder="Direct"
+                    onChange={(e) => setCh({ ...ch, name: e.target.value })}
+                    className={field}
+                  />
+                </div>
+                <div>
+                  <label htmlFor="c-kind" className={label}>Kind</label>
+                  <select
+                    id="c-kind"
+                    value={ch.kind}
+                    onChange={(e) => setCh({ ...ch, kind: e.target.value as ChannelKind })}
+                    className={field}
+                  >
+                    {CHANNEL_KINDS.map((k) => (
+                      <option key={k.value} value={k.value}>{k.label}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label htmlFor="c-comm" className={label}>Commission %</label>
+                  <input
+                    id="c-comm"
+                    inputMode="decimal"
+                    value={ch.commission}
+                    onChange={(e) => setCh({ ...ch, commission: e.target.value })}
+                    className={cn(field, "tnum")}
+                  />
+                </div>
+              </div>
+              {ch.id && (
+                <label className="mt-4 flex items-center gap-2 text-[13px] text-ink-muted">
+                  <input
+                    type="checkbox"
+                    checked={ch.isActive}
+                    onChange={(e) => setCh({ ...ch, isActive: e.target.checked })}
+                  />
+                  Still selling. Turning this off stops new bookings from it and
+                  leaves the old ones alone.
+                </label>
+              )}
+              <div className="mt-4 flex justify-end gap-2">
+                <button onClick={() => setCh(null)} className={secondary}>Cancel</button>
+                <button
+                  onClick={() =>
+                    run(
+                      () =>
+                        saveChannel({
+                          id: ch.id,
+                          code: ch.code,
+                          name: ch.name,
+                          kind: ch.kind,
+                          // Basis points, like every other rate here.
+                          commissionBps: Math.round((Number(ch.commission) || 0) * 100),
+                          isActive: ch.isActive,
+                        }),
+                      `${ch.name || "Source"} saved.`,
+                    )
+                  }
+                  disabled={pending}
+                  className={primary}
+                >
+                  Save
+                </button>
+              </div>
+            </div>
+          )}
+        </>
+      )}
+
+      {/* Tax ----------------------------------------------------------- */}
+      {tab === "tax" && (
+        <>
+          <div className={card}>
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="font-display text-[15px] font-semibold tracking-tightest text-ink">
+                Tax rates
+              </h2>
+              {canEdit && (
+                <button
+                  onClick={() =>
+                    setTx({
+                      id: null,
+                      name: "VAT",
+                      percent: "20",
+                      inclusion: "exclusive",
+                      isActive: true,
+                    })
+                  }
+                  className={secondary}
+                >
+                  New tax rate
+                </button>
+              )}
+            </div>
+
+            {taxRates.length === 0 ? (
+              <p className="py-6 text-center text-[13px] leading-relaxed text-ink-muted">
+                None yet. Without one, charges post with no tax at all — which
+                is right only if this property genuinely charges none.
+              </p>
+            ) : (
+              <table className="w-full text-[13px]">
+                <thead>
+                  <tr className="border-b border-line text-left text-ink-faint">
+                    {["Name", "Rate", "Quoted", "", ""].map((c, i) => (
+                      <th
+                        key={c || i}
+                        className="whitespace-nowrap px-3 pb-2.5 text-xxs font-semibold uppercase tracking-[0.1em]"
+                      >
+                        {c}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-line">
+                  {taxRates.map((t) => (
+                    <tr key={t.id} className={cn(!t.isActive && "opacity-55")}>
+                      <td className="px-3 py-2.5 font-medium text-ink">{t.name}</td>
+                      <td className="tnum px-3 py-2.5 text-ink-muted">
+                        {(t.rateBps / 100).toFixed(2)}%
+                      </td>
+                      <td className="px-3 py-2.5 text-ink-muted">
+                        {t.inclusion === "inclusive" ? "tax included" : "tax on top"}
+                      </td>
+                      <td className="px-3 py-2.5 text-xxs text-ink-faint">
+                        {t.isActive ? "" : "retired"}
+                      </td>
+                      <td className="px-3 py-2.5 text-right">
+                        {canEdit && (
+                          <button
+                            onClick={() =>
+                              setTx({
+                                id: t.id,
+                                name: t.name,
+                                percent: String(t.rateBps / 100),
+                                inclusion: t.inclusion,
+                                isActive: t.isActive,
+                              })
+                            }
+                            className="text-ink-muted underline-offset-2 hover:text-ink hover:underline"
+                          >
+                            Edit
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+            <Note>
+              Tax on top means the rate you quote is before tax; tax included
+              means the guest&rsquo;s price already contains it, and the split
+              is worked out backwards. The difference on a £120 room is about
+              £20, so it is worth being sure. Once charges have been posted at a
+              rate, that rate can be renamed or retired but not moved — a folio
+              item records which rate it used, and changing it would restate
+              history.
+            </Note>
+          </div>
+
+          {tx && (
+            <div className={card}>
+              <h3 className="mb-4 font-display text-[15px] font-semibold tracking-tightest text-ink">
+                {tx.id ? "Edit tax rate" : "New tax rate"}
+              </h3>
+              <div className="grid gap-4 sm:grid-cols-3">
+                <div>
+                  <label htmlFor="t-name" className={label}>Name</label>
+                  <input
+                    id="t-name"
+                    value={tx.name}
+                    onChange={(e) => setTx({ ...tx, name: e.target.value })}
+                    className={field}
+                  />
+                </div>
+                <div>
+                  <label htmlFor="t-pct" className={label}>Rate %</label>
+                  <input
+                    id="t-pct"
+                    inputMode="decimal"
+                    value={tx.percent}
+                    onChange={(e) => setTx({ ...tx, percent: e.target.value })}
+                    className={cn(field, "tnum")}
+                  />
+                </div>
+                <div>
+                  <label htmlFor="t-inc" className={label}>How it is quoted</label>
+                  <select
+                    id="t-inc"
+                    value={tx.inclusion}
+                    onChange={(e) =>
+                      setTx({ ...tx, inclusion: e.target.value as "inclusive" | "exclusive" })
+                    }
+                    className={field}
+                  >
+                    <option value="exclusive">Tax on top of the rate</option>
+                    <option value="inclusive">Rate already includes tax</option>
+                  </select>
+                </div>
+              </div>
+              {tx.id && (
+                <label className="mt-4 flex items-center gap-2 text-[13px] text-ink-muted">
+                  <input
+                    type="checkbox"
+                    checked={tx.isActive}
+                    onChange={(e) => setTx({ ...tx, isActive: e.target.checked })}
+                  />
+                  In use.
+                </label>
+              )}
+              <div className="mt-4 flex justify-end gap-2">
+                <button onClick={() => setTx(null)} className={secondary}>Cancel</button>
+                <button
+                  onClick={() =>
+                    run(
+                      () =>
+                        saveTaxRate({
+                          id: tx.id,
+                          name: tx.name,
+                          rateBps: Math.round((Number(tx.percent) || 0) * 100),
+                          inclusion: tx.inclusion,
+                          isActive: tx.isActive,
+                        }),
+                      `${tx.name || "Tax rate"} saved.`,
+                    )
+                  }
+                  disabled={pending}
+                  className={primary}
+                >
+                  Save
+                </button>
+              </div>
+            </div>
+          )}
+        </>
+      )}
+
+      {/* Staff --------------------------------------------------------- */}
+      {tab === "staff" && (
+        <div className={card}>
+          <h2 className="mb-4 font-display text-[15px] font-semibold tracking-tightest text-ink">
+            Staff
+          </h2>
+
+          <table className="w-full text-[13px]">
+            <thead>
+              <tr className="border-b border-line text-left text-ink-faint">
+                {["Name", "Role", "", ""].map((c, i) => (
+                  <th
+                    key={c || i}
+                    className="whitespace-nowrap px-3 pb-2.5 text-xxs font-semibold uppercase tracking-[0.1em]"
+                  >
+                    {c}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-line">
+              {staff.map((s) => (
+                <StaffRow
+                  key={s.id}
+                  staff={s}
+                  isMe={s.id === meId}
+                  canEdit={isAdmin}
+                  pending={pending}
+                  onSave={(next) =>
+                    run(() => saveStaffUser(next), `${next.fullName} saved.`)
+                  }
+                />
+              ))}
+            </tbody>
+          </table>
+
+          <Note>
+            Deactivating somebody withdraws their access everywhere at once —
+            they resolve to no property and no role, so every table returns
+            nothing and every role-gated action refuses. Reinstating them
+            restores it.
+          </Note>
+          <Note>
+            <strong className="font-medium text-ink">Adding a new login is not here.</strong>{" "}
+            A member of staff needs a Supabase Auth account before a row can
+            point at one, so creating one is an invite flow with its own
+            decisions about who may send it. For now a new person signs up or is
+            invited in Supabase, and then appears in this list.
+          </Note>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function StaffRow({
+  staff,
+  isMe,
+  canEdit,
+  pending,
+  onSave,
+}: {
+  staff: StaffSetting;
+  isMe: boolean;
+  canEdit: boolean;
+  pending: boolean;
+  onSave: (next: {
+    id: string;
+    fullName: string;
+    role: StaffRole;
+    isActive: boolean;
+  }) => void;
+}) {
+  const [editing, setEditing] = useState(false);
+  const [name, setName] = useState(staff.fullName);
+  const [role, setRole] = useState<StaffRole>(staff.role);
+  const [active, setActive] = useState(staff.isActive);
+
+  if (!editing) {
+    return (
+      <tr className={cn(!staff.isActive && "opacity-55")}>
+        <td className="px-3 py-2.5 font-medium text-ink">
+          {staff.fullName}
+          {isMe && <span className="ml-1.5 text-xxs font-normal text-ink-faint">you</span>}
+        </td>
+        <td className="px-3 py-2.5 text-ink-muted">
+          {ROLES.find((r) => r.value === staff.role)?.label ?? staff.role}
+        </td>
+        <td className="px-3 py-2.5 text-xxs text-ink-faint">
+          {staff.isActive ? "" : "no access"}
+        </td>
+        <td className="px-3 py-2.5 text-right">
+          {canEdit && (
+            <button
+              onClick={() => setEditing(true)}
+              className="text-ink-muted underline-offset-2 hover:text-ink hover:underline"
+            >
+              Edit
+            </button>
+          )}
+        </td>
+      </tr>
+    );
+  }
+
+  return (
+    <tr>
+      <td className="px-3 py-2.5">
+        <input
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          className={field}
+          aria-label="Name"
+        />
+      </td>
+      <td className="px-3 py-2.5">
+        <select
+          value={role}
+          onChange={(e) => setRole(e.target.value as StaffRole)}
+          className={field}
+          aria-label="Role"
+        >
+          {ROLES.map((r) => (
+            <option key={r.value} value={r.value}>{r.label}</option>
+          ))}
+        </select>
+        <span className="mt-1 block text-xxs text-ink-faint">
+          {ROLES.find((r) => r.value === role)?.note}
+        </span>
+      </td>
+      <td className="px-3 py-2.5">
+        <label className="flex items-center gap-2 text-xxs text-ink-muted">
+          <input
+            type="checkbox"
+            checked={active}
+            onChange={(e) => setActive(e.target.checked)}
+          />
+          Has access
+        </label>
+      </td>
+      <td className="whitespace-nowrap px-3 py-2.5 text-right">
+        <button
+          onClick={() => setEditing(false)}
+          className="mr-2 text-ink-muted underline-offset-2 hover:text-ink hover:underline"
+        >
+          Cancel
+        </button>
+        <button
+          onClick={() => {
+            onSave({ id: staff.id, fullName: name, role, isActive: active });
+            setEditing(false);
+          }}
+          disabled={pending}
+          className="font-medium text-brass underline-offset-2 hover:underline disabled:opacity-50"
+        >
+          Save
+        </button>
+      </td>
+    </tr>
+  );
+}

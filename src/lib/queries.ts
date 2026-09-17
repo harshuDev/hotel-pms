@@ -25,6 +25,7 @@ import type {
   BookingRoomLine,
   BookingStatus,
   Channel,
+  ChannelSetting,
   Customer,
   CustomerKind,
   SeriesPoint,
@@ -58,7 +59,11 @@ import type {
   MeetingRoomStatus,
   Promotion,
   PromotionKind,
+  PropertySettings,
   RatePlan,
+  RoomTypeSetting,
+  StaffSetting,
+  TaxRateSetting,
   InHouseRow,
   PaymentMethodTotal,
   PaymentRow,
@@ -2135,4 +2140,150 @@ export async function getMeetingRoomBooking(
     bookedBy: row.booked_by,
     createdAt: row.created_at,
   };
+}
+
+/* -------------------------------------------------------------------------- */
+/* Property settings                                                          */
+/* -------------------------------------------------------------------------- */
+
+export async function getPropertySettings(): Promise<PropertySettings> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("properties")
+    .select("id, name, timezone, currency, check_in_time, check_out_time")
+    .single();
+
+  if (error) throw new Error(`Failed to load the property: ${error.message}`);
+
+  const row = data as {
+    id: string;
+    name: string;
+    timezone: string;
+    currency: string;
+    check_in_time: string | null;
+    check_out_time: string | null;
+  };
+
+  return {
+    id: row.id,
+    name: row.name,
+    timezone: row.timezone,
+    currency: row.currency,
+    checkInTime: row.check_in_time,
+    checkOutTime: row.check_out_time,
+  };
+}
+
+/** Room types with how many rooms each has, so an empty one is obvious. */
+export async function getRoomTypeSettings(): Promise<RoomTypeSetting[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("room_types")
+    .select("id, code, name, base_occupancy, max_occupancy, sort_order, rooms(count)")
+    .order("sort_order")
+    .order("name");
+
+  if (error) throw new Error(`Failed to load the room types: ${error.message}`);
+
+  return (
+    (data ?? []) as {
+      id: string;
+      code: string;
+      name: string;
+      base_occupancy: number;
+      max_occupancy: number;
+      sort_order: number;
+      rooms: { count: number }[];
+    }[]
+  ).map((row) => ({
+    id: row.id,
+    code: row.code,
+    name: row.name,
+    baseOccupancy: row.base_occupancy,
+    maxOccupancy: row.max_occupancy,
+    sortOrder: row.sort_order,
+    roomCount: row.rooms?.[0]?.count ?? 0,
+  }));
+}
+
+export async function getChannelSettings(): Promise<ChannelSetting[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("channels")
+    .select("id, code, name, kind, commission_bps, is_active")
+    .order("kind")
+    .order("name");
+
+  if (error) throw new Error(`Failed to load the booking sources: ${error.message}`);
+
+  return (
+    (data ?? []) as {
+      id: string;
+      code: string;
+      name: string;
+      kind: ChannelKind;
+      commission_bps: number;
+      is_active: boolean;
+    }[]
+  ).map((row) => ({
+    id: row.id,
+    code: row.code,
+    name: row.name,
+    kind: row.kind,
+    commissionBps: row.commission_bps,
+    isActive: row.is_active,
+  }));
+}
+
+/** Every tax rate, retired ones included — this is where they are managed. */
+export async function getTaxRateSettings(): Promise<TaxRateSetting[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("tax_rates")
+    .select("id, name, rate_bps, inclusion, is_active")
+    .order("is_active", { ascending: false })
+    .order("name");
+
+  if (error) throw new Error(`Failed to load the tax rates: ${error.message}`);
+
+  return (
+    (data ?? []) as {
+      id: string;
+      name: string;
+      rate_bps: number;
+      inclusion: "inclusive" | "exclusive";
+      is_active: boolean;
+    }[]
+  ).map((row) => ({
+    id: row.id,
+    name: row.name,
+    rateBps: row.rate_bps,
+    inclusion: row.inclusion,
+    isActive: row.is_active,
+  }));
+}
+
+export async function getStaffSettings(): Promise<StaffSetting[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("staff_users")
+    .select("id, full_name, role, is_active")
+    .order("is_active", { ascending: false })
+    .order("full_name");
+
+  if (error) throw new Error(`Failed to load the staff: ${error.message}`);
+
+  return (
+    (data ?? []) as {
+      id: string;
+      full_name: string;
+      role: StaffRole;
+      is_active: boolean;
+    }[]
+  ).map((row) => ({
+    id: row.id,
+    fullName: row.full_name,
+    role: row.role,
+    isActive: row.is_active,
+  }));
 }

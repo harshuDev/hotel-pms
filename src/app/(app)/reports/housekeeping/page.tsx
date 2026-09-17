@@ -6,6 +6,7 @@ import {
   ReportShell,
 } from "@/components/reports/report-shell";
 import { ReportTable } from "@/components/reports/report-table";
+import { RoomStatusAction } from "@/components/settings/room-status-action";
 import {
   HOUSEKEEPING_PAGE_SIZE,
   getBusinessDate,
@@ -242,11 +243,12 @@ export default async function HousekeepingReportPage({
         }
         note={
           <>
-            The list is paged in Postgres rather than fetched whole: a property
-            can run well over a thousand rooms, and no screen here draws one
-            element per room. Filter by floor or state to get to a working list.
-            Due out means the guest is leaving today, so the room will need
-            cleaning even though it still reads as occupied.
+            Marking a room clean is what takes it off this list. Due out means
+            the guest is leaving today, so the room will need cleaning even
+            though it still reads as occupied — it becomes dirty automatically
+            when they are checked out. The list is paged in Postgres rather
+            than fetched whole: a property can run well over a thousand rooms,
+            and no screen here draws one element per room.
           </>
         }
         columns={[
@@ -300,6 +302,12 @@ export default async function HousekeepingReportPage({
               <span className="text-ink-faint">
                 {r.nightsLeft === null ? "—" : r.nightsLeft}
               </span>
+            ),
+          },
+          {
+            header: "Mark it",
+            cell: (r) => (
+              <RoomStatusAction roomId={r.roomId} status={r.housekeepingStatus} />
             ),
           },
         ]}
