@@ -6,15 +6,15 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0028` are
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0029` are
 applied to the hosted database.
 
 Working on real data: dashboard (house board, movements, pace, activity feed),
 bookings list, customers, the availability calendar, cashier (open a shift,
 take payments, record paid-outs, blind close), check-in and check-out, the
 night audit that advances the business date, taking a booking, all nine
-Inventory screens, the booking screen with edit and cancel, promotions, and
-twelve reports — occupancy, debtors, payments,
+Inventory screens, the booking screen with edit and cancel, promotions,
+meeting rooms, and twelve reports — occupancy, debtors, payments,
 financial, extras, daily checkout, booking, reservations, cancellation,
 channel, housekeeping and in house.
 
@@ -114,6 +114,8 @@ Each read is a Postgres view or RPC, never aggregation in the client:
 | `getBookingFolioLines(id)`          | `booking_folio_lines(id)`         |
 | `getBookingActivity(id)`            | `booking_activity(id)`            |
 | `getPromotions()`                   | `promotions_list()`               |
+| `getMeetingRoomCalendar(from, n)`   | `meeting_room_calendar(from, n)`  |
+| `getMeetingRoomBooking(id)`         | `meeting_room_booking_detail(id)` |
 
 **Two signatures carry the room-count rule.** The client operates properties
 with up to ~1,800 rooms, so no query may return every room and no screen may
@@ -387,10 +389,30 @@ anywhere else. Collapsed height must stay constant regardless of room count.
 - **The ~1,800 room rule does not apply here.** A property has a handful of
     meeting rooms, so a row-per-room calendar grid is correct. Do not build a
     house board for six meeting rooms.
-- Currently assumed whole-day booking (`starts_on` / `ends_on`, dates). If
-    the client wants hourly or half-day slots, these become `starts_at` /
-    `ends_at` timestamps and the constraint becomes `tstzrange` — a migration
-    plus a calendar rewrite. Confirm before building.
+- **Whole-day, and the range is inclusive at both ends.** A room booked
+    "Monday to Wednesday" is occupied on the Wednesday, which is the `'[]'` in
+    the exclusion constraint. This is the one place the module differs from
+    room bookings, where `check_out` is the morning the guest leaves and is not
+    a night stayed. Hourly or half-day slots would make these `starts_at` /
+    `ends_at` and the constraint a `tstzrange` — a migration plus a calendar
+    rewrite, so raise it rather than assuming.
+- **`folios.booking_id` is nullable because of this module.** It was `not null`
+    until 0029. A meeting room booking is not a `bookings` row and must never
+    become one, so a folio now belongs to exactly one of the two. The same goes
+    for `folio_items.booking_id` and `payments.booking_id`. The alternative — a
+    second set of money tables — would put meeting room payments outside the
+    cashier drawer, outside the financial report and outside the append-only
+    rules.
+- **Everything that reads money by property and business date was unaffected**:
+    the financial report, the payments report and the cashier drawer never join
+    on `booking_id`. What does join on it — the debtors report, daily checkout,
+    the booking screen — keeps returning room bookings only. That is right for
+    all but debtors, which is a known gap: a meeting room debt is not chased by
+    that report.
+- **The folio is made on the first charge and not before.** That is what makes
+    `folio_id is null` mean "no money was taken" rather than "there is an empty
+    folio nobody looked at". A booking with no customer cannot be charged at
+    all, because a folio has to belong to somebody.
 
 ## Commands
 
@@ -415,17 +437,18 @@ pnpm supabase migration new <name>
 - **Phase 1 — done.** Schema, auth, roles, and the swap from mock to Supabase.
 - **Phase 3 — mostly done.** Cashier on real data, check-in and check-out, the
   night audit, hardening, and the first two reports.
-- **Phase 2 — nearly done.** Availability calendar, booking creation, the
-  booking screen with edit and cancel, all nine Inventory screens and
-  promotions are built. Remaining: meeting rooms.
+- **Phase 2 — done.** Availability calendar, booking creation, the booking
+  screen with edit and cancel, all nine Inventory screens, promotions and
+  meeting rooms.
 - **Reports — done** except Meal, which has no schema behind it.
 
 ### What still renders `<ComingSoon />`
 
-- **Meeting Rooms** — no `meeting_rooms` or `meeting_room_bookings` tables yet.
-  Fully specified above and the granularity is settled, so it is buildable.
 - **Reports → Meal** — no meal plan or board type exists. It needs the same
-  inclusions model a "rate includes breakfast" promotion would.
+  inclusions model a "rate includes breakfast" promotion would, so the two are
+  one piece of work.
+
+Every other route in the nav is built and on real data.
 
 ## Open decisions — do not silently choose
 
@@ -453,10 +476,9 @@ than proceeding.
    above. Still open within it: **inclusions** — "rate includes breakfast" —
    which are a different mechanic because they post to the folio rather than
    reducing a night, and which would also unblock the Meal report.
-9. **Meeting room granularity — settled: whole day.** `starts_on` / `ends_on`
-   as dates, with the exclusion constraint on a `daterange`. Confirmed, so
-   build it that way. Hourly or half-day slots would be a migration plus a
-   calendar rewrite, so raise it again rather than assuming.
+9. **Meeting room granularity — settled and built: whole day.** `starts_on` /
+   `ends_on` as dates, exclusion constraint on an inclusive `daterange`.
+   Hourly or half-day slots would be a migration plus a calendar rewrite.
 10. **Tax rate and inclusion.** `tax_rates` is empty. 20% is easy; whether the
     property quotes VAT-inclusive or exclusive is a policy decision that
     changes every charge by a sixth.
@@ -472,3 +494,9 @@ than proceeding.
     `channels.commission_bps` on the room revenue. Nothing records a commission
     being invoiced or paid, so the figure is what is owed, never a balance. A
     real channel ledger is its own model.
+
+14. **Meeting room debts are not in the debtors report.** That report is per
+    room booking and joins `bookings`; a meeting room folio has no booking to
+    join to. The balance shows on the meeting room booking itself. Widening the
+    report means it returns two different kinds of thing, which is a reporting
+    decision rather than a bug to fix quietly.
