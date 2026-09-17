@@ -52,11 +52,16 @@ export interface NewBooking {
   ratePlanId: string | null;
   /** Sell against a stop sell, a closed date or a stay rule. */
   ignoreRestrictions: boolean;
+  /** Quoted for a private offer. Blank still gets any automatic promotion. */
+  promotionCode: string;
 }
 
 export interface BookingTaken {
   bookingId: string;
   reference: string;
+  /** Null when nothing qualified. */
+  promotionName: string | null;
+  discountCents: number;
 }
 
 /**
@@ -140,6 +145,7 @@ export async function createBooking(
     p_allow_overbook: input.allowOverbook,
     p_rate_plan_id: input.ratePlanId,
     p_ignore_restrictions: input.ignoreRestrictions,
+    p_promotion_code: input.promotionCode || null,
   });
 
   if (error) {
@@ -153,7 +159,14 @@ export async function createBooking(
     };
   }
 
-  const row = ((data ?? []) as { booking_id: string; reference: string }[])[0];
+  const row = (
+    (data ?? []) as {
+      booking_id: string;
+      reference: string;
+      promotion_name: string | null;
+      discount_cents: number;
+    }[]
+  )[0];
   if (!row) {
     return {
       ok: false,
@@ -166,7 +179,15 @@ export async function createBooking(
   revalidatePath("/calendar");
   revalidatePath("/dashboard");
 
-  return { ok: true, data: { bookingId: row.booking_id, reference: row.reference } };
+  return {
+    ok: true,
+    data: {
+      bookingId: row.booking_id,
+      reference: row.reference,
+      promotionName: row.promotion_name,
+      discountCents: row.discount_cents ?? 0,
+    },
+  };
 }
 
 /** What is free for a stay, reloaded when the dates change. */

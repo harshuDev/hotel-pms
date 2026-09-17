@@ -91,11 +91,17 @@ export function NewBookingForm({
   const [externalReference, setExternalReference] = useState("");
   const [allowOverbook, setAllowOverbook] = useState(false);
   const [ignoreRestrictions, setIgnoreRestrictions] = useState(false);
+  const [promotionCode, setPromotionCode] = useState("");
 
   const [error, setError] = useState<string | null>(null);
   // Set when Postgres refuses something a person is allowed to wave through.
   const [block, setBlock] = useState<BookingBlock | null>(null);
-  const [taken, setTaken] = useState<{ reference: string } | null>(null);
+  const [taken, setTaken] = useState<{
+    reference: string;
+    bookingId: string;
+    promotionName: string | null;
+    discountCents: number;
+  } | null>(null);
 
   const nights =
     checkOut > checkIn
@@ -286,6 +292,7 @@ export function NewBookingForm({
         allowOverbook,
         ratePlanId: ratePlanId || null,
         ignoreRestrictions,
+        promotionCode,
       });
 
       if (!result.ok) {
@@ -294,7 +301,12 @@ export function NewBookingForm({
         return;
       }
 
-      setTaken({ reference: result.data.reference });
+      setTaken({
+        reference: result.data.reference,
+        bookingId: result.data.bookingId,
+        promotionName: result.data.promotionName,
+        discountCents: result.data.discountCents,
+      });
       router.refresh();
     });
   }
@@ -311,10 +323,22 @@ export function NewBookingForm({
           room{lines.reduce((s, l) => s + l.quantity, 0) === 1 ? "" : "s"}. No room
           has been assigned yet — that happens at check-in.
         </p>
+        {taken.promotionName && (
+          <p className="mx-auto mt-3 max-w-md rounded-md bg-emerald-50 px-3 py-2.5 text-[13px] leading-relaxed text-emerald-800">
+            <span className="font-medium">{taken.promotionName}</span> applied,
+            taking {formatMoney(taken.discountCents)} off the stay.
+          </p>
+        )}
         <div className="mt-5 flex justify-center gap-2">
           <a
-            href="/bookings"
+            href={`/bookings/${taken.bookingId}`}
             className="rounded-md bg-chrome-800 px-5 py-2 text-[13px] font-medium text-white hover:bg-chrome-900"
+          >
+            Open the booking
+          </a>
+          <a
+            href="/bookings"
+            className="rounded-md border border-line px-5 py-2 text-[13px] text-ink-muted hover:bg-shell hover:text-ink"
           >
             See all bookings
           </a>
@@ -335,6 +359,8 @@ export function NewBookingForm({
               setInternalNotes("");
               setExternalReference("");
               setAllowOverbook(false);
+              setIgnoreRestrictions(false);
+              setPromotionCode("");
             }}
             className="rounded-md border border-line px-5 py-2 text-[13px] text-ink-muted hover:bg-shell hover:text-ink"
           >
@@ -858,7 +884,19 @@ export function NewBookingForm({
               ))}
             </select>
           </div>
-          <div className="sm:col-span-2">
+          <div>
+            <label htmlFor="promo" className={label}>
+              Promotion code
+            </label>
+            <input
+              id="promo"
+              value={promotionCode}
+              onChange={(e) => setPromotionCode(e.target.value.toUpperCase())}
+              placeholder="Optional"
+              className={cn(field, "uppercase")}
+            />
+          </div>
+          <div>
             <label htmlFor="external" className={label}>
               The channel&apos;s own reference
             </label>

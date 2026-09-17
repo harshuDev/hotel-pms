@@ -580,3 +580,126 @@ export type InventoryField =
   | "stop_sell"
   | "allotment"
   | "close_out";
+
+/* -------------------------------------------------------------------------- */
+/* One booking                                                                */
+/* -------------------------------------------------------------------------- */
+
+export interface BookingDetail {
+  bookingId: string;
+  reference: string;
+  status: BookingStatus;
+  settlement: Settlement;
+  customerId: string;
+  customerName: string;
+  customerEmail: string | null;
+  customerPhone: string | null;
+  channelId: string;
+  channelName: string | null;
+  checkIn: string;
+  checkOut: string;
+  nights: number;
+  adults: number;
+  children: number;
+  arrivalTime: string | null;
+  departureTime: string | null;
+  guestNotes: string | null;
+  internalNotes: string | null;
+  externalReference: string | null;
+  bookedOn: string;
+  bookedBy: string | null;
+  roomCount: number;
+  roomsAssigned: number;
+  reservationValueCents: number;
+  chargesCents: number;
+  paymentsCents: number;
+  balanceCents: number;
+  businessDate: string | null;
+}
+
+export interface BookingRoomLine {
+  bookingRoomId: string;
+  roomTypeId: string;
+  roomTypeName: string;
+  roomId: string | null;
+  roomNumber: string | null;
+  status: BookingStatus;
+  checkIn: string;
+  checkOut: string;
+  nights: number;
+  adults: number;
+  children: number;
+  valueCents: number;
+  taxCents: number;
+  discountCents: number;
+  /** Nights already posted to the folio, which can no longer be dropped. */
+  nightsCharged: number;
+}
+
+export interface BookingNight {
+  bookingRoomId: string;
+  roomTypeName: string;
+  roomNumber: string | null;
+  stayDate: string;
+  roomRateCents: number;
+  taxCents: number;
+  discountCents: number;
+  status: BookingStatus;
+  charged: boolean;
+}
+
+export interface FolioLine {
+  lineId: string;
+  folioId: string;
+  folioNumber: number;
+  businessDate: string;
+  postedAt: string;
+  kind: "charge" | "payment";
+  description: string;
+  isReversal: boolean;
+  /** Already signed: a reversal is negative. */
+  amountCents: number;
+}
+
+export interface BookingActivityItem {
+  activityId: string;
+  action: string;
+  summary: string;
+  actor: string | null;
+  createdAt: string;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Promotions                                                                 */
+/* -------------------------------------------------------------------------- */
+
+export type PromotionKind = "percent_off" | "amount_off" | "free_nights";
+
+export interface Promotion {
+  promotionId: string;
+  /** Null applies automatically; set must be quoted. */
+  code: string | null;
+  name: string;
+  description: string | null;
+  kind: PromotionKind;
+  percentBps: number | null;
+  amountOffCents: number | null;
+  freeNights: number | null;
+  paidNights: number | null;
+  sellFrom: string | null;
+  sellTo: string | null;
+  stayFrom: string | null;
+  stayTo: string | null;
+  minNights: number | null;
+  maxNights: number | null;
+  minAdvanceDays: number | null;
+  maxAdvanceDays: number | null;
+  arrivalDaysOfWeek: number[] | null;
+  priority: number;
+  isActive: boolean;
+  /** Null means every plan / every room type. */
+  ratePlanNames: string | null;
+  roomTypeNames: string | null;
+  bookingsTaken: number;
+  discountGivenCents: number;
+}
