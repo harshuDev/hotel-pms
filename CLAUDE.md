@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0047` are
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0048` are
 applied to the hosted database.
 
 Working on real data: dashboard (house board, movements, pace, activity feed),
@@ -868,6 +868,41 @@ anywhere else. Collapsed height must stay constant regardless of room count.
   did not exist, so nothing says what those rates included, and it cannot be
   backfilled. The report undercounts over historic dates by design; the screen
   says so rather than letting it read as a bug.
+- **A customer is created, corrected and merged from the Customers screen.**
+  Until 0048 a customer could only appear as a side effect of
+  `create_booking()`, and could not be edited at all: the screen's three
+  buttons — Create Customer, Merge Selected, Export to Excel — shipped
+  `disabled` with "Available in Phase 2" on them, and so did the row
+  tickboxes, which is why Merge could never have worked whatever anyone
+  clicked.
+  - **Merging was designed for in 0001 and built in 0048.**
+    `customers.merged_into_id` has been on the table from the start, with a
+    self-referencing foreign key under `on delete restrict`, and
+    `customer_stats` has always filtered `where merged_into_id is null`. So the
+    read side already hid a merged-away customer; only the write was missing.
+  - **`merge_customers()` repoints the three tables that carry `customer_id`** —
+    `bookings`, `folios` and `meeting_room_bookings` — then marks the
+    duplicates. One transaction: a merge that moved the bookings and then failed
+    would leave two customers both looking live, one holding the other's
+    history. **Nothing is deleted**, so the merged row and its trail survive.
+  - **It fills only the keeper's empty fields**, never overwrites. Somebody
+    chose that row to keep, so its own details are the ones they meant — but a
+    phone number held only by the duplicate would otherwise vanish from every
+    screen once the duplicate drops off the list.
+  - **Merging is `is_revenue_staff()`; creating and correcting is
+    `is_front_office_staff()`.** Rewriting who a booking belonged to is more
+    than a correction and cannot be undone from the application, so it is
+    logged to `activity_log` as well.
+  - **The export is a Server Action returning CSV, not a route.** "No API
+    routes except external webhooks" still holds: the action returns the text
+    and the browser makes the download out of a Blob. It exports the whole
+    filtered list rather than the page on screen — exporting 25 of 4,000 rows
+    because that is what the table was showing is the sort of thing nobody
+    notices until they have built a mailing list from it — and caps at 10,000,
+    saying so rather than handing over a short file that looks complete.
+  - **Every field is quoted against CSV injection.** A leading `=`, `+`, `-` or
+    `@` makes Excel treat a cell as a formula, so a customer name starting with
+    one is prefixed with a quote.
 - **Creating a login is not in the application.** `staff_users.id` references
   `auth.users`, so a new member of staff needs an auth account before a row can
   point at one. Settings manages the staff who already exist — name, role, and
