@@ -952,7 +952,15 @@ export async function getDebtorsReport(): Promise<DebtorRow[]> {
 /* Calendar                                                                    */
 /* -------------------------------------------------------------------------- */
 
-export const CALENDAR_NIGHTS = 14;
+/**
+ * How many nights the calendar covers.
+ *
+ * A month. A fortnight meant the board ran out four columns past what fits on
+ * screen, so scrolling right hit the end almost at once and the calendar read
+ * as "one week only". The chevrons page by this, and the date jump goes
+ * anywhere beyond it.
+ */
+export const CALENDAR_NIGHTS = 30;
 
 /**
  * How many bars one room type may draw before the board stops and counts.

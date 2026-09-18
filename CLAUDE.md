@@ -389,6 +389,27 @@ showed the Reservation Centric calendar and asked for it by name.
   those nights have not been charged yet and a future stay would show nothing.
 - **Cancelled bookings get their own row**, never the live ones, where they
   would read as sold. `calendar_bookings()` returns them only when asked.
+- **The window is a fixed month and the URL carries no `days`.** It used to:
+  the + and − controls moved the date span before they were corrected to size
+  the rail. Anybody who pressed "−" while they were wired that way got `days=7`
+  stuck in their URL, every link threaded it onward, and once + and − meant
+  something else there was no way back — the calendar showed a week for ever.
+  `CALENDAR_NIGHTS` in `src/lib/queries.ts` is the one place it is set. A
+  setting with no control is worse than no setting, so if the span becomes
+  adjustable again it needs its own control, not the rail's.
+- **+ and − size the rail, not the dates.** `railW` is a URL param and a prop
+  rather than component state because the chevron offset and the season label's
+  sticky `left` are arithmetic over it. `clampRail()` bounds it.
+- **An empty cell is a link to the booking form, not a modal.** Clicking one
+  goes to `/bookings/new?check_in=<date>&room_type=<id>` and `NewBookingForm`
+  prefills the arrival, one night, and a room line of that type. The reference
+  opens a small "Create Booking" panel in place; that would be a second booking
+  form to keep in step with `create_booking()` — its rate lookup, its overbook
+  and restriction flags, its promotion resolution — so the click reuses the one
+  form instead. The prefilled line's React key is the fixed string
+  `"from-calendar"`; a generated id there is a hydration mismatch.
+  - The date is validated server-side and ignored if it is before the business
+    date. A URL is not a form and cannot be trusted to have used the board.
 - **The reference's "Holding Area" row was not cloned.** Nothing in this schema
   matches it and guessing would put bookings somewhere arbitrary. Ask the
   client what it holds before building it.

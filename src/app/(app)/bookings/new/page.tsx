@@ -12,7 +12,14 @@ import {
 
 export const metadata = { title: "New booking" };
 
-export default async function NewBookingPage() {
+const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
+
+export default async function NewBookingPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ check_in?: string; room_type?: string }>;
+}) {
+  const sp = await searchParams;
   const staff = await getCurrentStaffUser();
 
   // Postgres refuses this too — create_booking() checks the role itself. This
@@ -35,13 +42,24 @@ export default async function NewBookingPage() {
   }
 
   const businessDate = await getBusinessDate();
-  const tomorrow = format(addDays(parseISO(businessDate), 1), "yyyy-MM-dd");
+
+  // The calendar links here with the cell that was clicked. An arrival before
+  // the business date is refused rather than quietly corrected: it is a date
+  // somebody typed into the URL, and silently moving it would take a booking
+  // for a night other than the one they asked for.
+  const wanted = sp.check_in;
+  const initialCheckIn =
+    wanted && ISO_DATE.test(wanted) && wanted >= businessDate ? wanted : undefined;
+  const arrival = initialCheckIn ?? businessDate;
+  const nextDay = format(addDays(parseISO(arrival), 1), "yyyy-MM-dd");
 
   const [channels, taxRates, ratePlans, types] = await Promise.all([
     getChannels(),
     getTaxRates(),
     getRatePlans(),
-    getBookableRoomTypes(businessDate, tomorrow),
+    // For the clicked night, so the room type it preselects is one that is
+    // actually bookable then.
+    getBookableRoomTypes(arrival, nextDay),
   ]);
 
   return (
@@ -56,6 +74,8 @@ export default async function NewBookingPage() {
         taxRates={taxRates}
         ratePlans={ratePlans}
         initialTypes={types}
+        initialCheckIn={initialCheckIn}
+        initialRoomTypeId={sp.room_type?.trim() || undefined}
       />
     </div>
   );
