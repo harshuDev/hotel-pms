@@ -7,7 +7,11 @@ import type { ActionResult } from "@/lib/actions/cashier";
 /**
  * Marks the feed read up to now for the signed-in member of staff.
  *
- * One timestamp each, so clearing your feed does not clear anyone else's.
+ * One timestamp each, so marking your feed read does not mark anyone else's.
+ *
+ * Nothing is removed. activity_feed() returns the most recent rows whether
+ * they have been read or not, and `unread` only decides whether a row is
+ * highlighted, so this is the read marker and never a delete.
  */
 export async function markActivitySeen(): Promise<ActionResult> {
   const supabase = await createClient();
@@ -15,7 +19,7 @@ export async function markActivitySeen(): Promise<ActionResult> {
   const { error } = await supabase.rpc("mark_activity_seen");
 
   if (error) {
-    return { ok: false, error: `The feed was not cleared: ${error.message}` };
+    return { ok: false, error: `The feed was not marked read: ${error.message}` };
   }
 
   revalidatePath("/dashboard");
