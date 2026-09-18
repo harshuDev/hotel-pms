@@ -31,12 +31,18 @@ export const SECTIONS: NavSection[] = [
   },
   {
     label: "Bookings",
+    /*
+      Three items, matching the client's reference system exactly.
+      
+      It used to carry five. Arrivals, Departures and In house are still built
+      and still reachable — the bookings list links to all three, and In house
+      is that list's own `checked_in` filter. They came out of the menu, not out
+      of the application.
+    */
     items: [
-      { label: "All bookings", href: "/bookings" },
-      { label: "New booking", href: "/bookings/new" },
-      { label: "Arrivals", href: "/bookings/arrivals" },
-      { label: "Departures", href: "/bookings/departures" },
-      { label: "In house", href: "/bookings/in-house" },
+      { label: "Add Simple Booking", href: "/bookings/new" },
+      { label: "Add Group Booking", href: "/bookings/new?group=1" },
+      { label: "Search", href: "/bookings" },
     ],
   },
   { label: "Offers", href: "/offers" },

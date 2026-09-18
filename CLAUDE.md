@@ -62,6 +62,18 @@ current design, not as drift.
 
 1. **Nav order and labels.** Section order is fixed: Dashboard, Calendar,
    Inventory, Bookings, Promotions, Reports, Customers, Cashier, Meeting Rooms.
+   - **The Bookings menu carries exactly three items**, matching the reference:
+     Add Simple Booking, Add Group Booking, Search. It used to carry five.
+     **Arrivals, Departures and In house are still built and still reachable** —
+     the bookings list links to all three, and In house is that list's own
+     `checked_in` filter. They came out of the menu, not out of the application;
+     do not "restore" them to the nav.
+   - **Simple and Group are the same transaction.** A group here is one
+     `bookings` row with several `booking_rooms` on it, which `create_booking()`
+     has always taken. `?group=1` changes the wording so somebody who chose
+     Group is told where the rooms go. There is no group flag in the schema and
+     adding one would be a second booking model to keep in step with the
+     first.
 2. **Dashboard, not Front Desk.** The route `/dashboard` is labelled
    "Dashboard" in the nav, the page `<h1>` and the page title. "Front Desk"
    survives only as a booking channel value in mock data — do not rename that.
@@ -502,6 +514,13 @@ showed the Reservation Centric calendar and asked for it by name.
     anyone who wants the full page.
   - The prefilled line's React key is the fixed string `"from-calendar"`; a
     generated id there is a hydration mismatch.
+  - **The stay band is dark**, matching the reference's Create Booking panel,
+    which puts the dates on a charcoal band and everything else on white.
+    `labelDark` and `fieldDark` in `new-booking-form.tsx` carry it, and the
+    inputs take `[color-scheme:dark]` so the native date picker's own icon is
+    light rather than a black square on a dark field. **It is one component**,
+    so the dark band appears wherever the form does — the calendar's dialog and
+    `/bookings/new` alike. That is the point of there being one form.
   - **Focus goes to the first field, not the first focusable element.**
     `querySelector` returns document order and the close button is first in the
     markup, so one selector put the cursor on "close" — where a habitual space

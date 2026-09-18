@@ -35,6 +35,16 @@ type Guest =
 
 const label =
   "mb-1 block text-xxs font-semibold uppercase tracking-[0.1em] text-ink-faint";
+/*
+ * The stay band is dark, matching the client's reference system: its Create
+ * Booking panel puts the dates, the rate and the cancellation policy on a
+ * charcoal band and everything else on white. Same component wherever the form
+ * appears, so the calendar's dialog gets it too.
+ */
+const labelDark =
+  "mb-1 block text-xxs font-semibold uppercase tracking-[0.1em] text-white/60";
+const fieldDark =
+  "w-full rounded-md border border-white/15 bg-white/10 px-3 py-2 text-[13px] text-white placeholder:text-white/40 focus:border-white/40 focus:outline-none focus:ring-1 focus:ring-white/40 [color-scheme:dark]";
 const field =
   "w-full rounded-md border border-line px-3 py-2 text-[13px] text-ink focus:border-brass focus:outline-none focus:ring-1 focus:ring-brass";
 
@@ -398,13 +408,13 @@ export function NewBookingForm({
   return (
     <div className="space-y-3">
       {/* Stay ---------------------------------------------------------- */}
-      <section className="rounded-lg border border-line bg-white p-5 shadow-card">
-        <h2 className="mb-4 font-display text-[15px] font-semibold tracking-tightest text-ink">
+      <section className="rounded-lg border border-chrome-700 bg-chrome-800 p-5 shadow-card">
+        <h2 className="mb-4 font-display text-[15px] font-semibold tracking-tightest text-white">
           Stay
         </h2>
         <div className="grid gap-4 sm:grid-cols-4">
           <div>
-            <label htmlFor="check-in" className={label}>
+            <label htmlFor="check-in" className={labelDark}>
               Arrival
             </label>
             <input
@@ -419,11 +429,11 @@ export function NewBookingForm({
                   );
                 }
               }}
-              className={cn(field, "tnum")}
+              className={cn(fieldDark, "tnum")}
             />
           </div>
           <div>
-            <label htmlFor="check-out" className={label}>
+            <label htmlFor="check-out" className={labelDark}>
               Departure
             </label>
             <input
@@ -432,11 +442,11 @@ export function NewBookingForm({
               value={checkOut}
               min={format(addDays(parseISO(checkIn), 1), "yyyy-MM-dd")}
               onChange={(e) => setCheckOut(e.target.value)}
-              className={cn(field, "tnum")}
+              className={cn(fieldDark, "tnum")}
             />
           </div>
           <div>
-            <label htmlFor="adults" className={label}>
+            <label htmlFor="adults" className={labelDark}>
               Adults
             </label>
             <input
@@ -445,11 +455,11 @@ export function NewBookingForm({
               min={1}
               value={adults}
               onChange={(e) => setAdults(Math.max(Number(e.target.value) || 1, 1))}
-              className={cn(field, "tnum")}
+              className={cn(fieldDark, "tnum")}
             />
           </div>
           <div>
-            <label htmlFor="children" className={label}>
+            <label htmlFor="children" className={labelDark}>
               Children
             </label>
             <input
@@ -458,11 +468,11 @@ export function NewBookingForm({
               min={0}
               value={children}
               onChange={(e) => setChildren(Math.max(Number(e.target.value) || 0, 0))}
-              className={cn(field, "tnum")}
+              className={cn(fieldDark, "tnum")}
             />
           </div>
         </div>
-        <p className="mt-3 text-xs text-ink-faint">
+        <p className="mt-3 text-xs text-white/60">
           {nights > 0
             ? `${nights} night${nights === 1 ? "" : "s"}, ${format(parseISO(checkIn), "EEE d MMM")} to ${format(parseISO(checkOut), "EEE d MMM")}`
             : "Pick a departure date after the arrival date."}
@@ -566,7 +576,7 @@ export function NewBookingForm({
                               quantity: Math.max(Number(e.target.value) || 1, 1),
                             })
                           }
-                          className={cn(field, "tnum")}
+                          className={cn(fieldDark, "tnum")}
                         />
                       </div>
                       <div>
@@ -577,7 +587,7 @@ export function NewBookingForm({
                           placeholder={ratePlanId ? "From the plan" : "0.00"}
                           value={line.rate}
                           onChange={(e) => setLine(line.key, { rate: e.target.value })}
-                          className={cn(field, "tnum")}
+                          className={cn(fieldDark, "tnum")}
                         />
                       </div>
                       <div>
@@ -591,7 +601,7 @@ export function NewBookingForm({
                               adults: Math.max(Number(e.target.value) || 1, 1),
                             })
                           }
-                          className={cn(field, "tnum")}
+                          className={cn(fieldDark, "tnum")}
                         />
                       </div>
                       <div>
@@ -605,7 +615,7 @@ export function NewBookingForm({
                               children: Math.max(Number(e.target.value) || 0, 0),
                             })
                           }
-                          className={cn(field, "tnum")}
+                          className={cn(fieldDark, "tnum")}
                         />
                       </div>
                       <div className="flex items-end">
