@@ -263,6 +263,29 @@ export interface AvailabilityCell {
   available: number;
 }
 
+/**
+ * One booking on the calendar board, as a bar across the dates it covers.
+ *
+ * A bar is per booked room, not per booking: a two-room reservation draws two,
+ * because they may sit on different room types.
+ */
+export interface CalendarBar {
+  roomTypeId: string;
+  bookingId: string;
+  bookingRoomId: string;
+  reference: string;
+  /** Surname first, which is what a tape chart is scanned by. */
+  guestName: string;
+  status: BookingStatus;
+  /** Null until check-in: no room is assigned when a booking is taken. */
+  roomNumber: string | null;
+  checkIn: string;
+  /** The morning they leave, and not a night stayed. */
+  checkOut: string;
+  /** Bookings overlapping the window for this type, before the per-type cap. */
+  typeTotal: number;
+}
+
 /** What a debt is owed against. The debtors report returns both. */
 export type DebtorKind = "room" | "meeting_room";
 
