@@ -2704,6 +2704,20 @@ export type Database = {
         Args: { p_customer: Database["public"]["Tables"]["customers"]["Row"] }
         Returns: string
       }
+      customer_for_edit: {
+        Args: { p_id: string }
+        Returns: {
+          company_name: string
+          email: string
+          exclude_from_email: boolean
+          first_name: string
+          id: string
+          kind: Database["public"]["Enums"]["customer_kind"]
+          last_name: string
+          national_id_number: string
+          phone: string
+        }[]
+      }
       customers_page: {
         Args: {
           p_kind?: Database["public"]["Enums"]["customer_kind"]
@@ -3001,6 +3015,15 @@ export type Database = {
       is_front_office_staff: { Args: never; Returns: boolean }
       is_revenue_staff: { Args: never; Returns: boolean }
       mark_activity_seen: { Args: never; Returns: string }
+      merge_customers: {
+        Args: { p_keep_id: string; p_merge_ids: string[] }
+        Returns: {
+          bookings_moved: number
+          customers_merged: number
+          folios_moved: number
+          meeting_rooms_moved: number
+        }[]
+      }
       meal_report: {
         Args: { p_from: string; p_to: string }
         Returns: {
@@ -3396,6 +3419,20 @@ export type Database = {
         }
         Returns: string
       }
+      save_customer: {
+        Args: {
+          p_company_name?: string
+          p_email?: string
+          p_exclude_from_email?: boolean
+          p_first_name?: string
+          p_id?: string
+          p_kind: Database["public"]["Enums"]["customer_kind"]
+          p_last_name?: string
+          p_national_id_number?: string
+          p_phone?: string
+        }
+        Returns: string
+      }
       save_property: {
         Args: {
           p_check_in_time?: string
@@ -3568,6 +3605,10 @@ export type Database = {
           p_to: string
         }
         Returns: number
+      }
+      set_customer_exclude_from_email: {
+        Args: { p_id: string; p_value: boolean }
+        Returns: undefined
       }
       set_room_status: {
         Args: {
