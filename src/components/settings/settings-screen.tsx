@@ -11,10 +11,13 @@ import {
   saveProperty,
   saveRoom,
   saveRoomType,
+  saveSeason,
+  deleteSeason,
   saveStaffUser,
   saveTaxRate,
 } from "@/lib/actions/settings";
 import type {
+  CalendarSeason,
   ChannelKind,
   ChannelSetting,
   PaymentMethodKind,
@@ -33,6 +36,7 @@ export type SettingsTab =
   | "rooms"
   | "channels"
   | "tax"
+  | "seasons"
   | "payment-methods"
   | "staff";
 
@@ -42,6 +46,7 @@ const TABS: { id: SettingsTab; label: string }[] = [
   { id: "rooms", label: "Rooms" },
   { id: "channels", label: "Booking sources" },
   { id: "tax", label: "Tax rates" },
+  { id: "seasons", label: "Seasons" },
   { id: "payment-methods", label: "Payment methods" },
   { id: "staff", label: "Staff" },
 ];
@@ -109,6 +114,7 @@ export function SettingsScreen({
   roomQuery,
   channels,
   taxRates,
+  seasons,
   paymentMethods,
   staff,
   meId,
@@ -122,6 +128,7 @@ export function SettingsScreen({
   roomQuery: string;
   channels: ChannelSetting[];
   taxRates: TaxRateSetting[];
+  seasons: CalendarSeason[];
   paymentMethods: PaymentMethodSetting[];
   staff: StaffSetting[];
   meId: string | null;
@@ -214,6 +221,13 @@ export function SettingsScreen({
     percent: string;
     inclusion: "inclusive" | "exclusive";
     isActive: boolean;
+  } | null>(null);
+
+  const [sn, setSn] = useState<{
+    id: string | null;
+    name: string;
+    startsOn: string;
+    endsOn: string;
   } | null>(null);
 
   return (
@@ -1159,6 +1173,165 @@ export function SettingsScreen({
       )}
 
       {/* Payment methods ----------------------------------------------- */}
+      {tab === "seasons" && (
+        <>
+          <div className={card}>
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="font-display text-[15px] font-semibold tracking-tightest text-ink">
+                Seasons
+              </h2>
+              {canEdit && (
+                <button
+                  onClick={() =>
+                    setSn({ id: null, name: "", startsOn: "", endsOn: "" })
+                  }
+                  className={secondary}
+                >
+                  New season
+                </button>
+              )}
+            </div>
+
+            {seasons.length === 0 ? (
+              <p className="py-6 text-center text-[13px] leading-relaxed text-ink-muted">
+                None yet. Name one and it appears as a band across the top of
+                the calendar for those dates.
+              </p>
+            ) : (
+              <table className="w-full text-[13px]">
+                <thead>
+                  <tr className="border-b border-line text-left text-ink-faint">
+                    {["Season", "First day", "Last day", ""].map((c, i) => (
+                      <th
+                        key={c || i}
+                        className="whitespace-nowrap px-3 pb-2.5 text-xxs font-semibold uppercase tracking-[0.1em]"
+                      >
+                        {c}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-line">
+                  {seasons.map((s) => (
+                    <tr key={s.id}>
+                      <td className="px-3 py-2.5 font-medium text-ink">{s.name}</td>
+                      <td className="tnum px-3 py-2.5 text-ink-muted">{s.startsOn}</td>
+                      <td className="tnum px-3 py-2.5 text-ink-muted">{s.endsOn}</td>
+                      <td className="px-3 py-2.5 text-right">
+                        {canEdit && (
+                          <span className="flex justify-end gap-3">
+                            <button
+                              onClick={() =>
+                                setSn({
+                                  id: s.id,
+                                  name: s.name,
+                                  startsOn: s.startsOn,
+                                  endsOn: s.endsOn,
+                                })
+                              }
+                              className="text-ink-muted underline-offset-2 hover:text-ink hover:underline"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              onClick={() =>
+                                startTransition(async () => {
+                                  const result = await deleteSeason(s.id);
+                                  if (!result.ok) {
+                                    setMessage({ ok: false, text: result.error });
+                                    return;
+                                  }
+                                  setMessage({ ok: true, text: `${s.name} removed.` });
+                                  router.refresh();
+                                })
+                              }
+                              className="text-rose-600 underline-offset-2 hover:underline"
+                            >
+                              Remove
+                            </button>
+                          </span>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+            <Note>
+              A season labels the calendar and changes no price. Rates are set
+              per plan, per room type, per night in Inventory, and nothing here
+              touches them — a season that quietly moved rates would be a second
+              price list nobody could see. Seasons cannot overlap: two bands
+              over one date has no sensible drawing. The last day is included,
+              so a season runs to the end of it.
+            </Note>
+          </div>
+
+          {sn && (
+            <div className={card}>
+              <h3 className="mb-4 font-display text-[15px] font-semibold tracking-tightest text-ink">
+                {sn.id ? "Edit season" : "New season"}
+              </h3>
+              <div className="grid gap-4 sm:grid-cols-3">
+                <div>
+                  <label className={label} htmlFor="season-name">Name</label>
+                  <input
+                    id="season-name"
+                    value={sn.name}
+                    onChange={(e) => setSn({ ...sn, name: e.target.value })}
+                    placeholder="Low season"
+                    className={field}
+                  />
+                </div>
+                <div>
+                  <label className={label} htmlFor="season-from">First day</label>
+                  <input
+                    id="season-from"
+                    type="date"
+                    value={sn.startsOn}
+                    onChange={(e) => setSn({ ...sn, startsOn: e.target.value })}
+                    className={field}
+                  />
+                </div>
+                <div>
+                  <label className={label} htmlFor="season-to">Last day</label>
+                  <input
+                    id="season-to"
+                    type="date"
+                    value={sn.endsOn}
+                    onChange={(e) => setSn({ ...sn, endsOn: e.target.value })}
+                    className={field}
+                  />
+                </div>
+              </div>
+              <div className="mt-4 flex gap-2">
+                <button
+                  disabled={pending}
+                  onClick={() =>
+                    startTransition(async () => {
+                      const result = await saveSeason(sn);
+                      if (!result.ok) {
+                        setMessage({ ok: false, text: result.error });
+                        return;
+                      }
+                      setMessage({ ok: true, text: `${sn.name} saved.` });
+                      setSn(null);
+                      router.refresh();
+                    })
+                  }
+                  className={primary}
+                >
+                  {pending ? "Saving…" : "Save season"}
+                </button>
+                <button onClick={() => setSn(null)} className={secondary}>
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
+        </>
+      )}
+
       {tab === "payment-methods" && (
         <>
           <div className={card}>

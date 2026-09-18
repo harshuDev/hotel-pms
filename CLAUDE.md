@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0043` are
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0044` are
 applied to the hosted database.
 
 Working on real data: dashboard (house board, movements, pace, activity feed),
@@ -132,6 +132,8 @@ Each read is a Postgres view or RPC, never aggregation in the client:
 | `getOpenShift()`                    | `current_cashier_shift()`         |
 | `getCalendarAvailability(from, n)`  | `calendar_availability(from, n)`  |
 | `getCalendarBookings(from, n, cap)` | `calendar_bookings(from, n, cap)`  |
+| `getCalendarSeasons(from, n)`       | `calendar_seasons(from, n)`        |
+| `getSeasonSettings()`               | `seasons` table                    |
 | `getOccupancyReport(from, to)`      | `occupancy_report(from, to)`      |
 | `getDebtorsReport()`                | `debtors_report()`                |
 | `getPaymentsReport(from, to)`       | `payments_report(from, to)`       |
@@ -318,16 +320,50 @@ showed the Reservation Centric calendar and asked for it by name.
 - **Bars carry booking status on their edge** — amber pending, blue confirmed,
   green in house, grey departed — where the reference's are uniform. The
   information was already there.
-- **`board` in `tailwind.config.ts` is the warm grid surface.** It is the one
-  warm family in a cool palette, and it is the reference's. It touches no
-  chrome, accent or status colour, so the client revision round stands.
+- **`board` in `tailwind.config.ts` is the grid surface, and it is cool.** The
+  first look at the reference was a photo of a monitor whose warm cast made the
+  grid read as cream; it was built that way and it was wrong. The clean
+  screenshots show near-white cells, blue-grey rules and a slate season band.
+  The rail uses `chrome`, so the board's left column matches this app's own nav
+  rather than introducing a third blue.
+- **Today's marker on this board is rose, not the accent.** Everywhere else
+  `brass` marks today. The reference circles it in red and the client asked for
+  the board exactly, so this one screen differs. It is a date marker, not a
+  status, so it does not collide with rose meaning "owing".
 - **Column width is fixed and the card is `w-fit`.** Bars are positioned by
   arithmetic over that width; letting columns stretch to fill would put every
   bar in the wrong place.
-- **Not cloned: the season band.** The reference shows "LOW SEASON" across the
-  dates. There is no season model in this schema, and a band that says nothing
-  is the disabled Language menu again. It wants a table, a Settings screen and
-  a decision about what a season changes — raise it, do not fake it.
+- **One scroller, and everything freezes against it with `sticky`.** The board
+  is a single element that scrolls both ways: the date header and the season
+  band hold their place down the page, the room-type rail holds its place
+  across, and the corner holds both. Two panes syncing their scroll positions
+  is the other way to build this and it drifts by a pixel on a trackpad; one
+  scroller cannot drift from itself. The sticky offsets are arithmetic over
+  `HEAD_H` and `SEASON_H`, so those two must be exactly as tall as declared —
+  padding them by eye opens a gap where rows show through.
+- **The season band is real, and a season changes no price.** 0044 added
+  `seasons`: a named date range per property, managed in Settings. It labels
+  the calendar and nothing else — rates stay in `rate_plan_days`, because a
+  season that quietly moved rates would be a second price list nobody could
+  see. Seasons cannot overlap (an exclusion constraint, since two bands over
+  one date has no sensible drawing) and the last day is included.
+  - A season is genuinely deleted, unlike a room, a room type or a payment
+    method. Nothing points at one, so removing it loses no history.
+  - The band's label is `sticky` inside its segment so it rides the left edge
+    of what is on screen. Do not put `overflow-hidden` on that segment: it
+    becomes the sticky containing block and pins the label, which is the bug
+    the sticky is there to avoid.
+- **Paging sits outside the scroller.** The chevrons are absolutely positioned
+  on the card, over the band. Inside the scroller they scrolled away with the
+  dates, so once you had moved right there was no way to page back.
+- **Bars carry guests and value**, like the reference's. The value is the room
+  line's own nights — rate less discount plus tax — not the folio: most of
+  those nights have not been charged yet and a future stay would show nothing.
+- **Cancelled bookings get their own row**, never the live ones, where they
+  would read as sold. `calendar_bookings()` returns them only when asked.
+- **The reference's "Holding Area" row was not cloned.** Nothing in this schema
+  matches it and guessing would put bookings somewhere arbitrary. Ask the
+  client what it holds before building it.
 
 **The house board, not a room rack.** The dashboard shows house state as a
 segmented status bar plus a clickable legend, with an on-demand room list

@@ -1823,6 +1823,41 @@ export type Database = {
           },
         ]
       }
+      seasons: {
+        Row: {
+          created_at: string
+          ends_on: string
+          id: string
+          name: string
+          property_id: string
+          starts_on: string
+        }
+        Insert: {
+          created_at?: string
+          ends_on: string
+          id?: string
+          name: string
+          property_id: string
+          starts_on: string
+        }
+        Update: {
+          created_at?: string
+          ends_on?: string
+          id?: string
+          name?: string
+          property_id?: string
+          starts_on?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "seasons_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       staff_users: {
         Row: {
           activity_seen_at: string | null
@@ -2403,18 +2438,34 @@ export type Database = {
         }[]
       }
       calendar_bookings: {
-        Args: { p_days?: number; p_from: string; p_max_per_type?: number }
+        Args: {
+          p_days?: number
+          p_from: string
+          p_include_canceled?: boolean
+          p_max_per_type?: number
+        }
         Returns: {
           booking_id: string
           booking_room_id: string
           check_in: string
           check_out: string
           guest_name: string
+          guests: number
           reference: string
           room_number: string
           room_type_id: string
           status: Database["public"]["Enums"]["booking_status"]
           type_total: number
+          value_cents: number
+        }[]
+      }
+      calendar_seasons: {
+        Args: { p_days?: number; p_from: string }
+        Returns: {
+          ends_on: string
+          id: string
+          name: string
+          starts_on: string
         }[]
       }
       can_see_drawer_total: { Args: never; Returns: boolean }
@@ -2769,6 +2820,7 @@ export type Database = {
           status: Database["public"]["Enums"]["booking_status"]
         }[]
       }
+      delete_season: { Args: { p_id: string }; Returns: undefined }
       eligible_promotions: {
         Args: {
           p_booked_on?: string
@@ -3359,6 +3411,15 @@ export type Database = {
           p_max_occupancy?: number
           p_name: string
           p_sort_order?: number
+        }
+        Returns: string
+      }
+      save_season: {
+        Args: {
+          p_ends_on: string
+          p_id?: string
+          p_name: string
+          p_starts_on: string
         }
         Returns: string
       }
