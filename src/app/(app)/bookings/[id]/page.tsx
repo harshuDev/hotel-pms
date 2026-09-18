@@ -11,7 +11,7 @@ import {
   getCurrentStaffUser,
 } from "@/lib/queries";
 
-export const metadata = { title: "The Grand Hotel — Booking" };
+export const metadata = { title: "Booking" };
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 

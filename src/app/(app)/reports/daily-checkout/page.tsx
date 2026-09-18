@@ -13,7 +13,7 @@ import {
 } from "@/lib/queries";
 import type { CheckoutRow } from "@/lib/types";
 
-export const metadata = { title: "The Grand Hotel — Daily checkout" };
+export const metadata = { title: "Daily checkout" };
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 

@@ -9,7 +9,7 @@ import {
   getMeetingRoomCalendar,
 } from "@/lib/queries";
 
-export const metadata = { title: "The Grand Hotel — Meeting rooms" };
+export const metadata = { title: "Meeting rooms" };
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;

@@ -17,7 +17,7 @@ import {
   PACE_DAYS,
 } from "@/lib/queries";
 
-export const metadata = { title: "The Grand Hotel — Dashboard" };
+export const metadata = { title: "Dashboard" };
 
 export default async function DashboardPage() {
   const today = await getBusinessDate();

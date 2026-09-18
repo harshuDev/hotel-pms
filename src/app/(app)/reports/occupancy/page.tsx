@@ -13,7 +13,7 @@ import {
   getOccupancySummary,
 } from "@/lib/queries";
 
-export const metadata = { title: "The Grand Hotel — Occupancy report" };
+export const metadata = { title: "Occupancy report" };
 
 export default async function OccupancyReportPage({
   searchParams,

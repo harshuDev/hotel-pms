@@ -8,6 +8,8 @@ import {
   getSuggestedOpeningFloat,
 } from "@/lib/queries";
 
+export const metadata = { title: "Cashier" };
+
 export default async function CashierPage() {
   const [shift, methods, payable, businessDate, suggestedFloat, canSeeExpected] =
     await Promise.all([

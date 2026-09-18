@@ -4,7 +4,7 @@ import { ReportShell } from "@/components/reports/report-shell";
 import { formatMoney } from "@/lib/money";
 import { getDebtorsReport } from "@/lib/queries";
 
-export const metadata = { title: "The Grand Hotel — Debtors report" };
+export const metadata = { title: "Debtors report" };
 
 export default async function DebtorsReportPage() {
   const rows = await getDebtorsReport();

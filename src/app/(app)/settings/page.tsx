@@ -14,7 +14,7 @@ import {
   getTaxRateSettings,
 } from "@/lib/queries";
 
-export const metadata = { title: "The Grand Hotel — Settings" };
+export const metadata = { title: "Settings" };
 
 const TABS: SettingsTab[] = [
   "property",

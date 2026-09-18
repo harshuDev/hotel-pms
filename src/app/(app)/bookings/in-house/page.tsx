@@ -2,7 +2,7 @@ import { PageHeader } from "@/components/ui";
 import { BookingList } from "@/components/bookings/booking-list";
 import { getBookings } from "@/lib/queries";
 
-export const metadata = { title: "The Grand Hotel — In house" };
+export const metadata = { title: "In house" };
 
 export default async function InHousePage() {
   // Everyone currently checked in, however long ago they arrived.

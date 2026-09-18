@@ -12,6 +12,8 @@
  * ============================================================================
  */
 
+import { cache } from "react";
+
 import { createClient } from "@/lib/supabase/server";
 import { nullableArg } from "@/lib/supabase/database";
 
@@ -92,8 +94,13 @@ import type {
  * Returns the property belonging to the authenticated staff user's property.
  *
  * RLS is responsible for restricting this query to the current property.
+ *
+ * Wrapped in cache() because the app layout and its generateMetadata both want
+ * the property name — the bar shows it, the browser tab is titled with it —
+ * and they run in the same request. Without this that is two round trips on
+ * every navigation for one row that cannot have changed between them.
  */
-export async function getProperty() {
+export const getProperty = cache(async () => {
   const supabase = await createClient();
 
   const { data, error } = await supabase
@@ -106,7 +113,7 @@ export async function getProperty() {
   }
 
   return data;
-}
+});
 
 /* -------------------------------------------------------------------------- */
 /* Staff                                                                      */
@@ -116,7 +123,7 @@ export async function getProperty() {
  * The signed-in member of staff. RLS restricts staff_users to the caller's
  * own property, and auth.uid() narrows it to the one row.
  */
-export async function getCurrentStaffUser(): Promise<StaffUser | null> {
+export const getCurrentStaffUser = cache(async (): Promise<StaffUser | null> => {
   const supabase = await createClient();
 
   const {
@@ -141,7 +148,7 @@ export async function getCurrentStaffUser(): Promise<StaffUser | null> {
     fullName: data.full_name,
     role: data.role as StaffRole,
   };
-}
+});
 
 /* -------------------------------------------------------------------------- */
 /* Business date                                                              */

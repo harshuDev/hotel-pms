@@ -10,7 +10,7 @@ import {
   getTaxRates,
 } from "@/lib/queries";
 
-export const metadata = { title: "The Grand Hotel — New booking" };
+export const metadata = { title: "New booking" };
 
 export default async function NewBookingPage() {
   const staff = await getCurrentStaffUser();

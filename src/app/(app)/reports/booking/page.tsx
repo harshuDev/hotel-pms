@@ -15,7 +15,7 @@ import {
 } from "@/lib/queries";
 import type { BookingProductionRow, ChannelProductionRow } from "@/lib/types";
 
-export const metadata = { title: "The Grand Hotel — Booking report" };
+export const metadata = { title: "Booking report" };
 
 export default async function BookingReportPage({
   searchParams,

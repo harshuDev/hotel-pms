@@ -63,6 +63,13 @@ current design, not as drift.
    - `src/lib/nav.ts` is the single source of nav sections, read by both the
      desktop bar and the mobile drawer. Add or reorder sections there, never
      inline in a component.
+   - **The browser tab title comes from the database.** Every page under
+     `src/app/(app)/` exports a bare title — `"Dashboard"`, `"Settings"` — and
+     `generateMetadata` in `(app)/layout.tsx` supplies the hotel from
+     `properties.name`, so renaming the property in Settings reaches the tab as
+     well as the bar. Do not put the hotel's name back into a page. The root
+     layout still names it once, for `/login` and the root redirect, where
+     there is no session and so no property row to read.
    - `src/components/menu.tsx` is the shared dropdown primitive — hover
      intent, click-outside, Escape, arrow keys. Inventory, Bookings, Reports
      and the user menu all use it. Do not hand-roll another one.

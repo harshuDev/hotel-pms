@@ -4,6 +4,8 @@ import { EmptyState, PageHeader, cn } from "@/components/ui";
 import { formatDue, formatMoney } from "@/lib/money";
 import { getCustomers } from "@/lib/queries";
 
+export const metadata = { title: "Customers" };
+
 const TABS = [
   { key: "all", label: "All" },
   { key: "personal", label: "Personal" },

@@ -11,7 +11,7 @@ import { reportRange } from "@/lib/reports";
 import { getBusinessDate, getCancellationReport } from "@/lib/queries";
 import type { CancellationRow } from "@/lib/types";
 
-export const metadata = { title: "The Grand Hotel — Cancellation report" };
+export const metadata = { title: "Cancellation report" };
 
 export default async function CancellationReportPage({
   searchParams,
