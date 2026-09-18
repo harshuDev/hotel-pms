@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0035` are
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0036` are
 applied to the hosted database.
 
 Working on real data: dashboard (house board, movements, pace, activity feed),
@@ -519,6 +519,26 @@ anywhere else. Collapsed height must stay constant regardless of room count.
     less it can do: one room type, one published plan, always `pending`, never
     overbooking, never ignoring a stay rule, and no parameter through which any
     of that could be asked for. It is still one transaction.
+  - **The endpoint carries its own limits, because the form cannot.** The RPC
+    is reachable with curl, so `max={12}` on an input is a suggestion to a
+    browser and nothing more. `create_public_booking()` refuses a party larger
+    than the room type's `max_occupancy`, a stay over 30 nights, an arrival
+    more than 500 days out, and a sixth unconfirmed booking on one email.
+    These guard a public endpoint; they are not the hotel's policy. A front
+    desk can still take a ninety-night booking for thirty people through
+    `create_booking()`.
+    - Before 0036, fifty adults went into a room that sleeps three and a
+      365-night stay was accepted. Both were confirmed against the endpoint,
+      not theorised.
+    - The pending cap stops an accident and a casual script, not a determined
+      abuser with a second address. Real rate limiting belongs in front of the
+      API rather than in a function, and has not been done.
+  - **Three advisor warnings on this surface are expected and must not be
+    "fixed".** `current_property_id()` and `current_role()` have to stay
+    executable by `anon`: RLS policies call them whenever `anon` touches a
+    table, and revoking would turn a clean empty result into a permission
+    error. `rls_auto_enable()` is Supabase's own event-trigger function, not
+    ours, and an event trigger cannot be usefully invoked over RPC.
   - **`rate_plans.is_public` is off by default and set by
     `set_rate_plan_public()`**, a tickbox on the Inventory screen. A Corporate
     or wholesaler rate stays invisible to strangers until somebody publishes
