@@ -290,6 +290,13 @@ export interface CalendarBar {
    * not been charged yet and a future stay would otherwise show nothing.
    */
   valueCents: number;
+  /**
+   * Whether anybody has left a note on this booking, for the bubble on the bar
+   * — the reference system's marker for a stay somebody should read up on
+   * before picking up the phone. A flag and not the note: the bar has room for
+   * an icon, and the booking screen is where a note is read.
+   */
+  hasNotes: boolean;
   /** Bookings overlapping the window for this type, before the per-type cap. */
   typeTotal: number;
 }
