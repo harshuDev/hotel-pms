@@ -1632,7 +1632,7 @@ export async function getRatePlans(): Promise<RatePlan[]> {
 
   const { data, error } = await supabase
     .from("rate_plans")
-    .select("id, code, name, description, is_default, is_active")
+    .select("id, code, name, description, is_default, is_active, is_public")
     .eq("is_active", true)
     .order("is_default", { ascending: false })
     .order("sort_order")
@@ -1650,6 +1650,7 @@ export async function getRatePlans(): Promise<RatePlan[]> {
       description: string | null;
       is_default: boolean;
       is_active: boolean;
+      is_public: boolean;
     }[]
   ).map((row) => ({
     id: row.id,
@@ -1658,6 +1659,7 @@ export async function getRatePlans(): Promise<RatePlan[]> {
     description: row.description,
     isDefault: row.is_default,
     isActive: row.is_active,
+    isPublic: row.is_public,
   }));
 }
 

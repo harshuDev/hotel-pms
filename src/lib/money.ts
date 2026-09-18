@@ -11,6 +11,30 @@ function assertMinorUnits(pence: number): void {
   }
 }
 
+/**
+ * The same figure, written the way the reader's language writes it.
+ *
+ * The staff app has one audience in one country, so formatMoney() pins en-GB
+ * and that is right. The guest booking page does not: a German guest expects
+ * "120,00 £" and a French one a space before the symbol. Only the formatting
+ * locale moves — the currency is still the property's, and the value is still
+ * integer pence, because a price is not a different price in another language.
+ */
+export function formatMoneyIn(
+  cents: number,
+  currency: string,
+  locale: string,
+): string {
+  assertMinorUnits(cents);
+
+  return new Intl.NumberFormat(locale, {
+    style: "currency",
+    currency,
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(cents / 100);
+}
+
 export function formatMoney(
   cents: number,
   currency: string = CURRENCY,

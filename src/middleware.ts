@@ -43,7 +43,13 @@ export async function updateSession(request: NextRequest) {
   // to /login would throw away the token in the URL, which is the one thing
   // the email link carries and cannot be asked for again.
   const isPublic =
-    isLoginPage || path === "/forgot-password" || path === "/reset-password";
+    isLoginPage ||
+    path === "/forgot-password" ||
+    path === "/reset-password" ||
+    // The guest booking page. A stranger has no session by definition, and
+    // sending them to /login would be sending them away from the thing the
+    // hotel published the link for.
+    path.startsWith("/book/");
 
   if (!user && !isPublic) {
     const url = request.nextUrl.clone();

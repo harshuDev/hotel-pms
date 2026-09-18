@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0033` are
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0036` are
 applied to the hosted database.
 
 Working on real data: dashboard (house board, movements, pace, activity feed),
@@ -73,13 +73,12 @@ current design, not as drift.
    - `src/components/menu.tsx` is the shared dropdown primitive — hover
      intent, click-outside, Escape, arrow keys. Inventory, Bookings, Reports
      and the user menu all use it. Do not hand-roll another one.
-   - **The user menu.** Profile, Settings, Reload data and Log out are live.
-     Two items remain disabled and are real pieces of work, not oversights:
-     **Guest booking page** (a public booking engine — no auth, its own
-     availability and payment decisions) and **Language** (i18n across 34
-     routes plus the copy that comes out of Postgres). Neither should be
-     enabled until it is built. The logo is a placeholder until the client
-     sends an asset, and search renders disabled until the lookup is built.
+   - **The user menu.** Profile, Settings, Reload data, Guest booking page and
+     Log out are live. **Language stays disabled** and is not an oversight:
+     the guest page carries all nineteen languages, and the staff app is
+     deliberately English — see the note in `src/lib/i18n/locales.ts`. The logo
+     is a placeholder until the client sends an asset, and search renders
+     disabled until the lookup is built.
 5. **No per-room grid.** See the house board note in the design system section.
 
 ## Stack
@@ -502,6 +501,61 @@ anywhere else. Collapsed height must stay constant regardless of room count.
   door. This is the button to reach for instead of teaching people to
   hard-reload, and it is why the item is labelled by its result rather than
   "Clear cache".
+- **The guest booking page is `/book/[propertyId]`, and it is the only thing
+  in this codebase that runs without a staff session.** A guest has no
+  `staff_users` row, so `current_property_id()` is null and the ordinary reads
+  see nothing. The property is therefore named in the URL and passed to four
+  `security definer` RPCs granted to `anon`: `public_property`,
+  `public_rate_plans`, `public_room_types` and `create_public_booking`. That is
+  the entire public surface — no table, no view, none of the staff functions.
+  - **`current_property_id()` was deliberately not taught about a public
+    context.** It is the root of every RLS policy in the database, so anything
+    able to set it would put cross-property access one bug away. That is why
+    the property is a parameter everywhere here instead.
+  - **`create_public_booking()` is the one sanctioned exception to "taking a
+    booking goes through `create_booking()` and nothing else".** It cannot
+    reuse it, because `create_booking()` resolves the property through
+    `current_property_id()`. What makes a second path acceptable is how much
+    less it can do: one room type, one published plan, always `pending`, never
+    overbooking, never ignoring a stay rule, and no parameter through which any
+    of that could be asked for. It is still one transaction.
+  - **The endpoint carries its own limits, because the form cannot.** The RPC
+    is reachable with curl, so `max={12}` on an input is a suggestion to a
+    browser and nothing more. `create_public_booking()` refuses a party larger
+    than the room type's `max_occupancy`, a stay over 30 nights, an arrival
+    more than 500 days out, and a sixth unconfirmed booking on one email.
+    These guard a public endpoint; they are not the hotel's policy. A front
+    desk can still take a ninety-night booking for thirty people through
+    `create_booking()`.
+    - Before 0036, fifty adults went into a room that sleeps three and a
+      365-night stay was accepted. Both were confirmed against the endpoint,
+      not theorised.
+    - The pending cap stops an accident and a casual script, not a determined
+      abuser with a second address. Real rate limiting belongs in front of the
+      API rather than in a function, and has not been done.
+  - **Three advisor warnings on this surface are expected and must not be
+    "fixed".** `current_property_id()` and `current_role()` have to stay
+    executable by `anon`: RLS policies call them whenever `anon` touches a
+    table, and revoking would turn a clean empty result into a permission
+    error. `rls_auto_enable()` is Supabase's own event-trigger function, not
+    ours, and an event trigger cannot be usefully invoked over RPC.
+  - **`rate_plans.is_public` is off by default and set by
+    `set_rate_plan_public()`**, a tickbox on the Inventory screen. A Corporate
+    or wholesaler rate stays invisible to strangers until somebody publishes
+    it. With no published plan the page is a 404, because there is nothing for
+    a guest to do there.
+  - **`stay_rule_violation_for()` holds the logic and
+    `stay_rule_violation()` is now a wrapper round it.** Two copies would drift
+    the first time a rule changed.
+  - **`properties.is_active` finally means something.** It had been honoured
+    nowhere since 0001; the public reads are the first to check it.
+  - **The guest page speaks nineteen languages and the staff app speaks
+    English.** `src/lib/i18n/` holds the locale list and a flat dictionary.
+    Guest copy is ordinary — dates, a room, a price, a name. Staff copy is
+    hotel and accounting terminology where a wrong word in a cash screen is an
+    operational risk, and that wants a translator rather than a best guess.
+    `formatMoneyIn()` in `money.ts` writes the figure the way the reader's
+    language writes it; the currency and the integer pence do not move.
 - **Creating a login is not in the application.** `staff_users.id` references
   `auth.users`, so a new member of staff needs an auth account before a row can
   point at one. Settings manages the staff who already exist — name, role, and

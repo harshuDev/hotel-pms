@@ -544,6 +544,8 @@ export interface RatePlan {
   description: string | null;
   isDefault: boolean;
   isActive: boolean;
+  /** Whether a guest with no session may see and book this plan. */
+  isPublic: boolean;
 }
 
 /** One room type on one night: price, stay rules and what is sellable. */

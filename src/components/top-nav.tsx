@@ -24,6 +24,7 @@ const TRIGGER =
   "relative flex h-14 items-center px-2.5 text-[13.5px] transition-colors";
 
 interface TopNavProps {
+  propertyId: string;
   propertyName: string;
   staffName: string;
   staffRole: StaffRole;
@@ -31,6 +32,7 @@ interface TopNavProps {
 }
 
 export function TopNav({
+  propertyId,
   propertyName,
   staffName,
   staffRole,
@@ -185,7 +187,7 @@ export function TopNav({
             </div>
             <div className="pt-1">
               <MenuItem href="/profile">Profile</MenuItem>
-              <MenuItem disabled>Guest booking page</MenuItem>
+              <MenuItem href={`/book/${propertyId}`}>Guest booking page</MenuItem>
               <MenuItem href="/settings">Settings</MenuItem>
               <MenuItem
                 onSelect={() => {
@@ -208,7 +210,8 @@ export function TopNav({
               <MenuItem onSelect={() => void signOut()}>Log out</MenuItem>
             </div>
             <p className="border-t border-line px-2.5 pb-1 pt-2 text-2xs text-ink-faint">
-              A guest booking page and other languages are not built yet.
+              The guest page is public. It shows only the rates published in
+              Inventory.
             </p>
           </Menu>
         </div>
