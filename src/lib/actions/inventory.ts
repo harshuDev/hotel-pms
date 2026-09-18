@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import type { ActionResult } from "@/lib/actions/cashier";
 import type { RpcName } from "@/lib/supabase/database";
-import type { InventoryField } from "@/lib/types";
+import type { InventoryField, MealType } from "@/lib/types";
 
 /**
  * Inventory writes.
@@ -184,4 +184,28 @@ export async function setRatePlanPublic(input: {
   // What a guest can see has changed.
   revalidatePath("/book", "layout");
   return { ok: true, data: null };
+}
+
+/**
+ * What a rate plan includes.
+ *
+ * Takes the whole set rather than one meal at a time: "this plan is half
+ * board" is one decision, and applying it as two calls leaves a moment where
+ * the plan is bed and breakfast.
+ */
+export async function setRatePlanMeals(input: {
+  ratePlanId: string;
+  meals: MealType[];
+}): Promise<ActionResult<{ count: number }>> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("set_rate_plan_meals", {
+    p_rate_plan_id: input.ratePlanId,
+    p_meals: input.meals,
+  });
+
+  if (error) return { ok: false, error: error.message };
+
+  revalidatePath("/inventory", "layout");
+  revalidatePath("/reports/meal");
+  return { ok: true, data: { count: Number(data ?? 0) } };
 }

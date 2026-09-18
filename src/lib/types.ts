@@ -546,6 +546,8 @@ export interface RatePlan {
   isActive: boolean;
   /** Whether a guest with no session may see and book this plan. */
   isPublic: boolean;
+  /** The meals this plan includes. The set is the board type. */
+  meals: MealType[];
 }
 
 /** One room type on one night: price, stay rules and what is sellable. */
@@ -842,3 +844,19 @@ export interface PaymentMethodSetting {
   /** Payments taken by this method. Non-zero freezes the kind. */
   paymentCount: number;
 }
+
+/* -------------------------------------------------------------------------- */
+/* Meals                                                                      */
+/* -------------------------------------------------------------------------- */
+
+export type MealType = "breakfast" | "lunch" | "dinner";
+
+export interface MealReportRow {
+  /** The day the meal is eaten. Breakfast is the morning after the night stayed. */
+  serviceDate: string;
+  meal: MealType;
+  adultCovers: number;
+  childCovers: number;
+  totalCovers: number;
+}
+
