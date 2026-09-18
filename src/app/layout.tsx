@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Grand Ferndale — Front Desk",
+  title: "The Grand Hotel",
   description: "Property management, bookings and cashier",
 };
 
