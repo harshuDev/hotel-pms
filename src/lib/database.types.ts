@@ -1540,18 +1540,21 @@ export type Database = {
           meal: Database["public"]["Enums"]["meal_type"]
           property_id: string
           rate_plan_id: string
+          value_cents: number | null
         }
         Insert: {
           created_at?: string
           meal: Database["public"]["Enums"]["meal_type"]
           property_id: string
           rate_plan_id: string
+          value_cents?: number | null
         }
         Update: {
           created_at?: string
           meal?: Database["public"]["Enums"]["meal_type"]
           property_id?: string
           rate_plan_id?: string
+          value_cents?: number | null
         }
         Relationships: [
           {
@@ -2516,6 +2519,8 @@ export type Database = {
         Returns: {
           closed_date: string
           next_date: string
+          no_show_fees_cents: number
+          no_shows_marked: number
           room_charges_cents: number
           room_charges_posted: number
         }[]
@@ -2742,6 +2747,7 @@ export type Database = {
           check_out: string
           customer_name: string
           days_overdue: number
+          kind: string
           outstanding_cents: number
           payments_cents: number
           reference: string
@@ -3442,6 +3448,14 @@ export type Database = {
           p_rate_plan_id: string
           p_room_type_ids: string[]
           p_to: string
+        }
+        Returns: number
+      }
+      set_rate_plan_meal_value: {
+        Args: {
+          p_meal: Database["public"]["Enums"]["meal_type"]
+          p_rate_plan_id: string
+          p_value_cents?: number
         }
         Returns: number
       }

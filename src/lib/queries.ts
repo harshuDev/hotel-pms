@@ -918,6 +918,7 @@ export async function getDebtorsReport(): Promise<DebtorRow[]> {
 
   return (
     (data ?? []) as {
+      kind: string;
       booking_id: string;
       reference: string;
       customer_name: string | null;
@@ -930,6 +931,7 @@ export async function getDebtorsReport(): Promise<DebtorRow[]> {
       days_overdue: number;
     }[]
   ).map((row) => ({
+    kind: row.kind === "meeting_room" ? "meeting_room" : "room",
     bookingId: row.booking_id,
     reference: row.reference,
     customerName: row.customer_name ?? "Unnamed guest",
@@ -1634,7 +1636,9 @@ export async function getRatePlans(): Promise<RatePlan[]> {
 
   const { data, error } = await supabase
     .from("rate_plans")
-    .select("id, code, name, description, is_default, is_active, is_public, rate_plan_meals(meal)")
+    .select(
+      "id, code, name, description, is_default, is_active, is_public, rate_plan_meals(meal, value_cents)",
+    )
     .eq("is_active", true)
     .order("is_default", { ascending: false })
     .order("sort_order")
@@ -1653,7 +1657,7 @@ export async function getRatePlans(): Promise<RatePlan[]> {
       is_default: boolean;
       is_active: boolean;
       is_public: boolean;
-      rate_plan_meals: { meal: MealType }[];
+      rate_plan_meals: { meal: MealType; value_cents: number | null }[];
     }[]
   ).map((row) => ({
     id: row.id,
@@ -1664,6 +1668,13 @@ export async function getRatePlans(): Promise<RatePlan[]> {
     isActive: row.is_active,
     isPublic: row.is_public,
     meals: (row.rate_plan_meals ?? []).map((m) => m.meal),
+    // Only the priced ones. A meal with no value is worth nothing and posts
+    // nothing, so leaving it out of the map says exactly that.
+    mealValues: Object.fromEntries(
+      (row.rate_plan_meals ?? [])
+        .filter((m) => m.value_cents !== null)
+        .map((m) => [m.meal, m.value_cents as number]),
+    ) as Partial<Record<MealType, number>>,
   }));
 }
 

@@ -19,18 +19,19 @@ export default async function DebtorsReportPage() {
         {rows.length === 0 ? (
           <EmptyState
             title="Nobody owes anything"
-            hint="Every folio with a balance would appear here."
+            hint="Every folio with a balance appears here, for room bookings and meeting rooms alike."
           />
         ) : (
           <>
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[820px] text-[13px]">
+              <table className="w-full min-w-[940px] text-[13px]">
                 <thead>
                   <tr className="border-b border-line text-left text-ink-faint">
                     {[
                       "Booking",
+                      "Kind",
                       "Status",
-                      "Departure",
+                      "Last day",
                       "Overdue",
                       "Charges",
                       "Paid",
@@ -40,7 +41,7 @@ export default async function DebtorsReportPage() {
                         key={c}
                         className={cn(
                           "whitespace-nowrap px-3 pb-2.5 text-xxs font-semibold uppercase tracking-[0.1em]",
-                          i >= 3 && "text-right",
+                          i >= 4 && "text-right",
                         )}
                       >
                         {c}
@@ -55,6 +56,18 @@ export default async function DebtorsReportPage() {
                         {r.reference}
                         <span className="block text-xxs font-normal text-ink-faint">
                           {r.customerName}
+                        </span>
+                      </td>
+                      <td className="whitespace-nowrap px-3 py-3">
+                        <span
+                          className={cn(
+                            "inline-flex rounded px-1.5 py-0.5 text-xxs font-medium ring-1 ring-inset",
+                            r.kind === "meeting_room"
+                              ? "bg-chrome-900/5 text-chrome-800 ring-chrome-800/20"
+                              : "bg-shell text-ink-muted ring-line",
+                          )}
+                        >
+                          {r.kind === "meeting_room" ? "Meeting room" : "Room"}
                         </span>
                       </td>
                       <td className="px-3 py-3">
@@ -87,7 +100,7 @@ export default async function DebtorsReportPage() {
                 </tbody>
                 <tfoot>
                   <tr className="border-t border-line-strong">
-                    <td colSpan={6} className="px-3 pt-3 text-right font-medium text-ink">
+                    <td colSpan={7} className="px-3 pt-3 text-right font-medium text-ink">
                       {rows.length} booking{rows.length === 1 ? "" : "s"} owing
                     </td>
                     <td className="tnum whitespace-nowrap px-3 pt-3 text-right font-semibold text-rose-600">
@@ -98,9 +111,12 @@ export default async function DebtorsReportPage() {
               </table>
             </div>
             <p className="mt-3 text-xs leading-relaxed text-ink-faint">
-              Overdue counts from the departure date against the business date,
-              so a guest still in house is never late. A booking with several
-              folios appears once: it is one debt to chase.
+              Overdue counts from the last day against the business date, so a
+              guest still in house is never late. For a room booking the last
+              day is the departure morning; for a meeting room it is the final
+              day the room was held, because that module is booked inclusively
+              at both ends. A booking with several folios appears once: it is
+              one debt to chase.
             </p>
           </>
         )}

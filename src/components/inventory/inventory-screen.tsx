@@ -5,11 +5,12 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { addDays, format, parseISO } from "date-fns";
 import { cn } from "@/components/ui";
-import { formatMoney, parseMoney } from "@/lib/money";
+import { formatMoney, formatMoneyInput, parseMoney } from "@/lib/money";
 import {
   applyInventory,
   createRatePlan,
   setRatePlanMeals,
+  setRatePlanMealValue,
   setRatePlanPublic,
 } from "@/lib/actions/inventory";
 import { SCREENS } from "@/components/inventory/field-spec";
@@ -172,6 +173,47 @@ export function InventoryScreen({
     { value: "dinner", label: "Dinner" },
   ];
 
+  function priceMeal(
+    plan: { id: string; name: string },
+    meal: MealType,
+    raw: string,
+  ) {
+    setMessage(null);
+    const trimmed = raw.trim();
+    let valueCents: number | null = null;
+    if (trimmed !== "") {
+      try {
+        valueCents = parseMoney(trimmed);
+      } catch {
+        setMessage({
+          ok: false,
+          text: "That is not an amount. Try 15 or 15.00, or clear it to make the meal worth nothing.",
+        });
+        return;
+      }
+    }
+    startTransition(async () => {
+      const result = await setRatePlanMealValue({
+        ratePlanId: plan.id,
+        meal,
+        valueCents,
+      });
+      if (!result.ok) {
+        setMessage({ ok: false, text: result.error });
+        return;
+      }
+      const label = MEALS.find((x) => x.value === meal)?.label ?? meal;
+      setMessage({
+        ok: true,
+        text:
+          valueCents === null
+            ? `${label} on ${plan.name} is worth nothing again, so nothing is posted for it.`
+            : `${label} on ${plan.name} is worth ${formatMoney(valueCents)}. Nights charged from the next night audit split it out as food.`,
+      });
+      router.refresh();
+    });
+  }
+
   function toggleMeal(
     plan: { id: string; name: string; meals: MealType[] },
     meal: MealType,
@@ -298,28 +340,57 @@ export function InventoryScreen({
               {selectedPlan && (
                 <div className="mt-3">
                   <span className={label}>Includes</span>
-                  <div className="flex flex-wrap gap-3">
-                    {MEALS.map((m) => (
-                      <label
-                        key={m.value}
-                        className="flex items-center gap-1.5 text-[13px] text-ink-muted"
-                      >
-                        <input
-                          type="checkbox"
-                          checked={selectedPlan.meals.includes(m.value)}
-                          disabled={pending}
-                          onChange={(e) =>
-                            toggleMeal(selectedPlan, m.value, e.target.checked)
-                          }
-                        />
-                        {m.label}
-                      </label>
-                    ))}
+                  <div className="flex flex-col gap-2">
+                    {MEALS.map((m) => {
+                      const on = selectedPlan.meals.includes(m.value);
+                      const value = selectedPlan.mealValues[m.value];
+                      return (
+                        <div key={m.value} className="flex items-center gap-2">
+                          <label className="flex w-[104px] items-center gap-1.5 text-[13px] text-ink-muted">
+                            <input
+                              type="checkbox"
+                              checked={on}
+                              disabled={pending}
+                              onChange={(e) =>
+                                toggleMeal(selectedPlan, m.value, e.target.checked)
+                              }
+                            />
+                            {m.label}
+                          </label>
+                          {on && (
+                            <input
+                              type="text"
+                              inputMode="decimal"
+                              defaultValue={
+                                value === undefined ? "" : formatMoneyInput(value)
+                              }
+                              placeholder="Worth nothing"
+                              disabled={pending}
+                              aria-label={`What ${m.label.toLowerCase()} on this rate is worth`}
+                              onBlur={(e) =>
+                                priceMeal(selectedPlan, m.value, e.target.value)
+                              }
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter") e.currentTarget.blur();
+                              }}
+                              className="tnum w-[128px] rounded-md border border-line bg-white px-2.5 py-1.5 text-[13px] text-ink outline-none transition focus:border-brass focus:ring-2 focus:ring-brass/20"
+                            />
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
                   <p className="mt-1.5 max-w-sm text-xs leading-relaxed text-ink-faint">
                     What this rate covers. The set is the board type — breakfast
                     alone is B&amp;B, breakfast and dinner is half board. It
                     feeds the Meal report and changes no price.
+                  </p>
+                  <p className="mt-1.5 max-w-sm text-xs leading-relaxed text-ink-faint">
+                    Give a meal a value and the night audit splits it out of the
+                    room charge as food, so a £120 B&amp;B night reads as
+                    accommodation plus breakfast. Leave it blank and the whole
+                    night stays accommodation, which is how every rate starts.
+                    Changing it never restates a night already charged.
                   </p>
                 </div>
               )}
