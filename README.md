@@ -1,121 +1,125 @@
-# Grand Ferndale — Property Management System
+# Hotel PMS
 
-Client-facing demo of a custom PMS with a Cashier shift feature.
+A custom property management system: front desk operations, channel-connected
+bookings, rates and availability, a cashier shift and drawer, meeting rooms,
+and twelve reports.
+
+`CLAUDE.md` at the repo root is the working document — the rules that hold
+across the codebase, the domain decisions behind them, and the ones still open.
+Read it before changing anything. This file is the short version.
 
 ## Running locally
 
 ```bash
 pnpm install
+cp .env.example .env.local     # fill in from `pnpm supabase start`
 pnpm dev
 ```
 
-Open http://localhost:3000
+Open http://localhost:3000.
 
-## What is real and what is not
-
-Everything on screen still renders from `src/lib/mock/` — a deterministic
-generator producing 140 bookings, 64 customers, 28 days of occupancy and
-revenue, and an open cashier shift. Layer 1 of the Supabase schema is now in
-`supabase/migrations/0001_core.sql`; the mock-to-live data swap is a later
-Phase 1 step.
-**This is not throwaway code.** Every page reads through
-`src/lib/mock/queries.ts`, whose functions are async and return exactly the
-shape the Supabase queries will return:
-
-| Function                 | Becomes                           |
-| ------------------------ | --------------------------------- |
-| `getArrivals(date)`      | `dashboard_arrivals(p_date)`      |
-| `getDepartures(date)`    | `dashboard_departures(p_date)`    |
-| `getOccupancyForecast()` | `occupancy_forecast(from, 28)`    |
-| `getRevenueSeries()`     | `revenue_series(from, 28)`        |
-| `getActivity()`          | paginated read of `activity_log`  |
-| `getBookings(filters)`   | paginated `booking_totals` query  |
-| `getCustomers(filters)`  | paginated `customer_stats` query  |
-| `getRooms()`             | `rooms` joined to `booking_rooms` |
-| `getHouseSummary()`      | house state aggregate             |
-| `getOpenShift()`         | open row in `cashier_shifts`      |
-
-To go live: create `src/lib/queries.ts` with the same signatures backed by
-Supabase, change the imports in the page files, delete `src/lib/mock/`.
-No component changes.
-
-Supabase schema
-
-Supabase configuration lives in `supabase/config.toml` and schema changes are
-versioned in `supabase/migrations/`. To run the database locally, install the
-[Supabase CLI](https://supabase.com/docs/guides/local-development/cli/getting-started),
-then:
+For the database:
 
 ```bash
-cp .env.example .env.local
 pnpm supabase start
-pnpm supabase db reset
+pnpm supabase db reset         # applies every migration from scratch
 pnpm supabase gen types typescript --local > src/lib/database.types.ts
 ```
 
-`business_dates` is the source of truth for a property's operating day. It is
-not derived from the server date: a partial unique index permits exactly one
-open date per property. Tenant tables carry `property_id`, use property-scoped
-RLS policies, and room status history plus activity log records are written by
-security-definer audit triggers rather than application clients.
+`supabase/seed.sql` is development data only — a property, rooms, bookings and
+folios with fixed UUIDs. `db reset` picks it up by default. Do not run it
+against a hosted database.
+
+## What is real
+
+All of it. Every read and write goes to Supabase; there is no mock layer.
+Thirty-four routes are built on real data — the dashboard, the availability
+calendar, bookings with edit and cancel, customers, all nine Inventory screens,
+promotions, meeting rooms, the cashier, check-in and check-out, the night
+audit, property settings, and twelve reports.
+
+One screen is not built: **Reports → Meal**. It needs a model of what a rate
+includes, which is the same piece of work as a "rate includes breakfast"
+promotion, and that decision is still open.
+
+## How data moves
+
+- **Reads** are Server Components calling `src/lib/queries.ts`, which is the
+  only place a page touches Supabase. Each read is a Postgres view or RPC —
+  aggregation never happens in the client. `CLAUDE.md` lists every query
+  against the function behind it.
+- **Writes** are Server Actions in `src/lib/actions/`. Each is a thin wrapper;
+  the role gates and the refusals live in Postgres, so they apply however the
+  row is written.
+- **RLS does the filtering.** Reads run with the signed-in user's session and
+  nothing bypasses it. Every tenant table carries `property_id` and a policy.
+- **Types** come from `src/lib/database.types.ts`, generated from the schema
+  and never edited. `src/lib/supabase/database.ts` is the type the clients are
+  built with and corrects one thing the generator gets wrong; the comment there
+  explains it.
+
+## Scale
+
+Assume up to ~1,800 rooms per property. No query returns every room and no
+screen renders one element per room. The dashboard shows house state as a
+segmented bar over a clickable legend with the room list behind a toggle, so
+its collapsed height is the same at 40 rooms and at 1,800. The calendar's rows
+are room types rather than rooms. The housekeeping report is a floor summary
+plus a list paged in Postgres.
+
+Meeting rooms are the one exception: a property has a handful, so a
+row-per-room calendar is correct there.
 
 ## Money
 
-All currency is integer minor units (paise). `src/lib/money.ts` is the only
-place a number becomes a string. `formatDue()` holds the display inversion
-that shows an outstanding balance as a negative — the stored value is always
-positive when the guest owes the hotel.
+Integer minor units — pence — in `bigint` columns and fields ending `_cents`.
+Never a float, never `numeric`. Tax rates are basis points (`_bps`).
+`src/lib/money.ts` is the only place a number becomes a string, and
+`formatDue()` holds the display inversion that shows an outstanding balance as
+negative; the stored value is positive when the guest owes the hotel.
 
-## Built
+`folio_items`, `payments` and `paid_outs` are append-only. A posted row is
+never updated or deleted — a correction inserts a reversing row, and every
+total sums a generated `signed_amount_cents`.
 
-**Dashboard** — the house strip (occupancy, arrivals, ADR, drawer, outstanding,
-housekeeping), the house board, today's movements, the pace chart, activity feed.
-**Bookings** — searchable, filterable, paginated.
-**Customers** — searchable, personal/company tabs.
-**Cashier** — take payment, record paid-out, blind-count close with variance.
+## Dates
 
-Everything else in the navigation is a scoped placeholder for Phase 2 or 3.
+`business_date` is the hotel operating day and `created_at` is wall-clock.
+They are different columns and never interchangeable; all operational
+reporting groups by the former. A partial unique index permits exactly one
+open business date per property, and the night audit is what advances it.
 
 ## Navigation
 
-Navigation runs horizontally across the top, matching the system the client's
-staff already work in. `src/components/top-nav.tsx` renders it; the section
-list lives in `src/lib/nav.ts` so the desktop bar and the mobile drawer never
-drift apart. Inventory, Bookings and Reports open as dropdown panels built on
-the shared primitive in `src/components/menu.tsx`, which handles hover intent,
-click-outside, Escape and arrow-key navigation in one place.
+Horizontal across the top, matching the system the client's staff already work
+in. There is no sidebar. `src/components/top-nav.tsx` renders the blue bar and
+`src/lib/nav.ts` is the single source of sections, so the desktop bar and the
+mobile drawer cannot drift apart. Inventory, Bookings and Reports open as
+dropdowns built on the shared primitive in `src/components/menu.tsx`, which
+handles hover intent, click-outside, Escape and arrow keys in one place.
 
-Below the blue bar, a slim strip carries the property name and the business
-date. The business date is the hotel operating day, not wall-clock date, and it
+Below it, a slim strip carries the property name and the business date. It
 stays visible on every screen because every decision at a front desk is made
-relative to it.
+relative to that date.
 
-## Design notes
-
-The house board reads the state of the whole property in one line: a segmented
-status bar over a clickable legend, with a searchable room list behind a
-toggle. Its collapsed height is constant whether the property has 40 rooms or
-1,800 — the client operates at the top of that range, and a per-room grid stops
-being readable long before it gets there. Clicking a legend entry isolates that
-state.
+## Design
 
 Chrome is dark blue; content sits on near-white. One accent carries the active
-nav underline, the revenue line, today's marker on the chart, and nothing else.
-Due-out rooms and pending bookings sit on a separate amber token, because they
-previously shared the accent and became indistinguishable from it. The accent
-token is still named `brass` from the earlier palette — the name is historical,
-the value is blue, and renaming it to `accent` is a safe mechanical change that
-hasn't been made yet.
+nav marker, the revenue line, today's marker and key figures — nothing else.
+The accent token is still named `brass` from an earlier palette: the name is
+historical, the value is blue, and renaming it to `accent` is a safe mechanical
+change that has not been made.
 
-Status colours stay semantic (green ready, amber due out, rose owing) because
-those carry meaning, not decoration.
+Due-out rooms and pending bookings share a separate amber token, because on the
+accent they became indistinguishable from the active nav marker. Status colours
+stay semantic — emerald ready, amber due out, rose owing, slate departed —
+because they carry meaning rather than decoration.
 
-Type is Archivo for display and numbers (a signage grotesque — door plates,
-floor markers) over Public Sans for UI text, which was drawn for dense data
-tables and holds up at 12px. All figures are tabular-lining so columns align.
+Type is Archivo for display and figures over Public Sans for UI text, which was
+drawn for dense tables and holds up at 12px. All figures are tabular-lining so
+columns align.
 
-The charts changed on purpose. Two flat sparklines were replaced by one
-timeline that stitches 28 days back to 28 days forward: solid bars are nights
+The pace chart stitches 28 days back to 28 days forward: solid bars are nights
 already sold, pale bars are rooms on the books, the accent line is revenue, and
-a dashed marker sits on today. That answers "are we ahead or behind", which
-two separate sparklines never could.
+a dashed marker sits on today. That answers "are we ahead or behind", which two
+separate sparklines never could.
