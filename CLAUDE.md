@@ -18,12 +18,26 @@ meeting rooms, property settings, the guest booking page, and thirteen reports �
 financial, extras, daily checkout, booking, reservations, cancellation,
 channel, housekeeping, in house and meal.
 
-The hosted database holds one property, one staff user, an open business date
-and seven payment methods. **It has no room types, rooms, channels, rate plans
-or tax rates yet** — but as of 0030 all of those can be created from
-`/settings` rather than by hand in SQL, and as of 0031 an individual room and
-the payment methods can be corrected there too, so the property can be set up
-and kept right from the application. Until a channel exists, no booking can be taken at all: every
+**The hosted property is set up and can take a booking.** The Grand Hotel holds
+four room types and 120 rooms — Standard Double 101–160 on floor 1, Twin
+201–230 on floor 2, Deluxe 301–320 on floor 3, Suite 401–410 on floor 4 — five
+booking sources (Direct, Walk-in, Phone, Booking.com at 15%, Expedia at 18%),
+VAT at 20% inclusive, seven payment methods, and one rate plan, Best Available,
+priced per room type from the open business date to 2027-09-18 and published to
+the guest booking page. Every row went in through the same RPCs `/settings` and
+Inventory call, as the admin staff user with RLS in force — nothing was written
+by hand.
+
+Those figures are a working configuration, not the client's own property. They
+were chosen with the client and are cheap to change in the application, with
+two exceptions that Postgres will not let anyone undo: there is no delete for a
+room, a room type or a tax rate, because bookings and folio items point at them
+under `on delete restrict`. A room that should not exist is `ooo`; a tax rate
+that should not apply is retired.
+
+As of 0030 all of this can be created from `/settings` rather than by hand in
+SQL, and as of 0031 an individual room and the payment methods can be corrected
+there too. Until a channel exists, no booking can be taken at all: every
 booking must have a source.
 
 The open business date is behind real time. The night audit advances it one
@@ -710,7 +724,10 @@ than proceeding.
 5. **Denomination counting at close.** Assumed not needed in v1.
 6. **Room scale.** The ~1,800 figure came from a passing remark in client
    feedback and has not been confirmed. It now drives the house board design
-   and two query signatures, so confirm it before writing migrations.
+   and two query signatures, so confirm it before writing migrations. The
+   hosted property is set up with 120 rooms, which is a working size and not a
+   confirmation of the ceiling — do not read it as one and do not relax a
+   query on the strength of it.
 7. **Rate model — settled.** A rate plan per room type per date, with
    restrictions layered on top: `rate_plans`, `rate_plan_days`,
    `room_type_days`. See the inventory notes above.
@@ -722,9 +739,14 @@ than proceeding.
 9. **Meeting room granularity — settled and built: whole day.** `starts_on` /
    `ends_on` as dates, exclusion constraint on an inclusive `daterange`.
    Hourly or half-day slots would be a migration plus a calendar rewrite.
-10. **Tax rate and inclusion.** `tax_rates` is empty. 20% is easy; whether the
-    property quotes VAT-inclusive or exclusive is a policy decision that
-    changes every charge by a sixth.
+10. **Tax rate and inclusion — settled: 20% inclusive.** The hosted property
+    carries one active rate, "VAT 20%", with `inclusion = 'inclusive'`, so a
+    £120 rate is £100 of room and £20 of VAT rather than £144 on the folio.
+    That is what a UK hotel selling to the public does, since consumer prices
+    have to be shown with tax in. A property selling mainly to businesses that
+    reclaim it would want exclusive instead — and that is a new rate, not an
+    edit: a rate with posted charges against it is frozen, because a folio item
+    records which rate it used.
 11. **No-show policy at night audit.** `close_business_date()` deliberately
     leaves unarrived bookings alone. Marking them no-show writes off revenue,
     so it needs saying out loud first.
