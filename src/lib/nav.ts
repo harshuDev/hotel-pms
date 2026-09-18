@@ -39,7 +39,7 @@ export const SECTIONS: NavSection[] = [
       { label: "In house", href: "/bookings/in-house" },
     ],
   },
-  { label: "Promotions", href: "/offers" },
+  { label: "Offers", href: "/offers" },
   {
     label: "Reports",
     columns: 2,

@@ -7,9 +7,9 @@ import {
   getRoomTypes,
 } from "@/lib/queries";
 
-export const metadata = { title: "Promotions" };
+export const metadata = { title: "Offers" };
 
-export default async function PromotionsPage() {
+export default async function OffersPage() {
   const [promotions, ratePlans, roomTypes, staff] = await Promise.all([
     getPromotions(),
     getRatePlans(),
@@ -20,7 +20,7 @@ export default async function PromotionsPage() {
   return (
     <div>
       <PageHeader
-        title="Promotions"
+        title="Offers"
         subtitle="What comes off a stay, and who qualifies for it"
       />
       <PromotionsScreen
