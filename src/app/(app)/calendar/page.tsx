@@ -1,6 +1,10 @@
 import { addDays, format, isValid, parseISO, subDays } from "date-fns";
 import { EmptyState, PageHeader } from "@/components/ui";
-import { CalendarBoard } from "@/components/calendar/calendar-board";
+import {
+  CalendarBoard,
+  RAIL_STEP,
+  clampRail,
+} from "@/components/calendar/calendar-board";
 import {
   CALENDAR_MAX_BARS_PER_TYPE,
   CALENDAR_NIGHTS,
@@ -33,12 +37,15 @@ function span(raw: string | undefined) {
 export default async function CalendarPage({
   searchParams,
 }: {
-  searchParams: Promise<{ from?: string; days?: string }>;
+  searchParams: Promise<{ from?: string; days?: string; rail?: string }>;
 }) {
   const sp = await searchParams;
   const businessDate = await getBusinessDate();
   const from = startDate(businessDate, sp.from);
   const days = span(sp.days);
+  // How wide the blue room column is. The + and − controls move this; they do
+  // not change the date range, which is what they were first built to do.
+  const railW = clampRail(Number(sp.rail) || 180);
 
   // Four reads, deliberately. The counts answer "can I sell tonight" and the
   // bars answer "who is in, and when"; neither is the other. Cancelled rooms
@@ -68,8 +75,8 @@ export default async function CalendarPage({
     else barsByType.set(bar.roomTypeId, [bar]);
   }
 
-  const href = (nextFrom: string, nextDays: number) =>
-    `/calendar?from=${nextFrom}&days=${nextDays}`;
+  const href = (nextFrom: string, nextDays: number, nextRail: number) =>
+    `/calendar?from=${nextFrom}&days=${nextDays}&rail=${nextRail}`;
 
   const shiftHref = (by: number) =>
     href(
@@ -80,10 +87,10 @@ export default async function CalendarPage({
         "yyyy-MM-dd",
       ),
       days,
+      railW,
     );
 
-  const spanHref = (by: number) =>
-    href(from, Math.min(MAX_DAYS, Math.max(MIN_DAYS, days + by)));
+  const railHref = (delta: number) => href(from, days, clampRail(railW + delta));
 
   const capped = [...barsByType.values()].some(
     (list) => (list[0]?.typeTotal ?? 0) > list.length,
@@ -114,11 +121,12 @@ export default async function CalendarPage({
             canceledBars={canceledBars}
             seasons={seasons}
             statusByType={statusByType}
-            jumpAction="/calendar"
             shiftHref={shiftHref}
-            spanHref={spanHref}
-            todayHref={href(businessDate, days)}
+            railHref={railHref}
+            todayHref={href(businessDate, days, railW)}
+            jumpAction="/calendar"
             days={days}
+            railW={railW}
           />
 
           <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-ink-faint">

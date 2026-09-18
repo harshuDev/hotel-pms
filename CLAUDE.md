@@ -332,6 +332,14 @@ showed the Reservation Centric calendar and asked for it by name.
   calendar was sitting. It is a plain GET form, so it needs no client
   JavaScript, and `HEAD_H` is tall enough for three rows — at two the controls
   shared a line and the "−" was pushed off the end of the rail.
+- **`+` and `−` size the rail, not the date range.** They widen and narrow the
+  blue room column, between `RAIL_MIN_W` and `RAIL_MAX_W`, so a long room type
+  name can be read in full without the dates moving underneath it. They were
+  first built to change how many days were shown, which the client corrected.
+  The width rides in `?rail=`, and every link and the jump form carry it —
+  drop it from one of them and going to a date silently resets the column.
+  `railW` is a prop rather than a constant because the chevron's offset and the
+  season label's sticky `left` are both arithmetic over it.
 - **The board keeps the availability figure**, faint at the foot of each cell,
   because that is what this screen used to be and is the only thing on it that
   answers "can I sell tonight". It sits in a reserved strip rather than behind

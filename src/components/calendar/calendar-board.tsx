@@ -28,8 +28,26 @@ import type {
  * a gap between the two where rows show through.
  */
 
-/** Width of the room-type rail, in pixels. */
-const RAIL_W = 180;
+/**
+ * Width of the room-type rail, in pixels — the default, which the + and −
+ * controls move.
+ *
+ * Those two size the rail and nothing else. They were first built to widen and
+ * narrow the date range, which was wrong: in the reference they make the blue
+ * room column bigger or smaller, so a long room type name can be read in full
+ * without the dates moving underneath it.
+ */
+const RAIL_DEFAULT_W = 180;
+/** Narrow enough to be a strip, wide enough for the longest room type name. */
+export const RAIL_MIN_W = 120;
+export const RAIL_MAX_W = 320;
+export const RAIL_STEP = 30;
+
+/** Keeps a width from a URL inside what the board can actually draw. */
+export function clampRail(width: number) {
+  if (!Number.isFinite(width)) return RAIL_DEFAULT_W;
+  return Math.min(RAIL_MAX_W, Math.max(RAIL_MIN_W, Math.round(width)));
+}
 /** Width of one date column. Wide enough for "19 Saturday" without wrapping. */
 const COL_W = 118;
 /**
@@ -274,10 +292,11 @@ export function CalendarBoard({
   seasons,
   statusByType,
   shiftHref,
-  spanHref,
+  railHref,
   todayHref,
   jumpAction,
   days,
+  railW = RAIL_DEFAULT_W,
 }: {
   dates: string[];
   businessDate: string;
@@ -293,11 +312,13 @@ export function CalendarBoard({
   seasons: CalendarSeason[];
   statusByType: Map<string, RoomTypeStatus>;
   shiftHref: (days: number) => string;
-  spanHref: (days: number) => string;
+  /** Where + and − go: they size the rail, not the date range. */
+  railHref: (delta: number) => string;
   todayHref: string;
   /** Where the date picker posts to, so any date is one step away. */
   jumpAction: string;
   days: number;
+  railW?: number;
 }) {
   const gridW = dates.length * COL_W;
   const first = parseISO(dates[0]);
@@ -320,7 +341,7 @@ export function CalendarBoard({
         href={shiftHref(-days)}
         aria-label="Earlier dates"
         className="absolute z-40 flex h-5 w-5 items-center justify-center rounded-full bg-white/90 text-ink-muted shadow-card hover:text-ink"
-        style={{ left: RAIL_W + 6, top: HEAD_H + (SEASON_H - 20) / 2 }}
+        style={{ left: railW + 6, top: HEAD_H + (SEASON_H - 20) / 2 }}
       >
         ‹
       </Link>
@@ -334,12 +355,12 @@ export function CalendarBoard({
       </Link>
       {/* One scroller. Everything else freezes against it with `sticky`. */}
       <div className="overflow-auto" style={{ maxHeight: MAX_H }}>
-        <div style={{ width: RAIL_W + gridW }}>
+        <div style={{ width: railW + gridW }}>
           {/* Date header */}
           <div className="sticky top-0 z-30 flex" style={{ height: HEAD_H }}>
             <div
               className={cn(railCell, "z-40 px-3 py-1.5")}
-              style={{ width: RAIL_W }}
+              style={{ width: railW }}
             >
               <div className="flex items-center justify-between">
                 <span className="text-xxs font-semibold uppercase tracking-[0.12em] text-white/70">
@@ -347,15 +368,17 @@ export function CalendarBoard({
                 </span>
                 <span className="flex items-center gap-1">
                   <Link
-                    href={spanHref(7)}
-                    aria-label="Show a week more"
+                    href={railHref(RAIL_STEP)}
+                    aria-label="Widen the room column"
+                    title="Widen the room column"
                     className="flex h-4 w-4 items-center justify-center rounded-sm bg-white/15 text-xs leading-none text-white hover:bg-white/30"
                   >
                     +
                   </Link>
                   <Link
-                    href={spanHref(-7)}
-                    aria-label="Show a week less"
+                    href={railHref(-RAIL_STEP)}
+                    aria-label="Narrow the room column"
+                    title="Narrow the room column"
                     className="flex h-4 w-4 items-center justify-center rounded-sm bg-white/15 text-xs leading-none text-white hover:bg-white/30"
                   >
                     −
@@ -375,6 +398,8 @@ export function CalendarBoard({
               */}
               <form action={jumpAction} method="get" className="mt-1 flex items-center gap-1">
                 <input type="hidden" name="days" value={days} />
+                {/* Carried through, or jumping to a date would reset the rail. */}
+                <input type="hidden" name="rail" value={railW} />
                 <label className="sr-only" htmlFor="jump-to">Go to date</label>
                 <input
                   id="jump-to"
@@ -435,7 +460,7 @@ export function CalendarBoard({
             className="sticky z-20 flex"
             style={{ top: HEAD_H, height: SEASON_H }}
           >
-            <div className={cn(railCell, "z-30")} style={{ width: RAIL_W }} />
+            <div className={cn(railCell, "z-30")} style={{ width: railW }} />
             <div
               className="relative border-b border-board-line bg-board"
               style={{ width: gridW }}
@@ -471,7 +496,7 @@ export function CalendarBoard({
                     */}
                     <span
                       className="sticky truncate whitespace-nowrap px-2 text-xxs font-bold uppercase tracking-[0.14em] text-white"
-                      style={{ left: RAIL_W + 28 }}
+                      style={{ left: railW + 28 }}
                     >
                       {s.name}
                     </span>
@@ -498,7 +523,7 @@ export function CalendarBoard({
               <div key={t.roomTypeId} className="flex items-stretch">
                 <div
                   className={cn(railCell, "group/rail relative px-3 py-2")}
-                  style={{ width: RAIL_W }}
+                  style={{ width: railW }}
                 >
                   {/*
                     Renaming a room type belongs in Settings, so this is a way
@@ -564,7 +589,7 @@ export function CalendarBoard({
               <div className="flex items-stretch">
                 <div
                   className={cn(railCell, "px-3 py-2")}
-                  style={{ width: RAIL_W }}
+                  style={{ width: railW }}
                 >
                   <div className="text-[12.5px] font-bold uppercase tracking-[0.06em] text-white/80">
                     Cancelled
