@@ -44,21 +44,22 @@ export default {
           wash: "#FEF7EC",
         },
 
-        // The calendar board. A warm neutral grid, matching the tape chart in
-        // the client's reference system, which they asked to be cloned.
+        // The calendar board, matching the client's reference system.
         //
-        // This is the one warm surface in a cool palette and it is deliberate:
-        // the board is a dense field of cells that a receptionist reads for
-        // minutes at a time, and `shell` behind white bars gave almost no
-        // separation. It does not touch the chrome, the accent or any status
-        // colour, so nothing about the client revision round is reverted.
-        // Use these rather than inventing a hex in the component.
+        // The first photo of that system was taken of a monitor and its warm
+        // cast made the grid read as cream; the clean screenshots show it is
+        // cool — near-white cells, blue-grey rules, a slate season band. These
+        // are those. The rail is `chrome`, not a token here, so the board's
+        // left column matches this app's own nav rather than introducing a
+        // third blue.
         board: {
-          DEFAULT: "#F3EEE2",
-          head: "#FBF9F4",
-          line: "#E4DBCB",
-          today: "#EDE4D0",
-          bar: "#FFFFFF",
+          DEFAULT: "#FBFCFE",
+          line: "#DCE3EC",
+          // Today's column, and days already behind the business date.
+          today: "#EAF2FD",
+          past: "#EDF0F4",
+          // The season band across the top of the grid.
+          season: "#6B7785",
         },
 
         // Legacy tokens kept so existing pages compile unchanged

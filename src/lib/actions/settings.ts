@@ -291,6 +291,73 @@ export async function saveTaxRate(input: {
  * member of staff needs an auth account before a row can point at one, and
  * that is an invite flow with its own decisions about who may send one.
  */
+/**
+ * A season: a named date range that labels the calendar.
+ *
+ * It changes no price. Pricing is `rate_plan_days` and stays there — a season
+ * that quietly moved rates would be a second price list nobody could see.
+ *
+ * Seasons may not overlap, which Postgres enforces with an exclusion
+ * constraint rather than this action: two bands over one date has no sensible
+ * drawing, and the rule belongs where every writer meets it.
+ */
+export async function saveSeason(input: {
+  id: string | null;
+  name: string;
+  startsOn: string;
+  endsOn: string;
+}): Promise<ActionResult<{ id: string }>> {
+  if (input.name.trim() === "") {
+    return { ok: false, error: "A season needs a name." };
+  }
+  if (!input.startsOn || !input.endsOn) {
+    return { ok: false, error: "A season needs a first and a last day." };
+  }
+  if (input.endsOn < input.startsOn) {
+    return { ok: false, error: "A season cannot end before it starts." };
+  }
+
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("save_season", {
+    p_name: input.name,
+    p_starts_on: input.startsOn,
+    p_ends_on: input.endsOn,
+    p_id: input.id,
+  });
+
+  if (error) {
+    // The exclusion constraint is the likely refusal, and its raw text names a
+    // constraint rather than the thing the manager did.
+    if (error.message.includes("seasons_no_overlap")) {
+      return {
+        ok: false,
+        error: "Those dates overlap a season that already exists. Seasons cannot overlap.",
+      };
+    }
+    return { ok: false, error: error.message };
+  }
+
+  revalidateSettings();
+  revalidatePath("/calendar");
+  return { ok: true, data: { id: data as string } };
+}
+
+/**
+ * Unlike a room, a room type or a tax rate, a season really is deleted.
+ * Nothing points at one — it is a label over dates — so removing it loses no
+ * history and there is nothing to retire it from.
+ */
+export async function deleteSeason(id: string): Promise<ActionResult<null>> {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("delete_season", { p_id: id });
+
+  if (error) return { ok: false, error: error.message };
+
+  revalidateSettings();
+  revalidatePath("/calendar");
+  return { ok: true, data: null };
+}
+
 export async function saveStaffUser(input: {
   id: string;
   fullName: string;

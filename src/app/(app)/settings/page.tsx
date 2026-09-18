@@ -10,6 +10,7 @@ import {
   getPropertySettings,
   getRoomsForSettings,
   getRoomTypeSettings,
+  getSeasonSettings,
   getStaffSettings,
   getTaxRateSettings,
 } from "@/lib/queries";
@@ -22,6 +23,7 @@ const TABS: SettingsTab[] = [
   "rooms",
   "channels",
   "tax",
+  "seasons",
   "payment-methods",
   "staff",
 ];
@@ -46,6 +48,7 @@ export default async function SettingsPage({
     rooms,
     channels,
     taxRates,
+    seasons,
     paymentMethods,
     staff,
     me,
@@ -55,6 +58,7 @@ export default async function SettingsPage({
     getRoomsForSettings({ q: roomQuery, page: roomPage }),
     getChannelSettings(),
     getTaxRateSettings(),
+    getSeasonSettings(),
     getPaymentMethodSettings(),
     getStaffSettings(),
     getCurrentStaffUser(),
@@ -74,6 +78,7 @@ export default async function SettingsPage({
         roomQuery={roomQuery}
         channels={channels}
         taxRates={taxRates}
+        seasons={seasons}
         paymentMethods={paymentMethods}
         staff={staff}
         meId={me?.id ?? null}

@@ -7,6 +7,7 @@ import {
   getBusinessDate,
   getCalendarAvailability,
   getCalendarBookings,
+  getCalendarSeasons,
 } from "@/lib/queries";
 
 export const metadata = { title: "Calendar" };
@@ -38,11 +39,15 @@ export default async function CalendarPage({
   const from = startDate(businessDate, sp.from);
   const days = span(sp.days);
 
-  // Two reads, deliberately: the counts answer "can I sell tonight", the bars
-  // answer "who is in, and when". Neither is the other.
-  const [cells, bars] = await Promise.all([
+  // Four reads, deliberately. The counts answer "can I sell tonight" and the
+  // bars answer "who is in, and when"; neither is the other. Cancelled rooms
+  // come back separately because they belong in their own row, not among the
+  // live ones where they would read as sold.
+  const [cells, bars, canceledBars, seasons] = await Promise.all([
     getCalendarAvailability(from, days),
     getCalendarBookings(from, days, CALENDAR_MAX_BARS_PER_TYPE),
+    getCalendarBookings(from, days, CALENDAR_MAX_BARS_PER_TYPE, true),
+    getCalendarSeasons(from, days),
   ]);
 
   const dates = Array.from({ length: days }, (_, i) =>
@@ -101,6 +106,8 @@ export default async function CalendarPage({
             types={types}
             cellAt={cellAt}
             barsByType={barsByType}
+            canceledBars={canceledBars}
+            seasons={seasons}
             shiftHref={shiftHref}
             spanHref={spanHref}
             todayHref={href(businessDate, days)}
@@ -118,8 +125,9 @@ export default async function CalendarPage({
               <span className="h-2 w-2 rounded-full bg-rose-500" /> Overbooked
             </span>
             <span>
-              Bars are bookings — click one to open it. The faint figure in each
-              cell is rooms still free to sell that night.
+              Bars are bookings — click one to open it. Each shows the guests
+              and what the room line bills. The faint figure in each cell is
+              rooms still free to sell that night.
             </span>
           </div>
 
@@ -135,7 +143,8 @@ export default async function CalendarPage({
             Rows are room types, not rooms. A property can run well over a
             thousand rooms, and a row each would be unusable. A bar covers the
             nights stayed and stops at the departure morning, which is not a
-            night.
+            night. The band across the top is the season covering those dates;
+            seasons are named in Settings and change no price.
           </p>
         </>
       )}

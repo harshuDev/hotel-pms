@@ -44,6 +44,7 @@ import type {
   DebtorRow,
   AvailabilityCell,
   CalendarBar,
+  CalendarSeason,
   BookingProductionRow,
   CancellationRow,
   ChannelKind,
@@ -1701,6 +1702,8 @@ export async function getCalendarBookings(
   from: string,
   days: number = CALENDAR_NIGHTS,
   maxPerType: number = CALENDAR_MAX_BARS_PER_TYPE,
+  /** Cancelled and no-show rooms instead of live ones, for their own row. */
+  includeCanceled = false,
 ): Promise<CalendarBar[]> {
   const supabase = await createClient();
 
@@ -1708,6 +1711,7 @@ export async function getCalendarBookings(
     p_from: from,
     p_days: days,
     p_max_per_type: maxPerType,
+    p_include_canceled: includeCanceled,
   });
 
   if (error) {
@@ -1725,6 +1729,8 @@ export async function getCalendarBookings(
       room_number: string | null;
       check_in: string;
       check_out: string;
+      guests: number;
+      value_cents: number;
       type_total: number;
     }[]
   ).map((row) => ({
@@ -1737,7 +1743,63 @@ export async function getCalendarBookings(
     roomNumber: row.room_number,
     checkIn: row.check_in,
     checkOut: row.check_out,
+    guests: row.guests,
+    valueCents: row.value_cents,
     typeTotal: row.type_total,
+  }));
+}
+
+/** Every season on the property, for the Settings screen. */
+export async function getSeasonSettings(): Promise<CalendarSeason[]> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("seasons")
+    .select("id, name, starts_on, ends_on")
+    .order("starts_on");
+
+  if (error) {
+    throw new Error(`Failed to load the seasons: ${error.message}`);
+  }
+
+  return (
+    (data ?? []) as { id: string; name: string; starts_on: string; ends_on: string }[]
+  ).map((row) => ({
+    id: row.id,
+    name: row.name,
+    startsOn: row.starts_on,
+    endsOn: row.ends_on,
+  }));
+}
+
+/** The seasons touching a calendar window. They label the board, nothing more. */
+export async function getCalendarSeasons(
+  from: string,
+  days: number = CALENDAR_NIGHTS,
+): Promise<CalendarSeason[]> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase.rpc("calendar_seasons", {
+    p_from: from,
+    p_days: days,
+  });
+
+  if (error) {
+    throw new Error(`Failed to load the seasons: ${error.message}`);
+  }
+
+  return (
+    (data ?? []) as {
+      id: string;
+      name: string;
+      starts_on: string;
+      ends_on: string;
+    }[]
+  ).map((row) => ({
+    id: row.id,
+    name: row.name,
+    startsOn: row.starts_on,
+    endsOn: row.ends_on,
   }));
 }
 

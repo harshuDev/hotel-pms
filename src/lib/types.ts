@@ -282,8 +282,25 @@ export interface CalendarBar {
   checkIn: string;
   /** The morning they leave, and not a night stayed. */
   checkOut: string;
+  /** Adults plus children on this room line. */
+  guests: number;
+  /**
+   * What this room line will bill if nothing changes — its nights, rate less
+   * discount plus tax. Read from the nights, not the folio: most of them have
+   * not been charged yet and a future stay would otherwise show nothing.
+   */
+  valueCents: number;
   /** Bookings overlapping the window for this type, before the per-type cap. */
   typeTotal: number;
+}
+
+/** A named date range labelling the calendar. It changes no price. */
+export interface CalendarSeason {
+  id: string;
+  name: string;
+  startsOn: string;
+  /** Inclusive: a season runs to the end of this day. */
+  endsOn: string;
 }
 
 /** What a debt is owed against. The debtors report returns both. */
