@@ -35,12 +35,14 @@ function isTab(value: string | undefined): value is SettingsTab {
 export default async function SettingsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ tab?: string; q?: string; page?: string }>;
+  searchParams: Promise<{ tab?: string; q?: string; page?: string; edit?: string }>;
 }) {
   const sp = await searchParams;
   const tab = isTab(sp.tab) ? sp.tab : "property";
   const roomQuery = sp.q?.trim() ?? "";
   const roomPage = Math.max(1, Number(sp.page) || 1);
+  // The calendar rail links here with a room type to rename.
+  const editRoomTypeId = sp.edit?.trim() || null;
 
   const [
     property,
@@ -79,6 +81,7 @@ export default async function SettingsPage({
         channels={channels}
         taxRates={taxRates}
         seasons={seasons}
+        editRoomTypeId={editRoomTypeId}
         paymentMethods={paymentMethods}
         staff={staff}
         meId={me?.id ?? null}

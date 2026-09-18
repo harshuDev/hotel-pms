@@ -45,6 +45,7 @@ import type {
   AvailabilityCell,
   CalendarBar,
   CalendarSeason,
+  RoomTypeStatus,
   BookingProductionRow,
   CancellationRow,
   ChannelKind,
@@ -1746,6 +1747,40 @@ export async function getCalendarBookings(
     guests: row.guests,
     valueCents: row.value_cents,
     typeTotal: row.type_total,
+  }));
+}
+
+/**
+ * Housekeeping state per room type, for the dot on the calendar rail.
+ *
+ * The dot used to repeat availability, which every cell on that row already
+ * shows. It reports what needs cleaning instead.
+ */
+export async function getRoomStatusByType(): Promise<RoomTypeStatus[]> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase.rpc("room_status_by_type");
+
+  if (error) {
+    throw new Error(`Failed to load the room status: ${error.message}`);
+  }
+
+  return (
+    (data ?? []) as {
+      room_type_id: string;
+      total_rooms: number;
+      vacant_clean: number;
+      vacant_dirty: number;
+      occupied: number;
+      out_of_order: number;
+    }[]
+  ).map((row) => ({
+    roomTypeId: row.room_type_id,
+    totalRooms: row.total_rooms,
+    vacantClean: row.vacant_clean,
+    vacantDirty: row.vacant_dirty,
+    occupied: row.occupied,
+    outOfOrder: row.out_of_order,
   }));
 }
 

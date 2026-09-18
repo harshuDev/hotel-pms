@@ -294,6 +294,21 @@ export interface CalendarBar {
   typeTotal: number;
 }
 
+/**
+ * Housekeeping state for one room type, as counts.
+ *
+ * Counts and never a room list: six integers per type is the same size at 40
+ * rooms and at 1,800, which is the ~1,800 rule the house board follows too.
+ */
+export interface RoomTypeStatus {
+  roomTypeId: string;
+  totalRooms: number;
+  vacantClean: number;
+  vacantDirty: number;
+  occupied: number;
+  outOfOrder: number;
+}
+
 /** A named date range labelling the calendar. It changes no price. */
 export interface CalendarSeason {
   id: string;

@@ -8,6 +8,7 @@ import {
   getCalendarAvailability,
   getCalendarBookings,
   getCalendarSeasons,
+  getRoomStatusByType,
 } from "@/lib/queries";
 
 export const metadata = { title: "Calendar" };
@@ -43,11 +44,14 @@ export default async function CalendarPage({
   // bars answer "who is in, and when"; neither is the other. Cancelled rooms
   // come back separately because they belong in their own row, not among the
   // live ones where they would read as sold.
-  const [cells, bars, canceledBars, seasons] = await Promise.all([
+  const [cells, bars, canceledBars, seasons, status] = await Promise.all([
     getCalendarAvailability(from, days),
     getCalendarBookings(from, days, CALENDAR_MAX_BARS_PER_TYPE),
     getCalendarBookings(from, days, CALENDAR_MAX_BARS_PER_TYPE, true),
     getCalendarSeasons(from, days),
+    // Housekeeping, for the dot on the rail. It is counts per type, not a room
+    // list, so it stays the same size at 40 rooms and at 1,800.
+    getRoomStatusByType(),
   ]);
 
   const dates = Array.from({ length: days }, (_, i) =>
@@ -55,6 +59,7 @@ export default async function CalendarPage({
   );
   const types = [...new Map(cells.map((c) => [c.roomTypeId, c])).values()];
   const cellAt = new Map(cells.map((c) => [`${c.roomTypeId}|${c.date}`, c]));
+  const statusByType = new Map(status.map((s) => [s.roomTypeId, s]));
 
   const barsByType = new Map<string, typeof bars>();
   for (const bar of bars) {
@@ -108,6 +113,8 @@ export default async function CalendarPage({
             barsByType={barsByType}
             canceledBars={canceledBars}
             seasons={seasons}
+            statusByType={statusByType}
+            jumpAction="/calendar"
             shiftHref={shiftHref}
             spanHref={spanHref}
             todayHref={href(businessDate, days)}
@@ -116,17 +123,17 @@ export default async function CalendarPage({
 
           <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-ink-faint">
             <span className="flex items-center gap-1.5">
-              <span className="h-2 w-2 rounded-full bg-emerald-500" /> Rooms free
+              <span className="h-2 w-2 rounded-full bg-emerald-400" /> Nothing to clean
             </span>
             <span className="flex items-center gap-1.5">
-              <span className="h-2 w-2 rounded-full bg-warn" /> Nothing free on a night
+              <span className="h-2 w-2 rounded-full bg-rose-500" /> Rooms waiting to be cleaned
             </span>
             <span className="flex items-center gap-1.5">
-              <span className="h-2 w-2 rounded-full bg-rose-500" /> Overbooked
+              <span className="h-2 w-2 rounded-full bg-slate-400" /> All out of order
             </span>
             <span>
-              Bars are bookings — click one to open it. Each shows the guests
-              and what the room line bills. The faint figure in each cell is
+              The dot is housekeeping — hover it for the breakdown. Bars are
+              bookings; click one to open it. The faint figure in each cell is
               rooms still free to sell that night.
             </span>
           </div>
