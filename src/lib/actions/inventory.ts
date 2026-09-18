@@ -160,3 +160,28 @@ export async function createRatePlan(input: {
   revalidatePath("/inventory", "layout");
   return { ok: true, data: { id: data as string } };
 }
+
+/**
+ * Publishing a rate to the guest booking page.
+ *
+ * Its own action rather than part of a general rate plan editor, because what
+ * it changes is who may see a price. A Corporate or wholesaler rate stays
+ * invisible to strangers until somebody deliberately does this.
+ */
+export async function setRatePlanPublic(input: {
+  ratePlanId: string;
+  isPublic: boolean;
+}): Promise<ActionResult<null>> {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("set_rate_plan_public", {
+    p_rate_plan_id: input.ratePlanId,
+    p_is_public: input.isPublic,
+  });
+
+  if (error) return { ok: false, error: error.message };
+
+  revalidatePath("/inventory", "layout");
+  // What a guest can see has changed.
+  revalidatePath("/book", "layout");
+  return { ok: true, data: null };
+}

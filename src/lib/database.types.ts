@@ -1532,6 +1532,7 @@ export type Database = {
           id: string
           is_active: boolean
           is_default: boolean
+          is_public: boolean
           name: string
           property_id: string
           sort_order: number
@@ -1544,6 +1545,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           is_default?: boolean
+          is_public?: boolean
           name: string
           property_id: string
           sort_order?: number
@@ -1556,6 +1558,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           is_default?: boolean
+          is_public?: boolean
           name?: string
           property_id?: string
           sort_order?: number
@@ -2523,6 +2526,26 @@ export type Database = {
         }
         Returns: string
       }
+      create_public_booking: {
+        Args: {
+          p_adults?: number
+          p_check_in: string
+          p_check_out: string
+          p_children?: number
+          p_email: string
+          p_first_name: string
+          p_last_name: string
+          p_notes?: string
+          p_phone?: string
+          p_property_id: string
+          p_rate_plan_id: string
+          p_room_type_id: string
+        }
+        Returns: {
+          booking_id: string
+          reference: string
+        }[]
+      }
       create_rate_plan: {
         Args: {
           p_code: string
@@ -3040,6 +3063,45 @@ export type Database = {
           stay_to: string
         }[]
       }
+      public_property: {
+        Args: { p_property_id: string }
+        Returns: {
+          check_in_time: string
+          check_out_time: string
+          currency: string
+          name: string
+          property_id: string
+          timezone: string
+        }[]
+      }
+      public_rate_plans: {
+        Args: { p_property_id: string }
+        Returns: {
+          code: string
+          description: string
+          name: string
+          rate_plan_id: string
+        }[]
+      }
+      public_room_types: {
+        Args: {
+          p_from: string
+          p_property_id: string
+          p_rate_plan_id: string
+          p_to: string
+        }
+        Returns: {
+          available: number
+          base_occupancy: number
+          code: string
+          max_occupancy: number
+          name: string
+          nights: number
+          room_type_id: string
+          total_cents: number
+          unavailable_reason: string
+        }[]
+      }
       record_cash_movement: {
         Args: {
           p_amount_cents: number
@@ -3327,6 +3389,10 @@ export type Database = {
         }
         Returns: number
       }
+      set_rate_plan_public: {
+        Args: { p_is_public: boolean; p_rate_plan_id: string }
+        Returns: boolean
+      }
       set_rates: {
         Args: {
           p_days_of_week?: number[]
@@ -3360,6 +3426,16 @@ export type Database = {
         Args: {
           p_check_in: string
           p_check_out: string
+          p_rate_plan_id: string
+          p_room_type_id: string
+        }
+        Returns: string
+      }
+      stay_rule_violation_for: {
+        Args: {
+          p_check_in: string
+          p_check_out: string
+          p_property_id: string
           p_rate_plan_id: string
           p_room_type_id: string
         }

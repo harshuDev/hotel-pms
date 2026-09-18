@@ -83,6 +83,7 @@ export default async function AppLayout({
   return (
     <div className="min-h-screen">
       <TopNav
+        propertyId={property.id}
         propertyName={property.name}
         staffName={staff.fullName}
         staffRole={staff.role}

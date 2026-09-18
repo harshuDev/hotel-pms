@@ -6,7 +6,11 @@ import { useRouter } from "next/navigation";
 import { addDays, format, parseISO } from "date-fns";
 import { cn } from "@/components/ui";
 import { formatMoney, parseMoney } from "@/lib/money";
-import { applyInventory, createRatePlan } from "@/lib/actions/inventory";
+import {
+  applyInventory,
+  createRatePlan,
+  setRatePlanPublic,
+} from "@/lib/actions/inventory";
 import { SCREENS } from "@/components/inventory/field-spec";
 import type { InventoryCell, InventoryField, RatePlan } from "@/lib/types";
 
@@ -154,6 +158,26 @@ export function InventoryScreen({
     });
   }
 
+  const selectedPlan = plans.find((p) => p.id === planId) ?? null;
+
+  function publish(plan: { id: string; name: string }, isPublic: boolean) {
+    setMessage(null);
+    startTransition(async () => {
+      const result = await setRatePlanPublic({ ratePlanId: plan.id, isPublic });
+      if (!result.ok) {
+        setMessage({ ok: false, text: result.error });
+        return;
+      }
+      setMessage({
+        ok: true,
+        text: isPublic
+          ? `${plan.name} is now on the guest booking page.`
+          : `${plan.name} is off the guest booking page.`,
+      });
+      router.refresh();
+    });
+  }
+
   function addPlan() {
     if (!newPlan) return;
     startTransition(async () => {
@@ -208,9 +232,28 @@ export function InventoryScreen({
                       {p.isDefault && (
                         <span className="ml-1.5 text-xxs opacity-70">default</span>
                       )}
+                      {p.isPublic && (
+                        <span className="ml-1.5 text-xxs opacity-70">published</span>
+                      )}
                     </Link>
                   ))}
                 </div>
+              )}
+              {selectedPlan && (
+                <label className="mt-2 flex items-start gap-2 text-xs leading-relaxed text-ink-muted">
+                  <input
+                    type="checkbox"
+                    checked={selectedPlan.isPublic}
+                    disabled={pending}
+                    onChange={(e) => publish(selectedPlan, e.target.checked)}
+                    className="mt-0.5"
+                  />
+                  <span>
+                    Sell this rate on the guest booking page. Off means a
+                    stranger never sees it — which is what a corporate or
+                    negotiated rate wants.
+                  </span>
+                </label>
               )}
             </div>
           )}
