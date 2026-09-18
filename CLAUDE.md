@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0032` are
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0033` are
 applied to the hosted database.
 
 Working on real data: dashboard (house board, movements, pace, activity feed),
@@ -73,9 +73,13 @@ current design, not as drift.
    - `src/components/menu.tsx` is the shared dropdown primitive — hover
      intent, click-outside, Escape, arrow keys. Inventory, Bookings, Reports
      and the user menu all use it. Do not hand-roll another one.
-   - The logo is a placeholder until the client sends an asset, search renders
-     disabled until the lookup is built, and the user menu items are disabled
-     until auth exists. None of these are bugs.
+   - **The user menu.** Profile, Settings, Reload data and Log out are live.
+     Two items remain disabled and are real pieces of work, not oversights:
+     **Guest booking page** (a public booking engine — no auth, its own
+     availability and payment decisions) and **Language** (i18n across 34
+     routes plus the copy that comes out of Postgres). Neither should be
+     enabled until it is built. The logo is a placeholder until the client
+     sends an asset, and search renders disabled until the lookup is built.
 5. **No per-room grid.** See the house board note in the design system section.
 
 ## Stack
@@ -479,6 +483,25 @@ anywhere else. Collapsed height must stay constant regardless of room count.
   - **Neither screen says whether an email belongs to an account.** The
     confirmation is the same either way. This is the one place the "errors say
     what happened" rule gives way, deliberately.
+- **Your own name is `save_own_profile()`, and it is the only self-service
+  write.** `save_staff_user()` is administrator-only and so is the single
+  UPDATE policy on `staff_users`, which left a receptionist unable to correct
+  their own misspelt name. Widening the policy is not the fix: RLS sees the new
+  row and not the old one, so it cannot say "the same row, but the role must
+  not change", and `for update using (id = auth.uid())` would let anyone make
+  themselves an admin. The function is `security definer` and takes one
+  parameter — the name. `role` and `is_active` are not parameters, so no call
+  can move them.
+- **Changing your own password asks for the current one first.** `updateUser`
+  does not: it trusts the session. A front desk terminal is left unlocked more
+  often than anyone admits, so `/profile` re-authenticates with
+  `signInWithPassword` before setting the new password. Somebody who has
+  genuinely forgotten theirs uses the reset flow instead.
+- **"Reload data" is `revalidatePath("/", "layout")`.** Reads are Server
+  Components, so a figure can sit behind a change made on the machine next
+  door. This is the button to reach for instead of teaching people to
+  hard-reload, and it is why the item is labelled by its result rather than
+  "Clear cache".
 - **Creating a login is not in the application.** `staff_users.id` references
   `auth.users`, so a new member of staff needs an auth account before a row can
   point at one. Settings manages the staff who already exist — name, role, and

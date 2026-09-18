@@ -1,12 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { cn } from "@/components/ui";
 import { Chevron, Menu, MenuItem } from "@/components/menu";
 import { SECTIONS, isHrefActive, isSectionActive } from "@/lib/nav";
 import { signOut } from "@/lib/actions/auth";
+import { clearCache } from "@/lib/actions/profile";
 import type { StaffRole } from "@/lib/types";
 
 const ROLE_LABEL: Record<StaffRole, string> = {
@@ -36,9 +37,11 @@ export function TopNav({
   onSearchClick,
 }: TopNavProps) {
   const pathname = usePathname();
+  const router = useRouter();
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [expanded, setExpanded] = useState<string | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     setOpenMenu(null);
@@ -181,15 +184,31 @@ export function TopNav({
               <p className="text-2xs text-ink-faint">{ROLE_LABEL[staffRole]}</p>
             </div>
             <div className="pt-1">
-              <MenuItem disabled>Profile</MenuItem>
+              <MenuItem href="/profile">Profile</MenuItem>
               <MenuItem disabled>Guest booking page</MenuItem>
               <MenuItem href="/settings">Settings</MenuItem>
-              <MenuItem disabled>Clear cache</MenuItem>
+              <MenuItem
+                onSelect={() => {
+                  if (refreshing) return;
+                  setRefreshing(true);
+                  // The menu stays open while this runs, which is the only
+                  // place there is to say it is happening — every screen this
+                  // sits over is a table that will look identical until the
+                  // new data lands. It closes once the refresh is through.
+                  void clearCache().then(() => {
+                    router.refresh();
+                    setRefreshing(false);
+                    setOpenMenu(null);
+                  });
+                }}
+              >
+                {refreshing ? "Reloading\u2026" : "Reload data"}
+              </MenuItem>
               <MenuItem disabled>Language</MenuItem>
               <MenuItem onSelect={() => void signOut()}>Log out</MenuItem>
             </div>
             <p className="border-t border-line px-2.5 pb-1 pt-2 text-2xs text-ink-faint">
-              Profile and settings arrive with Phase 2.
+              A guest booking page and other languages are not built yet.
             </p>
           </Menu>
         </div>

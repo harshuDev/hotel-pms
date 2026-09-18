@@ -3156,6 +3156,7 @@ export type Database = {
         }
         Returns: string
       }
+      save_own_profile: { Args: { p_full_name: string }; Returns: string }
       save_payment_method: {
         Args: {
           p_id?: string
