@@ -391,9 +391,13 @@ showed the Reservation Centric calendar and asked for it by name.
   `brass` marks today. The reference circles it in red and the client asked for
   the board exactly, so this one screen differs. It is a date marker, not a
   status, so it does not collide with rose meaning "owing".
-- **Column width is fixed and the card is `w-fit`.** Bars are positioned by
-  arithmetic over that width; letting columns stretch to fill would put every
-  bar in the wrong place.
+- **Column width is fixed; the card is `w-full`.** These are two different
+  elements and the distinction matters. Bars are positioned by arithmetic over
+  `COL_W`, so the GRID's width is fixed and columns must never stretch to fill
+  — that would put every bar in the wrong place. The CARD around it fills the
+  page. It used to be `w-fit`, which left a band of empty page beside the board
+  whenever the dates did not happen to fill the screen, and the client asked for
+  that space back.
 - **One scroller, and everything freezes against it with `sticky`.** The board
   is a single element that scrolls both ways: the date header and the season
   band hold their place down the page, the room-type rail holds its place
@@ -484,9 +488,12 @@ showed the Reservation Centric calendar and asked for it by name.
   `guest_notes` and `internal_notes` columns `bookings` has held since 0002 —
   a flag and not the note, because a board draws forty of these and the booking
   screen is where a note is read.
-- **The reference's "Holding Area" row was not cloned.** Nothing in this schema
-  matches it and guessing would put bookings somewhere arbitrary. Ask the
-  client what it holds before building it.
+- **The "Holding Area" row is cloned, and it holds `pending` bookings.** It
+  waited for an answer rather than being guessed at, because nothing in this
+  schema obviously matched it and putting bookings somewhere arbitrary would
+  have been worse than leaving the row out. The client settled it: it holds
+  what nobody has confirmed. See the "Two standing rows" note above for how it
+  is built.
 
 **The house board, not a room rack.** The dashboard shows house state as a
 segmented status bar plus a clickable legend, with an on-demand room list
