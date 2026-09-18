@@ -459,6 +459,13 @@ anywhere else. Collapsed height must stay constant regardless of room count.
     is the same page either way. It reads `window.location` rather than
     `useSearchParams` because the last of those lives in the fragment, which
     never reaches the server.
+  - **The session decides whether the link worked, not the exchange.** A
+    recovery token is single-use, so refreshing the reset page after it
+    succeeded gets the second exchange refused even though the first left a
+    good session behind — and React's development double-invoke does the same.
+    The page therefore checks `getSession()` after a failed exchange and only
+    reports the error when there is no session. Do not put the refusal back in
+    front of that check.
   - **`/forgot-password` and `/reset-password` are public in middleware.**
     Bouncing `/reset-password` to `/login` would throw away the token in the
     URL, which is the one thing the email carries and cannot be asked for

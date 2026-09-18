@@ -5,7 +5,11 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
-/** The shortest password Supabase will accept by default. */
+/**
+ * Stricter than GoTrue's own default of six, deliberately: these accounts reach
+ * the folio, the drawer and every report. Supabase enforces its minimum server
+ * side whatever this says, so raising it here cannot make the check weaker.
+ */
 const MIN_LENGTH = 8;
 
 type Stage =
@@ -57,42 +61,44 @@ export default function ResetPasswordPage() {
         return;
       }
 
+      let failure: string | null = null;
+
       if (code) {
         const { error } = await supabase.auth.exchangeCodeForSession(code);
-        if (!cancelled) {
-          setStage(
-            error ? { name: "invalid", reason: error.message } : { name: "ready" },
-          );
-        }
-        return;
-      }
-
-      if (tokenHash) {
+        failure = error?.message ?? null;
+      } else if (tokenHash) {
         const { error } = await supabase.auth.verifyOtp({
           type: "recovery",
           token_hash: tokenHash,
         });
-        if (!cancelled) {
-          setStage(
-            error ? { name: "invalid", reason: error.message } : { name: "ready" },
-          );
-        }
+        failure = error?.message ?? null;
+      }
+
+      if (cancelled) return;
+
+      // A failure above is not the end of it, because a recovery token is
+      // single-use: refresh this page after it worked and the second exchange
+      // is refused even though the first one left a perfectly good session
+      // behind. React's development double-invoke does the same thing. So the
+      // session is what decides, and the error only speaks if there is none.
+      //
+      // This is also the implicit-flow path, where nothing is in the query at
+      // all and the browser client has already turned the fragment into a
+      // session by the time this runs.
+      const { data } = await supabase.auth.getSession();
+      if (cancelled) return;
+
+      if (data.session) {
+        setStage({ name: "ready" });
         return;
       }
 
-      // Nothing in the URL. Either the implicit flow already turned the
-      // fragment into a session, or somebody typed the address in.
-      const { data } = await supabase.auth.getSession();
-      if (cancelled) return;
-      setStage(
-        data.session
-          ? { name: "ready" }
-          : {
-              name: "invalid",
-              reason:
-                "This page needs the link from the reset email. Ask for a new one below.",
-            },
-      );
+      setStage({
+        name: "invalid",
+        reason:
+          failure ??
+          "This page needs the link from the reset email. Ask for a new one below.",
+      });
     }
 
     void establishSession();
