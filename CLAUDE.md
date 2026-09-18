@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0030` are
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0031` are
 applied to the hosted database.
 
 Working on real data: dashboard (house board, movements, pace, activity feed),
@@ -21,8 +21,9 @@ channel, housekeeping and in house.
 The hosted database holds one property, one staff user, an open business date
 and seven payment methods. **It has no room types, rooms, channels, rate plans
 or tax rates yet** — but as of 0030 all of those can be created from
-`/settings` rather than by hand in SQL, so the property can be set up from the
-application. Until a channel exists, no booking can be taken at all: every
+`/settings` rather than by hand in SQL, and as of 0031 an individual room and
+the payment methods can be corrected there too, so the property can be set up
+and kept right from the application. Until a channel exists, no booking can be taken at all: every
 booking must have a source.
 
 The open business date is behind real time. The night audit advances it one
@@ -128,6 +129,8 @@ Each read is a Postgres view or RPC, never aggregation in the client:
 | `getChannelSettings()`              | `channels`                        |
 | `getTaxRateSettings()`              | `tax_rates`                       |
 | `getStaffSettings()`                | `staff_users`                     |
+| `getRoomsForSettings({ q, page })`  | `rooms_for_settings(...)`         |
+| `getPaymentMethodSettings()`        | `payment_methods` incl. retired   |
 
 **Two signatures carry the room-count rule.** The client operates properties
 with up to ~1,800 rooms, so no query may return every room and no screen may
@@ -275,7 +278,9 @@ anywhere else. Collapsed height must stay constant regardless of room count.
   `at_property | prepaid_to_channel | virtual_card`. Prepaid bookings must
   never appear as cash owed at the front desk.
 - `payment_methods.affects_drawer` decides whether a payment hits physical
-  cash. Cash true; card, UPI, bank transfer, OTA prepaid false.
+  cash. Cash true; card, UPI, bank transfer, OTA prepaid false. It follows from
+  the kind by check constraint and is never set independently — see the
+  settings notes below.
 - `booking_room_nights` holds one row per room per night at that night's rate.
   Occupancy, ADR, RevPAR and the revenue chart all derive from it with a
   GROUP BY. Generate these rows on booking create and modify.
@@ -380,6 +385,32 @@ anywhere else. Collapsed height must stay constant regardless of room count.
   entering those one at a time is not a thing anyone would do. A run is capped
   at 500 and refuses by name if it would collide with rooms that already exist,
   before anything is written.
+- **One room is corrected from the rooms list underneath it**, through
+  `save_room()`, which 0030 shipped and nothing called until 0031. The list is
+  `rooms_for_settings()` — searched and paged in Postgres like every other room
+  read, because the ~1,800 rule does not stop at a settings screen. It returns
+  the type and the floor; `rooms_page()` returns tonight's guest and nights
+  left, which is why they are two reads and not one.
+  - **Moving a room to another type rewrites nothing.** `booking_rooms` carries
+    its own `room_type_id`, so a reservation records the type it was sold at
+    and no booking, rate or night row moves with the room.
+  - **There is no delete**, for a room or a room type or a payment method:
+    bookings and payments point at them under `on delete restrict`. A room out
+    of service is `ooo`; a method no longer taken is `is_active = false`.
+  - Status is not settable here. It is changed where the work happens — the
+    housekeeping report and the house board.
+- **`payment_methods.affects_drawer` is not a setting.** A check constraint
+  ties it to the kind — cash touches physical cash, nothing else does — so
+  `save_payment_method()` derives it and takes no parameter for it. Offering
+  the tickbox would be offering a choice the database refuses, on the one
+  column the drawer total and every blind count are worked out from.
+  `unique (property_id, kind)` bounds the whole screen too: a property has at
+  most one method per kind, so the list is the eight kinds, each configured or
+  not, never free-form.
+- **A payment method's kind is frozen once payments exist against it.** Moving
+  a method across the cash line afterwards would restate every shift already
+  counted. Renaming and retiring stay free; the name is what the cashier picks
+  from, the kind is what the money means.
 - **`set_room_status()` is how a room is marked clean**, and housekeeping can
   call it. Until 0030 `rooms.status` was only ever set by check-in and
   check-out, so a room went dirty on departure and stayed dirty for ever — the

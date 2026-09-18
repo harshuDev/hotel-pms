@@ -3,7 +3,12 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import type { ActionResult } from "@/lib/actions/cashier";
-import type { ChannelKind, RoomStatus, StaffRole } from "@/lib/types";
+import type {
+  ChannelKind,
+  PaymentMethodKind,
+  RoomStatus,
+  StaffRole,
+} from "@/lib/types";
 
 /**
  * Setting a property up.
@@ -112,6 +117,86 @@ export async function createRooms(input: {
 
   revalidateSettings();
   return { ok: true, data: { created: Number(data ?? 0) } };
+}
+
+/**
+ * Correcting one room.
+ *
+ * createRooms() makes them in runs and nothing could touch one afterwards, so a
+ * number typed wrong, a room on the wrong type or a missing floor meant going
+ * back to SQL. Moving a room to another type is safe: booking_rooms carries its
+ * own room_type_id, so no booking, rate or night row is rewritten by the move.
+ *
+ * There is no delete. A room that reservations point at cannot be removed
+ * without taking their history with it, and a room out of service is `ooo`,
+ * which is what that status is for.
+ */
+export async function saveRoom(input: {
+  id: string | null;
+  number: string;
+  roomTypeId: string;
+  floor: number | null;
+}): Promise<ActionResult<{ id: string }>> {
+  if (input.number.trim() === "") {
+    return { ok: false, error: "A room needs a number." };
+  }
+  if (input.roomTypeId === "") {
+    return { ok: false, error: "Pick the room type this room belongs to." };
+  }
+  if (input.floor !== null && !Number.isSafeInteger(input.floor)) {
+    return { ok: false, error: "A floor is a whole number, or leave it blank." };
+  }
+
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("save_room", {
+    p_id: input.id,
+    p_number: input.number,
+    p_room_type_id: input.roomTypeId,
+    p_floor: input.floor,
+  });
+
+  if (error) return { ok: false, error: error.message };
+
+  revalidateSettings();
+  return { ok: true, data: { id: data as string } };
+}
+
+/**
+ * Payment methods.
+ *
+ * affects_drawer is not passed and is not a choice: a check constraint on the
+ * table ties it to the kind — cash touches physical cash, nothing else does —
+ * and the whole blind count rests on that being true. The kind itself is frozen
+ * by Postgres once payments exist against the method.
+ *
+ * There is no delete either. A method a payment points at cannot go without
+ * taking the payment with it, so retiring one is `isActive: false`, which every
+ * other read of the table already filters on.
+ */
+export async function savePaymentMethod(input: {
+  id: string | null;
+  name: string;
+  kind: PaymentMethodKind;
+  isActive: boolean;
+}): Promise<ActionResult<{ id: string }>> {
+  if (input.name.trim() === "") {
+    return { ok: false, error: "A payment method needs a name." };
+  }
+
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("save_payment_method", {
+    p_id: input.id,
+    p_name: input.name,
+    p_kind: input.kind,
+    p_is_active: input.isActive,
+  });
+
+  if (error) return { ok: false, error: error.message };
+
+  revalidateSettings();
+  // What the cashier may take a payment by has changed.
+  revalidatePath("/cashier");
+  return { ok: true, data: { id: data as string } };
 }
 
 /**

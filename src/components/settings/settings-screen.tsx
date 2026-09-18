@@ -7,7 +7,9 @@ import { cn } from "@/components/ui";
 import {
   createRooms,
   saveChannel,
+  savePaymentMethod,
   saveProperty,
+  saveRoom,
   saveRoomType,
   saveStaffUser,
   saveTaxRate,
@@ -15,7 +17,10 @@ import {
 import type {
   ChannelKind,
   ChannelSetting,
+  PaymentMethodKind,
+  PaymentMethodSetting,
   PropertySettings,
+  RoomSettingsPage,
   RoomTypeSetting,
   StaffRole,
   StaffSetting,
@@ -28,6 +33,7 @@ export type SettingsTab =
   | "rooms"
   | "channels"
   | "tax"
+  | "payment-methods"
   | "staff";
 
 const TABS: { id: SettingsTab; label: string }[] = [
@@ -36,6 +42,7 @@ const TABS: { id: SettingsTab; label: string }[] = [
   { id: "rooms", label: "Rooms" },
   { id: "channels", label: "Booking sources" },
   { id: "tax", label: "Tax rates" },
+  { id: "payment-methods", label: "Payment methods" },
   { id: "staff", label: "Staff" },
 ];
 
@@ -54,6 +61,29 @@ const ROLES: { value: StaffRole; label: string; note: string }[] = [
   { value: "cashier", label: "Cashier", note: "Payments and the drawer" },
   { value: "housekeeping", label: "Housekeeping", note: "Room status, and no money at all" },
 ];
+
+/**
+ * payment_methods carries `unique (property_id, kind)`, so this list is the
+ * whole space of methods a property can have — never a free-form list. A kind
+ * already taken is offered only on the method that holds it.
+ */
+const PAYMENT_KINDS: { value: PaymentMethodKind; label: string }[] = [
+  { value: "cash", label: "Cash" },
+  { value: "card", label: "Card" },
+  { value: "bank_transfer", label: "Bank transfer" },
+  { value: "upi", label: "UPI" },
+  { value: "ota_prepaid", label: "Prepaid to the channel" },
+  { value: "virtual_card", label: "Virtual card" },
+  { value: "complimentary", label: "Complimentary" },
+  { value: "other", label: "Other" },
+];
+
+const ROOM_STATUS_LABEL: Record<string, string> = {
+  vacant_clean: "Vacant, clean",
+  vacant_dirty: "Vacant, dirty",
+  occupied: "Occupied",
+  ooo: "Out of order",
+};
 
 const label =
   "mb-1 block text-xxs font-semibold uppercase tracking-[0.1em] text-ink-faint";
@@ -75,8 +105,11 @@ export function SettingsScreen({
   tab,
   property,
   roomTypes,
+  rooms,
+  roomQuery,
   channels,
   taxRates,
+  paymentMethods,
   staff,
   meId,
   canEdit,
@@ -85,8 +118,11 @@ export function SettingsScreen({
   tab: SettingsTab;
   property: PropertySettings;
   roomTypes: RoomTypeSetting[];
+  rooms: RoomSettingsPage;
+  roomQuery: string;
   channels: ChannelSetting[];
   taxRates: TaxRateSetting[];
+  paymentMethods: PaymentMethodSetting[];
   staff: StaffSetting[];
   meId: string | null;
   canEdit: boolean;
@@ -135,6 +171,31 @@ export function SettingsScreen({
     floor: "",
     prefix: "",
   });
+
+  /* -- One room ------------------------------------------------------- */
+  const [room, setRoom] = useState<{
+    id: string;
+    number: string;
+    roomTypeId: string;
+    floor: string;
+  } | null>(null);
+  const [roomSearch, setRoomSearch] = useState(roomQuery);
+
+  function goToRooms(q: string, page: number) {
+    const params = new URLSearchParams({ tab: "rooms" });
+    if (q.trim() !== "") params.set("q", q.trim());
+    if (page > 1) params.set("page", String(page));
+    router.push(`/settings?${params.toString()}`);
+  }
+
+  /* -- Payment methods ------------------------------------------------- */
+  const [pm, setPm] = useState<{
+    id: string | null;
+    name: string;
+    kind: PaymentMethodKind;
+    isActive: boolean;
+    frozen: boolean;
+  } | null>(null);
 
   /* -- Channels ------------------------------------------------------- */
   const [ch, setCh] = useState<{
@@ -436,6 +497,7 @@ export function SettingsScreen({
 
       {/* Rooms --------------------------------------------------------- */}
       {tab === "rooms" && (
+        <>
         <div className={card}>
           <h2 className="mb-4 font-display text-[15px] font-semibold tracking-tightest text-ink">
             Add rooms
@@ -509,8 +571,7 @@ export function SettingsScreen({
               {canEdit && (
                 <div className="mt-4 flex items-center justify-between gap-3">
                   <p className="text-xs text-ink-faint">
-                    Manage individual rooms — status, floor, type — from the
-                    housekeeping report and the house board.
+                    Correct a room afterwards from the list below.
                   </p>
                   <button
                     onClick={() =>
@@ -536,6 +597,217 @@ export function SettingsScreen({
             </>
           )}
         </div>
+
+        {/* The rooms themselves ---------------------------------------- */}
+        <div className={card}>
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+            <h2 className="font-display text-[15px] font-semibold tracking-tightest text-ink">
+              Rooms
+              {rooms.total > 0 && (
+                <span className="tnum ml-2 text-[13px] font-normal text-ink-faint">
+                  {rooms.total}
+                </span>
+              )}
+            </h2>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                goToRooms(roomSearch, 1);
+              }}
+              className="flex items-center gap-2"
+            >
+              <label htmlFor="room-q" className="sr-only">
+                Search rooms
+              </label>
+              <input
+                id="room-q"
+                value={roomSearch}
+                onChange={(e) => setRoomSearch(e.target.value)}
+                placeholder="Room number or type"
+                className={cn(field, "w-56")}
+              />
+              <button type="submit" className={secondary}>
+                Search
+              </button>
+              {roomQuery !== "" && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setRoomSearch("");
+                    goToRooms("", 1);
+                  }}
+                  className="text-[13px] text-ink-muted underline-offset-2 hover:text-ink hover:underline"
+                >
+                  Clear
+                </button>
+              )}
+            </form>
+          </div>
+
+          {rooms.rows.length === 0 ? (
+            <p className="py-6 text-center text-[13px] text-ink-muted">
+              {roomQuery !== ""
+                ? `No room matches \u201C${roomQuery}\u201D. Try the number on its own, or the room type.`
+                : "No rooms yet \u2014 add a run above."}
+            </p>
+          ) : (
+            <table className="w-full text-[13px]">
+              <thead>
+                <tr className="border-b border-line text-left text-ink-faint">
+                  {["Room", "Floor", "Type", "Status", ""].map((c, i) => (
+                    <th
+                      key={c || i}
+                      className="whitespace-nowrap px-3 pb-2.5 text-xxs font-semibold uppercase tracking-[0.1em]"
+                    >
+                      {c}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-line">
+                {rooms.rows.map((r) => (
+                  <tr key={r.id}>
+                    <td className="tnum px-3 py-2.5 font-medium text-ink">
+                      {r.number}
+                    </td>
+                    <td className="tnum px-3 py-2.5 text-ink-muted">
+                      {r.floor ?? "\u2014"}
+                    </td>
+                    <td className="px-3 py-2.5 text-ink">{r.roomTypeName}</td>
+                    <td className="px-3 py-2.5 text-ink-muted">
+                      {ROOM_STATUS_LABEL[r.status] ?? r.status}
+                    </td>
+                    <td className="px-3 py-2.5 text-right">
+                      {canEdit && (
+                        <button
+                          onClick={() =>
+                            setRoom({
+                              id: r.id,
+                              number: r.number,
+                              roomTypeId: r.roomTypeId,
+                              floor: r.floor === null ? "" : String(r.floor),
+                            })
+                          }
+                          className="text-ink-muted underline-offset-2 hover:text-ink hover:underline"
+                        >
+                          Edit
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+
+          {rooms.total > rooms.perPage && (
+            <div className="mt-4 flex items-center justify-between gap-3 text-[13px]">
+              <button
+                onClick={() => goToRooms(roomQuery, rooms.page - 1)}
+                disabled={rooms.page <= 1}
+                className={cn(secondary, "disabled:opacity-40")}
+              >
+                Previous
+              </button>
+              <span className="tnum text-ink-faint">
+                {(rooms.page - 1) * rooms.perPage + 1}
+                {"\u2013"}
+                {Math.min(rooms.page * rooms.perPage, rooms.total)} of {rooms.total}
+              </span>
+              <button
+                onClick={() => goToRooms(roomQuery, rooms.page + 1)}
+                disabled={rooms.page * rooms.perPage >= rooms.total}
+                className={cn(secondary, "disabled:opacity-40")}
+              >
+                Next
+              </button>
+            </div>
+          )}
+
+          <Note>
+            Paged in Postgres, because a property may hold well over a thousand
+            rooms. Status is changed where the work happens — the
+            housekeeping report and the house board — not here. A room
+            cannot be deleted: reservations point at it. Take one out of service
+            by setting it out of order.
+          </Note>
+        </div>
+
+        {room && (
+          <div className={card}>
+            <h3 className="mb-4 font-display text-[15px] font-semibold tracking-tightest text-ink">
+              Room {room.number}
+            </h3>
+            <div className="grid gap-4 sm:grid-cols-3">
+              <div>
+                <label htmlFor="room-number" className={label}>Number</label>
+                <input
+                  id="room-number"
+                  value={room.number}
+                  onChange={(e) => setRoom({ ...room, number: e.target.value })}
+                  className={cn(field, "tnum")}
+                />
+              </div>
+              <div>
+                <label htmlFor="room-type" className={label}>Room type</label>
+                <select
+                  id="room-type"
+                  value={room.roomTypeId}
+                  onChange={(e) => setRoom({ ...room, roomTypeId: e.target.value })}
+                  className={field}
+                >
+                  {roomTypes.map((t) => (
+                    <option key={t.id} value={t.id}>{t.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label htmlFor="room-floor" className={label}>Floor</label>
+                <input
+                  id="room-floor"
+                  inputMode="numeric"
+                  placeholder="Leave blank if none"
+                  value={room.floor}
+                  onChange={(e) => setRoom({ ...room, floor: e.target.value })}
+                  className={cn(field, "tnum")}
+                />
+              </div>
+            </div>
+            <Note>
+              Moving a room to another type leaves every booking alone: a
+              reservation records the type it was sold at, so nothing already
+              taken is re-priced or re-counted by the move.
+            </Note>
+            <div className="mt-4 flex gap-2">
+              <button
+                onClick={() =>
+                  run(
+                    () =>
+                      saveRoom({
+                        id: room.id,
+                        number: room.number,
+                        roomTypeId: room.roomTypeId,
+                        floor:
+                          room.floor.trim() === "" ? null : Number(room.floor),
+                      }).then((r) => {
+                        if (r.ok) setRoom(null);
+                        return r;
+                      }),
+                    "Room saved.",
+                  )
+                }
+                disabled={pending}
+                className={primary}
+              >
+                {pending ? "Saving\u2026" : "Save the room"}
+              </button>
+              <button onClick={() => setRoom(null)} className={secondary}>
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
+        </>
       )}
 
       {/* Channels ------------------------------------------------------ */}
@@ -879,6 +1151,202 @@ export function SettingsScreen({
                   className={primary}
                 >
                   Save
+                </button>
+              </div>
+            </div>
+          )}
+        </>
+      )}
+
+      {/* Payment methods ----------------------------------------------- */}
+      {tab === "payment-methods" && (
+        <>
+          <div className={card}>
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="font-display text-[15px] font-semibold tracking-tightest text-ink">
+                Payment methods
+              </h2>
+              {canEdit && paymentMethods.length < PAYMENT_KINDS.length && (
+                <button
+                  onClick={() =>
+                    setPm({
+                      id: null,
+                      name: "",
+                      kind:
+                        PAYMENT_KINDS.find(
+                          (k) => !paymentMethods.some((m) => m.kind === k.value),
+                        )?.value ?? "other",
+                      isActive: true,
+                      frozen: false,
+                    })
+                  }
+                  className={secondary}
+                >
+                  New method
+                </button>
+              )}
+            </div>
+
+            {paymentMethods.length === 0 ? (
+              <p className="rounded-md bg-warn-wash px-3 py-3 text-center text-[13px] leading-relaxed text-warn-deep">
+                None yet — so the cashier cannot take a payment at all. Add
+                at least cash and card.
+              </p>
+            ) : (
+              <table className="w-full text-[13px]">
+                <thead>
+                  <tr className="border-b border-line text-left text-ink-faint">
+                    {["Name", "Kind", "Drawer", "Taken", "", ""].map((c, i) => (
+                      <th
+                        key={c || i}
+                        className="whitespace-nowrap px-3 pb-2.5 text-xxs font-semibold uppercase tracking-[0.1em]"
+                      >
+                        {c}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-line">
+                  {paymentMethods.map((m) => (
+                    <tr key={m.id} className={cn(!m.isActive && "opacity-55")}>
+                      <td className="px-3 py-2.5 font-medium text-ink">{m.name}</td>
+                      <td className="px-3 py-2.5 text-ink-muted">
+                        {PAYMENT_KINDS.find((k) => k.value === m.kind)?.label ??
+                          m.kind}
+                      </td>
+                      <td className="px-3 py-2.5">
+                        {m.affectsDrawer ? (
+                          <span className="rounded bg-warn-wash px-1.5 py-0.5 text-xxs font-semibold uppercase tracking-[0.08em] text-warn-deep">
+                            Physical cash
+                          </span>
+                        ) : (
+                          <span className="text-ink-faint">—</span>
+                        )}
+                      </td>
+                      <td className="tnum px-3 py-2.5 text-ink-muted">
+                        {m.paymentCount === 0 ? "\u2014" : m.paymentCount}
+                      </td>
+                      <td className="px-3 py-2.5 text-xxs text-ink-faint">
+                        {m.isActive ? "" : "retired"}
+                      </td>
+                      <td className="px-3 py-2.5 text-right">
+                        {canEdit && (
+                          <button
+                            onClick={() =>
+                              setPm({
+                                id: m.id,
+                                name: m.name,
+                                kind: m.kind,
+                                isActive: m.isActive,
+                                frozen: m.paymentCount > 0,
+                              })
+                            }
+                            className="text-ink-muted underline-offset-2 hover:text-ink hover:underline"
+                          >
+                            Edit
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+            <Note>
+              Whether a method takes physical cash follows from its kind and is
+              not a separate setting: cash does, nothing else does. That one
+              column is what the drawer total and every blind count are worked
+              out from, which is also why a method&rsquo;s kind is fixed once a
+              payment has come in through it — moving it across the cash
+              line afterwards would restate every shift already counted. A
+              method cannot be deleted, because payments point at it; retiring
+              one takes it off the cashier&rsquo;s list and leaves its history
+              intact.
+            </Note>
+          </div>
+
+          {pm && (
+            <div className={card}>
+              <h3 className="mb-4 font-display text-[15px] font-semibold tracking-tightest text-ink">
+                {pm.id ? "Edit payment method" : "New payment method"}
+              </h3>
+              <div className="grid gap-4 sm:grid-cols-3">
+                <div>
+                  <label htmlFor="pm-name" className={label}>Name</label>
+                  <input
+                    id="pm-name"
+                    value={pm.name}
+                    placeholder="Card (Worldpay)"
+                    onChange={(e) => setPm({ ...pm, name: e.target.value })}
+                    className={field}
+                  />
+                </div>
+                <div>
+                  <label htmlFor="pm-kind" className={label}>Kind</label>
+                  <select
+                    id="pm-kind"
+                    value={pm.kind}
+                    disabled={pm.frozen}
+                    onChange={(e) =>
+                      setPm({ ...pm, kind: e.target.value as PaymentMethodKind })
+                    }
+                    className={cn(field, pm.frozen && "bg-shell text-ink-muted")}
+                  >
+                    {PAYMENT_KINDS.filter(
+                      (k) =>
+                        k.value === pm.kind ||
+                        !paymentMethods.some((m) => m.kind === k.value),
+                    ).map((k) => (
+                      <option key={k.value} value={k.value}>{k.label}</option>
+                    ))}
+                  </select>
+                  <p className="mt-1 text-xs text-ink-faint">
+                    {pm.frozen
+                      ? "Fixed \u2014 payments have already been taken by this method."
+                      : pm.kind === "cash"
+                        ? "Takes physical cash, so it counts towards the drawer."
+                        : "Does not touch the drawer."}
+                  </p>
+                </div>
+                <div>
+                  <label htmlFor="pm-active" className={label}>Offered</label>
+                  <select
+                    id="pm-active"
+                    value={pm.isActive ? "yes" : "no"}
+                    onChange={(e) =>
+                      setPm({ ...pm, isActive: e.target.value === "yes" })
+                    }
+                    className={field}
+                  >
+                    <option value="yes">On the cashier&rsquo;s list</option>
+                    <option value="no">Retired</option>
+                  </select>
+                </div>
+              </div>
+              <div className="mt-4 flex gap-2">
+                <button
+                  onClick={() =>
+                    run(
+                      () =>
+                        savePaymentMethod({
+                          id: pm.id,
+                          name: pm.name,
+                          kind: pm.kind,
+                          isActive: pm.isActive,
+                        }).then((r) => {
+                          if (r.ok) setPm(null);
+                          return r;
+                        }),
+                      pm.id ? "Payment method saved." : "Payment method added.",
+                    )
+                  }
+                  disabled={pending || pm.name.trim() === ""}
+                  className={primary}
+                >
+                  {pending ? "Saving\u2026" : "Save the method"}
+                </button>
+                <button onClick={() => setPm(null)} className={secondary}>
+                  Cancel
                 </button>
               </div>
             </div>
