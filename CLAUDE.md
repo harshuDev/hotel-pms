@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0031` are
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0032` are
 applied to the hosted database.
 
 Working on real data: dashboard (house board, movements, pace, activity feed),
@@ -192,6 +192,18 @@ the component.
   Supabase dashboard, never through ad-hoc SQL.
 - After any migration:
   `pnpm supabase gen types typescript --local > src/lib/database.types.ts`
+  That file is generated and never edited. It is what makes a renamed RPC
+  parameter, a misspelt function name or an enum value that does not exist a
+  compile error instead of a PostgREST failure in front of a receptionist.
+- **`src/lib/supabase/database.ts` is the type the clients actually use**, and
+  it corrects the generator in one place. A parameter with a SQL DEFAULT is
+  generated as optional (`p_id?: string`) and never as nullable, but PostgREST
+  accepts null for all of them — and null is not the same as omitting it:
+  omitting uses the SQL default, null passes NULL. The optional arguments are
+  widened to accept null so the call sites keep saying which they mean. Nothing
+  else is relaxed. A required parameter that is nonetheless nullable, which the
+  generator cannot express at all, is marked at the call site with
+  `nullableArg()` and a line saying what null means to that function.
 - Every tenant table has `property_id` and an RLS policy. A new table without a
   policy is a bug, not a TODO.
 
@@ -376,6 +388,11 @@ anywhere else. Collapsed height must stay constant regardless of room count.
   sixty-four percent off and nobody notices until the month end.
 - **A hand-priced room line gets no promotion.** Somebody has already decided
   what that room costs, and a discount on top would be a second reduction.
+- **`save_property()` refuses a missing check-in or check-out time.** The
+  columns are `not null` and every arrival and departure is timed against them,
+  so there is no blank to fall back to. Until 0032 the null went straight into
+  the UPDATE and a manager who cleared the field got the raw not-null violation
+  back.
 - **A property is set up from `/settings`, not from SQL.** Room types, rooms,
   booking sources, tax rates and the property itself are all written through
   RPCs in `src/lib/actions/settings.ts`. Settings lives in the user menu, not

@@ -13,6 +13,7 @@
  */
 
 import { createClient } from "@/lib/supabase/server";
+import { nullableArg } from "@/lib/supabase/database";
 
 import type {
   ActivityItem,
@@ -1668,7 +1669,9 @@ export async function getInventoryGrid(
   const supabase = await createClient();
 
   const { data, error } = await supabase.rpc("inventory_grid", {
-    p_rate_plan_id: ratePlanId,
+    // Null is a real argument here: it reads the grid with no plan selected,
+    // which is the room-type half — allotment and close-out — on its own.
+    p_rate_plan_id: nullableArg(ratePlanId),
     p_from: from,
     p_days: days,
   });
