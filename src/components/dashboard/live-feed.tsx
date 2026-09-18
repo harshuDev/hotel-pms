@@ -32,14 +32,14 @@ function Emphasised({ text, terms }: { text: string; terms: string[] }) {
 export function LiveFeed({ items }: { items: ActivityItem[] }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
-  // Cleared optimistically so the highlight goes at once; the server decides
+  // Marked optimistically so the highlight goes at once; the server decides
   // what is unread on the next read.
   const [read, setRead] = useState(false);
   const [error, setError] = useState("");
 
   const anyUnread = items.some((item) => item.unread);
 
-  const clear = () => {
+  const markRead = () => {
     setError("");
     startTransition(async () => {
       const result = await markActivitySeen();
@@ -57,11 +57,18 @@ export function LiveFeed({ items }: { items: ActivityItem[] }) {
       bodyClassName="overflow-y-auto"
       action={
         <button
-          onClick={clear}
+          onClick={markRead}
           disabled={pending || read || !anyUnread}
           className="text-xs text-brass hover:underline disabled:text-ink-faint disabled:no-underline"
         >
-          {pending ? "Clearing…" : read || !anyUnread ? "All read" : "Mark all read"}
+          {/*
+            "Marking…", not "Clearing…". This drops the unread highlight and
+            leaves every row where it is: the feed is the activity log, not an
+            inbox, and a room being created is a record that should not vanish
+            because somebody glanced at it. The old word promised the list
+            would empty, it did not, and the button got reported as broken.
+          */}
+          {pending ? "Marking…" : read || !anyUnread ? "All read" : "Mark all read"}
         </button>
       }
     >
