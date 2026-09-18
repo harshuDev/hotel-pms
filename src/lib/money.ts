@@ -76,6 +76,26 @@ export function formatDue(
   return formatMoney(-balanceCents, currency);
 }
 
+/**
+ * The plain editable form of an amount: "15.00" — no symbol, no grouping — for
+ * a text input whose value goes straight back to parseMoney().
+ *
+ * It lives here for the same reason every other formatter does. Doing it in a
+ * component would be a second place where a number becomes a currency string,
+ * and `cents / 100` in JSX is float arithmetic on money. This stays on
+ * integers: whole pounds and the remainder, padded.
+ */
+export function formatMoneyInput(cents: number): string {
+  assertMinorUnits(cents);
+
+  const negative = cents < 0;
+  const abs = Math.abs(cents);
+  const whole = Math.trunc(abs / 100);
+  const remainder = abs % 100;
+
+  return `${negative ? "-" : ""}${whole}.${String(remainder).padStart(2, "0")}`;
+}
+
 export function parseMoney(input: string): number {
   const cleaned = input.replace(/[^0-9.-]/g, "");
 

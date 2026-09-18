@@ -79,6 +79,18 @@ export function CloseDay({ businessDate }: { businessDate: string }) {
                         {formatMoney(done.roomChargesCents)}
                       </dd>
                     </div>
+                    <div className="flex justify-between border-b border-line pb-2">
+                      <dt className="text-ink-muted">No-shows recorded</dt>
+                      <dd className="tnum font-medium">{done.noShowsMarked}</dd>
+                    </div>
+                    {done.noShowsMarked > 0 && (
+                      <div className="flex justify-between border-b border-line pb-2">
+                        <dt className="text-ink-muted">No-show fees</dt>
+                        <dd className="tnum font-medium">
+                          {formatMoney(done.noShowFeesCents)}
+                        </dd>
+                      </div>
+                    )}
                     <div className="flex justify-between pt-1">
                       <dt className="font-medium">Business date</dt>
                       <dd className="tnum font-semibold text-brass">
@@ -103,9 +115,13 @@ export function CloseDay({ businessDate }: { businessDate: string }) {
                     reversal, never deletion.
                   </p>
                   <p className="text-xs leading-relaxed text-ink-faint">
-                    Every cashier shift must be closed first. Unarrived
-                    bookings are left alone; marking a no-show stays a
-                    decision someone makes.
+                    Any confirmed booking that should have arrived by{" "}
+                    <span className="font-medium text-ink-muted">{day}</span> and
+                    was never checked in is recorded as a no-show: its rooms go
+                    back on sale and its first night is billed. Check those
+                    guests in first if they are here. Unconfirmed bookings are
+                    left alone, and every cashier shift must be closed before
+                    this will run.
                   </p>
 
                   {error && (

@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0038` are
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0042` are
 applied to the hosted database.
 
 Working on real data: dashboard (house board, movements, pace, activity feed),
@@ -40,9 +40,11 @@ SQL, and as of 0031 an individual room and the payment methods can be corrected
 there too. Until a channel exists, no booking can be taken at all: every
 booking must have a source.
 
-The open business date is behind real time. The night audit advances it one
-day at a time and posts that night's room charges, so it is run once per day
-rather than caught up automatically.
+The night audit advances the business date one day at a time, posts that
+night's room charges and records no-shows, so it is run once per day rather
+than caught up automatically. Nothing runs it on a schedule: "Close the day"
+on the dashboard is the only caller, and it refuses while a cashier shift is
+still open on the date being closed.
 
 A client revision round has been applied on top of the original build: the
 palette moved from brass/slate to the client's white/blue/dark-blue scheme, the
@@ -392,6 +394,15 @@ anywhere else. Collapsed height must stay constant regardless of room count.
   that changed, leaving the rates on the rest alone. That is why a date change
   does not silently re-price a stay — and why extended nights arrive at zero
   and need a rate before the night audit runs.
+- **`cancel_booking()` and `close_folio()` could never run until 0039.** Both
+  assigned an enum column from a bare `CASE`, and Postgres resolves two unknown
+  literals to `text`, which does not assign to an enum. The statement could not
+  be planned, so every call raised before touching a row — the Cancel button on
+  the booking screen had never worked, and surfaced the raw Postgres message.
+  Found only because the no-show audit calls `cancel_booking()` rather than
+  releasing a booking a second way; a second copy would have worked and left
+  the button broken. **Cast at least one branch of any `CASE` assigned to an
+  enum**, or better, decide it once into a typed variable as these now do.
 - **Cancelling frees the inventory and does not write off the balance.** The
   rooms and their nights go to `canceled`, which every availability query
   excludes, and the outstanding amount is returned rather than cleared: a
@@ -590,13 +601,30 @@ anywhere else. Collapsed height must stay constant regardless of room count.
   anybody adding an enum value. `set_rate_plan_meals()` takes the whole set at
   once, because "this plan is half board" is one decision and applying it as
   two calls leaves a moment where the plan is bed and breakfast.
-- **An included meal is worth nothing, so nothing is posted.** That is a
-  decision, not an oversight, and it is why there are no value columns on
-  `rate_plan_meals`: a nullable column nobody sets would smuggle in a choice
-  that restates every historic revenue figure. Reporting F&B separately — a
-  £120 B&B night read as £105 accommodation plus £15 food — is a real
-  requirement for some hotels and would add two columns here and change how the
-  night audit posts. Raise it; do not assume it.
+- **An included meal is worth nothing until somebody prices it.**
+  `rate_plan_meals.value_cents` is nullable and null on every row, and a null
+  posts exactly as before: one accommodation line, nothing for the meal. Set a
+  value in Inventory and `post_room_charge()` splits the night into a
+  `room_charge` for the accommodation and a `food_beverage` line for the meals,
+  so a £120 B&B night reads as £105 plus £15.
+  - **The tax follows the money and the two lines always add up.** The night
+    carries one tax figure, so it is apportioned by net with integer division
+    and the remainder goes to accommodation. The pair totals exactly what the
+    single line did; no penny is invented or lost.
+  - **Nothing already posted is restated.** `folio_items` is append-only, so
+    the split begins with the next night audit and every night charged before
+    the value was set stays as it was. There is no backfill and there should
+    not be one: rewriting how a historic night was composed moves revenue
+    between buckets in months already reported.
+  - **Meals priced above the night are refused, not posted.** A rate whose
+    meals are worth more than the room is a configuration mistake, and the
+    audit says so by name rather than posting a negative accommodation line.
+  - **A stay booked before 0037 never splits**, because `booking_rooms` has no
+    `rate_plan_id` on it and nothing records what that rate included.
+  - The posting date is the night's own, while `meal_report()` dates breakfast
+    to `stay_date + 1`. Both are right and they answer different questions: the
+    folio records what the night's rate was made of, the report counts who eats
+    when. Do not "fix" one to match the other.
 - **`meal_report()` reads the booking, not the folio.** With no value there is
   no ledger row to count, and posting one anyway would put roughly 650,000
   zero-value rows a year into an append-only table to say what the booking
@@ -666,9 +694,10 @@ anywhere else. Collapsed height must stay constant regardless of room count.
 - **Everything that reads money by property and business date was unaffected**:
     the financial report, the payments report and the cashier drawer never join
     on `booking_id`. What does join on it — the debtors report, daily checkout,
-    the booking screen — keeps returning room bookings only. That is right for
-    all but debtors, which is a known gap: a meeting room debt is not chased by
-    that report.
+    the booking screen — keeps returning room bookings only. Daily checkout and
+    the booking screen are right to. **Debtors is no longer among them**: as of
+    0042 `debtors_report()` returns both kinds with a `kind` column, joining
+    meeting rooms by `folio_id` rather than by a booking that does not exist.
 - **The folio is made on the first charge and not before.** That is what makes
     `folio_id is null` mean "no money was taken" rather than "there is an empty
     folio nobody looked at". A booking with no customer cannot be charged at
@@ -707,6 +736,19 @@ pnpm supabase migration new <name>
 
 Nothing. Every route in the nav is built and on real data.
 
+## Card capture is not built
+
+There is no Stripe code in this repository and no keys in any environment. Card
+capture was scoped — capture the card at booking, charge it later — and then
+deliberately deferred rather than half-built against keys nobody has.
+
+When it is built: card details go to Stripe from the browser via Elements and a
+SetupIntent, and never touch this server or this database. What is stored is a
+token. A webhook is the one sanctioned API route, which is what the "no API
+routes except external webhooks" rule already allows for. Do not put a secret
+key in a `NEXT_PUBLIC_` variable, a client component, or anywhere the browser
+can reach.
+
 ## Open decisions — do not silently choose
 
 Assumed below. If an assumption is wrong the schema changes, so raise it rather
@@ -722,20 +764,22 @@ than proceeding.
 4. **Paid-out default.** Assumed recharged to the guest folio by default, with
    an explicit toggle for house expense.
 5. **Denomination counting at close.** Assumed not needed in v1.
-6. **Room scale.** The ~1,800 figure came from a passing remark in client
-   feedback and has not been confirmed. It now drives the house board design
-   and two query signatures, so confirm it before writing migrations. The
-   hosted property is set up with 120 rooms, which is a working size and not a
-   confirmation of the ceiling — do not read it as one and do not relax a
-   query on the strength of it.
+6. **Room scale — still open, and only the client can close it.** The ~1,800
+   figure came from a passing remark in client feedback. It drives the house
+   board design and two query signatures, so confirm it before writing
+   migrations. The hosted property is set up with 120 rooms, which is a working
+   size and not a confirmation of the ceiling — do not read it as one and do
+   not relax a query on the strength of it. Nothing in the codebase can answer
+   this and no amount of looking will: it is a question for the hotel.
 7. **Rate model — settled.** A rate plan per room type per date, with
    restrictions layered on top: `rate_plans`, `rate_plan_days`,
    `room_type_days`. See the inventory notes above.
 8. **Promotions — settled.** A discount (percentage or amount) or free nights,
    optionally behind a code, best single one wins. See the promotion notes
-   above. Still open within it: **inclusions** — "rate includes breakfast" —
-   which are a different mechanic because they post to the folio rather than
-   reducing a night, and which would also unblock the Meal report.
+   above. **Inclusions are settled too**: an inclusion is `rate_plan_meals`,
+   never a promotion kind, and as of 0041 it can carry a value that splits the
+   night between accommodation and F&B. Every value ships null, so the split is
+   off until a hotel turns it on.
 9. **Meeting room granularity — settled and built: whole day.** `starts_on` /
    `ends_on` as dates, exclusion constraint on an inclusive `daterange`.
    Hourly or half-day slots would be a migration plus a calendar rewrite.
@@ -747,9 +791,30 @@ than proceeding.
     reclaim it would want exclusive instead — and that is a new rate, not an
     edit: a rate with posted charges against it is frozen, because a folio item
     records which rate it used.
-11. **No-show policy at night audit.** `close_business_date()` deliberately
-    leaves unarrived bookings alone. Marking them no-show writes off revenue,
-    so it needs saying out loud first.
+11. **No-show policy at night audit — settled: mark and charge the first
+    night.** `close_business_date()` now sweeps every `confirmed` booking whose
+    arrival date has been reached and which nobody checked in. It calls
+    `cancel_booking(..., p_no_show => true)` — the existing release path, not a
+    second one — so the rooms and nights go to `no_show` and back on sale, and
+    it posts the arrival night as a fee on the folio.
+    - **`pending` is deliberately not swept.** The guest booking page creates
+      pending bookings; billing somebody for a stay the hotel never confirmed
+      is a mistake, not a no-show.
+    - **The fee is `miscellaneous`, not `room_charge`.** `post_charge()`
+      refuses `room_charge` outright, and rightly: a room charge belongs to a
+      night somebody occupied and is keyed to `booking_room_night_id` by a
+      unique index. Posting a no-show as room revenue would put room revenue
+      against a room nobody slept in and break the tie between the financial
+      report and the occupancy report. It lands in extras, where a fee belongs.
+    - **The amount is the arrival night exactly** — rate less discount as the
+      net and the night's own tax as the tax, summed over every room on the
+      booking. A booking with no rate loaded is marked and charged nothing,
+      because there is nothing to bill and a made-up figure is worse.
+    - **Whether a no-show fee is VATable is a question for the accountant.** It
+      currently carries the tax the night carried. If the answer is that it
+      should not, that is a change to the audit.
+    - The sweep uses `check_in <= business_date`, not `=`, so a backlog cannot
+      accumulate silently if the audit is not run for a few days.
 12. **Cancellation dating.** `bookings` has no `cancelled_at`. The cancellation
     report is therefore ranged on arrival date and shows a cancelled-on column
     read from the activity log, which is blank for any status change made
@@ -760,11 +825,23 @@ than proceeding.
     being invoiced or paid, so the figure is what is owed, never a balance. A
     real channel ledger is its own model.
 
-14. **Meeting room debts are not in the debtors report.** That report is per
-    room booking and joins `bookings`; a meeting room folio has no booking to
-    join to. The balance shows on the meeting room booking itself. Widening the
-    report means it returns two different kinds of thing, which is a reporting
-    decision rather than a bug to fix quietly.
+14. **Meeting room debts in the debtors report — settled: one list, with a
+    kind.** `debtors_report()` returns room bookings and meeting room bookings
+    together, ranked by what is owed, each row saying which it is. It is one
+    question — who owes this hotel money — and answering it in two places is
+    how a debt gets missed.
+    - Meeting rooms join by `folio_id`, because a meeting room booking has no
+      `bookings` row and must never get one.
+    - **`check_out` means different things on the two sides.** For a room
+      booking it is the departure morning and not a night stayed; for a meeting
+      room `ends_on` is a day the room was held, since that module is inclusive
+      at both ends. Overdue counts from each one's own last day, and the screen
+      says so. The column is headed "Last day" rather than "Departure".
+    - The status cast is lossless today — `meeting_room_booking_status` is
+      `(pending, confirmed, canceled)` and every label exists in
+      `booking_status`. Add one that does not and the report raises rather than
+      mislabelling a row, which is the right failure and wants an explicit
+      mapping here.
 
 15. **Inviting a new member of staff.** Creating an auth account needs either
     the Supabase dashboard or a server action holding the service-role key.

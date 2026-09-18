@@ -209,3 +209,46 @@ export async function setRatePlanMeals(input: {
   revalidatePath("/reports/meal");
   return { ok: true, data: { count: Number(data ?? 0) } };
 }
+
+/**
+ * What one included meal is worth.
+ *
+ * One meal at a time, unlike setRatePlanMeals(): "this plan is half board" and
+ * "breakfast on it is worth £15" are different decisions, and bundling them
+ * would mean re-stating the board type to re-price a breakfast.
+ *
+ * Null clears the value, which puts that meal back to being worth nothing and
+ * posting nothing. This is the shipped state of every meal.
+ *
+ * Setting a value changes how the night audit posts from the next run onward:
+ * the night's room charge splits into accommodation and food_beverage. Nothing
+ * already posted moves — folio_items is append-only — so this does not restate
+ * a figure any report has already shown.
+ */
+export async function setRatePlanMealValue(input: {
+  ratePlanId: string;
+  meal: MealType;
+  valueCents: number | null;
+}): Promise<ActionResult<null>> {
+  if (input.valueCents !== null) {
+    if (!Number.isSafeInteger(input.valueCents) || input.valueCents < 0) {
+      return { ok: false, error: "A meal cannot be worth less than nothing." };
+    }
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("set_rate_plan_meal_value", {
+    p_rate_plan_id: input.ratePlanId,
+    p_meal: input.meal,
+    p_value_cents: input.valueCents,
+  });
+
+  if (error) return { ok: false, error: error.message };
+
+  revalidatePath("/inventory", "layout");
+  revalidatePath("/reports/meal");
+  // The split reaches every revenue figure from the next night audit.
+  revalidatePath("/reports/financial");
+  revalidatePath("/reports/extras");
+  return { ok: true, data: null };
+}

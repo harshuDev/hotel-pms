@@ -263,7 +263,15 @@ export interface AvailabilityCell {
   available: number;
 }
 
+/** What a debt is owed against. The debtors report returns both. */
+export type DebtorKind = "room" | "meeting_room";
+
 export interface DebtorRow {
+  /**
+   * A meeting room booking is not a `bookings` row and never will be, so
+   * `bookingId` addresses whichever kind this is and the screen links by kind.
+   */
+  kind: DebtorKind;
   bookingId: string;
   reference: string;
   customerName: string;
@@ -548,6 +556,12 @@ export interface RatePlan {
   isPublic: boolean;
   /** The meals this plan includes. The set is the board type. */
   meals: MealType[];
+  /**
+   * What each included meal is worth, for the ones that have been priced.
+   * A meal absent from this map is worth nothing and posts nothing, which is
+   * every meal until somebody sets a figure.
+   */
+  mealValues: Partial<Record<MealType, number>>;
 }
 
 /** One room type on one night: price, stay rules and what is sellable. */
