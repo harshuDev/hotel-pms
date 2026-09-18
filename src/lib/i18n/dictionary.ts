@@ -49,6 +49,8 @@ export interface Dict {
   pickLaterDeparture: string;
   language: string;
   back: string;
+  notBookable: string;
+  notBookableHint: string;
 }
 
 const en: Dict = {
@@ -89,6 +91,8 @@ const en: Dict = {
   pickLaterDeparture: "Departure must be after arrival.",
   language: "Language",
   back: "Back",
+  notBookable: "Online booking is not open yet",
+  notBookableHint: "This hotel is not taking bookings on this page at the moment. Please contact us directly and we will be glad to help.",
 };
 
 const de: Dict = {
@@ -112,6 +116,8 @@ const de: Dict = {
   bookAnother: "Weiteres Zimmer buchen", somethingWentWrong: "Das hat nicht geklappt",
   pickLaterDeparture: "Die Abreise muss nach der Anreise liegen.",
   language: "Sprache", back: "Zurück",
+  notBookable: "Online-Buchung ist noch nicht möglich",
+  notBookableHint: "Dieses Hotel nimmt auf dieser Seite derzeit keine Buchungen entgegen. Bitte kontaktieren Sie uns direkt — wir helfen Ihnen gern.",
 };
 
 const fr: Dict = {
@@ -135,6 +141,8 @@ const fr: Dict = {
   bookAnother: "Réserver une autre chambre", somethingWentWrong: "Cela n'a pas fonctionné",
   pickLaterDeparture: "Le départ doit suivre l'arrivée.",
   language: "Langue", back: "Retour",
+  notBookable: "La réservation en ligne n'est pas encore ouverte",
+  notBookableHint: "Cet hôtel ne prend pas de réservations sur cette page pour le moment. Contactez-nous directement, nous serons ravis de vous aider.",
 };
 
 const es: Dict = {
@@ -158,6 +166,8 @@ const es: Dict = {
   bookAnother: "Reservar otra habitación", somethingWentWrong: "Eso no ha funcionado",
   pickLaterDeparture: "La salida debe ser posterior a la llegada.",
   language: "Idioma", back: "Volver",
+  notBookable: "La reserva en línea aún no está disponible",
+  notBookableHint: "Este hotel no acepta reservas en esta página por ahora. Póngase en contacto con nosotros directamente y le ayudaremos con mucho gusto.",
 };
 
 const it: Dict = {
@@ -181,6 +191,8 @@ const it: Dict = {
   bookAnother: "Prenota un'altra camera", somethingWentWrong: "Non ha funzionato",
   pickLaterDeparture: "La partenza deve essere dopo l'arrivo.",
   language: "Lingua", back: "Indietro",
+  notBookable: "La prenotazione online non è ancora attiva",
+  notBookableHint: "Al momento questo hotel non accetta prenotazioni da questa pagina. Contattaci direttamente, saremo lieti di aiutarti.",
 };
 
 const pt: Dict = {
@@ -204,6 +216,8 @@ const pt: Dict = {
   bookAnother: "Reservar outro quarto", somethingWentWrong: "Isso não resultou",
   pickLaterDeparture: "A partida tem de ser depois da chegada.",
   language: "Idioma", back: "Voltar",
+  notBookable: "A reserva online ainda não está disponível",
+  notBookableHint: "Este hotel não aceita reservas nesta página de momento. Contacte-nos diretamente e teremos todo o gosto em ajudar.",
 };
 
 const nl: Dict = {
@@ -227,6 +241,8 @@ const nl: Dict = {
   bookAnother: "Nog een kamer boeken", somethingWentWrong: "Dat is niet gelukt",
   pickLaterDeparture: "Vertrek moet na aankomst liggen.",
   language: "Taal", back: "Terug",
+  notBookable: "Online boeken is nog niet mogelijk",
+  notBookableHint: "Dit hotel neemt op deze pagina momenteel geen boekingen aan. Neem rechtstreeks contact met ons op, wij helpen u graag.",
 };
 
 const pl: Dict = {
@@ -250,6 +266,8 @@ const pl: Dict = {
   bookAnother: "Zarezerwuj kolejny pokój", somethingWentWrong: "To się nie udało",
   pickLaterDeparture: "Wyjazd musi być po przyjeździe.",
   language: "Język", back: "Wstecz",
+  notBookable: "Rezerwacja online nie jest jeszcze dostępna",
+  notBookableHint: "Ten hotel nie przyjmuje obecnie rezerwacji na tej stronie. Prosimy o bezpośredni kontakt — chętnie pomożemy.",
 };
 
 const sv: Dict = {
@@ -273,6 +291,8 @@ const sv: Dict = {
   bookAnother: "Boka ett rum till", somethingWentWrong: "Det fungerade inte",
   pickLaterDeparture: "Avresan måste vara efter ankomsten.",
   language: "Språk", back: "Tillbaka",
+  notBookable: "Onlinebokning är inte öppen än",
+  notBookableHint: "Hotellet tar för närvarande inte emot bokningar på den här sidan. Kontakta oss direkt, så hjälper vi dig gärna.",
 };
 
 const da: Dict = {
@@ -296,6 +316,8 @@ const da: Dict = {
   bookAnother: "Book et værelse mere", somethingWentWrong: "Det virkede ikke",
   pickLaterDeparture: "Afrejse skal være efter ankomst.",
   language: "Sprog", back: "Tilbage",
+  notBookable: "Onlinebooking er ikke åben endnu",
+  notBookableHint: "Dette hotel tager i øjeblikket ikke imod bookinger på denne side. Kontakt os direkte, så hjælper vi gerne.",
 };
 
 const no: Dict = {
@@ -319,6 +341,8 @@ const no: Dict = {
   bookAnother: "Bestill et rom til", somethingWentWrong: "Det fungerte ikke",
   pickLaterDeparture: "Avreise må være etter ankomst.",
   language: "Språk", back: "Tilbake",
+  notBookable: "Nettbestilling er ikke åpen ennå",
+  notBookableHint: "Dette hotellet tar foreløpig ikke imot bestillinger på denne siden. Ta kontakt med oss direkte, så hjelper vi deg gjerne.",
 };
 
 const fi: Dict = {
@@ -342,6 +366,8 @@ const fi: Dict = {
   bookAnother: "Varaa toinen huone", somethingWentWrong: "Se ei onnistunut",
   pickLaterDeparture: "Lähdön on oltava saapumisen jälkeen.",
   language: "Kieli", back: "Takaisin",
+  notBookable: "Verkkovaraus ei ole vielä avoinna",
+  notBookableHint: "Tämä hotelli ei toistaiseksi ota vastaan varauksia tältä sivulta. Ota meihin suoraan yhteyttä, autamme mielellämme.",
 };
 
 const cs: Dict = {
@@ -365,6 +391,8 @@ const cs: Dict = {
   bookAnother: "Rezervovat další pokoj", somethingWentWrong: "To se nepovedlo",
   pickLaterDeparture: "Odjezd musí být po příjezdu.",
   language: "Jazyk", back: "Zpět",
+  notBookable: "Online rezervace zatím není spuštěna",
+  notBookableHint: "Tento hotel na této stránce momentálně nepřijímá rezervace. Kontaktujte nás prosím přímo, rádi vám pomůžeme.",
 };
 
 const el: Dict = {
@@ -388,6 +416,8 @@ const el: Dict = {
   bookAnother: "Κράτηση άλλου δωματίου", somethingWentWrong: "Κάτι πήγε στραβά",
   pickLaterDeparture: "Η αναχώρηση πρέπει να είναι μετά την άφιξη.",
   language: "Γλώσσα", back: "Πίσω",
+  notBookable: "Η online κράτηση δεν είναι ακόμη διαθέσιμη",
+  notBookableHint: "Αυτό το ξενοδοχείο δεν δέχεται προς το παρόν κρατήσεις από αυτή τη σελίδα. Επικοινωνήστε μαζί μας απευθείας και θα χαρούμε να σας βοηθήσουμε.",
 };
 
 const ro: Dict = {
@@ -411,6 +441,8 @@ const ro: Dict = {
   bookAnother: "Rezervați altă cameră", somethingWentWrong: "Nu a funcționat",
   pickLaterDeparture: "Plecarea trebuie să fie după sosire.",
   language: "Limbă", back: "Înapoi",
+  notBookable: "Rezervarea online nu este încă disponibilă",
+  notBookableHint: "Acest hotel nu acceptă momentan rezervări pe această pagină. Contactați-ne direct și vă vom ajuta cu plăcere.",
 };
 
 const hu: Dict = {
@@ -434,6 +466,8 @@ const hu: Dict = {
   bookAnother: "Másik szoba foglalása", somethingWentWrong: "Ez nem sikerült",
   pickLaterDeparture: "A távozásnak az érkezés után kell lennie.",
   language: "Nyelv", back: "Vissza",
+  notBookable: "Az online foglalás még nem elérhető",
+  notBookableHint: "Ez a szálloda jelenleg nem fogad foglalást ezen az oldalon. Kérjük, vegye fel velünk közvetlenül a kapcsolatot, szívesen segítünk.",
 };
 
 const uk: Dict = {
@@ -457,6 +491,8 @@ const uk: Dict = {
   bookAnother: "Забронювати ще номер", somethingWentWrong: "Не вдалося",
   pickLaterDeparture: "Виїзд має бути після заїзду.",
   language: "Мова", back: "Назад",
+  notBookable: "Онлайн-бронювання ще не відкрите",
+  notBookableHint: "Цей готель наразі не приймає бронювання на цій сторінці. Зв’яжіться з нами напряму — ми радо допоможемо.",
 };
 
 const ru: Dict = {
@@ -480,6 +516,8 @@ const ru: Dict = {
   bookAnother: "Забронировать ещё номер", somethingWentWrong: "Не получилось",
   pickLaterDeparture: "Выезд должен быть после заезда.",
   language: "Язык", back: "Назад",
+  notBookable: "Онлайн-бронирование пока недоступно",
+  notBookableHint: "Этот отель сейчас не принимает бронирования на этой странице. Свяжитесь с нами напрямую — мы будем рады помочь.",
 };
 
 const tr: Dict = {
@@ -503,6 +541,8 @@ const tr: Dict = {
   bookAnother: "Başka bir oda ayırt", somethingWentWrong: "Bu işe yaramadı",
   pickLaterDeparture: "Çıkış, girişten sonra olmalı.",
   language: "Dil", back: "Geri",
+  notBookable: "Çevrimiçi rezervasyon henüz açık değil",
+  notBookableHint: "Bu otel şu anda bu sayfadan rezervasyon almıyor. Lütfen bizimle doğrudan iletişime geçin, memnuniyetle yardımcı oluruz.",
 };
 
 const DICTS: Record<Locale, Dict> = {

@@ -76,8 +76,11 @@ current design, not as drift.
    - **The user menu.** Profile, Settings, Reload data, Guest booking page and
      Log out are live. **Language stays disabled** and is not an oversight:
      the guest page carries all nineteen languages, and the staff app is
-     deliberately English — see the note in `src/lib/i18n/locales.ts`. The logo
-     is a placeholder until the client sends an asset, and search renders
+     deliberately English — see the note in `src/lib/i18n/locales.ts`. It
+     shows "English" beside the label and the footnote says so, because a
+     greyed row explaining nothing reads as broken, which is how it was
+     reported. Any disabled control added here needs the same treatment. The
+     logo is a placeholder until the client sends an asset, and search renders
      disabled until the lookup is built.
 5. **No per-room grid.** See the house board note in the design system section.
 
@@ -544,8 +547,16 @@ anywhere else. Collapsed height must stay constant regardless of room count.
   - **`rate_plans.is_public` is off by default and set by
     `set_rate_plan_public()`**, a tickbox on the Inventory screen. A Corporate
     or wholesaler rate stays invisible to strangers until somebody publishes
-    it. With no published plan the page is a 404, because there is nothing for
-    a guest to do there.
+    it.
+  - **Two failures, and they are not the same page.** An unknown or inactive
+    property is a bare 404, so a stranger guessing property ids learns
+    nothing. A real property with nothing published is a page that says the
+    hotel is not taking online bookings — in the guest's language — because it
+    used to 404 too, and the hotel's own staff clicked "Guest booking page" in
+    their menu and got a black error with no clue. When a staff session is
+    present that page also carries a "Staff only" panel naming the tickbox and
+    linking to Inventory. A guest never sees it: the word "Inventory" is not
+    theirs to read.
   - **`stay_rule_violation_for()` holds the logic and
     `stay_rule_violation()` is now a wrapper round it.** Two copies would drift
     the first time a rule changed.
