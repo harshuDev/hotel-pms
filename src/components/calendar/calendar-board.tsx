@@ -237,45 +237,67 @@ function DayCells({
   businessDate,
   cells,
   withFoot,
+  bookHref,
 }: {
   dates: string[];
   businessDate: string;
   cells?: Map<string, AvailabilityCell>;
   withFoot: boolean;
+  /**
+   * Where an empty cell goes when clicked — the booking form, with that date
+   * and room type already chosen. Bars sit above these, so clicking a booking
+   * still opens the booking.
+   */
+  bookHref?: (date: string) => string;
 }) {
   return (
     <div className="absolute inset-0 flex">
       {dates.map((d) => {
         const cell = cells?.get(d);
+        const tone = cn(
+          "flex shrink-0 flex-col justify-end border-r border-board-line last:border-r-0",
+          d === businessDate
+            ? "bg-board-today"
+            : d < businessDate
+              ? "bg-board-past"
+              : "bg-board",
+          bookHref &&
+            "transition-colors hover:bg-brass-wash focus-visible:bg-brass-wash focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brass",
+        );
+        const width = { width: COL_W };
+        const figure =
+          withFoot && cell ? (
+            <span
+              title={`${cell.sold} sold of ${cell.sellable} sellable`}
+              className={cn(
+                "tnum px-1.5 pb-1 text-right text-xxs leading-none",
+                cell.available < 0
+                  ? "font-semibold text-rose-600"
+                  : cell.available === 0
+                    ? "font-semibold text-warn-deep"
+                    : "text-ink-faint/70",
+              )}
+            >
+              {cell.available}
+            </span>
+          ) : null;
+
+        // Two branches rather than a component held in a variable: the union of
+        // a Link and a div does not typecheck, and spreading props onto it
+        // hides which element actually renders.
+        if (!bookHref) {
+          return <div key={d} className={tone} style={width}>{figure}</div>;
+        }
         return (
-          <div
+          <Link
             key={d}
-            className={cn(
-              "flex shrink-0 flex-col justify-end border-r border-board-line last:border-r-0",
-              d === businessDate
-                ? "bg-board-today"
-                : d < businessDate
-                  ? "bg-board-past"
-                  : "bg-board",
-            )}
-            style={{ width: COL_W }}
+            href={bookHref(d)}
+            title={`Take a booking arriving ${format(parseISO(d), "d MMM")}`}
+            className={tone}
+            style={width}
           >
-            {withFoot && cell && (
-              <span
-                title={`${cell.sold} sold of ${cell.sellable} sellable`}
-                className={cn(
-                  "tnum px-1.5 pb-1 text-right text-xxs leading-none",
-                  cell.available < 0
-                    ? "font-semibold text-rose-600"
-                    : cell.available === 0
-                      ? "font-semibold text-warn-deep"
-                      : "text-ink-faint/70",
-                )}
-              >
-                {cell.available}
-              </span>
-            )}
-          </div>
+            {figure}
+          </Link>
         );
       })}
     </div>
@@ -295,6 +317,7 @@ export function CalendarBoard({
   railHref,
   todayHref,
   jumpAction,
+  bookHref,
   days,
   railW = RAIL_DEFAULT_W,
 }: {
@@ -317,6 +340,13 @@ export function CalendarBoard({
   todayHref: string;
   /** Where the date picker posts to, so any date is one step away. */
   jumpAction: string;
+  /**
+   * An empty cell opens the booking form with that arrival and room type
+   * already chosen. The reference opens a small dialog in place; this goes to
+   * the one form that takes a booking, rather than standing up a second one
+   * that would have to be kept in step with it.
+   */
+  bookHref: (date: string, roomTypeId: string) => string;
   days: number;
   railW?: number;
 }) {
@@ -397,7 +427,6 @@ export function CalendarBoard({
                 GET form, so it needs no client JavaScript.
               */}
               <form action={jumpAction} method="get" className="mt-1 flex items-center gap-1">
-                <input type="hidden" name="days" value={days} />
                 {/* Carried through, or jumping to a date would reset the rail. */}
                 <input type="hidden" name="rail" value={railW} />
                 <label className="sr-only" htmlFor="jump-to">Go to date</label>
@@ -574,6 +603,7 @@ export function CalendarBoard({
                     businessDate={businessDate}
                     cells={byDate}
                     withFoot
+                    bookHref={(d) => bookHref(d, t.roomTypeId)}
                   />
                   <Bars placed={placed} />
                 </div>

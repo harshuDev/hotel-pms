@@ -44,25 +44,49 @@ export function NewBookingForm({
   taxRates,
   ratePlans,
   initialTypes,
+  initialCheckIn,
+  initialRoomTypeId,
 }: {
   businessDate: string;
   channels: Channel[];
   taxRates: TaxRate[];
   ratePlans: RatePlan[];
   initialTypes: BookableRoomType[];
+  /** Arrival the calendar was clicked on, if the form was reached that way. */
+  initialCheckIn?: string;
+  /** The room type whose row was clicked. */
+  initialRoomTypeId?: string;
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
 
-  const [checkIn, setCheckIn] = useState(businessDate);
+  // Clicking an empty cell on the calendar lands here with that night and that
+  // room type already chosen, which is the whole point of clicking it.
+  const arrival = initialCheckIn ?? businessDate;
+  const [checkIn, setCheckIn] = useState(arrival);
   const [checkOut, setCheckOut] = useState(
-    format(addDays(parseISO(businessDate), 1), "yyyy-MM-dd"),
+    format(addDays(parseISO(arrival), 1), "yyyy-MM-dd"),
   );
   const [types, setTypes] = useState(initialTypes);
   const [typesError, setTypesError] = useState<string | null>(null);
   const [loadingTypes, setLoadingTypes] = useState(false);
 
-  const [lines, setLines] = useState<Line[]>([]);
+  const [lines, setLines] = useState<Line[]>(() => {
+    const type = initialTypes.find((t) => t.roomTypeId === initialRoomTypeId);
+    if (!type) return [];
+    return [
+      {
+        // A fixed key, not a random one: this line exists on the server render
+        // as well, and a fresh uuid each time is a hydration mismatch.
+        key: "from-calendar",
+        roomTypeId: type.roomTypeId,
+        quantity: 1,
+        rate: "",
+        adults: Math.max(type.baseOccupancy, 1),
+        children: 0,
+      },
+    ];
+  });
   const [guest, setGuest] = useState<Guest>({ mode: "new" });
   const [query, setQuery] = useState("");
   const [matches, setMatches] = useState<

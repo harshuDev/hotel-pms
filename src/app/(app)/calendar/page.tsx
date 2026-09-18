@@ -19,30 +19,30 @@ export const metadata = { title: "Calendar" };
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 
-/** Narrower than a week is unreadable; wider than a month draws nothing legible. */
-const MIN_DAYS = 7;
-const MAX_DAYS = 35;
-
 function startDate(businessDate: string, from: string | undefined) {
   if (from && ISO_DATE.test(from) && isValid(parseISO(from))) return from;
   return businessDate;
 }
 
-function span(raw: string | undefined) {
-  const n = Number(raw);
-  if (!Number.isSafeInteger(n)) return CALENDAR_NIGHTS;
-  return Math.min(MAX_DAYS, Math.max(MIN_DAYS, n));
-}
-
 export default async function CalendarPage({
   searchParams,
 }: {
-  searchParams: Promise<{ from?: string; days?: string; rail?: string }>;
+  searchParams: Promise<{ from?: string; rail?: string }>;
 }) {
   const sp = await searchParams;
   const businessDate = await getBusinessDate();
   const from = startDate(businessDate, sp.from);
-  const days = span(sp.days);
+  /*
+   * The window is fixed at a month and is no longer a URL knob.
+   *
+   * It used to be one, moved by the + and − controls before those were
+   * corrected to size the rail. Anybody who pressed "−" while they were still
+   * wired that way got `days=7` stuck in their URL, every link carried it
+   * onward, and once + and − meant something else there was no way back: the
+   * calendar showed a week and stayed that way. A setting with no control is
+   * worse than no setting.
+   */
+  const days = CALENDAR_NIGHTS;
   // How wide the blue room column is. The + and − controls move this; they do
   // not change the date range, which is what they were first built to do.
   const railW = clampRail(Number(sp.rail) || 180);
@@ -75,8 +75,8 @@ export default async function CalendarPage({
     else barsByType.set(bar.roomTypeId, [bar]);
   }
 
-  const href = (nextFrom: string, nextDays: number, nextRail: number) =>
-    `/calendar?from=${nextFrom}&days=${nextDays}&rail=${nextRail}`;
+  const href = (nextFrom: string, nextRail: number) =>
+    `/calendar?from=${nextFrom}&rail=${nextRail}`;
 
   const shiftHref = (by: number) =>
     href(
@@ -86,11 +86,10 @@ export default async function CalendarPage({
           : addDays(parseISO(from), by),
         "yyyy-MM-dd",
       ),
-      days,
       railW,
     );
 
-  const railHref = (delta: number) => href(from, days, clampRail(railW + delta));
+  const railHref = (delta: number) => href(from, clampRail(railW + delta));
 
   const capped = [...barsByType.values()].some(
     (list) => (list[0]?.typeTotal ?? 0) > list.length,
@@ -123,8 +122,11 @@ export default async function CalendarPage({
             statusByType={statusByType}
             shiftHref={shiftHref}
             railHref={railHref}
-            todayHref={href(businessDate, days, railW)}
+            todayHref={href(businessDate, railW)}
             jumpAction="/calendar"
+            bookHref={(date, roomTypeId) =>
+              `/bookings/new?check_in=${date}&room_type=${roomTypeId}`
+            }
             days={days}
             railW={railW}
           />
