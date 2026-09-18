@@ -104,8 +104,10 @@ current design, not as drift.
      control to this menu that cannot do anything.** The nineteen languages
      live on the guest booking page, where the reader might not speak English;
      if the staff app is ever translated, the switcher goes back here. The logo
-     is a placeholder until the client sends an asset, and search renders
-     disabled until the lookup is built.
+     is `/public/logo-mark.png`, supplied by the client in the first commit,
+     and it is now the favicon too — `src/app/icon.png`, `apple-icon.png` and
+     `favicon.ico` are generated from that same mark, trimmed to its own bounds
+     and squared. Search renders disabled until the lookup is built.
 5. **No per-room grid.** See the house board note in the design system section.
 
 ## Stack
