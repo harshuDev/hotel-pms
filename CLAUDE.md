@@ -445,6 +445,33 @@ anywhere else. Collapsed height must stay constant regardless of room count.
   and retires freely, but the rate and its inclusion are frozen, because a
   folio item records which rate it used and changing it would restate history.
   Retire it and add a new one.
+- **Password reset is three screens and no API route.** `/login` links to
+  `/forgot-password`, which calls `resetPasswordForEmail` with a `redirectTo`
+  of `<origin>/reset-password`; that page turns whatever the link carried into
+  a session and then calls `updateUser`. Both are client components using the
+  browser client, like `/login`, because the session cookies have to be set
+  where the token lands. That keeps "no API routes except external webhooks"
+  intact — there is no `/auth/callback` route handler.
+  - **The reset page handles all three link shapes** — `?code` (PKCE),
+    `?token_hash&type` (the current email template) and `#access_token` (the
+    older implicit flow, which the browser client picks up itself). Which one
+    arrives depends on the project's auth flow and email template, and the page
+    is the same page either way. It reads `window.location` rather than
+    `useSearchParams` because the last of those lives in the fragment, which
+    never reaches the server.
+  - **`/forgot-password` and `/reset-password` are public in middleware.**
+    Bouncing `/reset-password` to `/login` would throw away the token in the
+    URL, which is the one thing the email carries and cannot be asked for
+    again. Only `/login` still redirects a signed-in user away: a recovery link
+    signs its holder in *before* they reach the reset page, so redirecting
+    signed-in users off it would make finishing the reset impossible.
+  - **The redirect URL must be on Supabase's allow-list** or it silently falls
+    back to `site_url`, dropping the token and making the link look broken.
+    `supabase/config.toml` covers local development. The hosted project has its
+    own list under Auth → URL Configuration.
+  - **Neither screen says whether an email belongs to an account.** The
+    confirmation is the same either way. This is the one place the "errors say
+    what happened" rule gives way, deliberately.
 - **Creating a login is not in the application.** `staff_users.id` references
   `auth.users`, so a new member of staff needs an auth account before a row can
   point at one. Settings manages the staff who already exist — name, role, and

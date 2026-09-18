@@ -18,6 +18,16 @@ port = 54323
 [auth]
 enabled = true
 site_url = "http://localhost:3000"
-additional_redirect_urls = ["http://127.0.0.1:3000"]
+# The reset email sends people to <origin>/reset-password, and Supabase will
+# only redirect to an address on this list — anything else silently falls back
+# to site_url, which drops the token and makes the link look broken. The
+# wildcards cover that path for local development. The hosted project keeps its
+# own list under Auth -> URL Configuration and needs the deployed origin added
+# there too.
+additional_redirect_urls = [
+  "http://127.0.0.1:3000",
+  "http://localhost:3000/**",
+  "http://127.0.0.1:3000/**",
+]
 jwt_expiry = 3600
 enable_signup = false
