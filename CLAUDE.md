@@ -65,8 +65,15 @@ current design, not as drift.
 2. **Dashboard, not Front Desk.** The route `/dashboard` is labelled
    "Dashboard" in the nav, the page `<h1>` and the page title. "Front Desk"
    survives only as a booking channel value in mock data — do not rename that.
-3. **Promotions, not Offers.** The nav label is "Promotions"; the route is
-   still `/offers`. Renaming the route is optional and has not been done.
+3. **Offers, not Promotions — reversed by the client, later.** This item used
+   to read the other way round. The client subsequently sent their reference
+   system's Offers screen and asked for the section to be called Offers and to
+   look like it, so the nav label, the page title and every piece of copy on
+   the screen now say "offer". The route was always `/offers`, so it did not
+   move. **The database still says `promotions`** — the table, the RPCs, the
+   `Promotion` type and `savePromotion()` — and renaming those is a migration
+   with no user-visible effect, so it has not been done. Read "offer" in the
+   interface and `promotion` in the schema as the same thing.
 4. **Navigation is horizontal, across the top. There is no sidebar.** The
    client confirmed this is what "move the main headline to the top" meant.
    `src/components/side-nav.tsx` is deleted — do not reintroduce it, and do
@@ -607,6 +614,24 @@ anywhere else. Collapsed height must stay constant regardless of room count.
   rooms and their nights go to `canceled`, which every availability query
   excludes, and the outstanding amount is returned rather than cleared: a
   cancellation fee is a real charge and somebody still has to chase it.
+- **The Offers screen is a card grid, cloned from the reference.**
+  `src/components/promotions/promotions-screen.tsx` — an Active section, an
+  Inactive section on a wash, and an "Add offer" tile at the end of the active
+  grid. Everything a card shows was already in `promotions_list()`: the
+  discount phrase, the room scope, the stay dates, and `arrival_days_of_week`,
+  which is what the reference's seven little squares are.
+  - **Null weekdays fills all seven squares, not none.** An offer with no
+    weekday rule applies on every day; drawing that empty would say the
+    opposite.
+  - **The artwork band is drawn, not uploaded.** The reference's cards carry
+    promo graphics; there is no image column and no storage bucket here, so
+    each card draws its own discount figure on a tint picked deterministically
+    from the offer's id — the same offer always looks the same, and neighbours
+    differ. Real artwork is a column plus Supabase Storage plus an upload
+    control, and wants asking for rather than assuming.
+  - The bookings-taken and discount-given figures survive from the old list, on
+    one truncated line. The reference has no equivalent, but they are the only
+    thing on the screen that says whether an offer is working.
 - **A promotion reduces a stay; it is not a second price list.** The rate plan
   still says what a room is worth. A promotion writes
   `booking_room_nights.discount_cents`, which has existed since 0002 and which

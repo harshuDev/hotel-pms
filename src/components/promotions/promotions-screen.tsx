@@ -22,7 +22,7 @@ const KINDS: { value: PromotionKind; label: string; hint: string }[] = [
   {
     value: "percent_off",
     label: "Percentage off",
-    hint: "Comes off every night the promotion covers.",
+    hint: "Comes off every night the offer covers.",
   },
   {
     value: "amount_off",
@@ -114,6 +114,258 @@ const EMPTY = {
   priority: "0",
   isActive: true,
 };
+
+/* -------------------------------------------------------------------------- */
+/* The cards                                                                  */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * The headline figure on a card, short enough to sit in the artwork band.
+ *
+ * `describe()` above writes the same thing as a sentence for the form; this is
+ * the poster version. Two renderings of one fact, because a card and a
+ * paragraph do not want the same words.
+ */
+function headline(p: Promotion) {
+  switch (p.kind) {
+    case "percent_off": {
+      const pct = (p.percentBps ?? 0) / 100;
+      return `${pct % 1 === 0 ? pct.toFixed(0) : pct.toFixed(1)}%`;
+    }
+    case "amount_off":
+      return formatMoney(p.amountOffCents ?? 0);
+    case "free_nights":
+      return `${p.freeNights ?? 0} free`;
+  }
+}
+
+/** The line under the name: what comes off, and what it comes off. */
+function scopeLine(p: Promotion) {
+  const off =
+    p.kind === "percent_off"
+      ? `${((p.percentBps ?? 0) / 100).toFixed(1)}% Discount`
+      : p.kind === "amount_off"
+        ? `${formatMoney(p.amountOffCents ?? 0)} Discount`
+        : `Stay ${(p.paidNights ?? 0) + (p.freeNights ?? 0)}, pay ${p.paidNights ?? 0}`;
+  return `${off}, ${p.roomTypeNames ?? "All Rooms"}`;
+}
+
+/**
+ * The seven squares the reference draws under each offer.
+ *
+ * They are the arrival days the offer applies to. `arrivalDaysOfWeek` null
+ * means no restriction, which is every day filled rather than none — an offer
+ * with no weekday rule applies on all of them, and drawing that as seven empty
+ * boxes would say the opposite.
+ *
+ * Monday first, matching the calendar's own week.
+ */
+function DayBoxes({ days }: { days: number[] | null }) {
+  return (
+    <span className="flex gap-[3px]" title={
+      days && days.length > 0
+        ? `Arrivals on ${days.map((d) => DOW.find((x) => x.value === d)?.label ?? d).join(", ")}`
+        : "Arrivals any day"
+    }>
+      {DOW.map((d) => {
+        const on = !days || days.length === 0 || days.includes(d.value);
+        return (
+          <span
+            key={d.value}
+            aria-hidden
+            className={cn(
+              "h-2.5 w-2.5 rounded-[2px]",
+              on ? "bg-chrome-700" : "bg-line",
+            )}
+          />
+        );
+      })}
+    </span>
+  );
+}
+
+/** The stay window, as the reference prints it: "04 Apr - 30 Jun". */
+function dateRange(p: Promotion) {
+  const from = p.stayFrom ?? p.sellFrom;
+  const to = p.stayTo ?? p.sellTo;
+  if (!from && !to) return "Any dates";
+  return `${from ? format(parseISO(from), "dd MMM") : "Any"} - ${
+    to ? format(parseISO(to), "dd MMM") : "Any"
+  }`;
+}
+
+/**
+ * The artwork band.
+ *
+ * The reference's cards carry uploaded promo graphics. There is no image
+ * column and no storage bucket in this project, so rather than half-build an
+ * upload path this draws the offer: the discount figure large, on a tint
+ * chosen from the offer's own id so a given offer always looks the same and two
+ * offers side by side do not. If the hotel wants real artwork later that is a
+ * column plus Supabase Storage plus an upload control, and worth asking for.
+ */
+const TINTS = [
+  "from-chrome-800 to-chrome-600",
+  "from-brass to-chrome-700",
+  "from-chrome-700 to-brass",
+  "from-chrome-900 to-chrome-700",
+];
+
+function Artwork({ offer, muted }: { offer: Promotion; muted: boolean }) {
+  // Deterministic: the same offer keeps the same tint across renders and
+  // reloads, which a random pick would not.
+  let hash = 0;
+  for (const ch of offer.promotionId) hash = (hash * 31 + ch.charCodeAt(0)) % 997;
+  const tint = TINTS[hash % TINTS.length];
+
+  return (
+    <div
+      className={cn(
+        "flex h-24 items-center justify-center bg-gradient-to-br",
+        tint,
+        muted && "opacity-50 grayscale",
+      )}
+    >
+      <span className="font-display text-3xl font-semibold tracking-tightest text-white">
+        {headline(offer)}
+      </span>
+    </div>
+  );
+}
+
+function OfferCard({
+  offer,
+  canEdit,
+  onEdit,
+}: {
+  offer: Promotion;
+  canEdit: boolean;
+  onEdit: (p: Promotion) => void;
+}) {
+  const muted = !offer.isActive;
+
+  return (
+    <div
+      className={cn(
+        "flex flex-col overflow-hidden rounded-lg border border-line bg-white shadow-card",
+        muted && "opacity-90",
+      )}
+    >
+      <Artwork offer={offer} muted={muted} />
+
+      <div className="flex flex-1 flex-col gap-2 p-4">
+        <div className="min-w-0">
+          <p className="truncate font-display text-[13px] font-semibold uppercase tracking-[0.04em] text-ink">
+            {offer.name}
+          </p>
+          <p className="mt-0.5 truncate text-xs text-ink-muted">{scopeLine(offer)}</p>
+        </div>
+
+        <DayBoxes days={offer.arrivalDaysOfWeek} />
+
+        <div className="flex min-w-0 items-center gap-2 text-xxs text-ink-faint">
+          {offer.code ? (
+            <span className="tnum shrink-0 rounded bg-chrome-800 px-1.5 py-0.5 font-medium text-white">
+              {offer.code}
+            </span>
+          ) : (
+            <span className="shrink-0 rounded bg-emerald-50 px-1.5 py-0.5 font-medium text-emerald-800">
+              Automatic
+            </span>
+          )}
+          {/*
+            Kept from the old list: what the offer has actually cost. Truncated
+            rather than wrapped — wrapping pushed the date range down and left
+            the cards in a row at different heights.
+          */}
+          <span className="tnum truncate whitespace-nowrap">
+            {offer.bookingsTaken} booking{offer.bookingsTaken === 1 ? "" : "s"}
+            {offer.discountGivenCents > 0 &&
+              ` · ${formatMoney(offer.discountGivenCents)}`}
+          </span>
+        </div>
+
+        <div className="mt-auto flex items-end justify-between gap-2 pt-1">
+          <span className="tnum text-xs font-semibold text-ink">
+            {dateRange(offer)}
+          </span>
+          {canEdit && (
+            <button
+              onClick={() => onEdit(offer)}
+              className="rounded-md border border-line px-2.5 py-1 text-xxs text-ink-muted transition hover:bg-shell hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brass"
+            >
+              Edit
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function OfferSection({
+  title,
+  offers,
+  canEdit,
+  onEdit,
+  onAdd,
+  emptyHint,
+  tinted = false,
+}: {
+  title: string;
+  offers: Promotion[];
+  canEdit: boolean;
+  onEdit: (p: Promotion) => void;
+  /** Only the active section offers the Add tile. */
+  onAdd?: () => void;
+  emptyHint?: string;
+  /** The reference sets the inactive section on a wash. */
+  tinted?: boolean;
+}) {
+  return (
+    <section
+      className={cn(
+        "rounded-lg px-4 py-4",
+        tinted ? "bg-shell/70" : "bg-transparent px-0",
+      )}
+    >
+      <h2 className="mb-3 font-display text-lg font-semibold tracking-tightest text-ink">
+        {title}
+      </h2>
+
+      <div className="grid grid-cols-[repeat(auto-fill,minmax(230px,1fr))] gap-4">
+        {offers.map((offer) => (
+          <OfferCard
+            key={offer.promotionId}
+            offer={offer}
+            canEdit={canEdit}
+            onEdit={onEdit}
+          />
+        ))}
+
+        {canEdit && onAdd && (
+          <button
+            onClick={onAdd}
+            className="flex min-h-[230px] flex-col items-center justify-center gap-1 rounded-lg border border-brass/40 bg-white text-brass transition hover:border-brass hover:bg-brass/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brass"
+          >
+            <span className="text-2xl leading-none">+</span>
+            <span className="font-display text-[15px] font-medium tracking-tightest">
+              Add offer
+            </span>
+          </button>
+        )}
+
+        {offers.length === 0 && !onAdd && (
+          <p className="text-[13px] text-ink-muted">Nothing here.</p>
+        )}
+      </div>
+
+      {offers.length === 0 && emptyHint && (
+        <p className="mt-3 text-[13px] leading-relaxed text-ink-muted">{emptyHint}</p>
+      )}
+    </section>
+  );
+}
 
 export function PromotionsScreen({
   promotions,
@@ -227,11 +479,11 @@ export function PromotionsScreen({
       {canEdit && (
         <div className="flex items-center justify-between rounded-lg border border-line bg-white px-5 py-4 shadow-card">
           <p className="max-w-2xl text-[13px] leading-relaxed text-ink-muted">
-            A promotion reduces what a stay costs. It is not a second price
-            list — the rate plan still says what a room is worth, and the
-            reduction is recorded against the nights so every revenue figure
-            nets it off. When several qualify, the one that saves the guest most
-            wins; they never stack.
+            An offer reduces what a stay costs. It is not a second price list —
+            the rate plan still says what a room is worth, and the reduction is
+            recorded against the nights so every revenue figure nets it off.
+            When several qualify, the one that saves the guest most wins; they
+            never stack.
           </p>
           <button
             onClick={() => {
@@ -240,7 +492,7 @@ export function PromotionsScreen({
             }}
             className="shrink-0 rounded-md bg-chrome-800 px-5 py-2 text-[13px] font-medium text-white hover:bg-chrome-900"
           >
-            New promotion
+            Add offer
           </button>
         </div>
       )}
@@ -259,7 +511,7 @@ export function PromotionsScreen({
       {form && (
         <div className="rounded-lg border border-line bg-white p-5 shadow-card">
           <h2 className="mb-4 font-display text-[15px] font-semibold tracking-tightest text-ink">
-            {form.id ? "Edit promotion" : "New promotion"}
+            {form.id ? "Edit offer" : "New offer"}
           </h2>
 
           <div className="grid gap-4 sm:grid-cols-4">
@@ -523,7 +775,7 @@ export function PromotionsScreen({
                 checked={form.isActive}
                 onChange={(e) => setForm({ ...form, isActive: e.target.checked })}
               />
-              Live. Turning this off retires the promotion and frees its code for reuse.
+              Live. Turning this off retires the offer and frees its code for reuse.
             </label>
           )}
 
@@ -539,7 +791,7 @@ export function PromotionsScreen({
               disabled={pending}
               className="rounded-md bg-chrome-800 px-6 py-2.5 text-[13px] font-medium text-white hover:bg-chrome-900 disabled:opacity-50"
             >
-              {pending ? "Saving…" : "Save promotion"}
+              {pending ? "Saving…" : "Save offer"}
             </button>
           </div>
           {form.id && (
@@ -552,91 +804,36 @@ export function PromotionsScreen({
         </div>
       )}
 
-      {promotions.length === 0 ? (
-        <div className="rounded-lg border border-line bg-white p-8 text-center shadow-card">
-          <p className="font-display text-lg font-semibold tracking-tightest text-ink">
-            No promotions yet
-          </p>
-          <p className="mx-auto mt-2 max-w-md text-[13px] leading-relaxed text-ink-muted">
-            {canEdit
-              ? "Create one to take a percentage or an amount off, or to give a night free on a longer stay."
-              : "A manager or administrator sets these up."}
-          </p>
-        </div>
-      ) : (
-        <div className="space-y-2">
-          {promotions.map((p) => (
-            <div
-              key={p.promotionId}
-              className={cn(
-                "rounded-lg border bg-white p-5 shadow-card",
-                p.isActive ? "border-line" : "border-line bg-shell/50",
-              )}
-            >
-              <div className="flex flex-wrap items-start justify-between gap-4">
-                <div className="min-w-0">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="font-display text-[15px] font-semibold tracking-tightest text-ink">
-                      {p.name}
-                    </span>
-                    <span className="rounded bg-brass/10 px-2 py-0.5 text-xxs font-medium text-brass">
-                      {describe(p)}
-                    </span>
-                    {p.code ? (
-                      <span className="tnum rounded bg-chrome-800 px-2 py-0.5 text-xxs font-medium text-white">
-                        {p.code}
-                      </span>
-                    ) : (
-                      <span className="rounded bg-emerald-50 px-2 py-0.5 text-xxs font-medium text-emerald-800">
-                        Automatic
-                      </span>
-                    )}
-                    {!p.isActive && (
-                      <span className="rounded bg-line px-2 py-0.5 text-xxs font-medium text-ink-faint">
-                        Retired
-                      </span>
-                    )}
-                  </div>
-                  {p.description && (
-                    <p className="mt-1 text-[13px] text-ink-muted">{p.description}</p>
-                  )}
-                  <p className="mt-1.5 text-xs text-ink-faint">
-                    {conditions(p).length > 0
-                      ? conditions(p).join(" · ")
-                      : "No conditions — any qualifying stay"}
-                  </p>
-                  <p className="mt-1 text-xs text-ink-faint">
-                    {p.ratePlanNames ?? "Every rate plan"} · {p.roomTypeNames ?? "Every room type"}
-                  </p>
-                </div>
-                <div className="flex shrink-0 items-center gap-4 text-right">
-                  <div>
-                    <p className="tnum font-display text-lg font-semibold tracking-tightest text-ink">
-                      {p.bookingsTaken}
-                    </p>
-                    <p className="text-xxs text-ink-faint">
-                      booking{p.bookingsTaken === 1 ? "" : "s"}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="tnum font-display text-lg font-semibold tracking-tightest text-brass">
-                      {formatMoney(p.discountGivenCents)}
-                    </p>
-                    <p className="text-xxs text-ink-faint">given away</p>
-                  </div>
-                  {canEdit && (
-                    <button
-                      onClick={() => edit(p)}
-                      className="rounded-md border border-line px-3 py-1.5 text-[13px] text-ink-muted hover:bg-shell hover:text-ink"
-                    >
-                      Edit
-                    </button>
-                  )}
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
+      {/*
+        Active and inactive, as two sections of cards — the client sent the
+        reference system's Offers screen and asked for it. Everything a card
+        shows we already held: the discount phrase, the room scope, the arrival
+        weekdays (those seven squares) and the stay dates.
+      */}
+      <OfferSection
+        title="Active offers"
+        offers={promotions.filter((p) => p.isActive)}
+        canEdit={canEdit}
+        onEdit={edit}
+        onAdd={() => {
+          setMessage(null);
+          setForm({ ...EMPTY });
+        }}
+        emptyHint={
+          canEdit
+            ? "Add one to take a percentage or an amount off, or to give a night free on a longer stay."
+            : "A manager or administrator sets these up."
+        }
+      />
+
+      {promotions.some((p) => !p.isActive) && (
+        <OfferSection
+          title="Inactive offers"
+          offers={promotions.filter((p) => !p.isActive)}
+          canEdit={canEdit}
+          onEdit={edit}
+          tinted
+        />
       )}
     </div>
   );
