@@ -73,14 +73,15 @@ current design, not as drift.
    - `src/components/menu.tsx` is the shared dropdown primitive — hover
      intent, click-outside, Escape, arrow keys. Inventory, Bookings, Reports
      and the user menu all use it. Do not hand-roll another one.
-   - **The user menu.** Profile, Settings, Reload data, Guest booking page and
-     Log out are live. **Language stays disabled** and is not an oversight:
-     the guest page carries all nineteen languages, and the staff app is
-     deliberately English — see the note in `src/lib/i18n/locales.ts`. It
-     shows "English" beside the label and the footnote says so, because a
-     greyed row explaining nothing reads as broken, which is how it was
-     reported. Any disabled control added here needs the same treatment. The
-     logo is a placeholder until the client sends an asset, and search renders
+   - **The user menu is Profile, Guest booking page, Settings, Reload data and
+     Log out. There is no Language item and no footnote.** Both were removed
+     after the client asked what the point of a control that changes nothing
+     was. A disabled row was tried twice — silent, then labelled "English" —
+     and read as broken the first time and pointless the second. **Do not add a
+     control to this menu that cannot do anything.** The nineteen languages
+     live on the guest booking page, where the reader might not speak English;
+     if the staff app is ever translated, the switcher goes back here. The logo
+     is a placeholder until the client sends an asset, and search renders
      disabled until the lookup is built.
 5. **No per-room grid.** See the house board note in the design system section.
 

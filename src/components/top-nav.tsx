@@ -207,24 +207,15 @@ export function TopNav({
                 {refreshing ? "Reloading\u2026" : "Reload data"}
               </MenuItem>
               {/*
-                Disabled on purpose, and it has to look it. A greyed row with
-                no reason reads as broken — which is exactly how it was
-                reported. Naming the current language turns it from a dead
-                control into a statement of fact.
+                There is no Language item. These screens are English, so a
+                control that cannot change anything was worse than nothing —
+                first it read as broken, then as pointless, and both were fair.
+                The nineteen languages live on the guest booking page, where
+                the person reading might not speak English. If the staff app is
+                ever translated this is where the switcher goes back.
               */}
-              <MenuItem disabled>
-                <span className="flex items-baseline justify-between gap-3">
-                  <span>Language</span>
-                  <span className="text-2xs">English</span>
-                </span>
-              </MenuItem>
               <MenuItem onSelect={() => void signOut()}>Log out</MenuItem>
             </div>
-            <p className="border-t border-line px-2.5 pb-1 pt-2 text-2xs leading-relaxed text-ink-faint">
-              The guest page is public and shows only the rates published in
-              Inventory. It reads in nineteen languages; these staff screens
-              are English only.
-            </p>
           </Menu>
         </div>
       </div>
