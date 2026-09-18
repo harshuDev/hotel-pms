@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { format, parseISO } from "date-fns";
 import { TopNav } from "@/components/top-nav";
 import { TopBar } from "@/components/top-bar";
@@ -7,6 +8,30 @@ import {
   getCurrentStaffUser,
   getProperty,
 } from "@/lib/queries";
+
+/**
+ * The browser tab carries the property's real name, not a hard-coded one.
+ *
+ * Every page under this layout exports a bare title — "Dashboard", "Settings"
+ * — and the template here supplies the hotel. That is what makes renaming the
+ * property in Settings reach the tab as well as the bar, and it is the only
+ * honest option in a system where property_id is on every tenant table: a
+ * name compiled into thirty-odd files can only ever describe one hotel.
+ *
+ * getProperty() throws when the signed-in user has no staff_users row, which
+ * is a real state — the layout below renders a panel for it. Metadata must not
+ * be what turns that into an error page, so it falls back to the generic title
+ * and lets the layout do the explaining.
+ */
+export async function generateMetadata(): Promise<Metadata> {
+  const staff = await getCurrentStaffUser();
+  if (!staff) return {};
+
+  const property = await getProperty();
+  return {
+    title: { default: property.name, template: `%s \u2014 ${property.name}` },
+  };
+}
 
 export default async function AppLayout({
   children,

@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0030` are
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0032` are
 applied to the hosted database.
 
 Working on real data: dashboard (house board, movements, pace, activity feed),
@@ -21,8 +21,9 @@ channel, housekeeping and in house.
 The hosted database holds one property, one staff user, an open business date
 and seven payment methods. **It has no room types, rooms, channels, rate plans
 or tax rates yet** — but as of 0030 all of those can be created from
-`/settings` rather than by hand in SQL, so the property can be set up from the
-application. Until a channel exists, no booking can be taken at all: every
+`/settings` rather than by hand in SQL, and as of 0031 an individual room and
+the payment methods can be corrected there too, so the property can be set up
+and kept right from the application. Until a channel exists, no booking can be taken at all: every
 booking must have a source.
 
 The open business date is behind real time. The night audit advances it one
@@ -62,6 +63,13 @@ current design, not as drift.
    - `src/lib/nav.ts` is the single source of nav sections, read by both the
      desktop bar and the mobile drawer. Add or reorder sections there, never
      inline in a component.
+   - **The browser tab title comes from the database.** Every page under
+     `src/app/(app)/` exports a bare title — `"Dashboard"`, `"Settings"` — and
+     `generateMetadata` in `(app)/layout.tsx` supplies the hotel from
+     `properties.name`, so renaming the property in Settings reaches the tab as
+     well as the bar. Do not put the hotel's name back into a page. The root
+     layout still names it once, for `/login` and the root redirect, where
+     there is no session and so no property row to read.
    - `src/components/menu.tsx` is the shared dropdown primitive — hover
      intent, click-outside, Escape, arrow keys. Inventory, Bookings, Reports
      and the user menu all use it. Do not hand-roll another one.
@@ -128,6 +136,8 @@ Each read is a Postgres view or RPC, never aggregation in the client:
 | `getChannelSettings()`              | `channels`                        |
 | `getTaxRateSettings()`              | `tax_rates`                       |
 | `getStaffSettings()`                | `staff_users`                     |
+| `getRoomsForSettings({ q, page })`  | `rooms_for_settings(...)`         |
+| `getPaymentMethodSettings()`        | `payment_methods` incl. retired   |
 
 **Two signatures carry the room-count rule.** The client operates properties
 with up to ~1,800 rooms, so no query may return every room and no screen may
@@ -189,6 +199,18 @@ the component.
   Supabase dashboard, never through ad-hoc SQL.
 - After any migration:
   `pnpm supabase gen types typescript --local > src/lib/database.types.ts`
+  That file is generated and never edited. It is what makes a renamed RPC
+  parameter, a misspelt function name or an enum value that does not exist a
+  compile error instead of a PostgREST failure in front of a receptionist.
+- **`src/lib/supabase/database.ts` is the type the clients actually use**, and
+  it corrects the generator in one place. A parameter with a SQL DEFAULT is
+  generated as optional (`p_id?: string`) and never as nullable, but PostgREST
+  accepts null for all of them — and null is not the same as omitting it:
+  omitting uses the SQL default, null passes NULL. The optional arguments are
+  widened to accept null so the call sites keep saying which they mean. Nothing
+  else is relaxed. A required parameter that is nonetheless nullable, which the
+  generator cannot express at all, is marked at the call site with
+  `nullableArg()` and a line saying what null means to that function.
 - Every tenant table has `property_id` and an RLS policy. A new table without a
   policy is a bug, not a TODO.
 
@@ -275,7 +297,9 @@ anywhere else. Collapsed height must stay constant regardless of room count.
   `at_property | prepaid_to_channel | virtual_card`. Prepaid bookings must
   never appear as cash owed at the front desk.
 - `payment_methods.affects_drawer` decides whether a payment hits physical
-  cash. Cash true; card, UPI, bank transfer, OTA prepaid false.
+  cash. Cash true; card, UPI, bank transfer, OTA prepaid false. It follows from
+  the kind by check constraint and is never set independently — see the
+  settings notes below.
 - `booking_room_nights` holds one row per room per night at that night's rate.
   Occupancy, ADR, RevPAR and the revenue chart all derive from it with a
   GROUP BY. Generate these rows on booking create and modify.
@@ -371,6 +395,11 @@ anywhere else. Collapsed height must stay constant regardless of room count.
   sixty-four percent off and nobody notices until the month end.
 - **A hand-priced room line gets no promotion.** Somebody has already decided
   what that room costs, and a discount on top would be a second reduction.
+- **`save_property()` refuses a missing check-in or check-out time.** The
+  columns are `not null` and every arrival and departure is timed against them,
+  so there is no blank to fall back to. Until 0032 the null went straight into
+  the UPDATE and a manager who cleared the field got the raw not-null violation
+  back.
 - **A property is set up from `/settings`, not from SQL.** Room types, rooms,
   booking sources, tax rates and the property itself are all written through
   RPCs in `src/lib/actions/settings.ts`. Settings lives in the user menu, not
@@ -380,6 +409,32 @@ anywhere else. Collapsed height must stay constant regardless of room count.
   entering those one at a time is not a thing anyone would do. A run is capped
   at 500 and refuses by name if it would collide with rooms that already exist,
   before anything is written.
+- **One room is corrected from the rooms list underneath it**, through
+  `save_room()`, which 0030 shipped and nothing called until 0031. The list is
+  `rooms_for_settings()` — searched and paged in Postgres like every other room
+  read, because the ~1,800 rule does not stop at a settings screen. It returns
+  the type and the floor; `rooms_page()` returns tonight's guest and nights
+  left, which is why they are two reads and not one.
+  - **Moving a room to another type rewrites nothing.** `booking_rooms` carries
+    its own `room_type_id`, so a reservation records the type it was sold at
+    and no booking, rate or night row moves with the room.
+  - **There is no delete**, for a room or a room type or a payment method:
+    bookings and payments point at them under `on delete restrict`. A room out
+    of service is `ooo`; a method no longer taken is `is_active = false`.
+  - Status is not settable here. It is changed where the work happens — the
+    housekeeping report and the house board.
+- **`payment_methods.affects_drawer` is not a setting.** A check constraint
+  ties it to the kind — cash touches physical cash, nothing else does — so
+  `save_payment_method()` derives it and takes no parameter for it. Offering
+  the tickbox would be offering a choice the database refuses, on the one
+  column the drawer total and every blind count are worked out from.
+  `unique (property_id, kind)` bounds the whole screen too: a property has at
+  most one method per kind, so the list is the eight kinds, each configured or
+  not, never free-form.
+- **A payment method's kind is frozen once payments exist against it.** Moving
+  a method across the cash line afterwards would restate every shift already
+  counted. Renaming and retiring stay free; the name is what the cashier picks
+  from, the kind is what the money means.
 - **`set_room_status()` is how a room is marked clean**, and housekeeping can
   call it. Until 0030 `rooms.status` was only ever set by check-in and
   check-out, so a room went dirty on departure and stayed dirty for ever — the
@@ -390,6 +445,40 @@ anywhere else. Collapsed height must stay constant regardless of room count.
   and retires freely, but the rate and its inclusion are frozen, because a
   folio item records which rate it used and changing it would restate history.
   Retire it and add a new one.
+- **Password reset is three screens and no API route.** `/login` links to
+  `/forgot-password`, which calls `resetPasswordForEmail` with a `redirectTo`
+  of `<origin>/reset-password`; that page turns whatever the link carried into
+  a session and then calls `updateUser`. Both are client components using the
+  browser client, like `/login`, because the session cookies have to be set
+  where the token lands. That keeps "no API routes except external webhooks"
+  intact — there is no `/auth/callback` route handler.
+  - **The reset page handles all three link shapes** — `?code` (PKCE),
+    `?token_hash&type` (the current email template) and `#access_token` (the
+    older implicit flow, which the browser client picks up itself). Which one
+    arrives depends on the project's auth flow and email template, and the page
+    is the same page either way. It reads `window.location` rather than
+    `useSearchParams` because the last of those lives in the fragment, which
+    never reaches the server.
+  - **The session decides whether the link worked, not the exchange.** A
+    recovery token is single-use, so refreshing the reset page after it
+    succeeded gets the second exchange refused even though the first left a
+    good session behind — and React's development double-invoke does the same.
+    The page therefore checks `getSession()` after a failed exchange and only
+    reports the error when there is no session. Do not put the refusal back in
+    front of that check.
+  - **`/forgot-password` and `/reset-password` are public in middleware.**
+    Bouncing `/reset-password` to `/login` would throw away the token in the
+    URL, which is the one thing the email carries and cannot be asked for
+    again. Only `/login` still redirects a signed-in user away: a recovery link
+    signs its holder in *before* they reach the reset page, so redirecting
+    signed-in users off it would make finishing the reset impossible.
+  - **The redirect URL must be on Supabase's allow-list** or it silently falls
+    back to `site_url`, dropping the token and making the link look broken.
+    `supabase/config.toml` covers local development. The hosted project has its
+    own list under Auth → URL Configuration.
+  - **Neither screen says whether an email belongs to an account.** The
+    confirmation is the same either way. This is the one place the "errors say
+    what happened" rule gives way, deliberately.
 - **Creating a login is not in the application.** `staff_users.id` references
   `auth.users`, so a new member of staff needs an auth account before a row can
   point at one. Settings manages the staff who already exist — name, role, and

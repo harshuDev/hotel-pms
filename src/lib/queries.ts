@@ -12,7 +12,10 @@
  * ============================================================================
  */
 
+import { cache } from "react";
+
 import { createClient } from "@/lib/supabase/server";
+import { nullableArg } from "@/lib/supabase/database";
 
 import type {
   ActivityItem,
@@ -63,6 +66,10 @@ import type {
   RatePlan,
   RoomTypeSetting,
   StaffSetting,
+  PaymentMethodKind,
+  PaymentMethodSetting,
+  RoomSetting,
+  RoomSettingsPage,
   TaxRateSetting,
   InHouseRow,
   PaymentMethodTotal,
@@ -87,8 +94,13 @@ import type {
  * Returns the property belonging to the authenticated staff user's property.
  *
  * RLS is responsible for restricting this query to the current property.
+ *
+ * Wrapped in cache() because the app layout and its generateMetadata both want
+ * the property name — the bar shows it, the browser tab is titled with it —
+ * and they run in the same request. Without this that is two round trips on
+ * every navigation for one row that cannot have changed between them.
  */
-export async function getProperty() {
+export const getProperty = cache(async () => {
   const supabase = await createClient();
 
   const { data, error } = await supabase
@@ -101,7 +113,7 @@ export async function getProperty() {
   }
 
   return data;
-}
+});
 
 /* -------------------------------------------------------------------------- */
 /* Staff                                                                      */
@@ -111,7 +123,7 @@ export async function getProperty() {
  * The signed-in member of staff. RLS restricts staff_users to the caller's
  * own property, and auth.uid() narrows it to the one row.
  */
-export async function getCurrentStaffUser(): Promise<StaffUser | null> {
+export const getCurrentStaffUser = cache(async (): Promise<StaffUser | null> => {
   const supabase = await createClient();
 
   const {
@@ -136,7 +148,7 @@ export async function getCurrentStaffUser(): Promise<StaffUser | null> {
     fullName: data.full_name,
     role: data.role as StaffRole,
   };
-}
+});
 
 /* -------------------------------------------------------------------------- */
 /* Business date                                                              */
@@ -1664,7 +1676,9 @@ export async function getInventoryGrid(
   const supabase = await createClient();
 
   const { data, error } = await supabase.rpc("inventory_grid", {
-    p_rate_plan_id: ratePlanId,
+    // Null is a real argument here: it reads the grid with no plan selected,
+    // which is the room-type half — allotment and close-out — on its own.
+    p_rate_plan_id: nullableArg(ratePlanId),
     p_from: from,
     p_days: days,
   });
@@ -2285,5 +2299,100 @@ export async function getStaffSettings(): Promise<StaffSetting[]> {
     fullName: row.full_name,
     role: row.role,
     isActive: row.is_active,
+  }));
+}
+
+const SETTINGS_ROOMS_PER_PAGE = 50;
+
+/**
+ * The rooms list behind the settings screen.
+ *
+ * Paginated in Postgres for the same reason everything else is: a property may
+ * hold ~1,800 rooms, and a settings screen is no more entitled to load them all
+ * than the dashboard is. rooms_page() is the house board's read and returns
+ * tonight's guest and nights left; this one returns the type and the floor,
+ * which are what actually get corrected here.
+ */
+export async function getRoomsForSettings(filters: {
+  q?: string;
+  page?: number;
+} = {}): Promise<RoomSettingsPage> {
+  const supabase = await createClient();
+
+  const perPage = SETTINGS_ROOMS_PER_PAGE;
+  const page = Math.max(1, filters.page ?? 1);
+
+  const { data, error } = await supabase.rpc("rooms_for_settings", {
+    p_q: filters.q?.trim() || null,
+    p_limit: perPage,
+    p_offset: (page - 1) * perPage,
+  });
+
+  if (error) throw new Error(`Failed to load the rooms: ${error.message}`);
+
+  const rows = (data ?? []) as {
+    room_id: string;
+    number: string;
+    floor: number | null;
+    room_type_id: string;
+    room_type_name: string;
+    status: RoomSetting["status"];
+    total_count: number;
+  }[];
+
+  return {
+    rows: rows.map((row) => ({
+      id: row.room_id,
+      number: row.number,
+      floor: row.floor,
+      roomTypeId: row.room_type_id,
+      roomTypeName: row.room_type_name,
+      status: row.status,
+    })),
+    total: rows[0]?.total_count ?? 0,
+    page,
+    perPage,
+  };
+}
+
+/**
+ * Payment methods, including the retired ones.
+ *
+ * Every other read of this table filters on is_active, because a retired method
+ * must stop being offered. This one is the screen that retires them, so it has
+ * to show what it has already put away.
+ *
+ * The payment count comes back with the row because it is what freezes the
+ * kind: once money has come in through a method, moving it across the cash line
+ * would restate every blind count that separated the two.
+ */
+export async function getPaymentMethodSettings(): Promise<PaymentMethodSetting[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("payment_methods")
+    .select("id, name, kind, affects_drawer, is_active, payments(count)")
+    .order("is_active", { ascending: false })
+    .order("name");
+
+  if (error) {
+    throw new Error(`Failed to load the payment methods: ${error.message}`);
+  }
+
+  return (
+    (data ?? []) as {
+      id: string;
+      name: string;
+      kind: PaymentMethodKind;
+      affects_drawer: boolean;
+      is_active: boolean;
+      payments: { count: number }[];
+    }[]
+  ).map((row) => ({
+    id: row.id,
+    name: row.name,
+    kind: row.kind,
+    affectsDrawer: row.affects_drawer,
+    isActive: row.is_active,
+    paymentCount: row.payments?.[0]?.count ?? 0,
   }));
 }

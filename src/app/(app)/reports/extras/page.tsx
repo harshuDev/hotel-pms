@@ -9,7 +9,7 @@ import { reportRange } from "@/lib/reports";
 import { ReportAccessError, getBusinessDate, getExtrasReport } from "@/lib/queries";
 import type { ExtrasRow, FolioItemType } from "@/lib/types";
 
-export const metadata = { title: "The Grand Hotel — Extras report" };
+export const metadata = { title: "Extras report" };
 
 /** The folio item types a guest sees on a bill, in plain words. */
 const ITEM_LABELS: Record<FolioItemType, string> = {

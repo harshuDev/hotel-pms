@@ -799,3 +799,44 @@ export interface StaffSetting {
   role: StaffRole;
   isActive: boolean;
 }
+
+export interface RoomSetting {
+  id: string;
+  number: string;
+  floor: number | null;
+  roomTypeId: string;
+  roomTypeName: string;
+  status: RoomStatus;
+}
+
+export interface RoomSettingsPage {
+  rows: RoomSetting[];
+  total: number;
+  page: number;
+  perPage: number;
+}
+
+export type PaymentMethodKind =
+  | "cash"
+  | "card"
+  | "bank_transfer"
+  | "upi"
+  | "ota_prepaid"
+  | "virtual_card"
+  | "complimentary"
+  | "other";
+
+export interface PaymentMethodSetting {
+  id: string;
+  name: string;
+  kind: PaymentMethodKind;
+  /**
+   * Decided entirely by the kind — cash true, everything else false, enforced
+   * by a check constraint on the table. Carried here so the screen can show
+   * what a method does to the drawer without working it out itself.
+   */
+  affectsDrawer: boolean;
+  isActive: boolean;
+  /** Payments taken by this method. Non-zero freezes the kind. */
+  paymentCount: number;
+}

@@ -10,7 +10,7 @@ insert into public.properties (
 )
 values (
   '10000000-0000-0000-0000-000000000001',
-  'Grand Ferndale',
+  'The Grand Hotel',
   'Europe/London',
   'GBP',
   '14:00',

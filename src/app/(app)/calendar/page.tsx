@@ -8,7 +8,7 @@ import {
 } from "@/lib/queries";
 import type { AvailabilityCell } from "@/lib/types";
 
-export const metadata = { title: "The Grand Hotel — Calendar" };
+export const metadata = { title: "Calendar" };
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 

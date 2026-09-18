@@ -6,13 +6,15 @@ import {
 import {
   getChannelSettings,
   getCurrentStaffUser,
+  getPaymentMethodSettings,
   getPropertySettings,
+  getRoomsForSettings,
   getRoomTypeSettings,
   getStaffSettings,
   getTaxRateSettings,
 } from "@/lib/queries";
 
-export const metadata = { title: "The Grand Hotel — Settings" };
+export const metadata = { title: "Settings" };
 
 const TABS: SettingsTab[] = [
   "property",
@@ -20,6 +22,7 @@ const TABS: SettingsTab[] = [
   "rooms",
   "channels",
   "tax",
+  "payment-methods",
   "staff",
 ];
 
@@ -30,16 +33,29 @@ function isTab(value: string | undefined): value is SettingsTab {
 export default async function SettingsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ tab?: string }>;
+  searchParams: Promise<{ tab?: string; q?: string; page?: string }>;
 }) {
   const sp = await searchParams;
   const tab = isTab(sp.tab) ? sp.tab : "property";
+  const roomQuery = sp.q?.trim() ?? "";
+  const roomPage = Math.max(1, Number(sp.page) || 1);
 
-  const [property, roomTypes, channels, taxRates, staff, me] = await Promise.all([
+  const [
+    property,
+    roomTypes,
+    rooms,
+    channels,
+    taxRates,
+    paymentMethods,
+    staff,
+    me,
+  ] = await Promise.all([
     getPropertySettings(),
     getRoomTypeSettings(),
+    getRoomsForSettings({ q: roomQuery, page: roomPage }),
     getChannelSettings(),
     getTaxRateSettings(),
+    getPaymentMethodSettings(),
     getStaffSettings(),
     getCurrentStaffUser(),
   ]);
@@ -54,8 +70,11 @@ export default async function SettingsPage({
         tab={tab}
         property={property}
         roomTypes={roomTypes}
+        rooms={rooms}
+        roomQuery={roomQuery}
         channels={channels}
         taxRates={taxRates}
+        paymentMethods={paymentMethods}
         staff={staff}
         meId={me?.id ?? null}
         canEdit={me !== null && ["admin", "manager"].includes(me.role)}

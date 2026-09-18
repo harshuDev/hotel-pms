@@ -1,6 +1,6 @@
 import { InventoryPage } from "@/components/inventory/inventory-page";
 
-export const metadata = { title: "The Grand Hotel — Closed to arrival" };
+export const metadata = { title: "Closed to arrival" };
 
 export default async function Page({
   searchParams,

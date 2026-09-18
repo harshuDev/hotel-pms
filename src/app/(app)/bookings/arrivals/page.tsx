@@ -3,7 +3,7 @@ import { PageHeader } from "@/components/ui";
 import { BookingList } from "@/components/bookings/booking-list";
 import { getArrivals, getBusinessDate } from "@/lib/queries";
 
-export const metadata = { title: "The Grand Hotel — Arrivals" };
+export const metadata = { title: "Arrivals" };
 
 export default async function ArrivalsPage() {
   const today = await getBusinessDate();

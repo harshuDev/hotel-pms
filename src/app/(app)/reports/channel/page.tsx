@@ -9,7 +9,7 @@ import { reportRange } from "@/lib/reports";
 import { getBusinessDate, getChannelReport } from "@/lib/queries";
 import type { ChannelRevenueRow } from "@/lib/types";
 
-export const metadata = { title: "The Grand Hotel — Channel report" };
+export const metadata = { title: "Channel report" };
 
 export default async function ChannelReportPage({
   searchParams,

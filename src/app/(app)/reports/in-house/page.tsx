@@ -9,7 +9,7 @@ import { ReportTable } from "@/components/reports/report-table";
 import { formatMoney, formatMoneyShort } from "@/lib/money";
 import { getBusinessDate, getInHouseReport } from "@/lib/queries";
 
-export const metadata = { title: "The Grand Hotel — In house report" };
+export const metadata = { title: "In house report" };
 
 export default async function InHouseReportPage() {
   // Not behind the money gate: knowing who is in which room is an operational

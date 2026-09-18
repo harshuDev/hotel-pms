@@ -4,6 +4,8 @@ import { EmptyState, PageHeader, StatusBadge, cn } from "@/components/ui";
 import { formatDue, formatMoney } from "@/lib/money";
 import { getBookings } from "@/lib/queries";
 
+export const metadata = { title: "Bookings" };
+
 const STATUSES = [
   "all",
   "pending",

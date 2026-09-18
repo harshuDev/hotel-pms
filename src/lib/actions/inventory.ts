@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import type { ActionResult } from "@/lib/actions/cashier";
+import type { RpcName } from "@/lib/supabase/database";
 import type { InventoryField } from "@/lib/types";
 
 /**
@@ -18,8 +19,12 @@ import type { InventoryField } from "@/lib/types";
  */
 
 interface FieldSpec {
-  /** The Postgres function that sets it. */
-  rpc: string;
+  /**
+   * The Postgres function that sets it. Typed to the names the database
+   * actually exposes, so a typo in this table is a compile error rather than
+   * a PostgREST 404 the first time somebody edits that screen.
+   */
+  rpc: RpcName;
   /** The value parameter that function takes. */
   param: string;
   /** Whether the write belongs to a rate plan or to the room type itself. */

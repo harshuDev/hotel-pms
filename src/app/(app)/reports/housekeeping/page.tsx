@@ -19,7 +19,7 @@ import type {
   RoomState,
 } from "@/lib/types";
 
-export const metadata = { title: "The Grand Hotel — Housekeeping report" };
+export const metadata = { title: "Housekeeping report" };
 
 const STATES: { value: RoomState; label: string; dot: string }[] = [
   { value: "vacant_dirty", label: "To clean", dot: "bg-rose-500" },

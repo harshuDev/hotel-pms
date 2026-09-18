@@ -16,7 +16,7 @@ import {
 } from "@/lib/queries";
 import type { PaymentMethodTotal, PaymentRow } from "@/lib/types";
 
-export const metadata = { title: "The Grand Hotel — Payments report" };
+export const metadata = { title: "Payments report" };
 
 export default async function PaymentsReportPage({
   searchParams,

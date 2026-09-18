@@ -15,7 +15,7 @@ import {
 } from "@/lib/queries";
 import type { FinancialRow } from "@/lib/types";
 
-export const metadata = { title: "The Grand Hotel — Financial report" };
+export const metadata = { title: "Financial report" };
 
 export default async function FinancialReportPage({
   searchParams,

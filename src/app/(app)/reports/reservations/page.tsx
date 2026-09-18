@@ -11,7 +11,7 @@ import { reportRange } from "@/lib/reports";
 import { getBusinessDate, getReservationsReport } from "@/lib/queries";
 import type { ReservationsRow } from "@/lib/types";
 
-export const metadata = { title: "The Grand Hotel — Reservations report" };
+export const metadata = { title: "Reservations report" };
 
 /** Forward-looking by default: the question is what is coming, not what went. */
 const FORWARD_DAYS = 28;

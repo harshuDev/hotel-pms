@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { ComingSoon } from "@/components/ui";
 
 const PHASES: Record<string, string> = {
@@ -10,6 +11,15 @@ function titleFor(segments: string[]) {
     .split("-")
     .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
     .join(" ");
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ stub: string[] }>;
+}): Promise<Metadata> {
+  const { stub } = await params;
+  return { title: titleFor(stub) || "Coming soon" };
 }
 
 export default async function StubPage({
