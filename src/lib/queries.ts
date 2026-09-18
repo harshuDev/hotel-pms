@@ -66,6 +66,8 @@ import type {
   RatePlan,
   RoomTypeSetting,
   StaffSetting,
+  MealReportRow,
+  MealType,
   PaymentMethodKind,
   PaymentMethodSetting,
   RoomSetting,
@@ -1632,7 +1634,7 @@ export async function getRatePlans(): Promise<RatePlan[]> {
 
   const { data, error } = await supabase
     .from("rate_plans")
-    .select("id, code, name, description, is_default, is_active, is_public")
+    .select("id, code, name, description, is_default, is_active, is_public, rate_plan_meals(meal)")
     .eq("is_active", true)
     .order("is_default", { ascending: false })
     .order("sort_order")
@@ -1651,6 +1653,7 @@ export async function getRatePlans(): Promise<RatePlan[]> {
       is_default: boolean;
       is_active: boolean;
       is_public: boolean;
+      rate_plan_meals: { meal: MealType }[];
     }[]
   ).map((row) => ({
     id: row.id,
@@ -1660,6 +1663,7 @@ export async function getRatePlans(): Promise<RatePlan[]> {
     isDefault: row.is_default,
     isActive: row.is_active,
     isPublic: row.is_public,
+    meals: (row.rate_plan_meals ?? []).map((m) => m.meal),
   }));
 }
 
@@ -2396,5 +2400,34 @@ export async function getPaymentMethodSettings(): Promise<PaymentMethodSetting[]
     affectsDrawer: row.affects_drawer,
     isActive: row.is_active,
     paymentCount: row.payments?.[0]?.count ?? 0,
+  }));
+}
+
+/**
+ * Covers per meal per service date.
+ *
+ * Read from the booking rather than the folio: an included meal is worth
+ * nothing, so there is no ledger row to count, and reading the booking means
+ * the kitchen gets forward dates — the night audit only posts nights that have
+ * already passed, and tomorrow's breakfast number is the one a chef needs.
+ */
+export async function getMealReport(
+  from: string,
+  to: string,
+): Promise<MealReportRow[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("meal_report", {
+    p_from: from,
+    p_to: to,
+  });
+
+  if (error) rethrow(error, "meal report");
+
+  return (data ?? []).map((row) => ({
+    serviceDate: row.service_date,
+    meal: row.meal as MealType,
+    adultCovers: Number(row.adult_covers ?? 0),
+    childCovers: Number(row.child_covers ?? 0),
+    totalCovers: Number(row.total_covers ?? 0),
   }));
 }

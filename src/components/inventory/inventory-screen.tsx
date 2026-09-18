@@ -9,10 +9,16 @@ import { formatMoney, parseMoney } from "@/lib/money";
 import {
   applyInventory,
   createRatePlan,
+  setRatePlanMeals,
   setRatePlanPublic,
 } from "@/lib/actions/inventory";
 import { SCREENS } from "@/components/inventory/field-spec";
-import type { InventoryCell, InventoryField, RatePlan } from "@/lib/types";
+import type {
+  InventoryCell,
+  InventoryField,
+  MealType,
+  RatePlan,
+} from "@/lib/types";
 
 const DOW = [
   { value: 1, label: "Mon" },
@@ -160,6 +166,40 @@ export function InventoryScreen({
 
   const selectedPlan = plans.find((p) => p.id === planId) ?? null;
 
+  const MEALS: { value: MealType; label: string }[] = [
+    { value: "breakfast", label: "Breakfast" },
+    { value: "lunch", label: "Lunch" },
+    { value: "dinner", label: "Dinner" },
+  ];
+
+  function toggleMeal(
+    plan: { id: string; name: string; meals: MealType[] },
+    meal: MealType,
+    on: boolean,
+  ) {
+    setMessage(null);
+    const next = on
+      ? [...plan.meals, meal]
+      : plan.meals.filter((m) => m !== meal);
+    startTransition(async () => {
+      const result = await setRatePlanMeals({ ratePlanId: plan.id, meals: next });
+      if (!result.ok) {
+        setMessage({ ok: false, text: result.error });
+        return;
+      }
+      setMessage({
+        ok: true,
+        text:
+          next.length === 0
+            ? `${plan.name} includes no meals.`
+            : `${plan.name} includes ${next
+                .map((m) => MEALS.find((x) => x.value === m)?.label.toLowerCase())
+                .join(", ")}.`,
+      });
+      router.refresh();
+    });
+  }
+
   function publish(plan: { id: string; name: string }, isPublic: boolean) {
     setMessage(null);
     startTransition(async () => {
@@ -254,6 +294,34 @@ export function InventoryScreen({
                     negotiated rate wants.
                   </span>
                 </label>
+              )}
+              {selectedPlan && (
+                <div className="mt-3">
+                  <span className={label}>Includes</span>
+                  <div className="flex flex-wrap gap-3">
+                    {MEALS.map((m) => (
+                      <label
+                        key={m.value}
+                        className="flex items-center gap-1.5 text-[13px] text-ink-muted"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={selectedPlan.meals.includes(m.value)}
+                          disabled={pending}
+                          onChange={(e) =>
+                            toggleMeal(selectedPlan, m.value, e.target.checked)
+                          }
+                        />
+                        {m.label}
+                      </label>
+                    ))}
+                  </div>
+                  <p className="mt-1.5 max-w-sm text-xs leading-relaxed text-ink-faint">
+                    What this rate covers. The set is the board type — breakfast
+                    alone is B&amp;B, breakfast and dinner is half board. It
+                    feeds the Meal report and changes no price.
+                  </p>
+                </div>
               )}
             </div>
           )}

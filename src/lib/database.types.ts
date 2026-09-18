@@ -139,6 +139,7 @@ export type Database = {
           created_at: string
           id: string
           property_id: string
+          rate_plan_id: string | null
           room_id: string | null
           room_type_id: string
           status: Database["public"]["Enums"]["booking_status"]
@@ -153,6 +154,7 @@ export type Database = {
           created_at?: string
           id?: string
           property_id: string
+          rate_plan_id?: string | null
           room_id?: string | null
           room_type_id: string
           status?: Database["public"]["Enums"]["booking_status"]
@@ -167,6 +169,7 @@ export type Database = {
           created_at?: string
           id?: string
           property_id?: string
+          rate_plan_id?: string | null
           room_id?: string | null
           room_type_id?: string
           status?: Database["public"]["Enums"]["booking_status"]
@@ -193,6 +196,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "properties"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "booking_rooms_rate_plan_fkey"
+            columns: ["rate_plan_id", "property_id"]
+            isOneToOne: false
+            referencedRelation: "rate_plans"
+            referencedColumns: ["id", "property_id"]
           },
           {
             foreignKeyName: "booking_rooms_room_id_property_id_fkey"
@@ -1520,6 +1530,42 @@ export type Database = {
             columns: ["updated_by", "property_id"]
             isOneToOne: false
             referencedRelation: "staff_users"
+            referencedColumns: ["id", "property_id"]
+          },
+        ]
+      }
+      rate_plan_meals: {
+        Row: {
+          created_at: string
+          meal: Database["public"]["Enums"]["meal_type"]
+          property_id: string
+          rate_plan_id: string
+        }
+        Insert: {
+          created_at?: string
+          meal: Database["public"]["Enums"]["meal_type"]
+          property_id: string
+          rate_plan_id: string
+        }
+        Update: {
+          created_at?: string
+          meal?: Database["public"]["Enums"]["meal_type"]
+          property_id?: string
+          rate_plan_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rate_plan_meals_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rate_plan_meals_rate_plan_id_property_id_fkey"
+            columns: ["rate_plan_id", "property_id"]
+            isOneToOne: false
+            referencedRelation: "rate_plans"
             referencedColumns: ["id", "property_id"]
           },
         ]
@@ -2881,6 +2927,16 @@ export type Database = {
       is_front_office_staff: { Args: never; Returns: boolean }
       is_revenue_staff: { Args: never; Returns: boolean }
       mark_activity_seen: { Args: never; Returns: string }
+      meal_report: {
+        Args: { p_from: string; p_to: string }
+        Returns: {
+          adult_covers: number
+          child_covers: number
+          meal: Database["public"]["Enums"]["meal_type"]
+          service_date: string
+          total_covers: number
+        }[]
+      }
       meeting_room_booking_detail: {
         Args: { p_booking_id: string }
         Returns: {
@@ -3389,6 +3445,13 @@ export type Database = {
         }
         Returns: number
       }
+      set_rate_plan_meals: {
+        Args: {
+          p_meals: Database["public"]["Enums"]["meal_type"][]
+          p_rate_plan_id: string
+        }
+        Returns: number
+      }
       set_rate_plan_public: {
         Args: { p_is_public: boolean; p_rate_plan_id: string }
         Returns: boolean
@@ -3493,6 +3556,7 @@ export type Database = {
         | "reversal"
       folio_kind: "guest" | "company"
       folio_status: "open" | "closed" | "cancelled"
+      meal_type: "breakfast" | "lunch" | "dinner"
       meeting_room_booking_status: "pending" | "confirmed" | "canceled"
       paid_out_category:
         | "taxi"
@@ -3682,6 +3746,7 @@ export const Constants = {
       ],
       folio_kind: ["guest", "company"],
       folio_status: ["open", "closed", "cancelled"],
+      meal_type: ["breakfast", "lunch", "dinner"],
       meeting_room_booking_status: ["pending", "confirmed", "canceled"],
       paid_out_category: [
         "taxi",

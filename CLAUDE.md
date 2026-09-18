@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0036` are
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0038` are
 applied to the hosted database.
 
 Working on real data: dashboard (house board, movements, pace, activity feed),
@@ -14,9 +14,9 @@ bookings list, customers, the availability calendar, cashier (open a shift,
 take payments, record paid-outs, blind close), check-in and check-out, the
 night audit that advances the business date, taking a booking, all nine
 Inventory screens, the booking screen with edit and cancel, promotions,
-meeting rooms, property settings, and twelve reports — occupancy, debtors, payments,
+meeting rooms, property settings, the guest booking page, and thirteen reports — occupancy, debtors, payments,
 financial, extras, daily checkout, booking, reservations, cancellation,
-channel, housekeeping and in house.
+channel, housekeeping, in house and meal.
 
 The hosted database holds one property, one staff user, an open business date
 and seven payment methods. **It has no room types, rooms, channels, rate plans
@@ -141,6 +141,7 @@ Each read is a Postgres view or RPC, never aggregation in the client:
 | `getStaffSettings()`                | `staff_users`                     |
 | `getRoomsForSettings({ q, page })`  | `rooms_for_settings(...)`         |
 | `getPaymentMethodSettings()`        | `payment_methods` incl. retired   |
+| `getMealReport(from, to)`           | `meal_report(from, to)`           |
 
 **Two signatures carry the room-count rule.** The client operates properties
 with up to ~1,800 rooms, so no query may return every room and no screen may
@@ -388,7 +389,8 @@ anywhere else. Collapsed height must stay constant regardless of room count.
   which is why `promotion_night_discounts()` has a branch per kind rather than
   one formula pretending they are the same. Adding a kind is a value column, a
   check, and a branch. Inclusions ("rate includes breakfast") are not a kind:
-  an inclusion posts to the folio rather than taking money off a night.
+  an inclusion is `rate_plan_meals`, and with a zero value there is nothing to
+  post at all — see the meal notes below.
 - **A promotion carries a code or it does not.** No code means it applies by
   itself to any qualifying stay; a code means somebody has to quote it, which
   is how a private or negotiated offer is run. A quoted code that matches
@@ -556,6 +558,35 @@ anywhere else. Collapsed height must stay constant regardless of room count.
     operational risk, and that wants a translator rather than a best guess.
     `formatMoneyIn()` in `money.ts` writes the figure the way the reader's
     language writes it; the currency and the integer pence do not move.
+- **What a rate includes is `rate_plan_meals`: one row per plan per meal.**
+  There is no board-type enum, because "half board" *is* two rows and "B&B" is
+  one — which handles a hotel that includes dinner but not breakfast without
+  anybody adding an enum value. `set_rate_plan_meals()` takes the whole set at
+  once, because "this plan is half board" is one decision and applying it as
+  two calls leaves a moment where the plan is bed and breakfast.
+- **An included meal is worth nothing, so nothing is posted.** That is a
+  decision, not an oversight, and it is why there are no value columns on
+  `rate_plan_meals`: a nullable column nobody sets would smuggle in a choice
+  that restates every historic revenue figure. Reporting F&B separately — a
+  £120 B&B night read as £105 accommodation plus £15 food — is a real
+  requirement for some hotels and would add two columns here and change how the
+  night audit posts. Raise it; do not assume it.
+- **`meal_report()` reads the booking, not the folio.** With no value there is
+  no ledger row to count, and posting one anyway would put roughly 650,000
+  zero-value rows a year into an append-only table to say what the booking
+  already says. The stronger reason is timing: the night audit only posts
+  nights that have passed, and the number a chef actually needs is tomorrow's.
+  Reading the booking gives forward dates for free.
+- **Breakfast on the 5th is eaten by guests who stayed the night of the 4th.**
+  `meal_report()` dates breakfast to `stay_date + 1` and lunch and dinner to
+  the night's own date. A guest arriving Monday and leaving Wednesday eats no
+  breakfast on Monday and does eat one on Wednesday. Reverse that and every
+  arrival and departure day is out by exactly one service — which looks fine in
+  testing and annoys a chef every morning.
+- **A stay booked before 0037 shows no meals.** `booking_rooms.rate_plan_id`
+  did not exist, so nothing says what those rates included, and it cannot be
+  backfilled. The report undercounts over historic dates by design; the screen
+  says so rather than letting it read as a bug.
 - **Creating a login is not in the application.** `staff_users.id` references
   `auth.users`, so a new member of staff needs an auth account before a row can
   point at one. Settings manages the staff who already exist — name, role, and
@@ -644,15 +675,11 @@ pnpm supabase migration new <name>
 - **Phase 2 — done.** Availability calendar, booking creation, the booking
   screen with edit and cancel, all nine Inventory screens, promotions and
   meeting rooms.
-- **Reports — done** except Meal, which has no schema behind it.
+- **Reports — done.** All thirteen, Meal included as of 0038.
 
 ### What still renders `<ComingSoon />`
 
-- **Reports → Meal** — no meal plan or board type exists. It needs the same
-  inclusions model a "rate includes breakfast" promotion would, so the two are
-  one piece of work.
-
-Every other route in the nav is built and on real data.
+Nothing. Every route in the nav is built and on real data.
 
 ## Open decisions — do not silently choose
 
