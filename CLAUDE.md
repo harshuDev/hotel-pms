@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0048` are
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0049` are
 applied to the hosted database.
 
 Working on real data: dashboard (house board, movements, pace, activity feed),
@@ -107,7 +107,21 @@ current design, not as drift.
      is `/public/logo-mark.png`, supplied by the client in the first commit,
      and it is now the favicon too — `src/app/icon.png`, `apple-icon.png` and
      `favicon.ico` are generated from that same mark, trimmed to its own bounds
-     and squared. Search renders disabled until the lookup is built.
+     and squared.
+   - **Search works, as of 0049**, and `src/components/search-overlay.tsx` owns
+     it. `global_search()` returns bookings, customers and rooms — a reference,
+     a name, a room number, which is what somebody at a front desk has in their
+     hand. `security invoker`, so RLS decides what the caller sees and there is
+     no role check to keep in step with the policies. Filtered and capped per
+     kind in Postgres, so the ~1,800 rule holds here too.
+     - **The button was structurally un-wireable, not merely unwired.** It took
+       an `onSearchClick` prop from `(app)/layout.tsx`, a Server Component,
+       which cannot hand a function to a client component — so nothing was ever
+       passed and `disabled={!onSearchClick}` was permanent. The overlay owns
+       its own open state now. Same trap as the calendar's date picker.
+     - Two characters minimum, debounced, and each reply checks it is still the
+       newest: without that a slow early request lands after a fast late one and
+       shows results for a term already typed over.
 5. **No per-room grid.** See the house board note in the design system section.
 
 ## Stack
@@ -996,7 +1010,17 @@ pnpm supabase migration new <name>
 
 ### What still renders `<ComingSoon />`
 
-Nothing. Every route in the nav is built and on real data.
+Nothing — the component is deleted, along with the `(app)/[...stub]` catch-all
+that used it. That route matched every unmatched path under the app and told
+anybody who mistyped a URL that the screen was scheduled for "Phase 2", long
+after every screen in the nav was built and on real data. There is a real 404
+at `src/app/not-found.tsx` now, deliberately outside the `(app)` layout: that
+layout reads the property from the database to title the page, and a wrong
+address is not worth a query.
+
+**There are no disabled controls left in the staff application.** If you are
+about to add one, read the user-menu note above first — the client has objected
+to a control that does nothing once already, and was right to.
 
 ## Card capture is not built
 
