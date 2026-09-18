@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0045` are
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0047` are
 applied to the hosted database.
 
 Working on real data: dashboard (house board, movements, pace, activity feed),
@@ -248,6 +248,32 @@ the component.
   `nullableArg()` and a line saying what null means to that function.
 - Every tenant table has `property_id` and an RLS policy. A new table without a
   policy is a bug, not a TODO.
+- **`revoke all on function ... from public` does not take the grant off
+  `anon`.** The hosted project carries `alter default privileges in schema
+  public grant execute on functions to anon, authenticated, service_role`, so a
+  new function comes out executable by `anon` however carefully the migration
+  revokes PUBLIC afterwards — PUBLIC and a named role are different grants.
+  0047 found thirteen that had drifted this way and took them back. **A new
+  staff function needs `revoke execute on function ... from anon` explicitly**,
+  and the check is
+  `select proname from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+  where n.nspname='public' and has_function_privilege('anon', p.oid, 'execute')`
+  — it should return only the public booking surface and the two policy
+  helpers. Four older functions held it through PUBLIC instead and needed
+  `from public`; both revokes exist for a reason.
+- **A null role is not a refusal unless you write it as one.**
+  `current_role()` returns null for anyone with no active `staff_users` row —
+  `anon`, and anybody deactivated since 0016 — and `null not in ('admin', ...)`
+  is null, which plpgsql treats as false. So
+  `if current_role() not in (...) then raise` skips the guard for exactly the
+  callers it exists to stop. Write
+  `if not coalesce(current_role() in (...), false) then`, which is the shape
+  `is_revenue_staff()` already uses. 0047 fixed `close_business_date()`, which
+  mattered most because it is `security definer` and so has no RLS behind it.
+  **Seven more of the `not in` shape remain**, in 0003, 0004, 0011 and 0013 on
+  the folio and cashier paths. Each appears to fail closed further down, on a
+  null `current_property_id()`, but that is luck rather than design — worth
+  fixing, and not swept into an unrelated change because it touches money.
 
 **Reports**
 
@@ -400,16 +426,36 @@ showed the Reservation Centric calendar and asked for it by name.
 - **+ and − size the rail, not the dates.** `railW` is a URL param and a prop
   rather than component state because the chevron offset and the season label's
   sticky `left` are arithmetic over it. `clampRail()` bounds it.
-- **An empty cell is a link to the booking form, not a modal.** Clicking one
-  goes to `/bookings/new?check_in=<date>&room_type=<id>` and `NewBookingForm`
-  prefills the arrival, one night, and a room line of that type. The reference
-  opens a small "Create Booking" panel in place; that would be a second booking
-  form to keep in step with `create_booking()` — its rate lookup, its overbook
-  and restriction flags, its promotion resolution — so the click reuses the one
-  form instead. The prefilled line's React key is the fixed string
-  `"from-calendar"`; a generated id there is a hydration mismatch.
-  - The date is validated server-side and ignored if it is before the business
-    date. A URL is not a form and cannot be trusted to have used the board.
+- **Clicking an empty cell opens the booking form over the board**, as the
+  reference's "Create Booking" panel does. `src/components/calendar/booking-dialog.tsx`
+  is the frame; what it wraps is the same `NewBookingForm` that `/bookings/new`
+  renders, handed to it as children from the server.
+  - **The dialog is a frame and never a form.** Taking a booking goes through
+    `create_booking()` and nothing else, and a second, smaller form would be
+    another thing to keep in step with it — the per-night rate lookup, the two
+    override flags, promotion resolution. The one that does less is the one a
+    receptionist would reach for. So the dialog moves where the form is shown
+    and changes nothing about what it does.
+  - **Open state is the URL** — `?book=<date>&type=<id>` on `/calendar` — not
+    React state, so the server renders the form already filled in for the night
+    clicked, and the back button closes it.
+  - The date is validated server-side and ignored if it falls before the
+    business date. A URL is not a form and cannot be trusted to have come from
+    the board. A role that cannot book gets the same refusal `/bookings/new`
+    gives, in the dialog, rather than a form Postgres will reject.
+  - `/bookings/new?check_in=&room_type=` still works, for a deep link and for
+    anyone who wants the full page.
+  - The prefilled line's React key is the fixed string `"from-calendar"`; a
+    generated id there is a hydration mismatch.
+  - **Focus goes to the first field, not the first focusable element.**
+    `querySelector` returns document order and the close button is first in the
+    markup, so one selector put the cursor on "close" — where a habitual space
+    or enter throws the form away.
+- **A bar carries a speech bubble when the booking has a note**, as the
+  reference's do. `calendar_bookings()` returns `has_notes` over the
+  `guest_notes` and `internal_notes` columns `bookings` has held since 0002 —
+  a flag and not the note, because a board draws forty of these and the booking
+  screen is where a note is read.
 - **The reference's "Holding Area" row was not cloned.** Nothing in this schema
   matches it and guessing would put bookings somewhere arbitrary. Ask the
   client what it holds before building it.

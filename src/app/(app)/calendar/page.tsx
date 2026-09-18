@@ -5,19 +5,29 @@ import {
   RAIL_STEP,
   clampRail,
 } from "@/components/calendar/calendar-board";
+import { BookingDialog } from "@/components/calendar/booking-dialog";
+import { NewBookingForm } from "@/components/bookings/new-booking-form";
 import {
   CALENDAR_MAX_BARS_PER_TYPE,
   CALENDAR_NIGHTS,
+  getBookableRoomTypes,
   getBusinessDate,
   getCalendarAvailability,
   getCalendarBookings,
   getCalendarSeasons,
+  getChannels,
+  getCurrentStaffUser,
+  getRatePlans,
   getRoomStatusByType,
+  getTaxRates,
 } from "@/lib/queries";
 
 export const metadata = { title: "Calendar" };
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
+
+/** Roles Postgres will let take a booking. `create_booking()` checks too. */
+const CAN_BOOK = ["admin", "manager", "front_desk"];
 
 function startDate(businessDate: string, from: string | undefined) {
   if (from && ISO_DATE.test(from) && isValid(parseISO(from))) return from;
@@ -27,7 +37,14 @@ function startDate(businessDate: string, from: string | undefined) {
 export default async function CalendarPage({
   searchParams,
 }: {
-  searchParams: Promise<{ from?: string; rail?: string }>;
+  searchParams: Promise<{
+    from?: string;
+    rail?: string;
+    /** The night a cell was clicked on, which opens the booking dialog. */
+    book?: string;
+    /** The room type whose row it was on. */
+    type?: string;
+  }>;
 }) {
   const sp = await searchParams;
   const businessDate = await getBusinessDate();
@@ -37,7 +54,7 @@ export default async function CalendarPage({
    *
    * It used to be one, moved by the + and − controls before those were
    * corrected to size the rail. Anybody who pressed "−" while they were still
-   * wired that way got `days=7` stuck in their URL, every link carried it
+   * wired that way got `days=7` stuck in their URL, every link threaded it
    * onward, and once + and − meant something else there was no way back: the
    * calendar showed a week and stayed that way. A setting with no control is
    * worse than no setting.
@@ -95,6 +112,44 @@ export default async function CalendarPage({
     (list) => (list[0]?.typeTotal ?? 0) > list.length,
   );
 
+  /*
+   * The dialog, when a cell has been clicked.
+   *
+   * The reference system opens "Create Booking" over the board rather than
+   * navigating away, so this does too — but what opens is the same
+   * `NewBookingForm` the /bookings/new page renders, not a second form. Taking
+   * a booking goes through `create_booking()` and nothing else, and a smaller
+   * copy of the form would either duplicate its rate lookup, override flags and
+   * promotion handling or quietly do less than it.
+   *
+   * The date is validated the same way /bookings/new validates it: a URL is not
+   * a form, and an arrival before the business date is refused rather than
+   * silently moved to a night nobody asked for.
+   */
+  const wanted = sp.book;
+  const bookDate =
+    wanted && ISO_DATE.test(wanted) && isValid(parseISO(wanted)) && wanted >= businessDate
+      ? wanted
+      : undefined;
+  const staff = bookDate ? await getCurrentStaffUser() : null;
+  const mayBook = !staff || CAN_BOOK.includes(staff.role);
+  const openBooking = Boolean(bookDate) && mayBook;
+
+  const nextDay = bookDate
+    ? format(addDays(parseISO(bookDate), 1), "yyyy-MM-dd")
+    : null;
+
+  // Loaded only when the dialog is actually opening, so the board costs nothing
+  // extra on an ordinary visit.
+  const [channels, taxRates, ratePlans, bookableTypes] = openBooking
+    ? await Promise.all([
+        getChannels(),
+        getTaxRates(),
+        getRatePlans(),
+        getBookableRoomTypes(bookDate!, nextDay!),
+      ])
+    : [null, null, null, null];
+
   return (
     <div>
       <PageHeader
@@ -124,8 +179,9 @@ export default async function CalendarPage({
             railHref={railHref}
             todayHref={href(businessDate, railW)}
             jumpAction="/calendar"
+            // Stays on the board: the dialog opens over it.
             bookHref={(date, roomTypeId) =>
-              `/bookings/new?check_in=${date}&room_type=${roomTypeId}`
+              `${href(from, railW)}&book=${date}&type=${roomTypeId}`
             }
             days={days}
             railW={railW}
@@ -143,8 +199,9 @@ export default async function CalendarPage({
             </span>
             <span>
               The dot is housekeeping — hover it for the breakdown. Bars are
-              bookings; click one to open it. The faint figure in each cell is
-              rooms still free to sell that night.
+              bookings; click one to open it, or click any empty night to take
+              one. The faint figure in each cell is rooms still free to sell
+              that night.
             </span>
           </div>
 
@@ -164,6 +221,46 @@ export default async function CalendarPage({
             seasons are named in Settings and change no price.
           </p>
         </>
+      )}
+
+      {openBooking && bookDate && (
+        <BookingDialog
+          title="Take a booking"
+          subtitle={`Arriving ${format(parseISO(bookDate), "EEEE d MMMM yyyy")}`}
+          closeHref={href(from, railW)}
+        >
+          <NewBookingForm
+            businessDate={businessDate}
+            channels={channels!}
+            taxRates={taxRates!}
+            ratePlans={ratePlans!}
+            initialTypes={bookableTypes!}
+            initialCheckIn={bookDate}
+            initialRoomTypeId={sp.type?.trim() || undefined}
+          />
+        </BookingDialog>
+      )}
+
+      {/*
+        A housekeeper who clicks a night is told why rather than being shown a
+        form Postgres will refuse. Same wording as /bookings/new.
+      */}
+      {bookDate && !mayBook && (
+        <BookingDialog
+          title="Take a booking"
+          subtitle={format(parseISO(bookDate), "EEEE d MMMM yyyy")}
+          closeHref={href(from, railW)}
+        >
+          <div className="rounded-lg border border-line bg-white p-8 text-center shadow-card">
+            <p className="font-display text-lg font-semibold tracking-tightest text-ink">
+              Taking bookings is not available to your role
+            </p>
+            <p className="mx-auto mt-2 max-w-md text-[13px] leading-relaxed text-ink-muted">
+              Front desk, manager and admin accounts can take a booking. Ask a
+              manager if you need access.
+            </p>
+          </div>
+        </BookingDialog>
       )}
     </div>
   );

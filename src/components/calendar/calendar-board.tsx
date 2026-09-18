@@ -185,7 +185,7 @@ function Bars({ placed }: { placed: Placed[] }) {
               bar.roomNumber ? ` · room ${bar.roomNumber}` : ""
             }`}
             className={cn(
-              "absolute flex flex-col justify-between overflow-hidden border-2 bg-white px-2 py-1 shadow-card transition hover:shadow-lift",
+              "absolute flex flex-col justify-between overflow-hidden border-2 bg-white pl-2 pt-1 shadow-card transition hover:shadow-lift",
               tone.edge,
               bar.clipLeft ? "rounded-l-none border-l-0" : "rounded-l-md",
               bar.clipRight ? "rounded-r-none border-r-0" : "rounded-r-md",
@@ -201,6 +201,20 @@ function Bars({ placed }: { placed: Placed[] }) {
             }}
           >
             <span className="flex items-center gap-1.5 truncate text-[12.5px] font-medium leading-none text-ink">
+              {/*
+                The reference marks a booking somebody has left a note on with
+                a speech bubble here. It is the thing a receptionist scanning
+                the board is looking for before they pick up the phone.
+              */}
+              {bar.hasNotes && (
+                <svg
+                  viewBox="0 0 16 16"
+                  aria-hidden
+                  className="h-3 w-3 shrink-0 fill-ink-faint"
+                >
+                  <path d="M2 3.2A1.2 1.2 0 0 1 3.2 2h9.6A1.2 1.2 0 0 1 14 3.2v6.4a1.2 1.2 0 0 1-1.2 1.2H6.6L3.4 13.6a.5.5 0 0 1-.8-.4v-2.4A1.2 1.2 0 0 1 2 9.6z" />
+                </svg>
+              )}
               {bar.roomNumber && (
                 <span className="tnum shrink-0 rounded bg-shell px-1 text-xxs font-semibold text-ink-muted">
                   {bar.roomNumber}
@@ -209,7 +223,7 @@ function Bars({ placed }: { placed: Placed[] }) {
               <span className="truncate">{bar.guestName}</span>
             </span>
             <span className="flex items-end justify-between gap-1">
-              <span className="tnum flex items-center gap-1 text-xxs text-ink-muted">
+              <span className="tnum mb-1 flex items-center gap-1 text-xxs text-ink-muted">
                 <svg viewBox="0 0 16 16" aria-hidden className="h-3 w-3 fill-current">
                   <circle cx="8" cy="5" r="2.6" />
                   <path d="M2.6 14a5.4 5.4 0 0 1 10.8 0z" />
@@ -217,8 +231,10 @@ function Bars({ placed }: { placed: Placed[] }) {
                 {bar.guests}
               </span>
               <span
+                // Flush into the corner, like the reference's, rather than
+                // floating inside the bar with padding all round it.
                 className={cn(
-                  "tnum shrink-0 rounded px-1 text-xxs font-semibold text-white",
+                  "tnum shrink-0 rounded-tl px-1 text-xxs font-semibold text-white",
                   tone.badge,
                 )}
               >

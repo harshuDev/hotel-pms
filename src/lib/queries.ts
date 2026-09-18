@@ -1740,6 +1740,7 @@ export async function getCalendarBookings(
       check_out: string;
       guests: number;
       value_cents: number;
+      has_notes: boolean;
       type_total: number;
     }[]
   ).map((row) => ({
@@ -1754,6 +1755,7 @@ export async function getCalendarBookings(
     checkOut: row.check_out,
     guests: row.guests,
     valueCents: row.value_cents,
+    hasNotes: row.has_notes,
     typeTotal: row.type_total,
   }));
 }

@@ -2451,6 +2451,7 @@ export type Database = {
           check_out: string
           guest_name: string
           guests: number
+          has_notes: boolean
           reference: string
           room_number: string
           room_type_id: string
