@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { SearchOverlay } from "@/components/search-overlay";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { cn } from "@/components/ui";
@@ -28,7 +29,6 @@ interface TopNavProps {
   propertyName: string;
   staffName: string;
   staffRole: StaffRole;
-  onSearchClick?: () => void;
 }
 
 export function TopNav({
@@ -36,12 +36,32 @@ export function TopNav({
   propertyName,
   staffName,
   staffRole,
-  onSearchClick,
 }: TopNavProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  /*
+    The search owns its own open state.
+
+    It used to take an `onSearchClick` prop, which the layout could never pass:
+    the layout is a Server Component and React will not serialise a function
+    across that boundary. So the button was `disabled={!onSearchClick}` for
+    ever — structurally un-wireable rather than merely unwired.
+  */
+  const [searchOpen, setSearchOpen] = useState(false);
+
+  // Ctrl/Cmd K is what people try first, and a front desk works by keyboard.
+  useEffect(() => {
+    function onKey(event: KeyboardEvent) {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
+        event.preventDefault();
+        setSearchOpen(true);
+      }
+    }
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, []);
   const [expanded, setExpanded] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -146,9 +166,9 @@ export function TopNav({
         <div className="ml-auto flex items-center gap-0.5 pl-2">
           <button
             type="button"
-            onClick={onSearchClick}
-            disabled={!onSearchClick}
-            aria-label="Search bookings and guests"
+            onClick={() => setSearchOpen(true)}
+            aria-label="Search bookings, guests and rooms"
+            title="Search bookings, guests and rooms (Ctrl K)"
             className="grid h-8 w-8 place-items-center rounded text-white/60 outline-none transition-colors hover:bg-white/[0.08] hover:text-white focus-visible:ring-1 focus-visible:ring-white/40 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent"
           >
             <svg
@@ -307,6 +327,8 @@ export function TopNav({
           </aside>
         </div>
       )}
+
+      {searchOpen && <SearchOverlay onClose={() => setSearchOpen(false)} />}
     </header>
   );
 }

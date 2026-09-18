@@ -127,21 +127,3 @@ export function PageHeader({
     </div>
   );
 }
-
-export function ComingSoon({ label, phase }: { label: string; phase: string }) {
-  return (
-    <div className="mx-auto max-w-md rounded-lg border border-line bg-white px-8 py-16 text-center shadow-card">
-      <p className="text-xxs font-semibold uppercase tracking-[0.18em] text-brass">
-        {phase}
-      </p>
-      <h1 className="mt-3 font-display text-[22px] font-semibold tracking-tightest text-ink">
-        {label}
-      </h1>
-      <p className="mx-auto mt-3 max-w-[38ch] text-[13px] leading-relaxed text-ink-muted">
-        Scoped and scheduled. The navigation, permissions and data model behind
-        this screen are already in place — the interface lands in{" "}
-        {phase.toLowerCase()}.
-      </p>
-    </div>
-  );
-}

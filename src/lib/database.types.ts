@@ -2911,6 +2911,16 @@ export type Database = {
           total_payments_cents: number
         }[]
       }
+      global_search: {
+        Args: { p_limit?: number; p_q: string }
+        Returns: {
+          id: string
+          kind: string
+          meta: string
+          subtitle: string
+          title: string
+        }[]
+      }
       house_summary: {
         Args: never
         Returns: {
