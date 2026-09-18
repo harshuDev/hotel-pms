@@ -44,6 +44,23 @@ export default {
           wash: "#FEF7EC",
         },
 
+        // The calendar board. A warm neutral grid, matching the tape chart in
+        // the client's reference system, which they asked to be cloned.
+        //
+        // This is the one warm surface in a cool palette and it is deliberate:
+        // the board is a dense field of cells that a receptionist reads for
+        // minutes at a time, and `shell` behind white bars gave almost no
+        // separation. It does not touch the chrome, the accent or any status
+        // colour, so nothing about the client revision round is reverted.
+        // Use these rather than inventing a hex in the component.
+        board: {
+          DEFAULT: "#F3EEE2",
+          head: "#FBF9F4",
+          line: "#E4DBCB",
+          today: "#EDE4D0",
+          bar: "#FFFFFF",
+        },
+
         // Legacy tokens kept so existing pages compile unchanged
         nav: { DEFAULT: "#153B63", dark: "#0E2C4D", light: "#1F4F80" },
       },

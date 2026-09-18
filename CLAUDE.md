@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0042` are
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0043` are
 applied to the hosted database.
 
 Working on real data: dashboard (house board, movements, pace, activity feed),
@@ -131,6 +131,7 @@ Each read is a Postgres view or RPC, never aggregation in the client:
 | `getHouseSummary()`                 | `house_summary()`                 |
 | `getOpenShift()`                    | `current_cashier_shift()`         |
 | `getCalendarAvailability(from, n)`  | `calendar_availability(from, n)`  |
+| `getCalendarBookings(from, n, cap)` | `calendar_bookings(from, n, cap)`  |
 | `getOccupancyReport(from, to)`      | `occupancy_report(from, to)`      |
 | `getDebtorsReport()`                | `debtors_report()`                |
 | `getPaymentsReport(from, to)`       | `payments_report(from, to)`       |
@@ -176,6 +177,13 @@ The calendar follows the same rule from the other side: its rows are room
 types, not rooms, so the grid is the same height at 40 rooms and at 1,800. The
 housekeeping report follows it too: a floor summary, which is a handful of rows
 whatever the hotel, plus a room list paged in Postgres.
+
+`getCalendarBookings()` is the one read where the rule is not automatic. A bar
+is per booked room rather than per room, so it is not broken outright, but a
+full house over a fortnight is thousands of bars and a row that draws them all
+is the key-board grid again by another name. It is capped per room type in
+Postgres, and every row carries `type_total`, the real number before the cap,
+so the board can say "1 of 9 shown" rather than quietly drawing one.
 
 If a screen seems to need a shape the query does not return, fix the query, not
 the component.
@@ -294,6 +302,32 @@ Defined in `tailwind.config.ts`. New UI must use these tokens.
   `tracking-tightest`. `font-sans` (Public Sans) for everything else.
 - All figures carry the `tnum` class so columns align.
 - Cards use `rounded-lg border border-line shadow-card`.
+
+**The calendar is a tape chart, cloned from the client's reference system.**
+`src/components/calendar/calendar-board.tsx` — room types down the rail, dates
+across the top, one bar per booked room across the nights it covers. The client
+showed the Reservation Centric calendar and asked for it by name.
+
+- **Rows stay room types.** The reference runs a small property; ours does not
+  get to assume that. See the note on `getCalendarBookings()` above.
+- **The board keeps the availability figure**, faint at the foot of each cell,
+  because that is what this screen used to be and is the only thing on it that
+  answers "can I sell tonight". It sits in a reserved strip rather than behind
+  the bars: overlaid, it vanished under every booking, and cells without one
+  still showed a number, so the row read as half broken.
+- **Bars carry booking status on their edge** — amber pending, blue confirmed,
+  green in house, grey departed — where the reference's are uniform. The
+  information was already there.
+- **`board` in `tailwind.config.ts` is the warm grid surface.** It is the one
+  warm family in a cool palette, and it is the reference's. It touches no
+  chrome, accent or status colour, so the client revision round stands.
+- **Column width is fixed and the card is `w-fit`.** Bars are positioned by
+  arithmetic over that width; letting columns stretch to fill would put every
+  bar in the wrong place.
+- **Not cloned: the season band.** The reference shows "LOW SEASON" across the
+  dates. There is no season model in this schema, and a band that says nothing
+  is the disabled Language menu again. It wants a table, a Settings screen and
+  a decision about what a season changes — raise it, do not fake it.
 
 **The house board, not a room rack.** The dashboard shows house state as a
 segmented status bar plus a clickable legend, with an on-demand room list

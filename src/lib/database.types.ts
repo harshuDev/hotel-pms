@@ -2402,6 +2402,21 @@ export type Database = {
           total_rooms: number
         }[]
       }
+      calendar_bookings: {
+        Args: { p_days?: number; p_from: string; p_max_per_type?: number }
+        Returns: {
+          booking_id: string
+          booking_room_id: string
+          check_in: string
+          check_out: string
+          guest_name: string
+          reference: string
+          room_number: string
+          room_type_id: string
+          status: Database["public"]["Enums"]["booking_status"]
+          type_total: number
+        }[]
+      }
       can_see_drawer_total: { Args: never; Returns: boolean }
       can_see_money_reports: { Args: never; Returns: boolean }
       cancel_booking: {

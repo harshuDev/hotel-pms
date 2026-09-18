@@ -43,6 +43,7 @@ import type {
   OccupancySummary,
   DebtorRow,
   AvailabilityCell,
+  CalendarBar,
   BookingProductionRow,
   CancellationRow,
   ChannelKind,
@@ -952,6 +953,17 @@ export async function getDebtorsReport(): Promise<DebtorRow[]> {
 export const CALENDAR_NIGHTS = 14;
 
 /**
+ * How many bars one room type may draw before the board stops and counts.
+ *
+ * The board is the read the ~1,800 room rule bites hardest on. A bar is per
+ * booking rather than per room, so the rule is not broken outright, but a full
+ * house over a fortnight is thousands of bars and a row that draws them all is
+ * the key-board grid again by another name. The query caps, and returns the
+ * true total so the screen can say what it left out.
+ */
+export const CALENDAR_MAX_BARS_PER_TYPE = 40;
+
+/**
  * Rooms available per room type per night.
  *
  * By type rather than by room: a property may run ~1,800 rooms, and neither a
@@ -1675,6 +1687,57 @@ export async function getRatePlans(): Promise<RatePlan[]> {
         .filter((m) => m.value_cents !== null)
         .map((m) => [m.meal, m.value_cents as number]),
     ) as Partial<Record<MealType, number>>,
+  }));
+}
+
+/**
+ * The bookings on the calendar board, as bars.
+ *
+ * Capped per room type in Postgres. Every row carries `typeTotal`, the real
+ * number overlapping the window for that type, so a short board says so rather
+ * than quietly drawing forty and letting somebody plan against it.
+ */
+export async function getCalendarBookings(
+  from: string,
+  days: number = CALENDAR_NIGHTS,
+  maxPerType: number = CALENDAR_MAX_BARS_PER_TYPE,
+): Promise<CalendarBar[]> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase.rpc("calendar_bookings", {
+    p_from: from,
+    p_days: days,
+    p_max_per_type: maxPerType,
+  });
+
+  if (error) {
+    throw new Error(`Failed to load the calendar bookings: ${error.message}`);
+  }
+
+  return (
+    (data ?? []) as {
+      room_type_id: string;
+      booking_id: string;
+      booking_room_id: string;
+      reference: string;
+      guest_name: string;
+      status: BookingStatus;
+      room_number: string | null;
+      check_in: string;
+      check_out: string;
+      type_total: number;
+    }[]
+  ).map((row) => ({
+    roomTypeId: row.room_type_id,
+    bookingId: row.booking_id,
+    bookingRoomId: row.booking_room_id,
+    reference: row.reference,
+    guestName: row.guest_name,
+    status: row.status,
+    roomNumber: row.room_number,
+    checkIn: row.check_in,
+    checkOut: row.check_out,
+    typeTotal: row.type_total,
   }));
 }
 
