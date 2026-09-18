@@ -85,8 +85,23 @@ export default async function CalendarPage({
   const cellAt = new Map(cells.map((c) => [`${c.roomTypeId}|${c.date}`, c]));
   const statusByType = new Map(status.map((s) => [s.roomTypeId, s]));
 
+  /*
+   * Pending bookings go to the Holding area, not to their room type.
+   *
+   * The client asked for the reference system's Holding row and said it holds
+   * what nobody has confirmed yet. That fits this schema exactly: the guest
+   * booking page creates `pending` bookings, and the night audit deliberately
+   * never sweeps them. A pending booking is not sold, and a bar sitting on a
+   * room type reads as though it were — which is the same argument that keeps
+   * cancelled bookings off the live rows.
+   *
+   * No migration for this: `calendar_bookings()` already returns the status.
+   */
+  const holdingBars = bars.filter((b) => b.status === "pending");
+
   const barsByType = new Map<string, typeof bars>();
   for (const bar of bars) {
+    if (bar.status === "pending") continue;
     const list = barsByType.get(bar.roomTypeId);
     if (list) list.push(bar);
     else barsByType.set(bar.roomTypeId, [bar]);
@@ -107,10 +122,6 @@ export default async function CalendarPage({
     );
 
   const railHref = (delta: number) => href(from, clampRail(railW + delta));
-
-  const capped = [...barsByType.values()].some(
-    (list) => (list[0]?.typeTotal ?? 0) > list.length,
-  );
 
   /*
    * The dialog, when a cell has been clicked.
@@ -172,13 +183,14 @@ export default async function CalendarPage({
             types={types}
             cellAt={cellAt}
             barsByType={barsByType}
+            holdingBars={holdingBars}
             canceledBars={canceledBars}
             seasons={seasons}
             statusByType={statusByType}
             shiftHref={shiftHref}
             railHref={railHref}
             todayHref={href(businessDate, railW)}
-            jumpAction="/calendar"
+            basePath="/calendar"
             // Stays on the board: the dialog opens over it.
             bookHref={(date, roomTypeId) =>
               `${href(from, railW)}&book=${date}&type=${roomTypeId}`
@@ -187,39 +199,6 @@ export default async function CalendarPage({
             railW={railW}
           />
 
-          <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-ink-faint">
-            <span className="flex items-center gap-1.5">
-              <span className="h-2 w-2 rounded-full bg-emerald-400" /> Nothing to clean
-            </span>
-            <span className="flex items-center gap-1.5">
-              <span className="h-2 w-2 rounded-full bg-rose-500" /> Rooms waiting to be cleaned
-            </span>
-            <span className="flex items-center gap-1.5">
-              <span className="h-2 w-2 rounded-full bg-slate-400" /> All out of order
-            </span>
-            <span>
-              The dot is housekeeping — hover it for the breakdown. Bars are
-              bookings; click one to open it, or click any empty night to take
-              one. The faint figure in each cell is rooms still free to sell
-              that night.
-            </span>
-          </div>
-
-          {capped && (
-            <p className="mt-2 text-xs leading-relaxed text-warn-deep">
-              Some room types have more bookings than the board draws. The rail
-              says how many of how many are shown. Narrow the dates to see fewer
-              at a time.
-            </p>
-          )}
-
-          <p className="mt-2 text-xs leading-relaxed text-ink-faint">
-            Rows are room types, not rooms. A property can run well over a
-            thousand rooms, and a row each would be unusable. A bar covers the
-            nights stayed and stops at the departure morning, which is not a
-            night. The band across the top is the season covering those dates;
-            seasons are named in Settings and change no price.
-          </p>
         </>
       )}
 

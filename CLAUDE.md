@@ -353,11 +353,18 @@ showed the Reservation Centric calendar and asked for it by name.
   arrival. It is a way in, not a second editor: renaming still happens in one
   place. It appears on focus as well as hover, because hover alone hides it
   from anyone working by tab.
-- **The corner carries a date jump.** Paging a fortnight at a time is fine for
-  next week and useless for next November, which is where the client's own
-  calendar was sitting. It is a plain GET form, so it needs no client
-  JavaScript, and `HEAD_H` is tall enough for three rows — at two the controls
-  shared a line and the "−" was pushed off the end of the rail.
+- **The corner carries a date picker that draws a month.**
+  `src/components/calendar/date-jump.tsx`. It was an `<input type="date">`, on
+  the grounds that a plain GET form needs no client JavaScript; the client asked
+  for a calendar they can see and click, and the native control shows one only
+  behind a small icon in an 18px field on a dark rail, which nobody reads as a
+  calendar. Picking a day navigates, and "Today" returns to the business date.
+  - It is a client component, so it takes `basePath` and `railW` and builds its
+    own href. **A Server Component cannot hand it a `hrefFor` closure** — React
+    refuses to serialise a function across that boundary, and the page 500s.
+  - `railW` has to be carried or picking a date silently resets the room column.
+  - `HEAD_H` is tall enough for three rows — at two the controls shared a line
+    and the "−" was pushed off the end of the rail.
 - **`+` and `−` size the rail, not the date range.** They widen and narrow the
   blue room column, between `RAIL_MIN_W` and `RAIL_MAX_W`, so a long room type
   name can be read in full without the dates moving underneath it. They were
@@ -413,8 +420,29 @@ showed the Reservation Centric calendar and asked for it by name.
 - **Bars carry guests and value**, like the reference's. The value is the room
   line's own nights — rate less discount plus tax — not the folio: most of
   those nights have not been charged yet and a future stay would show nothing.
-- **Cancelled bookings get their own row**, never the live ones, where they
-  would read as sold. `calendar_bookings()` returns them only when asked.
+- **Two standing rows sit under the room types: Holding area and Cancelled.**
+  Both draw through one `ExtraRow` component, because the only thing that
+  differs is the label, and both keep a row's height when empty so the board
+  does not jump as bookings move in and out.
+  - **Holding holds `pending` bookings** — the client settled this: it is what
+    nobody has confirmed yet. It needs no migration, since
+    `calendar_bookings()` already returns the status; the page filters them out
+    of `barsByType` and passes them separately. A pending booking is not sold,
+    and a bar sitting on a room type reads as though it were. This is the same
+    argument that keeps cancelled bookings off the live rows.
+  - **Cancelled** never goes among the live rows either.
+    `calendar_bookings()` returns those only when asked.
+- **The board fills the window, and the rail runs to the bottom.** The scroller
+  takes a `height` of `calc(100vh - 200px)`, not a `max-height`, and a filler
+  element under the last row takes the slack so the rail and the grid surface
+  reach the foot of the card. Content-sized, the board stopped mid-screen
+  against flat white and read as though it had failed to load. The card is
+  `w-full`; only the grid inside it keeps the fixed `COL_W` geometry the bars
+  are positioned against.
+- **There is no explanatory copy under the board.** A legend and two paragraphs
+  were there; the client read them as leftover prompt text and asked for them
+  gone. The reference has none. What mattered survives in place — the rail says
+  "2 of 9" where a type is capped, and the dot has its tooltip.
 - **The window is a fixed month and the URL carries no `days`.** It used to:
   the + and − controls moved the date span before they were corrected to size
   the rail. Anybody who pressed "−" while they were wired that way got `days=7`

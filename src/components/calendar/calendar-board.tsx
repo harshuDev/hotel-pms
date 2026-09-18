@@ -2,6 +2,7 @@ import Link from "next/link";
 import { differenceInCalendarDays, format, parseISO } from "date-fns";
 import { cn } from "@/components/ui";
 import { formatMoney } from "@/lib/money";
+import { DateJump } from "@/components/calendar/date-jump";
 import type {
   AvailabilityCell,
   BookingStatus,
@@ -71,8 +72,18 @@ const ROW_PAD = 6;
  * read as half broken.
  */
 const FOOT_H = 16;
-/** How tall the board gets before it scrolls rather than pushing the page. */
-const MAX_H = 620;
+/**
+ * How tall the board gets before it scrolls rather than pushing the page.
+ *
+ * Measured off the window rather than fixed, so the board fills the screen it
+ * is on. At a fixed 620px it stopped well short of the bottom on a desk
+ * monitor and the page below it was empty, which is what the client saw.
+ * The subtraction is the chrome above it: the two sticky bars, the page
+ * heading and the card's own margin.
+ */
+const MAX_H = "calc(100vh - 200px)";
+/** Never so short that the header, the band and a row do not fit. */
+const MIN_H = 360;
 
 /**
  * A bar carries its booking's status on its edge, which the reference's do not.
@@ -320,19 +331,69 @@ function DayCells({
   );
 }
 
+/**
+ * A standing row under the room types — Holding and Cancelled.
+ *
+ * Both draw bars that must not sit on a room-type row, and both keep a row's
+ * worth of height when empty so the board does not jump as bookings move in
+ * and out of them. One component rather than two copies, because the only
+ * thing that differs is the label.
+ */
+function ExtraRow({
+  label,
+  hint,
+  bars,
+  dates,
+  businessDate,
+  railW,
+  gridW,
+  railCell,
+}: {
+  label: string;
+  hint: string;
+  bars: CalendarBar[];
+  dates: string[];
+  businessDate: string;
+  railW: number;
+  gridW: number;
+  railCell: string;
+}) {
+  const { placed, lanes } = packLanes(bars, dates);
+  const rowH = rowHeight(lanes, false);
+
+  return (
+    <div className="flex items-stretch">
+      <div className={cn(railCell, "px-3 py-2")} style={{ width: railW }}>
+        <div className="text-[12.5px] font-bold uppercase tracking-[0.06em] text-white/80">
+          {label}
+        </div>
+        <div className="text-xxs leading-tight text-white/50">{hint}</div>
+      </div>
+      <div
+        className="relative border-b border-board-line"
+        style={{ width: gridW, minHeight: rowH }}
+      >
+        <DayCells dates={dates} businessDate={businessDate} withFoot={false} />
+        <Bars placed={placed} />
+      </div>
+    </div>
+  );
+}
+
 export function CalendarBoard({
   dates,
   businessDate,
   types,
   cellAt,
   barsByType,
+  holdingBars,
   canceledBars,
   seasons,
   statusByType,
   shiftHref,
   railHref,
   todayHref,
-  jumpAction,
+  basePath,
   bookHref,
   days,
   railW = RAIL_DEFAULT_W,
@@ -347,6 +408,8 @@ export function CalendarBoard({
   }[];
   cellAt: Map<string, AvailabilityCell>;
   barsByType: Map<string, CalendarBar[]>;
+  /** Pending bookings: not sold, so they sit in Holding, not on a type. */
+  holdingBars: CalendarBar[];
   canceledBars: CalendarBar[];
   seasons: CalendarSeason[];
   statusByType: Map<string, RoomTypeStatus>;
@@ -354,8 +417,8 @@ export function CalendarBoard({
   /** Where + and − go: they size the rail, not the date range. */
   railHref: (delta: number) => string;
   todayHref: string;
-  /** Where the date picker posts to, so any date is one step away. */
-  jumpAction: string;
+  /** The route the board lives on; the date picker builds its own hrefs. */
+  basePath: string;
   /**
    * An empty cell opens the booking form with that arrival and room type
    * already chosen. The reference opens a small dialog in place; this goes to
@@ -373,10 +436,16 @@ export function CalendarBoard({
     "sticky left-0 z-10 shrink-0 border-b border-r border-chrome-700 bg-chrome-800";
 
   return (
-    // w-fit so the card ends where the board does. Columns are a fixed width
-    // because bars are positioned by arithmetic over it; letting them stretch
-    // to fill would put every bar in the wrong place.
-    <div className="relative w-fit max-w-full overflow-hidden rounded-lg border border-line shadow-card">
+    /*
+      The card fills the width; the GRID inside it keeps a fixed geometry.
+      Those are different things, and the card used to be `w-fit`, which left a
+      band of empty page to its right whenever the dates did not happen to fill
+      the screen. Columns still cannot stretch — bars are positioned by
+      arithmetic over `COL_W`, so a flexible column would put every bar in the
+      wrong place — but that is the inner element's width, set below, not this
+      one's.
+    */
+    <div className="relative w-full overflow-hidden rounded-lg border border-line shadow-card">
       {/*
         Paging sits OUTSIDE the scroller, over the season band. Inside it the
         two chevrons scrolled away with the dates, so once you had moved right
@@ -400,8 +469,16 @@ export function CalendarBoard({
         ›
       </Link>
       {/* One scroller. Everything else freezes against it with `sticky`. */}
-      <div className="overflow-auto" style={{ maxHeight: MAX_H }}>
-        <div style={{ width: railW + gridW }}>
+      {/*
+        A height, not a max-height. The board used to stop where its rows
+        stopped, leaving a band of empty page underneath it whenever the hotel
+        had few room types — which is the space the client pointed at. Filling
+        the window puts the grid surface there instead, the way the reference
+        system's board runs to the bottom of the screen.
+      */}
+      <div className="overflow-auto" style={{ height: MAX_H, minHeight: MIN_H }}>
+        {/* min-h-full + column, so the filler at the foot can take the slack. */}
+        <div className="flex min-h-full flex-col" style={{ width: railW + gridW }}>
           {/* Date header */}
           <div className="sticky top-0 z-30 flex" style={{ height: HEAD_H }}>
             <div
@@ -438,29 +515,20 @@ export function CalendarBoard({
                 Today
               </Link>
               {/*
-                Paging a fortnight at a time is fine for next week and useless
-                for next November. This jumps straight there, and it is a plain
-                GET form, so it needs no client JavaScript.
+                Paging a month at a time is fine for next week and useless for
+                next November. This opens a month you can see and click — the
+                native date input drew one only behind a small icon in an
+                18px field on a dark rail, which the client rightly did not
+                read as a calendar at all.
               */}
-              <form action={jumpAction} method="get" className="mt-1 flex items-center gap-1">
-                {/* Carried through, or jumping to a date would reset the rail. */}
-                <input type="hidden" name="rail" value={railW} />
-                <label className="sr-only" htmlFor="jump-to">Go to date</label>
-                <input
-                  id="jump-to"
-                  type="date"
-                  name="from"
-                  defaultValue={dates[0]}
-                  className="h-[18px] min-w-0 flex-1 rounded-sm border-0 bg-white/15 px-1 text-xxs text-white outline-none focus-visible:ring-2 focus-visible:ring-white"
+              <div className="mt-1">
+                <DateJump
+                  from={dates[0]}
+                  businessDate={businessDate}
+                  basePath={basePath}
+                  railW={railW}
                 />
-                <button
-                  type="submit"
-                  aria-label="Go to that date"
-                  className="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-sm bg-white/15 text-xs leading-none text-white hover:bg-white/30"
-                >
-                  ›
-                </button>
-              </form>
+              </div>
             </div>
 
             <div className="flex bg-white" style={{ width: gridW }}>
@@ -627,39 +695,60 @@ export function CalendarBoard({
             );
           })}
 
-          {/* Cancelled, kept off the live rows so it cannot be misread as sold */}
-          {(() => {
-            const { placed, lanes } = packLanes(canceledBars, dates);
-            const rowH = rowHeight(lanes, false);
-            return (
-              <div className="flex items-stretch">
-                <div
-                  className={cn(railCell, "px-3 py-2")}
-                  style={{ width: railW }}
-                >
-                  <div className="text-[12.5px] font-bold uppercase tracking-[0.06em] text-white/80">
-                    Cancelled
-                  </div>
-                  <div className="text-xxs leading-tight text-white/50">
-                    {canceledBars.length === 0
-                      ? "None in these dates"
-                      : "Rooms back on sale"}
-                  </div>
-                </div>
-                <div
-                  className="relative border-b border-board-line"
-                  style={{ width: gridW, minHeight: rowH }}
-                >
-                  <DayCells
-                    dates={dates}
-                    businessDate={businessDate}
-                    withFoot={false}
-                  />
-                  <Bars placed={placed} />
-                </div>
-              </div>
-            );
-          })()}
+          {/*
+            The two standing rows, below the room types and off the live ones.
+
+            HOLDING holds the bookings nobody has confirmed yet — the guest
+            booking page creates them `pending`, and the night audit
+            deliberately never sweeps them. Keeping them off the room-type rows
+            is the point: a pending booking is not sold, and a bar sitting on a
+            type reads as though it were.
+
+            CANCELLED is the same argument from the other end — released rooms
+            that would read as sold if they sat among the live ones.
+          */}
+          <ExtraRow
+            label="Holding area"
+            hint={
+              holdingBars.length === 0
+                ? "Nothing waiting"
+                : `${holdingBars.length} awaiting confirmation`
+            }
+            bars={holdingBars}
+            dates={dates}
+            businessDate={businessDate}
+            railW={railW}
+            gridW={gridW}
+            railCell={railCell}
+          />
+          <ExtraRow
+            label="Cancelled"
+            hint={
+              canceledBars.length === 0
+                ? "None in these dates"
+                : "Rooms back on sale"
+            }
+            bars={canceledBars}
+            dates={dates}
+            businessDate={businessDate}
+            railW={railW}
+            gridW={gridW}
+            railCell={railCell}
+          />
+
+          {/*
+            Takes whatever height is left so the rail and the grid surface run
+            to the bottom of the board. Without it the rows stop mid-card and
+            the remainder is flat white, which reads as the board having failed
+            to load rather than as a hotel with four room types.
+          */}
+          <div className="flex min-h-0 flex-1 items-stretch" aria-hidden>
+            <div
+              className="sticky left-0 z-10 shrink-0 border-r border-chrome-700 bg-chrome-800"
+              style={{ width: railW }}
+            />
+            <div className="bg-board" style={{ width: gridW }} />
+          </div>
         </div>
       </div>
     </div>
