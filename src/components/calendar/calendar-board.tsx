@@ -7,6 +7,7 @@ import type {
   BookingStatus,
   CalendarBar,
   CalendarSeason,
+  RoomTypeStatus,
 } from "@/lib/types";
 
 /**
@@ -27,12 +28,36 @@ import type {
  * a gap between the two where rows show through.
  */
 
-/** Width of the room-type rail, in pixels. */
-const RAIL_W = 168;
+/**
+ * Width of the room-type rail, in pixels — the default, which the + and −
+ * controls move.
+ *
+ * Those two size the rail and nothing else. They were first built to widen and
+ * narrow the date range, which was wrong: in the reference they make the blue
+ * room column bigger or smaller, so a long room type name can be read in full
+ * without the dates moving underneath it.
+ */
+const RAIL_DEFAULT_W = 180;
+/** Narrow enough to be a strip, wide enough for the longest room type name. */
+export const RAIL_MIN_W = 120;
+export const RAIL_MAX_W = 320;
+export const RAIL_STEP = 30;
+
+/** Keeps a width from a URL inside what the board can actually draw. */
+export function clampRail(width: number) {
+  if (!Number.isFinite(width)) return RAIL_DEFAULT_W;
+  return Math.min(RAIL_MAX_W, Math.max(RAIL_MIN_W, Math.round(width)));
+}
 /** Width of one date column. Wide enough for "19 Saturday" without wrapping. */
 const COL_W = 118;
-/** The date header. The season band sticks to exactly this offset. */
-const HEAD_H = 54;
+/**
+ * The date header. The season band sticks to exactly this offset.
+ *
+ * Tall enough for three rows in the corner — DATE and the span controls, TODAY,
+ * and the date jump. At two rows they shared a line and the "−" was pushed off
+ * the end of the rail entirely.
+ */
+const HEAD_H = 74;
 const SEASON_H = 24;
 /** Two lines and a value badge, like the reference's. */
 const BAR_H = 44;
@@ -115,17 +140,33 @@ function rowHeight(lanes: number, withFoot: boolean) {
   );
 }
 
-/** The dot beside a room type: how tight the whole window is, at a glance. */
-function pressureDot(cells: AvailabilityCell[]) {
-  if (cells.length === 0) return "bg-white/30";
-  const tightest = Math.min(...cells.map((c) => c.available));
-  if (tightest < 0) return "bg-rose-500";
-  if (tightest === 0) return "bg-warn";
-  const smallest = Math.min(
-    ...cells.map((c) => Math.max(1, Math.round(c.sellable * 0.15))),
-  );
-  if (tightest <= smallest) return "bg-warn/70";
+/**
+ * The dot beside a room type: housekeeping, not availability.
+ *
+ * It used to report how tight the window was, which is what every cell on that
+ * row already says. The reference system's dot is the clean status — hover it
+ * and it says so — and that was the better use of the one mark on the rail.
+ *
+ * Aggregated, because a row is a room type and not a room. Rose while anything
+ * is waiting, slate when the whole type is out of order, emerald when there is
+ * nothing to do.
+ */
+function cleanDot(status: RoomTypeStatus | undefined) {
+  if (!status || status.totalRooms === 0) return "bg-white/30";
+  if (status.vacantDirty > 0) return "bg-rose-500";
+  if (status.outOfOrder === status.totalRooms) return "bg-slate-400";
   return "bg-emerald-400";
+}
+
+/** What that dot means, in the words a receptionist would use. */
+function cleanLabel(status: RoomTypeStatus | undefined) {
+  if (!status || status.totalRooms === 0) return "No rooms on this type";
+  const parts: string[] = [];
+  if (status.vacantDirty > 0) parts.push(`${status.vacantDirty} to clean`);
+  if (status.occupied > 0) parts.push(`${status.occupied} occupied`);
+  if (status.vacantClean > 0) parts.push(`${status.vacantClean} ready`);
+  if (status.outOfOrder > 0) parts.push(`${status.outOfOrder} out of order`);
+  return `Room clean status: ${parts.join(", ")}`;
 }
 
 function Bars({ placed }: { placed: Placed[] }) {
@@ -249,10 +290,13 @@ export function CalendarBoard({
   barsByType,
   canceledBars,
   seasons,
+  statusByType,
   shiftHref,
-  spanHref,
+  railHref,
   todayHref,
+  jumpAction,
   days,
+  railW = RAIL_DEFAULT_W,
 }: {
   dates: string[];
   businessDate: string;
@@ -266,10 +310,15 @@ export function CalendarBoard({
   barsByType: Map<string, CalendarBar[]>;
   canceledBars: CalendarBar[];
   seasons: CalendarSeason[];
+  statusByType: Map<string, RoomTypeStatus>;
   shiftHref: (days: number) => string;
-  spanHref: (days: number) => string;
+  /** Where + and − go: they size the rail, not the date range. */
+  railHref: (delta: number) => string;
   todayHref: string;
+  /** Where the date picker posts to, so any date is one step away. */
+  jumpAction: string;
   days: number;
+  railW?: number;
 }) {
   const gridW = dates.length * COL_W;
   const first = parseISO(dates[0]);
@@ -292,7 +341,7 @@ export function CalendarBoard({
         href={shiftHref(-days)}
         aria-label="Earlier dates"
         className="absolute z-40 flex h-5 w-5 items-center justify-center rounded-full bg-white/90 text-ink-muted shadow-card hover:text-ink"
-        style={{ left: RAIL_W + 6, top: HEAD_H + (SEASON_H - 20) / 2 }}
+        style={{ left: railW + 6, top: HEAD_H + (SEASON_H - 20) / 2 }}
       >
         ‹
       </Link>
@@ -306,40 +355,67 @@ export function CalendarBoard({
       </Link>
       {/* One scroller. Everything else freezes against it with `sticky`. */}
       <div className="overflow-auto" style={{ maxHeight: MAX_H }}>
-        <div style={{ width: RAIL_W + gridW }}>
+        <div style={{ width: railW + gridW }}>
           {/* Date header */}
           <div className="sticky top-0 z-30 flex" style={{ height: HEAD_H }}>
             <div
               className={cn(railCell, "z-40 px-3 py-1.5")}
-              style={{ width: RAIL_W }}
+              style={{ width: railW }}
             >
               <div className="flex items-center justify-between">
                 <span className="text-xxs font-semibold uppercase tracking-[0.12em] text-white/70">
                   Date
                 </span>
-                <Link
-                  href={spanHref(7)}
-                  aria-label="Show a week more"
-                  className="flex h-4 w-4 items-center justify-center rounded-sm bg-white/15 text-xs leading-none text-white hover:bg-white/30"
-                >
-                  +
-                </Link>
+                <span className="flex items-center gap-1">
+                  <Link
+                    href={railHref(RAIL_STEP)}
+                    aria-label="Widen the room column"
+                    title="Widen the room column"
+                    className="flex h-4 w-4 items-center justify-center rounded-sm bg-white/15 text-xs leading-none text-white hover:bg-white/30"
+                  >
+                    +
+                  </Link>
+                  <Link
+                    href={railHref(-RAIL_STEP)}
+                    aria-label="Narrow the room column"
+                    title="Narrow the room column"
+                    className="flex h-4 w-4 items-center justify-center rounded-sm bg-white/15 text-xs leading-none text-white hover:bg-white/30"
+                  >
+                    −
+                  </Link>
+                </span>
               </div>
-              <div className="mt-1 flex items-center justify-between">
-                <Link
-                  href={todayHref}
-                  className="text-xxs font-semibold uppercase tracking-[0.12em] text-white hover:underline"
+              <Link
+                href={todayHref}
+                className="mt-0.5 block text-xxs font-semibold uppercase tracking-[0.12em] text-white hover:underline"
+              >
+                Today
+              </Link>
+              {/*
+                Paging a fortnight at a time is fine for next week and useless
+                for next November. This jumps straight there, and it is a plain
+                GET form, so it needs no client JavaScript.
+              */}
+              <form action={jumpAction} method="get" className="mt-1 flex items-center gap-1">
+                <input type="hidden" name="days" value={days} />
+                {/* Carried through, or jumping to a date would reset the rail. */}
+                <input type="hidden" name="rail" value={railW} />
+                <label className="sr-only" htmlFor="jump-to">Go to date</label>
+                <input
+                  id="jump-to"
+                  type="date"
+                  name="from"
+                  defaultValue={dates[0]}
+                  className="h-[18px] min-w-0 flex-1 rounded-sm border-0 bg-white/15 px-1 text-xxs text-white outline-none focus-visible:ring-2 focus-visible:ring-white"
+                />
+                <button
+                  type="submit"
+                  aria-label="Go to that date"
+                  className="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-sm bg-white/15 text-xs leading-none text-white hover:bg-white/30"
                 >
-                  Today
-                </Link>
-                <Link
-                  href={spanHref(-7)}
-                  aria-label="Show a week less"
-                  className="flex h-4 w-4 items-center justify-center rounded-sm bg-white/15 text-xs leading-none text-white hover:bg-white/30"
-                >
-                  −
-                </Link>
-              </div>
+                  ›
+                </button>
+              </form>
             </div>
 
             <div className="flex bg-white" style={{ width: gridW }}>
@@ -384,7 +460,7 @@ export function CalendarBoard({
             className="sticky z-20 flex"
             style={{ top: HEAD_H, height: SEASON_H }}
           >
-            <div className={cn(railCell, "z-30")} style={{ width: RAIL_W }} />
+            <div className={cn(railCell, "z-30")} style={{ width: railW }} />
             <div
               className="relative border-b border-board-line bg-board"
               style={{ width: gridW }}
@@ -420,7 +496,7 @@ export function CalendarBoard({
                     */}
                     <span
                       className="sticky truncate whitespace-nowrap px-2 text-xxs font-bold uppercase tracking-[0.14em] text-white"
-                      style={{ left: RAIL_W + 28 }}
+                      style={{ left: railW + 28 }}
                     >
                       {s.name}
                     </span>
@@ -435,23 +511,40 @@ export function CalendarBoard({
             const bars = barsByType.get(t.roomTypeId) ?? [];
             const { placed, lanes } = packLanes(bars, dates);
             const rowH = rowHeight(lanes, true);
-            const windowCells = dates
-              .map((d) => cellAt.get(`${t.roomTypeId}|${d}`))
-              .filter((c): c is AvailabilityCell => Boolean(c));
             const byDate = new Map(
-              windowCells.map((c) => [c.date, c] as const),
+              dates
+                .map((d) => cellAt.get(`${t.roomTypeId}|${d}`))
+                .filter((c): c is AvailabilityCell => Boolean(c))
+                .map((c) => [c.date, c] as const),
             );
             const total = bars[0]?.typeTotal ?? 0;
 
             return (
               <div key={t.roomTypeId} className="flex items-stretch">
                 <div
-                  className={cn(railCell, "px-3 py-2")}
-                  style={{ width: RAIL_W }}
+                  className={cn(railCell, "group/rail relative px-3 py-2")}
+                  style={{ width: railW }}
                 >
+                  {/*
+                    Renaming a room type belongs in Settings, so this is a way
+                    in rather than a second editor. It appears on hover and on
+                    keyboard focus — hover alone would hide it from anyone
+                    working by tab, which a front desk does.
+                  */}
+                  <Link
+                    href={`/settings?tab=room-types&edit=${t.roomTypeId}`}
+                    title={`Rename ${t.roomTypeCode} in Settings`}
+                    aria-label={`Rename ${t.roomTypeCode} in Settings`}
+                    className="absolute right-2 top-2 flex h-5 w-5 items-center justify-center rounded bg-white/15 text-white opacity-0 transition hover:bg-white/30 focus:opacity-100 focus-visible:ring-2 focus-visible:ring-white group-hover/rail:opacity-100"
+                  >
+                    <svg viewBox="0 0 16 16" aria-hidden className="h-3 w-3 fill-current">
+                      <path d="M11.5 1.5a1.7 1.7 0 0 1 2.4 2.4l-.8.8-2.4-2.4zM9.6 3.4 2 11v2.4h2.4L12 5.8z" />
+                    </svg>
+                  </Link>
+
                   <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0">
-                      <div className="truncate text-[12.5px] font-bold uppercase tracking-[0.06em] text-white">
+                      <div className="truncate pr-6 text-[12.5px] font-bold uppercase tracking-[0.06em] text-white">
                         {t.roomTypeCode}
                       </div>
                       <div className="text-xxs leading-tight text-white/75">
@@ -463,10 +556,10 @@ export function CalendarBoard({
                       </div>
                     </div>
                     <span
-                      title="How tight this room type is across the dates shown"
+                      title={cleanLabel(statusByType.get(t.roomTypeId))}
                       className={cn(
-                        "mt-1 h-2.5 w-2.5 shrink-0 rounded-full",
-                        pressureDot(windowCells),
+                        "mt-6 h-2.5 w-2.5 shrink-0 rounded-full",
+                        cleanDot(statusByType.get(t.roomTypeId)),
                       )}
                     />
                   </div>
@@ -496,7 +589,7 @@ export function CalendarBoard({
               <div className="flex items-stretch">
                 <div
                   className={cn(railCell, "px-3 py-2")}
-                  style={{ width: RAIL_W }}
+                  style={{ width: railW }}
                 >
                   <div className="text-[12.5px] font-bold uppercase tracking-[0.06em] text-white/80">
                     Cancelled

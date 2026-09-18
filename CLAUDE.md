@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0044` are
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0045` are
 applied to the hosted database.
 
 Working on real data: dashboard (house board, movements, pace, activity feed),
@@ -134,6 +134,7 @@ Each read is a Postgres view or RPC, never aggregation in the client:
 | `getCalendarBookings(from, n, cap)` | `calendar_bookings(from, n, cap)`  |
 | `getCalendarSeasons(from, n)`       | `calendar_seasons(from, n)`        |
 | `getSeasonSettings()`               | `seasons` table                    |
+| `getRoomStatusByType()`             | `room_status_by_type()`            |
 | `getOccupancyReport(from, to)`      | `occupancy_report(from, to)`      |
 | `getDebtorsReport()`                | `debtors_report()`                |
 | `getPaymentsReport(from, to)`       | `payments_report(from, to)`       |
@@ -310,8 +311,35 @@ Defined in `tailwind.config.ts`. New UI must use these tokens.
 across the top, one bar per booked room across the nights it covers. The client
 showed the Reservation Centric calendar and asked for it by name.
 
-- **Rows stay room types.** The reference runs a small property; ours does not
-  get to assume that. See the note on `getCalendarBookings()` above.
+- **Rows stay room types.** The reference runs a small property — its rail rows
+  look like individual rooms, which is why hovering its dot says "Room clean
+  status is: Dirty" in the singular. Ours does not get to assume that scale.
+  See the note on `getCalendarBookings()` above.
+- **The dot on the rail is housekeeping, not availability.** It used to report
+  how tight the window was, which every cell on that row already says. It now
+  reads `room_status_by_type()` — rose while anything waits to be cleaned,
+  slate when the whole type is out of order, emerald when there is nothing to
+  do — and its tooltip gives the breakdown in a receptionist's words. Counts
+  per type, never a room list, so it is the same size at 40 rooms and at 1,800.
+- **The rail's pencil goes to Settings.** Hovering a room type shows an edit
+  affordance, as the reference does, linking to
+  `/settings?tab=room-types&edit=<id>`, which opens that type's form on
+  arrival. It is a way in, not a second editor: renaming still happens in one
+  place. It appears on focus as well as hover, because hover alone hides it
+  from anyone working by tab.
+- **The corner carries a date jump.** Paging a fortnight at a time is fine for
+  next week and useless for next November, which is where the client's own
+  calendar was sitting. It is a plain GET form, so it needs no client
+  JavaScript, and `HEAD_H` is tall enough for three rows — at two the controls
+  shared a line and the "−" was pushed off the end of the rail.
+- **`+` and `−` size the rail, not the date range.** They widen and narrow the
+  blue room column, between `RAIL_MIN_W` and `RAIL_MAX_W`, so a long room type
+  name can be read in full without the dates moving underneath it. They were
+  first built to change how many days were shown, which the client corrected.
+  The width rides in `?rail=`, and every link and the jump form carry it —
+  drop it from one of them and going to a date silently resets the column.
+  `railW` is a prop rather than a constant because the chevron's offset and the
+  season label's sticky `left` are both arithmetic over it.
 - **The board keeps the availability figure**, faint at the foot of each cell,
   because that is what this screen used to be and is the only thing on it that
   answers "can I sell tonight". It sits in a reserved strip rather than behind

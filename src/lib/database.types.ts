@@ -3295,6 +3295,17 @@ export type Database = {
         Args: { p_external_reference?: string; p_payment_id: string }
         Returns: string
       }
+      room_status_by_type: {
+        Args: never
+        Returns: {
+          occupied: number
+          out_of_order: number
+          room_type_id: string
+          total_rooms: number
+          vacant_clean: number
+          vacant_dirty: number
+        }[]
+      }
       rooms_for_settings: {
         Args: { p_limit?: number; p_offset?: number; p_q?: string }
         Returns: {

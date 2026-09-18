@@ -117,6 +117,7 @@ export function SettingsScreen({
   seasons,
   paymentMethods,
   staff,
+  editRoomTypeId,
   meId,
   canEdit,
   isAdmin,
@@ -130,6 +131,8 @@ export function SettingsScreen({
   taxRates: TaxRateSetting[];
   seasons: CalendarSeason[];
   paymentMethods: PaymentMethodSetting[];
+  /** A room type to open for editing on arrival, from the calendar's rail. */
+  editRoomTypeId: string | null;
   staff: StaffSetting[];
   meId: string | null;
   canEdit: boolean;
@@ -168,7 +171,20 @@ export function SettingsScreen({
     name: string;
     baseOccupancy: string;
     maxOccupancy: string;
-  } | null>(null);
+  } | null>(() => {
+    // The calendar's rail links here to rename a type, so arriving with that
+    // id opens its form rather than a list somebody then has to search. An id
+    // that no longer exists opens nothing, which is the right nothing.
+    const t = roomTypes.find((x) => x.id === editRoomTypeId);
+    if (!t) return null;
+    return {
+      id: t.id,
+      code: t.code,
+      name: t.name,
+      baseOccupancy: String(t.baseOccupancy),
+      maxOccupancy: String(t.maxOccupancy),
+    };
+  });
 
   /* -- Rooms ---------------------------------------------------------- */
   const [run_, setRun] = useState({
