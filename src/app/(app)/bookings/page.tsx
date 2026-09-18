@@ -79,6 +79,33 @@ export default async function BookingsPage({
         </button>
       </form>
 
+      {/*
+        Today's three operational lists.
+
+        The Bookings menu was cut to the three items the client's reference
+        system carries — Add Simple, Add Group, Search — which took Arrivals,
+        Departures and In house out of the nav. They are built screens on live
+        data, so they hang here instead of being stranded: this is the page
+        somebody is already on when they want them.
+      */}
+      <div className="mb-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-[13px]">
+        <span className="text-xxs font-semibold uppercase tracking-[0.1em] text-ink-faint">
+          Today
+        </span>
+        <Link href="/bookings/arrivals" className="text-brass hover:underline">
+          Arrivals
+        </Link>
+        <Link href="/bookings/departures" className="text-brass hover:underline">
+          Departures
+        </Link>
+        <Link
+          href="/bookings?status=checked_in"
+          className="text-brass hover:underline"
+        >
+          In house
+        </Link>
+      </div>
+
       {rows.length === 0 ? (
         <EmptyState
           title="No bookings match these filters"

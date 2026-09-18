@@ -17,7 +17,7 @@ const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 export default async function NewBookingPage({
   searchParams,
 }: {
-  searchParams: Promise<{ check_in?: string; room_type?: string }>;
+  searchParams: Promise<{ check_in?: string; room_type?: string; group?: string }>;
 }) {
   const sp = await searchParams;
   const staff = await getCurrentStaffUser();
@@ -62,11 +62,27 @@ export default async function NewBookingPage({
     getBookableRoomTypes(arrival, nextDay),
   ]);
 
+  /*
+   * "Add Group Booking" is the same transaction, not a second kind of booking.
+   *
+   * The client's reference system offers Simple and Group as two menu items, so
+   * ours does too — but a group here is one `bookings` row with several
+   * `booking_rooms` on it, which `create_booking()` has always taken. There is
+   * no group flag in the schema and inventing one would be a second booking
+   * model to keep in step with the first. What changes is the wording, so
+   * somebody who picked Group is told where the rooms go.
+   */
+  const group = sp.group === "1";
+
   return (
     <div>
       <PageHeader
-        title="New booking"
-        subtitle="Dates, rooms and a guest. The rate is per room per night, before tax."
+        title={group ? "New group booking" : "New booking"}
+        subtitle={
+          group
+            ? "One booking, several rooms. Add a room line for each, then a guest to hold it."
+            : "Dates, rooms and a guest. The rate is per room per night, before tax."
+        }
       />
       <NewBookingForm
         businessDate={businessDate}
