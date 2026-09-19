@@ -13,6 +13,7 @@ import {
   saveCustomer,
   setExcludeFromEmail,
 } from "@/lib/actions/customers";
+import { COUNTRIES } from "@/lib/countries";
 import type { Customer, CustomerKind } from "@/lib/types";
 
 /**
@@ -50,6 +51,11 @@ interface FormState {
   email: string;
   phone: string;
   excludeFromEmail: boolean;
+  nationality: string;
+  country: string;
+  passportNumber: string;
+  passportExpiry: string;
+  dateOfBirth: string;
 }
 
 const EMPTY: FormState = {
@@ -62,6 +68,11 @@ const EMPTY: FormState = {
   email: "",
   phone: "",
   excludeFromEmail: false,
+  nationality: "",
+  country: "",
+  passportNumber: "",
+  passportExpiry: "",
+  dateOfBirth: "",
 };
 
 export function CustomersScreen({
@@ -393,6 +404,93 @@ export function CustomersScreen({
               />
             </div>
           </div>
+
+          {/*
+            Identity, in its own band because it is filled in at a different
+            moment from everything above it: a booking is taken over the phone,
+            a passport is seen at the desk. Every field is optional -- making
+            any of it required would refuse the commonest thing this form does.
+
+            Nationality and country are separate on purpose. A German passport
+            holder living in Paris is a German national and a French booking,
+            and the two reports that read these ask different questions.
+          */}
+          <fieldset className="mt-4 rounded-md border border-line bg-shell/50 p-3">
+            <legend className="px-1 text-xxs font-semibold uppercase tracking-[0.1em] text-ink-faint">
+              Identity — for the immigration and country reports
+            </legend>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div>
+                <label className={label} htmlFor="c-nationality">Nationality</label>
+                <select
+                  id="c-nationality"
+                  value={form.nationality}
+                  onChange={(e) =>
+                    setForm({ ...form, nationality: e.target.value })
+                  }
+                  className={field}
+                >
+                  <option value="">Not recorded</option>
+                  {COUNTRIES.map((c) => (
+                    <option key={c.code} value={c.code}>
+                      {c.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className={label} htmlFor="c-country">Country of residence</label>
+                <select
+                  id="c-country"
+                  value={form.country}
+                  onChange={(e) => setForm({ ...form, country: e.target.value })}
+                  className={field}
+                >
+                  <option value="">Not recorded</option>
+                  {COUNTRIES.map((c) => (
+                    <option key={c.code} value={c.code}>
+                      {c.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className={label} htmlFor="c-passport">Passport number</label>
+                <input
+                  id="c-passport"
+                  value={form.passportNumber}
+                  onChange={(e) =>
+                    setForm({ ...form, passportNumber: e.target.value })
+                  }
+                  className={field}
+                />
+              </div>
+              <div>
+                <label className={label} htmlFor="c-passport-exp">Passport expiry</label>
+                <input
+                  id="c-passport-exp"
+                  type="date"
+                  value={form.passportExpiry}
+                  onChange={(e) =>
+                    setForm({ ...form, passportExpiry: e.target.value })
+                  }
+                  className={field}
+                />
+              </div>
+              <div>
+                <label className={label} htmlFor="c-dob">Date of birth</label>
+                <input
+                  id="c-dob"
+                  type="date"
+                  value={form.dateOfBirth}
+                  onChange={(e) =>
+                    setForm({ ...form, dateOfBirth: e.target.value })
+                  }
+                  className={field}
+                />
+              </div>
+            </div>
+          </fieldset>
 
           <label className="mt-3 flex items-center gap-2 text-[13px] text-ink">
             <input

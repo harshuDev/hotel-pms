@@ -25,6 +25,17 @@ export interface SaveCustomerInput {
   email: string;
   phone: string;
   excludeFromEmail: boolean;
+  /*
+    Identity, for the Immigration and Country reports. All optional: a
+    reservation is taken over the phone with a name, and a passport is seen
+    when the guest walks in. Requiring any of it here would make the form
+    refuse the commonest thing it is used for.
+  */
+  nationality: string;
+  country: string;
+  passportNumber: string;
+  passportExpiry: string;
+  dateOfBirth: string;
 }
 
 type Result<T = undefined> =
@@ -51,6 +62,13 @@ export async function saveCustomer(
     p_phone: input.phone.trim() || null,
     p_exclude_from_email: input.excludeFromEmail,
     p_id: input.id,
+    p_nationality: input.nationality.trim() || null,
+    p_country: input.country.trim() || null,
+    p_passport_number: input.passportNumber.trim() || null,
+    // An empty date input posts "", which is not a date. Null means "not
+    // recorded"; "" would be a parse error at the other end.
+    p_passport_expiry: input.passportExpiry.trim() || null,
+    p_date_of_birth: input.dateOfBirth.trim() || null,
   });
 
   if (error) return failure(error.message);
@@ -130,6 +148,11 @@ export async function getCustomerForEdit(id: string): Promise<
     email: string;
     phone: string;
     excludeFromEmail: boolean;
+    nationality: string;
+    country: string;
+    passportNumber: string;
+    passportExpiry: string;
+    dateOfBirth: string;
   }>
 > {
   const supabase = await createClient();
@@ -148,6 +171,11 @@ export async function getCustomerForEdit(id: string): Promise<
         email: string | null;
         phone: string | null;
         exclude_from_email: boolean;
+        nationality: string | null;
+        country: string | null;
+        passport_number: string | null;
+        passport_expiry: string | null;
+        date_of_birth: string | null;
       }
     | undefined;
 
@@ -165,6 +193,13 @@ export async function getCustomerForEdit(id: string): Promise<
       email: row.email ?? "",
       phone: row.phone ?? "",
       excludeFromEmail: row.exclude_from_email,
+      // "" rather than null throughout, because these feed controlled inputs
+      // and React logs a warning the moment one flips between the two.
+      nationality: row.nationality ?? "",
+      country: row.country ?? "",
+      passportNumber: row.passport_number ?? "",
+      passportExpiry: row.passport_expiry ?? "",
+      dateOfBirth: row.date_of_birth ?? "",
     },
   };
 }

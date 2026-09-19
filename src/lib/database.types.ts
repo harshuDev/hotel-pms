@@ -227,6 +227,63 @@ export type Database = {
           },
         ]
       }
+      booking_waitlist: {
+        Row: {
+          adults: number
+          check_in: string
+          check_out: string
+          children: number
+          contact_email: string | null
+          contact_name: string | null
+          contact_phone: string | null
+          converted_booking_id: string | null
+          created_at: string
+          created_by: string | null
+          customer_id: string | null
+          id: string
+          notes: string | null
+          property_id: string
+          room_type_id: string | null
+          status: Database["public"]["Enums"]["waitlist_status"]
+        }
+        Insert: {
+          adults?: number
+          check_in: string
+          check_out: string
+          children?: number
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          converted_booking_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          customer_id?: string | null
+          id?: string
+          notes?: string | null
+          property_id: string
+          room_type_id?: string | null
+          status?: Database["public"]["Enums"]["waitlist_status"]
+        }
+        Update: {
+          adults?: number
+          check_in?: string
+          check_out?: string
+          children?: number
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          converted_booking_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          customer_id?: string | null
+          id?: string
+          notes?: string | null
+          property_id?: string
+          room_type_id?: string | null
+          status?: Database["public"]["Enums"]["waitlist_status"]
+        }
+        Relationships: []
+      }
       bookings: {
         Row: {
           adults: number
@@ -634,8 +691,10 @@ export type Database = {
       customers: {
         Row: {
           company_name: string | null
+          country: string | null
           created_at: string
           customer_number: number
+          date_of_birth: string | null
           email: string | null
           exclude_from_email: boolean
           first_name: string | null
@@ -644,13 +703,18 @@ export type Database = {
           last_name: string | null
           merged_into_id: string | null
           national_id_number: string | null
+          nationality: string | null
+          passport_expiry: string | null
+          passport_number: string | null
           phone: string | null
           property_id: string
         }
         Insert: {
           company_name?: string | null
+          country?: string | null
           created_at?: string
           customer_number?: number
+          date_of_birth?: string | null
           email?: string | null
           exclude_from_email?: boolean
           first_name?: string | null
@@ -659,13 +723,18 @@ export type Database = {
           last_name?: string | null
           merged_into_id?: string | null
           national_id_number?: string | null
+          nationality?: string | null
+          passport_expiry?: string | null
+          passport_number?: string | null
           phone?: string | null
           property_id: string
         }
         Update: {
           company_name?: string | null
+          country?: string | null
           created_at?: string
           customer_number?: number
+          date_of_birth?: string | null
           email?: string | null
           exclude_from_email?: boolean
           first_name?: string | null
@@ -674,6 +743,9 @@ export type Database = {
           last_name?: string | null
           merged_into_id?: string | null
           national_id_number?: string | null
+          nationality?: string | null
+          passport_expiry?: string | null
+          passport_number?: string | null
           phone?: string | null
           property_id?: string
         }
@@ -2182,6 +2254,17 @@ export type Database = {
       }
     }
     Functions: {
+      accounting_report: {
+        Args: { p_from: string; p_to: string }
+        Returns: {
+          code: string
+          gross_cents: number
+          label: string
+          net_cents: number
+          section: string
+          tax_cents: number
+        }[]
+      }
       activity_feed: {
         Args: { p_limit?: number; p_offset?: number }
         Returns: {
@@ -2192,6 +2275,21 @@ export type Database = {
           summary: string
           unread: boolean
         }[]
+      }
+      add_to_waitlist: {
+        Args: {
+          p_adults?: number
+          p_check_in: string
+          p_check_out: string
+          p_children?: number
+          p_contact_email?: string | null
+          p_contact_name?: string | null
+          p_contact_phone?: string | null
+          p_customer_id?: string | null
+          p_notes?: string | null
+          p_room_type_id?: string | null
+        }
+        Returns: string
       }
       apply_tax_rate: {
         Args: { p_amount_cents: number; p_tax_rate_id: string }
@@ -2391,6 +2489,30 @@ export type Database = {
           room_id: string
           room_number: string
           room_type_name: string
+        }[]
+      }
+      booking_waitlist_report: {
+        Args: {
+          p_from: string
+          p_status?: Database["public"]["Enums"]["waitlist_status"] | null
+          p_to: string
+        }
+        Returns: {
+          adults: number
+          check_in: string
+          check_out: string
+          children: number
+          contact_email: string | null
+          contact_phone: string | null
+          converted_reference: string | null
+          created_at: string
+          created_by_name: string | null
+          guest_name: string
+          id: string
+          nights: number
+          notes: string | null
+          room_type_name: string
+          status: string
         }[]
       }
       bookings_page: {
@@ -2608,6 +2730,16 @@ export type Database = {
         Returns: undefined
       }
       confirm_booking: { Args: { p_booking_id: string }; Returns: undefined }
+      country_report: {
+        Args: { p_from: string; p_to: string }
+        Returns: {
+          bookings: number
+          country: string
+          guests: number
+          revenue_cents: number
+          room_nights: number
+        }[]
+      }
       create_booking: {
         Args: {
           p_adults?: number
@@ -2836,6 +2968,22 @@ export type Database = {
         }[]
       }
       delete_season: { Args: { p_id: string }; Returns: undefined }
+      deposit_report: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          booking_id: string
+          charges_cents: number
+          check_in: string
+          check_out: string
+          days_to_arrival: number
+          deposit_cents: number
+          guest_name: string
+          nights: number
+          reference: string
+          status: string
+          stay_value_cents: number
+        }[]
+      }
       eligible_promotions: {
         Args: {
           p_booked_on?: string
@@ -2878,6 +3026,28 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      end_of_day_report: {
+        Args: { p_date: string }
+        Returns: {
+          arrivals: number
+          business_date: string
+          closed_at: string | null
+          closed_by: string | null
+          date_status: string
+          departures: number
+          drawer_cents: number
+          in_house: number
+          no_shows: number
+          occupancy_pct: number
+          other_revenue_cents: number
+          payments_cents: number
+          room_revenue_cents: number
+          rooms_sold: number
+          sellable_rooms: number
+          shifts_open: number
+          tax_cents: number
+        }[]
+      }
       extras_report: {
         Args: { p_from: string; p_to: string }
         Returns: {
@@ -2900,6 +3070,22 @@ export type Database = {
           payments_cents: number
           room_revenue_cents: number
           tax_cents: number
+        }[]
+      }
+      folio_report: {
+        Args: { p_from: string; p_to: string }
+        Returns: {
+          balance_cents: number
+          charges_cents: number
+          closed_at: string | null
+          folio_id: string
+          folio_number: number
+          guest_name: string
+          kind: string
+          opened_at: string
+          payments_cents: number
+          reference: string
+          status: string
         }[]
       }
       get_folio_balance: {
@@ -2973,6 +3159,25 @@ export type Database = {
           vacant_dirty: number
         }[]
       }
+      immigration_report: {
+        Args: { p_from: string; p_to: string }
+        Returns: {
+          booking_id: string
+          check_in: string
+          check_out: string
+          country: string | null
+          date_of_birth: string | null
+          guest_name: string
+          is_complete: boolean
+          national_id_number: string | null
+          nationality: string | null
+          nights: number
+          passport_expiry: string | null
+          passport_number: string | null
+          reference: string
+          room_number: string
+        }[]
+      }
       in_house_report: {
         Args: never
         Returns: {
@@ -3025,6 +3230,23 @@ export type Database = {
       is_front_office_staff: { Args: never; Returns: boolean }
       is_revenue_staff: { Args: never; Returns: boolean }
       mark_activity_seen: { Args: never; Returns: string }
+      manager_report: {
+        Args: { p_from: string; p_to: string }
+        Returns: {
+          adr_cents: number
+          arrivals: number
+          business_date: string
+          departures: number
+          occupancy_pct: number
+          other_revenue_cents: number
+          payments_cents: number
+          revpar_cents: number
+          room_revenue_cents: number
+          rooms_sold: number
+          sellable_rooms: number
+          total_revenue_cents: number
+        }[]
+      }
       merge_customers: {
         Args: { p_keep_id: string; p_merge_ids: string[] }
         Returns: {
@@ -3265,6 +3487,20 @@ export type Database = {
           unavailable_reason: string
         }[]
       }
+      rate_plan_report: {
+        Args: { p_from: string; p_to: string }
+        Returns: {
+          adr_cents: number
+          bookings: number
+          discount_cents: number
+          gross_cents: number
+          is_public: boolean
+          net_cents: number
+          plan_name: string
+          rate_plan_id: string | null
+          room_nights: number
+        }[]
+      }
       record_cash_movement: {
         Args: {
           p_amount_cents: number
@@ -3301,6 +3537,10 @@ export type Database = {
       }
       require_financial_staff: { Args: never; Returns: undefined }
       require_money_reports: { Args: never; Returns: undefined }
+      require_guest_identity_reports: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       reservations_report: {
         Args: { p_from: string; p_to: string }
         Returns: {
@@ -3638,6 +3878,14 @@ export type Database = {
         }
         Returns: number
       }
+      set_waitlist_status: {
+        Args: {
+          p_booking_id?: string | null
+          p_id: string
+          p_status: Database["public"]["Enums"]["waitlist_status"]
+        }
+        Returns: undefined
+      }
       stay_rule_violation: {
         Args: {
           p_check_in: string
@@ -3737,6 +3985,12 @@ export type Database = {
         | "cashier"
         | "housekeeping"
       tax_inclusion: "inclusive" | "exclusive"
+      waitlist_status:
+        | "waiting"
+        | "offered"
+        | "converted"
+        | "expired"
+        | "canceled"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -3924,6 +4178,13 @@ export const Constants = {
       room_status: ["vacant_clean", "vacant_dirty", "occupied", "ooo"],
       staff_role: ["admin", "manager", "front_desk", "cashier", "housekeeping"],
       tax_inclusion: ["inclusive", "exclusive"],
+      waitlist_status: [
+        "waiting",
+        "offered",
+        "converted",
+        "expired",
+        "canceled",
+      ],
     },
   },
 } as const

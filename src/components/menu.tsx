@@ -38,6 +38,14 @@ interface MenuProps {
   onOpenChange: (open: boolean) => void;
   active?: boolean;
   columns?: 1 | 2;
+  /**
+   * A single column that scrolls once it is taller than the viewport allows.
+   *
+   * The Reports menu carries twenty-two items, which is what the client's
+   * reference system does and how they expect to find it. Two columns fits
+   * without scrolling and was tried; they asked for the reference's shape.
+   */
+  scroll?: boolean;
   align?: "start" | "end";
   triggerClassName?: string;
   /** Replaces the default label-plus-chevron trigger content. */
@@ -51,6 +59,7 @@ export function Menu({
   onOpenChange,
   active = false,
   columns = 1,
+  scroll = false,
   align = "start",
   triggerClassName,
   triggerContent,
@@ -188,6 +197,10 @@ export function Menu({
             columns === 2
               ? "grid w-[392px] grid-cols-2 gap-x-1"
               : "block min-w-[196px]",
+            // 78vh rather than a fixed pixel height: the bar is 56px and this
+            // hangs below it, so a fixed height overflows the window on a
+            // laptop and wastes half the screen on a desktop.
+            scroll && "max-h-[78vh] overflow-y-auto overscroll-contain",
           )}
         >
           {children}

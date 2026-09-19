@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0049` are
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0052` are
 applied to the hosted database.
 
 Working on real data: dashboard (house board, movements, pace, activity feed),
@@ -14,9 +14,11 @@ bookings list, customers, the availability calendar, cashier (open a shift,
 take payments, record paid-outs, blind close), check-in and check-out, the
 night audit that advances the business date, taking a booking, all nine
 Inventory screens, the booking screen with edit and cancel, promotions,
-meeting rooms, property settings, the guest booking page, and thirteen reports — occupancy, debtors, payments,
-financial, extras, daily checkout, booking, reservations, cancellation,
-channel, housekeeping, in house and meal.
+meeting rooms, property settings, the guest booking page, all eleven Inventory
+screens, and twenty-two reports — occupancy, debtors, payments, financial,
+extras, daily checkout, booking, reservations, cancellation, channel,
+housekeeping, in house, meal, manager, folio, immigration, country, deposit,
+rate plan, accounting, end of day and booking waitlist.
 
 **The hosted property is set up and can take a booking.** The Grand Hotel holds
 four room types and 120 rooms — Standard Double 101–160 on floor 1, Twin
@@ -62,6 +64,25 @@ current design, not as drift.
 
 1. **Nav order and labels.** Section order is fixed: Dashboard, Calendar,
    Inventory, Bookings, Promotions, Reports, Customers, Cashier, Meeting Rooms.
+   - **The Reports menu carries twenty-two items and Inventory eleven**, in the
+     reference's order and with the reference's labels. The order is theirs
+     rather than anything meaningful, and it is kept so somebody moving between
+     the two systems finds the same item in the same place.
+     - Reports read "Payments Report", "Daily Checkout Report" and so on —
+       Title Case with the word Report on the end, as theirs do. The one
+       departure is "Reservations Report": their own screen has it lower-case,
+       which is a slip rather than a decision, and copying it would have been
+       copying a typo.
+     - Inventory keeps their mixed casing exactly — "Min Stay Through" and
+       "Stop Sell" in Title Case beside "Closed to arrival" in sentence case.
+       That looks like an inconsistency because it is one, and it is theirs;
+       tidying it would be the one thing that made our menu look unlike the
+       screenshot they sent.
+     - **Reports is one scrolling column, not two.** `scroll` on the section
+       and on `Menu` caps the panel at `78vh` and lets it scroll, which is what
+       their menu does. Two columns fits twenty-two items without scrolling and
+       was what we had; they compared the two and asked for theirs. Do not
+       "improve" it back into columns.
    - **The Bookings menu carries exactly three items**, matching the reference:
      Add Simple Booking, Add Group Booking, Search. It used to carry five.
      **Arrivals, Departures and In house are still built and still reachable** —
@@ -322,6 +343,16 @@ the component.
 - Sum `signed_net_amount_cents` and `signed_tax_amount_cents`, never the
   unsigned columns. They carry the reversal sign the same way
   `signed_amount_cents` does.
+- **There are two gates and they raise the same string.**
+  `require_money_reports()` covers anything showing money;
+  `require_guest_identity_reports()` (0052) covers the immigration and waitlist
+  reports, which show passport numbers, dates of birth and guest contact
+  details. A cashier may read a folio and has no business reading a travel
+  document, so the money test is the wrong one there. Both raise
+  `REPORT_ACCESS_DENIED`, because `queries.ts` matches that string to render
+  `<ReportNoAccess />` and a second string would be a second branch at both
+  ends for an identical outcome. What differs is who passes, not what the
+  refusal looks like.
 - The revenue and payment reports are gated by `require_money_reports()`, which
   raises `REPORT_ACCESS_DENIED` for housekeeping. `src/lib/queries.ts` turns
   that into a `ReportAccessError` and the page renders `<ReportNoAccess />`.
@@ -583,10 +614,28 @@ anywhere else. Collapsed height must stay constant regardless of room count.
   and it keeps "min stay of one" distinct from "no min stay". A null
   `rate_cents` means no rate is loaded, which is not the same as free: a
   booking against it is refused.
-- **All nine Inventory screens are one grid with a different column brought
-  forward.** `inventory_grid()` reads it, `src/components/inventory/` renders
-  it, and `SCREENS` in `field-spec.ts` says what each one shows and sets. Do
-  not build a tenth screen by copying a ninth.
+- **The Inventory menu is eleven items, matching the reference.** Nine of them
+  are one grid with a different column brought forward: `inventory_grid()`
+  reads it, `src/components/inventory/` renders it, and `SCREENS` in
+  `field-spec.ts` says what each one shows and sets. Do not build a tenth
+  editing screen by copying a ninth.
+  - **"All" is the tenth entry and edits nothing.** `inventory-all.tsx` draws
+    every field at once, a block of rows per room type, over the same
+    `inventory_grid()` read — there was nothing to add in Postgres, only a way
+    to look at it. It answers "why will this date not sell", which no
+    single-field screen can, because the reason is usually on a different
+    screen from the one you are looking at. Cells that are actively stopping a
+    sale are shaded rose. **It stays read-only**: editing any field from here
+    would need either a tenth generic setter, which the field coming from the
+    browser is exactly the argument against, or nine bulk editors on one page.
+    Each row heading links to the screen that does edit it.
+  - **"Rates (Main)" and "Rates (All)" are the same field.** Main pins the
+    property's default plan and hides the switcher; All lets you pick. Two
+    entries for one field is not duplication — changing the main rate is most
+    of what anyone does here, and making them choose the plan first every time
+    is a click that is always the same click. `?plan=` is ignored on Main
+    rather than honoured, or a link carrying it would silently turn the pinned
+    screen into the unpinned one.
 - **Inventory is edited in bulk or not at all.** Every setter takes a date
   range, a set of room types and an optional set of weekdays, because "min stay
   two on every Friday and Saturday until March" is the actual job. Setting one
@@ -936,6 +985,72 @@ anywhere else. Collapsed height must stay constant regardless of room count.
   - **Every field is quoted against CSV injection.** A leading `=`, `+`, `-` or
     `@` makes Excel treat a cell as a formula, so a customer name starting with
     one is prefixed with a quote.
+- **Guest identity is five nullable columns on `customers`, added in 0050**:
+  `nationality`, `country`, `passport_number`, `passport_expiry` and
+  `date_of_birth`. They exist for the Immigration and Country reports.
+  - **Nationality and country are not the same field and must not be merged.**
+    A German passport holder living in Paris is a German national and a French
+    booking. The immigration return wants the first; the Country report wants
+    the second. Collapsing them would quietly make one of the two wrong.
+  - **Both are ISO 3166-1 alpha-2, enforced by a check constraint**, because a
+    free-text country column becomes "UK", "U.K.", "United Kingdom" and
+    "England" within a fortnight and the report then counts four countries that
+    are one. `src/lib/countries.ts` holds the list — not a table, because
+    reference data that changes once every few years would otherwise be a
+    migration every time a country is renamed and a join on every screen.
+    `save_customer()` upper-cases what it is given rather than refusing "gb".
+  - **Every field stays nullable and every existing row stays null.** These are
+    taken at check-in, not at booking: a reservation is made over the phone
+    with a name and a card, and a passport is seen when the guest walks in.
+    Making any of it required would refuse every booking the guest booking page
+    takes. The Immigration report shows incomplete rows, flagged and counted,
+    rather than hiding them — an unfileable return that looks complete is the
+    one failure this report exists to prevent.
+  - `merge_customers()` fills these on the keeper the same way it fills a phone
+    number. A passport held only on the duplicate would otherwise vanish the
+    moment somebody tidied up two records of one guest.
+- **The booking waitlist is a real table, added in 0051, and holds no
+  inventory.** `booking_waitlist` records somebody who asked for dates the
+  hotel could not sell. Nothing in it reserves a room, generates a night or
+  appears in occupancy — an entry that quietly held a room would be an
+  overbooking nobody asked for.
+  - **It never mints a booking.** `set_waitlist_status(..., 'converted')` takes
+    the booking that was made; it does not make one. Taking a reservation goes
+    through `create_booking()` and nothing else, and a waitlist that could
+    create one would be a second booking path with none of the inventory
+    checks. The screen's "Book" button opens the ordinary booking form.
+  - An entry carries either a `customer_id` or loose contact details, not
+    necessarily both: an enquiry that never becomes a booking should not have
+    to create a customer record to be written down.
+  - **There is no delete policy.** An entry that came to nothing is `expired`
+    or `canceled`; removing it loses the fact that somebody asked, which is the
+    only thing the list is evidence of.
+- **The Deposit report is derived and adds no column.** A deposit is any
+  payment taken against a booking that has not checked in — a fact about the
+  booking's status, not about the money. An `is_deposit` flag would be a second
+  thing to set correctly and a new way for this report and the cashier drawer
+  to disagree. Once the guest arrives the booking drops off: it is a part-paid
+  folio from then on, which is the debtors report's question.
+- **The Accounting report shows revenue and receipts over one range, and they
+  are not meant to agree.** Revenue is what was earned in the range; receipts
+  are what was collected in it. A guest who pays in March and leaves in April
+  moves the two apart, correctly. They are one report rather than two because
+  a bookkeeper checks one against the other, and two date pickers is how
+  somebody ends up comparing March revenue with April receipts. Tax is shown
+  against the revenue it belongs to and never as a category of its own, which
+  would double it.
+- **The End of day report takes one date and not a range.** The audit closes a
+  day at a time and this is the record of one closing; a range of them is the
+  Manager report, which is a different screen for a different question.
+- **The Manager report computes nothing new.** Every figure is worked out in
+  Postgres the same way the report it belongs to works it out, so the front
+  page and the occupancy report cannot drift — which is the usual fate of a
+  summary screen.
+- **The Rate plan report counts pre-0037 nights under "Not recorded".**
+  `booking_rooms.rate_plan_id` did not exist before then, so nothing says which
+  plan those nights were on. They are labelled rather than dropped, because the
+  totals have to tie to the occupancy report and a report that quietly excludes
+  a stretch of history is worse than one that admits it.
 - **Creating a login is not in the application.** `staff_users.id` references
   `auth.users`, so a new member of staff needs an auth account before a row can
   point at one. Settings manages the staff who already exist — name, role, and
@@ -1025,7 +1140,10 @@ pnpm supabase migration new <name>
 - **Phase 2 — done.** Availability calendar, booking creation, the booking
   screen with edit and cancel, all nine Inventory screens, promotions and
   meeting rooms.
-- **Reports — done.** All thirteen, Meal included as of 0038.
+- **Reports — done.** All twenty-two. The first thirteen shipped by 0038; the
+  other nine (manager, folio, immigration, country, deposit, rate plan,
+  accounting, end of day, booking waitlist) landed in 0050–0052, which also
+  added the guest identity fields and the waitlist table they needed.
 
 ### What still renders `<ComingSoon />`
 

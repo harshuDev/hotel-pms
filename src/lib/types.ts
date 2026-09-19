@@ -936,3 +936,156 @@ export interface MealReportRow {
   totalCovers: number;
 }
 
+
+/* -------------------------------------------------------------------------- */
+/* The nine reports added to match the client's reference system              */
+/* -------------------------------------------------------------------------- */
+
+/** One business date on the manager's front page. */
+export interface ManagerRow {
+  businessDate: string;
+  roomsSold: number;
+  sellableRooms: number;
+  occupancyPct: number;
+  adrCents: number;
+  revparCents: number;
+  roomRevenueCents: number;
+  otherRevenueCents: number;
+  totalRevenueCents: number;
+  paymentsCents: number;
+  arrivals: number;
+  departures: number;
+}
+
+/** One folio touched in the range. Positive balance means the guest owes. */
+export interface FolioReportRow {
+  folioId: string;
+  folioNumber: number;
+  kind: string;
+  status: string;
+  reference: string;
+  guestName: string;
+  openedAt: string;
+  closedAt: string | null;
+  chargesCents: number;
+  paymentsCents: number;
+  balanceCents: number;
+}
+
+/**
+ * One stay on the immigration return.
+ *
+ * `isComplete` is false where a document, a nationality or a birth date is
+ * missing. Those rows are returned rather than dropped: an incomplete return is
+ * the thing this report exists to surface.
+ */
+export interface ImmigrationRow {
+  bookingId: string;
+  reference: string;
+  guestName: string;
+  roomNumber: string;
+  nationality: string | null;
+  country: string | null;
+  passportNumber: string | null;
+  passportExpiry: string | null;
+  nationalIdNumber: string | null;
+  dateOfBirth: string | null;
+  checkIn: string;
+  checkOut: string;
+  nights: number;
+  isComplete: boolean;
+}
+
+/** Guests by country of residence. `country` is "Unknown" where none is held. */
+export interface CountryRow {
+  country: string;
+  bookings: number;
+  guests: number;
+  roomNights: number;
+  revenueCents: number;
+}
+
+/** Money held against a stay that has not started. */
+export interface DepositRow {
+  bookingId: string;
+  reference: string;
+  guestName: string;
+  status: string;
+  checkIn: string;
+  checkOut: string;
+  nights: number;
+  chargesCents: number;
+  depositCents: number;
+  stayValueCents: number;
+  daysToArrival: number;
+}
+
+/** How a rate plan sold. `ratePlanId` is null for stays sold before 0037. */
+export interface RatePlanReportRow {
+  ratePlanId: string | null;
+  planName: string;
+  isPublic: boolean;
+  bookings: number;
+  roomNights: number;
+  grossCents: number;
+  discountCents: number;
+  netCents: number;
+  adrCents: number;
+}
+
+/** A ledger line. `section` is "revenue" or "payments"; they need not agree. */
+export interface AccountingRow {
+  section: string;
+  code: string;
+  label: string;
+  netCents: number;
+  taxCents: number;
+  grossCents: number;
+}
+
+/** One date as the night audit left it. */
+export interface EndOfDayRow {
+  businessDate: string;
+  dateStatus: string;
+  closedAt: string | null;
+  closedBy: string | null;
+  arrivals: number;
+  departures: number;
+  inHouse: number;
+  noShows: number;
+  roomsSold: number;
+  sellableRooms: number;
+  occupancyPct: number;
+  roomRevenueCents: number;
+  otherRevenueCents: number;
+  taxCents: number;
+  paymentsCents: number;
+  drawerCents: number;
+  shiftsOpen: number;
+}
+
+export type WaitlistStatus =
+  | "waiting"
+  | "offered"
+  | "converted"
+  | "expired"
+  | "canceled";
+
+/** Somebody waiting for dates that were not sellable. Holds no inventory. */
+export interface WaitlistRow {
+  id: string;
+  guestName: string;
+  contactEmail: string | null;
+  contactPhone: string | null;
+  roomTypeName: string;
+  checkIn: string;
+  checkOut: string;
+  nights: number;
+  adults: number;
+  children: number;
+  status: WaitlistStatus;
+  convertedReference: string | null;
+  notes: string | null;
+  createdAt: string;
+  createdByName: string | null;
+}
