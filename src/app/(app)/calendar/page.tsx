@@ -14,6 +14,8 @@ import {
   getBusinessDate,
   getCalendarAvailability,
   getCalendarBookings,
+  getCalendarRoomBars,
+  getCalendarRooms,
   getCalendarSeasons,
   getChannels,
   getCurrentStaffUser,
@@ -68,9 +70,11 @@ export default async function CalendarPage({
   // bars answer "who is in, and when"; neither is the other. Cancelled rooms
   // come back separately because they belong in their own row, not among the
   // live ones where they would read as sold.
-  const [cells, bars, canceledBars, seasons, status] = await Promise.all([
+  const [cells, rooms, roomBars, canceledBars, seasons, status] = await Promise.all([
     getCalendarAvailability(from, days),
-    getCalendarBookings(from, days, CALENDAR_MAX_BARS_PER_TYPE),
+    // The rail. Every room, grouped by type in Postgres.
+    getCalendarRooms(),
+    getCalendarRoomBars(from, days),
     getCalendarBookings(from, days, CALENDAR_MAX_BARS_PER_TYPE, true),
     getCalendarSeasons(from, days),
     // Housekeeping, for the dot on the rail. It is counts per type, not a room
@@ -97,14 +101,31 @@ export default async function CalendarPage({
    *
    * No migration for this: `calendar_bookings()` already returns the status.
    */
-  const holdingBars = bars.filter((b) => b.status === "pending");
+  const holdingBars = roomBars.filter((b) => b.status === "pending");
 
-  const barsByType = new Map<string, typeof bars>();
-  for (const bar of bars) {
+  /*
+   * Everything else splits three ways: onto its room, or into the Unassigned
+   * band for its type.
+   *
+   * UNASSIGNED IS NOT THE SAME AS HOLDING, and they are deliberately two rows.
+   * Holding is "nobody has confirmed this booking". Unassigned is "confirmed,
+   * but no room picked yet" — which is every booking between being taken and
+   * being checked in. Collapsing them would tell a receptionist that a
+   * confirmed stay was still unconfirmed.
+   */
+  const barsByRoom = new Map<string, typeof roomBars>();
+  const unassignedByType = new Map<string, typeof roomBars>();
+  for (const bar of roomBars) {
     if (bar.status === "pending") continue;
-    const list = barsByType.get(bar.roomTypeId);
-    if (list) list.push(bar);
-    else barsByType.set(bar.roomTypeId, [bar]);
+    if (bar.roomId) {
+      const list = barsByRoom.get(bar.roomId);
+      if (list) list.push(bar);
+      else barsByRoom.set(bar.roomId, [bar]);
+    } else {
+      const list = unassignedByType.get(bar.roomTypeId);
+      if (list) list.push(bar);
+      else unassignedByType.set(bar.roomTypeId, [bar]);
+    }
   }
 
   const href = (nextFrom: string, nextRail: number) =>
@@ -182,7 +203,9 @@ export default async function CalendarPage({
             businessDate={businessDate}
             types={types}
             cellAt={cellAt}
-            barsByType={barsByType}
+            rooms={rooms}
+            barsByRoom={barsByRoom}
+            unassignedByType={unassignedByType}
             holdingBars={holdingBars}
             canceledBars={canceledBars}
             seasons={seasons}

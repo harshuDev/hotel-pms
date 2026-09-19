@@ -70,6 +70,8 @@ import type {
   RoomTypeSetting,
   StaffSetting,
   AccountingRow,
+  CalendarRoom,
+  CalendarRoomBar,
   CountryRow,
   DepositRow,
   EndOfDayRow,
@@ -2877,5 +2879,65 @@ export async function getWaitlistReport(
     notes: row.notes,
     createdAt: row.created_at,
     createdByName: row.created_by_name,
+  }));
+}
+
+/* -------------------------------------------------------------------------- */
+/* The room calendar                                                          */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Every room, as a calendar row.
+ *
+ * This is the one read that deliberately returns the whole house. The client
+ * asked for a calendar showing every room and the guest in it, which is what
+ * every property management system does and what a receptionist needs to answer
+ * "who is in 101". The row is thin — a number, a floor, a type and a status —
+ * and the board groups rooms under their type so a very large property collapses
+ * to a handful of headers rather than one enormous list.
+ */
+export async function getCalendarRooms(): Promise<CalendarRoom[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("calendar_rooms");
+  if (error) throw new Error(`Failed to load the rooms: ${error.message}`);
+
+  return (data ?? []).map((row) => ({
+    roomId: row.room_id,
+    roomNumber: row.room_number,
+    floor: row.floor,
+    roomTypeId: row.room_type_id,
+    roomTypeName: row.room_type_name,
+    roomStatus: row.room_status,
+    sortOrder: row.sort_order,
+  }));
+}
+
+/** The bars, keyed to a room. A null `roomId` means nothing is allocated yet. */
+export async function getCalendarRoomBars(
+  from: string,
+  nights: number = CALENDAR_NIGHTS,
+): Promise<CalendarRoomBar[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("calendar_room_bars", {
+    p_from: from,
+    p_nights: nights,
+  });
+  if (error) throw new Error(`Failed to load the calendar: ${error.message}`);
+
+  return (data ?? []).map((row) => ({
+    roomId: row.room_id,
+    roomTypeId: row.room_type_id,
+    bookingId: row.booking_id,
+    bookingRoomId: row.booking_room_id,
+    reference: row.reference,
+    guestName: row.guest_name,
+    status: row.status,
+    checkIn: row.check_in,
+    checkOut: row.check_out,
+    guests: Number(row.guests ?? 0),
+    valueCents: Number(row.value_cents ?? 0),
+    hasNotes: row.has_notes,
+    isAssigned: row.is_assigned,
+    unassignedTotal: Number(row.unassigned_total ?? 0),
   }));
 }

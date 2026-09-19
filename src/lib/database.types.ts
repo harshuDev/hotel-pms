@@ -2582,6 +2582,37 @@ export type Database = {
           value_cents: number
         }[]
       }
+      calendar_room_bars: {
+        Args: { p_from: string; p_nights: number; p_unassigned_cap?: number | null }
+        Returns: {
+          booking_id: string
+          booking_room_id: string
+          check_in: string
+          check_out: string
+          guest_name: string
+          guests: number
+          has_notes: boolean
+          is_assigned: boolean
+          reference: string
+          room_id: string | null
+          room_type_id: string
+          status: Database["public"]["Enums"]["booking_status"]
+          unassigned_total: number
+          value_cents: number
+        }[]
+      }
+      calendar_rooms: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          floor: string | null
+          room_id: string
+          room_number: string
+          room_status: Database["public"]["Enums"]["room_status"]
+          room_type_id: string
+          room_type_name: string
+          sort_order: number
+        }[]
+      }
       calendar_seasons: {
         Args: { p_days?: number; p_from: string }
         Returns: {
@@ -3904,6 +3935,10 @@ export type Database = {
           p_room_type_id: string
         }
         Returns: string
+      }
+      unassign_room: {
+        Args: { p_booking_room_id: string }
+        Returns: undefined
       }
       update_booking: {
         Args: {
