@@ -71,7 +71,23 @@ export function TopNav({
   }, [pathname]);
 
   return (
-    <header className="sticky top-0 z-40 bg-chrome-900">
+    /*
+      z-50, NOT z-40.
+
+      The mobile drawer below is `fixed inset-0 z-50`, but it is a child of this
+      header -- and a `sticky` element with a z-index creates a stacking
+      context, so that 50 only ranks the drawer *inside* the header. At page
+      level the whole header competes with its own z-index, so at z-40 it tied
+      with the calendar's paging chevrons and lost to them on DOM order: the
+      two arrows floated on top of the open drawer on a phone.
+
+      Raising it means the nav chrome sits above ordinary page content, which is
+      what it is for. Dialogs still cover it: they are `fixed inset-0 z-50` in
+      `main`, which comes after this header, so an equal z-index resolves their
+      way. Do not lower this back to z-40 to "match" the top bar -- that strip
+      is z-30 and sits under this by design.
+    */
+    <header className="sticky top-0 z-50 bg-chrome-900">
       <div className="flex h-14 items-center px-3 lg:px-4">
         <button
           type="button"
