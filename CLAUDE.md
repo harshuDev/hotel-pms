@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0053` are
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0054` are
 applied to the hosted database.
 
 Working on real data: dashboard (house board, movements, pace, activity feed),
@@ -689,6 +689,47 @@ anywhere else. Collapsed height must stay constant regardless of room count.
     would need either a tenth generic setter, which the field coming from the
     browser is exactly the argument against, or nine bulk editors on one page.
     Each row heading links to the screen that does edit it.
+- **RATES IS A NESTED GRID: every rate plan under every room type** (0054).
+  `src/components/inventory/rates-screen.tsx`, over
+  `inventory_rates_grid(from, days)`. The client: "the hotels have different
+  rates. Let's say bed and breakfast, room only, non-refundable ... when you
+  click on rates you will see the room and then below the room all the rates
+  and then you will be able to change the price on those rates."
+  - **It is not a tenth copy of the shared grid.** That rule covers the nine
+    screens that are each ONE field across room types, and they still share one
+    component. This is one field across TWO dimensions — plan and room type —
+    and folding it in would make all nine grow a rate-plan axis they have no
+    use for.
+  - **A blank cell is "not loaded", never free and never zero.**
+    `create_booking()` refuses a stay against a night with no rate, so a blank
+    is also how a hotel says "we do not sell this plan on this room type". That
+    is the plan-to-room-type link the client described, expressed as the
+    absence of a price rather than a second table somebody has to remember to
+    fill in. Do not add a `rate_plan_room_types` table for this.
+  - A selection is a (room type, rate plan) PAIR, so `applyRates()` groups the
+    selection by plan and calls `set_rates()` once per plan — each its own
+    transaction, exactly as applying to several room types already was. It
+    routes through `applyInventory()` so the validation stays in one place.
+- **Rate plans are created and corrected in Settings** (`?tab=rate-plans`),
+  through `save_rate_plan()`. Until 0054 a plan could be created — from a
+  corner of the Inventory screen — and never renamed, retired or reordered,
+  which is why the hosted property had exactly one. Setting up what the hotel
+  sells belongs beside the room types and the tax rates, not inside a week's
+  pricing.
+  - **There is no delete**, like a room or a tax rate: `rate_plan_days` and
+    `booking_rooms` point at a plan, so one no longer sold is
+    `is_active = false` and a booking taken on it keeps saying what it was sold
+    as.
+  - **A property always keeps one default plan.** `save_rate_plan()` promotes
+    the first active plan if the last default is retired or stood down —
+    otherwise a booking naming no plan has nowhere to fall back to.
+  - **"Non-refundable" is a name, not yet a rule.** A plan can be called that
+    and priced like it today; what actually refuses a refund is a cancellation
+    policy, and there is no cancellation policy table yet. Do not pretend
+    otherwise in the interface.
+  - `create_rate_plan()` still exists and still works. It is what the Inventory
+    screen calls, and breaking it to rename it would be churn for no
+    user-visible gain.
   - **"Rates (Main)" and "Rates (All)" are the same field.** Main pins the
     property's default plan and hides the switcher; All lets you pick. Two
     entries for one field is not duplication — changing the main rate is most

@@ -3254,6 +3254,22 @@ export type Database = {
         Args: { p_from: string; p_rate_plan_id: string; p_to: string }
         Returns: string
       }
+      inventory_rates_grid: {
+        Args: { p_from: string; p_days?: number | null }
+        Returns: {
+          date: string
+          rate_cents: number | null
+          rate_plan_code: string
+          rate_plan_id: string
+          rate_plan_is_default: boolean
+          rate_plan_name: string
+          rate_plan_sort: number
+          room_type_code: string
+          room_type_id: string
+          room_type_name: string
+          room_type_sort: number
+        }[]
+      }
       inventory_target_dates: {
         Args: { p_days_of_week: number[]; p_from: string; p_to: string }
         Returns: string[]
@@ -3723,6 +3739,17 @@ export type Database = {
           p_timezone: string
         }
         Returns: undefined
+      }
+      save_rate_plan: {
+        Args: {
+          p_code: string
+          p_description?: string | null
+          p_id?: string | null
+          p_is_active?: boolean | null
+          p_is_default?: boolean | null
+          p_name: string
+        }
+        Returns: string
       }
       save_room: {
         Args: {

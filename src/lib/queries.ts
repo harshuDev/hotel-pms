@@ -70,6 +70,7 @@ import type {
   RoomTypeSetting,
   StaffSetting,
   AccountingRow,
+  RatesGridCell,
   CalendarRoom,
   CalendarRoomBar,
   CountryRow,
@@ -2939,5 +2940,42 @@ export async function getCalendarRoomBars(
     hasNotes: row.has_notes,
     isAssigned: row.is_assigned,
     unassignedTotal: Number(row.unassigned_total ?? 0),
+  }));
+}
+
+/**
+ * The Rates screen: every active plan crossed with every room type and night.
+ *
+ * A second read beside `getInventoryGrid()` rather than a wider version of it.
+ * That one feeds nine screens each about ONE field across room types, and every
+ * one of them would have to grow a rate-plan dimension it has no use for. This
+ * is one field across two dimensions — a different question, and the client's:
+ * "you will see the room and then below the room all the rates".
+ */
+export async function getRatesGrid(
+  from: string,
+  days: number = INVENTORY_NIGHTS,
+): Promise<RatesGridCell[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("inventory_rates_grid", {
+    p_from: from,
+    p_days: days,
+  });
+  if (error) throw new Error(`Failed to load the rates: ${error.message}`);
+
+  return (data ?? []).map((row) => ({
+    ratePlanId: row.rate_plan_id,
+    ratePlanCode: row.rate_plan_code,
+    ratePlanName: row.rate_plan_name,
+    ratePlanIsDefault: row.rate_plan_is_default,
+    ratePlanSort: row.rate_plan_sort,
+    roomTypeId: row.room_type_id,
+    roomTypeCode: row.room_type_code,
+    roomTypeName: row.room_type_name,
+    roomTypeSort: row.room_type_sort,
+    date: row.date,
+    // Null is "not loaded", which is not zero and not free. Kept as null all
+    // the way to the cell so the screen can say so.
+    rateCents: row.rate_cents === null ? null : Number(row.rate_cents),
   }));
 }

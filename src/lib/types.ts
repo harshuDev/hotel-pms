@@ -1138,3 +1138,30 @@ export interface CalendarRoomBar {
   /** Unassigned bookings for this type before the cap on that shared band. */
   unassignedTotal: number;
 }
+
+/* -------------------------------------------------------------------------- */
+/* The Rates grid: plans nested under room types (0054)                       */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * One cell of the Rates screen: a rate plan, a room type and a night.
+ *
+ * `rateCents` null means this plan is not loaded for that room type on that
+ * night — which is also how a hotel says "we do not sell this plan on this room
+ * type". `create_booking()` refuses a stay against a night with no rate, so the
+ * absence of a price is the link between plans and room types rather than a
+ * second table somebody has to remember to fill in.
+ */
+export interface RatesGridCell {
+  ratePlanId: string;
+  ratePlanCode: string;
+  ratePlanName: string;
+  ratePlanIsDefault: boolean;
+  ratePlanSort: number;
+  roomTypeId: string;
+  roomTypeCode: string;
+  roomTypeName: string;
+  roomTypeSort: number;
+  date: string;
+  rateCents: number | null;
+}
