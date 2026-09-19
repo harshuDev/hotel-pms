@@ -113,6 +113,17 @@ current design, not as drift.
    not restore a sidebar layout when touching `src/app/(app)/layout.tsx`.
    - `src/components/top-nav.tsx` is the blue bar: logo slot, nine sections,
      search button, user menu. Sticky at `top-0`, `h-14`.
+     - **It is `z-50`, and that is load-bearing.** The mobile drawer inside it
+       is `fixed inset-0 z-50`, but a `sticky` element with a z-index creates a
+       stacking context — so the drawer's 50 only ranks it *within the header*,
+       and at page level the whole header competes with its own z-index. At
+       z-40 it tied with the calendar's paging chevrons and lost to them on DOM
+       order, so the two arrows floated on top of the open drawer on a phone.
+       Any z-40 page content would have done the same; the calendar merely had
+       some. Dialogs still cover the bar because they are `fixed inset-0 z-50`
+       inside `main`, which comes after the header, and an equal z-index
+       resolves on DOM order. Do not lower this to match the top bar, which is
+       `z-30` and belongs underneath.
    - `src/components/top-bar.tsx` is a slim strip below it with the property
      name and business date. Sticky at `top-14` — that offset is what stops
      the two bars overlapping on scroll. Do not change it to `top-0`.
