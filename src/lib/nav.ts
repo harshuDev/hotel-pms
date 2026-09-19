@@ -9,6 +9,8 @@ export interface NavSection {
   items?: NavItem[];
   /** Column count for this section's dropdown panel. Defaults to 1. */
   columns?: 1 | 2;
+  /** One tall scrolling column, as the client's reference system draws it. */
+  scroll?: boolean;
 }
 
 export const SECTIONS: NavSection[] = [
@@ -16,7 +18,6 @@ export const SECTIONS: NavSection[] = [
   { label: "Calendar", href: "/calendar" },
   {
     label: "Inventory",
-    columns: 2,
     /*
       Eleven items, matching the client's reference system exactly and in its
       order. "All" is every field on one read-only grid; the other ten each
@@ -32,13 +33,13 @@ export const SECTIONS: NavSection[] = [
       { label: "Rates (All)", href: "/inventory/rates-all" },
       { label: "Rates (Main)", href: "/inventory/rates-main" },
       { label: "Availability", href: "/inventory/availability" },
-      { label: "Min stay through", href: "/inventory/min-stay-through" },
-      { label: "Min stay arrival", href: "/inventory/min-stay-arrival" },
-      { label: "Max stay", href: "/inventory/max-stay" },
+      { label: "Min Stay Through", href: "/inventory/min-stay-through" },
+      { label: "Min Stay Arrival", href: "/inventory/min-stay-arrival" },
+      { label: "Max Stay", href: "/inventory/max-stay" },
       { label: "Closed to arrival", href: "/inventory/cta" },
       { label: "Closed to departure", href: "/inventory/ctd" },
-      { label: "Stop sell", href: "/inventory/stop-sell" },
-      { label: "Close out", href: "/inventory/close-out" },
+      { label: "Stop Sell", href: "/inventory/stop-sell" },
+      { label: "Close Out", href: "/inventory/close-out" },
     ],
   },
   {
@@ -60,7 +61,7 @@ export const SECTIONS: NavSection[] = [
   { label: "Offers", href: "/offers" },
   {
     label: "Reports",
-    columns: 2,
+    scroll: true,
     /*
       Twenty-two, matching the reference's list and its order. The first
       thirteen were built first and the other nine followed; the order is the
@@ -68,28 +69,28 @@ export const SECTIONS: NavSection[] = [
       moving between the two systems finds the same item in the same place.
     */
     items: [
-      { label: "Payments", href: "/reports/payments" },
-      { label: "Daily checkout", href: "/reports/daily-checkout" },
-      { label: "Booking", href: "/reports/booking" },
-      { label: "Cancellation", href: "/reports/cancellation" },
-      { label: "Housekeeping", href: "/reports/housekeeping" },
-      { label: "Channel", href: "/reports/channel" },
-      { label: "Extras", href: "/reports/extras" },
-      { label: "Meal", href: "/reports/meal" },
-      { label: "Occupancy", href: "/reports/occupancy" },
-      { label: "Financial", href: "/reports/financial" },
-      { label: "Debtors", href: "/reports/debtors" },
-      { label: "In house", href: "/reports/in-house" },
-      { label: "Reservations", href: "/reports/reservations" },
-      { label: "Manager", href: "/reports/manager" },
-      { label: "Folio", href: "/reports/folio" },
-      { label: "Immigration", href: "/reports/immigration" },
-      { label: "Country", href: "/reports/country" },
-      { label: "Deposit", href: "/reports/deposit" },
-      { label: "Rate plan", href: "/reports/rate-plan" },
-      { label: "Accounting", href: "/reports/accounting" },
-      { label: "End of day", href: "/reports/end-of-day" },
-      { label: "Booking waitlist", href: "/reports/waitlist" },
+      { label: "Payments Report", href: "/reports/payments" },
+      { label: "Daily Checkout Report", href: "/reports/daily-checkout" },
+      { label: "Booking Report", href: "/reports/booking" },
+      { label: "Cancellation Report", href: "/reports/cancellation" },
+      { label: "Housekeeping Report", href: "/reports/housekeeping" },
+      { label: "Channel Report", href: "/reports/channel" },
+      { label: "Extras Report", href: "/reports/extras" },
+      { label: "Meal Report", href: "/reports/meal" },
+      { label: "Occupancy Report", href: "/reports/occupancy" },
+      { label: "Financial Report", href: "/reports/financial" },
+      { label: "Debtors Report", href: "/reports/debtors" },
+      { label: "In House Report", href: "/reports/in-house" },
+      { label: "Reservations Report", href: "/reports/reservations" },
+      { label: "Manager Report", href: "/reports/manager" },
+      { label: "Folio Report", href: "/reports/folio" },
+      { label: "Immigration Report", href: "/reports/immigration" },
+      { label: "Country Report", href: "/reports/country" },
+      { label: "Deposit Report", href: "/reports/deposit" },
+      { label: "Rate Plan Report", href: "/reports/rate-plan" },
+      { label: "Accounting Report", href: "/reports/accounting" },
+      { label: "End Of Day Report", href: "/reports/end-of-day" },
+      { label: "Booking Waitlist Report", href: "/reports/waitlist" },
     ],
   },
   { label: "Customers", href: "/customers" },

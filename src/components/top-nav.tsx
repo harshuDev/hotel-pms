@@ -122,6 +122,7 @@ export function TopNav({
                   label={s.label}
                   active={active}
                   columns={s.columns ?? 1}
+                  scroll={s.scroll ?? false}
                   open={openMenu === s.label}
                   onOpenChange={(o) => setOpenMenu(o ? s.label : null)}
                   triggerClassName={cn(

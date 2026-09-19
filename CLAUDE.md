@@ -64,10 +64,25 @@ current design, not as drift.
 
 1. **Nav order and labels.** Section order is fixed: Dashboard, Calendar,
    Inventory, Bookings, Promotions, Reports, Customers, Cashier, Meeting Rooms.
-   - **The Reports menu carries twenty-two items and Inventory eleven**, both
-     in the reference's order. The order is the reference's rather than
-     anything meaningful, and it is kept so somebody moving between the two
-     systems finds the same item in the same place.
+   - **The Reports menu carries twenty-two items and Inventory eleven**, in the
+     reference's order and with the reference's labels. The order is theirs
+     rather than anything meaningful, and it is kept so somebody moving between
+     the two systems finds the same item in the same place.
+     - Reports read "Payments Report", "Daily Checkout Report" and so on —
+       Title Case with the word Report on the end, as theirs do. The one
+       departure is "Reservations Report": their own screen has it lower-case,
+       which is a slip rather than a decision, and copying it would have been
+       copying a typo.
+     - Inventory keeps their mixed casing exactly — "Min Stay Through" and
+       "Stop Sell" in Title Case beside "Closed to arrival" in sentence case.
+       That looks like an inconsistency because it is one, and it is theirs;
+       tidying it would be the one thing that made our menu look unlike the
+       screenshot they sent.
+     - **Reports is one scrolling column, not two.** `scroll` on the section
+       and on `Menu` caps the panel at `78vh` and lets it scroll, which is what
+       their menu does. Two columns fits twenty-two items without scrolling and
+       was what we had; they compared the two and asked for theirs. Do not
+       "improve" it back into columns.
    - **The Bookings menu carries exactly three items**, matching the reference:
      Add Simple Booking, Add Group Booking, Search. It used to carry five.
      **Arrivals, Departures and In house are still built and still reachable** —
