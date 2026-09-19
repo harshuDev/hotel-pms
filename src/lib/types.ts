@@ -1089,3 +1089,52 @@ export interface WaitlistRow {
   createdAt: string;
   createdByName: string | null;
 }
+
+/* -------------------------------------------------------------------------- */
+/* The room calendar (0053)                                                   */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * One room on the calendar rail.
+ *
+ * The board used to draw room types. The client asked for rooms, because the
+ * question a front desk actually has is "who is in 101", which a row aggregated
+ * to type cannot answer.
+ */
+export interface CalendarRoom {
+  roomId: string;
+  roomNumber: string;
+  floor: string | null;
+  roomTypeId: string;
+  roomTypeName: string;
+  roomStatus: RoomStatus;
+  sortOrder: number;
+}
+
+/**
+ * A bar on the room calendar.
+ *
+ * `roomId` is null where nothing has been allocated yet — every booking before
+ * check-in unless somebody placed it by hand. Those are drawn in an
+ * "Unassigned" band under their room type rather than guessed into a room: a
+ * bar sitting on 101 that nobody put there reads as settled when it is not.
+ */
+export interface CalendarRoomBar {
+  roomId: string | null;
+  roomTypeId: string;
+  bookingId: string;
+  bookingRoomId: string;
+  reference: string;
+  guestName: string;
+  status: BookingStatus;
+  checkIn: string;
+  /** The morning they leave, and not a night stayed. */
+  checkOut: string;
+  guests: number;
+  /** The room line's own nights — rate less discount plus tax, not the folio. */
+  valueCents: number;
+  hasNotes: boolean;
+  isAssigned: boolean;
+  /** Unassigned bookings for this type before the cap on that shared band. */
+  unassignedTotal: number;
+}

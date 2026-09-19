@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0052` are
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0053` are
 applied to the hosted database.
 
 Working on real data: dashboard (house board, movements, pace, activity feed),
@@ -414,10 +414,27 @@ Defined in `tailwind.config.ts`. New UI must use these tokens.
 across the top, one bar per booked room across the nights it covers. The client
 showed the Reservation Centric calendar and asked for it by name.
 
-- **Rows stay room types.** The reference runs a small property — its rail rows
-  look like individual rooms, which is why hovering its dot says "Room clean
-  status is: Dirty" in the singular. Ours does not get to assume that scale.
-  See the note on `getCalendarBookings()` above.
+- **ROWS ARE ROOMS, NOT ROOM TYPES. This reverses an earlier decision.** The
+  rail used to be one row per room type, on the grounds that a 1,800 room
+  property could not draw a row each. The client corrected it directly: "in the
+  calendar you should use the room setup because it allows the hotel to see all
+  the rooms they have and the guest staying in each room". They are right, and
+  it is what every property management system does — a receptionist's first
+  question is "who is in 101", which a row aggregated to type cannot answer at
+  all. Do not put types back.
+  - **This overrides the ~1,800 room rule for this one screen only.**
+    `calendar_rooms()` deliberately returns every room. The rule stands
+    everywhere else. What makes it safe here is that the row is thin — a
+    number, a floor, a type and a status, never the whole room — and rooms are
+    grouped under their type, so a very large property reads as a handful of
+    headers rather than one endless list.
+  - **The type still gets a header row**, because the availability figure at
+    the foot of each cell belongs to the type and not to any one room, and it
+    is the only thing on this board that answers "can I sell tonight".
+  - **The dot on a room row is that room's own housekeeping status**, which is
+    more use than the per-type dot above it: "101 is dirty" is actionable in a
+    way that "something in Deluxe is dirty" was not. The type keeps its
+    summary dot as well.
 - **The dot on the rail is housekeeping, not availability.** It used to report
   how tight the window was, which every cell on that row already says. It now
   reads `room_status_by_type()` — rose while anything waits to be cleaned,
@@ -513,6 +530,38 @@ showed the Reservation Centric calendar and asked for it by name.
     argument that keeps cancelled bookings off the live rows.
   - **Cancelled** never goes among the live rows either.
     `calendar_bookings()` returns those only when asked.
+- **"Unassigned" is a third band, and it is not Holding.** Holding is "nobody
+  has confirmed this booking". Unassigned is "confirmed, but no room picked
+  yet" — which is every booking between being taken and being checked in,
+  since no room is allocated when a booking is made. Collapsing the two would
+  tell a receptionist a confirmed stay was still unconfirmed. Each room type
+  gets its own Unassigned band, kept at full height when empty so the board
+  does not jump as rooms are allocated through the day.
+  - A bar with no room is drawn there rather than guessed onto a room. A bar
+    sitting on 101 that nobody put in 101 reads as settled when it is not.
+- **A booking is put in a room from the board**, through
+  `src/components/calendar/assign-room.tsx` — `+` on an unassigned bar, `⇄` on
+  an assigned one to move it or take it out. Holding and Cancelled bars carry
+  no control: an unconfirmed or cancelled booking holds nothing, so offering it
+  a room would be a promise the hotel has not made.
+  - **The picker offers every room of the type, not a filtered "free" list.**
+    Filtering in the browser is a promise it cannot keep — the list is a
+    snapshot and the room can go between page load and click. `assign_room()`
+    does the real check inside the transaction and refuses by name, which is a
+    better answer than a room quietly missing with no explanation.
+  - **`assign_room()` only demands a clean room for a stay that has already
+    started** (0053). It used to demand `vacant_clean` always, which was right
+    while check-in was the only caller and wrong the moment the front desk
+    started placing future bookings: a room occupied tonight is a perfectly
+    good room for next March. The overlap check is what protects the guest and
+    is unchanged.
+  - **The control is a sibling of the bar, not a child of it.** A `<button>`
+    inside an `<a>` is invalid HTML and browsers rearrange it during parsing,
+    so it vanished; and `Bars` is a Server Component, so the wrapper meant to
+    stop the click carried an `onClick` React cannot serialise and the page
+    500'd. As a sibling it needs neither. **That is the third time this
+    boundary has bitten** — after the calendar's `hrefFor` closure and the
+    search button's `onSearchClick`.
 - **The board fills the window, and the rail runs to the bottom.** The scroller
   takes a `height` of `calc(100vh - 200px)`, not a `max-height`, and a filler
   element under the last row takes the slack so the rail and the grid surface
@@ -1198,7 +1247,15 @@ than proceeding.
 4. **Paid-out default.** Assumed recharged to the guest folio by default, with
    an explicit toggle for house expense.
 5. **Denomination counting at close.** Assumed not needed in v1.
-6. **Room scale — still open, and only the client can close it.** The ~1,800
+6. **Room scale — partly settled by the calendar decision.** The client asked
+   for a calendar showing every room and the guest in each, which means at
+   least one screen draws a row per room and one query returns them all. That
+   is now true of `calendar_rooms()` and nothing else. The ceiling itself is
+   still unconfirmed, so the rule below still governs every other screen — but
+   it is no longer absolute, and "the client operates at 1,800" can no longer
+   be used on its own to refuse a room-level view they have asked for.
+
+   **Original note, still true of everywhere but the calendar:** The ~1,800
    figure came from a passing remark in client feedback. It drives the house
    board design and two query signatures, so confirm it before writing
    migrations. The hosted property is set up with 120 rooms, which is a working

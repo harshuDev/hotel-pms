@@ -1,4 +1,6 @@
+import { Fragment } from "react";
 import Link from "next/link";
+import { AssignRoom } from "@/components/calendar/assign-room";
 import { differenceInCalendarDays, format, parseISO } from "date-fns";
 import { cn } from "@/components/ui";
 import { formatMoney } from "@/lib/money";
@@ -6,7 +8,9 @@ import { DateJump } from "@/components/calendar/date-jump";
 import type {
   AvailabilityCell,
   BookingStatus,
-  CalendarBar,
+  CalendarRoom,
+  CalendarRoomBar,
+  RoomStatus,
   CalendarSeason,
   RoomTypeStatus,
 } from "@/lib/types";
@@ -99,7 +103,33 @@ const BAR_TONE: Record<BookingStatus, { edge: string; badge: string }> = {
   no_show: { edge: "border-rose-400", badge: "bg-rose-500" },
 };
 
-interface Placed extends CalendarBar {
+/**
+ * What the board needs of a bar, whichever read it came from.
+ *
+ * The board draws two shapes now: `CalendarBar` from the old type-keyed read,
+ * which still feeds the Cancelled row, and `CalendarRoomBar` from the
+ * room-keyed one. They agree on everything the layout and the bar markup
+ * touch, so the helpers take this rather than either concrete type -- the
+ * alternative is two copies of the lane packing, which would drift.
+ *
+ * `roomNumber` is optional because on a room row the row IS the room number,
+ * so the bar has no need to repeat it.
+ */
+interface BoardBar {
+  bookingId: string;
+  bookingRoomId: string;
+  reference: string;
+  guestName: string;
+  status: BookingStatus;
+  checkIn: string;
+  checkOut: string;
+  guests: number;
+  valueCents: number;
+  hasNotes: boolean;
+  roomNumber?: string | null;
+}
+
+interface Placed extends BoardBar {
   lane: number;
   startIdx: number;
   endIdx: number;
@@ -114,7 +144,7 @@ interface Placed extends CalendarBar {
  * Greedy, over bars sorted by arrival: each takes the first lane whose last bar
  * has ended. Layout, not aggregation — the counting happens in Postgres.
  */
-function packLanes(bars: CalendarBar[], dates: string[]) {
+function packLanes(bars: BoardBar[], dates: string[]) {
   const first = parseISO(dates[0]);
   const sorted = [...bars].sort(
     (a, b) =>
@@ -180,7 +210,22 @@ function cleanLabel(status: RoomTypeStatus | undefined) {
   return `Room clean status: ${parts.join(", ")}`;
 }
 
-function Bars({ placed }: { placed: Placed[] }) {
+function Bars({
+  placed,
+  assignRooms,
+  currentRoomId,
+}: {
+  placed: Placed[];
+  /**
+   * Every room of this bar's type. Supplied on rows where placing a booking
+   * makes sense — the Unassigned band, and the room rows themselves, where it
+   * becomes a move. Omitted on Holding and Cancelled: an unconfirmed or
+   * cancelled booking holds nothing, so giving it a room would be a promise
+   * the hotel has not made.
+   */
+  assignRooms?: { roomId: string; roomNumber: string }[];
+  currentRoomId?: string | null;
+}) {
   return (
     <>
       {placed.map((bar) => {
@@ -233,6 +278,7 @@ function Bars({ placed }: { placed: Placed[] }) {
               )}
               <span className="truncate">{bar.guestName}</span>
             </span>
+
             <span className="flex items-end justify-between gap-1">
               <span className="tnum mb-1 flex items-center gap-1 text-xxs text-ink-muted">
                 <svg viewBox="0 0 16 16" aria-hidden className="h-3 w-3 fill-current">
@@ -255,6 +301,39 @@ function Bars({ placed }: { placed: Placed[] }) {
           </Link>
         );
       })}
+
+      {/*
+        The room picker sits OVER each bar, not inside it, for two separate
+        reasons that happen to share a fix.
+
+        A `<button>` inside an `<a>` is invalid HTML and browsers rearrange it
+        during parsing, so the control simply vanished. And `Bars` is a Server
+        Component: the wrapper that was going to stop the click from following
+        the link carried an `onClick`, which React cannot serialise — the page
+        500'd. As a sibling it needs neither. Same trap as the calendar's date
+        picker and the search button before it.
+      */}
+      {assignRooms &&
+        placed.map((bar) => (
+          <span
+            key={`assign-${bar.bookingRoomId}`}
+            className="absolute"
+            style={{
+              left:
+                bar.startIdx * COL_W +
+                (bar.endIdx - bar.startIdx) * COL_W -
+                (bar.clipRight ? 2 : 5) -
+                20,
+              top: ROW_PAD + bar.lane * (BAR_H + BAR_GAP) + 4,
+            }}
+          >
+            <AssignRoom
+              bookingRoomId={bar.bookingRoomId}
+              rooms={assignRooms}
+              currentRoomId={currentRoomId}
+            />
+          </span>
+        ))}
     </>
   );
 }
@@ -351,7 +430,7 @@ function ExtraRow({
 }: {
   label: string;
   hint: string;
-  bars: CalendarBar[];
+  bars: BoardBar[];
   dates: string[];
   businessDate: string;
   railW: number;
@@ -380,12 +459,104 @@ function ExtraRow({
   );
 }
 
+
+/**
+ * Housekeeping, per room, on the rail.
+ *
+ * The type header keeps its own dot, which summarises the whole type. This one
+ * is the room's own status and is the more useful of the two now that rooms are
+ * rows — "101 is dirty" is actionable in a way that "something in Deluxe is
+ * dirty" was not.
+ */
+const ROOM_STATUS_LABEL: Record<RoomStatus, string> = {
+  vacant_clean: "Ready for a guest",
+  vacant_dirty: "Waiting to be cleaned",
+  occupied: "Occupied",
+  ooo: "Out of order",
+};
+
+const ROOM_STATUS_DOT: Record<RoomStatus, string> = {
+  vacant_clean: "bg-emerald-400",
+  vacant_dirty: "bg-rose-400",
+  occupied: "bg-white/35",
+  ooo: "bg-slate-500",
+};
+
+/**
+ * A room row draws no availability figure, so it needs no cells to read from.
+ * Hoisted rather than built per row: a fresh Map for every room on an 1,800
+ * room property is 1,800 allocations per render for an object that is always
+ * empty.
+ */
+const EMPTY_CELLS = new Map<string, AvailabilityCell>();
+
+/**
+ * Bookings sold on a room type that nobody has allocated a room to yet.
+ *
+ * Every booking is in this state between being taken and being checked in,
+ * unless somebody placed it by hand — so this is a normal band, not an error
+ * one. It keeps its height when empty so the board does not jump as rooms are
+ * allocated through the day.
+ */
+function UnassignedRow({
+  bars,
+  dates,
+  railW,
+  gridW,
+  total,
+  railCell,
+  assignRooms,
+}: {
+  bars: CalendarRoomBar[];
+  dates: string[];
+  railW: number;
+  gridW: number;
+  total: number;
+  /** Passed in like ExtraRow's, because the class is built inside the board. */
+  railCell: string;
+  /** Rooms of this type, so a booking can be placed straight from the band. */
+  assignRooms: { roomId: string; roomNumber: string }[];
+}) {
+  const { placed, lanes } = packLanes(bars, dates);
+  return (
+    <div className="flex items-stretch">
+      <div
+        className={cn(railCell, "flex flex-col justify-center px-3 py-1.5")}
+        style={{ width: railW }}
+      >
+        <span className="truncate text-[12px] font-medium uppercase tracking-[0.06em] text-white/70">
+          Unassigned
+        </span>
+        <span className="tnum text-xxs text-white/45">
+          {total === 0
+            ? "every booking has a room"
+            : `${total} awaiting a room`}
+        </span>
+      </div>
+      <div
+        className="relative border-b border-board-line bg-board-wash"
+        style={{ width: gridW, minHeight: rowHeight(Math.max(lanes, 1), false) }}
+      >
+        <DayCells
+          dates={dates}
+          businessDate={""}
+          cells={EMPTY_CELLS}
+          withFoot={false}
+        />
+        <Bars placed={placed} assignRooms={assignRooms} />
+      </div>
+    </div>
+  );
+}
+
 export function CalendarBoard({
   dates,
   businessDate,
   types,
   cellAt,
-  barsByType,
+  rooms,
+  barsByRoom,
+  unassignedByType,
   holdingBars,
   canceledBars,
   seasons,
@@ -407,10 +578,20 @@ export function CalendarBoard({
     totalRooms: number;
   }[];
   cellAt: Map<string, AvailabilityCell>;
-  barsByType: Map<string, CalendarBar[]>;
-  /** Pending bookings: not sold, so they sit in Holding, not on a type. */
-  holdingBars: CalendarBar[];
-  canceledBars: CalendarBar[];
+  /** Rooms for the rail, already in type-then-number order from Postgres. */
+  rooms: CalendarRoom[];
+  /** Bars that have a room, keyed by room id. */
+  barsByRoom: Map<string, CalendarRoomBar[]>;
+  /**
+   * Confirmed bookings with no room allocated yet, keyed by room type.
+   *
+   * These get a band under their type rather than being guessed into a room:
+   * a bar sitting on 101 that nobody put there reads as settled when it is not.
+   */
+  unassignedByType: Map<string, CalendarRoomBar[]>;
+  /** Pending bookings: not sold, so they sit in Holding, not on a room. */
+  holdingBars: BoardBar[];
+  canceledBars: BoardBar[];
   seasons: CalendarSeason[];
   statusByType: Map<string, RoomTypeStatus>;
   shiftHref: (days: number) => string;
@@ -619,79 +800,168 @@ export function CalendarBoard({
             </div>
           </div>
 
-          {/* One row per room type */}
+          {/*
+            THE RAIL IS ROOMS NOW, GROUPED UNDER THEIR TYPE.
+
+            It used to be one row per room type. The client was plain about why
+            that was wrong: "in the calendar you should use the room setup
+            because it allows the hotel to see all the rooms they have and the
+            guest staying in each room". A row aggregated to type cannot answer
+            "who is in 101", which is the first question anybody on a front desk
+            asks.
+
+            The type still gets a header row, because it carries the
+            availability figure at the foot of each cell -- the one thing on
+            this board that answers "can I sell tonight", and a number that
+            belongs to the type rather than to any one room. Its bars have moved
+            down onto the rooms.
+          */}
           {types.map((t) => {
-            const bars = barsByType.get(t.roomTypeId) ?? [];
-            const { placed, lanes } = packLanes(bars, dates);
-            const rowH = rowHeight(lanes, true);
+            const typeRooms = rooms.filter((r) => r.roomTypeId === t.roomTypeId);
+            const unassigned = unassignedByType.get(t.roomTypeId) ?? [];
             const byDate = new Map(
               dates
                 .map((d) => cellAt.get(`${t.roomTypeId}|${d}`))
                 .filter((c): c is AvailabilityCell => Boolean(c))
                 .map((c) => [c.date, c] as const),
             );
-            const total = bars[0]?.typeTotal ?? 0;
 
             return (
-              <div key={t.roomTypeId} className="flex items-stretch">
-                <div
-                  className={cn(railCell, "group/rail relative px-3 py-2")}
-                  style={{ width: railW }}
-                >
-                  {/*
-                    Renaming a room type belongs in Settings, so this is a way
-                    in rather than a second editor. It appears on hover and on
-                    keyboard focus — hover alone would hide it from anyone
-                    working by tab, which a front desk does.
-                  */}
-                  <Link
-                    href={`/settings?tab=room-types&edit=${t.roomTypeId}`}
-                    title={`Rename ${t.roomTypeCode} in Settings`}
-                    aria-label={`Rename ${t.roomTypeCode} in Settings`}
-                    className="absolute right-2 top-2 flex h-5 w-5 items-center justify-center rounded bg-white/15 text-white opacity-0 transition hover:bg-white/30 focus:opacity-100 focus-visible:ring-2 focus-visible:ring-white group-hover/rail:opacity-100"
+              <Fragment key={t.roomTypeId}>
+                {/* The type header: availability, and the way in to Settings. */}
+                <div className="flex items-stretch">
+                  <div
+                    className={cn(railCell, "group/rail relative px-3 py-2")}
+                    style={{ width: railW }}
                   >
-                    <svg viewBox="0 0 16 16" aria-hidden className="h-3 w-3 fill-current">
-                      <path d="M11.5 1.5a1.7 1.7 0 0 1 2.4 2.4l-.8.8-2.4-2.4zM9.6 3.4 2 11v2.4h2.4L12 5.8z" />
-                    </svg>
-                  </Link>
+                    {/*
+                      Renaming a room type belongs in Settings, so this is a way
+                      in rather than a second editor. It appears on hover and on
+                      keyboard focus — hover alone would hide it from anyone
+                      working by tab, which a front desk does.
+                    */}
+                    <Link
+                      href={`/settings?tab=room-types&edit=${t.roomTypeId}`}
+                      title={`Rename ${t.roomTypeCode} in Settings`}
+                      aria-label={`Rename ${t.roomTypeCode} in Settings`}
+                      className="absolute right-2 top-2 flex h-5 w-5 items-center justify-center rounded bg-white/15 text-white opacity-0 transition hover:bg-white/30 focus:opacity-100 focus-visible:ring-2 focus-visible:ring-white group-hover/rail:opacity-100"
+                    >
+                      <svg viewBox="0 0 16 16" aria-hidden className="h-3 w-3 fill-current">
+                        <path d="M11.5 1.5a1.7 1.7 0 0 1 2.4 2.4l-.8.8-2.4-2.4zM9.6 3.4 2 11v2.4h2.4L12 5.8z" />
+                      </svg>
+                    </Link>
 
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="min-w-0">
-                      <div className="truncate pr-6 text-[12.5px] font-bold uppercase tracking-[0.06em] text-white">
-                        {t.roomTypeCode}
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <div className="truncate pr-6 text-[12.5px] font-bold uppercase tracking-[0.06em] text-white">
+                          {t.roomTypeCode}
+                        </div>
+                        <div className="text-xxs leading-tight text-white/75">
+                          {t.roomTypeName}
+                        </div>
+                        <div className="tnum mt-0.5 text-xxs text-white/50">
+                          {typeRooms.length} room{typeRooms.length === 1 ? "" : "s"}
+                        </div>
                       </div>
-                      <div className="text-xxs leading-tight text-white/75">
-                        {t.roomTypeName}
-                      </div>
-                      <div className="tnum mt-0.5 text-xxs text-white/50">
-                        {t.totalRooms} room{t.totalRooms === 1 ? "" : "s"}
-                        {total > bars.length && ` · ${bars.length} of ${total}`}
-                      </div>
+                      <span
+                        title={cleanLabel(statusByType.get(t.roomTypeId))}
+                        className={cn(
+                          "mt-6 h-2.5 w-2.5 shrink-0 rounded-full",
+                          cleanDot(statusByType.get(t.roomTypeId)),
+                        )}
+                      />
                     </div>
-                    <span
-                      title={cleanLabel(statusByType.get(t.roomTypeId))}
-                      className={cn(
-                        "mt-6 h-2.5 w-2.5 shrink-0 rounded-full",
-                        cleanDot(statusByType.get(t.roomTypeId)),
-                      )}
+                  </div>
+
+                  <div
+                    className="relative border-b border-board-line"
+                    style={{ width: gridW, minHeight: rowHeight(1, true) }}
+                  >
+                    <DayCells
+                      dates={dates}
+                      businessDate={businessDate}
+                      cells={byDate}
+                      withFoot
+                      bookHref={(d) => bookHref(d, t.roomTypeId)}
                     />
                   </div>
                 </div>
 
-                <div
-                  className="relative border-b border-board-line"
-                  style={{ width: gridW, minHeight: rowH }}
-                >
-                  <DayCells
-                    dates={dates}
-                    businessDate={businessDate}
-                    cells={byDate}
-                    withFoot
-                    bookHref={(d) => bookHref(d, t.roomTypeId)}
-                  />
-                  <Bars placed={placed} />
-                </div>
-              </div>
+                {/*
+                  Bookings sold on this type that nobody has put in a room yet.
+                  Kept even when empty so the board does not jump as rooms are
+                  allocated, and so there is somewhere obvious to look.
+                */}
+                <UnassignedRow
+                  bars={unassigned}
+                  dates={dates}
+                  railW={railW}
+                  gridW={gridW}
+                  total={unassigned[0]?.unassignedTotal ?? unassigned.length}
+                  railCell={railCell}
+                  assignRooms={typeRooms.map((r) => ({
+                    roomId: r.roomId,
+                    roomNumber: r.roomNumber,
+                  }))}
+                />
+
+                {/* One row per room. This is the part the client asked for. */}
+                {typeRooms.map((room) => {
+                  const bars = barsByRoom.get(room.roomId) ?? [];
+                  const { placed, lanes } = packLanes(bars, dates);
+                  return (
+                    <div key={room.roomId} className="flex items-stretch">
+                      <div
+                        className={cn(railCell, "flex items-center gap-2 px-3 py-1.5")}
+                        style={{ width: railW }}
+                      >
+                        <span
+                          title={ROOM_STATUS_LABEL[room.roomStatus]}
+                          aria-label={ROOM_STATUS_LABEL[room.roomStatus]}
+                          className={cn(
+                            "h-2 w-2 shrink-0 rounded-full",
+                            ROOM_STATUS_DOT[room.roomStatus],
+                          )}
+                        />
+                        <span className="tnum truncate text-[13px] font-medium text-white">
+                          {room.roomNumber}
+                        </span>
+                        {room.floor && (
+                          <span className="ml-auto shrink-0 text-xxs text-white/45">
+                            {room.floor}
+                          </span>
+                        )}
+                      </div>
+
+                      <div
+                        className="relative border-b border-board-line"
+                        style={{ width: gridW, minHeight: rowHeight(lanes, false) }}
+                      >
+                        {/*
+                          No availability foot on a room row: a single room is
+                          free or it is not, which the bars already say. The
+                          figure belongs to the type header above.
+                        */}
+                        <DayCells
+                          dates={dates}
+                          businessDate={businessDate}
+                          cells={EMPTY_CELLS}
+                          withFoot={false}
+                          bookHref={(d) => bookHref(d, t.roomTypeId)}
+                        />
+                        <Bars
+                          placed={placed}
+                          assignRooms={typeRooms.map((r) => ({
+                            roomId: r.roomId,
+                            roomNumber: r.roomNumber,
+                          }))}
+                          currentRoomId={room.roomId}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+              </Fragment>
             );
           })}
 
