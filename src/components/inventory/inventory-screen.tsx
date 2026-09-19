@@ -44,6 +44,7 @@ export function InventoryScreen({
   cells,
   nights,
   canEdit,
+  lockedToDefaultPlan = false,
 }: {
   fieldName: InventoryField;
   plans: RatePlan[];
@@ -52,6 +53,12 @@ export function InventoryScreen({
   cells: InventoryCell[];
   nights: number;
   canEdit: boolean;
+  /**
+   * Rates (Main) pins the screen to the property's default plan and hides the
+   * switcher, so the commonest job -- change the main rate -- is one click from
+   * the menu. Rates (All) is the same grid with every plan to choose from.
+   */
+  lockedToDefaultPlan?: boolean;
 }) {
   const spec = SCREENS[fieldName];
   const router = useRouter();
@@ -297,6 +304,18 @@ export function InventoryScreen({
               <span className={label}>Rate plan</span>
               {plans.length === 0 ? (
                 <p className="text-[13px] text-ink-muted">None yet</p>
+              ) : lockedToDefaultPlan ? (
+                <p className="text-[13px] text-ink">
+                  <span className="font-medium">
+                    {plans.find((p) => p.id === planId)?.name ?? "None"}
+                  </span>
+                  <Link
+                    href="/inventory/rates-all"
+                    className="ml-2 text-xxs text-ink-faint underline underline-offset-2 hover:text-ink"
+                  >
+                    all plans
+                  </Link>
+                </p>
               ) : (
                 <div className="flex flex-wrap gap-1.5">
                   {plans.map((p) => (

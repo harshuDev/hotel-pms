@@ -23,9 +23,17 @@ const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 export async function InventoryPage({
   fieldName,
   searchParams,
+  lockedToDefaultPlan = false,
+  title,
+  subtitle,
 }: {
   fieldName: InventoryField;
   searchParams: Promise<{ plan?: string; from?: string }>;
+  /** Rates (Main) pins the default plan; Rates (All) lets you pick. */
+  lockedToDefaultPlan?: boolean;
+  /** Two routes share the `rate` field and need different headings. */
+  title?: string;
+  subtitle?: string;
 }) {
   const spec = SCREENS[fieldName];
   const sp = await searchParams;
@@ -43,11 +51,15 @@ export async function InventoryPage({
 
   // The named plan, else the default, else the first. Null is fine for the two
   // screens that set the room type itself.
-  const planId =
-    (sp.plan && plans.some((p) => p.id === sp.plan) ? sp.plan : null) ??
-    plans.find((p) => p.isDefault)?.id ??
-    plans[0]?.id ??
-    null;
+  const planId = lockedToDefaultPlan
+    ? // The default is the "main" rate by definition. `?plan=` is ignored here
+      // rather than honoured, or the pinned screen would silently become the
+      // unpinned one for anyone who arrived by a link carrying it.
+      (plans.find((p) => p.isDefault)?.id ?? plans[0]?.id ?? null)
+    : ((sp.plan && plans.some((p) => p.id === sp.plan) ? sp.plan : null) ??
+      plans.find((p) => p.isDefault)?.id ??
+      plans[0]?.id ??
+      null);
 
   const cells = await getInventoryGrid(
     spec.needsPlan ? planId : null,
@@ -57,7 +69,10 @@ export async function InventoryPage({
 
   return (
     <div>
-      <PageHeader title={spec.title} subtitle={spec.subtitle} />
+      <PageHeader
+        title={title ?? spec.title}
+        subtitle={subtitle ?? spec.subtitle}
+      />
       <InventoryScreen
         fieldName={fieldName}
         plans={plans}
@@ -68,6 +83,7 @@ export async function InventoryPage({
         canEdit={
           staff !== null && ["admin", "manager"].includes(staff.role)
         }
+        lockedToDefaultPlan={lockedToDefaultPlan}
       />
     </div>
   );

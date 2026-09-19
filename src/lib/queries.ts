@@ -69,7 +69,17 @@ import type {
   RatePlan,
   RoomTypeSetting,
   StaffSetting,
+  AccountingRow,
+  CountryRow,
+  DepositRow,
+  EndOfDayRow,
+  FolioReportRow,
+  ImmigrationRow,
+  ManagerRow,
   MealReportRow,
+  RatePlanReportRow,
+  WaitlistRow,
+  WaitlistStatus,
   MealType,
   PaymentMethodKind,
   PaymentMethodSetting,
@@ -2610,5 +2620,262 @@ export async function getMealReport(
     adultCovers: Number(row.adult_covers ?? 0),
     childCovers: Number(row.child_covers ?? 0),
     totalCovers: Number(row.total_covers ?? 0),
+  }));
+}
+
+/* -------------------------------------------------------------------------- */
+/* The nine reports added to match the client's reference system              */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * The manager's front page: occupancy, rate and revenue for each date.
+ *
+ * Every figure is worked out in Postgres the same way the report it comes from
+ * works it out, so this page and the occupancy report can never disagree.
+ */
+export async function getManagerReport(
+  from: string,
+  to: string,
+): Promise<ManagerRow[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("manager_report", {
+    p_from: from,
+    p_to: to,
+  });
+  if (error) rethrow(error, "manager report");
+
+  return (data ?? []).map((row) => ({
+    businessDate: row.business_date,
+    roomsSold: Number(row.rooms_sold ?? 0),
+    sellableRooms: Number(row.sellable_rooms ?? 0),
+    occupancyPct: Number(row.occupancy_pct ?? 0),
+    adrCents: Number(row.adr_cents ?? 0),
+    revparCents: Number(row.revpar_cents ?? 0),
+    roomRevenueCents: Number(row.room_revenue_cents ?? 0),
+    otherRevenueCents: Number(row.other_revenue_cents ?? 0),
+    totalRevenueCents: Number(row.total_revenue_cents ?? 0),
+    paymentsCents: Number(row.payments_cents ?? 0),
+    arrivals: Number(row.arrivals ?? 0),
+    departures: Number(row.departures ?? 0),
+  }));
+}
+
+/** Every folio charged or paid in the range, meeting rooms included. */
+export async function getFolioReport(
+  from: string,
+  to: string,
+): Promise<FolioReportRow[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("folio_report", {
+    p_from: from,
+    p_to: to,
+  });
+  if (error) rethrow(error, "folio report");
+
+  return (data ?? []).map((row) => ({
+    folioId: row.folio_id,
+    folioNumber: Number(row.folio_number ?? 0),
+    kind: row.kind,
+    status: row.status,
+    reference: row.reference,
+    guestName: row.guest_name,
+    openedAt: row.opened_at,
+    closedAt: row.closed_at,
+    chargesCents: Number(row.charges_cents ?? 0),
+    paymentsCents: Number(row.payments_cents ?? 0),
+    balanceCents: Number(row.balance_cents ?? 0),
+  }));
+}
+
+/** Who slept here, on what document. Front office only. */
+export async function getImmigrationReport(
+  from: string,
+  to: string,
+): Promise<ImmigrationRow[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("immigration_report", {
+    p_from: from,
+    p_to: to,
+  });
+  if (error) rethrow(error, "immigration report");
+
+  return (data ?? []).map((row) => ({
+    bookingId: row.booking_id,
+    reference: row.reference,
+    guestName: row.guest_name,
+    roomNumber: row.room_number,
+    nationality: row.nationality,
+    country: row.country,
+    passportNumber: row.passport_number,
+    passportExpiry: row.passport_expiry,
+    nationalIdNumber: row.national_id_number,
+    dateOfBirth: row.date_of_birth,
+    checkIn: row.check_in,
+    checkOut: row.check_out,
+    nights: Number(row.nights ?? 0),
+    isComplete: row.is_complete,
+  }));
+}
+
+/** Room nights by country of residence, not nationality. */
+export async function getCountryReport(
+  from: string,
+  to: string,
+): Promise<CountryRow[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("country_report", {
+    p_from: from,
+    p_to: to,
+  });
+  if (error) rethrow(error, "country report");
+
+  return (data ?? []).map((row) => ({
+    country: row.country,
+    bookings: Number(row.bookings ?? 0),
+    guests: Number(row.guests ?? 0),
+    roomNights: Number(row.room_nights ?? 0),
+    revenueCents: Number(row.revenue_cents ?? 0),
+  }));
+}
+
+/**
+ * Money held against stays that have not started.
+ *
+ * Takes no range: a deposit is held as of now, and a date filter on it would
+ * answer a question nobody asks.
+ */
+export async function getDepositReport(): Promise<DepositRow[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("deposit_report");
+  if (error) rethrow(error, "deposit report");
+
+  return (data ?? []).map((row) => ({
+    bookingId: row.booking_id,
+    reference: row.reference,
+    guestName: row.guest_name,
+    status: row.status,
+    checkIn: row.check_in,
+    checkOut: row.check_out,
+    nights: Number(row.nights ?? 0),
+    chargesCents: Number(row.charges_cents ?? 0),
+    depositCents: Number(row.deposit_cents ?? 0),
+    stayValueCents: Number(row.stay_value_cents ?? 0),
+    daysToArrival: Number(row.days_to_arrival ?? 0),
+  }));
+}
+
+/** How each rate plan sold. Stays sold before 0037 group under "Not recorded". */
+export async function getRatePlanReport(
+  from: string,
+  to: string,
+): Promise<RatePlanReportRow[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("rate_plan_report", {
+    p_from: from,
+    p_to: to,
+  });
+  if (error) rethrow(error, "rate plan report");
+
+  return (data ?? []).map((row) => ({
+    ratePlanId: row.rate_plan_id,
+    planName: row.plan_name,
+    isPublic: row.is_public,
+    bookings: Number(row.bookings ?? 0),
+    roomNights: Number(row.room_nights ?? 0),
+    grossCents: Number(row.gross_cents ?? 0),
+    discountCents: Number(row.discount_cents ?? 0),
+    netCents: Number(row.net_cents ?? 0),
+    adrCents: Number(row.adr_cents ?? 0),
+  }));
+}
+
+/** Revenue by category and money received by method, in one range. */
+export async function getAccountingReport(
+  from: string,
+  to: string,
+): Promise<AccountingRow[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("accounting_report", {
+    p_from: from,
+    p_to: to,
+  });
+  if (error) rethrow(error, "accounting report");
+
+  return (data ?? []).map((row) => ({
+    section: row.section,
+    code: row.code,
+    label: row.label,
+    netCents: Number(row.net_cents ?? 0),
+    taxCents: Number(row.tax_cents ?? 0),
+    grossCents: Number(row.gross_cents ?? 0),
+  }));
+}
+
+/** One date, as the night audit left it. One date and not a range, by design. */
+export async function getEndOfDayReport(
+  date: string,
+): Promise<EndOfDayRow | null> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("end_of_day_report", {
+    p_date: date,
+  });
+  if (error) rethrow(error, "end of day report");
+
+  const row = (data ?? [])[0];
+  if (!row) return null;
+
+  return {
+    businessDate: row.business_date,
+    dateStatus: row.date_status,
+    closedAt: row.closed_at,
+    closedBy: row.closed_by,
+    arrivals: Number(row.arrivals ?? 0),
+    departures: Number(row.departures ?? 0),
+    inHouse: Number(row.in_house ?? 0),
+    noShows: Number(row.no_shows ?? 0),
+    roomsSold: Number(row.rooms_sold ?? 0),
+    sellableRooms: Number(row.sellable_rooms ?? 0),
+    occupancyPct: Number(row.occupancy_pct ?? 0),
+    roomRevenueCents: Number(row.room_revenue_cents ?? 0),
+    otherRevenueCents: Number(row.other_revenue_cents ?? 0),
+    taxCents: Number(row.tax_cents ?? 0),
+    paymentsCents: Number(row.payments_cents ?? 0),
+    drawerCents: Number(row.drawer_cents ?? 0),
+    shiftsOpen: Number(row.shifts_open ?? 0),
+  };
+}
+
+/** Who is waiting for dates the hotel could not sell. */
+export async function getWaitlistReport(
+  from: string,
+  to: string,
+  status: WaitlistStatus | null,
+): Promise<WaitlistRow[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("booking_waitlist_report", {
+    p_from: from,
+    p_to: to,
+    // Null means every status. A default of "waiting" would hide the
+    // conversions, which are the only evidence the list is worth keeping.
+    p_status: status,
+  });
+  if (error) rethrow(error, "waitlist report");
+
+  return (data ?? []).map((row) => ({
+    id: row.id,
+    guestName: row.guest_name,
+    contactEmail: row.contact_email,
+    contactPhone: row.contact_phone,
+    roomTypeName: row.room_type_name,
+    checkIn: row.check_in,
+    checkOut: row.check_out,
+    nights: Number(row.nights ?? 0),
+    adults: Number(row.adults ?? 0),
+    children: Number(row.children ?? 0),
+    status: row.status as WaitlistStatus,
+    convertedReference: row.converted_reference,
+    notes: row.notes,
+    createdAt: row.created_at,
+    createdByName: row.created_by_name,
   }));
 }

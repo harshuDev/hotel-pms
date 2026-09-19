@@ -17,8 +17,20 @@ export const SECTIONS: NavSection[] = [
   {
     label: "Inventory",
     columns: 2,
+    /*
+      Eleven items, matching the client's reference system exactly and in its
+      order. "All" is every field on one read-only grid; the other ten each
+      bring one field forward to be edited in bulk.
+
+      Rates (All) and Rates (Main) are the same grid over the same field: Main
+      pins the default plan, All lets you pick. Changing the main rate is most
+      of what anyone does here, and making them choose the plan first every time
+      is a click that is always the same click.
+    */
     items: [
-      { label: "Rates", href: "/inventory/rates-all" },
+      { label: "All", href: "/inventory/all" },
+      { label: "Rates (All)", href: "/inventory/rates-all" },
+      { label: "Rates (Main)", href: "/inventory/rates-main" },
       { label: "Availability", href: "/inventory/availability" },
       { label: "Min stay through", href: "/inventory/min-stay-through" },
       { label: "Min stay arrival", href: "/inventory/min-stay-arrival" },
@@ -49,6 +61,12 @@ export const SECTIONS: NavSection[] = [
   {
     label: "Reports",
     columns: 2,
+    /*
+      Twenty-two, matching the reference's list and its order. The first
+      thirteen were built first and the other nine followed; the order is the
+      reference's rather than anything meaningful, and it is kept so somebody
+      moving between the two systems finds the same item in the same place.
+    */
     items: [
       { label: "Payments", href: "/reports/payments" },
       { label: "Daily checkout", href: "/reports/daily-checkout" },
@@ -63,6 +81,15 @@ export const SECTIONS: NavSection[] = [
       { label: "Debtors", href: "/reports/debtors" },
       { label: "In house", href: "/reports/in-house" },
       { label: "Reservations", href: "/reports/reservations" },
+      { label: "Manager", href: "/reports/manager" },
+      { label: "Folio", href: "/reports/folio" },
+      { label: "Immigration", href: "/reports/immigration" },
+      { label: "Country", href: "/reports/country" },
+      { label: "Deposit", href: "/reports/deposit" },
+      { label: "Rate plan", href: "/reports/rate-plan" },
+      { label: "Accounting", href: "/reports/accounting" },
+      { label: "End of day", href: "/reports/end-of-day" },
+      { label: "Booking waitlist", href: "/reports/waitlist" },
     ],
   },
   { label: "Customers", href: "/customers" },
