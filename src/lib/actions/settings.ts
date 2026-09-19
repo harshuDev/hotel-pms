@@ -381,3 +381,46 @@ export async function saveStaffUser(input: {
   revalidateSettings();
   return { ok: true, data: { id: data as string } };
 }
+
+/**
+ * Creating and correcting a rate plan.
+ *
+ * A hotel sells several: Room Only, Bed and Breakfast, Non-refundable. Until
+ * 0054 one could be created — from a corner of the Inventory screen — and never
+ * renamed, retired or reordered, which is why the hosted property has exactly
+ * one. Rate plans belong in Settings with the room types and the tax rates,
+ * because setting them up is part of setting up the property rather than part
+ * of pricing a week.
+ *
+ * There is no delete, for the same reason there is none for a room or a tax
+ * rate: `rate_plan_days` and `booking_rooms` point at a plan, so one no longer
+ * sold is `is_active = false`. A booking taken on it keeps saying what it was
+ * sold on.
+ */
+export async function saveRatePlan(input: {
+  id: string | null;
+  code: string;
+  name: string;
+  description: string;
+  isDefault: boolean;
+  isActive: boolean;
+}): Promise<ActionResult<{ id: string }>> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase.rpc("save_rate_plan", {
+    p_code: input.code,
+    p_name: input.name,
+    p_description: input.description.trim() || null,
+    p_is_default: input.isDefault,
+    p_is_active: input.isActive,
+    p_id: input.id,
+  });
+
+  if (error) return { ok: false, error: error.message };
+
+  revalidatePath("/settings");
+  // Every Inventory screen reads the plans, and the Rates grid draws a row per
+  // plan per room type, so it moves the moment one is added or retired.
+  revalidatePath("/inventory", "layout");
+  return { ok: true, data: { id: data as string } };
+}

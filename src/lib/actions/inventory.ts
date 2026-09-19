@@ -252,3 +252,58 @@ export async function setRatePlanMealValue(input: {
   revalidatePath("/reports/extras");
   return { ok: true, data: null };
 }
+
+/**
+ * Setting the rate on several (room type, rate plan) pairs at once.
+ *
+ * The Rates screen draws plans nested under room types, so a selection is a set
+ * of pairs rather than a set of room types on one plan. `set_rates()` takes one
+ * plan and an array of types, so this groups the selection by plan and makes
+ * one call per plan — each its own transaction, exactly as applying to several
+ * room types already was.
+ *
+ * It routes through `applyInventory()` rather than calling the RPC directly, so
+ * the validation lives in one place: a negative rate is refused here the same
+ * way it is on the nine single-field screens.
+ */
+export async function applyRates(edit: {
+  pairs: { roomTypeId: string; ratePlanId: string }[];
+  from: string;
+  to: string;
+  daysOfWeek: number[];
+  /** Null clears the rate back to "not loaded", which is not zero. */
+  value: number | null;
+}): Promise<ActionResult<{ nightsWritten: number }>> {
+  if (edit.pairs.length === 0) {
+    return { ok: false, error: "Tick at least one rate to apply this to." };
+  }
+
+  const byPlan = new Map<string, string[]>();
+  for (const pair of edit.pairs) {
+    const list = byPlan.get(pair.ratePlanId);
+    if (list) list.push(pair.roomTypeId);
+    else byPlan.set(pair.ratePlanId, [pair.roomTypeId]);
+  }
+
+  let nightsWritten = 0;
+  for (const [ratePlanId, roomTypeIds] of byPlan) {
+    const result = await applyInventory({
+      field: "rate",
+      ratePlanId,
+      // Duplicates would write the same night twice; harmless, but the count
+      // would then overstate what was done.
+      roomTypeIds: [...new Set(roomTypeIds)],
+      from: edit.from,
+      to: edit.to,
+      daysOfWeek: edit.daysOfWeek,
+      value: edit.value,
+    });
+    // Stop on the first refusal rather than pressing on: a half-applied bulk
+    // edit is worse than one that says what went wrong and changed nothing
+    // further.
+    if (!result.ok) return result;
+    nightsWritten += result.data.nightsWritten;
+  }
+
+  return { ok: true, data: { nightsWritten } };
+}
