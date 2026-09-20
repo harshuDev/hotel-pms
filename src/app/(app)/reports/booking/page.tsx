@@ -41,7 +41,6 @@ export default async function BookingReportPage({
   return (
     <ReportShell
       title="Booking"
-      subtitle="What was booked during this period, dated by when it was taken"
       action="/reports/booking"
       range={range}
     >
@@ -121,16 +120,6 @@ export default async function BookingReportPage({
         emptyTitle="No bookings were taken in this range"
         emptyHint="Widen the dates, or take a booking."
         footLabel={`${rows.length} booking${rows.length === 1 ? "" : "s"}`}
-        note={
-          <>
-            This is production: a booking belongs to the day it was taken, in
-            the property&apos;s own timezone, whatever date the guest arrives. For
-            what is on the books to arrive in a period, run the reservations
-            report instead. Cancelled bookings stay listed, because a period
-            that sold well and then lost it is not the same as one that never
-            sold.
-          </>
-        }
         columns={[
           {
             header: "Booked",

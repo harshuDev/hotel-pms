@@ -83,7 +83,6 @@ export default async function HousekeepingReportPage({
   return (
     <ReportShell
       title="Housekeeping"
-      subtitle="What needs cleaning, floor by floor and room by room"
       date={businessDate}
     >
       <ReportFigures>
@@ -240,16 +239,6 @@ export default async function HousekeepingReportPage({
           rooms.totalCount > HOUSEKEEPING_PAGE_SIZE
             ? `${rooms.rooms.length} of ${rooms.totalCount} rooms`
             : `${rooms.totalCount} room${rooms.totalCount === 1 ? "" : "s"}`
-        }
-        note={
-          <>
-            Marking a room clean is what takes it off this list. Due out means
-            the guest is leaving today, so the room will need cleaning even
-            though it still reads as occupied — it becomes dirty automatically
-            when they are checked out. The list is paged in Postgres rather
-            than fetched whole: a property can run well over a thousand rooms,
-            and no screen here draws one element per room.
-          </>
         }
         columns={[
           {

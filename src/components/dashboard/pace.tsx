@@ -170,10 +170,6 @@ export function Pace({
           </ComposedChart>
         </ResponsiveContainer>
       </div>
-      <p className="mt-1 px-1 text-xs text-ink-faint">
-        Solid bars are nights already sold. Pale bars are rooms on the books for
-        nights still to come. The blue line is room revenue.
-      </p>
     </Card>
   );
 }

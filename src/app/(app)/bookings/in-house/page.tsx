@@ -15,9 +15,6 @@ export default async function InHousePage() {
     <div>
       <PageHeader
         title="In house"
-        subtitle={
-          total === 1 ? "1 booking in residence" : `${total} bookings in residence`
-        }
       />
       <BookingList
         rows={rows}

@@ -973,7 +973,26 @@ export async function getDebtorsReport(): Promise<DebtorRow[]> {
  * as "one week only". The chevrons page by this, and the date jump goes
  * anywhere beyond it.
  */
-export const CALENDAR_NIGHTS = 30;
+export const CALENDAR_NIGHTS = 35;
+
+/**
+ * How many days BEFORE the business date the board opens on.
+ *
+ * The client: "in the calendar I want the hotels to be able to see past dates
+ * too", pointing at the reference, whose board has several days of history to
+ * the left of today rather than starting on it.
+ *
+ * Nothing was stopping a past date being shown -- the chevrons and the date
+ * picker have always gone anywhere, and past nights are already shaded -- but
+ * the board opened with today hard against the left edge, so "what happened
+ * this week" meant paging back a whole month and then hunting for it. A week
+ * of history is the useful amount: yesterday's departures and the last few
+ * nights' occupancy are what somebody actually looks back at.
+ *
+ * CALENDAR_NIGHTS went from 30 to 35 with it, so the four weeks of forward
+ * view the board had are still there.
+ */
+export const CALENDAR_LOOKBACK = 7;
 
 /**
  * How many bars one room type may draw before the board stops and counts.
@@ -2513,6 +2532,25 @@ const SETTINGS_ROOMS_PER_PAGE = 50;
  * tonight's guest and nights left; this one returns the type and the floor,
  * which are what actually get corrected here.
  */
+/** The bucket room photographs live in. Created by migration 0055. */
+export const ROOM_PHOTO_BUCKET = "room-photos";
+
+/**
+ * An object path turned into something an <img> can load.
+ *
+ * The bucket is public, so this is a plain URL and needs no signing round
+ * trip — which matters on a list that draws one per row. It resolves against
+ * one known bucket, so a path that somehow got into the column cannot point
+ * the browser anywhere else.
+ */
+function roomPhotoUrl(
+  supabase: { storage: { from: (b: string) => { getPublicUrl: (p: string) => { data: { publicUrl: string } } } } },
+  path: string | null,
+): string | null {
+  if (!path) return null;
+  return supabase.storage.from(ROOM_PHOTO_BUCKET).getPublicUrl(path).data.publicUrl;
+}
+
 export async function getRoomsForSettings(filters: {
   q?: string;
   page?: number;
@@ -2537,6 +2575,11 @@ export async function getRoomsForSettings(filters: {
     room_type_id: string;
     room_type_name: string;
     status: RoomSetting["status"];
+    // The generator cannot express a nullable column in a RETURNS TABLE, so
+    // it comes back typed non-null. It is nullable in Postgres and null on
+    // every room nobody has photographed.
+    photo_path: string | null;
+    has_bookings: boolean;
     total_count: number;
   }[];
 
@@ -2548,6 +2591,9 @@ export async function getRoomsForSettings(filters: {
       roomTypeId: row.room_type_id,
       roomTypeName: row.room_type_name,
       status: row.status,
+      photoPath: row.photo_path,
+      photoUrl: roomPhotoUrl(supabase, row.photo_path),
+      hasBookings: row.has_bookings,
     })),
     total: rows[0]?.total_count ?? 0,
     page,

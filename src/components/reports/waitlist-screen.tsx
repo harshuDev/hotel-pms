@@ -384,13 +384,6 @@ export function WaitlistScreen({
           </div>
         )}
 
-        <p className="mt-4 text-xs leading-relaxed text-ink-faint">
-          A waitlist entry holds no room. Nothing here appears in occupancy,
-          availability or any revenue figure until somebody takes a real booking
-          for it — which is what &ldquo;Book&rdquo; opens. Entries are never
-          deleted: one that came to nothing is cancelled or expired, because the
-          fact that somebody asked is the only thing this list is evidence of.
-        </p>
       </div>
     </div>
   );

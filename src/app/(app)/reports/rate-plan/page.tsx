@@ -30,7 +30,7 @@ export default async function RatePlanReportPage({
   } catch (error) {
     if (error instanceof ReportAccessError) {
       return (
-        <ReportShell title="Rate plans" subtitle="How each plan sold">
+        <ReportShell title="Rate plans">
           <ReportNoAccess />
         </ReportShell>
       );
@@ -49,7 +49,6 @@ export default async function RatePlanReportPage({
   return (
     <ReportShell
       title="Rate plans"
-      subtitle="Room nights, discount and average rate for each plan"
       action="/reports/rate-plan"
       range={range}
     >
@@ -82,16 +81,6 @@ export default async function RatePlanReportPage({
         emptyTitle="Nothing sold in this range"
         emptyHint="Pick a range that covers dates guests have stayed."
         footLabel={`${rows.length} plan${rows.length === 1 ? "" : "s"}`}
-        note={
-          <>
-            The average rate is net of discount, like every other ADR in this
-            application — taken before the discount it would flatter a promotion
-            into looking like full rate.
-            {unrecorded
-              ? " Nights under “Not recorded” were sold before the booking started carrying its rate plan, so nothing says which plan they were on. They are counted rather than dropped, so these totals still tie to the occupancy report."
-              : ""}
-          </>
-        }
         columns={[
           {
             header: "Plan",

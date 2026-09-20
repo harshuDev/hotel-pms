@@ -1856,6 +1856,7 @@ export type Database = {
           floor: number | null
           id: string
           number: string
+          photo_path: string | null
           property_id: string
           room_type_id: string
           status: Database["public"]["Enums"]["room_status"]
@@ -1865,6 +1866,7 @@ export type Database = {
           floor?: number | null
           id?: string
           number: string
+          photo_path?: string | null
           property_id: string
           room_type_id: string
           status?: Database["public"]["Enums"]["room_status"]
@@ -1874,6 +1876,7 @@ export type Database = {
           floor?: number | null
           id?: string
           number?: string
+          photo_path?: string | null
           property_id?: string
           room_type_id?: string
           status?: Database["public"]["Enums"]["room_status"]
@@ -2998,6 +3001,7 @@ export type Database = {
           status: Database["public"]["Enums"]["booking_status"]
         }[]
       }
+      delete_room: { Args: { p_room_id: string }; Returns: undefined }
       delete_season: { Args: { p_id: string }; Returns: undefined }
       deposit_report: {
         Args: Record<PropertyKey, never>
@@ -3631,7 +3635,9 @@ export type Database = {
         Args: { p_limit?: number; p_offset?: number; p_q?: string }
         Returns: {
           floor: number
+          has_bookings: boolean
           number: string
+          photo_path: string
           room_id: string
           room_type_id: string
           room_type_name: string
@@ -3916,6 +3922,10 @@ export type Database = {
       }
       set_customer_exclude_from_email: {
         Args: { p_id: string; p_value: boolean }
+        Returns: undefined
+      }
+      set_room_photo: {
+        Args: { p_photo_path?: string; p_room_id: string }
         Returns: undefined
       }
       set_room_status: {

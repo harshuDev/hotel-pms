@@ -111,8 +111,7 @@ export function InventoryAll({ cells }: { cells: InventoryCell[] }) {
   if (dates.length === 0 || types.length === 0) {
     return (
       <div className="rounded-lg border border-line bg-white p-4 text-[13px] text-ink-muted shadow-card">
-        No room types are set up yet, so there is nothing to show. Add one under
-        Settings and the grid fills in.
+        No room types are set up yet. Add one under Settings.
       </div>
     );
   }
@@ -207,14 +206,6 @@ export function InventoryAll({ cells }: { cells: InventoryCell[] }) {
         </table>
       </div>
 
-      <p className="mt-4 text-xs leading-relaxed text-ink-faint">
-        Everything on this screen is read-only — each row heading links to the
-        screen that sets it, where it can be applied across a date range and a
-        set of room types at once. A dash means no rule, which is not the same as
-        a rule of zero. Cells shaded rose are actively stopping a sale: no rate
-        loaded, nothing left to sell, or a closure. Availability shows what can
-        actually go, so rooms out of order are already off it.
-      </p>
     </div>
   );
 }

@@ -73,7 +73,6 @@ export default async function SettingsPage({
     <div>
       <PageHeader
         title="Settings"
-        subtitle="The rooms, sources and rates this property sells against"
       />
       <SettingsScreen
         tab={tab}

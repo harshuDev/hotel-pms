@@ -48,9 +48,6 @@ export default function LoginPage() {
           <h1 className="mt-3 font-display text-[28px] font-semibold tracking-tightest text-ink">
             The Grand Hotel
           </h1>
-          <p className="mt-2 text-[13px] text-ink-muted">
-            Sign in to your property management system
-          </p>
         </div>
 
         <section className="rounded-lg border border-line bg-white p-6 shadow-card">

@@ -27,7 +27,6 @@ export default async function InHouseReportPage() {
   return (
     <ReportShell
       title="In house"
-      subtitle="Everyone staying tonight, with what they owe so far"
       date={businessDate}
     >
       <ReportFigures>
@@ -57,15 +56,6 @@ export default async function InHouseReportPage() {
         emptyTitle="Nobody is in house tonight"
         emptyHint="Guests appear here once they are checked in against the open business date."
         footLabel={`${rows.length} room${rows.length === 1 ? "" : "s"}`}
-        note={
-          <>
-            One row per occupied room, so a booking that took three rooms
-            appears three times; the balance shown against each is the whole
-            booking&apos;s, because a folio belongs to the booking rather than the
-            room. Nights stayed counts from arrival to the open business date,
-            so a guest who arrived today shows none.
-          </>
-        }
         columns={[
           {
             header: "Room",

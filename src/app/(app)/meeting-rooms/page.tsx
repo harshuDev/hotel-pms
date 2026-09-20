@@ -40,7 +40,6 @@ export default async function MeetingRoomsPage({
     <div>
       <PageHeader
         title="Meeting rooms"
-        subtitle="What is free, and what is booked into it"
       />
       <MeetingRoomsScreen
         cells={cells}

@@ -37,7 +37,6 @@ export default async function DailyCheckoutPage({
       return (
         <ReportShell
           title="Daily checkout"
-          subtitle="Who departed and what they left owing"
         >
           <ReportNoAccess />
         </ReportShell>
@@ -54,7 +53,6 @@ export default async function DailyCheckoutPage({
   return (
     <ReportShell
       title="Daily checkout"
-      subtitle="Who departed on this business date, and what they left owing"
       action="/reports/daily-checkout"
       date={date}
     >
@@ -85,14 +83,6 @@ export default async function DailyCheckoutPage({
         emptyTitle="Nobody is due out on this date"
         emptyHint="Pick another business date, or check the arrivals and departures lists."
         footLabel={`${rows.length} departure${rows.length === 1 ? "" : "s"}`}
-        note={
-          <>
-            Bookings still showing as checked in are included: a guest whose
-            departure date has come but who has not been checked out is exactly
-            what this report is for. Amounts cover every folio on the booking,
-            so a split bill appears once.
-          </>
-        }
         columns={[
           {
             header: "Booking",

@@ -31,7 +31,6 @@ export default async function CancellationReportPage({
   return (
     <ReportShell
       title="Cancellation"
-      subtitle="Arrivals lost in this period, and what they were worth"
       action="/reports/cancellation"
       range={range}
     >
@@ -61,16 +60,6 @@ export default async function CancellationReportPage({
         emptyTitle="Nothing was cancelled for these arrival dates"
         emptyHint="Cancellations and no-shows appear here against the date they were due to arrive."
         footLabel={`${rows.length} booking${rows.length === 1 ? "" : "s"}`}
-        note={
-          <>
-            Dated by the arrival that was lost, not by when the booking was
-            cancelled: a booking cancelled in March for an August stay is an
-            August loss. Cancelled on is taken from the activity log and is
-            blank for a booking whose status was set outside the application, so
-            it is shown rather than filtered on. Dating the report by
-            cancellation instead would need a column on the booking itself.
-          </>
-        }
         columns={[
           {
             header: "Arrival",

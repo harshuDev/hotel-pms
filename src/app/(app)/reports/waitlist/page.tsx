@@ -56,7 +56,7 @@ export default async function WaitlistReportPage({
   } catch (error) {
     if (error instanceof ReportAccessError) {
       return (
-        <ReportShell title="Booking waitlist" subtitle="Guests waiting for dates">
+        <ReportShell title="Booking waitlist">
           <ReportNoAccess />
         </ReportShell>
       );
@@ -72,7 +72,6 @@ export default async function WaitlistReportPage({
   return (
     <ReportShell
       title="Booking waitlist"
-      subtitle="Guests waiting for dates the hotel could not sell them"
       action="/reports/waitlist"
       range={range}
     >

@@ -8,6 +8,7 @@ import {
 import { BookingDialog } from "@/components/calendar/booking-dialog";
 import { NewBookingForm } from "@/components/bookings/new-booking-form";
 import {
+  CALENDAR_LOOKBACK,
   CALENDAR_MAX_BARS_PER_TYPE,
   CALENDAR_NIGHTS,
   getBookableRoomTypes,
@@ -31,9 +32,22 @@ const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 /** Roles Postgres will let take a booking. `create_booking()` checks too. */
 const CAN_BOOK = ["admin", "manager", "front_desk"];
 
+/**
+ * Where the board opens when the URL does not say.
+ *
+ * A week before the business date, not on it. The client asked to be able to
+ * see past dates, and the reference's board carries several days of history to
+ * the left of today. Paging and the date picker have always reached backwards;
+ * what they had to reach past was a default that put today hard against the
+ * left edge.
+ */
+function defaultStart(businessDate: string) {
+  return format(subDays(parseISO(businessDate), CALENDAR_LOOKBACK), "yyyy-MM-dd");
+}
+
 function startDate(businessDate: string, from: string | undefined) {
   if (from && ISO_DATE.test(from) && isValid(parseISO(from))) return from;
-  return businessDate;
+  return defaultStart(businessDate);
 }
 
 export default async function CalendarPage({
@@ -186,7 +200,6 @@ export default async function CalendarPage({
     <div>
       <PageHeader
         title="Calendar"
-        subtitle="Who is in, by room type, night by night"
       />
 
       {types.length === 0 ? (
@@ -212,7 +225,8 @@ export default async function CalendarPage({
             statusByType={statusByType}
             shiftHref={shiftHref}
             railHref={railHref}
-            todayHref={href(businessDate, railW)}
+            todayHref={href(defaultStart(businessDate), railW)}
+            todayFrom={defaultStart(businessDate)}
             basePath="/calendar"
             // Stays on the board: the dialog opens over it.
             bookHref={(date, roomTypeId) =>

@@ -40,7 +40,7 @@ export default async function ExtrasReportPage({
   } catch (error) {
     if (error instanceof ReportAccessError) {
       return (
-        <ReportShell title="Extras" subtitle="Everything charged that is not the room">
+        <ReportShell title="Extras">
           <ReportNoAccess />
         </ReportShell>
       );
@@ -57,7 +57,6 @@ export default async function ExtrasReportPage({
   return (
     <ReportShell
       title="Extras"
-      subtitle="Everything charged that is not the room, by type"
       action="/reports/extras"
       range={range}
     >
@@ -90,16 +89,6 @@ export default async function ExtrasReportPage({
         emptyTitle="Nothing but rooms was charged in this range"
         emptyHint="Minibar, laundry and food charges posted to a folio appear here."
         footLabel={`${rows.length} type${rows.length === 1 ? "" : "s"}`}
-        note={
-          <>
-            Room charges and their tax are left out: they belong to the
-            occupancy report, and including them would drown everything else. A
-            charge posted in error and reversed nets to nothing but still shows
-            its count, because the correction is part of the record. Discounts
-            appear on the financial report, not here — a discount is a deduction
-            from a charge, not something sold.
-          </>
-        }
         columns={[
           {
             header: "Type",

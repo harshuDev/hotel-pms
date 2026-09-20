@@ -38,7 +38,7 @@ export default async function CountryReportPage({
   } catch (error) {
     if (error instanceof ReportAccessError) {
       return (
-        <ReportShell title="Countries" subtitle="Where the hotel's guests come from">
+        <ReportShell title="Countries">
           <ReportNoAccess />
         </ReportShell>
       );
@@ -56,7 +56,6 @@ export default async function CountryReportPage({
   return (
     <ReportShell
       title="Countries"
-      subtitle="Room nights and revenue by the guest's country of residence"
       action="/reports/country"
       range={range}
     >
@@ -89,16 +88,6 @@ export default async function CountryReportPage({
         emptyTitle="No nights were stayed in this range"
         emptyHint="Pick a range that covers dates guests have stayed."
         footLabel={`${rows.length} row${rows.length === 1 ? "" : "s"}`}
-        note={
-          <>
-            Guests whose country was never recorded are counted under
-            &ldquo;Unknown&rdquo; rather than left out, so the percentages are
-            of the real total. That row shrinking is the measure of how well the
-            desk is filling the field in — it is set on the customer, under
-            Identity. Nights are counted, not bookings, so a long stay weighs
-            what it is worth.
-          </>
-        }
         columns={[
           {
             header: "Country",

@@ -13,7 +13,6 @@ export default async function DebtorsReportPage() {
   return (
     <ReportShell
       title="Debtors"
-      subtitle="Bookings with money still owed, largest first"
     >
       <div className="rounded-lg border border-line bg-white p-4 shadow-card">
         {rows.length === 0 ? (
@@ -110,14 +109,6 @@ export default async function DebtorsReportPage() {
                 </tfoot>
               </table>
             </div>
-            <p className="mt-3 text-xs leading-relaxed text-ink-faint">
-              Overdue counts from the last day against the business date, so a
-              guest still in house is never late. For a room booking the last
-              day is the departure morning; for a meeting room it is the final
-              day the room was held, because that module is booked inclusively
-              at both ends. A booking with several folios appears once: it is
-              one debt to chase.
-            </p>
           </>
         )}
       </div>

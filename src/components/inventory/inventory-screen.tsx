@@ -350,9 +350,7 @@ export function InventoryScreen({
                     className="mt-0.5"
                   />
                   <span>
-                    Sell this rate on the guest booking page. Off means a
-                    stranger never sees it — which is what a corporate or
-                    negotiated rate wants.
+                    Sell this rate on the guest booking page.
                   </span>
                 </label>
               )}
@@ -399,27 +397,9 @@ export function InventoryScreen({
                       );
                     })}
                   </div>
-                  <p className="mt-1.5 max-w-sm text-xs leading-relaxed text-ink-faint">
-                    What this rate covers. The set is the board type — breakfast
-                    alone is B&amp;B, breakfast and dinner is half board. It
-                    feeds the Meal report and changes no price.
-                  </p>
-                  <p className="mt-1.5 max-w-sm text-xs leading-relaxed text-ink-faint">
-                    Give a meal a value and the night audit splits it out of the
-                    room charge as food, so a £120 B&amp;B night reads as
-                    accommodation plus breakfast. Leave it blank and the whole
-                    night stays accommodation, which is how every rate starts.
-                    Changing it never restates a night already charged.
-                  </p>
                 </div>
               )}
             </div>
-          )}
-          {!spec.needsPlan && (
-            <p className="max-w-sm text-xs leading-relaxed text-ink-faint">
-              This applies to the room type itself, on every rate plan at once,
-              so there is no plan to pick.
-            </p>
           )}
         </div>
 
@@ -443,11 +423,6 @@ export function InventoryScreen({
         <div className="rounded-lg border border-line bg-white p-6 shadow-card">
           <p className="font-display text-[15px] font-semibold tracking-tightest text-ink">
             No rate plan yet
-          </p>
-          <p className="mt-1.5 max-w-lg text-[13px] leading-relaxed text-ink-muted">
-            A rate plan is what the hotel sells — Best Available, Corporate, a
-            non-refundable rate. Prices and stay rules are loaded onto one, so
-            there has to be one before anything can be set.
           </p>
           {canEdit ? (
             newPlan ? (

@@ -33,7 +33,6 @@ export default async function ChannelReportPage({
   return (
     <ReportShell
       title="Channel"
-      subtitle="Room nights and revenue by where the business came from"
       action="/reports/channel"
       range={range}
     >
@@ -67,16 +66,6 @@ export default async function ChannelReportPage({
         emptyTitle="Nothing was stayed in this range"
         emptyHint="Room nights are counted against the nights stayed, so widen the dates."
         footLabel={`${rows.length} channel${rows.length === 1 ? "" : "s"}`}
-        note={
-          <>
-            Counted over the nights stayed, not the nights booked, so this
-            report and the occupancy report agree. Commission is worked out from
-            each channel&apos;s rate on the room revenue: it is what the channel is
-            owed on this business, not money that has moved — no commission
-            payment is recorded anywhere yet. Cancelled and no-show nights are
-            excluded.
-          </>
-        }
         columns={[
           {
             header: "Channel",

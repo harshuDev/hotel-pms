@@ -887,6 +887,22 @@ export interface RoomSetting {
   roomTypeId: string;
   roomTypeName: string;
   status: RoomStatus;
+  /**
+   * The public URL of the room's photograph, already resolved, or null.
+   *
+   * The column holds an object path; turning it into a URL is one bucket's
+   * business and belongs in the query layer rather than in every component
+   * that wants to draw the picture.
+   */
+  photoUrl: string | null;
+  /** The object path itself, which is what `set_room_photo()` takes back. */
+  photoPath: string | null;
+  /**
+   * Whether anything has ever been booked into it. A room with bookings
+   * cannot be deleted -- `delete_room()` refuses -- so the list says so
+   * before somebody clicks rather than after.
+   */
+  hasBookings: boolean;
 }
 
 export interface RoomSettingsPage {

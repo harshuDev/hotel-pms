@@ -388,10 +388,18 @@ function DayCells({
             </span>
           ) : null;
 
-        // Two branches rather than a component held in a variable: the union of
-        // a Link and a div does not typecheck, and spreading props onto it
-        // hides which element actually renders.
-        if (!bookHref) {
+        /*
+         * Two branches rather than a component held in a variable: the union
+         * of a Link and a div does not typecheck, and spreading props onto it
+         * hides which element actually renders.
+         *
+         * A NIGHT THAT HAS ALREADY PASSED IS NOT A LINK. The board shows past
+         * dates now, and `create_booking()` refuses an arrival before the
+         * business date -- so a link there is a click that opens a dialog only
+         * to have the server throw the date away. Better that the cell simply
+         * is not clickable.
+         */
+        if (!bookHref || d < businessDate) {
           return <div key={d} className={tone} style={width}>{figure}</div>;
         }
         return (
@@ -420,7 +428,6 @@ function DayCells({
  */
 function ExtraRow({
   label,
-  hint,
   bars,
   dates,
   businessDate,
@@ -429,7 +436,6 @@ function ExtraRow({
   railCell,
 }: {
   label: string;
-  hint: string;
   bars: BoardBar[];
   dates: string[];
   businessDate: string;
@@ -442,11 +448,13 @@ function ExtraRow({
 
   return (
     <div className="flex items-stretch">
-      <div className={cn(railCell, "px-3 py-2")} style={{ width: railW }}>
+      <div
+        className={cn(railCell, "flex items-center px-3 py-2")}
+        style={{ width: railW }}
+      >
         <div className="text-[12.5px] font-bold uppercase tracking-[0.06em] text-white/80">
           {label}
         </div>
-        <div className="text-xxs leading-tight text-white/50">{hint}</div>
       </div>
       <div
         className="relative border-b border-board-line"
@@ -459,6 +467,33 @@ function ExtraRow({
   );
 }
 
+
+/**
+ * A break in the board, above Holding and above Cancelled.
+ *
+ * The client asked for "a small space between the rooms, Holding Area and
+ * Cancelled area", pointing at the reference, whose two standing bands sit
+ * below a plain gap rather than butted against the last room row. It is doing
+ * real work: those two rows are not rooms, and without the gap the eye reads
+ * "Holding area" as one more room in the last room type.
+ *
+ * It spans the rail as well as the grid, so the blue column breaks with
+ * everything else -- a gap in the dates with the rail running straight past it
+ * would look like a rendering fault rather than a division.
+ */
+const GUTTER_H = 10;
+
+function Gutter({ railW, gridW }: { railW: number; gridW: number }) {
+  return (
+    <div className="flex items-stretch" aria-hidden style={{ height: GUTTER_H }}>
+      <div
+        className="sticky left-0 z-10 shrink-0 bg-shell"
+        style={{ width: railW }}
+      />
+      <div className="bg-shell" style={{ width: gridW }} />
+    </div>
+  );
+}
 
 /**
  * Housekeeping, per room, on the rail.
@@ -527,11 +562,15 @@ function UnassignedRow({
         <span className="truncate text-[12px] font-medium uppercase tracking-[0.06em] text-white/70">
           Unassigned
         </span>
-        <span className="tnum text-xxs text-white/45">
-          {total === 0
-            ? "every booking has a room"
-            : `${total} awaiting a room`}
-        </span>
+        {/*
+          The count and nothing else. There was a line of prose under this
+          saying what "unassigned" meant; the client read the explanatory copy
+          across the application as leftover prompt text and asked for it gone,
+          and the reference's own band carries a label alone.
+        */}
+        {total > 0 && (
+          <span className="tnum text-xxs text-white/45">{total}</span>
+        )}
       </div>
       <div
         className="relative border-b border-board-line bg-board-wash"
@@ -564,6 +603,7 @@ export function CalendarBoard({
   shiftHref,
   railHref,
   todayHref,
+  todayFrom,
   basePath,
   bookHref,
   days,
@@ -598,6 +638,8 @@ export function CalendarBoard({
   /** Where + and − go: they size the rail, not the date range. */
   railHref: (delta: number) => string;
   todayHref: string;
+  /** The first date of the default window, for the picker's own Today. */
+  todayFrom: string;
   /** The route the board lives on; the date picker builds its own hrefs. */
   basePath: string;
   /**
@@ -708,6 +750,7 @@ export function CalendarBoard({
                   businessDate={businessDate}
                   basePath={basePath}
                   railW={railW}
+                  todayFrom={todayFrom}
                 />
               </div>
             </div>
@@ -977,13 +1020,9 @@ export function CalendarBoard({
             CANCELLED is the same argument from the other end — released rooms
             that would read as sold if they sat among the live ones.
           */}
+          <Gutter railW={railW} gridW={gridW} />
           <ExtraRow
             label="Holding area"
-            hint={
-              holdingBars.length === 0
-                ? "Nothing waiting"
-                : `${holdingBars.length} awaiting confirmation`
-            }
             bars={holdingBars}
             dates={dates}
             businessDate={businessDate}
@@ -991,13 +1030,9 @@ export function CalendarBoard({
             gridW={gridW}
             railCell={railCell}
           />
+          <Gutter railW={railW} gridW={gridW} />
           <ExtraRow
             label="Cancelled"
-            hint={
-              canceledBars.length === 0
-                ? "None in these dates"
-                : "Rooms back on sale"
-            }
             bars={canceledBars}
             dates={dates}
             businessDate={businessDate}

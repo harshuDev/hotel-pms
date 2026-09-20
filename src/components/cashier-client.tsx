@@ -330,8 +330,7 @@ function ClosedReceipt({
       )}
 
       <p className="mt-6 text-xs leading-relaxed text-ink-faint">
-        The next receptionist can now open a shift. This one is locked — no
-        payment or paid-out can be posted against it.
+        The next receptionist can now open a shift.
       </p>
       <button
         onClick={onOpenAnother}
@@ -804,9 +803,7 @@ function CloseShiftModal({
     <Modal title="Close shift" onClose={onCancel}>
       <div className="space-y-4">
         <p className="text-sm leading-relaxed text-ink-muted">
-          Count the cash in the drawer and enter the total. The expected figure
-          is not worked out until you have — a blind count is the only way a
-          real discrepancy ever surfaces.
+          Count the cash in the drawer and enter the total.
         </p>
         <div>
           <label className={labelCls}>Cash counted</label>

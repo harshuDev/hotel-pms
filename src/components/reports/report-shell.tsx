@@ -9,14 +9,12 @@ import type { DateRange } from "@/lib/reports";
  */
 export function ReportShell({
   title,
-  subtitle,
   action,
   range,
   date,
   children,
 }: {
   title: string;
-  subtitle: string;
   action?: string;
   range?: DateRange;
   /** For a report that runs for one day rather than a range. */
@@ -27,7 +25,6 @@ export function ReportShell({
     <div>
       <PageHeader
         title={title}
-        subtitle={subtitle}
         action={
           date && action ? (
             <form action={action} className="flex flex-wrap items-end gap-2">

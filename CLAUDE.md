@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0054` are
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0055` are
 applied to the hosted database.
 
 Working on real data: dashboard (house board, movements, pace, activity feed),
@@ -33,9 +33,16 @@ by hand.
 Those figures are a working configuration, not the client's own property. They
 were chosen with the client and are cheap to change in the application, with
 two exceptions that Postgres will not let anyone undo: there is no delete for a
-room, a room type or a tax rate, because bookings and folio items point at them
-under `on delete restrict`. A room that should not exist is `ooo`; a tax rate
-that should not apply is retired.
+room type or a tax rate, because bookings and folio items point at them under
+`on delete restrict`. A tax rate that should not apply is retired.
+
+**A ROOM CAN BE DELETED, as of 0055, if it has never been booked.** That
+reverses what this file said from 0030 to 0054, and the reversal is narrow:
+`delete_room()` refuses by name the moment `booking_rooms` points at the room,
+and such a room is still `ooo`. What it unblocks is the case the old rule got
+wrong — a run of 60 entered as 50, a number typed wrong, a cupboard counted as
+sellable — where `ooo` is not an answer at all, because an out-of-order room
+still sits in the rail and still reads as a room the hotel owns.
 
 As of 0030 all of this can be created from `/settings` rather than by hand in
 SQL, and as of 0031 an individual room and the payment methods can be corrected
@@ -573,6 +580,26 @@ showed the Reservation Centric calendar and asked for it by name.
   were there; the client read them as leftover prompt text and asked for them
   gone. The reference has none. What mattered survives in place — the rail says
   "2 of 9" where a type is capped, and the dot has its tooltip.
+- **The board opens a week BEFORE the business date, not on it.** The client:
+  "in the calendar I want the hotels to be able to see past dates too".
+  Nothing had ever stopped a past date being shown — the chevrons and the date
+  picker go anywhere, and past nights are already shaded `board-past` — but
+  the default window put today hard against the left edge, so looking back
+  meant paging a whole month and hunting. `CALENDAR_LOOKBACK` is 7 and
+  `CALENDAR_NIGHTS` went from 30 to 35 with it, so the four weeks of forward
+  view are still there. Both "Today" controls, the rail's and the date
+  picker's, return to that same window rather than to a board starting on
+  today — two Todays landing in different places reads as a bug.
+  - **A cell in the past is not a link.** `create_booking()` refuses an
+    arrival before the business date, so a booking link there opened a dialog
+    the server then threw away.
+- **A gutter separates the room types from Holding and Cancelled.** The client
+  asked for "a small space between the rooms, Holding Area and Cancelled
+  area", pointing at the reference, where those two bands sit below a plain
+  gap. It is doing real work: they are not rooms, and butted against the last
+  room row the eye reads "Holding area" as one more room in the last type. The
+  gutter spans the rail as well as the grid — breaking the dates while the
+  blue column ran straight past would look like a rendering fault.
 - **The window is a fixed month and the URL carries no `days`.** It used to:
   the + and − controls moved the date span before they were corrected to size
   the rail. Anybody who pressed "−" while they were wired that way got `days=7`
@@ -716,8 +743,8 @@ anywhere else. Collapsed height must stay constant regardless of room count.
   which is why the hosted property had exactly one. Setting up what the hotel
   sells belongs beside the room types and the tax rates, not inside a week's
   pricing.
-  - **There is no delete**, like a room or a tax rate: `rate_plan_days` and
-    `booking_rooms` point at a plan, so one no longer sold is
+  - **There is no delete**, like a room type or a tax rate: `rate_plan_days`
+    and `booking_rooms` point at a plan, so one no longer sold is
     `is_active = false` and a booking taken on it keeps saying what it was sold
     as.
   - **A property always keeps one default plan.** `save_rate_plan()` promotes
@@ -862,9 +889,29 @@ anywhere else. Collapsed height must stay constant regardless of room count.
   - **Moving a room to another type rewrites nothing.** `booking_rooms` carries
     its own `room_type_id`, so a reservation records the type it was sold at
     and no booking, rate or night row moves with the room.
-  - **There is no delete**, for a room or a room type or a payment method:
-    bookings and payments point at them under `on delete restrict`. A room out
-    of service is `ooo`; a method no longer taken is `is_active = false`.
+  - **A room that has never been booked is deleted from the list** (0055),
+    through `delete_room()`. A room with bookings is refused by name and stays
+    `ooo`; the list says which is which with `has_bookings` rather than letting
+    somebody find out by clicking. The room's `room_status_history` goes with
+    it — that log is about the room, and once the room is gone there is nothing
+    for it to be evidence of. **There is still no delete for a room type or a
+    payment method**: bookings and payments point at those under
+    `on delete restrict`, so one no longer used is `is_active = false`.
+  - **A room carries a photograph** (0055). `rooms.photo_path` holds an object
+    path in the public `room-photos` bucket, never a URL: a url column renders
+    whatever the browser sent. The path is `<property_id>/<room_id>/<file>`,
+    and that prefix is checked twice — by the storage policy on the upload and
+    by `set_room_photo()` on the write — so a name invented in the browser
+    cannot point a room at somebody else's file. The upload goes straight from
+    the browser under the user's own session; nothing holds a service key.
+    - `set_room_photo()` is its own function rather than a parameter on
+      `save_room()`. An optional parameter there would be an overload for
+      PostgREST to choose between, and a form saving a number and a floor would
+      be saying "no photograph" every time somebody fixed a typo.
+    - Each upload gets a fresh object name. Overwriting one path would leave
+      the browser and any CDN showing the old picture, which reads as the
+      upload having failed; the old file is removed once the new path is
+      recorded.
   - Status is not settable here. It is changed where the work happens — the
     housekeeping report and the house board.
 - **`payment_methods.affects_drawer` is not a setting.** A check constraint
@@ -1225,6 +1272,44 @@ pnpm supabase migration new <name>
 ```
 
 ## Copy and interface writing
+
+**THERE IS NO EXPLANATORY COPY IN THIS APPLICATION. Do not add any back.**
+
+The client asked for it twice. The first time it was the legend and two
+paragraphs under the calendar board; the second time it was everything —
+"they're a lot of written stuff with explanations in the system delete all",
+and "I think is the prompt", which is the point: a screen covered in prose
+explaining itself reads as leftover AI output, not as a product. The reference
+system labels a control and says nothing else.
+
+What went, and how it is kept gone:
+
+- **`PageHeader` has no `subtitle` prop.** Every screen carried a line under
+  its title saying what the screen was for. The prop was removed rather than
+  ignored, so every one of the thirty-odd call sites was a compile error and
+  none was missed. `ReportShell`, `InventoryPage` and `SCREENS` in
+  `field-spec.ts` lost theirs with it.
+- **`ReportTable` has no `note` prop.** All twenty-two reports carried a
+  methodology footnote — "dated by business date, not by the clock", "sellable
+  is the number of rooms not currently out of order". Gone the same way.
+- **The calendar rail's bands carry a label and a count, nothing else.**
+  "Nothing waiting", "Rooms back on sale", "every booking has a room" are gone.
+- **Settings keeps one note**, and only because removing it leaves an
+  administrator hunting for an "Add staff" button that deliberately does not
+  exist. Nine others went.
+
+**What deliberately stays, and is not the thing being complained about:**
+
+- **Refusals.** "This report is not available to your role", "You can read the
+  inventory but not change it" — a screen that refuses has to say why.
+- **Errors**, which still say what happened and how to fix it.
+- **Empty states**, cut to the action: "None yet. Add at least cash and card."
+- **One clause on a control whose consequence is not obvious** — the overbook
+  and ignore-restrictions tickboxes, the merge warning, the close-day
+  confirmation. These were cut to a single sentence, not deleted: a tickbox
+  that oversells the hotel needs to say so.
+- The password reset screens, which are recovery paths for somebody already
+  stuck and are not part of the staff application proper.
 
 - Empty states say what to do, not "No data".
 - Errors say what happened and how to fix it.

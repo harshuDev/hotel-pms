@@ -37,7 +37,7 @@ export default async function PaymentsReportPage({
   } catch (error) {
     if (error instanceof ReportAccessError) {
       return (
-        <ReportShell title="Payments" subtitle="Every payment taken, by method">
+        <ReportShell title="Payments">
           <ReportNoAccess />
         </ReportShell>
       );
@@ -54,7 +54,6 @@ export default async function PaymentsReportPage({
   return (
     <ReportShell
       title="Payments"
-      subtitle="Every payment taken, by method and one by one"
       action="/reports/payments"
       range={range}
     >
@@ -138,13 +137,6 @@ export default async function PaymentsReportPage({
         minWidth="880px"
         emptyTitle="No payments in this range"
         emptyHint="Widen the dates, or take a payment on the cashier screen."
-        note={
-          <>
-            Dated by business date, not by the clock, so a payment taken after
-            midnight belongs to the night still open. A reversal is its own row
-            and shows as a negative: nothing is edited or deleted once posted.
-          </>
-        }
         columns={[
           {
             header: "Business date",
