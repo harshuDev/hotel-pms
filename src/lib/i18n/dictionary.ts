@@ -51,6 +51,9 @@ export interface Dict {
   back: string;
   notBookable: string;
   notBookableHint: string;
+  /** Cancellation terms, which a guest must be shown BEFORE they agree. */
+  cancellation: string;
+  nonRefundable: string;
 }
 
 const en: Dict = {
@@ -93,6 +96,7 @@ const en: Dict = {
   back: "Back",
   notBookable: "Online booking is not open yet",
   notBookableHint: "This hotel is not taking bookings on this page at the moment. Please contact us directly and we will be glad to help.",
+  cancellation: "Cancellation", nonRefundable: "Non-refundable",
 };
 
 const de: Dict = {
@@ -118,6 +122,7 @@ const de: Dict = {
   language: "Sprache", back: "Zurück",
   notBookable: "Online-Buchung ist noch nicht möglich",
   notBookableHint: "Dieses Hotel nimmt auf dieser Seite derzeit keine Buchungen entgegen. Bitte kontaktieren Sie uns direkt — wir helfen Ihnen gern.",
+  cancellation: "Stornierung", nonRefundable: "Nicht erstattbar",
 };
 
 const fr: Dict = {
@@ -143,6 +148,7 @@ const fr: Dict = {
   language: "Langue", back: "Retour",
   notBookable: "La réservation en ligne n'est pas encore ouverte",
   notBookableHint: "Cet hôtel ne prend pas de réservations sur cette page pour le moment. Contactez-nous directement, nous serons ravis de vous aider.",
+  cancellation: "Annulation", nonRefundable: "Non remboursable",
 };
 
 const es: Dict = {
@@ -168,6 +174,7 @@ const es: Dict = {
   language: "Idioma", back: "Volver",
   notBookable: "La reserva en línea aún no está disponible",
   notBookableHint: "Este hotel no acepta reservas en esta página por ahora. Póngase en contacto con nosotros directamente y le ayudaremos con mucho gusto.",
+  cancellation: "Cancelación", nonRefundable: "No reembolsable",
 };
 
 const it: Dict = {
@@ -193,6 +200,7 @@ const it: Dict = {
   language: "Lingua", back: "Indietro",
   notBookable: "La prenotazione online non è ancora attiva",
   notBookableHint: "Al momento questo hotel non accetta prenotazioni da questa pagina. Contattaci direttamente, saremo lieti di aiutarti.",
+  cancellation: "Cancellazione", nonRefundable: "Non rimborsabile",
 };
 
 const pt: Dict = {
@@ -218,6 +226,7 @@ const pt: Dict = {
   language: "Idioma", back: "Voltar",
   notBookable: "A reserva online ainda não está disponível",
   notBookableHint: "Este hotel não aceita reservas nesta página de momento. Contacte-nos diretamente e teremos todo o gosto em ajudar.",
+  cancellation: "Cancelamento", nonRefundable: "Não reembolsável",
 };
 
 const nl: Dict = {
@@ -243,6 +252,7 @@ const nl: Dict = {
   language: "Taal", back: "Terug",
   notBookable: "Online boeken is nog niet mogelijk",
   notBookableHint: "Dit hotel neemt op deze pagina momenteel geen boekingen aan. Neem rechtstreeks contact met ons op, wij helpen u graag.",
+  cancellation: "Annulering", nonRefundable: "Niet-restitueerbaar",
 };
 
 const pl: Dict = {
@@ -268,6 +278,7 @@ const pl: Dict = {
   language: "Język", back: "Wstecz",
   notBookable: "Rezerwacja online nie jest jeszcze dostępna",
   notBookableHint: "Ten hotel nie przyjmuje obecnie rezerwacji na tej stronie. Prosimy o bezpośredni kontakt — chętnie pomożemy.",
+  cancellation: "Anulowanie", nonRefundable: "Bezzwrotna",
 };
 
 const sv: Dict = {
@@ -293,6 +304,7 @@ const sv: Dict = {
   language: "Språk", back: "Tillbaka",
   notBookable: "Onlinebokning är inte öppen än",
   notBookableHint: "Hotellet tar för närvarande inte emot bokningar på den här sidan. Kontakta oss direkt, så hjälper vi dig gärna.",
+  cancellation: "Avbokning", nonRefundable: "Återbetalas ej",
 };
 
 const da: Dict = {
@@ -318,6 +330,7 @@ const da: Dict = {
   language: "Sprog", back: "Tilbage",
   notBookable: "Onlinebooking er ikke åben endnu",
   notBookableHint: "Dette hotel tager i øjeblikket ikke imod bookinger på denne side. Kontakt os direkte, så hjælper vi gerne.",
+  cancellation: "Afbestilling", nonRefundable: "Ikke-refunderbar",
 };
 
 const no: Dict = {
@@ -343,6 +356,7 @@ const no: Dict = {
   language: "Språk", back: "Tilbake",
   notBookable: "Nettbestilling er ikke åpen ennå",
   notBookableHint: "Dette hotellet tar foreløpig ikke imot bestillinger på denne siden. Ta kontakt med oss direkte, så hjelper vi deg gjerne.",
+  cancellation: "Avbestilling", nonRefundable: "Ikke refunderbar",
 };
 
 const fi: Dict = {
@@ -368,6 +382,7 @@ const fi: Dict = {
   language: "Kieli", back: "Takaisin",
   notBookable: "Verkkovaraus ei ole vielä avoinna",
   notBookableHint: "Tämä hotelli ei toistaiseksi ota vastaan varauksia tältä sivulta. Ota meihin suoraan yhteyttä, autamme mielellämme.",
+  cancellation: "Peruutus", nonRefundable: "Ei hyvitettävä",
 };
 
 const cs: Dict = {
@@ -393,6 +408,7 @@ const cs: Dict = {
   language: "Jazyk", back: "Zpět",
   notBookable: "Online rezervace zatím není spuštěna",
   notBookableHint: "Tento hotel na této stránce momentálně nepřijímá rezervace. Kontaktujte nás prosím přímo, rádi vám pomůžeme.",
+  cancellation: "Zrušení", nonRefundable: "Nevratná",
 };
 
 const el: Dict = {
@@ -418,6 +434,7 @@ const el: Dict = {
   language: "Γλώσσα", back: "Πίσω",
   notBookable: "Η online κράτηση δεν είναι ακόμη διαθέσιμη",
   notBookableHint: "Αυτό το ξενοδοχείο δεν δέχεται προς το παρόν κρατήσεις από αυτή τη σελίδα. Επικοινωνήστε μαζί μας απευθείας και θα χαρούμε να σας βοηθήσουμε.",
+  cancellation: "Ακύρωση", nonRefundable: "Μη επιστρέψιμη",
 };
 
 const ro: Dict = {
@@ -443,6 +460,7 @@ const ro: Dict = {
   language: "Limbă", back: "Înapoi",
   notBookable: "Rezervarea online nu este încă disponibilă",
   notBookableHint: "Acest hotel nu acceptă momentan rezervări pe această pagină. Contactați-ne direct și vă vom ajuta cu plăcere.",
+  cancellation: "Anulare", nonRefundable: "Nerambursabil",
 };
 
 const hu: Dict = {
@@ -468,6 +486,7 @@ const hu: Dict = {
   language: "Nyelv", back: "Vissza",
   notBookable: "Az online foglalás még nem elérhető",
   notBookableHint: "Ez a szálloda jelenleg nem fogad foglalást ezen az oldalon. Kérjük, vegye fel velünk közvetlenül a kapcsolatot, szívesen segítünk.",
+  cancellation: "Lemondás", nonRefundable: "Nem visszatéríthető",
 };
 
 const uk: Dict = {
@@ -493,6 +512,7 @@ const uk: Dict = {
   language: "Мова", back: "Назад",
   notBookable: "Онлайн-бронювання ще не відкрите",
   notBookableHint: "Цей готель наразі не приймає бронювання на цій сторінці. Зв’яжіться з нами напряму — ми радо допоможемо.",
+  cancellation: "Скасування", nonRefundable: "Без повернення коштів",
 };
 
 const ru: Dict = {
@@ -518,6 +538,7 @@ const ru: Dict = {
   language: "Язык", back: "Назад",
   notBookable: "Онлайн-бронирование пока недоступно",
   notBookableHint: "Этот отель сейчас не принимает бронирования на этой странице. Свяжитесь с нами напрямую — мы будем рады помочь.",
+  cancellation: "Отмена", nonRefundable: "Без возврата",
 };
 
 const tr: Dict = {
@@ -543,6 +564,7 @@ const tr: Dict = {
   language: "Dil", back: "Geri",
   notBookable: "Çevrimiçi rezervasyon henüz açık değil",
   notBookableHint: "Bu otel şu anda bu sayfadan rezervasyon almıyor. Lütfen bizimle doğrudan iletişime geçin, memnuniyetle yardımcı oluruz.",
+  cancellation: "İptal", nonRefundable: "İade edilmez",
 };
 
 const DICTS: Record<Locale, Dict> = {

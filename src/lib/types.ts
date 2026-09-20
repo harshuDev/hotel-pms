@@ -624,6 +624,54 @@ export interface RatePlan {
    * every meal until somebody sets a figure.
    */
   mealValues: Partial<Record<MealType, number>>;
+  /**
+   * The cancellation terms this rate is sold on, or null when the hotel has
+   * not set any. Null is "not set" and is NOT free cancellation — the screens
+   * say so rather than guessing on a hotel's behalf about refunds.
+   */
+  cancellationPolicyId: string | null;
+}
+
+/**
+ * What a rate plan promises about cancelling (0060).
+ *
+ * The client: "Flexible Cancellation: The hotel choose how many day in Advance
+ * the guest can cancel for free. Non Refundable: Means that the guests cannot
+ * cancel or modify and the hotel can charge the guest card anytime."
+ */
+export type CancellationPolicyKind = "flexible" | "non_refundable";
+
+export interface CancellationPolicy {
+  id: string;
+  /** The hotel's own wording, which is what a guest reads. */
+  name: string;
+  kind: CancellationPolicyKind;
+  /**
+   * How many days before arrival a guest may still cancel free. Flexible only
+   * and null on a non-refundable policy, where "how many days" has no answer.
+   * Zero is meaningful: free until the arrival day itself.
+   */
+  freeCancellationDays: number | null;
+  description: string | null;
+  isActive: boolean;
+  sortOrder: number;
+  /** How many rate plans are sold on it, so retiring a live one is visible. */
+  ratePlanCount: number;
+}
+
+/** A booking's cancellation terms, dated against the open business date. */
+export interface BookingCancellationTerms {
+  policyName: string | null;
+  kind: CancellationPolicyKind | null;
+  freeCancellationDays: number | null;
+  /** The last business date on which cancelling is still free. */
+  freeUntil: string | null;
+  /** Whether it is free today. Null when no policy applies. */
+  isFreeNow: boolean | null;
+  /** True when the rooms on this booking do not share one policy. */
+  isMixed: boolean;
+  /** True when no room names a policy. Not the same as free. */
+  hasNoPolicy: boolean;
 }
 
 /** One room type on one night: price, stay rules and what is sellable. */

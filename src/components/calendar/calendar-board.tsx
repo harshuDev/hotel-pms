@@ -936,14 +936,26 @@ export function CalendarBoard({
                             : `${dayNotes.length} note${dayNotes.length === 1 ? "" : "s"} on ${format(day, "d MMM")}`
                         }
                         className={cn(
-                          "inline-flex items-center gap-0.5 rounded px-1 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brass",
+                          "inline-flex items-center gap-0.5 rounded border px-1 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brass",
                           dayNotes.length > 0
-                            ? "bg-warn-wash text-warn-deep"
-                            : "text-ink-faint/50 opacity-0 hover:bg-shell hover:text-ink group-hover/day:opacity-100",
+                            ? "border-warn/40 bg-warn-wash text-warn-deep"
+                            : "border-board-line bg-white text-ink-muted opacity-0 hover:bg-shell hover:text-ink group-hover/day:opacity-100",
                         )}
                       >
+                        {/*
+                          A PENCIL, IN A BOX, matching the reference: the
+                          client circled theirs and it is an edit affordance,
+                          not a speech bubble.
+
+                          The two are deliberately different marks now. A
+                          speech bubble on a BAR means "this booking carries a
+                          note somebody wrote about the guest"; a pencil in the
+                          DATE HEADER means "write a note about this day". They
+                          are different things and drawing both as a bubble
+                          made the board say one word for two.
+                        */}
                         <svg viewBox="0 0 16 16" aria-hidden className="h-3 w-3 fill-current">
-                          <path d="M2 3.2A1.2 1.2 0 0 1 3.2 2h9.6A1.2 1.2 0 0 1 14 3.2v6.4a1.2 1.2 0 0 1-1.2 1.2H6.6L3.4 13.6a.5.5 0 0 1-.8-.4v-2.4A1.2 1.2 0 0 1 2 9.6z" />
+                          <path d="M11.6 1.8a1.3 1.3 0 0 1 1.9 0l.7.7a1.3 1.3 0 0 1 0 1.9l-.9.9-2.6-2.6zM9.8 3.6l2.6 2.6-6.1 6.1a1 1 0 0 1-.45.26l-2.7.73a.4.4 0 0 1-.5-.5l.73-2.7a1 1 0 0 1 .26-.45z" />
                         </svg>
                         {dayNotes.length > 0 && (
                           <span className="tnum font-semibold">{dayNotes.length}</span>

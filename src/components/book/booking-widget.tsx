@@ -47,6 +47,8 @@ export function BookingWidget({
   const money = useMemo(() => bcp47(locale), [locale]);
 
   const [ratePlanId, setRatePlanId] = useState(ratePlans[0].ratePlanId);
+  /* Derived, not a second piece of state to keep in step with the first. */
+  const selectedPlan = ratePlans.find((p) => p.ratePlanId === ratePlanId);
   const [from, setFrom] = useState(isoDate(1));
   const [to, setTo] = useState(isoDate(3));
   const [adults, setAdults] = useState(2);
@@ -212,6 +214,46 @@ export function BookingWidget({
                       <option key={p.ratePlanId} value={p.ratePlanId}>{p.name}</option>
                     ))}
                   </select>
+                </div>
+              )}
+
+              {/*
+                The cancellation terms of the plan being booked, shown BEFORE
+                the guest searches and commits to anything. A guest agreeing to
+                a non-refundable rate without being told it is non-refundable
+                is the one failure this whole feature exists to prevent.
+
+                Nothing is drawn when the hotel has set no policy: silence is
+                honest, where "free cancellation" would be a promise the hotel
+                never made.
+
+                The hotel's own wording carries the detail and is NOT
+                translated -- only the label around it is. A hotel writing its
+                terms in its own language is the hotel's call, not ours to
+                machine-translate.
+              */}
+              {selectedPlan?.cancellationKind && (
+                <div
+                  className={cn(
+                    "mt-4 rounded-md px-3 py-2.5 text-[13px] leading-snug",
+                    selectedPlan.cancellationKind === "non_refundable"
+                      ? "bg-rose-50 text-rose-800"
+                      : "bg-emerald-50 text-emerald-800",
+                  )}
+                >
+                  <span className="font-semibold">
+                    {selectedPlan.cancellationKind === "non_refundable"
+                      ? t.nonRefundable
+                      : t.cancellation}
+                  </span>
+                  {selectedPlan.cancellationName && (
+                    <span className="block">{selectedPlan.cancellationName}</span>
+                  )}
+                  {selectedPlan.cancellationDescription && (
+                    <span className="block text-[12.5px] opacity-90">
+                      {selectedPlan.cancellationDescription}
+                    </span>
+                  )}
                 </div>
               )}
 

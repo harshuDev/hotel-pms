@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { ROOM_PHOTO_BUCKET } from "@/lib/queries";
 import type { ActionResult } from "@/lib/actions/cashier";
 import type {
+  CancellationPolicyKind,
   ChannelKind,
   PaymentMethodKind,
   RoomStatus,
@@ -505,4 +506,79 @@ export async function saveRatePlan(input: {
   // plan per room type, so it moves the moment one is added or retired.
   revalidatePath("/inventory", "layout");
   return { ok: true, data: { id: data as string } };
+}
+
+/**
+ * A cancellation policy (0060).
+ *
+ * Thin, like every other write here: the role gate is the RLS policy on
+ * `cancellation_policies`, so it applies however the row is written rather
+ * than only when it is written through this file.
+ *
+ * There is no delete. `rate_plans.cancellation_policy_id` points at a policy
+ * under `on delete restrict`, and a booking taken on one keeps meaning what it
+ * was sold under, so a policy no longer offered is retired.
+ */
+export async function saveCancellationPolicy(input: {
+  id: string | null;
+  name: string;
+  kind: CancellationPolicyKind;
+  /** Flexible only. Ignored by the RPC on a non-refundable policy. */
+  freeCancellationDays: number | null;
+  description: string;
+  isActive: boolean;
+  sortOrder: number;
+}): Promise<ActionResult<{ id: string }>> {
+  if (input.name.trim() === "") {
+    return { ok: false, error: "Give the policy a name the guest will read." };
+  }
+
+  const supabase = await createClient();
+
+  const { data, error } = await supabase.rpc("save_cancellation_policy", {
+    p_name: input.name,
+    p_kind: input.kind,
+    p_free_cancellation_days:
+      input.kind === "flexible" ? (input.freeCancellationDays ?? 0) : null,
+    p_description: input.description.trim() || null,
+    p_is_active: input.isActive,
+    p_sort_order: input.sortOrder,
+    p_id: input.id,
+  });
+
+  if (error) return { ok: false, error: error.message };
+
+  revalidatePath("/settings");
+  // The guest booking page quotes the terms, and a booking screen reads them.
+  revalidatePath("/book", "layout");
+  revalidatePath("/bookings", "layout");
+  return { ok: true, data: { id: data as string } };
+}
+
+/**
+ * Which policy a rate is sold on.
+ *
+ * Its own action rather than a field on `saveRatePlan()`, matching the RPC:
+ * an optional parameter there would be an overload for PostgREST to choose
+ * between, and renaming a plan would otherwise say "and no cancellation
+ * policy" unless the form remembered to send it back. Null clears it.
+ */
+export async function setRatePlanCancellationPolicy(
+  ratePlanId: string,
+  cancellationPolicyId: string | null,
+): Promise<ActionResult<null>> {
+  const supabase = await createClient();
+
+  const { error } = await supabase.rpc("set_rate_plan_cancellation_policy", {
+    p_rate_plan_id: ratePlanId,
+    p_cancellation_policy_id: cancellationPolicyId,
+  });
+
+  if (error) return { ok: false, error: error.message };
+
+  revalidatePath("/settings");
+  revalidatePath("/inventory", "layout");
+  revalidatePath("/book", "layout");
+  revalidatePath("/bookings", "layout");
+  return { ok: true, data: null };
 }

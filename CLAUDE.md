@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0059` are
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0060` are
 applied to the hosted database.
 
 Working on real data: dashboard (house board, movements, pace, activity feed),
@@ -565,6 +565,13 @@ showed the Reservation Centric calendar and asked for it by name.
     118px and an operational note is a sentence. The note is read in the
     dialog, which opens from `?note=<date>` — URL state, like the booking
     dialog, so a reload keeps it open and the back button closes it.
+  - **The marker is a PENCIL IN A BOX, matching the reference**, which the
+    client circled in a screenshot. It is deliberately a different mark from
+    the speech bubble on a bar: a bubble on a BAR means "this booking carries
+    a note about the guest", a pencil in the DATE HEADER means "write a note
+    about this day". Drawing both as a bubble made the board say one word for
+    two things. It is revealed on hover, as theirs is, and goes solid with a
+    count once the day has a note.
   - Reading is anyone on the property, writing is `is_front_office_staff()`,
     both enforced by the RLS policy rather than by a second copy of the rule
     inside the RPCs — which is why they are `security invoker`.
@@ -820,13 +827,66 @@ anywhere else. Collapsed height must stay constant regardless of room count.
   - **A property always keeps one default plan.** `save_rate_plan()` promotes
     the first active plan if the last default is retired or stood down —
     otherwise a booking naming no plan has nowhere to fall back to.
-  - **"Non-refundable" is a name, not yet a rule.** A plan can be called that
-    and priced like it today; what actually refuses a refund is a cancellation
-    policy, and there is no cancellation policy table yet. Do not pretend
-    otherwise in the interface.
+  - **"Non-refundable" IS A RULE NOW, as of 0060.** This note used to say the
+    opposite: a plan could be called non-refundable and priced like it, and
+    nothing enforced or even recorded what that meant. `cancellation_policies`
+    is that table, and `rate_plans.cancellation_policy_id` is the link. See
+    the cancellation notes below.
   - `create_rate_plan()` still exists and still works. It is what the Inventory
     screen calls, and breaking it to rename it would be churn for no
     user-visible gain.
+- **CANCELLATION POLICIES HANG OFF A RATE PLAN** (0060). The client: "for
+  CANCELLATION POLICY each hotel have different policy. Flexible Cancellation:
+  The hotel choose how many day in Advance the guest can cancel for free. Non
+  Refundable: Means that the guests cannot cancel or modify and the hotel can
+  charge the guest card anytime."
+  - **Two kinds, because they behave differently rather than being one setting
+    at two values.** `flexible` carries `free_cancellation_days` and a check
+    constraint requires it; `non_refundable` carries none and the same
+    constraint forbids one. Switching kind in the form DROPS the stale days
+    rather than refusing — nobody should have to clear a field the new kind
+    does not have.
+  - **Per rate plan, not per property.** "Each hotel have different policy" is
+    satisfied by the rows being per-property; what a policy governs is a rate,
+    because Flexible and Non-refundable are two things one hotel sells side by
+    side at two prices. That is the whole point of a non-refundable rate.
+  - **Null is "not set" and is NOT free cancellation.** Every screen says "Not
+    set" rather than defaulting, because a default here would put words in a
+    hotel's mouth about refunds. Same convention as the rest of the inventory.
+  - **`set_rate_plan_cancellation_policy()` is its own function**, like
+    `set_room_photo()`, for the same reason: an optional parameter on
+    `save_rate_plan()` would be an overload for PostgREST to choose between,
+    and renaming a plan would then say "and no cancellation policy" every time.
+  - **`booking_cancellation_terms()` REPORTS AND DOES NOT ENFORCE.** Staff can
+    always cancel — a hotel that cannot cancel its own booking is broken — so
+    the terms appear on the booking screen and inside the cancel confirmation,
+    and the button still works. What the policy decides is whether money is
+    owed, not whether staff may act, and cancelling has never written off the
+    balance.
+    - Dated against the open `business_date`, not `now()`, like every other
+      operational question here. Free when
+      `business_date <= check_in - free_cancellation_days`, so the deadline day
+      itself is still free and a policy of 0 days is free until arrival.
+    - **A booking can carry more than one policy**, since `booking_rooms` holds
+      a rate plan per room and a group booking may mix them. The strictest is
+      reported and `is_mixed` says the rooms differ, rather than stating one
+      room's terms as though they were the booking's.
+  - **The guest is told before they agree.** `public_rate_plans()` carries the
+    policy name, kind and days, and the booking page draws them under the plan
+    picker. A guest accepting a non-refundable rate without being shown it is
+    non-refundable is the one failure this feature exists to prevent. The
+    hotel's own wording is NOT translated — only the label around it is.
+  - **NOTHING CHARGES A CARD.** "The hotel can charge the guest card anytime"
+    is a right the policy records, not one this system can exercise: there is
+    no Stripe code and no keys (see "Card capture is not built"). A
+    non-refundable booking means the charge stands and the folio still says
+    what is owed; collecting it is the front desk's job until card capture
+    exists. Do not let the interface imply otherwise.
+  - **There is no delete**, like a rate plan or a tax rate: `rate_plans` points
+    at a policy under `on delete restrict` and a booking keeps meaning what it
+    was sold under. One no longer offered is `is_active = false`, and the
+    Settings list shows how many plans use each so retiring a live one is
+    visible before it happens.
   - **"Rates (Main)" and "Rates (All)" are the same field.** Main pins the
     property's default plan and hides the switcher; All lets you pick. Two
     entries for one field is not duplication — changing the main rate is most
@@ -1573,3 +1633,10 @@ than proceeding.
     The second bypasses RLS, which the brief discourages, so it has not been
     built. Until it is, a new person is invited in Supabase Auth and then
     appears in Settings to be named and given a role.
+
+16. **Cancellation policy — settled and built (0060): two kinds, per rate
+    plan.** Flexible with a free-cancellation window in days, and
+    non-refundable. See the cancellation notes above. **What is NOT settled is
+    charging the card**: the client's "the hotel can charge the guest card
+    anytime" needs card capture, which is deferred, so the policy records the
+    right and cannot exercise it.

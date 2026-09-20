@@ -11,6 +11,7 @@ import {
   getRoomsForSettings,
   getRoomTypeSettings,
   getRatePlans,
+  getCancellationPolicies,
   getSeasonSettings,
   getStaffSettings,
   getTaxRateSettings,
@@ -53,6 +54,7 @@ export default async function SettingsPage({
     taxRates,
     seasons,
     ratePlans,
+    cancellationPolicies,
     paymentMethods,
     staff,
     me,
@@ -64,6 +66,7 @@ export default async function SettingsPage({
     getTaxRateSettings(),
     getSeasonSettings(),
     getRatePlans(),
+    getCancellationPolicies(),
     getPaymentMethodSettings(),
     getStaffSettings(),
     getCurrentStaffUser(),
@@ -84,6 +87,7 @@ export default async function SettingsPage({
         taxRates={taxRates}
         seasons={seasons}
         ratePlans={ratePlans}
+        cancellationPolicies={cancellationPolicies}
         editRoomTypeId={editRoomTypeId}
         paymentMethods={paymentMethods}
         staff={staff}

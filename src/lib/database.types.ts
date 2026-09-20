@@ -1,13 +1,3 @@
-// Generated from the hosted Supabase project. Do not edit by hand.
-//
-// Regenerate after every migration:
-//   pnpm supabase gen types typescript --local > src/lib/database.types.ts
-//
-// This is what puts compile-time checking on the RPC calls in
-// src/lib/queries.ts and src/lib/actions/. A renamed parameter or a changed
-// return shape is a type error here rather than a runtime failure in front of
-// a receptionist.
-
 export type Json =
   | string
   | number
@@ -282,7 +272,57 @@ export type Database = {
           room_type_id?: string | null
           status?: Database["public"]["Enums"]["waitlist_status"]
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "booking_waitlist_converted_booking_id_property_id_fkey"
+            columns: ["converted_booking_id", "property_id"]
+            isOneToOne: false
+            referencedRelation: "booking_totals"
+            referencedColumns: ["booking_id", "property_id"]
+          },
+          {
+            foreignKeyName: "booking_waitlist_converted_booking_id_property_id_fkey"
+            columns: ["converted_booking_id", "property_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id", "property_id"]
+          },
+          {
+            foreignKeyName: "booking_waitlist_created_by_property_id_fkey"
+            columns: ["created_by", "property_id"]
+            isOneToOne: false
+            referencedRelation: "staff_users"
+            referencedColumns: ["id", "property_id"]
+          },
+          {
+            foreignKeyName: "booking_waitlist_customer_id_property_id_fkey"
+            columns: ["customer_id", "property_id"]
+            isOneToOne: false
+            referencedRelation: "customer_stats"
+            referencedColumns: ["customer_id", "property_id"]
+          },
+          {
+            foreignKeyName: "booking_waitlist_customer_id_property_id_fkey"
+            columns: ["customer_id", "property_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id", "property_id"]
+          },
+          {
+            foreignKeyName: "booking_waitlist_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "booking_waitlist_room_type_id_property_id_fkey"
+            columns: ["room_type_id", "property_id"]
+            isOneToOne: false
+            referencedRelation: "room_types"
+            referencedColumns: ["id", "property_id"]
+          },
+        ]
       }
       bookings: {
         Row: {
@@ -460,6 +500,98 @@ export type Database = {
           },
         ]
       }
+      calendar_notes: {
+        Row: {
+          body: string
+          created_at: string
+          created_by: string | null
+          id: string
+          note_date: string
+          property_id: string
+          updated_at: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          note_date: string
+          property_id: string
+          updated_at?: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          note_date?: string
+          property_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "calendar_notes_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "staff_users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "calendar_notes_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cancellation_policies: {
+        Row: {
+          created_at: string
+          description: string | null
+          free_cancellation_days: number | null
+          id: string
+          is_active: boolean
+          kind: Database["public"]["Enums"]["cancellation_policy_kind"]
+          name: string
+          property_id: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          free_cancellation_days?: number | null
+          id?: string
+          is_active?: boolean
+          kind: Database["public"]["Enums"]["cancellation_policy_kind"]
+          name: string
+          property_id: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          free_cancellation_days?: number | null
+          id?: string
+          is_active?: boolean
+          kind?: Database["public"]["Enums"]["cancellation_policy_kind"]
+          name?: string
+          property_id?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cancellation_policies_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cash_movements: {
         Row: {
           amount_cents: number
@@ -568,51 +700,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "cashier_shifts"
             referencedColumns: ["id", "property_id"]
-          },
-        ]
-      }
-      calendar_notes: {
-        Row: {
-          body: string
-          created_at: string
-          created_by: string | null
-          id: string
-          note_date: string
-          property_id: string
-          updated_at: string
-        }
-        Insert: {
-          body: string
-          created_at?: string
-          created_by?: string | null
-          id?: string
-          note_date: string
-          property_id: string
-          updated_at?: string
-        }
-        Update: {
-          body?: string
-          created_at?: string
-          created_by?: string | null
-          id?: string
-          note_date?: string
-          property_id?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "calendar_notes_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "staff_users"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "calendar_notes_property_id_fkey"
-            columns: ["property_id"]
-            isOneToOne: false
-            referencedRelation: "properties"
-            referencedColumns: ["id"]
           },
         ]
       }
@@ -1692,6 +1779,7 @@ export type Database = {
       }
       rate_plans: {
         Row: {
+          cancellation_policy_id: string | null
           code: string
           created_at: string
           description: string | null
@@ -1705,6 +1793,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          cancellation_policy_id?: string | null
           code: string
           created_at?: string
           description?: string | null
@@ -1718,6 +1807,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          cancellation_policy_id?: string | null
           code?: string
           created_at?: string
           description?: string | null
@@ -1731,6 +1821,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "rate_plans_cancellation_policy_id_fkey"
+            columns: ["cancellation_policy_id"]
+            isOneToOne: false
+            referencedRelation: "cancellation_policies"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "rate_plans_property_id_fkey"
             columns: ["property_id"]
@@ -2330,12 +2427,12 @@ export type Database = {
           p_check_in: string
           p_check_out: string
           p_children?: number
-          p_contact_email?: string | null
-          p_contact_name?: string | null
-          p_contact_phone?: string | null
-          p_customer_id?: string | null
-          p_notes?: string | null
-          p_room_type_id?: string | null
+          p_contact_email?: string
+          p_contact_name?: string
+          p_contact_phone?: string
+          p_customer_id?: string
+          p_notes?: string
+          p_room_type_id?: string
         }
         Returns: string
       }
@@ -2415,6 +2512,18 @@ export type Database = {
           summary: string
         }[]
       }
+      booking_cancellation_terms: {
+        Args: { p_booking_id: string }
+        Returns: {
+          free_cancellation_days: number
+          free_until: string
+          has_no_policy: boolean
+          is_free_now: boolean
+          is_mixed: boolean
+          kind: Database["public"]["Enums"]["cancellation_policy_kind"]
+          policy_name: string
+        }[]
+      }
       booking_detail: {
         Args: { p_booking_id: string }
         Returns: {
@@ -2458,7 +2567,7 @@ export type Database = {
           folio_id: string
           folio_number: number
           is_reversal: boolean
-          item_type: Database["public"]["Enums"]["folio_item_type"] | null
+          item_type: Database["public"]["Enums"]["folio_item_type"]
           kind: string
           line_id: string
           posted_at: string
@@ -2543,7 +2652,7 @@ export type Database = {
       booking_waitlist_report: {
         Args: {
           p_from: string
-          p_status?: Database["public"]["Enums"]["waitlist_status"] | null
+          p_status?: Database["public"]["Enums"]["waitlist_status"]
           p_to: string
         }
         Returns: {
@@ -2551,15 +2660,15 @@ export type Database = {
           check_in: string
           check_out: string
           children: number
-          contact_email: string | null
-          contact_phone: string | null
-          converted_reference: string | null
+          contact_email: string
+          contact_phone: string
+          converted_reference: string
           created_at: string
-          created_by_name: string | null
+          created_by_name: string
           guest_name: string
           id: string
           nights: number
-          notes: string | null
+          notes: string
           room_type_name: string
           status: string
         }[]
@@ -2631,8 +2740,19 @@ export type Database = {
           value_cents: number
         }[]
       }
+      calendar_notes_for: {
+        Args: { p_days?: number; p_from: string }
+        Returns: {
+          author: string
+          body: string
+          created_at: string
+          id: string
+          note_date: string
+          updated_at: string
+        }[]
+      }
       calendar_room_bars: {
-        Args: { p_from: string; p_nights: number; p_unassigned_cap?: number | null }
+        Args: { p_from: string; p_nights: number; p_unassigned_cap?: number }
         Returns: {
           booking_id: string
           booking_room_id: string
@@ -2642,35 +2762,19 @@ export type Database = {
           guests: number
           has_notes: boolean
           is_assigned: boolean
-          rate_plan_name: string | null
+          rate_plan_name: string
           reference: string
-          room_id: string | null
+          room_id: string
           room_type_id: string
           status: Database["public"]["Enums"]["booking_status"]
           unassigned_total: number
           value_cents: number
         }[]
       }
-      calendar_notes_for: {
-        Args: { p_days?: number | null; p_from: string }
-        Returns: {
-          author: string | null
-          body: string
-          created_at: string
-          id: string
-          note_date: string
-          updated_at: string
-        }[]
-      }
-      delete_calendar_note: { Args: { p_id: string }; Returns: undefined }
-      save_calendar_note: {
-        Args: { p_body: string; p_id?: string; p_note_date: string }
-        Returns: string
-      }
       calendar_rooms: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
-          floor: string | null
+          floor: string
           room_id: string
           room_number: string
           room_status: Database["public"]["Enums"]["room_status"]
@@ -2697,6 +2801,19 @@ export type Database = {
       cancel_meeting_room_booking: {
         Args: { p_booking_id: string; p_reason?: string }
         Returns: number
+      }
+      cancellation_policies_list: {
+        Args: never
+        Returns: {
+          description: string
+          free_cancellation_days: number
+          id: string
+          is_active: boolean
+          kind: Database["public"]["Enums"]["cancellation_policy_kind"]
+          name: string
+          rate_plan_count: number
+          sort_order: number
+        }[]
       }
       cancellation_report: {
         Args: { p_from: string; p_to: string }
@@ -2937,6 +3054,8 @@ export type Database = {
         Args: { p_id: string }
         Returns: {
           company_name: string
+          country: string
+          date_of_birth: string
           email: string
           exclude_from_email: boolean
           first_name: string
@@ -2944,6 +3063,9 @@ export type Database = {
           kind: Database["public"]["Enums"]["customer_kind"]
           last_name: string
           national_id_number: string
+          nationality: string
+          passport_expiry: string
+          passport_number: string
           phone: string
         }[]
       }
@@ -3064,10 +3186,11 @@ export type Database = {
           status: Database["public"]["Enums"]["booking_status"]
         }[]
       }
+      delete_calendar_note: { Args: { p_id: string }; Returns: undefined }
       delete_room: { Args: { p_room_id: string }; Returns: undefined }
       delete_season: { Args: { p_id: string }; Returns: undefined }
       deposit_report: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           booking_id: string
           charges_cents: number
@@ -3129,8 +3252,8 @@ export type Database = {
         Returns: {
           arrivals: number
           business_date: string
-          closed_at: string | null
-          closed_by: string | null
+          closed_at: string
+          closed_by: string
           date_status: string
           departures: number
           drawer_cents: number
@@ -3175,7 +3298,7 @@ export type Database = {
         Returns: {
           balance_cents: number
           charges_cents: number
-          closed_at: string | null
+          closed_at: string
           folio_id: string
           folio_number: number
           guest_name: string
@@ -3263,15 +3386,15 @@ export type Database = {
           booking_id: string
           check_in: string
           check_out: string
-          country: string | null
-          date_of_birth: string | null
+          country: string
+          date_of_birth: string
           guest_name: string
           is_complete: boolean
-          national_id_number: string | null
-          nationality: string | null
+          national_id_number: string
+          nationality: string
           nights: number
-          passport_expiry: string | null
-          passport_number: string | null
+          passport_expiry: string
+          passport_number: string
           reference: string
           room_number: string
         }[]
@@ -3322,10 +3445,10 @@ export type Database = {
         Returns: string
       }
       inventory_rates_grid: {
-        Args: { p_from: string; p_days?: number | null }
+        Args: { p_days?: number; p_from: string }
         Returns: {
           date: string
-          rate_cents: number | null
+          rate_cents: number
           rate_plan_code: string
           rate_plan_id: string
           rate_plan_is_default: boolean
@@ -3343,7 +3466,6 @@ export type Database = {
       }
       is_front_office_staff: { Args: never; Returns: boolean }
       is_revenue_staff: { Args: never; Returns: boolean }
-      mark_activity_seen: { Args: never; Returns: string }
       manager_report: {
         Args: { p_from: string; p_to: string }
         Returns: {
@@ -3361,15 +3483,7 @@ export type Database = {
           total_revenue_cents: number
         }[]
       }
-      merge_customers: {
-        Args: { p_keep_id: string; p_merge_ids: string[] }
-        Returns: {
-          bookings_moved: number
-          customers_merged: number
-          folios_moved: number
-          meeting_rooms_moved: number
-        }[]
-      }
+      mark_activity_seen: { Args: never; Returns: string }
       meal_report: {
         Args: { p_from: string; p_to: string }
         Returns: {
@@ -3421,6 +3535,15 @@ export type Database = {
           starts_on: string
           status: Database["public"]["Enums"]["meeting_room_booking_status"]
           stay_date: string
+        }[]
+      }
+      merge_customers: {
+        Args: { p_keep_id: string; p_merge_ids: string[] }
+        Returns: {
+          bookings_moved: number
+          customers_merged: number
+          folios_moved: number
+          meeting_rooms_moved: number
         }[]
       }
       next_booking_reference: { Args: never; Returns: string }
@@ -3576,6 +3699,10 @@ export type Database = {
       public_rate_plans: {
         Args: { p_property_id: string }
         Returns: {
+          cancellation_description: string
+          cancellation_free_days: number
+          cancellation_kind: Database["public"]["Enums"]["cancellation_policy_kind"]
+          cancellation_name: string
           code: string
           description: string
           name: string
@@ -3611,7 +3738,7 @@ export type Database = {
           is_public: boolean
           net_cents: number
           plan_name: string
-          rate_plan_id: string | null
+          rate_plan_id: string
           room_nights: number
         }[]
       }
@@ -3650,11 +3777,8 @@ export type Database = {
         Returns: string
       }
       require_financial_staff: { Args: never; Returns: undefined }
+      require_guest_identity_reports: { Args: never; Returns: undefined }
       require_money_reports: { Args: never; Returns: undefined }
-      require_guest_identity_reports: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
       reservations_report: {
         Args: { p_from: string; p_to: string }
         Returns: {
@@ -3726,6 +3850,22 @@ export type Database = {
           total_count: number
         }[]
       }
+      save_calendar_note: {
+        Args: { p_body: string; p_id?: string; p_note_date: string }
+        Returns: string
+      }
+      save_cancellation_policy: {
+        Args: {
+          p_description?: string
+          p_free_cancellation_days?: number
+          p_id?: string
+          p_is_active?: boolean
+          p_kind: Database["public"]["Enums"]["cancellation_policy_kind"]
+          p_name: string
+          p_sort_order?: number
+        }
+        Returns: string
+      }
       save_channel: {
         Args: {
           p_code: string
@@ -3734,6 +3874,25 @@ export type Database = {
           p_is_active?: boolean
           p_kind: Database["public"]["Enums"]["channel_kind"]
           p_name: string
+        }
+        Returns: string
+      }
+      save_customer: {
+        Args: {
+          p_company_name?: string
+          p_country?: string
+          p_date_of_birth?: string
+          p_email?: string
+          p_exclude_from_email?: boolean
+          p_first_name?: string
+          p_id?: string
+          p_kind: Database["public"]["Enums"]["customer_kind"]
+          p_last_name?: string
+          p_national_id_number?: string
+          p_nationality?: string
+          p_passport_expiry?: string
+          p_passport_number?: string
+          p_phone?: string
         }
         Returns: string
       }
@@ -3785,20 +3944,6 @@ export type Database = {
         }
         Returns: string
       }
-      save_customer: {
-        Args: {
-          p_company_name?: string
-          p_email?: string
-          p_exclude_from_email?: boolean
-          p_first_name?: string
-          p_id?: string
-          p_kind: Database["public"]["Enums"]["customer_kind"]
-          p_last_name?: string
-          p_national_id_number?: string
-          p_phone?: string
-        }
-        Returns: string
-      }
       save_property: {
         Args: {
           p_check_in_time?: string
@@ -3812,10 +3957,10 @@ export type Database = {
       save_rate_plan: {
         Args: {
           p_code: string
-          p_description?: string | null
-          p_id?: string | null
-          p_is_active?: boolean | null
-          p_is_default?: boolean | null
+          p_description?: string
+          p_id?: string
+          p_is_active?: boolean
+          p_is_default?: boolean
           p_name: string
         }
         Returns: string
@@ -3920,6 +4065,10 @@ export type Database = {
         }
         Returns: number
       }
+      set_customer_exclude_from_email: {
+        Args: { p_id: string; p_value: boolean }
+        Returns: undefined
+      }
       set_max_stay: {
         Args: {
           p_days_of_week?: number[]
@@ -3953,6 +4102,10 @@ export type Database = {
         }
         Returns: number
       }
+      set_rate_plan_cancellation_policy: {
+        Args: { p_cancellation_policy_id?: string; p_rate_plan_id: string }
+        Returns: undefined
+      }
       set_rate_plan_meal_value: {
         Args: {
           p_meal: Database["public"]["Enums"]["meal_type"]
@@ -3983,10 +4136,6 @@ export type Database = {
         }
         Returns: number
       }
-      set_customer_exclude_from_email: {
-        Args: { p_id: string; p_value: boolean }
-        Returns: undefined
-      }
       set_room_photo: {
         Args: { p_photo_path?: string; p_room_id: string }
         Returns: undefined
@@ -4011,7 +4160,7 @@ export type Database = {
       }
       set_waitlist_status: {
         Args: {
-          p_booking_id?: string | null
+          p_booking_id?: string
           p_id: string
           p_status: Database["public"]["Enums"]["waitlist_status"]
         }
@@ -4036,10 +4185,7 @@ export type Database = {
         }
         Returns: string
       }
-      unassign_room: {
-        Args: { p_booking_room_id: string }
-        Returns: undefined
-      }
+      unassign_room: { Args: { p_booking_room_id: string }; Returns: undefined }
       update_booking: {
         Args: {
           p_adults?: number
@@ -4069,6 +4215,7 @@ export type Database = {
         | "canceled"
         | "no_show"
       business_date_status: "open" | "closed"
+      cancellation_policy_kind: "flexible" | "non_refundable"
       cash_movement_direction: "in" | "out"
       cash_movement_type:
         | "paid_out"
@@ -4263,6 +4410,7 @@ export const Constants = {
         "no_show",
       ],
       business_date_status: ["open", "closed"],
+      cancellation_policy_kind: ["flexible", "non_refundable"],
       cash_movement_direction: ["in", "out"],
       cash_movement_type: [
         "paid_out",
