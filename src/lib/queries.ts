@@ -2986,6 +2986,7 @@ export async function getCalendarRoomBars(
     hasNotes: row.has_notes,
     isAssigned: row.is_assigned,
     unassignedTotal: Number(row.unassigned_total ?? 0),
+    ratePlanName: row.rate_plan_name,
   }));
 }
 

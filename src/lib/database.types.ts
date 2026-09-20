@@ -2596,6 +2596,7 @@ export type Database = {
           guests: number
           has_notes: boolean
           is_assigned: boolean
+          rate_plan_name: string | null
           reference: string
           room_id: string | null
           room_type_id: string

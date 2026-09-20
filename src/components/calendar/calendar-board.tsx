@@ -95,13 +95,43 @@ const MIN_H = 360;
  * White fill with a coloured edge keeps the look and says which kind of booking
  * it is without a legend.
  */
-const BAR_TONE: Record<BookingStatus, { edge: string; badge: string }> = {
-  pending: { edge: "border-warn", badge: "bg-warn" },
-  confirmed: { edge: "border-brass", badge: "bg-brass" },
-  checked_in: { edge: "border-emerald-500", badge: "bg-emerald-600" },
-  checked_out: { edge: "border-slate-400", badge: "bg-slate-500" },
-  canceled: { edge: "border-rose-400", badge: "bg-rose-500" },
-  no_show: { edge: "border-rose-400", badge: "bg-rose-500" },
+const BAR_TONE: Record<
+  BookingStatus,
+  { edge: string; badge: string; text: string }
+> = {
+  pending: { edge: "border-warn", badge: "bg-warn", text: "text-warn-deep" },
+  confirmed: { edge: "border-brass", badge: "bg-brass", text: "text-brass" },
+  checked_in: {
+    edge: "border-emerald-500",
+    badge: "bg-emerald-600",
+    text: "text-emerald-700",
+  },
+  checked_out: {
+    edge: "border-slate-400",
+    badge: "bg-slate-500",
+    text: "text-slate-600",
+  },
+  canceled: { edge: "border-rose-400", badge: "bg-rose-500", text: "text-rose-600" },
+  no_show: { edge: "border-rose-400", badge: "bg-rose-500", text: "text-rose-600" },
+};
+
+/**
+ * The status, in the words a front desk uses rather than the enum's.
+ *
+ * THE COLOUR IS NOT ENOUGH ON ITS OWN. A bar's edge has carried the status
+ * since the board was built, but the legend that explained the colours was
+ * removed at the client's request, so blue-means-confirmed and
+ * green-means-in-house became something you either already knew or did not.
+ * The word costs one line inside the bar and removes the guesswork; the colour
+ * stays, because scanning forty bars for a colour is faster than reading them.
+ */
+const STATUS_LABEL: Record<BookingStatus, string> = {
+  pending: "Pending",
+  confirmed: "Confirmed",
+  checked_in: "In house",
+  checked_out: "Departed",
+  canceled: "Cancelled",
+  no_show: "No show",
 };
 
 /**
@@ -128,6 +158,12 @@ interface BoardBar {
   valueCents: number;
   hasNotes: boolean;
   roomNumber?: string | null;
+  /**
+   * What the room was sold as. Optional because the Cancelled row is fed by
+   * `calendar_bookings()`, which does not return it, and null for any stay
+   * taken before 0037 recorded a plan at all.
+   */
+  ratePlanName?: string | null;
 }
 
 interface Placed extends BoardBar {
@@ -231,16 +267,46 @@ function Bars({
     <>
       {placed.map((bar) => {
         const tone = BAR_TONE[bar.status];
+        /*
+         * How many date columns this bar spans, which is how much room its
+         * bottom line has.
+         *
+         * Decided here rather than left to CSS truncation, because the width
+         * is known exactly -- it is arithmetic over COL_W, the same arithmetic
+         * that positions the bar. A one-night bar is 112px, and status, party
+         * size, rate and value do not fit in it: the value badge sits at the
+         * right and the status ran underneath it. Truncating instead would
+         * have given "Confi...", which is worse than showing less.
+         *
+         * So the line sheds from the least useful end: the rate goes first,
+         * then the party size. The status and the value never go.
+         */
+        const cols = bar.endIdx - bar.startIdx;
         return (
           <Link
             key={bar.bookingRoomId}
+            /*
+              The booking screen, which is where a reservation is read and
+              changed. A page rather than a dialog because that IS the
+              reservation workflow here -- the board does not hold a second,
+              smaller copy of it.
+            */
             href={`/bookings/${bar.bookingId}`}
-            title={`${bar.reference} · ${bar.guestName} · ${format(
-              parseISO(bar.checkIn),
-              "d MMM",
-            )} to ${format(parseISO(bar.checkOut), "d MMM")}${
-              bar.roomNumber ? ` · room ${bar.roomNumber}` : ""
-            }`}
+            title={[
+              bar.reference,
+              bar.guestName,
+              `${format(parseISO(bar.checkIn), "d MMM")} to ${format(
+                parseISO(bar.checkOut),
+                "d MMM",
+              )}`,
+              STATUS_LABEL[bar.status],
+              `${bar.guests} guest${bar.guests === 1 ? "" : "s"}`,
+              bar.ratePlanName,
+              bar.roomNumber ? `room ${bar.roomNumber}` : null,
+              formatMoney(bar.valueCents),
+            ]
+              .filter(Boolean)
+              .join(" · ")}
             className={cn(
               "absolute flex flex-col justify-between overflow-hidden border-2 bg-white pl-2 pt-1 shadow-card transition hover:shadow-lift",
               tone.edge,
@@ -281,12 +347,39 @@ function Bars({
             </span>
 
             <span className="flex items-end justify-between gap-1">
-              <span className="tnum mb-1 flex items-center gap-1 text-xxs text-ink-muted">
-                <svg viewBox="0 0 16 16" aria-hidden className="h-3 w-3 fill-current">
-                  <circle cx="8" cy="5" r="2.6" />
-                  <path d="M2.6 14a5.4 5.4 0 0 1 10.8 0z" />
-                </svg>
-                {bar.guests}
+              <span className="mb-1 flex min-w-0 items-center gap-1.5 text-xxs">
+                {/*
+                  Measured, not guessed: a one-night bar leaves 100px inside
+                  its border, the value badge takes 56 of it, and "Confirmed"
+                  wants 52. Something has to go, and the status is the one
+                  thing on this bar with a second encoding — the edge colour
+                  says it, and the tooltip spells it out. The value has no
+                  such fallback, so it stays.
+                */}
+                {cols >= 2 && (
+                  <span className={cn("shrink-0 font-semibold", tone.text)}>
+                    {STATUS_LABEL[bar.status]}
+                  </span>
+                )}
+                {cols >= 2 && (
+                  <span className="tnum flex shrink-0 items-center gap-0.5 text-ink-muted">
+                    <svg viewBox="0 0 16 16" aria-hidden className="h-3 w-3 fill-current">
+                      <circle cx="8" cy="5" r="2.6" />
+                      <path d="M2.6 14a5.4 5.4 0 0 1 10.8 0z" />
+                    </svg>
+                    {bar.guests}
+                  </span>
+                )}
+                {/*
+                  What the room was sold as. Nothing is drawn when no plan was
+                  recorded — a stay taken before 0037 has none, and a guess
+                  would be worse than a blank.
+                */}
+                {cols >= 3 && bar.ratePlanName && (
+                  <span className="truncate text-ink-faint">
+                    {bar.ratePlanName}
+                  </span>
+                )}
               </span>
               <span
                 // Flush into the corner, like the reference's, rather than
