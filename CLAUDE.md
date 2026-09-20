@@ -487,9 +487,14 @@ showed the Reservation Centric calendar and asked for it by name.
   drop it from one of them and going to a date silently resets the column.
   `railW` is a prop rather than a constant because the chevron's offset and the
   season label's sticky `left` are both arithmetic over it.
-- **The board keeps the availability figure**, faint at the foot of each cell,
-  because that is what this screen used to be and is the only thing on it that
-  answers "can I sell tonight". It sits in a reserved strip rather than behind
+- **The board keeps the availability figure** at the foot of each cell, because
+  that is what this screen used to be and is the only thing on it that answers
+  "can I sell tonight". **It is BOLD**, at the client's request — "ye jo 60 60
+  dekh rhe ho likha hua hai, inko bold krna hai". It used to be faint and
+  unweighted, to keep it from competing with the bars, which made the one
+  figure that answers the board's own question the hardest thing on it to read.
+  The weight is the same on all three states now and only the COLOUR carries
+  meaning: rose oversold, amber none left, ordinary ink otherwise. It sits in a reserved strip rather than behind
   the bars: overlaid, it vanished under every booking, and cells without one
   still showed a number, so the row read as half broken.
 - **Bars carry booking status on their edge** — amber pending, blue confirmed,

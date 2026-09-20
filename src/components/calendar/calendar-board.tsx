@@ -534,13 +534,29 @@ function DayCells({
           withFoot && cell ? (
             <span
               title={`${cell.sold} sold of ${cell.sellable} sellable`}
+              /*
+                BOLD, at the client's request: "ye jo 60 60 dekh rhe ho likha
+                hua hai, inko bold krna hai".
+
+                It used to be faint -- `text-ink-faint/70` and no weight --
+                which was deliberate at the time, to keep it from competing
+                with the bars. But it is the one thing on this board that
+                answers "can I sell tonight", and at 10.5px in a washed-out
+                grey it was the hardest figure on the screen to read.
+
+                The weight is now the same on all three states and only the
+                COLOUR carries meaning -- rose oversold, amber none left,
+                ordinary ink otherwise. Bold on the faint grey alone would
+                still have read as washed out, so the ordinary state moves up
+                to `text-ink-muted` as well.
+              */
               className={cn(
-                "tnum px-1.5 pb-1 text-right text-xxs leading-none",
+                "tnum px-1.5 pb-1 text-right text-xxs font-semibold leading-none",
                 cell.available < 0
-                  ? "font-semibold text-rose-600"
+                  ? "text-rose-600"
                   : cell.available === 0
-                    ? "font-semibold text-warn-deep"
-                    : "text-ink-faint/70",
+                    ? "text-warn-deep"
+                    : "text-ink-muted",
               )}
             >
               {cell.available}
