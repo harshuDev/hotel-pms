@@ -1,5 +1,5 @@
 import { addDays, format, isValid, parseISO, subDays } from "date-fns";
-import { EmptyState, PageHeader } from "@/components/ui";
+import { EmptyState } from "@/components/ui";
 import {
   CalendarBoard,
   RAIL_STEP,
@@ -197,11 +197,17 @@ export default async function CalendarPage({
     : [null, null, null, null];
 
   return (
+    /*
+     * NO PAGE HEADING ON THIS SCREEN. The client: "eliminate the written
+     * calendar it does not make sense to have it there".
+     *
+     * They are right and the reference agrees: its board starts immediately
+     * under the nav. An <h1> reading "Calendar" on the Calendar screen, with
+     * Calendar already marked as the active section in the bar above it, says
+     * the same thing a third time and costs the board a row of height on a
+     * screen that wants every pixel.
+     */
     <div>
-      <PageHeader
-        title="Calendar"
-      />
-
       {types.length === 0 ? (
         <div className="rounded-lg border border-line bg-white p-4 shadow-card">
           <EmptyState

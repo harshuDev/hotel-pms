@@ -569,6 +569,13 @@ showed the Reservation Centric calendar and asked for it by name.
     500'd. As a sibling it needs neither. **That is the third time this
     boundary has bitten** — after the calendar's `hrefFor` closure and the
     search button's `onSearchClick`.
+- **There is no page heading on the calendar.** The client: "eliminate the
+  written calendar it does not make sense to have it there". The reference's
+  board starts immediately under the nav, and an `<h1>` reading "Calendar" on
+  the Calendar screen — with Calendar already marked active in the bar above
+  it — says the same thing a third time while costing the board a row of
+  height. `MAX_H` went from `calc(100vh - 200px)` to `calc(100vh - 150px)` to
+  take that height back. Do not put the heading back.
 - **The board fills the window, and the rail runs to the bottom.** The scroller
   takes a `height` of `calc(100vh - 200px)`, not a `max-height`, and a filler
   element under the last row takes the slack so the rail and the grid surface
