@@ -111,6 +111,33 @@ export async function cancelBooking(input: {
   return { ok: true, data: { outstandingCents: Number(data ?? 0) } };
 }
 
+/**
+ * Putting a cancelled booking back on the house (0061).
+ *
+ * `allowOverbook` is a deliberate second call, not a flag the first screen
+ * sets: the rooms were freed when the booking was cancelled and somebody may
+ * have sold them since, so the default refuses with `HP001` and the caller
+ * has to ask again, having read what it said. Same shape as taking a booking
+ * that would oversell.
+ */
+export async function restoreBooking(
+  bookingId: string,
+  allowOverbook = false,
+): Promise<ActionResult<null>> {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("restore_booking", {
+    p_booking_id: bookingId,
+    p_allow_overbook: allowOverbook,
+  });
+
+  if (error) return { ok: false, error: error.message };
+
+  revalidateBooking(bookingId);
+  // The board draws cancelled bars in their own band, so it moves too.
+  revalidatePath("/calendar");
+  return { ok: true, data: null };
+}
+
 export async function confirmBooking(
   bookingId: string,
 ): Promise<ActionResult<null>> {

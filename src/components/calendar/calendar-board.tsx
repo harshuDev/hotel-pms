@@ -1,6 +1,8 @@
 import { Fragment } from "react";
 import Link from "next/link";
 import { AssignRoom } from "@/components/calendar/assign-room";
+import { RestoreBooking } from "@/components/calendar/restore-booking";
+import { RoomStatusMenu } from "@/components/calendar/room-status-menu";
 import { differenceInCalendarDays, format, parseISO } from "date-fns";
 import { cn } from "@/components/ui";
 import { formatMoney } from "@/lib/money";
@@ -253,6 +255,8 @@ function Bars({
   assignRooms,
   currentRoomId,
   backHref,
+  bookingHref,
+  canRestore,
 }: {
   placed: Placed[];
   /**
@@ -275,6 +279,15 @@ function Bars({
    */
   assignRooms?: { roomId: string; roomNumber: string }[];
   currentRoomId?: string | null;
+  /**
+   * Opens the details popup over the board instead of navigating away, which
+   * is what the client asked for. Absent, the bar falls back to the old
+   * navigation, so a caller not given one still works.
+   */
+  bookingHref?: (bookingId: string) => string;
+  /** Set only by the Cancelled band, which is the only place restoring makes
+      sense: a live booking has nothing to restore. */
+  canRestore?: boolean;
 }) {
   return (
     <>
@@ -304,10 +317,18 @@ function Bars({
               reservation workflow here -- the board does not hold a second,
               smaller copy of it.
             */
+            /*
+              The popup over the board, as the reference does. It used to
+              navigate straight to /bookings/[id], which meant losing the dates
+              and the rail width just to read a reference and a balance. The
+              panel it opens links on to that page for anything that writes.
+            */
             href={
-              backHref
-                ? `/bookings/${bar.bookingId}?back=${encodeURIComponent(backHref)}`
-                : `/bookings/${bar.bookingId}`
+              bookingHref
+                ? bookingHref(bar.bookingId)
+                : backHref
+                  ? `/bookings/${bar.bookingId}?back=${encodeURIComponent(backHref)}`
+                  : `/bookings/${bar.bookingId}`
             }
             title={[
               bar.reference,
@@ -445,6 +466,33 @@ function Bars({
             />
           </span>
         ))}
+
+      {/*
+        RESTORE, on a cancelled bar (0061). A sibling of the bar for the same
+        reason AssignRoom is one: a button inside an anchor is invalid HTML
+        and the browser throws it away during parsing.
+
+        Only on cancelled and no-show bars, which is exactly the Cancelled
+        band -- `canRestore` is passed by the row that draws that band, so a
+        live bar never gets one.
+      */}
+      {canRestore &&
+        placed.map((bar) => (
+          <span
+            key={`restore-${bar.bookingRoomId}`}
+            className="absolute"
+            style={{
+              left:
+                bar.startIdx * COL_W +
+                (bar.endIdx - bar.startIdx) * COL_W -
+                (bar.clipRight ? 2 : 5) -
+                48,
+              top: ROW_PAD + bar.lane * (BAR_H + BAR_GAP) + 4,
+            }}
+          >
+            <RestoreBooking bookingId={bar.bookingId} />
+          </span>
+        ))}
     </>
   );
 }
@@ -486,13 +534,29 @@ function DayCells({
           withFoot && cell ? (
             <span
               title={`${cell.sold} sold of ${cell.sellable} sellable`}
+              /*
+                BOLD, at the client's request: "ye jo 60 60 dekh rhe ho likha
+                hua hai, inko bold krna hai".
+
+                It used to be faint -- `text-ink-faint/70` and no weight --
+                which was deliberate at the time, to keep it from competing
+                with the bars. But it is the one thing on this board that
+                answers "can I sell tonight", and at 10.5px in a washed-out
+                grey it was the hardest figure on the screen to read.
+
+                The weight is now the same on all three states and only the
+                COLOUR carries meaning -- rose oversold, amber none left,
+                ordinary ink otherwise. Bold on the faint grey alone would
+                still have read as washed out, so the ordinary state moves up
+                to `text-ink-muted` as well.
+              */
               className={cn(
-                "tnum px-1.5 pb-1 text-right text-xxs leading-none",
+                "tnum px-1.5 pb-1 text-right text-xxs font-semibold leading-none",
                 cell.available < 0
-                  ? "font-semibold text-rose-600"
+                  ? "text-rose-600"
                   : cell.available === 0
-                    ? "font-semibold text-warn-deep"
-                    : "text-ink-faint/70",
+                    ? "text-warn-deep"
+                    : "text-ink-muted",
               )}
             >
               {cell.available}
@@ -546,10 +610,15 @@ function ExtraRow({
   gridW,
   railCell,
   backHref,
+  bookingHref,
+  canRestore,
 }: {
   label: string;
   bars: BoardBar[];
   backHref?: string;
+  bookingHref?: (bookingId: string) => string;
+  /** True on the Cancelled band only. */
+  canRestore?: boolean;
   dates: string[];
   businessDate: string;
   railW: number;
@@ -574,7 +643,12 @@ function ExtraRow({
         style={{ width: gridW, minHeight: rowH }}
       >
         <DayCells dates={dates} businessDate={businessDate} withFoot={false} />
-        <Bars placed={placed} backHref={backHref} />
+        <Bars
+          placed={placed}
+          backHref={backHref}
+          bookingHref={bookingHref}
+          canRestore={canRestore}
+        />
       </div>
     </div>
   );
@@ -655,6 +729,7 @@ function UnassignedRow({
   railCell,
   assignRooms,
   backHref,
+  bookingHref,
 }: {
   bars: CalendarRoomBar[];
   dates: string[];
@@ -666,6 +741,8 @@ function UnassignedRow({
   /** Rooms of this type, so a booking can be placed straight from the band. */
   assignRooms: { roomId: string; roomNumber: string }[];
   backHref?: string;
+  /** Opens the details popup instead of navigating away. */
+  bookingHref?: (bookingId: string) => string;
 }) {
   const { placed, lanes } = packLanes(bars, dates);
   return (
@@ -676,6 +753,17 @@ function UnassignedRow({
       >
         <span className="truncate text-[12px] font-medium uppercase tracking-[0.06em] text-white/70">
           Unassigned
+        </span>
+        {/*
+          HOLDING AREA IS THIS BAND NOW. The client removed the standalone
+          Holding row: "unassigned bhi holding ke liye hi hai" -- a booking
+          with no room is being held, whether or not anybody has confirmed it,
+          and two bands for one idea made the board say it twice. The bracket
+          keeps the reference's word where somebody moving between the two
+          systems will look for it.
+        */}
+        <span className="truncate text-xxs uppercase tracking-[0.06em] text-white/40">
+          (Holding area)
         </span>
         {/*
           The count and nothing else. There was a line of prose under this
@@ -697,7 +785,7 @@ function UnassignedRow({
           cells={EMPTY_CELLS}
           withFoot={false}
         />
-        <Bars placed={placed} assignRooms={assignRooms} backHref={backHref} />
+        <Bars placed={placed} assignRooms={assignRooms} backHref={backHref} bookingHref={bookingHref} />
       </div>
     </div>
   );
@@ -711,7 +799,6 @@ export function CalendarBoard({
   rooms,
   barsByRoom,
   unassignedByType,
-  holdingBars,
   canceledBars,
   seasons,
   statusByType,
@@ -722,6 +809,7 @@ export function CalendarBoard({
   notesByDate,
   noteHref,
   selfHref,
+  bookingHref,
   basePath,
   bookHref,
   days,
@@ -747,8 +835,6 @@ export function CalendarBoard({
    * a bar sitting on 101 that nobody put there reads as settled when it is not.
    */
   unassignedByType: Map<string, CalendarRoomBar[]>;
-  /** Pending bookings: not sold, so they sit in Holding, not on a room. */
-  holdingBars: BoardBar[];
   canceledBars: BoardBar[];
   seasons: CalendarSeason[];
   statusByType: Map<string, RoomTypeStatus>;
@@ -771,6 +857,8 @@ export function CalendarBoard({
    * booking and coming back lands on these dates and this rail width.
    */
   selfHref: string;
+  /** Opens a booking's details over the board rather than navigating away. */
+  bookingHref?: (bookingId: string) => string;
   /** The route the board lives on; the date picker builds its own hrefs. */
   basePath: string;
   /**
@@ -916,7 +1004,8 @@ export function CalendarBoard({
                       </span>
                     </div>
                     <div className="flex items-center justify-center gap-1 text-xxs text-ink-faint">
-                      <span>{format(day, "MMMM")}</span>
+                      {/* CAPITALS, as the client asked. */}
+                      <span className="uppercase">{format(day, "MMMM")}</span>
                       {/*
                         The day's notes: a marker and a count, never the words.
                         A column is 118px wide and an operational note is a
@@ -1135,13 +1224,18 @@ export function CalendarBoard({
                         className={cn(railCell, "flex items-center gap-2 px-3 py-1.5")}
                         style={{ width: railW }}
                       >
-                        <span
-                          title={ROOM_STATUS_LABEL[room.roomStatus]}
-                          aria-label={ROOM_STATUS_LABEL[room.roomStatus]}
-                          className={cn(
-                            "h-2 w-2 shrink-0 rounded-full",
-                            ROOM_STATUS_DOT[room.roomStatus],
-                          )}
+                        {/*
+                          The dot is a control now, not just a light. The
+                          reference opens a housekeeping menu off it, and the
+                          board is where somebody is already looking at the
+                          room when they learn it has been cleaned.
+                        */}
+                        <RoomStatusMenu
+                          roomId={room.roomId}
+                          roomNumber={room.roomNumber}
+                          status={room.roomStatus}
+                          dotClass={ROOM_STATUS_DOT[room.roomStatus]}
+                          label={ROOM_STATUS_LABEL[room.roomStatus]}
                         />
                         <span className="tnum truncate text-[13px] font-medium text-white">
                           {room.roomNumber}
@@ -1200,18 +1294,8 @@ export function CalendarBoard({
           */}
           <Gutter railW={railW} gridW={gridW} />
           <ExtraRow
-            label="Holding area"
-            backHref={selfHref}
-            bars={holdingBars}
-            dates={dates}
-            businessDate={businessDate}
-            railW={railW}
-            gridW={gridW}
-            railCell={railCell}
-          />
-          <Gutter railW={railW} gridW={gridW} />
-          <ExtraRow
             label="Cancelled"
+            canRestore
             backHref={selfHref}
             bars={canceledBars}
             dates={dates}

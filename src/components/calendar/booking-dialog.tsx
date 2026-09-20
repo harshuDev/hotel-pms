@@ -25,12 +25,22 @@ export function BookingDialog({
   title,
   subtitle,
   closeHref,
+  closeLabel = "Close without taking a booking",
+  wide = false,
   children,
 }: {
   title: string;
   subtitle: string;
   /** Where closing goes: the same board, without the booking params. */
   closeHref: string;
+  /** What the close button announces. The frame wraps more than one thing. */
+  closeLabel?: string;
+  /**
+   * Wider, for the booking details. The reference's own details popup is
+   * close to full width, and the reservation screen carries a table of rooms
+   * and a folio that a 4xl panel wraps badly.
+   */
+  wide?: boolean;
   children: React.ReactNode;
 }) {
   const router = useRouter();
@@ -90,7 +100,9 @@ export function BookingDialog({
         role="dialog"
         aria-modal="true"
         aria-labelledby="booking-dialog-title"
-        className="my-4 w-full max-w-4xl overflow-hidden rounded-lg border border-line bg-shell shadow-lift"
+        className={`my-4 w-full overflow-hidden rounded-lg border border-line bg-shell shadow-lift ${
+          wide ? "max-w-6xl" : "max-w-4xl"
+        }`}
       >
         <div className="flex items-start justify-between gap-4 bg-chrome-800 px-5 py-3">
           <div className="min-w-0">
@@ -110,7 +122,7 @@ export function BookingDialog({
           <button
             type="button"
             onClick={() => router.push(closeHref)}
-            aria-label="Close without taking a booking"
+            aria-label={closeLabel}
             className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-white/15 text-white transition hover:bg-white/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
           >
             <svg viewBox="0 0 16 16" aria-hidden className="h-3.5 w-3.5 fill-current">

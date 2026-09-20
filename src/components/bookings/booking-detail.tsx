@@ -10,6 +10,7 @@ import { CheckInAction, CheckOutAction } from "@/components/dashboard/movement-a
 import { formatMoney, parseMoney } from "@/lib/money";
 import {
   cancelBooking,
+  restoreBooking,
   confirmBooking,
   setBookingRoomRate,
   updateBooking,
@@ -114,6 +115,7 @@ export function BookingDetailView({
   guest,
   cancellationTerms,
   timezone,
+  inDialog = false,
   backHref,
   backLabel,
 }: {
@@ -138,11 +140,23 @@ export function BookingDetailView({
   /** Where "back" goes — the calendar the booking was opened from, or the list. */
   backHref: string;
   backLabel: string;
+  /**
+   * Rendered inside the calendar's dialog rather than as its own page.
+   *
+   * The dialog carries its own title bar and close button, so the back link
+   * and the big reference heading would each be saying a second time what the
+   * frame already says. Nothing else changes: it is the SAME component, which
+   * is the whole point — a reduced copy of this screen is what this codebase
+   * has refused to build three times.
+   */
+  inDialog?: boolean;
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
   const [block, setBlock] = useState<"overbook" | null>(null);
+  /* The restore refusal, when the rooms have been sold since the cancellation. */
+  const [restoreBlocked, setRestoreBlocked] = useState<string | null>(null);
   const [tab, setTab] = useState<Tab>("rooms");
 
   const [editing, setEditing] = useState(false);
@@ -209,17 +223,25 @@ export function BookingDetailView({
     balanceCents: detail.balanceCents,
   };
 
-  function run(fn: () => Promise<{ ok: boolean; error?: string }>, done: string) {
+  function run(
+    fn: () => Promise<{ ok: boolean; error?: string }>,
+    done: string,
+    /** For a caller that needs the refusal text as well as the banner. */
+    onError?: (message: string) => void,
+  ) {
     setMessage(null);
     setBlock(null);
     startTransition(async () => {
       const result = await fn();
       if (!result.ok) {
-        setMessage({ ok: false, text: result.error ?? "That did not work." });
+        const text = result.error ?? "That did not work.";
+        setMessage({ ok: false, text });
         if ("block" in result && result.block === "overbook") setBlock("overbook");
+        onError?.(text);
         return;
       }
       setMessage({ ok: true, text: done });
+      setRestoreBlocked(null);
       setEditing(false);
       setCancelling(false);
       setPricing(null);
@@ -234,21 +256,25 @@ export function BookingDetailView({
         board returns to the board on the same dates and rail width, so the
         calendar is where it was left rather than reset to today.
       */}
-      <Link
-        href={backHref}
-        className="inline-block text-[13px] text-ink-muted underline-offset-2 hover:text-ink hover:underline"
-      >
-        ← {backLabel}
-      </Link>
+      {!inDialog && (
+        <Link
+          href={backHref}
+          className="inline-block text-[13px] text-ink-muted underline-offset-2 hover:text-ink hover:underline"
+        >
+          ← {backLabel}
+        </Link>
+      )}
 
       {/* Header ------------------------------------------------------- */}
       <div className="rounded-lg border border-line bg-white p-5 shadow-card">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <div className="flex items-center gap-3">
-              <h1 className="font-display text-2xl font-semibold tracking-tightest text-ink">
-                {detail.reference}
-              </h1>
+              {!inDialog && (
+                <h1 className="font-display text-2xl font-semibold tracking-tightest text-ink">
+                  {detail.reference}
+                </h1>
+              )}
               <StatusBadge status={detail.status} />
             </div>
             <p className="mt-1 text-[13px] text-ink-muted">
@@ -279,6 +305,29 @@ export function BookingDetailView({
                 className="rounded-md border border-line px-4 py-2 text-[13px] text-ink-muted hover:bg-shell hover:text-ink"
               >
                 {editing ? "Stop editing" : "Edit"}
+              </button>
+            )}
+            {/*
+              RESTORE, for a booking somebody cancelled and wants back (0061).
+              Cancelling used to be a one-way door: a guest ringing back meant
+              taking the booking again by hand, losing the reference, the folio
+              and the trail. It only shows on a booking that is actually
+              cancelled, so it is never a second way to do nothing.
+            */}
+            {canEdit && ["canceled", "no_show"].includes(detail.status) && (
+              <button
+                onClick={() => {
+                  setRestoreBlocked(null);
+                  run(
+                    () => restoreBooking(detail.bookingId),
+                    "Booking restored.",
+                    (message) => setRestoreBlocked(message),
+                  );
+                }}
+                disabled={pending}
+                className="rounded-md border border-emerald-300 px-4 py-2 text-[13px] text-emerald-700 hover:bg-emerald-50 disabled:opacity-50"
+              >
+                {pending ? "Restoring\u2026" : "Restore booking"}
               </button>
             )}
             {canEdit && ["pending", "confirmed"].includes(detail.status) && (

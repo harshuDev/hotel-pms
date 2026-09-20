@@ -8,6 +8,8 @@ import {
 import { BookingDialog } from "@/components/calendar/booking-dialog";
 import { NewBookingForm } from "@/components/bookings/new-booking-form";
 import { NoteForm } from "@/components/calendar/note-form";
+import { BookingDetailView } from "@/components/bookings/booking-detail";
+import { getCustomerForEdit } from "@/lib/actions/customers";
 import {
   CALENDAR_LOOKBACK,
   CALENDAR_MAX_BARS_PER_TYPE,
@@ -17,6 +19,12 @@ import {
   getCalendarAvailability,
   getCalendarBookings,
   getCalendarNotes,
+  getBookingDetail,
+  getBookingRoomLines,
+  getBookingCancellationTerms,
+  getBookingNights,
+  getBookingFolioLines,
+  getBookingActivity,
   getCalendarRoomBars,
   getCalendarRooms,
   getCalendarSeasons,
@@ -31,6 +39,7 @@ import {
 export const metadata = { title: "Calendar" };
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /** Roles Postgres will let take a booking. `create_booking()` checks too. */
 const CAN_BOOK = ["admin", "manager", "front_desk"];
@@ -65,6 +74,8 @@ export default async function CalendarPage({
     type?: string;
     /** The day whose notes are open, which is the Add Note dialog. */
     note?: string;
+    /** The booking whose details are open over the board. */
+    booking?: string;
   }>;
 }) {
   const sp = await searchParams;
@@ -122,33 +133,30 @@ export default async function CalendarPage({
   }
 
   /*
-   * Pending bookings go to the Holding area, not to their room type.
+   * THE HOLDING AREA IS GONE, AND UNASSIGNED IS NOW BOTH. This reverses an
+   * earlier decision, at the client's direction: "unassigned bhi holding ke
+   * hi liye hai ... to holding area vala remove krdo". The Unassigned band
+   * carries "(Holding area)" under its label so the reference's word is still
+   * where somebody would look for it.
    *
-   * The client asked for the reference system's Holding row and said it holds
-   * what nobody has confirmed yet. That fits this schema exactly: the guest
-   * booking page creates `pending` bookings, and the night audit deliberately
-   * never sweeps them. A pending booking is not sold, and a bar sitting on a
-   * room type reads as though it were — which is the same argument that keeps
-   * cancelled bookings off the live rows.
+   * It used to be two bands. Holding held every `pending` booking, and
+   * Unassigned held the confirmed ones nobody had put in a room yet, on the
+   * argument that "nobody has confirmed this" and "confirmed, but no room" are
+   * different facts. They ARE different facts — but they are both "this
+   * booking is being held and occupies no room", which is the one thing the
+   * band is telling a receptionist, and the client judged one band enough.
    *
-   * No migration for this: `calendar_bookings()` already returns the status.
-   */
-  const holdingBars = roomBars.filter((b) => b.status === "pending");
-
-  /*
-   * Everything else splits three ways: onto its room, or into the Unassigned
-   * band for its type.
+   * NOTHING IS LOST FROM THE BAR ITSELF: a pending booking still draws its
+   * amber edge and still says "Pending" in words, which is how it stays
+   * distinguishable from a confirmed one sitting beside it.
    *
-   * UNASSIGNED IS NOT THE SAME AS HOLDING, and they are deliberately two rows.
-   * Holding is "nobody has confirmed this booking". Unassigned is "confirmed,
-   * but no room picked yet" — which is every booking between being taken and
-   * being checked in. Collapsing them would tell a receptionist that a
-   * confirmed stay was still unconfirmed.
+   * So pending bookings no longer get filtered out here. They fall through the
+   * ordinary split like every other bar: onto their room if one was assigned,
+   * into their room type's Unassigned band if not.
    */
   const barsByRoom = new Map<string, typeof roomBars>();
   const unassignedByType = new Map<string, typeof roomBars>();
   for (const bar of roomBars) {
-    if (bar.status === "pending") continue;
     if (bar.roomId) {
       const list = barsByRoom.get(bar.roomId);
       if (list) list.push(bar);
@@ -206,7 +214,43 @@ export default async function CalendarPage({
       ? wantedNote
       : undefined;
 
-  const staff = bookDate || noteDate ? await getCurrentStaffUser() : null;
+  /*
+   * The booking popup. The client asked for their reference's behaviour:
+   * opening a booking shows its details over the board rather than navigating
+   * away and losing the dates and rail width you were looking at.
+   *
+   * URL state like the other two dialogs, so the server renders it, a reload
+   * keeps it open and the back button closes it. An id that is not a uuid, or
+   * names a booking on another property, simply returns nothing and the dialog
+   * does not open -- RLS decides that, not this page.
+   */
+  const peekId = sp.booking && UUID.test(sp.booking) ? sp.booking : undefined;
+  const peek = peekId
+    ? await (async () => {
+        const d = await getBookingDetail(peekId);
+        if (!d) return null;
+        /*
+         * The SAME reads `/bookings/[id]` makes, because what opens is the
+         * same component. Loaded only when the dialog is actually opening, so
+         * an ordinary visit to the board costs none of them.
+         */
+        const [lines, nights, folio, activity, channels, terms, guest] =
+          await Promise.all([
+            getBookingRoomLines(peekId),
+            getBookingNights(peekId),
+            getBookingFolioLines(peekId),
+            getBookingActivity(peekId),
+            getChannels(),
+            getBookingCancellationTerms(peekId),
+            getCustomerForEdit(d.customerId),
+          ]);
+        return { detail: d, lines, nights, folio, activity, channels, terms, guest };
+      })()
+    : null;
+
+  const staff = bookDate || noteDate || peekId ? await getCurrentStaffUser() : null;
+  /* Named apart so the booking dialog's own gate reads for itself. */
+  const peekStaff = peekId ? staff : null;
   const noteStaff = noteDate ? staff : null;
   const mayBook = !staff || CAN_BOOK.includes(staff.role);
   const openBooking = Boolean(bookDate) && mayBook;
@@ -255,7 +299,6 @@ export default async function CalendarPage({
             rooms={rooms}
             barsByRoom={barsByRoom}
             unassignedByType={unassignedByType}
-            holdingBars={holdingBars}
             canceledBars={canceledBars}
             seasons={seasons}
             statusByType={statusByType}
@@ -264,6 +307,7 @@ export default async function CalendarPage({
             todayHref={href(defaultStart(businessDate), railW)}
             todayFrom={defaultStart(businessDate)}
             selfHref={href(from, railW)}
+            bookingHref={(id) => `${href(from, railW)}&booking=${id}`}
             notesByDate={notesByDate}
             noteHref={(date) => `${href(from, railW)}&note=${date}`}
             basePath="/calendar"
@@ -314,6 +358,47 @@ export default async function CalendarPage({
             closeHref={href(from, railW)}
             timezone={property.timezone}
             canEdit={noteStaff === null || CAN_BOOK.includes(noteStaff.role)}
+          />
+        </BookingDialog>
+      )}
+
+      {/*
+        The booking details, over the board. A frame around a read-only panel:
+        everything that WRITES still lives on /bookings/[id], which the panel
+        links to, because two editors for one booking drift apart.
+      */}
+      {peek && (
+        <BookingDialog
+          /* Their popup titles itself with the reference and the channel's
+             own booking number, which is what somebody matching an OTA email
+             against the board is holding. */
+          title={peek.detail.reference}
+          subtitle={
+            peek.detail.externalReference
+              ? `${peek.detail.channelName ?? "Channel"} booking ${peek.detail.externalReference}`
+              : (peek.detail.channelName ?? peek.detail.customerName)
+          }
+          closeHref={href(from, railW)}
+          closeLabel="Close the booking"
+          wide
+        >
+          <BookingDetailView
+            detail={peek.detail}
+            rooms={peek.lines}
+            nights={peek.nights}
+            folio={peek.folio}
+            activity={peek.activity}
+            channels={peek.channels}
+            guest={peek.guest.ok ? peek.guest.data : null}
+            cancellationTerms={peek.terms}
+            timezone={property.timezone}
+            backHref={href(from, railW)}
+            backLabel="Back to the calendar"
+            inDialog
+            canEdit={
+              peekStaff !== null &&
+              ["admin", "manager", "front_desk"].includes(peekStaff.role)
+            }
           />
         </BookingDialog>
       )}
