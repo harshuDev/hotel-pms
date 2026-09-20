@@ -1628,15 +1628,15 @@ than proceeding.
       mislabelling a row, which is the right failure and wants an explicit
       mapping here.
 
+15. **Inviting a new member of staff.** Creating an auth account needs either
+    the Supabase dashboard or a server action holding the service-role key.
+    The second bypasses RLS, which the brief discourages, so it has not been
+    built. Until it is, a new person is invited in Supabase Auth and then
+    appears in Settings to be named and given a role.
+
 16. **Cancellation policy — settled and built (0060): two kinds, per rate
     plan.** Flexible with a free-cancellation window in days, and
     non-refundable. See the cancellation notes above. **What is NOT settled is
     charging the card**: the client's "the hotel can charge the guest card
     anytime" needs card capture, which is deferred, so the policy records the
     right and cannot exercise it.
-
-15. **Inviting a new member of staff.** Creating an auth account needs either
-    the Supabase dashboard or a server action holding the service-role key.
-    The second bypasses RLS, which the brief discourages, so it has not been
-    built. Until it is, a new person is invited in Supabase Auth and then
-    appears in Settings to be named and given a role.
