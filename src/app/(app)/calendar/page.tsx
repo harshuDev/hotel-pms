@@ -7,6 +7,7 @@ import {
 } from "@/components/calendar/calendar-board";
 import { BookingDialog } from "@/components/calendar/booking-dialog";
 import { NewBookingForm } from "@/components/bookings/new-booking-form";
+import { NoteForm } from "@/components/calendar/note-form";
 import {
   CALENDAR_LOOKBACK,
   CALENDAR_MAX_BARS_PER_TYPE,
@@ -15,6 +16,7 @@ import {
   getBusinessDate,
   getCalendarAvailability,
   getCalendarBookings,
+  getCalendarNotes,
   getCalendarRoomBars,
   getCalendarRooms,
   getCalendarSeasons,
@@ -60,6 +62,8 @@ export default async function CalendarPage({
     book?: string;
     /** The room type whose row it was on. */
     type?: string;
+    /** The day whose notes are open, which is the Add Note dialog. */
+    note?: string;
   }>;
 }) {
   const sp = await searchParams;
@@ -84,7 +88,8 @@ export default async function CalendarPage({
   // bars answer "who is in, and when"; neither is the other. Cancelled rooms
   // come back separately because they belong in their own row, not among the
   // live ones where they would read as sold.
-  const [cells, rooms, roomBars, canceledBars, seasons, status] = await Promise.all([
+  const [cells, rooms, roomBars, canceledBars, seasons, status, notes] =
+    await Promise.all([
     getCalendarAvailability(from, days),
     // The rail. Every room, grouped by type in Postgres.
     getCalendarRooms(),
@@ -94,6 +99,8 @@ export default async function CalendarPage({
     // Housekeeping, for the dot on the rail. It is counts per type, not a room
     // list, so it stays the same size at 40 rooms and at 1,800.
     getRoomStatusByType(),
+    // Day notes for the window, one call for the whole board.
+    getCalendarNotes(from, days),
   ]);
 
   const dates = Array.from({ length: days }, (_, i) =>
@@ -102,6 +109,13 @@ export default async function CalendarPage({
   const types = [...new Map(cells.map((c) => [c.roomTypeId, c])).values()];
   const cellAt = new Map(cells.map((c) => [`${c.roomTypeId}|${c.date}`, c]));
   const statusByType = new Map(status.map((s) => [s.roomTypeId, s]));
+
+  const notesByDate = new Map<string, typeof notes>();
+  for (const note of notes) {
+    const list = notesByDate.get(note.noteDate);
+    if (list) list.push(note);
+    else notesByDate.set(note.noteDate, [note]);
+  }
 
   /*
    * Pending bookings go to the Holding area, not to their room type.
@@ -177,7 +191,19 @@ export default async function CalendarPage({
     wanted && ISO_DATE.test(wanted) && isValid(parseISO(wanted)) && wanted >= businessDate
       ? wanted
       : undefined;
-  const staff = bookDate ? await getCurrentStaffUser() : null;
+  /*
+   * The note dialog's date. Validated like the booking one -- a URL is not a
+   * form -- but a PAST date is allowed here: writing down what happened
+   * yesterday is a normal thing to do, where taking a booking for it is not.
+   */
+  const wantedNote = sp.note;
+  const noteDate =
+    wantedNote && ISO_DATE.test(wantedNote) && isValid(parseISO(wantedNote))
+      ? wantedNote
+      : undefined;
+
+  const staff = bookDate || noteDate ? await getCurrentStaffUser() : null;
+  const noteStaff = noteDate ? staff : null;
   const mayBook = !staff || CAN_BOOK.includes(staff.role);
   const openBooking = Boolean(bookDate) && mayBook;
 
@@ -234,6 +260,8 @@ export default async function CalendarPage({
             todayHref={href(defaultStart(businessDate), railW)}
             todayFrom={defaultStart(businessDate)}
             selfHref={href(from, railW)}
+            notesByDate={notesByDate}
+            noteHref={(date) => `${href(from, railW)}&note=${date}`}
             basePath="/calendar"
             // Stays on the board: the dialog opens over it.
             bookHref={(date, roomTypeId) =>
@@ -260,6 +288,27 @@ export default async function CalendarPage({
             initialTypes={bookableTypes!}
             initialCheckIn={bookDate}
             initialRoomTypeId={sp.type?.trim() || undefined}
+          />
+        </BookingDialog>
+      )}
+
+      {/*
+        The Add Note dialog. Open state is `?note=<date>` on the board rather
+        than React state, so the server renders the day's notes, a reload keeps
+        the dialog open, and the back button closes it -- the same shape the
+        booking dialog uses.
+      */}
+      {noteDate && (
+        <BookingDialog
+          title="Add note"
+          subtitle={format(parseISO(noteDate), "EEEE d MMMM yyyy")}
+          closeHref={href(from, railW)}
+        >
+          <NoteForm
+            noteDate={noteDate}
+            notes={notesByDate.get(noteDate) ?? []}
+            closeHref={href(from, railW)}
+            canEdit={noteStaff === null || CAN_BOOK.includes(noteStaff.role)}
           />
         </BookingDialog>
       )}

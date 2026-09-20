@@ -8,6 +8,7 @@ import { DateJump } from "@/components/calendar/date-jump";
 import type {
   AvailabilityCell,
   BookingStatus,
+  CalendarNote,
   CalendarRoom,
   CalendarRoomBar,
   RoomStatus,
@@ -718,6 +719,8 @@ export function CalendarBoard({
   railHref,
   todayHref,
   todayFrom,
+  notesByDate,
+  noteHref,
   selfHref,
   basePath,
   bookHref,
@@ -755,6 +758,14 @@ export function CalendarBoard({
   todayHref: string;
   /** The first date of the default window, for the picker's own Today. */
   todayFrom: string;
+  /**
+   * Day notes, keyed by date. The header shows a marker and a count -- never
+   * the text, which would put a paragraph in a 118px column. The note itself
+   * is one click away in the dialog.
+   */
+  notesByDate: Map<string, CalendarNote[]>;
+  /** Opens the Add Note dialog for a day, as `?note=<date>` on the board. */
+  noteHref: (date: string) => string;
   /**
    * The board's own URL. Every bar carries it as `?back=`, so opening a
    * booking and coming back lands on these dates and this rail width.
@@ -879,11 +890,12 @@ export function CalendarBoard({
               {dates.map((d) => {
                 const day = parseISO(d);
                 const isToday = d === businessDate;
+                const dayNotes = notesByDate.get(d) ?? [];
                 return (
                   <div
                     key={d}
                     className={cn(
-                      "shrink-0 border-b border-r border-board-line px-2 py-1.5 text-center last:border-r-0",
+                      "group/day shrink-0 border-b border-r border-board-line px-2 py-1.5 text-center last:border-r-0",
                       isToday ? "bg-white" : d < businessDate ? "bg-board-past" : "bg-white",
                     )}
                     style={{ width: COL_W }}
@@ -903,8 +915,40 @@ export function CalendarBoard({
                         {format(day, "EEEE")}
                       </span>
                     </div>
-                    <div className="text-xxs text-ink-faint">
-                      {format(day, "MMMM")}
+                    <div className="flex items-center justify-center gap-1 text-xxs text-ink-faint">
+                      <span>{format(day, "MMMM")}</span>
+                      {/*
+                        The day's notes: a marker and a count, never the words.
+                        A column is 118px wide and an operational note is a
+                        sentence, so the board says one exists and the dialog
+                        is where it is read.
+                      */}
+                      <Link
+                        href={noteHref(d)}
+                        title={
+                          dayNotes.length === 0
+                            ? `Add a note for ${format(day, "d MMM")}`
+                            : dayNotes.map((n) => n.body).join("\n")
+                        }
+                        aria-label={
+                          dayNotes.length === 0
+                            ? `Add a note for ${format(day, "d MMM")}`
+                            : `${dayNotes.length} note${dayNotes.length === 1 ? "" : "s"} on ${format(day, "d MMM")}`
+                        }
+                        className={cn(
+                          "inline-flex items-center gap-0.5 rounded px-1 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brass",
+                          dayNotes.length > 0
+                            ? "bg-warn-wash text-warn-deep"
+                            : "text-ink-faint/50 opacity-0 hover:bg-shell hover:text-ink group-hover/day:opacity-100",
+                        )}
+                      >
+                        <svg viewBox="0 0 16 16" aria-hidden className="h-3 w-3 fill-current">
+                          <path d="M2 3.2A1.2 1.2 0 0 1 3.2 2h9.6A1.2 1.2 0 0 1 14 3.2v6.4a1.2 1.2 0 0 1-1.2 1.2H6.6L3.4 13.6a.5.5 0 0 1-.8-.4v-2.4A1.2 1.2 0 0 1 2 9.6z" />
+                        </svg>
+                        {dayNotes.length > 0 && (
+                          <span className="tnum font-semibold">{dayNotes.length}</span>
+                        )}
+                      </Link>
                     </div>
                   </div>
                 );

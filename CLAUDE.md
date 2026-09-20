@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0057` are
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0058` are
 applied to the hosted database.
 
 Working on real data: dashboard (house board, movements, pace, activity feed),
@@ -207,6 +207,7 @@ Each read is a Postgres view or RPC, never aggregation in the client:
 | `getCalendarAvailability(from, n)`  | `calendar_availability(from, n)`  |
 | `getCalendarBookings(from, n, cap)` | `calendar_bookings(from, n, cap)`  |
 | `getCalendarSeasons(from, n)`       | `calendar_seasons(from, n)`        |
+| `getCalendarNotes(from, n)`         | `calendar_notes_for(from, n)`      |
 | `getSeasonSettings()`               | `seasons` table                    |
 | `getRoomStatusByType()`             | `room_status_by_type()`            |
 | `getOccupancyReport(from, to)`      | `occupancy_report(from, to)`      |
@@ -528,6 +529,35 @@ showed the Reservation Centric calendar and asked for it by name.
   scroller cannot drift from itself. The sticky offsets are arithmetic over
   `HEAD_H` and `SEASON_H`, so those two must be exactly as tall as declared —
   padding them by eye opens a gap where rows show through.
+- **A day on the board can carry an operational note** (0058).
+  `calendar_notes` is a new table: one property, one day, one note. The client
+  asked for their reference's "Add Note" action — a dialog with the date, a
+  field, Cancel and Save, and the note visible on the board afterwards.
+  - **NONE of the existing note columns could be reused, and that was checked
+    before the table was written.** `bookings.guest_notes` and
+    `internal_notes` belong to a stay, `booking_waitlist.notes` to an enquiry,
+    `cashier_shifts.opening_notes`/`closing_notes` to a drawer,
+    `meeting_room_bookings.comments` to one meeting room booking. The
+    `activity_log` is deliberately not used either: it records what the system
+    did, it is not somewhere a person writes.
+  - **`note_date` IS NOT `business_date` and does not reference
+    `business_dates`.** That table holds the days the audit has opened or
+    closed; the board shows weeks beyond it, and the point of a day note is to
+    write it down BEFORE the day arrives. Keying to `business_dates` would make
+    next Tuesday un-noteable and tie note-keeping to the audit. Nothing in 0058
+    reads, writes or constrains `business_dates`.
+  - **Several notes per day are allowed.** No unique constraint on (property,
+    date): two things can happen on one day, and one textarea means the second
+    person to write overwrites the first.
+  - **The board shows a marker and a count, never the words.** A column is
+    118px and an operational note is a sentence. The note is read in the
+    dialog, which opens from `?note=<date>` — URL state, like the booking
+    dialog, so a reload keeps it open and the back button closes it.
+  - Reading is anyone on the property, writing is `is_front_office_staff()`,
+    both enforced by the RLS policy rather than by a second copy of the rule
+    inside the RPCs — which is why they are `security invoker`.
+  - **A note is genuinely deleted**, like a season. Nothing points at one and
+    it is not a record of money or of a stay.
 - **The season band is real, and a season changes no price.** 0044 added
   `seasons`: a named date range per property, managed in Settings. It labels
   the calendar and nothing else — rates stay in `rate_plan_days`, because a

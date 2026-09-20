@@ -72,6 +72,7 @@ import type {
   AccountingRow,
   RatesGridCell,
   CalendarRoom,
+  CalendarNote,
   CalendarRoomBar,
   CountryRow,
   DepositRow,
@@ -2962,6 +2963,33 @@ export async function getCalendarRooms(): Promise<CalendarRoom[]> {
 }
 
 /** The bars, keyed to a room. A null `roomId` means nothing is allocated yet. */
+/**
+ * The day notes touching a calendar window.
+ *
+ * One call for the whole board rather than one per column, shaped like
+ * `getCalendarSeasons()`.
+ */
+export async function getCalendarNotes(
+  from: string,
+  days: number = CALENDAR_NIGHTS,
+): Promise<CalendarNote[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("calendar_notes_for", {
+    p_from: from,
+    p_days: days,
+  });
+  if (error) throw new Error(`Failed to load the calendar notes: ${error.message}`);
+
+  return (data ?? []).map((row) => ({
+    id: row.id,
+    noteDate: row.note_date,
+    body: row.body,
+    author: row.author,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  }));
+}
+
 export async function getCalendarRoomBars(
   from: string,
   nights: number = CALENDAR_NIGHTS,

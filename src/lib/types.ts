@@ -1144,6 +1144,24 @@ export interface CalendarRoom {
  * "Unassigned" band under their room type rather than guessed into a room: a
  * bar sitting on 101 that nobody put there reads as settled when it is not.
  */
+/**
+ * An operational note against one day on the board.
+ *
+ * Not a booking note and not the activity log: it belongs to the property and
+ * the day, and to nothing else. "Coach party arriving 14:00", "lift out of
+ * service".
+ */
+export interface CalendarNote {
+  id: string;
+  /** The day on the board. Deliberately not a `business_dates` reference. */
+  noteDate: string;
+  body: string;
+  /** Who wrote it, or null if that staff row has since been removed. */
+  author: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface CalendarRoomBar {
   roomId: string | null;
   roomTypeId: string;
