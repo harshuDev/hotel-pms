@@ -9,6 +9,7 @@ import {
   getBookingRoomLines,
   getChannels,
   getCurrentStaffUser,
+  getProperty,
 } from "@/lib/queries";
 
 export const metadata = { title: "Booking" };
@@ -50,7 +51,7 @@ export default async function BookingPage({
   const detail = await getBookingDetail(id);
   if (!detail) notFound();
 
-  const [rooms, nights, folio, activity, channels, staff, guest] =
+  const [rooms, nights, folio, activity, channels, staff, guest, property] =
     await Promise.all([
       getBookingRoomLines(id),
       getBookingNights(id),
@@ -62,6 +63,10 @@ export default async function BookingPage({
       // returns a Result, so a refusal leaves the tab saying so instead of
       // taking the whole page down with it.
       getCustomerForEdit(detail.customerId),
+      // Free: getProperty() is cache()d and the app layout has already called
+      // it in this same request. It carries the timezone the History tab's
+      // posting times are rendered on.
+      getProperty(),
     ]);
 
   const back = backTarget(sp.back);
@@ -75,6 +80,7 @@ export default async function BookingPage({
       activity={activity}
       channels={channels}
       guest={guest.ok ? guest.data : null}
+      timezone={property.timezone}
       backHref={back.href}
       backLabel={back.label}
       canEdit={

@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { format, parseISO } from "date-fns";
+import { formatStampInProperty } from "@/lib/dates";
 import { StatusBadge, cn } from "@/components/ui";
 import { CheckInAction, CheckOutAction } from "@/components/dashboard/movement-actions";
 import { formatMoney, parseMoney } from "@/lib/money";
@@ -110,6 +111,7 @@ export function BookingDetailView({
   channels,
   canEdit,
   guest,
+  timezone,
   backHref,
   backLabel,
 }: {
@@ -122,6 +124,9 @@ export function BookingDetailView({
   canEdit: boolean;
   /** Null when the guest record could not be read; the tab then says so. */
   guest: BookingGuest | null;
+  /** The property's own timezone. A posting time on the History tab is the
+      hotel's clock, and renders the same on the server as in the browser. */
+  timezone: string;
   /** Where "back" goes — the calendar the booking was opened from, or the list. */
   backHref: string;
   backLabel: string;
@@ -985,7 +990,7 @@ export function BookingDetailView({
               <li key={a.activityId} className="flex items-baseline justify-between gap-4">
                 <span className="text-[13px] text-ink">{a.summary}</span>
                 <span className="shrink-0 text-xxs text-ink-faint">
-                  {format(parseISO(a.createdAt), "d MMM, HH:mm")}
+                  {formatStampInProperty(a.createdAt, timezone)}
                   {a.actor && ` · ${a.actor}`}
                 </span>
               </li>

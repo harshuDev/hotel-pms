@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { format, parseISO } from "date-fns";
 import { cn } from "@/components/ui";
-import { formatMoney, parseMoney } from "@/lib/money";
+import { formatMoney, formatMoneyInput, parseMoney } from "@/lib/money";
 import { savePromotion } from "@/lib/actions/promotions";
 import type { Promotion, PromotionKind, RatePlan } from "@/lib/types";
 
@@ -392,7 +392,7 @@ export function PromotionsScreen({
       description: p.description ?? "",
       kind: p.kind,
       percent: p.percentBps === null ? "" : String(p.percentBps / 100),
-      amount: p.amountOffCents === null ? "" : String(p.amountOffCents / 100),
+      amount: p.amountOffCents === null ? "" : formatMoneyInput(p.amountOffCents),
       freeNights: String(p.freeNights ?? 1),
       paidNights: String(p.paidNights ?? 2),
       sellFrom: p.sellFrom ?? "",

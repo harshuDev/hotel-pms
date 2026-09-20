@@ -3,8 +3,8 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { format, parseISO } from "date-fns";
 import { cn } from "@/components/ui";
+import { formatStampInProperty } from "@/lib/dates";
 import { deleteCalendarNote, saveCalendarNote } from "@/lib/actions/calendar-notes";
 import type { CalendarNote } from "@/lib/types";
 
@@ -20,11 +20,15 @@ export function NoteForm({
   noteDate,
   notes,
   closeHref,
+  timezone,
   canEdit,
 }: {
   noteDate: string;
   notes: CalendarNote[];
   closeHref: string;
+  /** The property's own timezone, so a posting time is the hotel's clock and
+      renders the same on the server as in the browser. */
+  timezone: string;
   /** Front office writes; everyone else reads. Postgres decides either way. */
   canEdit: boolean;
 }) {
@@ -97,7 +101,7 @@ export function NoteForm({
                   <div className="mt-1.5 flex items-center justify-between gap-3">
                     <span className="text-xxs text-ink-faint">
                       {n.author ?? "Unknown"} ·{" "}
-                      {format(parseISO(n.createdAt), "d MMM, HH:mm")}
+                      {formatStampInProperty(n.createdAt, timezone)}
                     </span>
                     {canEdit && (
                       <span className="flex gap-3 text-xxs">
