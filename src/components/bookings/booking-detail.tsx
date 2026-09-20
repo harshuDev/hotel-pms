@@ -17,6 +17,7 @@ import {
 import type {
   Booking,
   BookingActivityItem,
+  BookingCancellationTerms,
   BookingDetail as Detail,
   BookingNight,
   BookingRoomLine,
@@ -111,6 +112,7 @@ export function BookingDetailView({
   channels,
   canEdit,
   guest,
+  cancellationTerms,
   timezone,
   backHref,
   backLabel,
@@ -124,6 +126,12 @@ export function BookingDetailView({
   canEdit: boolean;
   /** Null when the guest record could not be read; the tab then says so. */
   guest: BookingGuest | null;
+  /**
+   * What this booking may be cancelled under (0060). Null when it has no
+   * rooms left to cancel. It REPORTS and does not block: staff can always
+   * cancel, because a hotel that cannot cancel its own booking is broken.
+   */
+  cancellationTerms: BookingCancellationTerms | null;
   /** The property's own timezone. A posting time on the History tab is the
       hotel's clock, and renders the same on the server as in the browser. */
   timezone: string;
@@ -323,6 +331,42 @@ export function BookingDetailView({
           {detail.externalReference && (
             <Fact name="Channel reference">{detail.externalReference}</Fact>
           )}
+          <Fact name="Cancellation">
+            {cancellationTerms === null || cancellationTerms.hasNoPolicy ? (
+              /* "Not set" is not "free". Saying "free cancellation" here
+                 because no policy is attached would be inventing a promise
+                 the hotel never made. */
+              <span className="text-ink-muted">Not set</span>
+            ) : cancellationTerms.kind === "non_refundable" ? (
+              <>
+                <span className="font-medium text-rose-600">Non-refundable</span>
+                <span className="block text-xxs text-ink-faint">
+                  {cancellationTerms.policyName}
+                </span>
+              </>
+            ) : (
+              <>
+                <span
+                  className={cn(
+                    "font-medium",
+                    cancellationTerms.isFreeNow ? "text-emerald-600" : "text-warn-deep",
+                  )}
+                >
+                  {cancellationTerms.isFreeNow ? "Free to cancel" : "Past the free window"}
+                </span>
+                <span className="block text-xxs text-ink-faint">
+                  {cancellationTerms.freeUntil
+                    ? `Free until ${format(parseISO(cancellationTerms.freeUntil), "d MMM yyyy")}`
+                    : cancellationTerms.policyName}
+                </span>
+              </>
+            )}
+            {cancellationTerms?.isMixed && (
+              <span className="block text-xxs text-warn-deep">
+                Rooms differ — strictest shown
+              </span>
+            )}
+          </Fact>
           <Fact name="Reservation value">
             <span className="tnum">{formatMoney(detail.reservationValueCents)}</span>
             <span className="block text-xxs text-ink-faint">Rate less discount, before tax</span>
@@ -550,6 +594,30 @@ export function BookingDetailView({
               />
               They did not turn up (no show)
             </label>
+            {/*
+              The terms, at the moment somebody is about to cancel — which is
+              the one moment they matter. It does not block the button: a
+              hotel has to be able to cancel its own booking, and what the
+              policy decides is whether money is owed, not whether staff may
+              act. Cancelling never writes off the balance either way.
+            */}
+            {cancellationTerms && !cancellationTerms.hasNoPolicy && (
+              <p
+                className={cn(
+                  "mb-3 rounded-md px-3 py-2 text-[12.5px] leading-snug",
+                  cancellationTerms.kind === "non_refundable" ||
+                    cancellationTerms.isFreeNow === false
+                    ? "bg-rose-50 text-rose-700"
+                    : "bg-emerald-50 text-emerald-700",
+                )}
+              >
+                {cancellationTerms.kind === "non_refundable"
+                  ? `Sold as non-refundable (${cancellationTerms.policyName}). The charge stands and stays on the folio.`
+                  : cancellationTerms.isFreeNow
+                    ? `Free to cancel until ${cancellationTerms.freeUntil ? format(parseISO(cancellationTerms.freeUntil), "d MMM yyyy") : "the deadline"}.`
+                    : `The free window closed on ${cancellationTerms.freeUntil ? format(parseISO(cancellationTerms.freeUntil), "d MMM yyyy") : "the deadline"}. A cancellation fee applies.`}
+              </p>
+            )}
             <button
               onClick={() =>
                 run(

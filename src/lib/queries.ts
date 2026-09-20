@@ -67,6 +67,9 @@ import type {
   PromotionKind,
   PropertySettings,
   RatePlan,
+  CancellationPolicy,
+  CancellationPolicyKind,
+  BookingCancellationTerms,
   RoomTypeSetting,
   StaffSetting,
   AccountingRow,
@@ -1692,7 +1695,7 @@ export async function getRatePlans(): Promise<RatePlan[]> {
   const { data, error } = await supabase
     .from("rate_plans")
     .select(
-      "id, code, name, description, is_default, is_active, is_public, rate_plan_meals(meal, value_cents)",
+      "id, code, name, description, is_default, is_active, is_public, cancellation_policy_id, rate_plan_meals(meal, value_cents)",
     )
     .eq("is_active", true)
     .order("is_default", { ascending: false })
@@ -1712,6 +1715,7 @@ export async function getRatePlans(): Promise<RatePlan[]> {
       is_default: boolean;
       is_active: boolean;
       is_public: boolean;
+      cancellation_policy_id: string | null;
       rate_plan_meals: { meal: MealType; value_cents: number | null }[];
     }[]
   ).map((row) => ({
@@ -1730,7 +1734,70 @@ export async function getRatePlans(): Promise<RatePlan[]> {
         .filter((m) => m.value_cents !== null)
         .map((m) => [m.meal, m.value_cents as number]),
     ) as Partial<Record<MealType, number>>,
+    cancellationPolicyId: row.cancellation_policy_id,
   }));
+}
+
+/**
+ * The property's cancellation policies (0060).
+ *
+ * Read by anyone on the property — a receptionist taking a booking has to be
+ * able to say what the terms are — and written only by revenue staff, which
+ * the RLS policy decides rather than a second copy of the rule here.
+ */
+export async function getCancellationPolicies(): Promise<CancellationPolicy[]> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase.rpc("cancellation_policies_list");
+
+  if (error) {
+    throw new Error(`Failed to load the cancellation policies: ${error.message}`);
+  }
+
+  return (data ?? []).map((row) => ({
+    id: row.id,
+    name: row.name,
+    kind: row.kind as CancellationPolicyKind,
+    freeCancellationDays: row.free_cancellation_days,
+    description: row.description,
+    isActive: row.is_active,
+    sortOrder: row.sort_order,
+    ratePlanCount: row.rate_plan_count,
+  }));
+}
+
+/**
+ * What a booking may be cancelled under, dated against the open business date.
+ *
+ * Null when the booking has no rooms left to cancel. The RPC reports the
+ * STRICTEST policy across the rooms and flags a mixed booking, rather than
+ * stating one room's terms as though they were the whole booking's.
+ */
+export async function getBookingCancellationTerms(
+  bookingId: string,
+): Promise<BookingCancellationTerms | null> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase.rpc("booking_cancellation_terms", {
+    p_booking_id: bookingId,
+  });
+
+  if (error) {
+    throw new Error(`Failed to load the cancellation terms: ${error.message}`);
+  }
+
+  const row = (data ?? [])[0];
+  if (!row) return null;
+
+  return {
+    policyName: row.policy_name,
+    kind: row.kind as CancellationPolicyKind | null,
+    freeCancellationDays: row.free_cancellation_days,
+    freeUntil: row.free_until,
+    isFreeNow: row.is_free_now,
+    isMixed: row.is_mixed,
+    hasNoPolicy: row.has_no_policy,
+  };
 }
 
 /**

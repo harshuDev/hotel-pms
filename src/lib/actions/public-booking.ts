@@ -31,6 +31,18 @@ export interface PublicRatePlan {
   code: string;
   name: string;
   description: string | null;
+  /**
+   * The cancellation terms, which a guest has to be shown BEFORE they agree
+   * to them (0060). Null when the hotel has set no policy on this rate —
+   * which is "not set" and is deliberately NOT drawn as free cancellation.
+   *
+   * The name and description are the hotel's own words and are not
+   * translated; only the label around them is.
+   */
+  cancellationName: string | null;
+  cancellationKind: "flexible" | "non_refundable" | null;
+  cancellationFreeDays: number | null;
+  cancellationDescription: string | null;
 }
 
 export interface PublicRoomType {
@@ -82,6 +94,10 @@ export async function getPublicRatePlans(
     code: row.code,
     name: row.name,
     description: row.description,
+    cancellationName: row.cancellation_name,
+    cancellationKind: row.cancellation_kind,
+    cancellationFreeDays: row.cancellation_free_days,
+    cancellationDescription: row.cancellation_description,
   }));
 }
 

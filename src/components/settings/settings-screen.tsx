@@ -17,12 +17,16 @@ import {
   saveStaffUser,
   saveTaxRate,
   saveRatePlan,
+  saveCancellationPolicy,
+  setRatePlanCancellationPolicy,
   deleteRoom,
 } from "@/lib/actions/settings";
 import type {
   CalendarSeason,
   MealType,
   RatePlan,
+  CancellationPolicy,
+  CancellationPolicyKind,
   ChannelKind,
   ChannelSetting,
   PaymentMethodKind,
@@ -43,6 +47,7 @@ export type SettingsTab =
   | "tax"
   | "seasons"
   | "rate-plans"
+  | "cancellation"
   | "payment-methods"
   | "staff";
 
@@ -61,6 +66,7 @@ const TABS: { id: SettingsTab; label: string }[] = [
   { id: "tax", label: "Tax rates" },
   { id: "seasons", label: "Seasons" },
   { id: "rate-plans", label: "Rate plans" },
+  { id: "cancellation", label: "Cancellation" },
   { id: "payment-methods", label: "Payment methods" },
   { id: "staff", label: "Staff" },
 ];
@@ -130,6 +136,7 @@ export function SettingsScreen({
   taxRates,
   seasons,
   ratePlans,
+  cancellationPolicies,
   paymentMethods,
   staff,
   editRoomTypeId,
@@ -146,6 +153,7 @@ export function SettingsScreen({
   taxRates: TaxRateSetting[];
   seasons: CalendarSeason[];
   ratePlans: RatePlan[];
+  cancellationPolicies: CancellationPolicy[];
   paymentMethods: PaymentMethodSetting[];
   /** A room type to open for editing on arrival, from the calendar's rail. */
   editRoomTypeId: string | null;
@@ -269,6 +277,18 @@ export function SettingsScreen({
     description: string;
     isDefault: boolean;
     isActive: boolean;
+  } | null>(null);
+
+  const [cp, setCp] = useState<{
+    id: string | null;
+    name: string;
+    kind: CancellationPolicyKind;
+    /* A string, not a number: an emptied field is "" while somebody retypes,
+       and a number state would turn that into 0 under their cursor. */
+    freeCancellationDays: string;
+    description: string;
+    isActive: boolean;
+    sortOrder: number;
   } | null>(null);
 
   return (
@@ -1419,7 +1439,7 @@ export function SettingsScreen({
                 <table className="w-full min-w-[620px] text-[13px]">
                   <thead>
                     <tr className="border-b border-line text-left text-ink-faint">
-                      {["Code", "Name", "Includes", "Guest page", "Status", ""].map(
+                      {["Code", "Name", "Includes", "Cancellation", "Guest page", "Status", ""].map(
                         (c, i) => (
                           <th
                             key={c || `c${i}`}
@@ -1457,6 +1477,52 @@ export function SettingsScreen({
                             : p.meals
                                 .map((m) => MEAL_LABEL[m])
                                 .join(", ")}
+                        </td>
+                        <td className="px-3 py-2.5">
+                          {/*
+                            Set here rather than in the form below, because it
+                            goes through its own RPC: an optional parameter on
+                            save_rate_plan() would be an overload for PostgREST
+                            to choose between, and a rename would then have to
+                            resend the policy or silently clear it.
+                          */}
+                          {canEdit ? (
+                            <select
+                              aria-label={`Cancellation policy for ${p.name}`}
+                              value={p.cancellationPolicyId ?? ""}
+                              disabled={pending}
+                              onChange={(e) =>
+                                run(
+                                  () =>
+                                    setRatePlanCancellationPolicy(
+                                      p.id,
+                                      e.target.value || null,
+                                    ),
+                                  "Cancellation terms saved.",
+                                )
+                              }
+                              className="w-full min-w-[150px] rounded border border-line bg-white px-2 py-1 text-[12.5px] text-ink"
+                            >
+                              <option value="">Not set</option>
+                              {cancellationPolicies
+                                .filter(
+                                  (c) =>
+                                    c.isActive || c.id === p.cancellationPolicyId,
+                                )
+                                .map((c) => (
+                                  <option key={c.id} value={c.id}>
+                                    {c.name}
+                                    {c.isActive ? "" : " (retired)"}
+                                  </option>
+                                ))}
+                            </select>
+                          ) : (
+                            <span className="text-ink-muted">
+                              {cancellationPolicies.find(
+                                (c) => c.id === p.cancellationPolicyId,
+                              )?.name ?? "Not set"}
+                            </span>
+                          )}
                         </td>
                         <td className="px-3 py-2.5">
                           <span
@@ -1592,6 +1658,250 @@ export function SettingsScreen({
         </>
       )}
 
+
+      {tab === "cancellation" && (
+        <>
+          <div className={card}>
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="font-display text-[15px] font-semibold tracking-tightest text-ink">
+                Cancellation policies
+              </h2>
+              {canEdit && (
+                <button
+                  onClick={() =>
+                    setCp({
+                      id: null,
+                      name: "",
+                      kind: "flexible",
+                      freeCancellationDays: "1",
+                      description: "",
+                      isActive: true,
+                      sortOrder: cancellationPolicies.length,
+                    })
+                  }
+                  className={secondary}
+                >
+                  New policy
+                </button>
+              )}
+            </div>
+
+            {cancellationPolicies.length === 0 ? (
+              <p className="text-[13px] text-ink-muted">
+                None yet. Add a flexible policy, a non-refundable one, or both.
+              </p>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[620px] text-[13px]">
+                  <thead>
+                    <tr className="border-b border-line text-left text-ink-faint">
+                      {["Name", "Type", "Free until", "Rate plans", "Status", ""].map(
+                        (c, i) => (
+                          <th
+                            key={c || `c${i}`}
+                            className="whitespace-nowrap px-3 pb-2.5 text-xxs font-semibold uppercase tracking-[0.1em]"
+                          >
+                            {c}
+                          </th>
+                        ),
+                      )}
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-line">
+                    {cancellationPolicies.map((c) => (
+                      <tr key={c.id}>
+                        <td className="px-3 py-2.5 font-medium text-ink">
+                          {c.name}
+                          {c.description && (
+                            <span className="block text-xxs text-ink-faint">
+                              {c.description}
+                            </span>
+                          )}
+                        </td>
+                        <td className="px-3 py-2.5">
+                          <span
+                            className={
+                              c.kind === "non_refundable"
+                                ? "rounded bg-rose-50 px-1.5 py-0.5 text-xxs font-semibold text-rose-700"
+                                : "rounded bg-emerald-50 px-1.5 py-0.5 text-xxs font-semibold text-emerald-700"
+                            }
+                          >
+                            {c.kind === "non_refundable"
+                              ? "Non-refundable"
+                              : "Flexible"}
+                          </span>
+                        </td>
+                        <td className="tnum px-3 py-2.5 text-ink-muted">
+                          {c.kind === "non_refundable"
+                            ? "\u2014"
+                            : c.freeCancellationDays === 0
+                              ? "The arrival day"
+                              : `${c.freeCancellationDays} day${c.freeCancellationDays === 1 ? "" : "s"} before arrival`}
+                        </td>
+                        <td className="tnum px-3 py-2.5 text-ink-muted">
+                          {c.ratePlanCount}
+                        </td>
+                        <td className="px-3 py-2.5">
+                          <span className={c.isActive ? "text-ink" : "text-ink-faint"}>
+                            {c.isActive ? "Offered" : "Retired"}
+                          </span>
+                        </td>
+                        <td className="whitespace-nowrap px-3 py-2.5 text-right">
+                          {canEdit && (
+                            <button
+                              onClick={() =>
+                                setCp({
+                                  id: c.id,
+                                  name: c.name,
+                                  kind: c.kind,
+                                  freeCancellationDays: String(
+                                    c.freeCancellationDays ?? 1,
+                                  ),
+                                  description: c.description ?? "",
+                                  isActive: c.isActive,
+                                  sortOrder: c.sortOrder,
+                                })
+                              }
+                              className="rounded border border-line px-2 py-1 text-xxs text-ink-muted hover:bg-shell"
+                            >
+                              Edit
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+
+          {cp && canEdit && (
+            <div className={card}>
+              <h2 className="mb-3 font-display text-[15px] font-semibold tracking-tightest text-ink">
+                {cp.id ? "Edit cancellation policy" : "New cancellation policy"}
+              </h2>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div>
+                  <label className={label} htmlFor="cp-name">Name</label>
+                  <input
+                    id="cp-name"
+                    value={cp.name}
+                    onChange={(e) => setCp({ ...cp, name: e.target.value })}
+                    placeholder="Free cancellation until 3 days before"
+                    className={field}
+                  />
+                </div>
+                <div>
+                  <label className={label} htmlFor="cp-kind">Type</label>
+                  <select
+                    id="cp-kind"
+                    value={cp.kind}
+                    onChange={(e) =>
+                      setCp({
+                        ...cp,
+                        kind: e.target.value as CancellationPolicyKind,
+                      })
+                    }
+                    className={field}
+                  >
+                    <option value="flexible">Flexible</option>
+                    <option value="non_refundable">Non-refundable</option>
+                  </select>
+                </div>
+
+                {/* Only flexible has a window. Non-refundable has no "how many
+                    days", so the field goes rather than sitting there disabled. */}
+                {cp.kind === "flexible" && (
+                  <div>
+                    <label className={label} htmlFor="cp-days">
+                      Free cancellation up to
+                    </label>
+                    <div className="flex items-center gap-2">
+                      <input
+                        id="cp-days"
+                        type="number"
+                        min={0}
+                        max={365}
+                        value={cp.freeCancellationDays}
+                        onChange={(e) =>
+                          setCp({ ...cp, freeCancellationDays: e.target.value })
+                        }
+                        className={cn(field, "w-24")}
+                      />
+                      <span className="text-[13px] text-ink-muted">
+                        days before arrival
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                <div className="sm:col-span-2">
+                  <label className={label} htmlFor="cp-desc">
+                    What the guest is told
+                  </label>
+                  <input
+                    id="cp-desc"
+                    value={cp.description}
+                    onChange={(e) => setCp({ ...cp, description: e.target.value })}
+                    placeholder="Cancel free up to three days before you arrive."
+                    className={field}
+                  />
+                </div>
+              </div>
+
+              <label className="mt-3 flex items-center gap-2 text-[13px] text-ink">
+                <input
+                  type="checkbox"
+                  checked={cp.isActive}
+                  onChange={(e) => setCp({ ...cp, isActive: e.target.checked })}
+                  className="h-3.5 w-3.5 accent-brass"
+                />
+                Still offered
+              </label>
+
+              {cp.kind === "non_refundable" && (
+                <p className="mt-3 rounded-md bg-shell px-3 py-2 text-[12.5px] leading-snug text-ink-muted">
+                  A non-refundable booking can still be cancelled by staff — the
+                  charge stands and stays on the folio. Charging a card
+                  automatically is not built; there is no card capture in this
+                  system yet.
+                </p>
+              )}
+
+              <div className="mt-4 flex gap-2">
+                <button
+                  onClick={() =>
+                    run(
+                      () =>
+                        saveCancellationPolicy({
+                          id: cp.id,
+                          name: cp.name,
+                          kind: cp.kind,
+                          freeCancellationDays:
+                            cp.kind === "flexible"
+                              ? Number(cp.freeCancellationDays || 0)
+                              : null,
+                          description: cp.description,
+                          isActive: cp.isActive,
+                          sortOrder: cp.sortOrder,
+                        }),
+                      cp.id ? "Policy saved." : "Policy created.",
+                    )
+                  }
+                  disabled={pending}
+                  className={primary}
+                >
+                  {pending ? "Saving\u2026" : "Save"}
+                </button>
+                <button onClick={() => setCp(null)} className={secondary}>
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
+        </>
+      )}
 
       {tab === "payment-methods" && (
         <>
