@@ -82,10 +82,11 @@ const FOOT_H = 16;
  * Measured off the window rather than fixed, so the board fills the screen it
  * is on. At a fixed 620px it stopped well short of the bottom on a desk
  * monitor and the page below it was empty, which is what the client saw.
- * The subtraction is the chrome above it: the two sticky bars, the page
- * heading and the card's own margin.
+ * The subtraction is the chrome above it: the two sticky bars and the page's
+ * own padding. It dropped from 200 to 150 when the "Calendar" heading was
+ * removed -- that row of height belongs to the board now.
  */
-const MAX_H = "calc(100vh - 200px)";
+const MAX_H = "calc(100vh - 150px)";
 /** Never so short that the header, the band and a row do not fit. */
 const MIN_H = 360;
 
