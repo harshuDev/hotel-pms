@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0060` are
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0061` are
 applied to the hosted database.
 
 Working on real data: dashboard (house board, movements, pace, activity feed),
@@ -565,6 +565,7 @@ showed the Reservation Centric calendar and asked for it by name.
     118px and an operational note is a sentence. The note is read in the
     dialog, which opens from `?note=<date>` — URL state, like the booking
     dialog, so a reload keeps it open and the back button closes it.
+  - **The month in the date header is in CAPITALS**, at the client's request.
   - **The marker is a PENCIL IN A BOX, matching the reference**, which the
     client circled in a screenshot. It is deliberately a different mark from
     the speech bubble on a bar: a bubble on a BAR means "this booking carries
@@ -595,18 +596,27 @@ showed the Reservation Centric calendar and asked for it by name.
 - **Bars carry guests and value**, like the reference's. The value is the room
   line's own nights — rate less discount plus tax — not the folio: most of
   those nights have not been charged yet and a future stay would show nothing.
-- **Two standing rows sit under the room types: Holding area and Cancelled.**
-  Both draw through one `ExtraRow` component, because the only thing that
-  differs is the label, and both keep a row's height when empty so the board
-  does not jump as bookings move in and out.
-  - **Holding holds `pending` bookings** — the client settled this: it is what
-    nobody has confirmed yet. It needs no migration, since
-    `calendar_bookings()` already returns the status; the page filters them out
-    of `barsByType` and passes them separately. A pending booking is not sold,
-    and a bar sitting on a room type reads as though it were. This is the same
-    argument that keeps cancelled bookings off the live rows.
-  - **Cancelled** never goes among the live rows either.
-    `calendar_bookings()` returns those only when asked.
+- **THE HOLDING AREA IS GONE. UNASSIGNED IS BOTH. This reverses an earlier
+  decision, at the client's direction:** "unassigned bhi holding ke liye hi hai
+  ... to holding area vala remove krdo". One standing row is left under the
+  room types — Cancelled — and it still draws through `ExtraRow`.
+  - The two bands used to be separate: Holding held every `pending` booking,
+    Unassigned held the confirmed ones with no room yet, on the argument that
+    "nobody has confirmed this" and "confirmed, but no room" are different
+    facts. They ARE different facts, but they are both "this booking is being
+    held and occupies no room", which is the one thing the band tells a
+    receptionist. The client judged one band enough. **Do not split them
+    again.**
+  - **The Unassigned band carries "(Holding area)" under its label**, so
+    somebody moving between the two systems finds the reference's word where
+    they expect it.
+  - **Nothing is lost from the bar**: a pending booking still draws its amber
+    edge and still says "Pending" in words, so it stays distinguishable from a
+    confirmed one beside it. `calendar/page.tsx` no longer filters pending out
+    — every bar takes the ordinary split, onto its room or into its type's
+    Unassigned band.
+  - **Cancelled** never goes among the live rows. `calendar_bookings()`
+    returns those only when asked.
 - **"Unassigned" is a third band, and it is not Holding.** Holding is "nobody
   has confirmed this booking". Unassigned is "confirmed, but no room picked
   yet" — which is every booking between being taken and being checked in,
@@ -626,6 +636,44 @@ showed the Reservation Centric calendar and asked for it by name.
     snapshot and the room can go between page load and click. `assign_room()`
     does the real check inside the transaction and refuses by name, which is a
     better answer than a room quietly missing with no explanation.
+  - **The control that takes a booking out of a room reads "Cancel the room"**,
+    which is the client's wording, not "Take out of the room".
+  - **A CANCELLED BOOKING CAN BE RESTORED** (0061), from the Cancelled band and
+    from the booking screen. `restore_booking()` is the exact reverse of
+    `cancel_booking()` — the booking, its rooms and their nights go back to
+    `confirmed` — plus the one thing the reversal makes necessary.
+    - **It re-checks availability, because cancelling freed the rooms.**
+      Between the cancellation and the restore somebody may have sold those
+      nights, so it refuses with `HP001` rather than overselling silently, and
+      the override is a deliberate second ask, exactly like taking a booking
+      that would oversell.
+    - **Back to `confirmed`, not to whatever it was.** `cancel_booking()`
+      overwrote the old status, so restoring a `pending` booking as `pending`
+      would be a guess. Staff pressing Restore are saying the hotel intends to
+      honour the stay.
+    - **`room_id` stays null** — the old room may be occupied now, so
+      `assign_room()` does the placing with its overlap check. The booking
+      lands in its type's Unassigned band.
+    - **The folio is not touched.** A cancellation or no-show fee stands until
+      somebody reverses it deliberately; `folio_items` is append-only and a
+      Restore button is not the place to decide about money.
+    - Nothing is logged by hand: `bookings_log_activity_after_status_change`
+      already writes it, and a second insert would put two rows on the trail
+      for one act.
+  - **THE HOUSEKEEPING DOT IS A CONTROL** (`room-status-menu.tsx`), as the
+    reference's is: clicking it sets that room's status from the board, which
+    is where somebody already is when they learn a room has been cleaned.
+    - **Three of the reference's five, and the other two are not invented.**
+      `room_status` is `vacant_clean | vacant_dirty | occupied | ooo`, so
+      Clean, Dirty and Broken map exactly and go through `set_room_status()`.
+      **"Inspected" and "Do not disturb" are NOT two more enum values**:
+      Inspected is a second fact about a CLEAN room, so as a status it would
+      make every `= 'vacant_clean'` test wrong the day it was used; Do not
+      disturb is a request on an OCCUPIED room, and `room_status` says whether
+      a room can be sold. Both want a schema decision and are raised rather
+      than half-built.
+    - **Occupied is not offered in either direction**, as before: a guest being
+      in the room is what puts it there.
   - **`assign_room()` only demands a clean room for a stay that has already
     started** (0053). It used to demand `vacant_clean` always, which was right
     while check-in was the only caller and wrong the moment the front desk
@@ -961,10 +1009,21 @@ anywhere else. Collapsed height must stay constant regardless of room count.
     link off this site wearing a path's clothes. Every other way in (the
     bookings list, search, the reports) sends no `back` and falls back to
     "All bookings".
-  - **Clicking a bar still navigates to `/bookings/[id]`.** That page IS the
-    reservation workflow; a second, smaller copy inside a dialog is the thing
-    this codebase keeps refusing to build, for the same reason the calendar's
-    booking dialog wraps the real form rather than a reduced one.
+  - **CLICKING A BAR NOW OPENS A POPUP OVER THE BOARD, as of this round.**
+    This reverses what this file said. The client asked for their reference's
+    behaviour directly — "jab koi bhi kisi booking ko open krta hai to vo
+    popup hota hai uski puri details ke sath" — and they are right that
+    navigating away to read a reference and a balance costs you the dates and
+    rail width you were looking at.
+    - `src/components/calendar/booking-peek.tsx`, opened by `?booking=<id>`,
+      URL state like the other two dialogs.
+    - **IT READS AND DOES NOT EDIT, and that is the whole design.**
+      `/bookings/[id]` is still the reservation workflow — the five tabs,
+      editing, payments, cancelling — and the popup links to it for anything
+      that writes. A second EDITOR is still the thing this codebase refuses to
+      build; a read-only panel is not one.
+    - Every figure comes from `booking_detail()` and `booking_room_lines()`,
+      the same reads the full screen uses, so the two cannot disagree.
 - **`bookings.external_payload` is empty on every row and nothing fills it.**
   OTA bookings are entered by hand (open decision 2), so the channel's raw
   payload never arrives. The screen shows the source, the settlement and

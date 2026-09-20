@@ -10,6 +10,7 @@ import { CheckInAction, CheckOutAction } from "@/components/dashboard/movement-a
 import { formatMoney, parseMoney } from "@/lib/money";
 import {
   cancelBooking,
+  restoreBooking,
   confirmBooking,
   setBookingRoomRate,
   updateBooking,
@@ -143,6 +144,8 @@ export function BookingDetailView({
   const [pending, startTransition] = useTransition();
   const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
   const [block, setBlock] = useState<"overbook" | null>(null);
+  /* The restore refusal, when the rooms have been sold since the cancellation. */
+  const [restoreBlocked, setRestoreBlocked] = useState<string | null>(null);
   const [tab, setTab] = useState<Tab>("rooms");
 
   const [editing, setEditing] = useState(false);
@@ -209,17 +212,25 @@ export function BookingDetailView({
     balanceCents: detail.balanceCents,
   };
 
-  function run(fn: () => Promise<{ ok: boolean; error?: string }>, done: string) {
+  function run(
+    fn: () => Promise<{ ok: boolean; error?: string }>,
+    done: string,
+    /** For a caller that needs the refusal text as well as the banner. */
+    onError?: (message: string) => void,
+  ) {
     setMessage(null);
     setBlock(null);
     startTransition(async () => {
       const result = await fn();
       if (!result.ok) {
-        setMessage({ ok: false, text: result.error ?? "That did not work." });
+        const text = result.error ?? "That did not work.";
+        setMessage({ ok: false, text });
         if ("block" in result && result.block === "overbook") setBlock("overbook");
+        onError?.(text);
         return;
       }
       setMessage({ ok: true, text: done });
+      setRestoreBlocked(null);
       setEditing(false);
       setCancelling(false);
       setPricing(null);
@@ -279,6 +290,29 @@ export function BookingDetailView({
                 className="rounded-md border border-line px-4 py-2 text-[13px] text-ink-muted hover:bg-shell hover:text-ink"
               >
                 {editing ? "Stop editing" : "Edit"}
+              </button>
+            )}
+            {/*
+              RESTORE, for a booking somebody cancelled and wants back (0061).
+              Cancelling used to be a one-way door: a guest ringing back meant
+              taking the booking again by hand, losing the reference, the folio
+              and the trail. It only shows on a booking that is actually
+              cancelled, so it is never a second way to do nothing.
+            */}
+            {canEdit && ["canceled", "no_show"].includes(detail.status) && (
+              <button
+                onClick={() => {
+                  setRestoreBlocked(null);
+                  run(
+                    () => restoreBooking(detail.bookingId),
+                    "Booking restored.",
+                    (message) => setRestoreBlocked(message),
+                  );
+                }}
+                disabled={pending}
+                className="rounded-md border border-emerald-300 px-4 py-2 text-[13px] text-emerald-700 hover:bg-emerald-50 disabled:opacity-50"
+              >
+                {pending ? "Restoring\u2026" : "Restore booking"}
               </button>
             )}
             {canEdit && ["pending", "confirmed"].includes(detail.status) && (

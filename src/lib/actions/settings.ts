@@ -303,6 +303,9 @@ export async function setRoomStatus(input: {
 
   revalidatePath("/reports/housekeeping");
   revalidatePath("/dashboard");
+  // The calendar rail draws a dot per room and a summary dot per type, and
+  // the status is settable from that rail now, so the board has to move too.
+  revalidatePath("/calendar");
   revalidateSettings();
   return { ok: true, data: null };
 }

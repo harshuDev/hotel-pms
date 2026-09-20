@@ -124,7 +124,7 @@ export function AssignRoom({
                 onClick={() => run(() => unassignRoom(bookingRoomId))}
                 className="mt-1 block w-full rounded border-t border-line px-1.5 py-1 text-left text-[12px] text-ink-muted transition hover:bg-shell hover:text-ink disabled:opacity-50"
               >
-                Take out of the room
+                Cancel the room
               </button>
             )}
 

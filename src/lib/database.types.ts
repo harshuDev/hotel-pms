@@ -3792,6 +3792,10 @@ export type Database = {
           value_cents: number
         }[]
       }
+      restore_booking: {
+        Args: { p_allow_overbook?: boolean; p_booking_id: string }
+        Returns: undefined
+      }
       revenue_series: {
         Args: { p_days?: number; p_from: string }
         Returns: {
