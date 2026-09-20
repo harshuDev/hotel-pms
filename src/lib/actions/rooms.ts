@@ -32,15 +32,29 @@ function failure(message: string): { ok: false; error: string } {
   return { ok: false, error: message };
 }
 
+/**
+ * Putting a booked room in a physical room.
+ *
+ * `allowTypeChange` is the upgrade (0062). The client: "hotels do offer
+ * upgrades ... someone booked a Double Room but when he arrive at the property
+ * they changed their mind and decide to upgrade to the Suite."
+ *
+ * It defaults false and Postgres refuses a different type without it, so an
+ * upgrade is always a deliberate second act rather than a misclick. The guest
+ * keeps the rate they were sold: neither the sold room type nor the nightly
+ * rates are rewritten.
+ */
 export async function assignRoom(
   bookingRoomId: string,
   roomId: string,
+  allowTypeChange = false,
 ): Promise<Result> {
   const supabase = await createClient();
 
   const { error } = await supabase.rpc("assign_room", {
     p_booking_room_id: bookingRoomId,
     p_room_id: roomId,
+    p_allow_type_change: allowTypeChange,
   });
 
   if (error) return failure(error.message);

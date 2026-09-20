@@ -6,6 +6,7 @@ import { ROOM_PHOTO_BUCKET } from "@/lib/queries";
 import type { ActionResult } from "@/lib/actions/cashier";
 import type {
   CancellationPolicyKind,
+  HousekeepingChoice,
   ChannelKind,
   PaymentMethodKind,
   RoomStatus,
@@ -307,6 +308,61 @@ export async function setRoomStatus(input: {
   // the status is settable from that rail now, so the board has to move too.
   revalidatePath("/calendar");
   revalidateSettings();
+  return { ok: true, data: null };
+}
+
+/**
+ * The housekeeping menu on the calendar rail (0062).
+ *
+ * One call for the four points on the clean-to-broken scale, because that is
+ * one decision at a front desk. The mapping from a choice to a status plus its
+ * inspected flag lives in Postgres, so the menu and the data cannot drift.
+ *
+ * ONLY "broken" CHANGES WHAT THE HOTEL CAN SELL — it is `ooo`. Clean, dirty
+ * and inspected are information for reception and housekeeping, exactly as the
+ * client described, and move no availability figure.
+ */
+export async function setRoomHousekeeping(input: {
+  roomId: string;
+  choice: HousekeepingChoice;
+}): Promise<ActionResult<null>> {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("set_room_housekeeping", {
+    p_room_id: input.roomId,
+    p_choice: input.choice,
+  });
+
+  if (error) return { ok: false, error: error.message };
+
+  revalidatePath("/reports/housekeeping");
+  revalidatePath("/dashboard");
+  revalidatePath("/calendar");
+  revalidateSettings();
+  return { ok: true, data: null };
+}
+
+/**
+ * The guest's own request, which is not a point on that scale.
+ *
+ * Its own action because it is a toggle on an OCCUPIED room rather than a
+ * state of the room's cleanliness — "set this room to do not disturb" would
+ * otherwise have to answer "and is it clean?", which has no sensible answer.
+ * Postgres refuses it on a room with nobody in it.
+ */
+export async function setRoomDoNotDisturb(
+  roomId: string,
+  on: boolean,
+): Promise<ActionResult<null>> {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("set_room_do_not_disturb", {
+    p_room_id: roomId,
+    p_on: on,
+  });
+
+  if (error) return { ok: false, error: error.message };
+
+  revalidatePath("/reports/housekeeping");
+  revalidatePath("/calendar");
   return { ok: true, data: null };
 }
 

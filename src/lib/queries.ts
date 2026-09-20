@@ -3025,6 +3025,8 @@ export async function getCalendarRooms(): Promise<CalendarRoom[]> {
     roomTypeId: row.room_type_id,
     roomTypeName: row.room_type_name,
     roomStatus: row.room_status,
+    isInspected: row.is_inspected,
+    doNotDisturb: row.do_not_disturb,
     sortOrder: row.sort_order,
   }));
 }

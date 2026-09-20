@@ -1995,8 +1995,10 @@ export type Database = {
       rooms: {
         Row: {
           created_at: string
+          do_not_disturb: boolean
           floor: number | null
           id: string
+          is_inspected: boolean
           number: string
           photo_path: string | null
           property_id: string
@@ -2005,8 +2007,10 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          do_not_disturb?: boolean
           floor?: number | null
           id?: string
+          is_inspected?: boolean
           number: string
           photo_path?: string | null
           property_id: string
@@ -2015,8 +2019,10 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          do_not_disturb?: boolean
           floor?: number | null
           id?: string
+          is_inspected?: boolean
           number?: string
           photo_path?: string | null
           property_id?: string
@@ -2445,7 +2451,11 @@ export type Database = {
         }[]
       }
       assign_room: {
-        Args: { p_booking_room_id: string; p_room_id: string }
+        Args: {
+          p_allow_type_change?: boolean
+          p_booking_room_id: string
+          p_room_id: string
+        }
         Returns: undefined
       }
       available_rooms_for_booking_room: {
@@ -2774,7 +2784,9 @@ export type Database = {
       calendar_rooms: {
         Args: never
         Returns: {
+          do_not_disturb: boolean
           floor: string
+          is_inspected: boolean
           room_id: string
           room_number: string
           room_status: Database["public"]["Enums"]["room_status"]
@@ -4140,6 +4152,17 @@ export type Database = {
         }
         Returns: number
       }
+      set_room_do_not_disturb: {
+        Args: { p_on: boolean; p_room_id: string }
+        Returns: undefined
+      }
+      set_room_housekeeping: {
+        Args: {
+          p_choice: Database["public"]["Enums"]["housekeeping_choice"]
+          p_room_id: string
+        }
+        Returns: undefined
+      }
       set_room_photo: {
         Args: { p_photo_path?: string; p_room_id: string }
         Returns: undefined
@@ -4243,6 +4266,7 @@ export type Database = {
         | "reversal"
       folio_kind: "guest" | "company"
       folio_status: "open" | "closed" | "cancelled"
+      housekeeping_choice: "inspected" | "clean" | "dirty" | "broken"
       meal_type: "breakfast" | "lunch" | "dinner"
       meeting_room_booking_status: "pending" | "confirmed" | "canceled"
       paid_out_category:
@@ -4440,6 +4464,7 @@ export const Constants = {
       ],
       folio_kind: ["guest", "company"],
       folio_status: ["open", "closed", "cancelled"],
+      housekeeping_choice: ["inspected", "clean", "dirty", "broken"],
       meal_type: ["breakfast", "lunch", "dinner"],
       meeting_room_booking_status: ["pending", "confirmed", "canceled"],
       paid_out_category: [

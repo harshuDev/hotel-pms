@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0061` are
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0062` are
 applied to the hosted database.
 
 Working on real data: dashboard (house board, movements, pace, activity feed),
@@ -668,23 +668,95 @@ showed the Reservation Centric calendar and asked for it by name.
   - **THE HOUSEKEEPING DOT IS A CONTROL** (`room-status-menu.tsx`), as the
     reference's is: clicking it sets that room's status from the board, which
     is where somebody already is when they learn a room has been cleaned.
-    - **Three of the reference's five, and the other two are not invented.**
-      `room_status` is `vacant_clean | vacant_dirty | occupied | ooo`, so
-      Clean, Dirty and Broken map exactly and go through `set_room_status()`.
-      **"Inspected" and "Do not disturb" are NOT two more enum values**:
-      Inspected is a second fact about a CLEAN room, so as a status it would
-      make every `= 'vacant_clean'` test wrong the day it was used; Do not
-      disturb is a request on an OCCUPIED room, and `room_status` says whether
-      a room can be sold. Both want a schema decision and are raised rather
-      than half-built.
+    - **ALL FIVE OF THE REFERENCE'S ARE BUILT, as of 0062.** This note used to
+      say three were and the other two were raised rather than half-built.
+      The schema decision they were waiting on has been made, and it is the
+      one the old note argued for: Inspected and Do not disturb are BOOLEAN
+      COLUMNS ON `rooms`, not two more values of `room_status`.
+      - `room_status` is what decides whether a room can be sold, so neither
+        could go in it. **Inspected is a second fact about a room that is
+        already CLEAN** — as a status, every `= 'vacant_clean'` test would stop
+        matching it, including the readiness check inside `assign_room()`, so
+        signing a room off would have made it unassignable. **Do not disturb
+        belongs to an OCCUPIED room** and is the guest's request rather than a
+        state of cleanliness.
+      - `set_room_housekeeping()` takes a `housekeeping_choice`
+        (`inspected | clean | dirty | broken`) and writes the status and the
+        flag together, so the two cannot disagree: inspected is
+        `vacant_clean` + `is_inspected`, and clean, dirty or broken clears it.
+        `set_room_do_not_disturb()` is its own function and Postgres refuses it
+        on a room with nobody in it.
+      - **`set_room_status()` still exists and is unchanged.** The
+        housekeeping report and check-in and check-out call it; nothing was
+        broken to add a second, richer way in.
+    - **THE CLIENT ON WHAT THIS DOT IS FOR:** "The housekeeping, does not
+      affect availability. It's there for the hotel reception and housekeeping
+      staff to use ... If the 101 is showing as dirty, the receptionist knows
+      that the room is not ready and will offer a room that's is shown ready in
+      the system." That is true of four of the five, and the fourth is the
+      exception worth knowing: **Broken is `ooo`, which DOES reduce what the
+      hotel can sell** — and should, since a broken room cannot take a guest.
+      The menu says so on the item rather than letting somebody find out from a
+      changed figure. Clean, Dirty, Inspected and Do not disturb move no
+      availability number anywhere.
+    - **Both flags show on the rail dot**, or setting one would have no visible
+      result and the menu would read as broken. Inspected is a deeper green
+      than merely clean — the same two greens the menu uses, so the board and
+      the menu cannot say different things — and Do not disturb takes amber on
+      an occupied room.
     - **Occupied is not offered in either direction**, as before: a guest being
       in the room is what puts it there.
+  - **A GUEST CAN BE UPGRADED INTO ANOTHER ROOM TYPE** (0062). The client:
+    "when a room is in the holding area, whe can only move it to the same room
+    type. But hotels do offer upgrades. Let's say someone booked a Double Room
+    but when he arrive at the property they changed their mind and decide to
+    upgrade to the Suite. The way the system is build now, the hotel cannot
+    upgrade the guest room in the system." They were right — `assign_room()`
+    refused a room of any other type outright.
+    - **It is a deliberate second act, never a misclick.** A cross-type room is
+      still refused, now with `HP003` and a message naming what the booking was
+      sold, and `p_allow_type_change` is what overrides it. Same shape as
+      `p_allow_overbook` on a new booking and on a restore: the first click
+      attempts, Postgres refuses, and the interface offers the override with
+      the refusal's own words on it. The picker does not decide this — the
+      board's room list is a snapshot, and the server is the authority on what
+      type a room actually is.
+    - **The sold type and the nightly rates are NEVER rewritten.**
+      `booking_rooms.room_type_id` and `booking_room_nights.room_rate_cents`
+      stay exactly as sold, so an upgrade is the same money in a better room —
+      which is what an upgrade is. Rewriting the type would restate the
+      reservation's value and move revenue between room types after the fact.
+    - **AVAILABILITY COUNTS THE ROOM THE GUEST IS ACTUALLY IN, and that change
+      is what makes the upgrade safe.** Every availability read counted a
+      booked night against the type it was SOLD. Put a Double booking in a
+      Suite under that rule and the Suite still reads as free while the Double
+      reads as sold — phantom availability on the room that is genuinely
+      occupied. The `sold` CTE in `calendar_availability()`,
+      `bookable_room_types()`, `public_room_types()` and `inventory_grid()`
+      now counts `coalesce(the assigned room's type, the sold type)`, so an
+      unassigned booking still counts against what it was sold and an assigned
+      one counts against where the guest is.
+      - It is a no-op on every row that has never been upgraded, which was
+        confirmed against the hosted property rather than assumed: zero of the
+        assigned `booking_rooms` had a room whose type differed from the sold
+        type when 0062 was applied.
+      - The overlap check is untouched, so an upgraded room cannot be sold to
+        somebody else either — tested.
   - **`assign_room()` only demands a clean room for a stay that has already
     started** (0053). It used to demand `vacant_clean` always, which was right
     while check-in was the only caller and wrong the moment the front desk
     started placing future bookings: a room occupied tonight is a perfectly
     good room for next March. The overlap check is what protects the guest and
     is unchanged.
+    - **An inspected room is still `vacant_clean`**, so signing a room off does
+      not make it unassignable. That is the whole reason Inspected is a flag.
+  - **The picker opens on the sold type and keeps the others collapsed.** Most
+    of the time the guest goes in the room they bought, and a list that opens
+    on every room of every type makes the ordinary job harder to do the common
+    way round. The board builds that grouped room list ONCE and hands the same
+    array to every bar, so the rooms cross the server boundary once rather than
+    once per booking — built per bar, a full house on a large property would
+    ship the room list forty times over.
   - **The control is a sibling of the bar, not a child of it.** A `<button>`
     inside an `<a>` is invalid HTML and browsers rearrange it during parsing,
     so it vanished; and `Bars` is a Server Component, so the wrapper meant to
