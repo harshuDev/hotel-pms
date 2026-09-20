@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0055` are
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0056` are
 applied to the hosted database.
 
 Working on real data: dashboard (house board, movements, pace, activity feed),
@@ -482,6 +482,27 @@ showed the Reservation Centric calendar and asked for it by name.
 - **Bars carry booking status on their edge** — amber pending, blue confirmed,
   green in house, grey departed — where the reference's are uniform. The
   information was already there.
+  - **The status is also a word on the bar, as of 0056.** The edge colour had
+    been the only encoding, and the legend that explained it was deleted at the
+    client's request — so blue-means-confirmed became something a receptionist
+    either already knew or did not. `STATUS_LABEL` gives it in front-desk words
+    ("In house", "Departed"), coloured to match the edge. The colour stays:
+    scanning forty bars for a colour is faster than reading them.
+- **A bar says which rate the room was sold on** (0056). `rate_plan_name` comes
+  off `booking_rooms.rate_plan_id`, which 0037 added and which every row on the
+  hosted property carries. **No column was added for this** — the board's read
+  simply never returned it. It is null for a stay taken before 0037, and the
+  bar then draws nothing rather than guessing a plan, the same way the Rate
+  plan report counts those nights under "Not recorded".
+- **The bottom line of a bar sheds detail by the bar's own width**, and that
+  width is known exactly: it is `(endIdx - startIdx)` columns, the same
+  arithmetic that positions the bar. Measured, not guessed — a one-night bar
+  leaves 100px inside its border, the value badge takes 56 and "Confirmed"
+  wants 52. So the rate goes below three columns and the party size below two,
+  and on a one-night bar the status word goes too. **The value never goes**,
+  because it is the one figure on the bar with no second encoding; the status
+  keeps its edge colour and its tooltip. Truncating instead would have given
+  "Confi…", which is worse than showing less.
 - **`board` in `tailwind.config.ts` is the grid surface, and it is cool.** The
   first look at the reference was a photo of a monitor whose warm cast made the
   grid read as cream; it was built that way and it was wrong. The clean

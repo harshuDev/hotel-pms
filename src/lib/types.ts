@@ -1153,6 +1153,13 @@ export interface CalendarRoomBar {
   isAssigned: boolean;
   /** Unassigned bookings for this type before the cap on that shared band. */
   unassignedTotal: number;
+  /**
+   * What the room was sold as — "Room Only", "Bed and Breakfast".
+   *
+   * Null for a stay taken before 0037, which recorded no plan at all. The
+   * board draws nothing rather than guessing one.
+   */
+  ratePlanName: string | null;
 }
 
 /* -------------------------------------------------------------------------- */
