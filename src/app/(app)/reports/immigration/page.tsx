@@ -44,7 +44,6 @@ export default async function ImmigrationReportPage({
       return (
         <ReportShell
           title="Immigration"
-          subtitle="Who stayed, on what travel document"
         >
           <ReportNoAccess />
         </ReportShell>
@@ -58,7 +57,6 @@ export default async function ImmigrationReportPage({
   return (
     <ReportShell
       title="Immigration"
-      subtitle="Who stayed each night, with the travel document recorded for them"
       action="/reports/immigration"
       range={range}
     >
@@ -100,15 +98,6 @@ export default async function ImmigrationReportPage({
         emptyTitle="Nobody stayed in this range"
         emptyHint="The return covers nights actually slept, so cancellations and no-shows never appear."
         footLabel={`${rows.length} stay${rows.length === 1 ? "" : "s"}`}
-        note={
-          <>
-            Ranged on the nights stayed rather than the arrival date, because a
-            return is filed for a date and a guest who arrived a week earlier was
-            still in the building. Cancellations and no-shows are excluded — they
-            did not sleep here. A row is complete when it carries a nationality, a
-            date of birth and either a passport or a national id number.
-          </>
-        }
         columns={[
           {
             header: "",

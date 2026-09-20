@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { ROOM_PHOTO_BUCKET } from "@/lib/queries";
 import type { ActionResult } from "@/lib/actions/cashier";
 import type {
   ChannelKind,
@@ -159,6 +160,87 @@ export async function saveRoom(input: {
 
   revalidateSettings();
   return { ok: true, data: { id: data as string } };
+}
+
+/**
+ * Deleting a room.
+ *
+ * The rule used to be that there is no delete for a room at all, on the
+ * grounds that `booking_rooms` points at one under `on delete restrict`. That
+ * is still true of a room somebody has stayed in, and `delete_room()` refuses
+ * those by name. It is not true of a room that has never been booked — a run
+ * of 60 entered as 50, a number typed wrong, a cupboard counted as sellable —
+ * and those are the rooms a hotel actually wants rid of.
+ *
+ * The photograph goes with it. Nothing points at the object once the row is
+ * gone, so leaving it would be a file in a bucket that no screen can ever
+ * show or remove.
+ */
+export async function deleteRoom(
+  roomId: string,
+): Promise<ActionResult<{ id: string }>> {
+  const supabase = await createClient();
+
+  /*
+   * Read the path BEFORE the row goes, and read it from the database rather
+   * than taking it from the browser: a path sent up with the request could
+   * name another room's photograph, and the storage policy — which only
+   * checks the property — would happily delete it.
+   */
+  const { data: room } = await supabase
+    .from("rooms")
+    .select("photo_path")
+    .eq("id", roomId)
+    .maybeSingle();
+
+  const { error } = await supabase.rpc("delete_room", { p_room_id: roomId });
+  if (error) return { ok: false, error: error.message };
+
+  if (room?.photo_path) {
+    // Best effort, and deliberately not fatal: the room is already gone, and
+    // failing the whole action over a leftover file would report a delete
+    // that did happen as one that did not.
+    await supabase.storage.from(ROOM_PHOTO_BUCKET).remove([room.photo_path]);
+  }
+
+  revalidateSettings();
+  revalidatePath("/calendar");
+  return { ok: true, data: { id: roomId } };
+}
+
+/**
+ * Recording which uploaded file is a room's photograph, or taking it off.
+ *
+ * The upload itself happens in the browser, straight to Supabase Storage under
+ * the signed-in user's session, so the storage policy decides whether it is
+ * allowed. Nothing here holds a service key and nothing bypasses RLS.
+ *
+ * `set_room_photo()` then checks the path really is under this property and
+ * this room before it stores it — the browser chose the name, so the database
+ * does not take its word for it.
+ */
+export async function setRoomPhoto(input: {
+  roomId: string;
+  /** The new object path, or null to take the photograph off. */
+  path: string | null;
+  /** The path being replaced, so the old file does not linger in the bucket. */
+  previousPath: string | null;
+}): Promise<ActionResult<{ id: string }>> {
+  const supabase = await createClient();
+
+  const { error } = await supabase.rpc("set_room_photo", {
+    p_room_id: input.roomId,
+    p_photo_path: input.path,
+  });
+
+  if (error) return { ok: false, error: error.message };
+
+  if (input.previousPath && input.previousPath !== input.path) {
+    await supabase.storage.from(ROOM_PHOTO_BUCKET).remove([input.previousPath]);
+  }
+
+  revalidateSettings();
+  return { ok: true, data: { id: input.roomId } };
 }
 
 /**

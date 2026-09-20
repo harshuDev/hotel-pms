@@ -52,7 +52,6 @@ export default async function Page({
     <div>
       <PageHeader
         title="Inventory"
-        subtitle="Every rate and restriction on one grid, for one plan"
       />
 
       {plans.length > 1 && (

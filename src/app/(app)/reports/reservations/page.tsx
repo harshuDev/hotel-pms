@@ -48,7 +48,6 @@ export default async function ReservationsReportPage({
   return (
     <ReportShell
       title="Reservations"
-      subtitle="What is on the books to arrive, arrival date by arrival date"
       action="/reports/reservations"
       range={range}
     >
@@ -83,15 +82,6 @@ export default async function ReservationsReportPage({
         emptyTitle="No days in this range"
         emptyHint="Widen the dates, or check that the range runs forwards."
         footLabel={`${rows.length} day${rows.length === 1 ? "" : "s"}`}
-        note={
-          <>
-            Dated by arrival, so a booking taken in June for an October stay
-            counts in October. Run the booking report against the same dates to
-            see what was sold rather than what is expected. Cancellations and
-            no-shows are left out: they are not arrivals, and the cancellation
-            report covers them.
-          </>
-        }
         columns={[
           {
             header: "Arrival",

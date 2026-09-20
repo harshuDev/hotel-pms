@@ -238,11 +238,6 @@ export function ProfileScreen({
           </button>
         </form>
 
-        <p className="mt-3 text-xs leading-relaxed text-ink-faint">
-          Your current password is asked for because a signed-in screen is not
-          proof of who is standing at it. Forgotten it entirely? Log out and use
-          &ldquo;Forgot password?&rdquo; instead.
-        </p>
 
         {passwordMessage && (
           <Message ok={passwordMessage.ok}>{passwordMessage.text}</Message>

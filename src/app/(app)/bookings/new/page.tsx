@@ -27,7 +27,7 @@ export default async function NewBookingPage({
   if (staff && !["admin", "manager", "front_desk"].includes(staff.role)) {
     return (
       <div>
-        <PageHeader title="New booking" subtitle="Take a booking" />
+        <PageHeader title="New booking" />
         <div className="rounded-lg border border-line bg-white p-8 text-center shadow-card">
           <p className="font-display text-lg font-semibold tracking-tightest text-ink">
             Taking bookings is not available to your role
@@ -78,11 +78,6 @@ export default async function NewBookingPage({
     <div>
       <PageHeader
         title={group ? "New group booking" : "New booking"}
-        subtitle={
-          group
-            ? "One booking, several rooms. Add a room line for each, then a guest to hold it."
-            : "Dates, rooms and a guest. The rate is per room per night, before tax."
-        }
       />
       <NewBookingForm
         businessDate={businessDate}

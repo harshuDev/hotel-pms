@@ -27,7 +27,7 @@ export default async function DepositReportPage() {
   } catch (error) {
     if (error instanceof ReportAccessError) {
       return (
-        <ReportShell title="Deposits" subtitle="Money held against stays still to come">
+        <ReportShell title="Deposits" >
           <ReportNoAccess />
         </ReportShell>
       );
@@ -42,7 +42,6 @@ export default async function DepositReportPage() {
   return (
     <ReportShell
       title="Deposits"
-      subtitle="Payments taken against bookings that have not arrived yet"
     >
       <ReportFigures>
         <ReportFigure
@@ -70,17 +69,6 @@ export default async function DepositReportPage() {
         emptyTitle="No deposits are being held"
         emptyHint="A booking appears here once a payment is taken against it and before the guest checks in."
         footLabel={`${rows.length} booking${rows.length === 1 ? "" : "s"}`}
-        note={
-          <>
-            A deposit here is simply money taken before arrival — there is no
-            separate deposit ledger, so nothing can drift out of step with the
-            cashier drawer or the financial report. Once the guest checks in the
-            booking drops off this list: it is a part-paid folio from then on,
-            which is the debtors report&rsquo;s question. A cancelled booking
-            still holding money is left to debtors too, because that is a refund
-            to chase rather than a stay to expect.
-          </>
-        }
         columns={[
           {
             header: "Reference",

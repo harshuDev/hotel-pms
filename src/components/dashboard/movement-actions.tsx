@@ -125,9 +125,7 @@ export function CheckInAction({ booking }: { booking: Booking }) {
           {slots === null ? (
             <p className="text-[13px] text-ink-faint">Loading rooms…</p>
           ) : unassigned.length === 0 ? (
-            <p className="text-[13px] text-ink-muted">
-              Every room is assigned. Checking in marks them occupied.
-            </p>
+            <p className="text-[13px] text-ink-muted">Every room is assigned.</p>
           ) : (
             unassigned.map((slot) => {
               const rooms = options[slot.bookingRoomId];
@@ -242,9 +240,7 @@ export function CheckOutAction({ booking }: { booking: Booking }) {
               is going to an account.
             </div>
           ) : (
-            <p className="text-[13px] text-ink-muted">
-              The folio is settled. The room goes to housekeeping for servicing.
-            </p>
+            <p className="text-[13px] text-ink-muted">The folio is settled.</p>
           )}
 
           {error && <p className="text-xs text-rose-600">{error}</p>}

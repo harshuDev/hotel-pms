@@ -16,7 +16,6 @@ export default async function ProfilePage() {
     <div>
       <PageHeader
         title="Profile"
-        subtitle="Your name, as it appears on everything you do here"
       />
       <ProfileScreen fullName={me.fullName} role={me.role} />
     </div>

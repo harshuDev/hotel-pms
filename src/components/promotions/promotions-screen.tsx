@@ -478,13 +478,6 @@ export function PromotionsScreen({
     <div className="space-y-3">
       {canEdit && (
         <div className="flex items-center justify-between rounded-lg border border-line bg-white px-5 py-4 shadow-card">
-          <p className="max-w-2xl text-[13px] leading-relaxed text-ink-muted">
-            An offer reduces what a stay costs. It is not a second price list —
-            the rate plan still says what a room is worth, and the reduction is
-            recorded against the nights so every revenue figure nets it off.
-            When several qualify, the one that saves the guest most wins; they
-            never stack.
-          </p>
           <button
             onClick={() => {
               setMessage(null);
@@ -775,7 +768,7 @@ export function PromotionsScreen({
                 checked={form.isActive}
                 onChange={(e) => setForm({ ...form, isActive: e.target.checked })}
               />
-              Live. Turning this off retires the offer and frees its code for reuse.
+              Live
             </label>
           )}
 
@@ -797,8 +790,7 @@ export function PromotionsScreen({
           {form.id && (
             <p className="mt-3 text-xs leading-relaxed text-ink-faint">
               Saving replaces which rate plans and room types this applies to
-              with whatever is picked above. Nothing is carried over, so check
-              them even when only changing a date.
+              with whatever is picked above.
             </p>
           )}
         </div>

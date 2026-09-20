@@ -35,7 +35,7 @@ export default async function FolioReportPage({
   } catch (error) {
     if (error instanceof ReportAccessError) {
       return (
-        <ReportShell title="Folios" subtitle="Every account touched in the range">
+        <ReportShell title="Folios" >
           <ReportNoAccess />
         </ReportShell>
       );
@@ -51,7 +51,6 @@ export default async function FolioReportPage({
   return (
     <ReportShell
       title="Folios"
-      subtitle="Every account charged or paid in the range, with what is left on it"
       action="/reports/folio"
       range={range}
     >
@@ -78,17 +77,6 @@ export default async function FolioReportPage({
         emptyTitle="No folio was charged or paid in this range"
         emptyHint="A folio is created on its first charge, so a booking that has taken no money yet has none."
         footLabel={`${rows.length} folio${rows.length === 1 ? "" : "s"}`}
-        note={
-          <>
-            Meeting room folios are here too, shown as &ldquo;Meeting
-            room&rdquo; where a booking reference would be: a folio belongs to a
-            stay or to a meeting room booking, and a list that quietly dropped
-            half of them would understate what the hotel is owed. A folio counts
-            as in range if anything posted to it in range, not by when it was
-            opened — a long stay opened in March and settled in June belongs to
-            both.
-          </>
-        }
         columns={[
           {
             header: "Folio",

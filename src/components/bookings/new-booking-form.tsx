@@ -641,30 +641,6 @@ export function NewBookingForm({
               </div>
             )}
 
-            {lines.length > 0 && nights > 0 && (
-              <p className="mt-3 text-[13px] leading-relaxed text-ink-muted">
-                {lines.every((l) => l.rate.trim() === "") && ratePlanId ? (
-                  <>
-                    Priced from the rate plan, night by night — a Friday is not
-                    a Tuesday. Type a rate to override it for the whole stay.
-                  </>
-                ) : (
-                  <>
-                    <span className="tnum font-medium text-ink">
-                      {formatMoney(total)}
-                    </span>{" "}
-                    for the stay, before tax
-                    {lines.some((l) => l.rate.trim() === "") && ratePlanId
-                      ? ", counting only the lines you priced by hand"
-                      : ""}
-                    {taxRateId
-                      ? " — the tax rate below is applied when the booking is taken"
-                      : ""}
-                    .
-                  </>
-                )}
-              </p>
-            )}
           </>
         )}
       </section>
@@ -967,12 +943,6 @@ export function NewBookingForm({
             />
           </div>
         </div>
-        {settlement === "prepaid_to_channel" && (
-          <p className="mt-3 text-xs leading-relaxed text-ink-faint">
-            Prepaid to the channel: the guest has already paid, so nothing should
-            be collected at the desk. The booking will not show as cash owed.
-          </p>
-        )}
       </section>
 
       {/* Take it ------------------------------------------------------- */}
@@ -991,9 +961,7 @@ export function NewBookingForm({
               className="mt-0.5"
             />
             <span className="text-[13px] leading-relaxed text-warn-deep">
-              Take this booking against the restriction above. Somebody closed
-              that date or set that rule on purpose, so only override it if you
-              know why.
+              Take this booking against the restriction above.
             </span>
           </label>
         )}
@@ -1006,17 +974,11 @@ export function NewBookingForm({
               className="mt-0.5"
             />
             <span className="text-[13px] leading-relaxed text-warn-deep">
-              Take this booking anyway, overbooking the house. The calendar will
-              show the affected nights as a negative rather than hiding them.
+              Take this booking anyway, overbooking the house.
             </span>
           </label>
         )}
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <p className="text-xs leading-relaxed text-ink-faint">
-            Availability is checked again when the booking is taken, so two
-            people selling the last room at once cannot both succeed. No room is
-            assigned here — that happens at check-in.
-          </p>
           <button
             type="button"
             onClick={submit}

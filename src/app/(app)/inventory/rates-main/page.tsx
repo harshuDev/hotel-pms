@@ -21,7 +21,6 @@ export default async function Page({
       searchParams={searchParams}
       lockedToDefaultPlan
       title="Rates (Main)"
-      subtitle="The price of one room, per night, on the default rate plan"
     />
   );
 }

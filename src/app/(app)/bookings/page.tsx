@@ -52,7 +52,6 @@ export default async function BookingsPage({
     <div>
       <PageHeader
         title="Bookings"
-        subtitle="Every reservation across every channel"
       />
       <div className="rounded-lg border border-line bg-white p-4 shadow-card">
       <form className="mb-3 flex flex-wrap gap-2">

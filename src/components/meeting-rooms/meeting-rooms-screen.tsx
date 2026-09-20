@@ -191,11 +191,6 @@ export function MeetingRoomsScreen({
   return (
     <div className="space-y-3">
       <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-line bg-white p-4 shadow-card">
-        <p className="max-w-2xl text-[13px] leading-relaxed text-ink-muted">
-          Which meeting room is free on which day. Click a free day to book it —
-          a booking runs from its first day to its last inclusive, so a room
-          booked Monday to Wednesday is occupied on the Wednesday.
-        </p>
         <div className="flex items-center gap-2">
           {canConfigure && (
             <button
@@ -343,15 +338,6 @@ export function MeetingRoomsScreen({
             </table>
           </div>
         )}
-        {rooms.length > 0 && (
-          <p className="mt-3 text-xs leading-relaxed text-ink-faint">
-            Double-booking is refused by the database, not the form, so two
-            people booking the same room at the same moment cannot both succeed.
-            Meeting rooms are kept entirely apart from guest rooms: they never
-            reach occupancy, ADR or RevPAR, which are about rooms sold for the
-            night.
-          </p>
-        )}
       </div>
 
       {/* Booking a slot ------------------------------------------------ */}
@@ -478,8 +464,7 @@ export function MeetingRoomsScreen({
           </div>
 
           <p className="text-xs leading-relaxed text-ink-faint">
-            A customer is optional for an internal event, but one is needed
-            before any money can be charged: a folio has to belong to somebody.
+            A customer is needed before any money can be charged.
           </p>
 
           <div className="flex justify-end gap-2">
@@ -610,11 +595,6 @@ export function MeetingRoomsScreen({
                     Charge
                   </button>
                 </div>
-                <p className="mt-1.5 text-xs leading-relaxed text-ink-faint">
-                  Posts to a folio like any other charge, so it reaches the
-                  cashier drawer and the financial report. Take the payment on
-                  the cashier screen.
-                </p>
               </div>
 
               <div className="border-t border-line pt-4">
@@ -687,10 +667,6 @@ export function MeetingRoomsScreen({
               />
             </div>
           </div>
-          <p className="text-xs leading-relaxed text-ink-faint">
-            A capacity is optional, but with one set a booking for more people
-            than the room seats is refused rather than quietly taken.
-          </p>
           <div className="flex justify-end gap-2">
             <button
               onClick={() => setNewRoom(null)}

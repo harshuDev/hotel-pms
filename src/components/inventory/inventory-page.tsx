@@ -25,7 +25,6 @@ export async function InventoryPage({
   searchParams,
   lockedToDefaultPlan = false,
   title,
-  subtitle,
 }: {
   fieldName: InventoryField;
   searchParams: Promise<{ plan?: string; from?: string }>;
@@ -33,7 +32,6 @@ export async function InventoryPage({
   lockedToDefaultPlan?: boolean;
   /** Two routes share the `rate` field and need different headings. */
   title?: string;
-  subtitle?: string;
 }) {
   const spec = SCREENS[fieldName];
   const sp = await searchParams;
@@ -71,7 +69,6 @@ export async function InventoryPage({
     <div>
       <PageHeader
         title={title ?? spec.title}
-        subtitle={subtitle ?? spec.subtitle}
       />
       <InventoryScreen
         fieldName={fieldName}

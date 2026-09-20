@@ -39,7 +39,7 @@ export default async function EndOfDayReportPage({
   } catch (error) {
     if (error instanceof ReportAccessError) {
       return (
-        <ReportShell title="End of day" subtitle="One date, as the audit left it">
+        <ReportShell title="End of day" >
           <ReportNoAccess />
         </ReportShell>
       );
@@ -52,7 +52,6 @@ export default async function EndOfDayReportPage({
   return (
     <ReportShell
       title="End of day"
-      subtitle={`The audit record for ${pretty}`}
       action="/reports/end-of-day"
       date={date}
     >
@@ -137,15 +136,6 @@ export default async function EndOfDayReportPage({
             </Panel>
           </div>
 
-          <p className="mt-4 text-xs leading-relaxed text-ink-faint">
-            Room revenue is the night&rsquo;s own rate less discount, taken from
-            the booking rather than the folio, so it is the same figure the
-            occupancy report shows. Money taken is every payment dated to this
-            business date, against any stay — so it will not equal the revenue
-            above, and is not meant to. Cash is whatever was taken on a method
-            that touches the drawer, which follows from the method&rsquo;s kind
-            and is never set by hand.
-          </p>
         </>
       )}
     </ReportShell>

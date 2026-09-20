@@ -13,7 +13,6 @@ export default async function DeparturesPage() {
     <div>
       <PageHeader
         title="Departures"
-        subtitle={`Due out on ${format(parseISO(today), "EEEE d MMMM yyyy")}`}
       />
       <BookingList
         rows={rows}

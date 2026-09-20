@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { cn } from "@/components/ui";
+import { RoomPhoto } from "@/components/settings/room-photo";
 import {
   createRooms,
   saveChannel,
@@ -16,6 +17,7 @@ import {
   saveStaffUser,
   saveTaxRate,
   saveRatePlan,
+  deleteRoom,
 } from "@/lib/actions/settings";
 import type {
   CalendarSeason,
@@ -367,12 +369,6 @@ export function SettingsScreen({
               />
             </div>
           </div>
-          <Note>
-            The timezone decides every business date this property computes, so
-            an unknown one is refused rather than stored. Changing the currency
-            does not restate money already posted — amounts are held in minor
-            units and only the symbol moves.
-          </Note>
           {canEdit && (
             <div className="mt-4 flex justify-end">
               <button
@@ -409,8 +405,7 @@ export function SettingsScreen({
 
             {roomTypes.length === 0 ? (
               <p className="py-6 text-center text-[13px] text-ink-muted">
-                None yet. A room type is what you sell — Double, Twin, Suite —
-                and rooms belong to one. Add these before anything else.
+                None yet. Add a room type before anything else.
               </p>
             ) : (
               <table className="w-full text-[13px]">
@@ -466,10 +461,6 @@ export function SettingsScreen({
                 </tbody>
               </table>
             )}
-            <Note>
-              A room type cannot be deleted once bookings reference it. Rename
-              it or stop selling it on the rate plan instead.
-            </Note>
           </div>
 
           {rt && (
@@ -614,13 +605,6 @@ export function SettingsScreen({
                   />
                 </div>
               </div>
-              <Note>
-                Rooms are made in runs because a property can run well over a
-                thousand of them. &ldquo;Double, floor 1, 101 to 120&rdquo;
-                makes twenty rooms, all vacant and clean. Up to 500 at a time,
-                and a run that would collide with a room that already exists is
-                refused by name before anything is written.
-              </Note>
               {canEdit && (
                 <div className="mt-4 flex items-center justify-between gap-3">
                   <p className="text-xs text-ink-faint">
@@ -707,7 +691,7 @@ export function SettingsScreen({
             <table className="w-full text-[13px]">
               <thead>
                 <tr className="border-b border-line text-left text-ink-faint">
-                  {["Room", "Floor", "Type", "Status", ""].map((c, i) => (
+                  {["", "Room", "Floor", "Type", "Status", ""].map((c, i) => (
                     <th
                       key={c || i}
                       className="whitespace-nowrap px-3 pb-2.5 text-xxs font-semibold uppercase tracking-[0.1em]"
@@ -720,6 +704,20 @@ export function SettingsScreen({
               <tbody className="divide-y divide-line">
                 {rooms.rows.map((r) => (
                   <tr key={r.id}>
+                    <td className="py-2 pl-3 pr-0">
+                      <span className="block h-9 w-12 overflow-hidden rounded border border-line bg-shell">
+                        {r.photoUrl && (
+                          /* eslint-disable-next-line @next/next/no-img-element --
+                             the bucket is a runtime host; next/image would want
+                             it in remotePatterns and a rebuild per property. */
+                          <img
+                            src={r.photoUrl}
+                            alt=""
+                            className="h-full w-full object-cover"
+                          />
+                        )}
+                      </span>
+                    </td>
                     <td className="tnum px-3 py-2.5 font-medium text-ink">
                       {r.number}
                     </td>
@@ -745,6 +743,35 @@ export function SettingsScreen({
                         >
                           Edit
                         </button>
+                      )}
+                      {canEdit && !r.hasBookings && (
+                        <button
+                          onClick={() => {
+                            if (
+                              !confirm(
+                                `Delete room ${r.number}? This cannot be undone.`,
+                              )
+                            ) {
+                              return;
+                            }
+                            run(
+                              () => deleteRoom(r.id),
+                              `Room ${r.number} deleted.`,
+                            );
+                          }}
+                          disabled={pending}
+                          className="ml-3 text-rose-600 underline-offset-2 hover:underline disabled:opacity-40"
+                        >
+                          Delete
+                        </button>
+                      )}
+                      {canEdit && r.hasBookings && (
+                        <span
+                          title="This room has bookings against it. Put it out of order instead."
+                          className="ml-3 text-ink-faint"
+                        >
+                          Booked
+                        </span>
                       )}
                     </td>
                   </tr>
@@ -777,13 +804,6 @@ export function SettingsScreen({
             </div>
           )}
 
-          <Note>
-            Paged in Postgres, because a property may hold well over a thousand
-            rooms. Status is changed where the work happens — the
-            housekeeping report and the house board — not here. A room
-            cannot be deleted: reservations point at it. Take one out of service
-            by setting it out of order.
-          </Note>
         </div>
 
         {room && (
@@ -826,11 +846,28 @@ export function SettingsScreen({
                 />
               </div>
             </div>
-            <Note>
-              Moving a room to another type leaves every booking alone: a
-              reservation records the type it was sold at, so nothing already
-              taken is re-priced or re-counted by the move.
-            </Note>
+            {room.id && (
+              <div className="mt-5 border-t border-line pt-4">
+                <span className={label}>Picture</span>
+                {/*
+                  Read off the list rather than held in the edit form's state:
+                  the upload refreshes the page, so the row is the fresher of
+                  the two and a copy in state would go stale the moment a
+                  picture changed.
+                */}
+                <RoomPhoto
+                  propertyId={property.id}
+                  roomId={room.id}
+                  roomNumber={room.number}
+                  photoUrl={
+                    rooms.rows.find((r) => r.id === room.id)?.photoUrl ?? null
+                  }
+                  photoPath={
+                    rooms.rows.find((r) => r.id === room.id)?.photoPath ?? null
+                  }
+                />
+              </div>
+            )}
             <div className="mt-4 flex gap-2">
               <button
                 onClick={() =>
@@ -892,8 +929,8 @@ export function SettingsScreen({
 
             {channels.length === 0 ? (
               <p className="rounded-md bg-warn-wash px-3 py-3 text-center text-[13px] leading-relaxed text-warn-deep">
-                None yet — and every booking must have one, so no booking can be
-                taken at all until there is. Add at least &ldquo;Direct&rdquo;.
+                None yet. Add at least &ldquo;Direct&rdquo; — a booking cannot
+                be taken without a source.
               </p>
             ) : (
               <table className="w-full text-[13px]">
@@ -945,11 +982,6 @@ export function SettingsScreen({
                 </tbody>
               </table>
             )}
-            <Note>
-              Commission is what the channel report works out as owed on the
-              room revenue. Nothing records it being invoiced or paid, so the
-              figure is what is owed, never a balance.
-            </Note>
           </div>
 
           {ch && (
@@ -1009,8 +1041,7 @@ export function SettingsScreen({
                     checked={ch.isActive}
                     onChange={(e) => setCh({ ...ch, isActive: e.target.checked })}
                   />
-                  Still selling. Turning this off stops new bookings from it and
-                  leaves the old ones alone.
+                  Still selling
                 </label>
               )}
               <div className="mt-4 flex justify-end gap-2">
@@ -1070,8 +1101,7 @@ export function SettingsScreen({
 
             {taxRates.length === 0 ? (
               <p className="py-6 text-center text-[13px] leading-relaxed text-ink-muted">
-                None yet. Without one, charges post with no tax at all — which
-                is right only if this property genuinely charges none.
+                None yet. Without one, charges post with no tax.
               </p>
             ) : (
               <table className="w-full text-[13px]">
@@ -1123,15 +1153,6 @@ export function SettingsScreen({
                 </tbody>
               </table>
             )}
-            <Note>
-              Tax on top means the rate you quote is before tax; tax included
-              means the guest&rsquo;s price already contains it, and the split
-              is worked out backwards. The difference on a £120 room is about
-              £20, so it is worth being sure. Once charges have been posted at a
-              rate, that rate can be renamed or retired but not moved — a folio
-              item records which rate it used, and changing it would restate
-              history.
-            </Note>
           </div>
 
           {tx && (
@@ -1233,8 +1254,7 @@ export function SettingsScreen({
 
             {seasons.length === 0 ? (
               <p className="py-6 text-center text-[13px] leading-relaxed text-ink-muted">
-                None yet. Name one and it appears as a band across the top of
-                the calendar for those dates.
+                None yet.
               </p>
             ) : (
               <table className="w-full text-[13px]">
@@ -1296,14 +1316,6 @@ export function SettingsScreen({
                 </tbody>
               </table>
             )}
-            <Note>
-              A season labels the calendar and changes no price. Rates are set
-              per plan, per room type, per night in Inventory, and nothing here
-              touches them — a season that quietly moved rates would be a second
-              price list nobody could see. Seasons cannot overlap: two bands
-              over one date has no sensible drawing. The last day is included,
-              so a season runs to the end of it.
-            </Note>
           </div>
 
           {sn && (
@@ -1400,9 +1412,7 @@ export function SettingsScreen({
 
             {ratePlans.length === 0 ? (
               <p className="text-[13px] text-ink-muted">
-                No rate plans yet. A hotel usually sells several — Room Only,
-                Bed and Breakfast, Non-refundable — and each is priced per room
-                type on the Rates screen.
+                No rate plans yet. Add one.
               </p>
             ) : (
               <div className="overflow-x-auto">
@@ -1613,8 +1623,7 @@ export function SettingsScreen({
 
             {paymentMethods.length === 0 ? (
               <p className="rounded-md bg-warn-wash px-3 py-3 text-center text-[13px] leading-relaxed text-warn-deep">
-                None yet — so the cashier cannot take a payment at all. Add
-                at least cash and card.
+                None yet. Add at least cash and card.
               </p>
             ) : (
               <table className="w-full text-[13px]">
@@ -1676,17 +1685,6 @@ export function SettingsScreen({
                 </tbody>
               </table>
             )}
-            <Note>
-              Whether a method takes physical cash follows from its kind and is
-              not a separate setting: cash does, nothing else does. That one
-              column is what the drawer total and every blind count are worked
-              out from, which is also why a method&rsquo;s kind is fixed once a
-              payment has come in through it — moving it across the cash
-              line afterwards would restate every shift already counted. A
-              method cannot be deleted, because payments point at it; retiring
-              one takes it off the cashier&rsquo;s list and leaves its history
-              intact.
-            </Note>
           </div>
 
           {pm && (
@@ -1815,17 +1813,9 @@ export function SettingsScreen({
           </table>
 
           <Note>
-            Deactivating somebody withdraws their access everywhere at once —
-            they resolve to no property and no role, so every table returns
-            nothing and every role-gated action refuses. Reinstating them
-            restores it.
-          </Note>
-          <Note>
             <strong className="font-medium text-ink">Adding a new login is not here.</strong>{" "}
-            A member of staff needs a Supabase Auth account before a row can
-            point at one, so creating one is an invite flow with its own
-            decisions about who may send it. For now a new person signs up or is
-            invited in Supabase, and then appears in this list.
+            A new member of staff is invited in Supabase Auth, and then
+            appears in this list.
           </Note>
         </div>
       )}

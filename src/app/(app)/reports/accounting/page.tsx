@@ -35,7 +35,7 @@ export default async function AccountingReportPage({
   } catch (error) {
     if (error instanceof ReportAccessError) {
       return (
-        <ReportShell title="Accounting" subtitle="Revenue and receipts for the ledger">
+        <ReportShell title="Accounting" >
           <ReportNoAccess />
         </ReportShell>
       );
@@ -54,7 +54,6 @@ export default async function AccountingReportPage({
   return (
     <ReportShell
       title="Accounting"
-      subtitle="Revenue by category and receipts by method, over one range"
       action="/reports/accounting"
       range={range}
     >
@@ -129,17 +128,6 @@ export default async function AccountingReportPage({
           emptyTitle="Nothing was collected in this range"
           emptyHint="Payments are dated to the business date they were taken on."
           footLabel={`${receipts.length} method${receipts.length === 1 ? "" : "s"}`}
-          note={
-            <>
-              These two totals are not meant to match. Revenue is what the hotel
-              earned in the range; receipts are what it collected in it, against
-              any stay. A guest who paid in March and left in April sits in one
-              table in one month and the other in the next. Tax is shown against
-              the revenue it belongs to and never as a category of its own, which
-              would double it in the total. A reversal reduces the line it
-              reverses rather than appearing separately.
-            </>
-          }
           columns={[
             {
               header: "Method",

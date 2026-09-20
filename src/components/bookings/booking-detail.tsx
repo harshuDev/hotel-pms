@@ -289,11 +289,6 @@ export function BookingDetailView({
                 onChange={(e) => setForm({ ...form, checkIn: e.target.value })}
                 className={cn(field, "tnum disabled:bg-shell disabled:text-ink-faint")}
               />
-              {detail.status === "checked_in" && (
-                <p className="mt-1 text-xxs text-ink-faint">
-                  The guest has arrived, so this is history.
-                </p>
-              )}
             </div>
             <div>
               <label htmlFor="e-out" className={label}>Departure</label>
@@ -383,19 +378,12 @@ export function BookingDetailView({
                 className="mt-0.5"
               />
               <span className="text-[13px] leading-relaxed text-warn-deep">
-                Extend anyway, overbooking the house. The calendar will show the
-                affected nights as a negative rather than hiding them.
+                Extend anyway, overbooking the house.
               </span>
             </label>
           )}
 
           <div className="mt-4 flex items-center justify-between gap-3">
-            <p className="text-xs leading-relaxed text-ink-faint">
-              Shortening the stay drops the nights that fall outside it — except
-              any the night audit has already charged, which stay and have to be
-              reversed on the folio if they should not stand. Nights added by an
-              extension come in unpriced.
-            </p>
             <button
               onClick={() =>
                 run(
@@ -563,11 +551,6 @@ export function BookingDetailView({
                     >
                       Apply
                     </button>
-                    <p className="text-xs leading-relaxed text-ink-faint">
-                      A night already charged to the folio keeps its rate: the
-                      folio is what the guest owes, and changing the night
-                      underneath it would put the two out of step.
-                    </p>
                   </div>
                 )}
 
@@ -646,7 +629,7 @@ export function BookingDetailView({
         </div>
         {folio.length === 0 ? (
           <p className="py-6 text-center text-[13px] text-ink-muted">
-            Nothing posted yet. Room charges land when the night audit runs.
+            Nothing posted yet.
           </p>
         ) : (
           <table className="w-full text-[13px]">
@@ -693,11 +676,6 @@ export function BookingDetailView({
             </tbody>
           </table>
         )}
-        <p className="mt-3 text-xs leading-relaxed text-ink-faint">
-          Charges and payments are append-only. A correction is its own row
-          pointing at what it reverses, never an edit, which is why a reversed
-          charge shows twice and nets to nothing.
-        </p>
       </div>
 
       {/* Activity ----------------------------------------------------- */}

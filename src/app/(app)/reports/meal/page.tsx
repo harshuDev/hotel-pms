@@ -49,7 +49,6 @@ export default async function MealReportPage({
   return (
     <ReportShell
       title="Meals"
-      subtitle="Covers to cater for, by the day they are eaten"
       action="/reports/meal"
       range={range}
     >
@@ -123,13 +122,6 @@ export default async function MealReportPage({
           </div>
         )}
 
-        <p className="mt-4 text-xs leading-relaxed text-ink-faint">
-          Breakfast is counted on the morning it is served, which is the day
-          after the night stayed — a guest leaving on Thursday eats Thursday
-          breakfast. Lunch and dinner fall on the night&rsquo;s own date.
-          Stays booked before the rate plan was recorded against them show no
-          meals, because nothing says what those rates included.
-        </p>
       </div>
     </ReportShell>
   );

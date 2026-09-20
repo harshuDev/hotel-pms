@@ -110,9 +110,7 @@ export function CloseDay({ businessDate }: { businessDate: string }) {
                   <p className="text-sm leading-relaxed text-ink-muted">
                     This posts tonight&rsquo;s room charge for every guest in
                     house, closes <span className="font-medium text-ink">{day}</span>,
-                    and opens the next day. It cannot be undone — a closed day
-                    stays closed, and the charges it posts are corrected by
-                    reversal, never deletion.
+                    and opens the next day. It cannot be undone.
                   </p>
                   <p className="text-xs leading-relaxed text-ink-faint">
                     Any confirmed booking that should have arrived by{" "}

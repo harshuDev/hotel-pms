@@ -25,7 +25,6 @@ export function ReportTable<T>({
   emptyTitle,
   emptyHint,
   footLabel,
-  note,
 }: {
   columns: ReportColumn<T>[];
   rows: T[];
@@ -35,7 +34,6 @@ export function ReportTable<T>({
   emptyHint: string;
   /** Sits in the first column of the footer, e.g. "12 bookings". */
   footLabel?: React.ReactNode;
-  note?: React.ReactNode;
 }) {
   const hasFoot = footLabel !== undefined || columns.some((c) => c.foot !== undefined);
 
@@ -44,64 +42,59 @@ export function ReportTable<T>({
       {rows.length === 0 ? (
         <EmptyState title={emptyTitle} hint={emptyHint} />
       ) : (
-        <>
-          <div className="overflow-x-auto">
-            <table className="w-full text-[13px]" style={{ minWidth }}>
-              <thead>
-                <tr className="border-b border-line text-left text-ink-faint">
+        <div className="overflow-x-auto">
+          <table className="w-full text-[13px]" style={{ minWidth }}>
+            <thead>
+              <tr className="border-b border-line text-left text-ink-faint">
+                {columns.map((c) => (
+                  <th
+                    key={c.header}
+                    className={cn(
+                      "whitespace-nowrap px-3 pb-2.5 text-xxs font-semibold uppercase tracking-[0.1em]",
+                      c.align === "right" && "text-right",
+                    )}
+                  >
+                    {c.header}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-line">
+              {rows.map((row) => (
+                <tr key={rowKey(row)} className="hover:bg-shell">
                   {columns.map((c) => (
-                    <th
+                    <td
                       key={c.header}
                       className={cn(
-                        "whitespace-nowrap px-3 pb-2.5 text-xxs font-semibold uppercase tracking-[0.1em]",
-                        c.align === "right" && "text-right",
+                        "px-3 py-2.5 align-top",
+                        c.align === "right" && "tnum whitespace-nowrap text-right",
                       )}
                     >
-                      {c.header}
-                    </th>
+                      {c.cell(row)}
+                    </td>
                   ))}
                 </tr>
-              </thead>
-              <tbody className="divide-y divide-line">
-                {rows.map((row) => (
-                  <tr key={rowKey(row)} className="hover:bg-shell">
-                    {columns.map((c) => (
-                      <td
-                        key={c.header}
-                        className={cn(
-                          "px-3 py-2.5 align-top",
-                          c.align === "right" && "tnum whitespace-nowrap text-right",
-                        )}
-                      >
-                        {c.cell(row)}
-                      </td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-              {hasFoot && (
-                <tfoot>
-                  <tr className="border-t border-line-strong">
-                    {columns.map((c, i) => (
-                      <td
-                        key={c.header}
-                        className={cn(
-                          "px-3 pt-3 font-semibold text-ink",
-                          c.align === "right" && "tnum whitespace-nowrap text-right",
-                        )}
-                      >
-                        {c.foot ?? (i === 0 ? footLabel : null)}
-                      </td>
-                    ))}
-                  </tr>
-                </tfoot>
-              )}
-            </table>
-          </div>
-          {note && (
-            <p className="mt-3 text-xs leading-relaxed text-ink-faint">{note}</p>
-          )}
-        </>
+              ))}
+            </tbody>
+            {hasFoot && (
+              <tfoot>
+                <tr className="border-t border-line-strong">
+                  {columns.map((c, i) => (
+                    <td
+                      key={c.header}
+                      className={cn(
+                        "px-3 pt-3 font-semibold text-ink",
+                        c.align === "right" && "tnum whitespace-nowrap text-right",
+                      )}
+                    >
+                      {c.foot ?? (i === 0 ? footLabel : null)}
+                    </td>
+                  ))}
+                </tr>
+              </tfoot>
+            )}
+          </table>
+        </div>
       )}
     </div>
   );

@@ -21,7 +21,6 @@ export default async function OffersPage() {
     <div>
       <PageHeader
         title="Offers"
-        subtitle="What comes off a stay, and who qualifies for it"
       />
       <PromotionsScreen
         promotions={promotions}

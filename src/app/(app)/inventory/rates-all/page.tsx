@@ -48,7 +48,6 @@ export default async function Page({
     <div>
       <PageHeader
         title="Rates (All)"
-        subtitle="Every rate the hotel sells, on every room type, per night"
       />
       <RatesScreen
         cells={cells}

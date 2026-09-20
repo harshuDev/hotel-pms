@@ -34,7 +34,6 @@ export default async function FinancialReportPage({
       return (
         <ReportShell
           title="Financial"
-          subtitle="Revenue posted and money received"
         >
           <ReportNoAccess />
         </ReportShell>
@@ -57,7 +56,6 @@ export default async function FinancialReportPage({
   return (
     <ReportShell
       title="Financial"
-      subtitle="Revenue posted and money received, business date by business date"
       action="/reports/financial"
       range={range}
     >
@@ -88,16 +86,6 @@ export default async function FinancialReportPage({
         emptyTitle="No days in this range"
         emptyHint="Widen the dates, or check that the range runs forwards."
         footLabel={`${rows.length} day${rows.length === 1 ? "" : "s"}`}
-        note={
-          <>
-            Revenue and money received are different numbers on purpose: a guest
-            can be charged on Monday and settle on Thursday, so only the totals
-            over a long enough range converge. Discounts are negative because a
-            discount posts as a reversing row against the charge it reduces, and
-            a reversal lands on the day it was made, not the day of the original.
-            Room revenue excludes tax; charged includes it.
-          </>
-        }
         columns={[
           {
             header: "Business date",

@@ -43,11 +43,19 @@ export function DateJump({
    */
   basePath,
   railW,
+  todayFrom,
 }: {
   from: string;
   businessDate: string;
   basePath: string;
   railW: number;
+  /**
+   * The date the board starts on for "today" -- which is a week before the
+   * business date, not the business date itself, since the board opens with
+   * some history to the left. Passed in rather than worked out here so this
+   * and the rail's own Today land in exactly the same place.
+   */
+  todayFrom: string;
 }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -181,7 +189,7 @@ export function DateJump({
 
           <button
             type="button"
-            onClick={() => go(today)}
+            onClick={() => go(parseISO(todayFrom))}
             className="mt-2 w-full rounded-md border border-line py-1.5 text-[12px] font-medium text-ink transition hover:bg-shell focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brass"
           >
             Today

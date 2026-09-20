@@ -32,7 +32,6 @@ export default async function OccupancyReportPage({
   return (
     <ReportShell
       title="Occupancy"
-      subtitle="Rooms sold, ADR and RevPAR, night by night"
       action="/reports/occupancy"
       range={range}
     >
@@ -122,12 +121,6 @@ export default async function OccupancyReportPage({
             </table>
           </div>
         )}
-        <p className="mt-3 text-xs leading-relaxed text-ink-faint">
-          Sellable is the number of rooms not currently out of order, so taking
-          a room out of service today changes the occupancy shown for past
-          nights too. ADR for the period is total revenue over total rooms
-          sold, which is not the same as averaging the nightly figures above.
-        </p>
       </div>
     </ReportShell>
   );

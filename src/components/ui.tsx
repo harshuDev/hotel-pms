@@ -104,25 +104,32 @@ export function EmptyState({ title, hint }: { title: string; hint?: string }) {
   );
 }
 
+/**
+ * A page's heading.
+ *
+ * THERE IS NO SUBTITLE, and the prop is gone rather than ignored. Every screen
+ * carried a line under its title describing what the screen was for -- "Who is
+ * in, by room type, night by night", "Rooms sold, ADR and RevPAR, night by
+ * night". The client read that copy, and the explanatory notes across the rest
+ * of the application, as leftover prompt text and asked for all of it gone.
+ * The reference system labels a screen and says nothing else.
+ *
+ * Removing the prop rather than dropping the markup is deliberate: it makes
+ * every call site a compile error, so none was missed, and nobody adds the
+ * thirty-second one back without noticing it was taken away on purpose.
+ */
 export function PageHeader({
   title,
-  subtitle,
   action,
 }: {
   title: string;
-  subtitle?: string;
   action?: ReactNode;
 }) {
   return (
     <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
-      <div>
-        <h1 className="font-display text-[26px] font-semibold tracking-tightest text-ink">
-          {title}
-        </h1>
-        {subtitle && (
-          <p className="mt-1 text-[13px] text-ink-muted">{subtitle}</p>
-        )}
-      </div>
+      <h1 className="font-display text-[26px] font-semibold tracking-tightest text-ink">
+        {title}
+      </h1>
       {action}
     </div>
   );

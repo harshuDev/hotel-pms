@@ -36,7 +36,7 @@ export default async function ManagerReportPage({
   } catch (error) {
     if (error instanceof ReportAccessError) {
       return (
-        <ReportShell title="Manager" subtitle="The house at a glance">
+        <ReportShell title="Manager" >
           <ReportNoAccess />
         </ReportShell>
       );
@@ -67,7 +67,6 @@ export default async function ManagerReportPage({
   return (
     <ReportShell
       title="Manager"
-      subtitle="Occupancy, rate and revenue for every date in the range"
       action="/reports/manager"
       range={range}
     >
@@ -98,16 +97,6 @@ export default async function ManagerReportPage({
         emptyTitle="Nothing happened in this range"
         emptyHint="Pick a range that covers dates the hotel has traded."
         footLabel={`${nights} night${nights === 1 ? "" : "s"}`}
-        note={
-          <>
-            Room revenue comes from the nights, not the folio, so a stay that
-            has not been charged yet still counts — which is why revenue and
-            payments do not agree and should not. Payments are what was
-            collected on the day, against any stay. ADR is revenue over rooms
-            sold; RevPAR is the same revenue over every room available, which is
-            why it is always the smaller of the two.
-          </>
-        }
         columns={[
           {
             header: "Date",

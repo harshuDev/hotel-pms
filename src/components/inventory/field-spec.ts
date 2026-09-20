@@ -9,7 +9,6 @@ import type { InventoryCell, InventoryField } from "@/lib/types";
  */
 export interface ScreenSpec {
   title: string;
-  subtitle: string;
   /** How the value is entered: a price, a night count, a cap, or a switch. */
   kind: "money" | "nights" | "count" | "flag";
   /** Rate plan fields are per plan; the other two apply whatever is sold. */
@@ -25,7 +24,6 @@ export interface ScreenSpec {
 export const SCREENS: Record<InventoryField, ScreenSpec> = {
   rate: {
     title: "Rates",
-    subtitle: "The price of one room, per night",
     kind: "money",
     needsPlan: true,
     read: (c) => c.rateCents,
@@ -34,7 +32,6 @@ export const SCREENS: Record<InventoryField, ScreenSpec> = {
   },
   min_stay_through: {
     title: "Min stay through",
-    subtitle: "Shortest stay that may cover a night",
     kind: "nights",
     needsPlan: true,
     read: (c) => c.minStayThrough,
@@ -43,7 +40,6 @@ export const SCREENS: Record<InventoryField, ScreenSpec> = {
   },
   min_stay_arrival: {
     title: "Min stay arrival",
-    subtitle: "Shortest stay that may start on a night",
     kind: "nights",
     needsPlan: true,
     read: (c) => c.minStayArrival,
@@ -52,7 +48,6 @@ export const SCREENS: Record<InventoryField, ScreenSpec> = {
   },
   max_stay: {
     title: "Max stay",
-    subtitle: "Longest stay that may cover a night",
     kind: "nights",
     needsPlan: true,
     read: (c) => c.maxStay,
@@ -61,7 +56,6 @@ export const SCREENS: Record<InventoryField, ScreenSpec> = {
   },
   closed_to_arrival: {
     title: "Closed to arrival",
-    subtitle: "Nights nobody may check in",
     kind: "flag",
     needsPlan: true,
     read: (c) => c.closedToArrival,
@@ -70,7 +64,6 @@ export const SCREENS: Record<InventoryField, ScreenSpec> = {
   },
   closed_to_departure: {
     title: "Closed to departure",
-    subtitle: "Nights nobody may check out",
     kind: "flag",
     needsPlan: true,
     read: (c) => c.closedToDeparture,
@@ -79,7 +72,6 @@ export const SCREENS: Record<InventoryField, ScreenSpec> = {
   },
   stop_sell: {
     title: "Stop sell",
-    subtitle: "Nights this rate plan is not sold",
     kind: "flag",
     needsPlan: true,
     read: (c) => c.stopSell,
@@ -88,7 +80,6 @@ export const SCREENS: Record<InventoryField, ScreenSpec> = {
   },
   allotment: {
     title: "Availability",
-    subtitle: "How many of each type may be sold a night",
     kind: "count",
     needsPlan: false,
     read: (c) => c.allotment,
@@ -97,7 +88,6 @@ export const SCREENS: Record<InventoryField, ScreenSpec> = {
   },
   close_out: {
     title: "Close out",
-    subtitle: "Nights a room type is not sold at all",
     kind: "flag",
     needsPlan: false,
     read: (c) => c.closeOut,

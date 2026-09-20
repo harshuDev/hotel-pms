@@ -250,9 +250,6 @@ export function CustomersScreen({
           <h1 className="font-display text-2xl font-semibold tracking-tightest text-ink">
             Customer Profiles
           </h1>
-          <p className="mt-1 text-[13px] text-ink-muted">
-            Here you can manage all your customers and their history
-          </p>
         </div>
         <div className="flex flex-wrap gap-2">
           <button
@@ -417,7 +414,7 @@ export function CustomersScreen({
           */}
           <fieldset className="mt-4 rounded-md border border-line bg-shell/50 p-3">
             <legend className="px-1 text-xxs font-semibold uppercase tracking-[0.1em] text-ink-faint">
-              Identity — for the immigration and country reports
+              Identity
             </legend>
             <div className="grid gap-3 sm:grid-cols-2">
               <div>
@@ -528,9 +525,8 @@ export function CustomersScreen({
             Merge {selectedRows.length} customers into one
           </h2>
           <p className="mt-1 text-[13px] leading-relaxed text-warn-deep">
-            Choose the record to keep. Every booking, folio and meeting room
-            booking on the others moves to it, and the others come off this
-            list. Nothing is deleted, and this cannot be undone from here.
+            Choose the record to keep. Everything on the others moves to it.
+            This cannot be undone from here.
           </p>
 
           <div className="mt-3 space-y-1.5">
