@@ -35,7 +35,7 @@ export default async function FolioReportPage({
   } catch (error) {
     if (error instanceof ReportAccessError) {
       return (
-        <ReportShell title="Folios" >
+        <ReportShell title="Folios">
           <ReportNoAccess />
         </ReportShell>
       );

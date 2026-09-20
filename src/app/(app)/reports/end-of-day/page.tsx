@@ -39,7 +39,7 @@ export default async function EndOfDayReportPage({
   } catch (error) {
     if (error instanceof ReportAccessError) {
       return (
-        <ReportShell title="End of day" >
+        <ReportShell title="End of day">
           <ReportNoAccess />
         </ReportShell>
       );

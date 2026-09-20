@@ -38,7 +38,7 @@ export default async function CountryReportPage({
   } catch (error) {
     if (error instanceof ReportAccessError) {
       return (
-        <ReportShell title="Countries" >
+        <ReportShell title="Countries">
           <ReportNoAccess />
         </ReportShell>
       );

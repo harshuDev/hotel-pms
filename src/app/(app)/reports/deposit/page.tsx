@@ -27,7 +27,7 @@ export default async function DepositReportPage() {
   } catch (error) {
     if (error instanceof ReportAccessError) {
       return (
-        <ReportShell title="Deposits" >
+        <ReportShell title="Deposits">
           <ReportNoAccess />
         </ReportShell>
       );

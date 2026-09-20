@@ -40,7 +40,7 @@ export default async function ExtrasReportPage({
   } catch (error) {
     if (error instanceof ReportAccessError) {
       return (
-        <ReportShell title="Extras" >
+        <ReportShell title="Extras">
           <ReportNoAccess />
         </ReportShell>
       );

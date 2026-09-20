@@ -36,7 +36,7 @@ export default async function ManagerReportPage({
   } catch (error) {
     if (error instanceof ReportAccessError) {
       return (
-        <ReportShell title="Manager" >
+        <ReportShell title="Manager">
           <ReportNoAccess />
         </ReportShell>
       );

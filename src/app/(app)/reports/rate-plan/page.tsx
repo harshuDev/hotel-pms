@@ -30,7 +30,7 @@ export default async function RatePlanReportPage({
   } catch (error) {
     if (error instanceof ReportAccessError) {
       return (
-        <ReportShell title="Rate plans" >
+        <ReportShell title="Rate plans">
           <ReportNoAccess />
         </ReportShell>
       );

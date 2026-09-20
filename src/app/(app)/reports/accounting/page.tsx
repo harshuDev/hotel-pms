@@ -35,7 +35,7 @@ export default async function AccountingReportPage({
   } catch (error) {
     if (error instanceof ReportAccessError) {
       return (
-        <ReportShell title="Accounting" >
+        <ReportShell title="Accounting">
           <ReportNoAccess />
         </ReportShell>
       );
