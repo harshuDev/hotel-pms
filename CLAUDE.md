@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0058` are
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0059` are
 applied to the hosted database.
 
 Working on real data: dashboard (house board, movements, pace, activity feed),
@@ -302,6 +302,18 @@ the component.
 - All operational reporting groups by `business_date`.
 - Property timezone lives on `properties.timezone`. Never derive a business
   date from server local time or `now()::date`.
+- **A `timestamptz` is rendered by `formatStampInProperty()` in
+  `src/lib/dates.ts`, never by `format()` from date-fns.** date-fns renders in
+  the RUNTIME's zone, and a client component is rendered twice — once on the
+  server (UTC on Vercel) and once in the browser — so one row came out
+  "20 Sep, 11:18" and "20 Sep, 12:18" and React reported a hydration mismatch.
+  Neither was the hotel's clock either. The helper names the zone, which makes
+  the two renders identical and the time the one the front desk would read off
+  the wall. Its month names and hour cycle are pinned rather than left to
+  `Intl`, because Node's ICU and the browser's disagree about "Sep"/"Sept" and
+  about midnight under `hour12: false` — leaving either to the platform would
+  put the mismatch straight back. A plain `date` column is not affected and
+  `format()` is still right for one.
 
 **Schema**
 

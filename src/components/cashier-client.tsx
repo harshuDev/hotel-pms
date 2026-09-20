@@ -4,7 +4,7 @@ import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { format, parseISO } from "date-fns";
 import { Card, cn } from "@/components/ui";
-import { formatMoney, parseMoney } from "@/lib/money";
+import { formatMoney, formatMoneyInput, parseMoney } from "@/lib/money";
 import {
   closeShift,
   openShift,
@@ -352,7 +352,7 @@ function OpenShiftPanel({
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [float, setFloat] = useState(
-    suggestedFloatCents === null ? "" : String(suggestedFloatCents / 100),
+    suggestedFloatCents === null ? "" : formatMoneyInput(suggestedFloatCents),
   );
   const [error, setError] = useState("");
 
@@ -562,7 +562,7 @@ function PaymentModal({
           />
           {booking && (
             <button
-              onClick={() => setAmount(String(booking.balanceCents / 100))}
+              onClick={() => setAmount(formatMoneyInput(booking.balanceCents))}
               className="mt-1.5 text-xxs text-brass hover:underline"
             >
               Use full balance

@@ -22,6 +22,7 @@ import {
   getCalendarSeasons,
   getChannels,
   getCurrentStaffUser,
+  getProperty,
   getRatePlans,
   getRoomStatusByType,
   getTaxRates,
@@ -88,7 +89,7 @@ export default async function CalendarPage({
   // bars answer "who is in, and when"; neither is the other. Cancelled rooms
   // come back separately because they belong in their own row, not among the
   // live ones where they would read as sold.
-  const [cells, rooms, roomBars, canceledBars, seasons, status, notes] =
+  const [cells, rooms, roomBars, canceledBars, seasons, status, notes, property] =
     await Promise.all([
     getCalendarAvailability(from, days),
     // The rail. Every room, grouped by type in Postgres.
@@ -101,6 +102,9 @@ export default async function CalendarPage({
     getRoomStatusByType(),
     // Day notes for the window, one call for the whole board.
     getCalendarNotes(from, days),
+    // Free: cache()d, and the app layout has already called it in this same
+    // request. It carries the timezone a note's posting time is rendered on.
+    getProperty(),
   ]);
 
   const dates = Array.from({ length: days }, (_, i) =>
@@ -308,6 +312,7 @@ export default async function CalendarPage({
             noteDate={noteDate}
             notes={notesByDate.get(noteDate) ?? []}
             closeHref={href(from, railW)}
+            timezone={property.timezone}
             canEdit={noteStaff === null || CAN_BOOK.includes(noteStaff.role)}
           />
         </BookingDialog>
