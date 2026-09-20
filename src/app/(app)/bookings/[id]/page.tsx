@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
-import Link from "next/link";
 import { BookingDetailView } from "@/components/bookings/booking-detail";
+import { getCustomerForEdit } from "@/lib/actions/customers";
 import {
   getBookingActivity,
   getBookingDetail,
@@ -15,12 +15,34 @@ export const metadata = { title: "Booking" };
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
+/**
+ * Where "back" goes, from `?back=`.
+ *
+ * The calendar sends the board's own URL so a receptionist who opened a
+ * booking from it returns to the same dates and rail width rather than to a
+ * board reset to today.
+ *
+ * ONLY A PATH ON THIS SITE IS ACCEPTED. The value arrives in a URL and ends up
+ * in an href, so anything not starting with a single "/" is dropped — a
+ * protocol-relative "//evil.example" is a link off this site wearing a path's
+ * clothes.
+ */
+function backTarget(back: string | undefined) {
+  if (back && back.startsWith("/") && !back.startsWith("//")) {
+    return { href: back, label: back.startsWith("/calendar") ? "Calendar" : "Back" };
+  }
+  return { href: "/bookings", label: "All bookings" };
+}
+
 export default async function BookingPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ back?: string }>;
 }) {
   const { id } = await params;
+  const sp = await searchParams;
 
   // A malformed id would reach Postgres as a cast error rather than a miss.
   if (!UUID.test(id)) notFound();
@@ -28,35 +50,37 @@ export default async function BookingPage({
   const detail = await getBookingDetail(id);
   if (!detail) notFound();
 
-  const [rooms, nights, folio, activity, channels, staff] = await Promise.all([
-    getBookingRoomLines(id),
-    getBookingNights(id),
-    getBookingFolioLines(id),
-    getBookingActivity(id),
-    getChannels(),
-    getCurrentStaffUser(),
-  ]);
+  const [rooms, nights, folio, activity, channels, staff, guest] =
+    await Promise.all([
+      getBookingRoomLines(id),
+      getBookingNights(id),
+      getBookingFolioLines(id),
+      getBookingActivity(id),
+      getChannels(),
+      getCurrentStaffUser(),
+      // The existing guest read, reused rather than a second one written. It
+      // returns a Result, so a refusal leaves the tab saying so instead of
+      // taking the whole page down with it.
+      getCustomerForEdit(detail.customerId),
+    ]);
+
+  const back = backTarget(sp.back);
 
   return (
-    <div>
-      <Link
-        href="/bookings"
-        className="mb-3 inline-block text-[13px] text-ink-muted underline-offset-2 hover:text-ink hover:underline"
-      >
-        ← All bookings
-      </Link>
-      <BookingDetailView
-        detail={detail}
-        rooms={rooms}
-        nights={nights}
-        folio={folio}
-        activity={activity}
-        channels={channels}
-        canEdit={
-          staff !== null &&
-          ["admin", "manager", "front_desk"].includes(staff.role)
-        }
-      />
-    </div>
+    <BookingDetailView
+      detail={detail}
+      rooms={rooms}
+      nights={nights}
+      folio={folio}
+      activity={activity}
+      channels={channels}
+      guest={guest.ok ? guest.data : null}
+      backHref={back.href}
+      backLabel={back.label}
+      canEdit={
+        staff !== null &&
+        ["admin", "manager", "front_desk"].includes(staff.role)
+      }
+    />
   );
 }

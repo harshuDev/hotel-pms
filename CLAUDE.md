@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0056` are
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0057` are
 applied to the hosted database.
 
 Working on real data: dashboard (house board, movements, pace, activity feed),
@@ -830,6 +830,44 @@ anywhere else. Collapsed height must stay constant regardless of room count.
   (`BK-000123`). A channel's reference goes in `external_reference`.
 - No room is assigned when a booking is taken. `assign_room()` does that, at
   check-in.
+- **The booking screen is five tabs: Rooms, Extras, Guests, Folio, History**,
+  which are the areas the client's reference PMS organises a reservation into.
+  The header above them carries the reference, status, guest, dates, nights,
+  party size, room count, source, settlement, channel reference, reservation
+  value, balance and notes — that was already there and did not move.
+  - **EXTRAS ARE NOT A NEW THING AND HAVE NO TABLE.** An extra is a folio item
+    that is not the room, which `folio_item_type` has expressed since 0002 and
+    `extras_report()` has read since 0038. 0057 adds `item_type` to
+    `booking_folio_lines()` — `effective_item_type`, per the reports rule, so a
+    reversal and a discount land in the bucket they affect — and the tab
+    filters the lines the Folio tab already holds by the report's own rule,
+    `not in ('room_charge', 'tax', 'discount')`.
+  - **The extras total is a column sum over those same rows**, not a second
+    set of books. Deriving rather than fetching is what stops this screen and
+    the folio balance ever disagreeing. Do not give extras their own read, own
+    total, or own table.
+  - **The Guests tab shows ONE guest, because that is all there is.**
+    `bookings.customer_id` is a single row and `booking_rooms` carries adults
+    and children as counts with no names against them. So the tab shows the
+    customer — contact plus the 0050 identity fields, nationality and country
+    kept separate — and occupancy per room. It cannot name the second occupant
+    of 101 and must not pretend to. It reuses `getCustomerForEdit()`.
+  - **A bar on the calendar carries `?back=` with the board's own URL**, so
+    opening a booking and coming back lands on the same dates and rail width
+    rather than a board reset to today. The page accepts only a path beginning
+    with a single `/` — the value reaches an href, and `//evil.example` is a
+    link off this site wearing a path's clothes. Every other way in (the
+    bookings list, search, the reports) sends no `back` and falls back to
+    "All bookings".
+  - **Clicking a bar still navigates to `/bookings/[id]`.** That page IS the
+    reservation workflow; a second, smaller copy inside a dialog is the thing
+    this codebase keeps refusing to build, for the same reason the calendar's
+    booking dialog wraps the real form rather than a reduced one.
+- **`bookings.external_payload` is empty on every row and nothing fills it.**
+  OTA bookings are entered by hand (open decision 2), so the channel's raw
+  payload never arrives. The screen shows the source, the settlement and
+  `external_reference` when present, and does not build a viewer for a column
+  that has never held anything.
 - **Changing a booking never touches posted money.** `update_booking()`
   refuses to drop a night the night audit has already charged, and
   `set_booking_room_rate()` leaves a charged night's rate alone. The folio is

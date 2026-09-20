@@ -20,9 +20,66 @@ import type {
   BookingNight,
   BookingRoomLine,
   Channel,
+  FolioItemType,
   FolioLine,
   Settlement,
 } from "@/lib/types";
+import { COUNTRIES } from "@/lib/countries";
+
+/**
+ * The guest record behind the booking, as `customer_for_edit()` returns it.
+ *
+ * ONE CUSTOMER, NOT A GUEST LIST. `bookings.customer_id` is a single row and
+ * `booking_rooms` carries adults and children as COUNTS with no names against
+ * them. So the Guests tab shows who the booking belongs to and how many people
+ * are in each room -- it cannot name the second and third occupant, because
+ * nothing in this schema records them.
+ */
+export interface BookingGuest {
+  id: string;
+  firstName: string;
+  lastName: string;
+  companyName: string;
+  email: string;
+  phone: string;
+  nationality: string;
+  country: string;
+  passportNumber: string;
+  passportExpiry: string;
+  dateOfBirth: string;
+  nationalIdNumber: string;
+}
+
+/**
+ * What counts as an extra, taken from the rule the reports already use:
+ * `effective_item_type not in ('room_charge', 'tax', 'discount')`.
+ *
+ * Reused rather than restated. If this screen had its own idea of an extra it
+ * would disagree with the Extras report the first time somebody added an item
+ * type, and the two would have to be found and reconciled by hand.
+ */
+const NOT_AN_EXTRA: FolioItemType[] = ["room_charge", "tax", "discount"];
+
+/** The extras a folio holds, in the words a guest would read on the bill. */
+const EXTRA_LABEL: Partial<Record<FolioItemType, string>> = {
+  food_beverage: "Food & beverage",
+  laundry: "Laundry",
+  minibar: "Minibar",
+  transport: "Transport",
+  miscellaneous: "Miscellaneous",
+  adjustment: "Adjustment",
+  reversal: "Reversal",
+};
+
+const TABS = [
+  { id: "rooms", label: "Rooms" },
+  { id: "extras", label: "Extras" },
+  { id: "guests", label: "Guests" },
+  { id: "folio", label: "Folio" },
+  { id: "history", label: "History" },
+] as const;
+
+type Tab = (typeof TABS)[number]["id"];
 
 const label =
   "mb-1 block text-xxs font-semibold uppercase tracking-[0.1em] text-ink-faint";
@@ -52,6 +109,9 @@ export function BookingDetailView({
   activity,
   channels,
   canEdit,
+  guest,
+  backHref,
+  backLabel,
 }: {
   detail: Detail;
   rooms: BookingRoomLine[];
@@ -60,11 +120,17 @@ export function BookingDetailView({
   activity: BookingActivityItem[];
   channels: Channel[];
   canEdit: boolean;
+  /** Null when the guest record could not be read; the tab then says so. */
+  guest: BookingGuest | null;
+  /** Where "back" goes — the calendar the booking was opened from, or the list. */
+  backHref: string;
+  backLabel: string;
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
   const [block, setBlock] = useState<"overbook" | null>(null);
+  const [tab, setTab] = useState<Tab>("rooms");
 
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState({
@@ -86,6 +152,22 @@ export function BookingDetailView({
 
   const [pricing, setPricing] = useState<string | null>(null);
   const [newRate, setNewRate] = useState("");
+
+  /*
+   * The extras, derived from the folio rather than read separately.
+   *
+   * These are the same rows the Folio tab draws, filtered by the rule the
+   * Extras report already uses. Deriving rather than fetching is what keeps
+   * requirement 7 true: there is one set of money on this screen, looked at
+   * two ways, so the two can never disagree.
+   */
+  const extras = folio.filter(
+    (l) =>
+      l.kind === "charge" &&
+      l.itemType !== null &&
+      !NOT_AN_EXTRA.includes(l.itemType),
+  );
+  const extrasCents = extras.reduce((sum, l) => sum + l.amountCents, 0);
 
   const settled = detail.balanceCents === 0;
   const unpriced = nights.filter((n) => n.roomRateCents === 0);
@@ -134,6 +216,18 @@ export function BookingDetailView({
 
   return (
     <div className="space-y-3">
+      {/*
+        Back to wherever this was opened from. A booking reached from the
+        board returns to the board on the same dates and rail width, so the
+        calendar is where it was left rather than reset to today.
+      */}
+      <Link
+        href={backHref}
+        className="inline-block text-[13px] text-ink-muted underline-offset-2 hover:text-ink hover:underline"
+      >
+        ← {backLabel}
+      </Link>
+
       {/* Header ------------------------------------------------------- */}
       <div className="rounded-lg border border-line bg-white p-5 shadow-card">
         <div className="flex flex-wrap items-start justify-between gap-4">
@@ -472,7 +566,36 @@ export function BookingDetailView({
         </div>
       )}
 
+      {/*
+        The areas the reference PMS puts a reservation into. Rooms, Extras and
+        Guests are what the client named; Folio and History were already here
+        as their own cards and join the same strip rather than sitting below it,
+        so the screen is one thing to scroll instead of five.
+      */}
+      <div className="flex flex-wrap gap-1 rounded-lg border border-line bg-white p-1.5 shadow-card">
+        {TABS.map((t) => (
+          <button
+            key={t.id}
+            type="button"
+            onClick={() => setTab(t.id)}
+            aria-current={tab === t.id ? "page" : undefined}
+            className={cn(
+              "rounded-md px-3.5 py-1.5 text-[13px] font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brass",
+              tab === t.id
+                ? "bg-chrome-800 text-white"
+                : "text-ink-muted hover:bg-shell hover:text-ink",
+            )}
+          >
+            {t.label}
+            {t.id === "extras" && extras.length > 0 && (
+              <span className="tnum ml-1.5 text-xxs opacity-70">{extras.length}</span>
+            )}
+          </button>
+        ))}
+      </div>
+
       {/* Rooms and nights --------------------------------------------- */}
+      {tab === "rooms" && (
       <div className="rounded-lg border border-line bg-white p-5 shadow-card">
         <h2 className="mb-4 font-display text-[15px] font-semibold tracking-tightest text-ink">
           Rooms
@@ -614,7 +737,175 @@ export function BookingDetailView({
         )}
       </div>
 
+      )}
+
+      {/* Extras ------------------------------------------------------- */}
+      {tab === "extras" && (
+        <div className="rounded-lg border border-line bg-white p-5 shadow-card">
+          <h2 className="mb-4 font-display text-[15px] font-semibold tracking-tightest text-ink">
+            Extras
+          </h2>
+          {extras.length === 0 ? (
+            <p className="py-6 text-center text-[13px] text-ink-muted">
+              Nothing charged beyond the room. Post an extra from the cashier.
+            </p>
+          ) : (
+            <table className="w-full text-[13px]">
+              <thead>
+                <tr className="border-b border-line text-left text-ink-faint">
+                  {["Business date", "Type", "What", "Amount"].map((c, i) => (
+                    <th
+                      key={c}
+                      className={cn(
+                        "whitespace-nowrap px-3 pb-2.5 text-xxs font-semibold uppercase tracking-[0.1em]",
+                        i === 3 && "text-right",
+                      )}
+                    >
+                      {c}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-line">
+                {extras.map((l) => (
+                  <tr key={l.lineId}>
+                    <td className="whitespace-nowrap px-3 py-2.5 text-ink-muted">
+                      {format(parseISO(l.businessDate), "d MMM")}
+                    </td>
+                    <td className="px-3 py-2.5 text-ink-muted">
+                      {(l.itemType && EXTRA_LABEL[l.itemType]) ?? l.itemType}
+                    </td>
+                    <td className="px-3 py-2.5 text-ink">
+                      {l.description}
+                      {l.isReversal && (
+                        <span className="ml-2 text-xxs text-warn-deep">reversed</span>
+                      )}
+                    </td>
+                    <td
+                      className={cn(
+                        "tnum whitespace-nowrap px-3 py-2.5 text-right font-medium",
+                        l.isReversal ? "text-warn-deep" : "text-ink",
+                      )}
+                    >
+                      {formatMoney(l.amountCents)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+              {/*
+                The same folio lines, added up. Not a second set of books: it
+                is a column total over rows the Folio tab also shows, so it
+                cannot disagree with the balance in the header.
+              */}
+              <tfoot>
+                <tr className="border-t border-line-strong">
+                  <td className="px-3 pt-3 font-semibold text-ink" colSpan={3}>
+                    Extras charged
+                  </td>
+                  <td className="tnum whitespace-nowrap px-3 pt-3 text-right font-semibold text-ink">
+                    {formatMoney(extrasCents)}
+                  </td>
+                </tr>
+              </tfoot>
+            </table>
+          )}
+        </div>
+      )}
+
+      {/* Guests ------------------------------------------------------- */}
+      {tab === "guests" && (
+        <div className="rounded-lg border border-line bg-white p-5 shadow-card">
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="font-display text-[15px] font-semibold tracking-tightest text-ink">
+              Guests
+            </h2>
+            <Link
+              href={`/customers?q=${encodeURIComponent(detail.customerName)}`}
+              className="text-[13px] text-ink-muted underline-offset-2 hover:text-ink hover:underline"
+            >
+              Open in Customers
+            </Link>
+          </div>
+
+          {guest === null ? (
+            <p className="py-6 text-center text-[13px] text-ink-muted">
+              The guest record could not be read.
+            </p>
+          ) : (
+            <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-4">
+              <Fact name="Name">{detail.customerName}</Fact>
+              {guest.companyName && <Fact name="Company">{guest.companyName}</Fact>}
+              <Fact name="Email">{guest.email || "—"}</Fact>
+              <Fact name="Phone">{guest.phone || "—"}</Fact>
+              <Fact name="Nationality">
+                {COUNTRIES.find((c) => c.code === guest.nationality)?.name ??
+                  guest.nationality ??
+                  "—"}
+              </Fact>
+              <Fact name="Country">
+                {COUNTRIES.find((c) => c.code === guest.country)?.name ??
+                  guest.country ??
+                  "—"}
+              </Fact>
+              <Fact name="Passport">{guest.passportNumber || "—"}</Fact>
+              <Fact name="Passport expiry">
+                {guest.passportExpiry
+                  ? format(parseISO(guest.passportExpiry), "d MMM yyyy")
+                  : "—"}
+              </Fact>
+              <Fact name="Date of birth">
+                {guest.dateOfBirth
+                  ? format(parseISO(guest.dateOfBirth), "d MMM yyyy")
+                  : "—"}
+              </Fact>
+              {guest.nationalIdNumber && (
+                <Fact name="National ID">{guest.nationalIdNumber}</Fact>
+              )}
+            </div>
+          )}
+
+          {/*
+            Occupancy per room. This is as close to a guest list as the schema
+            gets: `booking_rooms` counts adults and children and records no
+            names, so the second occupant of 101 is a number here and nowhere
+            a name.
+          */}
+          <div className="mt-5 border-t border-line pt-4">
+            <table className="w-full text-[13px]">
+              <thead>
+                <tr className="border-b border-line text-left text-ink-faint">
+                  {["Room", "Room type", "Adults", "Children"].map((c, i) => (
+                    <th
+                      key={c}
+                      className={cn(
+                        "whitespace-nowrap px-3 pb-2.5 text-xxs font-semibold uppercase tracking-[0.1em]",
+                        i > 1 && "text-right",
+                      )}
+                    >
+                      {c}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-line">
+                {rooms.map((r) => (
+                  <tr key={r.bookingRoomId}>
+                    <td className="tnum px-3 py-2.5 font-medium text-ink">
+                      {r.roomNumber ?? "Not assigned"}
+                    </td>
+                    <td className="px-3 py-2.5 text-ink-muted">{r.roomTypeName}</td>
+                    <td className="tnum px-3 py-2.5 text-right text-ink">{r.adults}</td>
+                    <td className="tnum px-3 py-2.5 text-right text-ink">{r.children}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
       {/* Folio -------------------------------------------------------- */}
+      {tab === "folio" && (
       <div className="rounded-lg border border-line bg-white p-5 shadow-card">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="font-display text-[15px] font-semibold tracking-tightest text-ink">
@@ -678,7 +969,10 @@ export function BookingDetailView({
         )}
       </div>
 
+      )}
+
       {/* Activity ----------------------------------------------------- */}
+      {tab === "history" && (
       <div className="rounded-lg border border-line bg-white p-5 shadow-card">
         <h2 className="mb-4 font-display text-[15px] font-semibold tracking-tightest text-ink">
           History
@@ -699,6 +993,7 @@ export function BookingDetailView({
           </ul>
         )}
       </div>
+      )}
     </div>
   );
 }
