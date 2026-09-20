@@ -8,7 +8,8 @@ import {
 import { BookingDialog } from "@/components/calendar/booking-dialog";
 import { NewBookingForm } from "@/components/bookings/new-booking-form";
 import { NoteForm } from "@/components/calendar/note-form";
-import { BookingPeek } from "@/components/calendar/booking-peek";
+import { BookingDetailView } from "@/components/bookings/booking-detail";
+import { getCustomerForEdit } from "@/lib/actions/customers";
 import {
   CALENDAR_LOOKBACK,
   CALENDAR_MAX_BARS_PER_TYPE,
@@ -21,6 +22,9 @@ import {
   getBookingDetail,
   getBookingRoomLines,
   getBookingCancellationTerms,
+  getBookingNights,
+  getBookingFolioLines,
+  getBookingActivity,
   getCalendarRoomBars,
   getCalendarRooms,
   getCalendarSeasons,
@@ -225,15 +229,28 @@ export default async function CalendarPage({
     ? await (async () => {
         const d = await getBookingDetail(peekId);
         if (!d) return null;
-        const [lines, terms] = await Promise.all([
-          getBookingRoomLines(peekId),
-          getBookingCancellationTerms(peekId),
-        ]);
-        return { detail: d, rooms: lines, terms };
+        /*
+         * The SAME reads `/bookings/[id]` makes, because what opens is the
+         * same component. Loaded only when the dialog is actually opening, so
+         * an ordinary visit to the board costs none of them.
+         */
+        const [lines, nights, folio, activity, channels, terms, guest] =
+          await Promise.all([
+            getBookingRoomLines(peekId),
+            getBookingNights(peekId),
+            getBookingFolioLines(peekId),
+            getBookingActivity(peekId),
+            getChannels(),
+            getBookingCancellationTerms(peekId),
+            getCustomerForEdit(d.customerId),
+          ]);
+        return { detail: d, lines, nights, folio, activity, channels, terms, guest };
       })()
     : null;
 
-  const staff = bookDate || noteDate ? await getCurrentStaffUser() : null;
+  const staff = bookDate || noteDate || peekId ? await getCurrentStaffUser() : null;
+  /* Named apart so the booking dialog's own gate reads for itself. */
+  const peekStaff = peekId ? staff : null;
   const noteStaff = noteDate ? staff : null;
   const mayBook = !staff || CAN_BOOK.includes(staff.role);
   const openBooking = Boolean(bookDate) && mayBook;
@@ -352,15 +369,36 @@ export default async function CalendarPage({
       */}
       {peek && (
         <BookingDialog
-          title={peek.detail.customerName}
-          subtitle={peek.detail.reference}
+          /* Their popup titles itself with the reference and the channel's
+             own booking number, which is what somebody matching an OTA email
+             against the board is holding. */
+          title={peek.detail.reference}
+          subtitle={
+            peek.detail.externalReference
+              ? `${peek.detail.channelName ?? "Channel"} booking ${peek.detail.externalReference}`
+              : (peek.detail.channelName ?? peek.detail.customerName)
+          }
           closeHref={href(from, railW)}
+          closeLabel="Close the booking"
+          wide
         >
-          <BookingPeek
+          <BookingDetailView
             detail={peek.detail}
-            rooms={peek.rooms}
+            rooms={peek.lines}
+            nights={peek.nights}
+            folio={peek.folio}
+            activity={peek.activity}
+            channels={peek.channels}
+            guest={peek.guest.ok ? peek.guest.data : null}
             cancellationTerms={peek.terms}
-            fullHref={`/bookings/${peek.detail.bookingId}?back=${encodeURIComponent(href(from, railW))}`}
+            timezone={property.timezone}
+            backHref={href(from, railW)}
+            backLabel="Back to the calendar"
+            inDialog
+            canEdit={
+              peekStaff !== null &&
+              ["admin", "manager", "front_desk"].includes(peekStaff.role)
+            }
           />
         </BookingDialog>
       )}

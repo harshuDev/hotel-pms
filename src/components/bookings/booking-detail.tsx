@@ -115,6 +115,7 @@ export function BookingDetailView({
   guest,
   cancellationTerms,
   timezone,
+  inDialog = false,
   backHref,
   backLabel,
 }: {
@@ -139,6 +140,16 @@ export function BookingDetailView({
   /** Where "back" goes — the calendar the booking was opened from, or the list. */
   backHref: string;
   backLabel: string;
+  /**
+   * Rendered inside the calendar's dialog rather than as its own page.
+   *
+   * The dialog carries its own title bar and close button, so the back link
+   * and the big reference heading would each be saying a second time what the
+   * frame already says. Nothing else changes: it is the SAME component, which
+   * is the whole point — a reduced copy of this screen is what this codebase
+   * has refused to build three times.
+   */
+  inDialog?: boolean;
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -245,21 +256,25 @@ export function BookingDetailView({
         board returns to the board on the same dates and rail width, so the
         calendar is where it was left rather than reset to today.
       */}
-      <Link
-        href={backHref}
-        className="inline-block text-[13px] text-ink-muted underline-offset-2 hover:text-ink hover:underline"
-      >
-        ← {backLabel}
-      </Link>
+      {!inDialog && (
+        <Link
+          href={backHref}
+          className="inline-block text-[13px] text-ink-muted underline-offset-2 hover:text-ink hover:underline"
+        >
+          ← {backLabel}
+        </Link>
+      )}
 
       {/* Header ------------------------------------------------------- */}
       <div className="rounded-lg border border-line bg-white p-5 shadow-card">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <div className="flex items-center gap-3">
-              <h1 className="font-display text-2xl font-semibold tracking-tightest text-ink">
-                {detail.reference}
-              </h1>
+              {!inDialog && (
+                <h1 className="font-display text-2xl font-semibold tracking-tightest text-ink">
+                  {detail.reference}
+                </h1>
+              )}
               <StatusBadge status={detail.status} />
             </div>
             <p className="mt-1 text-[13px] text-ink-muted">

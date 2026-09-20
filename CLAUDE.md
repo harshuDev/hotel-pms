@@ -1015,15 +1015,24 @@ anywhere else. Collapsed height must stay constant regardless of room count.
     popup hota hai uski puri details ke sath" — and they are right that
     navigating away to read a reference and a balance costs you the dates and
     rail width you were looking at.
-    - `src/components/calendar/booking-peek.tsx`, opened by `?booking=<id>`,
-      URL state like the other two dialogs.
-    - **IT READS AND DOES NOT EDIT, and that is the whole design.**
-      `/bookings/[id]` is still the reservation workflow — the five tabs,
-      editing, payments, cancelling — and the popup links to it for anything
-      that writes. A second EDITOR is still the thing this codebase refuses to
-      build; a read-only panel is not one.
-    - Every figure comes from `booking_detail()` and `booking_room_lines()`,
-      the same reads the full screen uses, so the two cannot disagree.
+    - **WHAT OPENS IS THE REAL `BookingDetailView`, not a summary of it.** The
+      client's screenshot of their own popup settled this: it carries their
+      full tab set — Rooms, Extras, Guests, Folios, Payment, History — a table
+      of room lines and the OTA notes, which is the reservation screen in a
+      panel rather than a reduced view of it.
+    - **That is the same move the booking FORM dialog already makes.** It
+      wraps the real `NewBookingForm`; this wraps the real detail view. One
+      component rendered in two frames cannot drift, which is exactly what a
+      second, smaller copy would do — and refusing the copy, not refusing the
+      popup, was always the point of the old rule here.
+    - `?booking=<id>` on `/calendar`, URL state like the other two dialogs.
+      The reads are the same ones `/bookings/[id]` makes and they run only
+      when the dialog is opening, so an ordinary visit to the board costs
+      nothing extra.
+    - `inDialog` hides the back link and the reference heading, because the
+      dialog's own title bar already carries both. Nothing else changes.
+    - `BookingDialog` takes `wide` for this, since the reservation screen
+      wraps badly in the 4xl panel the booking form uses.
 - **`bookings.external_payload` is empty on every row and nothing fills it.**
   OTA bookings are entered by hand (open decision 2), so the channel's raw
   payload never arrives. The screen shows the source, the settlement and
