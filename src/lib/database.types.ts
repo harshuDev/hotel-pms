@@ -2413,6 +2413,7 @@ export type Database = {
           folio_id: string
           folio_number: number
           is_reversal: boolean
+          item_type: Database["public"]["Enums"]["folio_item_type"] | null
           kind: string
           line_id: string
           posted_at: string

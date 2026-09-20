@@ -2131,6 +2131,7 @@ export async function getBookingFolioLines(
       description: string;
       is_reversal: boolean;
       amount_cents: number;
+      item_type: FolioLine["itemType"];
     }[]
   ).map((row) => ({
     lineId: row.line_id,
@@ -2142,6 +2143,7 @@ export async function getBookingFolioLines(
     description: row.description,
     isReversal: row.is_reversal,
     amountCents: row.amount_cents,
+    itemType: row.item_type,
   }));
 }
 

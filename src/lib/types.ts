@@ -739,6 +739,15 @@ export interface FolioLine {
   isReversal: boolean;
   /** Already signed: a reversal is negative. */
   amountCents: number;
+  /**
+   * What kind of charge this is — the EFFECTIVE type, so a reversal and a
+   * discount land in the bucket they actually affect rather than in their own.
+   *
+   * Null on a payment: a payment is not a charge and belongs to no revenue
+   * category. This is what lets the booking screen separate the room from the
+   * extras without a second read or a second total.
+   */
+  itemType: FolioItemType | null;
 }
 
 export interface BookingActivityItem {

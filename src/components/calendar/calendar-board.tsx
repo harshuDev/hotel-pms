@@ -251,8 +251,20 @@ function Bars({
   placed,
   assignRooms,
   currentRoomId,
+  backHref,
 }: {
   placed: Placed[];
+  /**
+   * The board's own URL, threaded onto every bar as `?back=`.
+   *
+   * A booking opened from the calendar is still a navigation to the booking
+   * screen -- that screen IS the reservation workflow, and a second smaller
+   * copy of it inside a dialog is the thing this codebase keeps refusing to
+   * build. What it should not do is lose where you were, so the booking screen
+   * sends you back to these dates and this rail width rather than to a board
+   * reset to today.
+   */
+  backHref?: string;
   /**
    * Every room of this bar's type. Supplied on rows where placing a booking
    * makes sense — the Unassigned band, and the room rows themselves, where it
@@ -291,7 +303,11 @@ function Bars({
               reservation workflow here -- the board does not hold a second,
               smaller copy of it.
             */
-            href={`/bookings/${bar.bookingId}`}
+            href={
+              backHref
+                ? `/bookings/${bar.bookingId}?back=${encodeURIComponent(backHref)}`
+                : `/bookings/${bar.bookingId}`
+            }
             title={[
               bar.reference,
               bar.guestName,
@@ -528,9 +544,11 @@ function ExtraRow({
   railW,
   gridW,
   railCell,
+  backHref,
 }: {
   label: string;
   bars: BoardBar[];
+  backHref?: string;
   dates: string[];
   businessDate: string;
   railW: number;
@@ -555,7 +573,7 @@ function ExtraRow({
         style={{ width: gridW, minHeight: rowH }}
       >
         <DayCells dates={dates} businessDate={businessDate} withFoot={false} />
-        <Bars placed={placed} />
+        <Bars placed={placed} backHref={backHref} />
       </div>
     </div>
   );
@@ -635,6 +653,7 @@ function UnassignedRow({
   total,
   railCell,
   assignRooms,
+  backHref,
 }: {
   bars: CalendarRoomBar[];
   dates: string[];
@@ -645,6 +664,7 @@ function UnassignedRow({
   railCell: string;
   /** Rooms of this type, so a booking can be placed straight from the band. */
   assignRooms: { roomId: string; roomNumber: string }[];
+  backHref?: string;
 }) {
   const { placed, lanes } = packLanes(bars, dates);
   return (
@@ -676,7 +696,7 @@ function UnassignedRow({
           cells={EMPTY_CELLS}
           withFoot={false}
         />
-        <Bars placed={placed} assignRooms={assignRooms} />
+        <Bars placed={placed} assignRooms={assignRooms} backHref={backHref} />
       </div>
     </div>
   );
@@ -698,6 +718,7 @@ export function CalendarBoard({
   railHref,
   todayHref,
   todayFrom,
+  selfHref,
   basePath,
   bookHref,
   days,
@@ -734,6 +755,11 @@ export function CalendarBoard({
   todayHref: string;
   /** The first date of the default window, for the picker's own Today. */
   todayFrom: string;
+  /**
+   * The board's own URL. Every bar carries it as `?back=`, so opening a
+   * booking and coming back lands on these dates and this rail width.
+   */
+  selfHref: string;
   /** The route the board lives on; the date picker builds its own hrefs. */
   basePath: string;
   /**
@@ -1040,6 +1066,7 @@ export function CalendarBoard({
                     roomId: r.roomId,
                     roomNumber: r.roomNumber,
                   }))}
+                  backHref={selfHref}
                 />
 
                 {/* One row per room. This is the part the client asked for. */}
@@ -1093,6 +1120,7 @@ export function CalendarBoard({
                             roomNumber: r.roomNumber,
                           }))}
                           currentRoomId={room.roomId}
+                          backHref={selfHref}
                         />
                       </div>
                     </div>
@@ -1117,6 +1145,7 @@ export function CalendarBoard({
           <Gutter railW={railW} gridW={gridW} />
           <ExtraRow
             label="Holding area"
+            backHref={selfHref}
             bars={holdingBars}
             dates={dates}
             businessDate={businessDate}
@@ -1127,6 +1156,7 @@ export function CalendarBoard({
           <Gutter railW={railW} gridW={gridW} />
           <ExtraRow
             label="Cancelled"
+            backHref={selfHref}
             bars={canceledBars}
             dates={dates}
             businessDate={businessDate}

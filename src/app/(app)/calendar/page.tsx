@@ -233,6 +233,7 @@ export default async function CalendarPage({
             railHref={railHref}
             todayHref={href(defaultStart(businessDate), railW)}
             todayFrom={defaultStart(businessDate)}
+            selfHref={href(from, railW)}
             basePath="/calendar"
             // Stays on the board: the dialog opens over it.
             bookHref={(date, roomTypeId) =>
