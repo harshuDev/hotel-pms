@@ -1,6 +1,7 @@
 import { Fragment } from "react";
 import Link from "next/link";
 import { AssignRoom } from "@/components/calendar/assign-room";
+import type { AssignTypeGroup } from "@/components/calendar/assign-room";
 import { RestoreBooking } from "@/components/calendar/restore-booking";
 import { RoomStatusMenu } from "@/components/calendar/room-status-menu";
 import { differenceInCalendarDays, format, parseISO } from "date-fns";
@@ -252,7 +253,8 @@ function cleanLabel(status: RoomTypeStatus | undefined) {
 
 function Bars({
   placed,
-  assignRooms,
+  roomsByType,
+  soldTypeId,
   currentRoomId,
   backHref,
   bookingHref,
@@ -271,13 +273,19 @@ function Bars({
    */
   backHref?: string;
   /**
-   * Every room of this bar's type. Supplied on rows where placing a booking
-   * makes sense — the Unassigned band, and the room rows themselves, where it
-   * becomes a move. Omitted on Holding and Cancelled: an unconfirmed or
-   * cancelled booking holds nothing, so giving it a room would be a promise
-   * the hotel has not made.
+   * Every room type and its rooms, so a bar can be placed in the type it was
+   * sold or — deliberately, behind a second confirmation — upgraded into
+   * another. Supplied on rows where placing a booking makes sense: the
+   * Unassigned band, and the room rows themselves, where it becomes a move.
+   * Omitted on Cancelled, where the booking holds nothing and giving it a room
+   * would be a promise the hotel has not made.
+   *
+   * The board builds it ONCE and hands the same array to every bar, so the
+   * room list crosses the server boundary once rather than once per booking.
    */
-  assignRooms?: { roomId: string; roomNumber: string }[];
+  roomsByType?: AssignTypeGroup[];
+  /** The type this bar's booking was sold; its rooms open expanded. */
+  soldTypeId?: string;
   currentRoomId?: string | null;
   /**
    * Opens the details popup over the board instead of navigating away, which
@@ -445,7 +453,8 @@ function Bars({
         500'd. As a sibling it needs neither. Same trap as the calendar's date
         picker and the search button before it.
       */}
-      {assignRooms &&
+      {roomsByType &&
+        soldTypeId &&
         placed.map((bar) => (
           <span
             key={`assign-${bar.bookingRoomId}`}
@@ -461,7 +470,8 @@ function Bars({
           >
             <AssignRoom
               bookingRoomId={bar.bookingRoomId}
-              rooms={assignRooms}
+              soldTypeId={soldTypeId}
+              roomsByType={roomsByType}
               currentRoomId={currentRoomId}
             />
           </span>
@@ -704,6 +714,36 @@ const ROOM_STATUS_DOT: Record<RoomStatus, string> = {
   ooo: "bg-slate-500",
 };
 
+/*
+ * THE TWO FLAGS SHOW ON THE RAIL, because otherwise setting one has no visible
+ * result and the menu reads as broken.
+ *
+ * The client on what the dot is for: "The housekeeping, does not affect
+ * availability. It's there for the hotel reception and housekeeping staff to
+ * use ... If the 101 is showing as dirty, the receptionist knows that the room
+ * is not ready and will offer a room that's is shown ready in the system."
+ *
+ * So the dot answers "is this one ready", and inspected is the strongest yes
+ * there is -- a deeper green than merely clean, the same two greens the menu
+ * itself uses so the board and the menu cannot say different things. Do not
+ * disturb rides on an occupied room and takes amber, which on this board means
+ * "a person needs to know about this" rather than any cleaning state.
+ */
+function roomDot(room: CalendarRoom) {
+  if (room.roomStatus === "vacant_clean" && room.isInspected)
+    return "bg-emerald-500 ring-1 ring-emerald-200";
+  if (room.roomStatus === "occupied" && room.doNotDisturb) return "bg-warn";
+  return ROOM_STATUS_DOT[room.roomStatus];
+}
+
+function roomDotLabel(room: CalendarRoom) {
+  if (room.roomStatus === "vacant_clean" && room.isInspected)
+    return "Ready for a guest, inspected";
+  if (room.roomStatus === "occupied" && room.doNotDisturb)
+    return "Occupied, do not disturb";
+  return ROOM_STATUS_LABEL[room.roomStatus];
+}
+
 /**
  * A room row draws no availability figure, so it needs no cells to read from.
  * Hoisted rather than built per row: a fresh Map for every room on an 1,800
@@ -727,7 +767,8 @@ function UnassignedRow({
   gridW,
   total,
   railCell,
-  assignRooms,
+  roomsByType,
+  soldTypeId,
   backHref,
   bookingHref,
 }: {
@@ -738,8 +779,13 @@ function UnassignedRow({
   total: number;
   /** Passed in like ExtraRow's, because the class is built inside the board. */
   railCell: string;
-  /** Rooms of this type, so a booking can be placed straight from the band. */
-  assignRooms: { roomId: string; roomNumber: string }[];
+  /**
+   * Every type and its rooms, so a booking can be placed straight from the
+   * band — into the type it was sold, or into another as an upgrade.
+   */
+  roomsByType: AssignTypeGroup[];
+  /** The type this band belongs to; its rooms open expanded in the picker. */
+  soldTypeId: string;
   backHref?: string;
   /** Opens the details popup instead of navigating away. */
   bookingHref?: (bookingId: string) => string;
@@ -785,7 +831,13 @@ function UnassignedRow({
           cells={EMPTY_CELLS}
           withFoot={false}
         />
-        <Bars placed={placed} assignRooms={assignRooms} backHref={backHref} bookingHref={bookingHref} />
+        <Bars
+          placed={placed}
+          roomsByType={roomsByType}
+          soldTypeId={soldTypeId}
+          backHref={backHref}
+          bookingHref={bookingHref}
+        />
       </div>
     </div>
   );
@@ -873,6 +925,30 @@ export function CalendarBoard({
 }) {
   const gridW = dates.length * COL_W;
   const first = parseISO(dates[0]);
+
+  /*
+   * THE ROOM PICKER'S LIST, BUILT ONCE FOR THE WHOLE BOARD.
+   *
+   * Every bar that can be placed gets this same array by reference, so the
+   * rooms cross the server boundary once rather than once per booking. Built
+   * per bar -- which is what it was, filtered to the bar's own type -- a full
+   * house on a large property would ship the room list forty times over.
+   *
+   * It carries EVERY type, not just the one the booking was sold, because of
+   * the upgrade (0062). The client: "hotels do offer upgrades ... The way the
+   * system is build now, the hotel cannot upgrade the guest room in the
+   * system." The picker opens on the sold type and keeps the others collapsed;
+   * Postgres is what decides whether a cross-type move is allowed, and refuses
+   * it with `HP003` until somebody says they meant it.
+   */
+  const roomsByType: AssignTypeGroup[] = types.map((t) => ({
+    roomTypeId: t.roomTypeId,
+    code: t.roomTypeCode,
+    name: t.roomTypeName,
+    rooms: rooms
+      .filter((r) => r.roomTypeId === t.roomTypeId)
+      .map((r) => ({ roomId: r.roomId, roomNumber: r.roomNumber })),
+  }));
 
   const railCell =
     "sticky left-0 z-10 shrink-0 border-b border-r border-chrome-700 bg-chrome-800";
@@ -1207,10 +1283,8 @@ export function CalendarBoard({
                   gridW={gridW}
                   total={unassigned[0]?.unassignedTotal ?? unassigned.length}
                   railCell={railCell}
-                  assignRooms={typeRooms.map((r) => ({
-                    roomId: r.roomId,
-                    roomNumber: r.roomNumber,
-                  }))}
+                  roomsByType={roomsByType}
+                  soldTypeId={t.roomTypeId}
                   backHref={selfHref}
                 />
 
@@ -1234,8 +1308,10 @@ export function CalendarBoard({
                           roomId={room.roomId}
                           roomNumber={room.roomNumber}
                           status={room.roomStatus}
-                          dotClass={ROOM_STATUS_DOT[room.roomStatus]}
-                          label={ROOM_STATUS_LABEL[room.roomStatus]}
+                          isInspected={room.isInspected}
+                          doNotDisturb={room.doNotDisturb}
+                          dotClass={roomDot(room)}
+                          label={roomDotLabel(room)}
                         />
                         <span className="tnum truncate text-[13px] font-medium text-white">
                           {room.roomNumber}
@@ -1265,10 +1341,8 @@ export function CalendarBoard({
                         />
                         <Bars
                           placed={placed}
-                          assignRooms={typeRooms.map((r) => ({
-                            roomId: r.roomId,
-                            roomNumber: r.roomNumber,
-                          }))}
+                          roomsByType={roomsByType}
+                          soldTypeId={t.roomTypeId}
                           currentRoomId={room.roomId}
                           backHref={selfHref}
                         />

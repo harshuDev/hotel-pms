@@ -1181,8 +1181,22 @@ export interface CalendarRoom {
   roomTypeId: string;
   roomTypeName: string;
   roomStatus: RoomStatus;
+  /**
+   * A supervisor has signed this clean room off (0062).
+   *
+   * A FACT ABOUT a `vacant_clean` room, never a status of its own — as an
+   * enum value it would stop every `= 'vacant_clean'` test matching, starting
+   * with the readiness check in `assign_room()`, so signing a room off would
+   * have made it unassignable.
+   */
+  isInspected: boolean;
+  /** The guest has asked not to be disturbed. Only ever true while occupied. */
+  doNotDisturb: boolean;
   sortOrder: number;
 }
+
+/** The four points on the housekeeping scale the rail's dot menu offers. */
+export type HousekeepingChoice = "inspected" | "clean" | "dirty" | "broken";
 
 /**
  * A bar on the room calendar.
