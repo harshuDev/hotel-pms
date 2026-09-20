@@ -571,6 +571,51 @@ export type Database = {
           },
         ]
       }
+      calendar_notes: {
+        Row: {
+          body: string
+          created_at: string
+          created_by: string | null
+          id: string
+          note_date: string
+          property_id: string
+          updated_at: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          note_date: string
+          property_id: string
+          updated_at?: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          note_date?: string
+          property_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "calendar_notes_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "staff_users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "calendar_notes_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cashier_shifts: {
         Row: {
           business_date_id: string
@@ -2605,6 +2650,22 @@ export type Database = {
           unassigned_total: number
           value_cents: number
         }[]
+      }
+      calendar_notes_for: {
+        Args: { p_days?: number | null; p_from: string }
+        Returns: {
+          author: string | null
+          body: string
+          created_at: string
+          id: string
+          note_date: string
+          updated_at: string
+        }[]
+      }
+      delete_calendar_note: { Args: { p_id: string }; Returns: undefined }
+      save_calendar_note: {
+        Args: { p_body: string; p_id?: string; p_note_date: string }
+        Returns: string
       }
       calendar_rooms: {
         Args: Record<PropertyKey, never>
