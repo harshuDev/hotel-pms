@@ -8,6 +8,7 @@ import { differenceInCalendarDays, format, parseISO } from "date-fns";
 import { cn } from "@/components/ui";
 import { formatMoney } from "@/lib/money";
 import { DateJump } from "@/components/calendar/date-jump";
+import { OpenOnToday } from "@/components/calendar/open-on-today";
 import type {
   AvailabilityCell,
   BookingStatus,
@@ -92,6 +93,15 @@ const FOOT_H = 16;
 const MAX_H = "calc(100vh - 150px)";
 /** Never so short that the header, the band and a row do not fit. */
 const MIN_H = 360;
+/**
+ * The scroller's id.
+ *
+ * `OpenOnToday` is a client component and the board is a Server Component, so
+ * it cannot be handed a ref -- React refuses to serialise one across that
+ * boundary, the same wall the date picker's `hrefFor` and the search button's
+ * `onSearchClick` both hit. An id crosses it as a string.
+ */
+const SCROLLER_ID = "calendar-scroller";
 
 /**
  * A bar carries its booking's status on its edge, which the reference's do not.
@@ -895,6 +905,21 @@ export function CalendarBoard({
   const first = parseISO(dates[0]);
 
   /*
+   * How far in the business date sits, in pixels -- the board's opening
+   * scroll position.
+   *
+   * `indexOf` rather than arithmetic over the lookback constant, because the
+   * window does not always start a week before today: paging and the date
+   * picker both move it, and on those the business date is usually not in the
+   * window at all. -1 then gives an offset of 0, which leaves the board where
+   * the URL put it, which is the whole point of the URL being the state.
+   */
+  const todayIdx = dates.indexOf(businessDate);
+  const openOffset = todayIdx > 0 ? todayIdx * COL_W : 0;
+  /* What the corner should name: the column the board actually opens on. */
+  const opensOn = todayIdx > 0 ? businessDate : dates[0];
+
+  /*
    * THE ROOM PICKER'S LIST, BUILT ONCE FOR THE WHOLE BOARD.
    *
    * Every bar that can be placed gets this same array by reference, so the
@@ -962,7 +987,25 @@ export function CalendarBoard({
         the window puts the grid surface there instead, the way the reference
         system's board runs to the bottom of the screen.
       */}
-      <div className="overflow-auto" style={{ height: MAX_H, minHeight: MIN_H }}>
+      {/*
+        THE BOARD OPENS ON THE BUSINESS DATE, not on the first column it
+        loaded. The lookback week is still there -- one swipe to the left,
+        which is where a tape chart keeps the past -- but the day the hotel is
+        actually operating is what you land on.
+
+        This was wrong in a way only a phone showed up. On a wide screen eight
+        or nine columns fit, so today was on screen even when the board began a
+        week earlier; on a phone exactly one column fits, so the client opened
+        the calendar, saw 12 September, and read it against a top bar saying
+        "Business date Sat 19 Sep 2026". Two figures that disagreed, with the
+        one that mattered seven columns off the edge.
+      */}
+      <OpenOnToday scrollerId={SCROLLER_ID} offset={openOffset} />
+      <div
+        id={SCROLLER_ID}
+        className="overflow-auto"
+        style={{ height: MAX_H, minHeight: MIN_H }}
+      >
         {/* min-h-full + column, so the filler at the foot can take the slack. */}
         <div className="flex min-h-full flex-col" style={{ width: railW + gridW }}>
           {/* Date header */}
@@ -1025,8 +1068,15 @@ export function CalendarBoard({
                 read as a calendar at all.
               */}
               <div className="mt-1">
+                {/*
+                  The date you LAND ON, which is the business date whenever it
+                  is in the window, because the board now scrolls there on
+                  arrival. Handing it `dates[0]` made the field name a column
+                  seven to the left of the first one on screen -- true of the
+                  data range and useless to the person reading it.
+                */}
                 <DateJump
-                  from={dates[0]}
+                  from={opensOn}
                   businessDate={businessDate}
                   basePath={basePath}
                   railW={railW}
