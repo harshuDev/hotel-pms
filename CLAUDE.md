@@ -872,9 +872,11 @@ showed the Reservation Centric calendar and asked for it by name.
   - `OpenOnToday` takes the scroller's **id**, not a ref: it is a client
     component and the board is a Server Component, so a ref cannot cross that
     boundary. Same wall as the date picker's `hrefFor` and the search button's
-    `onSearchClick`. A string crosses it. Both "Today" controls, the rail's and the date
-  picker's, return to that same window rather than to a board starting on
-  today — two Todays landing in different places reads as a bug.
+    `onSearchClick`. A string crosses it.
+  - **Both "Today" controls return to the same place** — the rail's chip and
+    the date picker's button. They go to the default window, which now opens
+    scrolled to the business date, so the two land identically. Two Todays
+    landing in different places reads as a bug.
   - **A cell in the past is not a link.** `create_booking()` refuses an
     arrival before the business date, so a booking link there opened a dialog
     the server then threw away.
