@@ -655,6 +655,20 @@ showed the Reservation Centric calendar and asked for it by name.
     Unassigned band.
   - **Cancelled** never goes among the live rows. `calendar_bookings()`
     returns those only when asked.
+  - **THE CANCELLED BAND IS PINNED TO THE FOOT OF THE SCROLLER when it holds
+    anything.** It sits below every room row, which is fine at four rooms and
+    useless at 120: the client cancelled a booking and reported that it was
+    not going into Cancelled at all. It was — a hundred and twenty rows down,
+    past every room in the hotel. `calendar_bookings(..., true)` was returning
+    all three cancelled bookings correctly, which was checked against the
+    hosted database before anything was changed.
+    - Sticky rather than moved to the top: the band belongs under the rooms,
+      and pinning keeps its place in the document while putting it where
+      somebody can see it.
+    - **Only when it has bars.** An empty band pinned across the foot would
+      cost a row of height to say nothing.
+    - It is rendered AFTER the filler element, because `sticky bottom-0` has
+      nothing to stick against while a flex-grow sibling sits below it.
 - **"Unassigned" is a third band, and it is not Holding.** Holding is "nobody
   has confirmed this booking". Unassigned is "confirmed, but no room picked
   yet" — which is every booking between being taken and being checked in,
@@ -935,6 +949,18 @@ showed the Reservation Centric calendar and asked for it by name.
   - **Open state is the URL** — `?book=<date>&type=<id>` on `/calendar` — not
     React state, so the server renders the form already filled in for the night
     clicked, and the back button closes it.
+  - **`NewBookingForm` NEEDS A `key` ON THE NIGHT AND THE ROOM TYPE.** It seeds
+    check-in and check-out with `useState(arrival)`, which runs once per mount.
+    Clicking a second cell changes only `?book=`, so React reconciles the same
+    instance at the same position and the state never re-seeds — the form went
+    on showing the FIRST night it was opened with, while the dialog's subtitle
+    (a prop rendered directly) updated. The header said one date, the field
+    said another, and **the field is what gets submitted**, so the booking was
+    taken on the wrong night. The client: "Date ko fix kro vrna ye by default
+    mein jo date dikha rha hai vhi date confirmed krne pr or hold krne pr
+    dikha rha hai." The key remounts the form and re-seeds the dates and the
+    prefilled line together; syncing in an effect would be one per field and
+    would fight anything already typed.
   - The date is validated server-side and ignored if it falls before the
     business date. A URL is not a form and cannot be trusted to have come from
     the board. A role that cannot book gets the same refusal `/bookings/new`
@@ -1211,6 +1237,13 @@ anywhere else. Collapsed height must stay constant regardless of room count.
       component rendered in two frames cannot drift, which is exactly what a
       second, smaller copy would do — and refusing the copy, not refusing the
       popup, was always the point of the old rule here.
+    - **EVERY ROW THAT DRAWS A BAR MUST BE HANDED `bookingHref`.** It was
+      missing on the room rows — the one that matters, since a booking with a
+      room is nearly every booking — so clicking a live bar navigated to
+      `/bookings/[id]` and the popup only ever opened from the Unassigned and
+      Cancelled bands. The feature looked built and was not. The prop is
+      optional in the type so a caller without one still works; that is what
+      let the omission through, and it is why this is written down.
     - `?booking=<id>` on `/calendar`, URL state like the other two dialogs.
       The reads are the same ones `/bookings/[id]` makes and they run only
       when the dialog is opening, so an ordinary visit to the board costs

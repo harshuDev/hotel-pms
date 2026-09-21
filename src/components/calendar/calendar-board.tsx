@@ -602,8 +602,11 @@ function ExtraRow({
   backHref,
   bookingHref,
   canRestore,
+  pinned,
 }: {
   label: string;
+  /** Hold the row against the foot of the scroller. See the note below. */
+  pinned?: boolean;
   bars: BoardBar[];
   backHref?: string;
   bookingHref?: (bookingId: string) => string;
@@ -619,7 +622,30 @@ function ExtraRow({
   const rowH = rowHeight(lanes, false);
 
   return (
-    <div className="flex items-stretch">
+    <div
+      className={cn(
+        "flex items-stretch",
+        /*
+          PINNED TO THE FOOT OF THE SCROLLER when it has something in it.
+
+          The Cancelled band sits below every room row, which is fine at four
+          rooms and useless at 120: the client cancelled a booking, looked at
+          the board, and reported that cancelling "cancel mein ja hi nhi rha
+          hai" -- it is not going into Cancelled at all. It was. It was a
+          hundred and twenty rows down, past every room in the hotel.
+          `calendar_bookings(..., true)` was returning all three cancelled
+          bookings correctly the whole time, which was checked against the
+          hosted database before anything here was touched.
+
+          Sticky rather than moved to the top: the band belongs under the
+          rooms, and pinning keeps its place in the document while putting it
+          where somebody can see it. Only when it HAS bars -- an empty band
+          pinned across the foot of the board would cost a row of height to
+          say nothing.
+        */
+        pinned && "sticky bottom-0 z-20 shadow-[0_-6px_12px_-8px_rgba(0,0,0,0.45)]",
+      )}
+    >
       <div
         className={cn(railCell, "flex items-center px-3 py-2")}
         style={{ width: railW }}
@@ -1383,12 +1409,23 @@ export function CalendarBoard({
                           withFoot={false}
                           bookHref={(d) => bookHref(d, t.roomTypeId)}
                         />
+                        {/*
+                          `bookingHref` IS NOT OPTIONAL HERE, whatever the
+                          prop's type says. It was missing, and this is the
+                          row that matters: a booking with a room is nearly
+                          every booking, so clicking a bar navigated away to
+                          /bookings/[id] instead of opening the popup. The
+                          Unassigned and Cancelled bands had it, which is why
+                          the feature looked built and was not -- the client
+                          clicked a live booking and got a full page.
+                        */}
                         <Bars
                           placed={placed}
                           roomsByType={roomsByType}
                           soldTypeId={t.roomTypeId}
                           currentRoomId={room.roomId}
                           backHref={selfHref}
+                          bookingHref={bookingHref}
                         />
                       </div>
                     </div>
@@ -1410,18 +1447,6 @@ export function CalendarBoard({
             CANCELLED is the same argument from the other end — released rooms
             that would read as sold if they sat among the live ones.
           */}
-          <Gutter railW={railW} gridW={gridW} />
-          <ExtraRow
-            label="Cancelled"
-            canRestore
-            backHref={selfHref}
-            bars={canceledBars}
-            dates={dates}
-            businessDate={businessDate}
-            railW={railW}
-            gridW={gridW}
-            railCell={railCell}
-          />
 
           {/*
             Takes whatever height is left so the rail and the grid surface run
@@ -1436,6 +1461,25 @@ export function CalendarBoard({
             />
             <div className="bg-board" style={{ width: gridW }} />
           </div>
+
+          {/*
+            Cancelled comes AFTER the filler now, so `sticky bottom-0` has
+            something to stick against -- an element cannot pin to the foot of
+            a scroller when a flex-grow sibling sits below it.
+          */}
+          <Gutter railW={railW} gridW={gridW} />
+          <ExtraRow
+            label="Cancelled"
+            canRestore
+            pinned={canceledBars.length > 0}
+            backHref={selfHref}
+            bars={canceledBars}
+            dates={dates}
+            businessDate={businessDate}
+            railW={railW}
+            gridW={gridW}
+            railCell={railCell}
+          />
         </div>
       </div>
     </div>
