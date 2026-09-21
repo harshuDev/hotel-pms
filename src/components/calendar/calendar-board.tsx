@@ -16,7 +16,6 @@ import type {
   CalendarRoomBar,
   RoomStatus,
   CalendarSeason,
-  RoomTypeStatus,
 } from "@/lib/types";
 
 /**
@@ -220,35 +219,6 @@ function rowHeight(lanes: number, withFoot: boolean) {
     (lanes - 1) * BAR_GAP +
     (withFoot ? FOOT_H : 0)
   );
-}
-
-/**
- * The dot beside a room type: housekeeping, not availability.
- *
- * It used to report how tight the window was, which is what every cell on that
- * row already says. The reference system's dot is the clean status — hover it
- * and it says so — and that was the better use of the one mark on the rail.
- *
- * Aggregated, because a row is a room type and not a room. Rose while anything
- * is waiting, slate when the whole type is out of order, emerald when there is
- * nothing to do.
- */
-function cleanDot(status: RoomTypeStatus | undefined) {
-  if (!status || status.totalRooms === 0) return "bg-white/30";
-  if (status.vacantDirty > 0) return "bg-rose-500";
-  if (status.outOfOrder === status.totalRooms) return "bg-slate-400";
-  return "bg-emerald-400";
-}
-
-/** What that dot means, in the words a receptionist would use. */
-function cleanLabel(status: RoomTypeStatus | undefined) {
-  if (!status || status.totalRooms === 0) return "No rooms on this type";
-  const parts: string[] = [];
-  if (status.vacantDirty > 0) parts.push(`${status.vacantDirty} to clean`);
-  if (status.occupied > 0) parts.push(`${status.occupied} occupied`);
-  if (status.vacantClean > 0) parts.push(`${status.vacantClean} ready`);
-  if (status.outOfOrder > 0) parts.push(`${status.outOfOrder} out of order`);
-  return `Room clean status: ${parts.join(", ")}`;
 }
 
 function Bars({
@@ -853,7 +823,6 @@ export function CalendarBoard({
   unassignedByType,
   canceledBars,
   seasons,
-  statusByType,
   shiftHref,
   railHref,
   todayHref,
@@ -889,7 +858,6 @@ export function CalendarBoard({
   unassignedByType: Map<string, CalendarRoomBar[]>;
   canceledBars: BoardBar[];
   seasons: CalendarSeason[];
-  statusByType: Map<string, RoomTypeStatus>;
   shiftHref: (days: number) => string;
   /** Where + and − go: they size the rail, not the date range. */
   railHref: (delta: number) => string;
@@ -1252,25 +1220,34 @@ export function CalendarBoard({
                       </svg>
                     </Link>
 
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="min-w-0">
-                        <div className="truncate pr-6 text-[12.5px] font-bold uppercase tracking-[0.06em] text-white">
-                          {t.roomTypeCode}
-                        </div>
-                        <div className="text-xxs leading-tight text-white/75">
-                          {t.roomTypeName}
-                        </div>
-                        <div className="tnum mt-0.5 text-xxs text-white/50">
-                          {typeRooms.length} room{typeRooms.length === 1 ? "" : "s"}
-                        </div>
+                    {/*
+                      NO HOUSEKEEPING DOT ON A ROOM TYPE. The client, twice:
+                      "the housekeeping button has to be next to each room.
+                      Not the room type" and "isme room type ke aage nhi
+                      ayega vo ... sbhi room number ke aage ayega".
+
+                      There used to be an aggregated clean-status dot here. It
+                      was not a control -- the control has always been on the
+                      room rows -- but it was drawn exactly like one: same
+                      size, same shape, same colours, one row above sixty dots
+                      that DO open the menu. So the board offered a mark that
+                      looked pressable and did nothing, which is the thing
+                      this application keeps refusing to ship. Removing it
+                      loses no information: every room under this header
+                      carries its own status, which is what the client asked
+                      for and is more use than a summary -- "101 is dirty" is
+                      actionable in a way "something in DBL is dirty" is not.
+                    */}
+                    <div className="min-w-0">
+                      <div className="truncate pr-6 text-[12.5px] font-bold uppercase tracking-[0.06em] text-white">
+                        {t.roomTypeCode}
                       </div>
-                      <span
-                        title={cleanLabel(statusByType.get(t.roomTypeId))}
-                        className={cn(
-                          "mt-6 h-2.5 w-2.5 shrink-0 rounded-full",
-                          cleanDot(statusByType.get(t.roomTypeId)),
-                        )}
-                      />
+                      <div className="text-xxs leading-tight text-white/75">
+                        {t.roomTypeName}
+                      </div>
+                      <div className="tnum mt-0.5 text-xxs text-white/50">
+                        {typeRooms.length} room{typeRooms.length === 1 ? "" : "s"}
+                      </div>
                     </div>
                   </div>
 

@@ -209,7 +209,7 @@ Each read is a Postgres view or RPC, never aggregation in the client:
 | `getCalendarSeasons(from, n)`       | `calendar_seasons(from, n)`        |
 | `getCalendarNotes(from, n)`         | `calendar_notes_for(from, n)`      |
 | `getSeasonSettings()`               | `seasons` table                    |
-| `getRoomStatusByType()`             | `room_status_by_type()`            |
+| `getRoomStatusByType()` (unused)    | `room_status_by_type()`            |
 | `getOccupancyReport(from, to)`      | `occupancy_report(from, to)`      |
 | `getDebtorsReport()`                | `debtors_report()`                |
 | `getPaymentsReport(from, to)`       | `payments_report(from, to)`       |
@@ -452,15 +452,29 @@ showed the Reservation Centric calendar and asked for it by name.
     the foot of each cell belongs to the type and not to any one room, and it
     is the only thing on this board that answers "can I sell tonight".
   - **The dot on a room row is that room's own housekeeping status**, which is
-    more use than the per-type dot above it: "101 is dirty" is actionable in a
-    way that "something in Deluxe is dirty" was not. The type keeps its
-    summary dot as well.
-- **The dot on the rail is housekeeping, not availability.** It used to report
-  how tight the window was, which every cell on that row already says. It now
-  reads `room_status_by_type()` — rose while anything waits to be cleaned,
-  slate when the whole type is out of order, emerald when there is nothing to
-  do — and its tooltip gives the breakdown in a receptionist's words. Counts
-  per type, never a room list, so it is the same size at 40 rooms and at 1,800.
+    more use than a per-type summary: "101 is dirty" is actionable in a way
+    that "something in Deluxe is dirty" was not.
+- **THERE IS NO DOT ON A ROOM TYPE. This reverses what this file said**, which
+  was that the type kept a summary dot as well as the room rows. The client
+  asked for it gone twice — first in a voice note, "the housekeeping button
+  has to be next to each room. Not the room type", and again in writing: "isme
+  room type ke aage nhi ayega vo ... sbhi room number ke aage ayega, jisme hum
+  kisi bhi room ka tag lga skte h".
+  - **They were right, and it was a real defect rather than a preference.**
+    The type dot was never a control — the menu has always been on the room
+    rows — but it was drawn exactly like one: same size, same shape, same
+    colours, sitting one row above sixty dots that DO open the menu. So the
+    board offered a mark that looked pressable and did nothing, which is the
+    thing this application keeps refusing to ship. See the user-menu note for
+    the last time the client objected to a control that changes nothing.
+  - **Nothing is lost.** Every room under the header carries its own status,
+    which is the thing the client actually wants to see and act on. The
+    aggregate only ever said "something in here needs attention" without
+    saying what.
+  - **`getRoomStatusByType()` and `room_status_by_type()` still exist and are
+    now called by nothing.** They are left in place rather than deleted: the
+    RPC would need a migration to drop, and a per-type roll-up is a reasonable
+    thing to want again. The calendar makes one fewer read per board for it.
 - **The rail's pencil goes to Settings.** Hovering a room type shows an edit
   affordance, as the reference does, linking to
   `/settings?tab=room-types&edit=<id>`, which opens that type's form on

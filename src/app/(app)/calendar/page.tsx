@@ -32,7 +32,6 @@ import {
   getCurrentStaffUser,
   getProperty,
   getRatePlans,
-  getRoomStatusByType,
   getTaxRates,
 } from "@/lib/queries";
 
@@ -100,7 +99,7 @@ export default async function CalendarPage({
   // bars answer "who is in, and when"; neither is the other. Cancelled rooms
   // come back separately because they belong in their own row, not among the
   // live ones where they would read as sold.
-  const [cells, rooms, roomBars, canceledBars, seasons, status, notes, property] =
+  const [cells, rooms, roomBars, canceledBars, seasons, notes, property] =
     await Promise.all([
     getCalendarAvailability(from, days),
     // The rail. Every room, grouped by type in Postgres.
@@ -108,9 +107,10 @@ export default async function CalendarPage({
     getCalendarRoomBars(from, days),
     getCalendarBookings(from, days, CALENDAR_MAX_BARS_PER_TYPE, true),
     getCalendarSeasons(from, days),
-    // Housekeeping, for the dot on the rail. It is counts per type, not a room
-    // list, so it stays the same size at 40 rooms and at 1,800.
-    getRoomStatusByType(),
+    // NO per-type housekeeping read any more. `getRoomStatusByType()` fed a
+    // summary dot on the room-type header, and the client asked twice for the
+    // housekeeping mark to be on the room rows only -- where `getCalendarRooms()`
+    // already returns each room's own status. One fewer round trip per board.
     // Day notes for the window, one call for the whole board.
     getCalendarNotes(from, days),
     // Free: cache()d, and the app layout has already called it in this same
@@ -123,7 +123,6 @@ export default async function CalendarPage({
   );
   const types = [...new Map(cells.map((c) => [c.roomTypeId, c])).values()];
   const cellAt = new Map(cells.map((c) => [`${c.roomTypeId}|${c.date}`, c]));
-  const statusByType = new Map(status.map((s) => [s.roomTypeId, s]));
 
   const notesByDate = new Map<string, typeof notes>();
   for (const note of notes) {
@@ -301,7 +300,6 @@ export default async function CalendarPage({
             unassignedByType={unassignedByType}
             canceledBars={canceledBars}
             seasons={seasons}
-            statusByType={statusByType}
             shiftHref={shiftHref}
             railHref={railHref}
             todayHref={href(defaultStart(businessDate), railW)}
