@@ -729,9 +729,11 @@ showed the Reservation Centric calendar and asked for it by name.
       the system." That is true of four of the five, and the fourth is the
       exception worth knowing: **Broken is `ooo`, which DOES reduce what the
       hotel can sell** — and should, since a broken room cannot take a guest.
-      The menu says so on the item rather than letting somebody find out from a
-      changed figure. Clean, Dirty, Inspected and Do not disturb move no
-      availability number anywhere.
+      The menu does NOT say so on the item — it used to, and the client had
+      that removed with the rest of the copy — so Broken reads like the other
+      three and its effect is something the board's own figures show. Clean,
+      Dirty, Inspected and Do not disturb move no availability number
+      anywhere.
     - **Both flags show on the rail dot**, or setting one would have no visible
       result and the menu would read as broken. Inspected is a deeper green
       than merely clean — the same two greens the menu uses, so the board and
@@ -772,10 +774,12 @@ showed the Reservation Centric calendar and asked for it by name.
         controls, which this application does not have — see the user-menu
         note, where the client objected to one and was right then too. **A
         control that is not offered needs no explanation.**
-      - **"Takes it off sale" under Broken stays.** That is the one permitted
-        clause on a control whose consequence is not obvious, the same
-        exception the overbook tickbox holds. It is a consequence, not an
-        explanation of why a row is dead.
+      - **"Takes it off sale" under Broken went too.** It was kept for one
+        round as the permitted clause on a control whose consequence is not
+        obvious — the exception the overbook tickbox holds — and the client
+        asked for it gone with the rest. `CHOICES` now has **no `note` field
+        at all**, so putting a sub-label back is a deliberate act rather than
+        an easy one. The menu is four labels and a coloured dot.
       - Postgres enforces the same split either way, so hiding a row is a
         courtesy and never the only thing standing between a bad write and the
         database.
