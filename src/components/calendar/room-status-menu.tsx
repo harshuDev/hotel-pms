@@ -25,8 +25,10 @@ import type { HousekeepingChoice, RoomStatus } from "@/lib/types";
  *
  * That is true of four of the five. **Broken is the exception**: it maps to
  * `ooo`, which does reduce what the hotel can sell — and should, because a
- * broken room cannot take a guest. The menu says so on the item rather than
- * letting somebody find out from a changed figure.
+ * broken room cannot take a guest. The menu does NOT say so on the item --
+ * it used to, and the client had that removed with the rest of the copy --
+ * so Broken reads like the other three and its effect on availability is
+ * something the board's own figures show.
  *
  * WHY INSPECTED AND DO NOT DISTURB ARE NOT STATUSES. `room_status` is the
  * column that decides sellability, so neither could go in it:
@@ -61,23 +63,25 @@ import type { HousekeepingChoice, RoomStatus } from "@/lib/types";
  * behind entirely, which is why the menu is positioned by measurement rather
  * than by `absolute`.
  */
+/*
+ * FOUR LABELS AND A COLOURED DOT. Nothing else, and there is no field here
+ * for anything else.
+ *
+ * Broken used to carry "Takes it off sale" underneath it, on the argument
+ * that the copy rules allow one clause on a control whose consequence is not
+ * obvious. The client asked for that gone too, after the two sentences above
+ * it. So the sub-label is not merely unused -- the type has no `note` on it,
+ * which makes putting one back a deliberate act rather than an easy one.
+ */
 const CHOICES: {
   choice: HousekeepingChoice;
   label: string;
   dot: string;
-  note?: string;
 }[] = [
   { choice: "inspected", label: "Inspected", dot: "bg-emerald-500" },
   { choice: "clean", label: "Clean", dot: "bg-emerald-400" },
   { choice: "dirty", label: "Dirty", dot: "bg-rose-400" },
-  {
-    choice: "broken",
-    label: "Broken",
-    dot: "bg-slate-500",
-    // The one clause on a control whose consequence is not obvious, which the
-    // copy rules keep: a choice that takes a room off sale has to say so.
-    note: "Takes it off sale",
-  },
+  { choice: "broken", label: "Broken", dot: "bg-slate-500" },
 ];
 
 export function RoomStatusMenu({
@@ -107,7 +111,7 @@ export function RoomStatusMenu({
   const [pos, setPos] = useState<{ left: number; top: number } | null>(null);
 
   const MENU_W = 192; // w-48
-  const MENU_MAX_H = 260; // the five rows plus a note, near enough
+  const MENU_MAX_H = 200; // four plain rows, or one, plus room for an error
 
   /*
    * Measured from the dot, because a portalled menu has no parent to be
@@ -280,14 +284,7 @@ export function RoomStatusMenu({
                     <span
                       className={cn("h-2 w-2 shrink-0 rounded-full", c.dot)}
                     />
-                    <span className="min-w-0 flex-1 truncate">
-                      {c.label}
-                      {c.note && (
-                        <span className="block text-xxs text-ink-faint">
-                          {c.note}
-                        </span>
-                      )}
-                    </span>
+                    <span className="min-w-0 flex-1 truncate">{c.label}</span>
                     {c.choice === current && (
                       <span className="shrink-0 text-xxs text-ink-faint">
                         now
