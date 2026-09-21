@@ -65,6 +65,139 @@ export type Database = {
           },
         ]
       }
+      booking_attachments: {
+        Row: {
+          booking_id: string
+          content_type: string
+          created_at: string
+          file_name: string
+          id: string
+          property_id: string
+          size_bytes: number
+          storage_path: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          booking_id: string
+          content_type: string
+          created_at?: string
+          file_name: string
+          id?: string
+          property_id: string
+          size_bytes: number
+          storage_path: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          booking_id?: string
+          content_type?: string
+          created_at?: string
+          file_name?: string
+          id?: string
+          property_id?: string
+          size_bytes?: number
+          storage_path?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "booking_attachments_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "booking_totals"
+            referencedColumns: ["booking_id"]
+          },
+          {
+            foreignKeyName: "booking_attachments_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "booking_attachments_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "booking_attachments_uploaded_by_fkey"
+            columns: ["uploaded_by"]
+            isOneToOne: false
+            referencedRelation: "staff_users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      booking_emails: {
+        Row: {
+          body: string
+          booking_id: string
+          created_at: string
+          id: string
+          property_id: string
+          sent_at: string
+          sent_by: string | null
+          status: Database["public"]["Enums"]["booking_email_status"]
+          subject: string
+          to_address: string
+        }
+        Insert: {
+          body?: string
+          booking_id: string
+          created_at?: string
+          id?: string
+          property_id: string
+          sent_at?: string
+          sent_by?: string | null
+          status?: Database["public"]["Enums"]["booking_email_status"]
+          subject: string
+          to_address: string
+        }
+        Update: {
+          body?: string
+          booking_id?: string
+          created_at?: string
+          id?: string
+          property_id?: string
+          sent_at?: string
+          sent_by?: string | null
+          status?: Database["public"]["Enums"]["booking_email_status"]
+          subject?: string
+          to_address?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "booking_emails_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "booking_totals"
+            referencedColumns: ["booking_id"]
+          },
+          {
+            foreignKeyName: "booking_emails_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "booking_emails_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "booking_emails_sent_by_fkey"
+            columns: ["sent_by"]
+            isOneToOne: false
+            referencedRelation: "staff_users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       booking_room_nights: {
         Row: {
           booking_room_id: string
@@ -2427,6 +2560,16 @@ export type Database = {
           unread: boolean
         }[]
       }
+      add_booking_attachment: {
+        Args: {
+          p_booking_id: string
+          p_content_type: string
+          p_file_name: string
+          p_size_bytes: number
+          p_storage_path: string
+        }
+        Returns: string
+      }
       add_to_waitlist: {
         Args: {
           p_adults?: number
@@ -2522,6 +2665,18 @@ export type Database = {
           summary: string
         }[]
       }
+      booking_attachments_list: {
+        Args: { p_booking_id: string }
+        Returns: {
+          content_type: string
+          created_at: string
+          file_name: string
+          id: string
+          size_bytes: number
+          storage_path: string
+          uploaded_by_name: string
+        }[]
+      }
       booking_cancellation_terms: {
         Args: { p_booking_id: string }
         Returns: {
@@ -2566,6 +2721,18 @@ export type Database = {
           rooms_assigned: number
           settlement: Database["public"]["Enums"]["booking_settlement"]
           status: Database["public"]["Enums"]["booking_status"]
+        }[]
+      }
+      booking_emails_list: {
+        Args: { p_booking_id: string }
+        Returns: {
+          body: string
+          id: string
+          sent_at: string
+          sent_by_name: string
+          status: Database["public"]["Enums"]["booking_email_status"]
+          subject: string
+          to_address: string
         }[]
       }
       booking_folio_lines: {
@@ -3198,6 +3365,10 @@ export type Database = {
           status: Database["public"]["Enums"]["booking_status"]
         }[]
       }
+      delete_booking_attachment: {
+        Args: { p_attachment_id: string }
+        Returns: string
+      }
       delete_calendar_note: { Args: { p_id: string }; Returns: undefined }
       delete_room: { Args: { p_room_id: string }; Returns: undefined }
       delete_season: { Args: { p_id: string }; Returns: undefined }
@@ -3478,6 +3649,15 @@ export type Database = {
       }
       is_front_office_staff: { Args: never; Returns: boolean }
       is_revenue_staff: { Args: never; Returns: boolean }
+      log_booking_email: {
+        Args: {
+          p_body: string
+          p_booking_id: string
+          p_subject: string
+          p_to_address: string
+        }
+        Returns: string
+      }
       manager_report: {
         Args: { p_from: string; p_to: string }
         Returns: {
@@ -4233,6 +4413,7 @@ export type Database = {
       }
     }
     Enums: {
+      booking_email_status: "logged" | "sent" | "failed"
       booking_settlement: "at_property" | "prepaid_to_channel" | "virtual_card"
       booking_status:
         | "pending"
@@ -4428,6 +4609,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      booking_email_status: ["logged", "sent", "failed"],
       booking_settlement: ["at_property", "prepaid_to_channel", "virtual_card"],
       booking_status: [
         "pending",

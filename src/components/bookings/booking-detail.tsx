@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { format, parseISO } from "date-fns";
 import { formatStampInProperty } from "@/lib/dates";
+import { AttachmentsTab } from "@/components/bookings/attachments-tab";
+import { EmailTab } from "@/components/bookings/email-tab";
 import { StatusBadge, cn } from "@/components/ui";
 import { CheckInAction, CheckOutAction } from "@/components/dashboard/movement-actions";
 import { formatMoney, parseMoney } from "@/lib/money";
@@ -18,6 +20,8 @@ import {
 import type {
   Booking,
   BookingActivityItem,
+  BookingAttachment,
+  BookingEmail,
   BookingCancellationTerms,
   BookingDetail as Detail,
   BookingNight,
@@ -79,6 +83,14 @@ const TABS = [
   { id: "extras", label: "Extras" },
   { id: "guests", label: "Guests" },
   { id: "folio", label: "Folio" },
+  /*
+   * ATTACHMENTS AND EMAIL ARE THE REFERENCE'S LAST TWO (0063). The client:
+   * "Copy them too, I just want to clone the application." They sit before
+   * History because that is where theirs are, and because History is the
+   * trail rather than a thing anybody adds to.
+   */
+  { id: "attachments", label: "Attachments" },
+  { id: "email", label: "Email" },
   { id: "history", label: "History" },
 ] as const;
 
@@ -110,6 +122,8 @@ export function BookingDetailView({
   nights,
   folio,
   activity,
+  attachments,
+  emails,
   channels,
   canEdit,
   guest,
@@ -124,6 +138,10 @@ export function BookingDetailView({
   nights: BookingNight[];
   folio: FolioLine[];
   activity: BookingActivityItem[];
+  /** Files on the booking (0063). */
+  attachments: BookingAttachment[];
+  /** Correspondence recorded against the booking (0063). */
+  emails: BookingEmail[];
   channels: Channel[];
   canEdit: boolean;
   /** Null when the guest record could not be read; the tab then says so. */
@@ -1094,6 +1112,25 @@ export function BookingDetailView({
       )}
 
       {/* Activity ----------------------------------------------------- */}
+      {tab === "attachments" && (
+        <AttachmentsTab
+          bookingId={detail.bookingId}
+          attachments={attachments}
+          timezone={timezone}
+          canEdit={canEdit}
+        />
+      )}
+
+      {tab === "email" && (
+        <EmailTab
+          bookingId={detail.bookingId}
+          emails={emails}
+          defaultTo={guest?.email ?? null}
+          timezone={timezone}
+          canEdit={canEdit}
+        />
+      )}
+
       {tab === "history" && (
       <div className="rounded-lg border border-line bg-white p-5 shadow-card">
         <h2 className="mb-4 font-display text-[15px] font-semibold tracking-tightest text-ink">

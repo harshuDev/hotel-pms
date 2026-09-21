@@ -46,6 +46,8 @@ import type {
   CalendarBar,
   CalendarSeason,
   RoomTypeStatus,
+  BookingAttachment,
+  BookingEmail,
   BookingProductionRow,
   CancellationRow,
   ChannelKind,
@@ -3123,5 +3125,47 @@ export async function getRatesGrid(
     // Null is "not loaded", which is not zero and not free. Kept as null all
     // the way to the cell so the screen can say so.
     rateCents: row.rate_cents === null ? null : Number(row.rate_cents),
+  }));
+}
+
+/** Files attached to one booking, newest first (0063). */
+export async function getBookingAttachments(
+  bookingId: string,
+): Promise<BookingAttachment[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("booking_attachments_list", {
+    p_booking_id: bookingId,
+  });
+  if (error) throw new Error(`Failed to load the attachments: ${error.message}`);
+
+  return (data ?? []).map((row) => ({
+    id: row.id,
+    storagePath: row.storage_path,
+    fileName: row.file_name,
+    contentType: row.content_type,
+    sizeBytes: Number(row.size_bytes),
+    uploadedByName: row.uploaded_by_name,
+    createdAt: row.created_at,
+  }));
+}
+
+/** Correspondence recorded against one booking, newest first (0063). */
+export async function getBookingEmails(
+  bookingId: string,
+): Promise<BookingEmail[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("booking_emails_list", {
+    p_booking_id: bookingId,
+  });
+  if (error) throw new Error(`Failed to load the correspondence: ${error.message}`);
+
+  return (data ?? []).map((row) => ({
+    id: row.id,
+    toAddress: row.to_address,
+    subject: row.subject,
+    body: row.body,
+    status: row.status,
+    sentAt: row.sent_at,
+    sentByName: row.sent_by_name,
   }));
 }

@@ -1277,3 +1277,41 @@ export interface RatesGridCell {
   date: string;
   rateCents: number | null;
 }
+
+/**
+ * A file attached to a booking (0063).
+ *
+ * `storagePath` is an object path in the private `booking-attachments`
+ * bucket, never a URL -- the same rule `rooms.photo_path` follows. Reading
+ * one means minting a signed URL under the reader's own session, so RLS and
+ * the storage policies both apply and the link expires.
+ */
+export interface BookingAttachment {
+  id: string;
+  storagePath: string;
+  fileName: string;
+  contentType: string;
+  sizeBytes: number;
+  uploadedByName: string | null;
+  createdAt: string;
+}
+
+/**
+ * A recorded email about a booking (0063).
+ *
+ * THIS IS A LOG AND NOT A MAILBOX. Nothing in this codebase sends: there is
+ * no provider and no key. `status` is `logged` for a row a person wrote down
+ * after the fact, and leaves room for `sent`/`failed` if a provider is ever
+ * wired in without needing a second migration.
+ */
+export type BookingEmailStatus = "logged" | "sent" | "failed";
+
+export interface BookingEmail {
+  id: string;
+  toAddress: string;
+  subject: string;
+  body: string;
+  status: BookingEmailStatus;
+  sentAt: string;
+  sentByName: string | null;
+}

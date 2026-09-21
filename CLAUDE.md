@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0062` are
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0063` are
 applied to the hosted database.
 
 Working on real data: dashboard (house board, movements, pace, activity feed),
@@ -1192,7 +1192,50 @@ anywhere else. Collapsed height must stay constant regardless of room count.
   (`BK-000123`). A channel's reference goes in `external_reference`.
 - No room is assigned when a booking is taken. `assign_room()` does that, at
   check-in.
-- **The booking screen is five tabs: Rooms, Extras, Guests, Folio, History**,
+- **The booking screen is SEVEN tabs: Rooms, Extras, Guests, Folio,
+  Attachments, Email, History.** It was five. Attachments and Email landed in
+  0063, when the client asked for full parity with their reference — "Copy
+  them too, I just want to clone the application" — having been told both were
+  deliberately left out. They sit before History because that is where theirs
+  are, and because History is a trail rather than something anybody adds to.
+  - **ATTACHMENTS IS COMPLETE.** `booking_attachments` records what is in the
+    private `booking-attachments` bucket.
+    - **The bucket is PRIVATE, the opposite of `room-photos`.** A room
+      photograph is marketing material that belongs on the hotel's website; an
+      attachment on a reservation is a passport scan, a registration card, a
+      company purchase order. Reading one is a **signed URL** minted under the
+      reader's own session, so the storage policy decides, and it expires —
+      a link pasted into a chat stops working.
+    - The path is `<property_id>/<booking_id>/<uuid>-<name>`, checked twice:
+      by the storage policy and again by `add_booking_attachment()`. The same
+      belt and braces `set_room_photo()` has, for the same reason — the path
+      is a string the browser chose.
+    - **The file never passes through the server.** It goes straight from the
+      browser under the user's own session, so nothing holds a service key.
+      The action says where to put it, the browser puts it there, a second
+      action records the row. If the row fails the browser removes the object
+      it just uploaded, rather than leaving a file nothing points at.
+    - **Delete is allowed**, unlike a folio row. A document on the wrong
+      booking is a mistake to undo, not history to keep — same reasoning as a
+      calendar note or a season. The row goes first and hands back the path,
+      so the object is only removed once Postgres has agreed.
+  - **EMAIL IS A RECORD OF CORRESPONDENCE AND DOES NOT SEND.** There is no
+    mail provider in this repository and no API key in any environment, and a
+    Send button that cannot send is the dead control this application keeps
+    refusing to ship — see the user-menu note.
+    - **The control says "Record", not "Send"**, because a control's label
+      matches its result. That is the one thing keeping this tab honest; do
+      not rename it without wiring a provider first.
+    - What a front desk reads that tab for is "what have we already told
+      them", which is what `booking_emails` holds: to, subject, body, when,
+      and by whom.
+    - **No update and no delete policy**, which is the opposite of an
+      attachment and the same as a folio row. A correspondence log somebody
+      can quietly edit is not evidence of anything.
+    - **Wiring a provider later is an action and a key, not a migration.**
+      `sent_at` is already there and `booking_email_status` already carries
+      `sent` and `failed` beside `logged`.
+- **The booking screen's first five tabs are Rooms, Extras, Guests, Folio, History**,
   which are the areas the client's reference PMS organises a reservation into.
   The header above them carries the reference, status, guest, dates, nights,
   party size, room count, source, settlement, channel reference, reservation
