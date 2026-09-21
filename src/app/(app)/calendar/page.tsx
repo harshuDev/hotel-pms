@@ -26,6 +26,8 @@ import {
   getBookingNights,
   getBookingFolioLines,
   getBookingActivity,
+  getBookingAttachments,
+  getBookingEmails,
   getCalendarRoomBars,
   getCalendarRooms,
   getCalendarSeasons,
@@ -234,17 +236,41 @@ export default async function CalendarPage({
          * same component. Loaded only when the dialog is actually opening, so
          * an ordinary visit to the board costs none of them.
          */
-        const [lines, nights, folio, activity, channels, terms, guest] =
+        const [
+          lines,
+          nights,
+          folio,
+          activity,
+          attachments,
+          emails,
+          channels,
+          terms,
+          guest,
+        ] =
           await Promise.all([
             getBookingRoomLines(peekId),
             getBookingNights(peekId),
             getBookingFolioLines(peekId),
             getBookingActivity(peekId),
+            // The two tabs the reference carries, added in 0063.
+            getBookingAttachments(peekId),
+            getBookingEmails(peekId),
             getChannels(),
             getBookingCancellationTerms(peekId),
             getCustomerForEdit(d.customerId),
           ]);
-        return { detail: d, lines, nights, folio, activity, channels, terms, guest };
+        return {
+          detail: d,
+          lines,
+          nights,
+          folio,
+          activity,
+          attachments,
+          emails,
+          channels,
+          terms,
+          guest,
+        };
       })()
     : null;
 
@@ -435,6 +461,8 @@ export default async function CalendarPage({
             nights={peek.nights}
             folio={peek.folio}
             activity={peek.activity}
+            attachments={peek.attachments}
+            emails={peek.emails}
             channels={peek.channels}
             guest={peek.guest.ok ? peek.guest.data : null}
             cancellationTerms={peek.terms}

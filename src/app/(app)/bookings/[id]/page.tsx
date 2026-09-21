@@ -3,6 +3,8 @@ import { BookingDetailView } from "@/components/bookings/booking-detail";
 import { getCustomerForEdit } from "@/lib/actions/customers";
 import {
   getBookingActivity,
+  getBookingAttachments,
+  getBookingEmails,
   getBookingDetail,
   getBookingFolioLines,
   getBookingNights,
@@ -52,12 +54,27 @@ export default async function BookingPage({
   const detail = await getBookingDetail(id);
   if (!detail) notFound();
 
-  const [rooms, nights, folio, activity, channels, staff, guest, property, cancellationTerms] =
+  const [
+    rooms,
+    nights,
+    folio,
+    activity,
+    attachments,
+    emails,
+    channels,
+    staff,
+    guest,
+    property,
+    cancellationTerms,
+  ] =
     await Promise.all([
       getBookingRoomLines(id),
       getBookingNights(id),
       getBookingFolioLines(id),
       getBookingActivity(id),
+      // The two tabs the reference carries and this screen gained in 0063.
+      getBookingAttachments(id),
+      getBookingEmails(id),
       getChannels(),
       getCurrentStaffUser(),
       // The existing guest read, reused rather than a second one written. It
@@ -83,6 +100,8 @@ export default async function BookingPage({
       nights={nights}
       folio={folio}
       activity={activity}
+      attachments={attachments}
+      emails={emails}
       channels={channels}
       guest={guest.ok ? guest.data : null}
       cancellationTerms={cancellationTerms}
