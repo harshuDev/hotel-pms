@@ -815,14 +815,42 @@ showed the Reservation Centric calendar and asked for it by name.
   were there; the client read them as leftover prompt text and asked for them
   gone. The reference has none. What mattered survives in place — the rail says
   "2 of 9" where a type is capped, and the dot has its tooltip.
-- **The board opens a week BEFORE the business date, not on it.** The client:
-  "in the calendar I want the hotels to be able to see past dates too".
-  Nothing had ever stopped a past date being shown — the chevrons and the date
-  picker go anywhere, and past nights are already shaded `board-past` — but
-  the default window put today hard against the left edge, so looking back
-  meant paging a whole month and hunting. `CALENDAR_LOOKBACK` is 7 and
-  `CALENDAR_NIGHTS` went from 30 to 35 with it, so the four weeks of forward
-  view are still there. Both "Today" controls, the rail's and the date
+- **The board LOADS a week before the business date and OPENS ON it.** Those
+  are two different things and treating them as one was a bug the client hit
+  twice.
+  - The load range is the lookback. The client: "in the calendar I want the
+    hotels to be able to see past dates too". Nothing had ever stopped a past
+    date being shown — the chevrons and the date picker go anywhere, and past
+    nights are already shaded `board-past` — but the default window put today
+    hard against the left edge, so looking back meant paging a whole month and
+    hunting. `CALENDAR_LOOKBACK` is 7 and `CALENDAR_NIGHTS` went from 30 to 35
+    with it, so the four weeks of forward view are still there.
+  - **The opening scroll position is the business date**, set by
+    `OpenOnToday` in `open-on-today.tsx`. The board used to open on the first
+    column it had loaded, which is a separate decision and one nobody asked
+    for. On a desk monitor it was survivable — eight or nine columns fit, so
+    today was on screen, just not at the left. **On a phone exactly one column
+    fits**, so the client opened the calendar, saw 12 September, and read it
+    against a top bar saying "Business date Sat 19 Sep 2026". The figure that
+    mattered was seven columns off the edge with nothing to say so.
+  - The week of history is one swipe LEFT, which is where a tape chart keeps
+    the past. Nothing was removed to fix this.
+  - **It scrolls only on arrival**, never after somebody has moved the board:
+    the component remounts on every navigation the board makes, and forcing
+    the offset back each time would drag the grid out from under a reader. A
+    `scrollLeft` already above zero means hands off.
+  - **The offset is `dates.indexOf(businessDate)`, not arithmetic over the
+    lookback constant.** Paging and the date picker both move the window, and
+    on those the business date is usually not in it at all — `indexOf` then
+    returns -1, the offset is 0, and the board stays where the URL put it,
+    which is the whole point of the URL being the state.
+  - **The corner names the column you land on**, so `DateJump` is handed that
+    same date rather than `dates[0]`. Naming a column seven to the left of the
+    first one on screen is true of the data range and useless to the reader.
+  - `OpenOnToday` takes the scroller's **id**, not a ref: it is a client
+    component and the board is a Server Component, so a ref cannot cross that
+    boundary. Same wall as the date picker's `hrefFor` and the search button's
+    `onSearchClick`. A string crosses it. Both "Today" controls, the rail's and the date
   picker's, return to that same window rather than to a board starting on
   today — two Todays landing in different places reads as a bug.
   - **A cell in the past is not a link.** `create_booking()` refuses an
