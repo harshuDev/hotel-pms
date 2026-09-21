@@ -326,7 +326,31 @@ export default async function CalendarPage({
           subtitle={`Arriving ${format(parseISO(bookDate), "EEEE d MMMM yyyy")}`}
           closeHref={href(from, railW)}
         >
+          {/*
+            THE KEY IS THE FIX, not decoration.
+
+            `NewBookingForm` seeds its check-in and check-out from props with
+            `useState(arrival)`, which runs ONCE per mount. Clicking a second
+            cell only changes `?book=`, and React reconciles the same instance
+            at the same position in the tree -- so the state never re-seeded
+            and the form went on showing the FIRST night it was ever opened
+            with. The dialog's own subtitle updated, because that is a prop
+            rendered directly, so the header said one date and the field said
+            another; the field is what gets submitted, so the booking was
+            taken on the wrong night.
+
+            The client: "Date ko fix kro vrna ye by default mein jo date
+            dikha rha hai vhi date confirmed krne pr or hold krne pr dikha
+            rha hai."
+
+            Keying on the night and the room type remounts the form whenever
+            either changes, which re-seeds every piece of derived state at
+            once -- the dates and the prefilled room line. Syncing them in an
+            effect instead would need one per field and would fight anything
+            the user had already typed.
+          */}
           <NewBookingForm
+            key={`${bookDate}|${sp.type?.trim() ?? ""}`}
             businessDate={businessDate}
             channels={channels!}
             taxRates={taxRates!}
