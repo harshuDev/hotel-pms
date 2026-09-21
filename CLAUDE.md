@@ -1250,8 +1250,33 @@ anywhere else. Collapsed height must stay constant regardless of room count.
       nothing extra.
     - `inDialog` hides the back link and the reference heading, because the
       dialog's own title bar already carries both. Nothing else changes.
-    - `BookingDialog` takes `wide` for this, since the reservation screen
-      wraps badly in the 4xl panel the booking form uses.
+    - **IT IS A RIGHT-HAND PANEL, not a centred box** — `BookingDialog` takes
+      `side` for this. The client sent their reference's popup and asked for
+      it by shape: it comes in from the right, runs the full height of the
+      window, and the board stays visible down the left. A centred dialog
+      covered the dates you were reading, which is the one thing a popup was
+      supposed to avoid.
+      - **The booking FORM keeps the centred frame.** A panel the height of
+        the screen for six fields is the wrong shape; only the reservation,
+        which carries a room table and a folio, earns the panel.
+      - **The close goes on the LEFT of a panel**, where the reference puts it
+        and where a slide-over conventionally carries it — the panel arrives
+        from the right, so the eye lands on its left edge. On the centred
+        dialog it stays on the right.
+      - **`meta` carries Total, Paid and Due along the top**, as theirs does.
+        Read off the detail the server already loaded — `chargesCents`,
+        `paymentsCents` and `balanceCents` — so nothing new is computed and
+        the bar cannot disagree with the folio below it. Hidden below `sm`
+        rather than wrapped: the reservation repeats every one of those
+        figures a few centimetres down, so a phone loses nothing.
+      - The panel is a flex COLUMN with the body scrolling, not a `max-h` on
+        the body: that held up until the header wrapped on a narrow screen and
+        pushed the totals off the end.
+      - **Email and Attachments are NOT built.** The reference's panel carries
+        those two tabs; there is no mail in this codebase and no attachment
+        storage, so ours shows the five tabs it has. Copying the tab strip
+        without the features behind it would be two more controls that do
+        nothing.
 - **`bookings.external_payload` is empty on every row and nothing fills it.**
   OTA bookings are entered by hand (open decision 2), so the channel's raw
   payload never arrives. The screen shows the source, the settlement and

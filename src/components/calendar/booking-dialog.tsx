@@ -26,7 +26,8 @@ export function BookingDialog({
   subtitle,
   closeHref,
   closeLabel = "Close without taking a booking",
-  wide = false,
+  side = false,
+  meta,
   children,
 }: {
   title: string;
@@ -36,11 +37,26 @@ export function BookingDialog({
   /** What the close button announces. The frame wraps more than one thing. */
   closeLabel?: string;
   /**
-   * Wider, for the booking details. The reference's own details popup is
-   * close to full width, and the reservation screen carries a table of rooms
-   * and a folio that a 4xl panel wraps badly.
+   * A RIGHT-HAND PANEL rather than a centred dialog, for the booking details.
+   *
+   * The client sent their reference's popup and asked for it by shape: it
+   * slides in from the right, runs the full height of the window, and the
+   * board stays visible down the left. A centred box is what we had, and it
+   * covers the dates you were reading -- which was the whole reason they
+   * wanted a popup instead of a page in the first place.
+   *
+   * The booking FORM keeps the centred frame. It is a short form and a panel
+   * the height of the screen for six fields is the wrong shape; only the
+   * reservation, which carries a room table and a folio, earns the panel.
    */
-  wide?: boolean;
+  side?: boolean;
+  /**
+   * The figures the reference puts along the top of its panel -- Grand Total,
+   * Due, Paid. Passed in rather than worked out here, because this frame is
+   * generic and the money belongs to the booking the server already loaded.
+   * Omitted on the form, which has no totals until it is submitted.
+   */
+  meta?: { label: string; value: string; tone?: "paid" | "due" }[];
   children: React.ReactNode;
 }) {
   const router = useRouter();
@@ -87,7 +103,11 @@ export function BookingDialog({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-chrome-900/50 p-4 sm:p-6"
+      className={
+        side
+          ? "fixed inset-0 z-50 flex justify-end bg-chrome-900/50"
+          : "fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-chrome-900/50 p-4 sm:p-6"
+      }
       // Only a click that starts AND ends on the backdrop closes. A drag that
       // begins inside the form and finishes outside it is somebody selecting
       // text, and closing on that throws away everything they have typed.
@@ -100,38 +120,105 @@ export function BookingDialog({
         role="dialog"
         aria-modal="true"
         aria-labelledby="booking-dialog-title"
-        className={`my-4 w-full overflow-hidden rounded-lg border border-line bg-shell shadow-lift ${
-          wide ? "max-w-6xl" : "max-w-4xl"
-        }`}
+        className={
+          side
+            ? /*
+                Full height and flush to the right edge, like the reference's.
+                A flex COLUMN, so the header keeps its place and only the body
+                scrolls -- `max-h` on the body would work until the header
+                wrapped on a narrow screen and pushed the total off the end.
+              */
+              "flex h-full w-full flex-col overflow-hidden border-l border-line bg-shell shadow-lift sm:max-w-3xl lg:max-w-5xl"
+            : "my-4 w-full max-w-4xl overflow-hidden rounded-lg border border-line bg-shell shadow-lift"
+        }
       >
-        <div className="flex items-start justify-between gap-4 bg-chrome-800 px-5 py-3">
-          <div className="min-w-0">
+        <div className="flex items-start gap-4 bg-chrome-800 px-4 py-3 sm:px-5">
+          {/*
+            THE CLOSE GOES FIRST ON A PANEL, which is where the reference puts
+            it and where a slide-over conventionally carries it: the panel
+            arrives from the right, so the eye lands on its left edge. On the
+            centred dialog it stays on the right, as it was.
+          */}
+          {side && (
+            <button
+              type="button"
+              onClick={() => router.push(closeHref)}
+              aria-label={closeLabel}
+              className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-white/15 text-white transition hover:bg-white/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+            >
+              <svg viewBox="0 0 16 16" aria-hidden className="h-3.5 w-3.5 fill-current">
+                <path d="M4.3 3 3 4.3 6.7 8 3 11.7 4.3 13 8 9.3l3.7 3.7 1.3-1.3L9.3 8 13 4.3 11.7 3 8 6.7z" />
+              </svg>
+            </button>
+          )}
+
+          <div className="min-w-0 flex-1">
             <h2
               id="booking-dialog-title"
-              className="font-display text-[15px] font-semibold tracking-tightest text-white"
+              className="truncate font-display text-[15px] font-semibold tracking-tightest text-white"
             >
               {title}
             </h2>
-            <p className="mt-0.5 text-xxs text-white/70">{subtitle}</p>
+            <p className="mt-0.5 truncate text-xxs text-white/70">{subtitle}</p>
           </div>
+
+          {/*
+            The money, along the top, as the reference's panel carries it.
+            Hidden on a narrow screen rather than wrapped: the reservation
+            repeats every one of these figures a few centimetres below, so a
+            phone loses nothing by dropping them out of the bar.
+          */}
+          {meta && meta.length > 0 && (
+            <div className="hidden shrink-0 items-start gap-5 sm:flex">
+              {meta.map((m) => (
+                <div key={m.label} className="text-right">
+                  <div className="text-xxs uppercase tracking-[0.1em] text-white/55">
+                    {m.label}
+                  </div>
+                  <div
+                    className={`tnum font-display text-[14px] font-semibold tracking-tightest ${
+                      m.tone === "paid"
+                        ? "text-emerald-300"
+                        : m.tone === "due"
+                          ? "text-rose-300"
+                          : "text-white"
+                    }`}
+                  >
+                    {m.value}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
           {/*
             A button rather than a link, so it cannot be opened in a new tab —
             "close this" is not a destination. It pushes the same href the
             backdrop and Escape do.
           */}
-          <button
-            type="button"
-            onClick={() => router.push(closeHref)}
-            aria-label={closeLabel}
-            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-white/15 text-white transition hover:bg-white/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
-          >
-            <svg viewBox="0 0 16 16" aria-hidden className="h-3.5 w-3.5 fill-current">
-              <path d="M4.3 3 3 4.3 6.7 8 3 11.7 4.3 13 8 9.3l3.7 3.7 1.3-1.3L9.3 8 13 4.3 11.7 3 8 6.7z" />
-            </svg>
-          </button>
+          {!side && (
+            <button
+              type="button"
+              onClick={() => router.push(closeHref)}
+              aria-label={closeLabel}
+              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-white/15 text-white transition hover:bg-white/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+            >
+              <svg viewBox="0 0 16 16" aria-hidden className="h-3.5 w-3.5 fill-current">
+                <path d="M4.3 3 3 4.3 6.7 8 3 11.7 4.3 13 8 9.3l3.7 3.7 1.3-1.3L9.3 8 13 4.3 11.7 3 8 6.7z" />
+              </svg>
+            </button>
+          )}
         </div>
 
-        <div className="max-h-[75vh] overflow-y-auto p-4 sm:p-5">{children}</div>
+        <div
+          className={
+            side
+              ? "min-h-0 flex-1 overflow-y-auto p-4 sm:p-5"
+              : "max-h-[75vh] overflow-y-auto p-4 sm:p-5"
+          }
+        >
+          {children}
+        </div>
       </div>
     </div>
   );
