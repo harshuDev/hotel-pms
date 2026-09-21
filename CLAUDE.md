@@ -737,6 +737,28 @@ showed the Reservation Centric calendar and asked for it by name.
       than merely clean — the same two greens the menu uses, so the board and
       the menu cannot say different things — and Do not disturb takes amber on
       an occupied room.
+    - **THE MENU IS PORTALLED TO `document.body`, AND IT HAS TO BE.** Each
+      room row's rail cell is `sticky left-0 z-10` — a positioned element with
+      a z-index, which creates a STACKING CONTEXT. So a `z-50` on a menu
+      inside room 103's cell only ranks it against room 103's own contents;
+      rows 104, 105 and the rest are later siblings at the same `z-10` and
+      paint straight over it. The client saw a menu with only its first item
+      visible and everything below it buried under the room numbers.
+      - **This is the same trap the top nav documents**, and the third time it
+        has bitten this board. Raising the number does not help, because the
+        competition is between the ROWS and not inside them.
+      - A portal leaves the stacking contexts behind, so the menu is placed by
+        measuring the dot rather than by `absolute`. It clamps to the viewport
+        both ways — the rail is on the left of a phone, so it opens to the
+        right and flips only when there is no room, and a dot near the foot of
+        a long list would otherwise hang off the bottom.
+      - **It closes on scroll.** The board is a scroller and the menu is fixed
+        to the viewport, so the two come apart the moment anything moves;
+        re-measuring every frame would have the menu chasing the dot across
+        the screen, which is worse than it going away.
+      - `AssignRoom` is NOT affected and needs no portal: its dropdown sits in
+        the grid, whose row wrappers are `relative` with no z-index, so they
+        are not stacking contexts and its `z-50` still wins.
     - **Occupied is not offered in either direction**, as before: a guest being
       in the room is what puts it there.
   - **A GUEST CAN BE UPGRADED INTO ANOTHER ROOM TYPE** (0062). The client:
