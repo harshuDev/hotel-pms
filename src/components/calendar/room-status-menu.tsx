@@ -39,6 +39,13 @@ import type { HousekeepingChoice, RoomStatus } from "@/lib/types";
  *     not a state of cleanliness, so it is a separate toggle and Postgres
  *     refuses it on a room with nobody in it.
  *
+ * WHICH ROWS APPEAR DEPENDS ON THE ROOM, and the menu says nothing about the
+ * ones it leaves out. A vacant room gets the four cleaning states; an
+ * occupied room gets Do not disturb. There are no greyed rows and no sentence
+ * explaining why something is unavailable -- a control that is not offered
+ * needs no explanation, and both the disabled rows and the prose were things
+ * the client has now objected to twice.
+ *
  * THE MENU IS PORTALLED TO `document.body`, AND IT HAS TO BE. Each room row's
  * rail cell is `sticky left-0 z-10` -- a positioned element with a z-index,
  * which creates a STACKING CONTEXT. So a `z-50` on a menu inside room 103's
@@ -208,48 +215,28 @@ export function RoomStatusMenu({
               className="fixed z-[61] w-48 rounded-md border border-line bg-white py-1 shadow-lift"
               style={{ left: pos.left, top: pos.top }}
             >
-              {CHOICES.map((c) => (
-                <button
-                  key={c.choice}
-                  type="button"
-                  disabled={pending || status === "occupied"}
-                  onClick={() =>
-                    run(() => setRoomHousekeeping({ roomId, choice: c.choice }))
-                  }
-                  className={cn(
-                    "flex w-full items-center gap-2 px-3 py-1.5 text-left text-[13px] transition",
-                    c.choice === current
-                      ? "cursor-default text-ink-faint"
-                      : "text-ink hover:bg-shell",
-                    (pending || status === "occupied") && "opacity-50",
-                  )}
-                >
-                  <span
-                    className={cn("h-2 w-2 shrink-0 rounded-full", c.dot)}
-                  />
-                  <span className="min-w-0 flex-1 truncate">
-                    {c.label}
-                    {c.note && (
-                      <span className="block text-xxs text-ink-faint">
-                        {c.note}
-                      </span>
-                    )}
-                  </span>
-                  {c.choice === current && (
-                    <span className="shrink-0 text-xxs text-ink-faint">
-                      now
-                    </span>
-                  )}
-                </button>
-              ))}
-
               {/*
-              Do not disturb sits below a rule, because it is the guest's
-              request rather than a point on the scale above. It is only
-              offered while somebody is in the room — Postgres refuses it
-              otherwise, and a menu that offers a refusal is worse than one
-              that does not offer it.
-            */}
+                THE MENU OFFERS WHAT YOU CAN DO, AND NOTHING ELSE.
+
+                It used to show all five rows always, greying out whichever
+                the room's state forbade and printing a sentence underneath
+                saying why -- "Occupied - check the guest out before changing
+                its state", "Do not disturb needs a guest in the room". The
+                client struck both out: "there's no need as client have said
+                earlier also."
+
+                They are right twice over. That prose is exactly what the copy
+                rules forbid, and the greyed rows were disabled controls,
+                which this application does not have -- the client objected to
+                one in the user menu and was right then too. An explanation
+                for why a control is dead is not needed when the control is
+                simply not offered.
+
+                So a vacant room gets the cleaning states, an occupied room
+                gets Do not disturb, and neither is told about the other.
+                Postgres enforces the same split, so nothing here is the only
+                thing standing between a bad write and the database.
+              */}
               {status === "occupied" ? (
                 <button
                   type="button"
@@ -258,7 +245,7 @@ export function RoomStatusMenu({
                     run(() => setRoomDoNotDisturb(roomId, !doNotDisturb))
                   }
                   className={cn(
-                    "mt-1 flex w-full items-center gap-2 border-t border-line px-3 py-1.5 text-left text-[13px] transition",
+                    "flex w-full items-center gap-2 px-3 py-1.5 text-left text-[13px] transition",
                     "text-ink hover:bg-shell",
                     pending && "opacity-50",
                   )}
@@ -266,29 +253,48 @@ export function RoomStatusMenu({
                   <span className="h-2 w-2 shrink-0 rounded-full bg-warn" />
                   <span className="min-w-0 flex-1 truncate">
                     Do not disturb
-                    <span className="block text-xxs text-ink-faint">
-                      Guest is in the room
-                    </span>
                   </span>
                   {doNotDisturb && (
                     <span className="shrink-0 text-xxs text-warn-deep">on</span>
                   )}
                 </button>
               ) : (
-                <span className="mt-1 block border-t border-line px-3 py-1.5 text-[12.5px] leading-snug text-ink-faint">
-                  Do not disturb needs a guest in the room.
-                </span>
-              )}
-
-              {/*
-              Occupied is shown rather than silently missing, and is not
-              selectable: a guest being in the room is what puts it there, and
-              check-in and check-out are what move it.
-            */}
-              {status === "occupied" && (
-                <span className="block border-t border-line px-3 py-1.5 text-[12px] leading-snug text-ink-faint">
-                  Occupied — check the guest out before changing its state.
-                </span>
+                CHOICES.map((c) => (
+                  <button
+                    key={c.choice}
+                    type="button"
+                    disabled={pending}
+                    onClick={() =>
+                      run(() =>
+                        setRoomHousekeeping({ roomId, choice: c.choice }),
+                      )
+                    }
+                    className={cn(
+                      "flex w-full items-center gap-2 px-3 py-1.5 text-left text-[13px] transition",
+                      c.choice === current
+                        ? "cursor-default text-ink-faint"
+                        : "text-ink hover:bg-shell",
+                      pending && "opacity-50",
+                    )}
+                  >
+                    <span
+                      className={cn("h-2 w-2 shrink-0 rounded-full", c.dot)}
+                    />
+                    <span className="min-w-0 flex-1 truncate">
+                      {c.label}
+                      {c.note && (
+                        <span className="block text-xxs text-ink-faint">
+                          {c.note}
+                        </span>
+                      )}
+                    </span>
+                    {c.choice === current && (
+                      <span className="shrink-0 text-xxs text-ink-faint">
+                        now
+                      </span>
+                    )}
+                  </button>
+                ))
               )}
 
               {error && (

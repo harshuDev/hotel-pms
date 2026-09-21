@@ -759,6 +759,26 @@ showed the Reservation Centric calendar and asked for it by name.
       - `AssignRoom` is NOT affected and needs no portal: its dropdown sits in
         the grid, whose row wrappers are `relative` with no z-index, so they
         are not stacking contexts and its `z-50` still wins.
+    - **THE MENU OFFERS ONLY WHAT THE ROOM ALLOWS, and explains nothing about
+      the rest.** A vacant room gets the four cleaning states; an occupied
+      room gets Do not disturb. Neither is told about the other.
+      - It used to show all five always, greying out whatever the room's state
+        forbade and printing a sentence underneath saying why — "Occupied —
+        check the guest out before changing its state", "Do not disturb needs
+        a guest in the room". The client struck both out: "there's no need as
+        client have said earlier also."
+      - **They were right on both counts.** The sentences are exactly the
+        explanatory copy the rules forbid, and the greyed rows were disabled
+        controls, which this application does not have — see the user-menu
+        note, where the client objected to one and was right then too. **A
+        control that is not offered needs no explanation.**
+      - **"Takes it off sale" under Broken stays.** That is the one permitted
+        clause on a control whose consequence is not obvious, the same
+        exception the overbook tickbox holds. It is a consequence, not an
+        explanation of why a row is dead.
+      - Postgres enforces the same split either way, so hiding a row is a
+        courtesy and never the only thing standing between a bad write and the
+        database.
     - **Occupied is not offered in either direction**, as before: a guest being
       in the room is what puts it there.
   - **A GUEST CAN BE UPGRADED INTO ANOTHER ROOM TYPE** (0062). The client:
