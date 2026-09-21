@@ -1,4 +1,5 @@
 import { addDays, format, isValid, parseISO, subDays } from "date-fns";
+import { formatMoney } from "@/lib/money";
 import { EmptyState } from "@/components/ui";
 import {
   CalendarBoard,
@@ -402,7 +403,31 @@ export default async function CalendarPage({
           }
           closeHref={href(from, railW)}
           closeLabel="Close the booking"
-          wide
+          side
+          /*
+            The three figures the reference's panel carries along its top.
+            Read off the detail the server already loaded rather than worked
+            out here -- `chargesCents` and `paymentsCents` are what the folio
+            says, and `balanceCents` is their difference under the sign
+            convention, so nothing new is being computed and the bar cannot
+            disagree with the folio a few centimetres below it.
+          */
+          meta={[
+            {
+              label: "Total",
+              value: formatMoney(peek.detail.chargesCents),
+            },
+            {
+              label: "Paid",
+              value: formatMoney(peek.detail.paymentsCents),
+              tone: "paid" as const,
+            },
+            {
+              label: "Due",
+              value: formatMoney(peek.detail.balanceCents),
+              tone: peek.detail.balanceCents > 0 ? ("due" as const) : undefined,
+            },
+          ]}
         >
           <BookingDetailView
             detail={peek.detail}
