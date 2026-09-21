@@ -473,6 +473,25 @@ showed the Reservation Centric calendar and asked for it by name.
   for a calendar they can see and click, and the native control shows one only
   behind a small icon in an 18px field on a dark rail, which nobody reads as a
   calendar. Picking a day navigates, and "Today" returns to the business date.
+  - **THE CORNER MUST NOT READ AS "today is <date>".** The picker's button
+    shows where the BOARD STARTS, which since the lookback landed is a week
+    BEFORE the business date — so it can never equal the date the top bar
+    shows, and the two sat on screen contradicting each other. The client
+    circled both: "Business date Sat 19 Sep 2026" above, "12 Sep 2026" in the
+    corner.
+    - Nothing was wrong with either figure. The fault was typographic: the
+      Today control carried the same styling as the "Date" heading above it —
+      uppercase, tracked, semibold — so the three stacked lines read as
+      "DATE / TODAY / 12 Sep 2026", a heading, a sub-heading and a value.
+    - **Today is a chip now**, matching the `+`, `−` and the picker beside it,
+      so all four read as things you press rather than captions. Do not style
+      it like the "Date" label again.
+    - **The picker's label starts with "From"**, so the date on it says which
+      of the two dates it is. One word, and it is a control label rather than
+      explanatory copy, so the no-prose rule is intact.
+    - The popover marks both: the window start in `brass`, the business date in
+      rose. Seeing them as two different days in one month grid is the clearest
+      statement that they are two different things.
   - It is a client component, so it takes `basePath` and `railW` and builds its
     own href. **A Server Component cannot hand it a `hrefFor` closure** — React
     refuses to serialise a function across that boundary, and the page 500s.

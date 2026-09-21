@@ -24,9 +24,14 @@ import { cn } from "@/components/ui";
  * 18 pixels tall, on a dark rail, which is not a calendar as far as anybody
  * using it is concerned. So this draws the month.
  *
- * Picking a day navigates the board to it. "Today" goes back to the business
- * date. Nothing here decides what the board shows — it only builds the href,
- * so the server still renders the board and the URL is still the whole state.
+ * Picking a day navigates the board to it. "Today" goes back to the default
+ * window -- which STARTS A WEEK BEFORE the business date, not on it, because
+ * the board deliberately opens with some history to the left. That is also why
+ * the button's own label says "From": the date on it is where the board
+ * starts, and it is a week behind the business date the top bar shows.
+ *
+ * Nothing here decides what the board shows — it only builds the href, so the
+ * server still renders the board and the URL is still the whole state.
  */
 export function DateJump({
   /** The first date currently on the board — what the picker opens on. */
@@ -108,13 +113,22 @@ export function DateJump({
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
         aria-haspopup="dialog"
-        title="Go to a date"
+        title={`The board starts on ${format(first, "d MMM yyyy")}. Go to another date.`}
+        aria-label={`The board starts on ${format(first, "d MMM yyyy")}. Go to another date.`}
         className="flex w-full items-center gap-1.5 rounded-sm bg-white/15 px-1.5 py-[3px] text-left text-xxs font-medium text-white transition hover:bg-white/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
       >
         <svg viewBox="0 0 16 16" aria-hidden className="h-3 w-3 shrink-0 fill-current">
           <path d="M5 1v1.5H3.8A1.8 1.8 0 0 0 2 4.3v8A1.8 1.8 0 0 0 3.8 14h8.4a1.8 1.8 0 0 0 1.8-1.7v-8a1.8 1.8 0 0 0-1.8-1.8H11V1H9.5v1.5h-3V1zM3.5 6.2h9v6.1a.3.3 0 0 1-.3.2H3.8a.3.3 0 0 1-.3-.2z" />
         </svg>
-        <span className="truncate">{format(first, "d MMM yyyy")}</span>
+        {/*
+          "From", because this is WHERE THE BOARD STARTS and not what day it
+          is. A bare date here sat directly under the Today control and the
+          two read as a label and its value, so the board appeared to claim
+          today was this date -- while the top bar, correctly, showed the
+          business date a week later. One word, and the field now says which
+          of the two it is.
+        */}
+        <span className="truncate">From {format(first, "d MMM yyyy")}</span>
       </button>
 
       {open && (

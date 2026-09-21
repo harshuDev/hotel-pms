@@ -1026,9 +1026,26 @@ export function CalendarBoard({
                   </Link>
                 </span>
               </div>
+              {/*
+                A CONTROL, NOT A CAPTION -- and it has to look like one.
+
+                This used to carry the same styling as the "Date" heading
+                above it: uppercase, tracked, semibold. Stacked straight on
+                top of the date picker, the three lines read as
+                "DATE / TODAY / 12 Sep 2026" -- a heading, a sub-heading and a
+                value -- so the board appeared to be announcing that today was
+                the date in the field. It is not: the field shows where the
+                BOARD STARTS, which is a week before the business date since
+                the lookback was added, so the two could never agree and the
+                client rightly flagged it against the top bar's business date.
+
+                Chip styling, matching the + and - beside it and the picker
+                below it, so all four read as things you press.
+              */}
               <Link
                 href={todayHref}
-                className="mt-0.5 block text-xxs font-semibold uppercase tracking-[0.12em] text-white hover:underline"
+                title="Back to the current dates"
+                className="mt-0.5 inline-flex rounded-sm bg-white/15 px-1.5 py-[1px] text-xxs font-medium text-white transition hover:bg-white/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
               >
                 Today
               </Link>
