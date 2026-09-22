@@ -12,6 +12,8 @@ import { CheckInAction, CheckOutAction } from "@/components/dashboard/movement-a
 import { formatMoney, parseMoney } from "@/lib/money";
 import {
   cancelBooking,
+  cancelBookingRoom,
+  restoreBookingRoom,
   restoreBooking,
   confirmBooking,
   setBookingRoomRate,
@@ -199,6 +201,18 @@ export function BookingDetailView({
   const [newRate, setNewRate] = useState("");
 
   /*
+   * Cancelling ONE room out of a group booking (0065). Which line is asking,
+   * and the refusal when putting one back finds the room has been sold since
+   * -- kept per line, because a group can be twenty-seven rooms and a message
+   * with no room against it says nothing.
+   */
+  const [roomCancelling, setRoomCancelling] = useState<string | null>(null);
+  const [roomCancelReason, setRoomCancelReason] = useState("");
+  const [roomRestoreBlocked, setRoomRestoreBlocked] = useState<
+    { bookingRoomId: string; message: string } | null
+  >(null);
+
+  /*
    * The extras, derived from the folio rather than read separately.
    *
    * These are the same rows the Folio tab draws, filtered by the rule the
@@ -213,6 +227,16 @@ export function BookingDetailView({
       !NOT_AN_EXTRA.includes(l.itemType),
   );
   const extrasCents = extras.reduce((sum, l) => sum + l.amountCents, 0);
+
+  /*
+   * How many rooms this booking still holds. Cancelling ONE room is offered
+   * only above one, because the last one is the booking itself -- Postgres
+   * refuses it by name and says to cancel the booking instead, and a control
+   * that is always refused is a control that should not be drawn.
+   */
+  const liveRooms = rooms.filter(
+    (r) => !["canceled", "no_show"].includes(r.status),
+  ).length;
 
   const settled = detail.balanceCents === 0;
   const unpriced = nights.filter((n) => n.roomRateCents === 0);
@@ -263,6 +287,8 @@ export function BookingDetailView({
       setEditing(false);
       setCancelling(false);
       setPricing(null);
+      setRoomCancelling(null);
+      setRoomRestoreBlocked(null);
       router.refresh();
     });
   }
@@ -743,8 +769,15 @@ export function BookingDetailView({
         <div className="space-y-4">
           {rooms.map((room) => {
             const roomNights = nights.filter((n) => n.bookingRoomId === room.bookingRoomId);
+            const roomCanceled = ["canceled", "no_show"].includes(room.status);
             return (
-              <div key={room.bookingRoomId} className="rounded-md border border-line">
+              <div
+                key={room.bookingRoomId}
+                className={cn(
+                  "rounded-md border border-line",
+                  roomCanceled && "bg-shell/60",
+                )}
+              >
                 <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line px-4 py-3">
                   <div>
                     <span className="font-medium text-ink">
@@ -755,6 +788,17 @@ export function BookingDetailView({
                       {room.adults} adult{room.adults === 1 ? "" : "s"}
                       {room.children > 0 && ` + ${room.children}`}
                     </span>
+                    {/*
+                      Only when this room does not agree with the booking --
+                      which since 0065 is possible, and is the whole point. A
+                      badge repeating the header's status on every line would
+                      be noise on the twenty-seven-room group.
+                    */}
+                    {room.status !== detail.status && (
+                      <span className="ml-2 align-middle">
+                        <StatusBadge status={room.status} />
+                      </span>
+                    )}
                   </div>
                   <div className="flex items-center gap-3">
                     <span className="tnum text-[13px] text-ink">
@@ -765,7 +809,7 @@ export function BookingDetailView({
                         {formatMoney(room.discountCents)} off
                       </span>
                     )}
-                    {canEdit && editable && (
+                    {canEdit && editable && !roomCanceled && (
                       <button
                         onClick={() =>
                           setPricing(pricing === room.bookingRoomId ? null : room.bookingRoomId)
@@ -775,8 +819,122 @@ export function BookingDetailView({
                         Set rate
                       </button>
                     )}
+                    {/*
+                      CANCEL ONE ROOM OUT OF A GROUP (0065). The client:
+                      "Group bookings allow the receptionist to be able to
+                      cancel a reservation." Only above one live room -- the
+                      last one is the booking, and cancelling the booking is
+                      the header's own button.
+                    */}
+                    {canEdit && editable && liveRooms > 1 && !roomCanceled && (
+                      <button
+                        onClick={() => {
+                          setRoomCancelReason("");
+                          setRoomCancelling(
+                            roomCancelling === room.bookingRoomId ? null : room.bookingRoomId,
+                          );
+                        }}
+                        className="rounded border border-rose-300 px-2.5 py-1 text-xxs text-rose-700 hover:bg-rose-50"
+                      >
+                        Cancel this room
+                      </button>
+                    )}
+                    {canEdit && editable && room.canceledSeparately && (
+                      <button
+                        onClick={() => {
+                          setRoomRestoreBlocked(null);
+                          run(
+                            () =>
+                              restoreBookingRoom({
+                                bookingId: detail.bookingId,
+                                bookingRoomId: room.bookingRoomId,
+                              }),
+                            "Room restored.",
+                            (m) =>
+                              setRoomRestoreBlocked({
+                                bookingRoomId: room.bookingRoomId,
+                                message: m,
+                              }),
+                          );
+                        }}
+                        disabled={pending}
+                        className="rounded border border-emerald-300 px-2.5 py-1 text-xxs text-emerald-700 hover:bg-emerald-50 disabled:opacity-50"
+                      >
+                        Restore this room
+                      </button>
+                    )}
                   </div>
                 </div>
+
+                {roomCancelling === room.bookingRoomId && (
+                  <div className="flex flex-wrap items-end gap-3 border-b border-line bg-rose-50/50 px-4 py-3">
+                    <div className="min-w-[240px] flex-1">
+                      <label htmlFor={`rc-${room.bookingRoomId}`} className={label}>
+                        Reason
+                      </label>
+                      <input
+                        id={`rc-${room.bookingRoomId}`}
+                        value={roomCancelReason}
+                        placeholder="Recorded on the booking's staff notes"
+                        onChange={(e) => setRoomCancelReason(e.target.value)}
+                        className={field}
+                      />
+                    </div>
+                    <button
+                      onClick={() =>
+                        run(
+                          () =>
+                            cancelBookingRoom({
+                              bookingId: detail.bookingId,
+                              bookingRoomId: room.bookingRoomId,
+                              reason: roomCancelReason,
+                            }),
+                          "Room cancelled. The rest of the booking is unchanged.",
+                        )
+                      }
+                      disabled={pending}
+                      className="rounded-md bg-rose-600 px-4 py-2 text-[13px] font-medium text-white hover:bg-rose-700 disabled:opacity-50"
+                    >
+                      Cancel this room
+                    </button>
+                    <button
+                      onClick={() => setRoomCancelling(null)}
+                      className="rounded-md border border-line px-4 py-2 text-[13px] text-ink-muted hover:bg-shell hover:text-ink"
+                    >
+                      Keep it
+                    </button>
+                  </div>
+                )}
+
+                {/*
+                  The refusal when the room has been sold since it was
+                  cancelled, with the override carrying Postgres's own words --
+                  the same second ask taking an overbooked booking makes.
+                */}
+                {roomRestoreBlocked?.bookingRoomId === room.bookingRoomId && (
+                  <div className="flex flex-wrap items-center gap-3 border-b border-line bg-rose-50 px-4 py-3">
+                    <p className="flex-1 text-[13px] text-rose-700">
+                      {roomRestoreBlocked.message}
+                    </p>
+                    <button
+                      onClick={() =>
+                        run(
+                          () =>
+                            restoreBookingRoom({
+                              bookingId: detail.bookingId,
+                              bookingRoomId: room.bookingRoomId,
+                              allowOverbook: true,
+                            }),
+                          "Room restored, and the house is oversold for those nights.",
+                        )
+                      }
+                      disabled={pending}
+                      className="rounded-md bg-rose-600 px-4 py-2 text-[13px] font-medium text-white hover:bg-rose-700 disabled:opacity-50"
+                    >
+                      Restore it anyway
+                    </button>
+                  </div>
+                )}
 
                 {pricing === room.bookingRoomId && (
                   <div className="flex flex-wrap items-end gap-3 border-b border-line bg-shell px-4 py-3">

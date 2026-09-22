@@ -2118,6 +2118,7 @@ export async function getBookingRoomLines(
       room_id: string | null;
       room_number: string | null;
       status: BookingStatus;
+      canceled_separately: boolean;
       check_in: string;
       check_out: string;
       nights: number;
@@ -2130,6 +2131,7 @@ export async function getBookingRoomLines(
     }[]
   ).map((row) => ({
     bookingRoomId: row.booking_room_id,
+    canceledSeparately: row.canceled_separately,
     roomTypeId: row.room_type_id,
     roomTypeName: row.room_type_name,
     roomId: row.room_id,
@@ -2455,7 +2457,9 @@ export async function getPropertySettings(): Promise<PropertySettings> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("properties")
-    .select("id, name, timezone, currency, check_in_time, check_out_time")
+    .select(
+      "id, name, timezone, currency, check_in_time, check_out_time, audit_close_time",
+    )
     .single();
 
   if (error) throw new Error(`Failed to load the property: ${error.message}`);
@@ -2467,6 +2471,7 @@ export async function getPropertySettings(): Promise<PropertySettings> {
     currency: string;
     check_in_time: string | null;
     check_out_time: string | null;
+    audit_close_time: string;
   };
 
   return {
@@ -2476,6 +2481,7 @@ export async function getPropertySettings(): Promise<PropertySettings> {
     currency: row.currency,
     checkInTime: row.check_in_time,
     checkOutTime: row.check_out_time,
+    auditCloseTime: row.audit_close_time,
   };
 }
 

@@ -9,24 +9,25 @@ export interface CloseDayResult {
   nextDate: string;
   roomChargesPosted: number;
   roomChargesCents: number;
-  /** Confirmed bookings whose guest never arrived, released by this run. */
-  noShowsMarked: number;
-  /** The first night billed for each of them. Zero when no rate was loaded. */
-  noShowFeesCents: number;
 }
 
 /**
- * Runs the night audit: records no-shows, posts the night's room charges,
- * closes the open business date and opens the next one, all in one
- * transaction.
+ * Runs the night audit: posts the night's room charges, closes the open
+ * business date and opens the next one, all in one transaction.
  *
  * The RPC is the gate, not this action — it refuses anyone who is not an
  * administrator or manager, and refuses while a cashier shift is still open.
  *
- * The no-show step releases the rooms of any confirmed booking whose arrival
- * has been reached and who never checked in, and bills the first night. That
- * is money moving without anybody typing, so the dialog reports it rather than
- * letting it happen quietly.
+ * IT NO LONGER MARKS ANYBODY A NO-SHOW (0064). It used to sweep every
+ * confirmed booking whose arrival had been reached and nobody had checked in,
+ * release its rooms and bill the first night. The client asked for that to be
+ * a person's decision: "sometimes people arrive late because of a delayed
+ * flight or whatever reason". The manual path is the booking screen's "Mark no
+ * show", which calls the same `cancel_booking(..., p_no_show => true)` the
+ * sweep called, so nothing was lost but the automatic trigger.
+ *
+ * Only nights whose status is `checked_in` are charged, so a guest who never
+ * arrived is billed nothing — but their rooms stay held until somebody acts.
  */
 export async function closeBusinessDate(): Promise<
   ActionResult<CloseDayResult>
@@ -45,8 +46,6 @@ export async function closeBusinessDate(): Promise<
       next_date: string;
       room_charges_posted: number;
       room_charges_cents: number;
-      no_shows_marked: number;
-      no_show_fees_cents: number;
     }[]
   )[0];
 
@@ -68,8 +67,6 @@ export async function closeBusinessDate(): Promise<
       nextDate: row.next_date,
       roomChargesPosted: row.room_charges_posted,
       roomChargesCents: row.room_charges_cents,
-      noShowsMarked: row.no_shows_marked,
-      noShowFeesCents: row.no_show_fees_cents,
     },
   };
 }

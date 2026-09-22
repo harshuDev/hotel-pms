@@ -112,6 +112,66 @@ export async function cancelBooking(input: {
 }
 
 /**
+ * Cancelling ONE room out of a group booking (0065).
+ *
+ * The client: "Group bookings allow the receptionist to be able to cancel a
+ * reservation." A group is one booking carrying several rooms, and until this
+ * the only cancel was `cancelBooking()`, which takes the whole thing down —
+ * five rooms booked, one guest drops out, and the desk could cancel all five
+ * or none.
+ *
+ * Postgres refuses the LAST live room by name and says to cancel the booking
+ * instead, so this can never quietly leave a confirmed reservation holding no
+ * rooms at all. It refuses an in-house room too: a guest in the room is
+ * checked out, never cancelled.
+ */
+export async function cancelBookingRoom(input: {
+  bookingId: string;
+  bookingRoomId: string;
+  reason: string;
+}): Promise<ActionResult<null>> {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("cancel_booking_room", {
+    p_booking_room_id: input.bookingRoomId,
+    p_reason: input.reason || null,
+  });
+
+  if (error) return { ok: false, error: error.message };
+
+  revalidateBooking(input.bookingId);
+  return { ok: true, data: null };
+}
+
+/**
+ * Putting one of those rooms back (0065).
+ *
+ * The mirror of the above and the reason it is safe to ship: a destructive
+ * control with no undo is one misclick from a reservation nobody can rebuild,
+ * and every other cancel in this application has one.
+ *
+ * `allowOverbook` is a deliberate second call for the same reason it is on
+ * `restoreBooking()` — cancelling gave the room back to the house and somebody
+ * may have sold it since, so the default refuses with `HP001` and the caller
+ * asks again having read what it said.
+ */
+export async function restoreBookingRoom(input: {
+  bookingId: string;
+  bookingRoomId: string;
+  allowOverbook?: boolean;
+}): Promise<ActionResult<null>> {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("restore_booking_room", {
+    p_booking_room_id: input.bookingRoomId,
+    p_allow_overbook: input.allowOverbook ?? false,
+  });
+
+  if (error) return { ok: false, error: error.message };
+
+  revalidateBooking(input.bookingId);
+  return { ok: true, data: null };
+}
+
+/**
  * Putting a cancelled booking back on the house (0061).
  *
  * `allowOverbook` is a deliberate second call, not a flag the first screen
