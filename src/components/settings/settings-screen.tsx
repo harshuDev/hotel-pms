@@ -186,6 +186,7 @@ export function SettingsScreen({
     currency: property.currency,
     checkInTime: property.checkInTime?.slice(0, 5) ?? "15:00",
     checkOutTime: property.checkOutTime?.slice(0, 5) ?? "11:00",
+    auditCloseTime: property.auditCloseTime.slice(0, 5),
   });
 
   /* -- Room types ----------------------------------------------------- */
@@ -385,6 +386,24 @@ export function SettingsScreen({
                 value={prop.checkOutTime}
                 disabled={!canEdit}
                 onChange={(e) => setProp({ ...prop, checkOutTime: e.target.value })}
+                className={cn(field, "tnum")}
+              />
+            </div>
+            {/*
+              The hour this property's day closes, on its own clock. The client:
+              "a hotel in London cannot run on the same time as a hotel in
+              Mexico" -- so it sits beside the timezone that gives it meaning,
+              and beside the two times it is a sibling of, rather than in a
+              settings tab of its own.
+            */}
+            <div>
+              <label htmlFor="p-audit" className={label}>Night audit at</label>
+              <input
+                id="p-audit"
+                type="time"
+                value={prop.auditCloseTime}
+                disabled={!canEdit}
+                onChange={(e) => setProp({ ...prop, auditCloseTime: e.target.value })}
                 className={cn(field, "tnum")}
               />
             </div>

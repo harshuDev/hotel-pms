@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0063` are
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0064` are
 applied to the hosted database.
 
 Working on real data: dashboard (house board, movements, pace, activity feed),
@@ -49,11 +49,21 @@ SQL, and as of 0031 an individual room and the payment methods can be corrected
 there too. Until a channel exists, no booking can be taken at all: every
 booking must have a source.
 
-The night audit advances the business date one day at a time, posts that
-night's room charges and records no-shows, so it is run once per day rather
-than caught up automatically. Nothing runs it on a schedule: "Close the day"
-on the dashboard is the only caller, and it refuses while a cashier shift is
-still open on the date being closed.
+The night audit advances the business date one day at a time and posts that
+night's room charges, so it is run once per day rather than caught up
+automatically. Nothing runs it on a schedule: "Close the day" on the dashboard
+is the only caller, and it refuses while a cashier shift is still open on the
+date being closed.
+
+**IT NO LONGER MARKS NO-SHOWS, as of 0064.** See open decision 11, which has
+been reversed. **The hour it should run at now lives on the property** —
+`properties.audit_close_time`, defaulting to 02:00, set in Settings beside the
+check-in and check-out times and read against `properties.timezone`. **Nothing
+reads that column yet**, because the scheduled job that will is the next piece
+of work and the client has not finished settling what it may do. It is a stored
+choice rather than a live setting, and it is the one place in this application
+where a control does not yet change anything — if the job does not land, the
+field comes out again.
 
 A client revision round has been applied on top of the original build: the
 palette moved from brass/slate to the client's white/blue/dark-blue scheme, the
@@ -1389,11 +1399,19 @@ anywhere else. Collapsed height must stay constant regardless of room count.
   sixty-four percent off and nobody notices until the month end.
 - **A hand-priced room line gets no promotion.** Somebody has already decided
   what that room costs, and a discount on top would be a second reduction.
-- **`save_property()` refuses a missing check-in or check-out time.** The
-  columns are `not null` and every arrival and departure is timed against them,
-  so there is no blank to fall back to. Until 0032 the null went straight into
-  the UPDATE and a manager who cleared the field got the raw not-null violation
-  back.
+- **`save_property()` refuses a missing check-in, check-out or night audit
+  time.** The columns are `not null` and every arrival and departure is timed
+  against them, so there is no blank to fall back to. Until 0032 the null went
+  straight into the UPDATE and a manager who cleared the field got the raw
+  not-null violation back. `audit_close_time` joined them in 0064 and takes the
+  same treatment: a cleared field is refused by name rather than quietly
+  keeping the old value, which would read as a save that did not save.
+  - **0064 DROPPED the five-parameter signature before creating the
+    six-parameter one.** A changed parameter list is a new function, so
+    `create or replace` would have left two `save_property` functions side by
+    side and PostgREST would refuse to choose between them — the overload trap
+    that keeps `set_room_photo()` and
+    `set_rate_plan_cancellation_policy()` out of the functions they belong to.
 - **A property is set up from `/settings`, not from SQL.** Room types, rooms,
   booking sources, tax rates and the property itself are all written through
   RPCs in `src/lib/actions/settings.ts`. Settings lives in the user menu, not
@@ -1931,30 +1949,44 @@ than proceeding.
     reclaim it would want exclusive instead — and that is a new rate, not an
     edit: a rate with posted charges against it is frozen, because a folio item
     records which rate it used.
-11. **No-show policy at night audit — settled: mark and charge the first
-    night.** `close_business_date()` now sweeps every `confirmed` booking whose
-    arrival date has been reached and which nobody checked in. It calls
-    `cancel_booking(..., p_no_show => true)` — the existing release path, not a
-    second one — so the rooms and nights go to `no_show` and back on sale, and
-    it posts the arrival night as a fee on the folio.
-    - **`pending` is deliberately not swept.** The guest booking page creates
-      pending bookings; billing somebody for a stay the hotel never confirmed
-      is a mistake, not a no-show.
-    - **The fee is `miscellaneous`, not `room_charge`.** `post_charge()`
-      refuses `room_charge` outright, and rightly: a room charge belongs to a
-      night somebody occupied and is keyed to `booking_room_night_id` by a
-      unique index. Posting a no-show as room revenue would put room revenue
-      against a room nobody slept in and break the tie between the financial
-      report and the occupancy report. It lands in extras, where a fee belongs.
-    - **The amount is the arrival night exactly** — rate less discount as the
-      net and the night's own tax as the tax, summed over every room on the
-      booking. A booking with no rate loaded is marked and charged nothing,
-      because there is nothing to bill and a made-up figure is worse.
-    - **Whether a no-show fee is VATable is a question for the accountant.** It
-      currently carries the tax the night carried. If the answer is that it
-      should not, that is a change to the audit.
-    - The sweep uses `check_in <= business_date`, not `=`, so a backlog cannot
-      accumulate silently if the audit is not run for a few days.
+11. **No-show policy at night audit — SETTLED THE OTHER WAY, AS OF 0064: A
+    NO-SHOW IS A PERSON'S DECISION AND THE AUDIT MAKES NONE.** This entry used
+    to say the opposite — that `close_business_date()` swept every `confirmed`
+    booking whose arrival had been reached and nobody had checked in, released
+    its rooms and billed the first night. 0040 built that; 0064 removed it.
+    - **The client settled it when told the audit would run unattended:** "No
+      show should be manual because sometimes people arrive late because of a
+      delayed flight or whatever reason", and "we don't want it to
+      automatically cancelled reservations of guests that have not arrived at
+      the property. It would generate chaos for the hotel."
+    - **They are right, and the cost of being wrong is asymmetric.** A guest
+      landing at 4am on a delayed flight, whose room went back on sale at 2am
+      and who was billed a fee nobody discussed with them, is an argument at
+      the desk and a reversal on the folio. The opposite mistake — a room held
+      a few hours too long — costs the hotel one morning's attention.
+    - **NOTHING WAS LOST, because the manual path predates the sweep.** The
+      cancel dialog on the booking screen carries a "Mark no show" tickbox,
+      which calls the same `cancel_booking(..., p_no_show => true)` the sweep
+      called. 0064 deleted a caller, not a capability. Everything the old note
+      said about the FEE still holds wherever a no-show is marked by hand: it
+      is `miscellaneous` and never `room_charge`, because `post_charge()`
+      refuses `room_charge` outright and a room charge against a room nobody
+      slept in would break the tie between the financial and occupancy
+      reports.
+    - **The consequence to know about.** A booking whose guest never arrives
+      now stays `confirmed` and holds its rooms, night after night, until
+      somebody deals with it. It is never billed — `close_business_date()`
+      posts only nights whose status is `checked_in` — but the room reads as
+      sold and cannot be resold. **An overdue-arrivals list is the answer and
+      is not built.** Without one the front desk has no prompt, and the failure
+      is silent: rooms quietly unsellable with nobody told.
+    - **`close_business_date()` lost two return columns** with the sweep,
+      `no_shows_marked` and `no_show_fees_cents`. Dropped rather than left
+      returning zero, so the regenerated types made every call site a compile
+      error and none was missed. The confirmation dialog lost the two rows and
+      the paragraph that explained them.
+    - **Whether a no-show fee is VATable is still a question for the
+      accountant.** A hand-marked one carries the tax the night carried.
 12. **Cancellation dating.** `bookings` has no `cancelled_at`. The cancellation
     report is therefore ranged on arrival date and shows a cancelled-on column
     read from the activity log, which is blank for any status change made

@@ -901,6 +901,13 @@ export interface PropertySettings {
   currency: string;
   checkInTime: string | null;
   checkOutTime: string | null;
+  /**
+   * The hour, on this property's own clock, at which its business date closes.
+   * Not null and defaulted to 02:00 -- there is no sensible "no cut-off", and
+   * `timezone` above is what turns this into a moment. A hotel in London and a
+   * hotel in Mexico City both close at 02:00 and never at the same instant.
+   */
+  auditCloseTime: string;
 }
 
 export interface RoomTypeSetting {

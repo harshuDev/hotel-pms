@@ -1760,6 +1760,7 @@ export type Database = {
       }
       properties: {
         Row: {
+          audit_close_time: string
           check_in_time: string
           check_out_time: string
           created_at: string
@@ -1770,6 +1771,7 @@ export type Database = {
           timezone: string
         }
         Insert: {
+          audit_close_time?: string
           check_in_time: string
           check_out_time: string
           created_at?: string
@@ -1780,6 +1782,7 @@ export type Database = {
           timezone: string
         }
         Update: {
+          audit_close_time?: string
           check_in_time?: string
           check_out_time?: string
           created_at?: string
@@ -3101,8 +3104,6 @@ export type Database = {
         Returns: {
           closed_date: string
           next_date: string
-          no_show_fees_cents: number
-          no_shows_marked: number
           room_charges_cents: number
           room_charges_posted: number
         }[]
@@ -4142,6 +4143,7 @@ export type Database = {
       }
       save_property: {
         Args: {
+          p_audit_close_time?: string
           p_check_in_time?: string
           p_check_out_time?: string
           p_currency: string

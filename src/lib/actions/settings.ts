@@ -36,6 +36,7 @@ export async function saveProperty(input: {
   currency: string;
   checkInTime: string;
   checkOutTime: string;
+  auditCloseTime: string;
 }): Promise<ActionResult<null>> {
   if (input.name.trim() === "") {
     return { ok: false, error: "The property needs a name." };
@@ -51,6 +52,10 @@ export async function saveProperty(input: {
     p_currency: input.currency.toUpperCase(),
     p_check_in_time: input.checkInTime || null,
     p_check_out_time: input.checkOutTime || null,
+    // Empty becomes null and Postgres refuses it by name, exactly as it does
+    // for the two times above. A cleared field that silently kept the old
+    // value would read as a save that did not save.
+    p_audit_close_time: input.auditCloseTime || null,
   });
 
   if (error) return { ok: false, error: error.message };

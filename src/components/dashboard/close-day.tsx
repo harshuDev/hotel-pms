@@ -79,18 +79,6 @@ export function CloseDay({ businessDate }: { businessDate: string }) {
                         {formatMoney(done.roomChargesCents)}
                       </dd>
                     </div>
-                    <div className="flex justify-between border-b border-line pb-2">
-                      <dt className="text-ink-muted">No-shows recorded</dt>
-                      <dd className="tnum font-medium">{done.noShowsMarked}</dd>
-                    </div>
-                    {done.noShowsMarked > 0 && (
-                      <div className="flex justify-between border-b border-line pb-2">
-                        <dt className="text-ink-muted">No-show fees</dt>
-                        <dd className="tnum font-medium">
-                          {formatMoney(done.noShowFeesCents)}
-                        </dd>
-                      </div>
-                    )}
                     <div className="flex justify-between pt-1">
                       <dt className="font-medium">Business date</dt>
                       <dd className="tnum font-semibold text-brass">
@@ -107,19 +95,17 @@ export function CloseDay({ businessDate }: { businessDate: string }) {
                 </>
               ) : (
                 <>
+                  {/*
+                    The one clause a control whose consequence is not obvious is
+                    allowed. The paragraph that stood under it explained the
+                    no-show sweep, which 0064 removed at the client's request —
+                    a guest who has not arrived is now left exactly as they are,
+                    and there is nothing to warn anybody about.
+                  */}
                   <p className="text-sm leading-relaxed text-ink-muted">
                     This posts tonight&rsquo;s room charge for every guest in
                     house, closes <span className="font-medium text-ink">{day}</span>,
                     and opens the next day. It cannot be undone.
-                  </p>
-                  <p className="text-xs leading-relaxed text-ink-faint">
-                    Any confirmed booking that should have arrived by{" "}
-                    <span className="font-medium text-ink-muted">{day}</span> and
-                    was never checked in is recorded as a no-show: its rooms go
-                    back on sale and its first night is billed. Check those
-                    guests in first if they are here. Unconfirmed bookings are
-                    left alone, and every cashier shift must be closed before
-                    this will run.
                   </p>
 
                   {error && (
