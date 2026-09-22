@@ -256,6 +256,7 @@ export type Database = {
         Row: {
           adults: number
           booking_id: string
+          canceled_separately: boolean
           check_in: string
           check_out: string
           children: number
@@ -271,6 +272,7 @@ export type Database = {
         Insert: {
           adults?: number
           booking_id: string
+          canceled_separately?: boolean
           check_in: string
           check_out: string
           children?: number
@@ -286,6 +288,7 @@ export type Database = {
         Update: {
           adults?: number
           booking_id?: string
+          canceled_separately?: boolean
           check_in?: string
           check_out?: string
           children?: number
@@ -2803,6 +2806,7 @@ export type Database = {
         Returns: {
           adults: number
           booking_room_id: string
+          canceled_separately: boolean
           check_in: string
           check_out: string
           children: number
@@ -2979,6 +2983,10 @@ export type Database = {
       cancel_booking: {
         Args: { p_booking_id: string; p_no_show?: boolean; p_reason?: string }
         Returns: number
+      }
+      cancel_booking_room: {
+        Args: { p_booking_room_id: string; p_reason?: string }
+        Returns: undefined
       }
       cancel_meeting_room_booking: {
         Args: { p_booking_id: string; p_reason?: string }
@@ -3987,6 +3995,10 @@ export type Database = {
       }
       restore_booking: {
         Args: { p_allow_overbook?: boolean; p_booking_id: string }
+        Returns: undefined
+      }
+      restore_booking_room: {
+        Args: { p_allow_overbook?: boolean; p_booking_room_id: string }
         Returns: undefined
       }
       revenue_series: {

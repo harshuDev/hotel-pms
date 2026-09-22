@@ -752,6 +752,13 @@ export interface BookingRoomLine {
   roomId: string | null;
   roomNumber: string | null;
   status: BookingStatus;
+  /**
+   * True when THIS ROOM was cancelled out of its booking, rather than the
+   * whole booking being cancelled (0065). It is what tells a room to offer
+   * Restore from a room line rather than from the booking, and what stops
+   * `restore_booking()` dragging it back with the rest of the group.
+   */
+  canceledSeparately: boolean;
   checkIn: string;
   checkOut: string;
   nights: number;

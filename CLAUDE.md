@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0064` are
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0065` are
 applied to the hosted database.
 
 Working on real data: dashboard (house board, movements, pace, activity feed),
@@ -112,6 +112,13 @@ current design, not as drift.
      Group is told where the rooms go. There is no group flag in the schema and
      adding one would be a second booking model to keep in step with the
      first.
+     - **ONE ROOM OF A GROUP CAN BE CANCELLED ON ITS OWN, as of 0065.** The
+       client: "Group bookings allow the receptionist to be able to cancel a
+       reservation." Until then the only cancel was `cancel_booking()`, which
+       takes the whole booking down — five rooms booked, one guest drops out,
+       and the desk could cancel all five or none. See the cancellation notes
+       below for how it is built and for the two things that would have
+       silently undone it.
 2. **Dashboard, not Front Desk.** The route `/dashboard` is labelled
    "Dashboard" in the nav, the page `<h1>` and the page title. "Front Desk"
    survives only as a booking channel value in mock data — do not rename that.
@@ -1359,6 +1366,51 @@ anywhere else. Collapsed height must stay constant regardless of room count.
   rooms and their nights go to `canceled`, which every availability query
   excludes, and the outstanding amount is returned rather than cleared: a
   cancellation fee is a real charge and somebody still has to chase it.
+- **ONE ROOM OF A BOOKING CAN BE CANCELLED WITHOUT THE BOOKING** (0065).
+  `cancel_booking_room()` and `restore_booking_room()`, from the booking
+  screen's Rooms tab. A group is one `bookings` row with several
+  `booking_rooms`, so this is the cancel that operates at the row the guest
+  actually dropped out of.
+  - **`booking_rooms.canceled_separately` is a new column, and it is the whole
+    reason this is more than an UPDATE.** Two things already in the schema
+    would have silently undone a per-room cancellation, and neither could tell
+    "cancelled because the booking was" from "cancelled on its own":
+    - `sync_booking_room_status()` pushes `bookings.status` onto EVERY room
+      whenever it changes. Cancel room 3 of a group, check the group in, and
+      the trigger brought room 3 back as `checked_in` — a room on the house
+      with a guest implied in it. **Tested against the hosted database inside
+      a rolled-back transaction** before and after the fix.
+    - `restore_booking()` set every room back to `confirmed`, so a room
+      cancelled on its own beforehand came back with the group. Its
+      availability check counted those rooms too, which would refuse restores
+      that were perfectly sellable.
+  - **It is NOT a second status.** `booking_rooms.status` still reads
+    `canceled`, so every availability query, the calendar's Cancelled band and
+    every report keep working untouched — a separately cancelled room frees
+    its inventory exactly like any other. The column answers only "who
+    cancelled it", which is a question only those two places ask.
+  - **THE LAST LIVE ROOM IS REFUSED BY NAME**, pointing at the booking-level
+    cancel. Cancelling every room one at a time would leave a booking still
+    reading `confirmed` while holding nothing and billing nothing. The control
+    is drawn only above one live room, so the refusal is a backstop rather
+    than something anybody meets.
+  - Refuses an in-house or departed room, exactly as `cancel_booking()` does:
+    a guest in the room is checked out, never cancelled.
+  - **The folio is not touched**, like every other cancellation here. Nights
+    already charged stay charged and a cancellation fee stands until somebody
+    reverses it deliberately.
+  - **Logged by hand, and that is the exception rather than the rule.** The
+    booking's own status has not moved, so
+    `bookings_log_activity_after_status_change` does not fire — unlike
+    `restore_booking()`, which is why that one logs nothing itself.
+    `booking_activity()` already read `entity_type = 'booking_room'` rows, so
+    it lands on the History tab with no change there.
+  - **`booking_rooms_for_assignment()` now excludes cancelled lines.** It
+    offered them before only because a line could not be cancelled while its
+    booking was live; now one can, and putting a guest in it would be wrong.
+  - **A room line shows its own status badge only when it differs from the
+    booking's** — which since 0065 is possible, and is the point. Repeating
+    the header's status on all twenty-seven rows of a group would be noise.
 - **The Offers screen is a card grid, cloned from the reference.**
   `src/components/promotions/promotions-screen.tsx` — an Active section, an
   Inactive section on a wash, and an "Add offer" tile at the end of the active

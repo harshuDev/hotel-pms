@@ -2118,6 +2118,7 @@ export async function getBookingRoomLines(
       room_id: string | null;
       room_number: string | null;
       status: BookingStatus;
+      canceled_separately: boolean;
       check_in: string;
       check_out: string;
       nights: number;
@@ -2130,6 +2131,7 @@ export async function getBookingRoomLines(
     }[]
   ).map((row) => ({
     bookingRoomId: row.booking_room_id,
+    canceledSeparately: row.canceled_separately,
     roomTypeId: row.room_type_id,
     roomTypeName: row.room_type_name,
     roomId: row.room_id,
