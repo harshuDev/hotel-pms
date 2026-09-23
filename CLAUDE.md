@@ -1411,6 +1411,33 @@ anywhere else. Collapsed height must stay constant regardless of room count.
   - **A room line shows its own status badge only when it differs from the
     booking's** — which since 0065 is possible, and is the point. Repeating
     the header's status on all twenty-seven rows of a group would be noise.
+- **A ROOM'S NIGHTS ARE COLLAPSED ON A GROUP BOOKING.** Every room used to
+  draw its whole nights table at once, which is fine on the one-room booking
+  the screen was built for and unusable on a group: the hosted property's
+  27-room booking over six nights is 162 night rows plus 27 table headers on
+  screen together. The client, having taken a group booking and looked at it:
+  "it's very, very big ... it takes the whole area."
+  - **The summary line is the toggle, and it says enough to not need
+    opening** — room or "No room assigned", type, occupancy, nights, value,
+    and the status badge when it differs. Opening a room is for the per-night
+    rates, which is a pricing job rather than a reading one.
+  - **A ONE-ROOM BOOKING OPENS ITSELF.** There is nothing to shorten, and
+    putting one short table behind a click would add a click to the commonest
+    case to fix a problem it does not have.
+  - **The toggle is its own button, not a wrapper round the header row.** The
+    controls on the right are buttons, and a button inside a button is invalid
+    HTML that browsers rearrange during parsing — the same trap the calendar's
+    assign control hit as a child of its bar.
+  - **Open rooms are seeded once per mount and survive `router.refresh()`**,
+    so setting a rate does not collapse what somebody just opened.
+  - **`BookingDetailView` IS NOW KEYED ON THE BOOKING ID in the calendar's
+    dialog**, and that was a real defect this uncovered. `?booking=` changes
+    while the element keeps its position, so React reconciled the same
+    instance and nothing seeded with `useState` re-seeded — the open rooms of
+    a twenty-seven-room group would have carried onto the next booking opened.
+    **That is the same trap `NewBookingForm` hit with its dates**, which is
+    twice now on this dialog; a component with seeded state behind a URL param
+    needs a key.
 - **The Offers screen is a card grid, cloned from the reference.**
   `src/components/promotions/promotions-screen.tsx` — an Active section, an
   Inactive section on a wash, and an "Add offer" tile at the end of the active

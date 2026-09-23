@@ -206,6 +206,24 @@ export function BookingDetailView({
    * -- kept per line, because a group can be twenty-seven rooms and a message
    * with no room against it says nothing.
    */
+  /*
+   * WHICH ROOMS HAVE THEIR NIGHTS OPEN.
+   *
+   * Every room used to draw its whole nights table at once, which is fine on
+   * the one-room booking this screen was built for and unusable on a group:
+   * the hosted property's 27-room booking over six nights is 162 night rows
+   * plus 27 table headers, all on screen together. The client: "it's very,
+   * very big ... it takes the whole area."
+   *
+   * Seeded once per mount rather than derived, so a room somebody opened
+   * stays open across `router.refresh()`. A single-room booking opens itself,
+   * because there is nothing to shorten and hiding one short table behind a
+   * click would only add a click.
+   */
+  const [openRooms, setOpenRooms] = useState<Set<string>>(
+    () => new Set(rooms.length === 1 ? rooms.map((r) => r.bookingRoomId) : []),
+  );
+
   const [roomCancelling, setRoomCancelling] = useState<string | null>(null);
   const [roomCancelReason, setRoomCancelReason] = useState("");
   const [roomRestoreBlocked, setRoomRestoreBlocked] = useState<
@@ -290,6 +308,15 @@ export function BookingDetailView({
       setRoomCancelling(null);
       setRoomRestoreBlocked(null);
       router.refresh();
+    });
+  }
+
+  function toggleRoom(bookingRoomId: string) {
+    setOpenRooms((open) => {
+      const next = new Set(open);
+      if (next.has(bookingRoomId)) next.delete(bookingRoomId);
+      else next.add(bookingRoomId);
+      return next;
     });
   }
 
@@ -770,6 +797,7 @@ export function BookingDetailView({
           {rooms.map((room) => {
             const roomNights = nights.filter((n) => n.bookingRoomId === room.bookingRoomId);
             const roomCanceled = ["canceled", "no_show"].includes(room.status);
+            const roomOpen = openRooms.has(room.bookingRoomId);
             return (
               <div
                 key={room.bookingRoomId}
@@ -778,28 +806,61 @@ export function BookingDetailView({
                   roomCanceled && "bg-shell/60",
                 )}
               >
-                <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line px-4 py-3">
-                  <div>
-                    <span className="font-medium text-ink">
-                      {room.roomNumber ? `Room ${room.roomNumber}` : "No room assigned"}
-                    </span>
-                    <span className="ml-2 text-[13px] text-ink-muted">{room.roomTypeName}</span>
-                    <span className="ml-2 text-xxs text-ink-faint">
-                      {room.adults} adult{room.adults === 1 ? "" : "s"}
-                      {room.children > 0 && ` + ${room.children}`}
-                    </span>
-                    {/*
-                      Only when this room does not agree with the booking --
-                      which since 0065 is possible, and is the whole point. A
-                      badge repeating the header's status on every line would
-                      be noise on the twenty-seven-room group.
-                    */}
-                    {room.status !== detail.status && (
-                      <span className="ml-2 align-middle">
-                        <StatusBadge status={room.status} />
+                <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line px-4 py-2.5">
+                  {/*
+                    THE SUMMARY IS THE TOGGLE, and it is its own button rather
+                    than a wrapper round the row: the controls on the right are
+                    buttons too, and a button inside a button is invalid HTML
+                    that browsers rearrange during parsing -- the same trap the
+                    calendar's assign control hit as a child of its bar.
+                  */}
+                  <button
+                    type="button"
+                    onClick={() => toggleRoom(room.bookingRoomId)}
+                    aria-expanded={roomOpen}
+                    className="-my-1 flex min-w-0 flex-1 items-center gap-2 rounded py-1 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brass"
+                  >
+                    <svg
+                      viewBox="0 0 16 16"
+                      aria-hidden="true"
+                      className={cn(
+                        "h-3.5 w-3.5 shrink-0 text-ink-faint transition-transform",
+                        roomOpen && "rotate-90",
+                      )}
+                    >
+                      <path
+                        d="M6 4l4 4-4 4"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                    <span className="min-w-0">
+                      <span className="font-medium text-ink">
+                        {room.roomNumber ? `Room ${room.roomNumber}` : "No room assigned"}
                       </span>
-                    )}
-                  </div>
+                      <span className="ml-2 text-[13px] text-ink-muted">{room.roomTypeName}</span>
+                      <span className="ml-2 text-xxs text-ink-faint">
+                        {room.adults} adult{room.adults === 1 ? "" : "s"}
+                        {room.children > 0 && ` + ${room.children}`}
+                        {" · "}
+                        {room.nights} night{room.nights === 1 ? "" : "s"}
+                      </span>
+                      {/*
+                        Only when this room does not agree with the booking --
+                        which since 0065 is possible, and is the whole point. A
+                        badge repeating the header's status on every line would
+                        be noise on the twenty-seven-room group.
+                      */}
+                      {room.status !== detail.status && (
+                        <span className="ml-2 align-middle">
+                          <StatusBadge status={room.status} />
+                        </span>
+                      )}
+                    </span>
+                  </button>
                   <div className="flex items-center gap-3">
                     <span className="tnum text-[13px] text-ink">
                       {formatMoney(room.valueCents)}
@@ -975,6 +1036,7 @@ export function BookingDetailView({
                   </div>
                 )}
 
+                {roomOpen && (
                 <table className="w-full text-[13px]">
                   <thead>
                     <tr className="text-left text-ink-faint">
@@ -1021,6 +1083,7 @@ export function BookingDetailView({
                     ))}
                   </tbody>
                 </table>
+                )}
               </div>
             );
           })}

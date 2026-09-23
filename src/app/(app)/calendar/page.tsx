@@ -455,7 +455,17 @@ export default async function CalendarPage({
             },
           ]}
         >
+          {/*
+            KEYED ON THE BOOKING, so opening a second bar gives a fresh
+            component rather than the first one's state. `?booking=` changes
+            but the element keeps its position, so React reconciles the same
+            instance and anything seeded with `useState` never re-seeds --
+            which is how the Rooms tab's open rooms would carry from a
+            twenty-seven-room group onto the next booking opened. Exactly the
+            trap `NewBookingForm` hit with its dates.
+          */}
           <BookingDetailView
+            key={peek.detail.bookingId}
             detail={peek.detail}
             rooms={peek.lines}
             nights={peek.nights}
