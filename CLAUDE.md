@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0065` are
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0066` are
 applied to the hosted database.
 
 Working on real data: dashboard (house board, movements, pace, activity feed),
@@ -1583,6 +1583,20 @@ anywhere else. Collapsed height must stay constant regardless of room count.
   and retires freely, but the rate and its inclusion are frozen, because a
   folio item records which rate it used and changing it would restate history.
   Retire it and add a new one.
+  - **THE LIST SHOWS HOW MANY CHARGES ARE POSTED AT EACH RATE** (0066), which
+    is what makes that rule visible before somebody types a new figure rather
+    than only in the refusal afterwards. Same move as the cancellation
+    policies list carrying its rate-plan count, and for the same reason.
+    `tax_rates_list()` replaces the direct table read so the count is worked
+    out in Postgres; it is `security invoker`, so RLS decides what a caller
+    counts rather than a second copy of the property rule living inside it.
+  - **A NEW rate is seeded `inclusive`.** It seeded `exclusive`, which pointed
+    every new rate away from what this property charges and what a hotel
+    selling to the public does — consumer prices have to be shown with tax in.
+  - **The window closes at the first charge.** Until the night audit posts a
+    room charge on a booking carrying the rate, its figure and its inclusion
+    are still editable in Settings; after that they are not. Worth knowing
+    before telling a hotel they can change VAT whenever they like.
 - **Password reset is three screens and no API route.** `/login` links to
   `/forgot-password`, which calls `resetPasswordForEmail` with a `redirectTo`
   of `<origin>/reset-password`; that page turns whatever the link carried into

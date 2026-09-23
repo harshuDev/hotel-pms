@@ -2549,11 +2549,12 @@ export async function getChannelSettings(): Promise<ChannelSetting[]> {
 /** Every tax rate, retired ones included — this is where they are managed. */
 export async function getTaxRateSettings(): Promise<TaxRateSetting[]> {
   const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("tax_rates")
-    .select("id, name, rate_bps, inclusion, is_active")
-    .order("is_active", { ascending: false })
-    .order("name");
+  /*
+   * An RPC rather than the table, so the count of charges posted at each rate
+   * is worked out in Postgres (0066). The screen needs it to show that a rate
+   * has been used, which is what freezes it against `save_tax_rate()`.
+   */
+  const { data, error } = await supabase.rpc("tax_rates_list");
 
   if (error) throw new Error(`Failed to load the tax rates: ${error.message}`);
 
@@ -2564,6 +2565,7 @@ export async function getTaxRateSettings(): Promise<TaxRateSetting[]> {
       rate_bps: number;
       inclusion: "inclusive" | "exclusive";
       is_active: boolean;
+      charge_count: number;
     }[]
   ).map((row) => ({
     id: row.id,
@@ -2571,6 +2573,7 @@ export async function getTaxRateSettings(): Promise<TaxRateSetting[]> {
     rateBps: row.rate_bps,
     inclusion: row.inclusion,
     isActive: row.is_active,
+    chargeCount: Number(row.charge_count ?? 0),
   }));
 }
 

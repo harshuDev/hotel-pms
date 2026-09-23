@@ -933,6 +933,16 @@ export interface TaxRateSetting {
   rateBps: number;
   inclusion: "inclusive" | "exclusive";
   isActive: boolean;
+  /**
+   * How many folio items were posted at this rate (0066).
+   *
+   * Above zero, `save_tax_rate()` refuses to move the rate or its inclusion —
+   * a folio item records which rate it used, and moving it underneath would
+   * restate money already billed. The list shows the figure so that is
+   * visible before somebody types a new one, the same way the cancellation
+   * policies list shows how many plans use each.
+   */
+  chargeCount: number;
 }
 
 export interface ChannelSetting {
