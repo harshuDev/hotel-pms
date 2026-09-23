@@ -117,7 +117,20 @@ export function NewBookingForm({
   );
   const [status, setStatus] = useState<"pending" | "confirmed">("confirmed");
   const [settlement, setSettlement] = useState<Settlement>("at_property");
-  const [taxRateId, setTaxRateId] = useState("");
+  /*
+   * THE PROPERTY'S OWN RATE, NOT "No tax".
+   *
+   * This was seeded empty, and empty is the "No tax" option, so every booking
+   * taken without somebody remembering to pick VAT went out with none. It was
+   * not theoretical: sixteen of the nineteen bookings on the hosted property
+   * carry zero tax, against roughly £616 of VAT that should have been on them.
+   *
+   * `taxRates` is already filtered to the active rates, so the first is the
+   * one this hotel charges. "No tax" stays in the list, because a zero-rated
+   * booking is a real thing -- it is now something you choose rather than
+   * something you get by not noticing.
+   */
+  const [taxRateId, setTaxRateId] = useState(taxRates[0]?.id ?? "");
   const [adults, setAdults] = useState(2);
   const [children, setChildren] = useState(0);
   const [guestNotes, setGuestNotes] = useState("");
@@ -209,8 +222,14 @@ export function NewBookingForm({
         roomTypeId: free.roomTypeId,
         quantity: 1,
         rate: "",
-        adults: Math.max(free.baseOccupancy, 1),
-        children: 0,
+        /*
+         * The Stay band's occupancy, capped at what the type sleeps. It used
+         * to come from `baseOccupancy` alone, which ignored the figure
+         * somebody had just typed at the top of the form -- so the Stay band
+         * was a number that changed nothing anywhere.
+         */
+        adults: Math.min(Math.max(adults, 1), Math.max(free.maxOccupancy, 1)),
+        children: Math.max(children, 0),
       },
     ]);
   }
@@ -315,8 +334,26 @@ export function NewBookingForm({
         channelId,
         customerId: guest.mode === "existing" ? guest.id : null,
         newCustomer: guest.mode === "new" ? newGuest : null,
-        adults,
-        children,
+        /*
+         * THE BOOKING'S PARTY SIZE IS THE SUM OF ITS ROOMS.
+         *
+         * These used to be sent straight from the Stay band, which is a
+         * separate number from the per-room occupancy and never had to agree
+         * with it. On one room nobody noticed. On a group it was plainly
+         * wrong: twenty-seven rooms recorded "2 adults", and that is the
+         * figure the booking header and every report then showed.
+         *
+         * The Stay band is not removed -- it seeds each room as it is added,
+         * which is what somebody typing "2 adults" first actually means.
+         * Falling back to it when there are no lines keeps the refusal below
+         * the one that fires on an empty booking.
+         */
+        adults: lines.length
+          ? lines.reduce((sum, l) => sum + l.adults * l.quantity, 0)
+          : adults,
+        children: lines.length
+          ? lines.reduce((sum, l) => sum + l.children * l.quantity, 0)
+          : children,
         status,
         settlement,
         taxRateId: taxRateId || null,
@@ -895,8 +932,13 @@ export function NewBookingForm({
             </select>
           </div>
           <div>
+            {/*
+              "Offer", not "Promotion". The client had the section renamed and
+              every piece of copy follows; the schema still says `promotions`
+              and deliberately stays that way. Read one as the other.
+            */}
             <label htmlFor="promo" className={label}>
-              Promotion code
+              Offer code
             </label>
             <input
               id="promo"

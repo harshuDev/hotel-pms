@@ -1186,6 +1186,33 @@ anywhere else. Collapsed height must stay constant regardless of room count.
   nights `sync_booking_room_nights()` generates. A booking assembled from
   several calls leaves a half-made booking behind on any failure, holding
   inventory with no guest against it.
+- **THE BOOKING FORM DEFAULTS TO THE PROPERTY'S OWN TAX RATE.** It used to
+  seed the field empty, and empty is the "No tax" option, so a booking went
+  out with no VAT unless somebody remembered to pick it every single time.
+  **That was not theoretical**: sixteen of the nineteen bookings on the hosted
+  property carry zero tax, against roughly £616 of VAT that belonged on them.
+  `getTaxRates()` is already filtered to the active rates, so the first is the
+  one this hotel charges. "No tax" stays in the list — a zero-rated booking is
+  a real thing — but it is chosen rather than fallen into.
+  - **The sixteen existing ones are NOT fixed by this.** They have no tax rate
+    against them and `folio_items` is append-only, so putting VAT on them is
+    reversing and reposting each folio deliberately. It has not been done and
+    wants asking about.
+- **THE BOOKING'S PARTY SIZE IS THE SUM OF ITS ROOMS**, not the Stay band's own
+  figure. Those were two unrelated numbers: the Stay band went to
+  `bookings.adults`, each room line carried its own occupancy, and nothing made
+  them agree. On one room nobody noticed; on a group it was plainly wrong —
+  twenty-seven rooms recorded "2 adults", and that is the figure the booking
+  header and every report then showed.
+  - **The Stay band is not removed**, it is wired up: it seeds each room as it
+    is added, capped at what the type sleeps. That is what somebody typing "2
+    adults" at the top of the form actually means, and it was previously a
+    control that changed nothing anywhere.
+  - A booking with no room lines still falls back to it, so the refusal that
+    fires on an empty booking is the one that speaks.
+- **The form says "Offer code", not "Promotion code."** The client had the
+  section renamed; the schema still says `promotions` and deliberately stays
+  that way.
 - **A booking is priced per night off the rate plan**, not once for the stay: a
   Friday is not a Tuesday, and one figure across the stay is what daily rates
   exist to stop. A room line may name its own `rate_cents` instead, which then
@@ -2023,6 +2050,19 @@ than proceeding.
 10. **Tax rate and inclusion — settled: 20% inclusive.** The hosted property
     carries one active rate, "VAT 20%", with `inclusion = 'inclusive'`, so a
     £120 rate is £100 of room and £20 of VAT rather than £144 on the folio.
+    - **IT HAD DRIFTED TO `exclusive` AND WAS PUT BACK.** Somebody changed it
+      in Settings, or it was never what this note claimed; either way the
+      hosted rate read `exclusive`, which on a £120 room is £144 to the guest
+      rather than £120. Corrected through `save_tax_rate()` as the admin under
+      RLS, which is how every other row on this property went in — never a
+      hand-written UPDATE on the table.
+    - **It was only correctable because nothing had used it.** Zero
+      `folio_items` carried a `tax_rate_id`, so `save_tax_rate()`'s freeze
+      check passed. **Had one charge been posted at that rate it would have
+      been refused**, and the answer would have been to retire it and add a
+      new one. Check `folio_items` before assuming a rate can be moved.
+    - **If the client wants exclusive, that is now a NEW rate rather than an
+      edit**, the moment the first charge posts against this one.
     That is what a UK hotel selling to the public does, since consumer prices
     have to be shown with tax in. A property selling mainly to businesses that
     reclaim it would want exclusive instead — and that is a new rate, not an
