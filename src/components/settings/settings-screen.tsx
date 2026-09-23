@@ -1127,7 +1127,11 @@ export function SettingsScreen({
                       id: null,
                       name: "VAT",
                       percent: "20",
-                      inclusion: "exclusive",
+                      // Inclusive, which is what a hotel selling to the public
+                      // does -- consumer prices have to be shown with tax in,
+                      // and it is the property's settled choice. It seeded
+                      // "exclusive", pointing a new rate the wrong way.
+                      inclusion: "inclusive",
                       isActive: true,
                     })
                   }
@@ -1146,7 +1150,7 @@ export function SettingsScreen({
               <table className="w-full text-[13px]">
                 <thead>
                   <tr className="border-b border-line text-left text-ink-faint">
-                    {["Name", "Rate", "Quoted", "", ""].map((c, i) => (
+                    {["Name", "Rate", "Quoted", "Charges posted", "", ""].map((c, i) => (
                       <th
                         key={c || i}
                         className="whitespace-nowrap px-3 pb-2.5 text-xxs font-semibold uppercase tracking-[0.1em]"
@@ -1165,6 +1169,17 @@ export function SettingsScreen({
                       </td>
                       <td className="px-3 py-2.5 text-ink-muted">
                         {t.inclusion === "inclusive" ? "tax included" : "tax on top"}
+                      </td>
+                      {/*
+                        Above zero, `save_tax_rate()` refuses to move the rate
+                        or its inclusion: a folio item records which rate it
+                        used. The figure is here so that is visible before
+                        somebody types a new one, rather than only in the
+                        refusal afterwards -- the same reason the cancellation
+                        policies list carries its rate-plan count.
+                      */}
+                      <td className="tnum px-3 py-2.5 text-ink-muted">
+                        {t.chargeCount > 0 ? t.chargeCount : "\u2014"}
                       </td>
                       <td className="px-3 py-2.5 text-xxs text-ink-faint">
                         {t.isActive ? "" : "retired"}

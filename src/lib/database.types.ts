@@ -4406,6 +4406,17 @@ export type Database = {
         }
         Returns: string
       }
+      tax_rates_list: {
+        Args: never
+        Returns: {
+          charge_count: number
+          id: string
+          inclusion: Database["public"]["Enums"]["tax_inclusion"]
+          is_active: boolean
+          name: string
+          rate_bps: number
+        }[]
+      }
       unassign_room: { Args: { p_booking_room_id: string }; Returns: undefined }
       update_booking: {
         Args: {
