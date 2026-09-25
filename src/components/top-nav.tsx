@@ -9,13 +9,15 @@ import { Chevron, Menu, MenuItem } from "@/components/menu";
 import { SECTIONS, isHrefActive, isSectionActive } from "@/lib/nav";
 import { signOut } from "@/lib/actions/auth";
 import { clearCache } from "@/lib/actions/profile";
-import { setStaffLanguage } from "@/lib/actions/staff-language";
-import {
-  STAFF_LOCALES,
-  staffHtmlLang,
-  staffT,
-  type StaffLocale,
-} from "@/lib/i18n/staff";
+import type { StaffRole } from "@/lib/types";
+
+const ROLE_LABEL: Record<StaffRole, string> = {
+  admin: "Administrator",
+  manager: "Manager",
+  front_desk: "Front desk",
+  cashier: "Cashier",
+  housekeeping: "Housekeeping",
+};
 
 const USER_MENU = "__user";
 
@@ -26,15 +28,14 @@ interface TopNavProps {
   propertyId: string;
   propertyName: string;
   staffName: string;
-  /** The language the frame is drawn in, read from the cookie on the server. */
-  lang: StaffLocale;
+  staffRole: StaffRole;
 }
 
 export function TopNav({
   propertyId,
   propertyName,
   staffName,
-  lang,
+  staffRole,
 }: TopNavProps) {
   const pathname = usePathname();
   const router = useRouter();
@@ -63,18 +64,6 @@ export function TopNav({
   }, []);
   const [expanded, setExpanded] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
-  const [switching, setSwitching] = useState<StaffLocale | null>(null);
-
-  function chooseLanguage(code: StaffLocale) {
-    if (code === lang || switching) return;
-    setSwitching(code);
-    // The menu stays open, so the change is seen where it was made: its own
-    // items re-render in the new language when the layout comes back.
-    void setStaffLanguage(code).then(() => {
-      router.refresh();
-      setSwitching(null);
-    });
-  }
 
   useEffect(() => {
     setOpenMenu(null);
@@ -98,10 +87,7 @@ export function TopNav({
       way. Do not lower this back to z-40 to "match" the top bar -- that strip
       is z-30 and sits under this by design.
     */
-    // `lang` on the frame, not on <html>: this header is in the chosen
-    // language while every page body under it is still English, and a screen
-    // reader picks its pronunciation from the nearest `lang` it finds.
-    <header lang={staffHtmlLang(lang)} className="sticky top-0 z-50 bg-chrome-900">
+    <header className="sticky top-0 z-50 bg-chrome-900">
       <div className="flex h-14 items-center px-3 lg:px-4">
         <button
           type="button"
@@ -149,7 +135,7 @@ export function TopNav({
               return (
                 <Menu
                   key={s.label}
-                  label={staffT(lang, s.id)}
+                  label={s.label}
                   active={active}
                   columns={s.columns ?? 1}
                   scroll={s.scroll ?? false}
@@ -185,7 +171,7 @@ export function TopNav({
                     : "text-white/60 hover:text-white",
                 )}
               >
-                {staffT(lang, s.id)}
+                {s.label}
                 {active && (
                   <span className="absolute inset-x-2.5 bottom-0 h-[2px] rounded-full bg-brass" />
                 )}
@@ -232,39 +218,22 @@ export function TopNav({
               </>
             }
           >
-            {/*
-              THE CLIENT'S REFERENCE MENU, item for item. Their screenshot is
-              the specification: Profile, Guest Booking Page, Settings; Clear
-              cache; the language codes; the build; Log Out -- each group behind
-              a rule, each item behind an icon, and their casing kept even where
-              it is inconsistent, as the Inventory menu keeps theirs.
-
-              The name-and-role heading that used to open this menu is gone,
-              because theirs has none; the name is on the trigger.
-            */}
-            <div className="py-1">
-              <MenuItem href="/profile">
-                <MenuRow icon={<ProfileIcon />}>{staffT(lang, "profile")}</MenuRow>
-              </MenuItem>
-              <MenuItem href={`/book/${propertyId}`}>
-                <MenuRow icon={<CaseIcon />}>{staffT(lang, "guestBookingPage")}</MenuRow>
-              </MenuItem>
-              <MenuItem href="/settings">
-                <MenuRow icon={<GearIcon />}>{staffT(lang, "settings")}</MenuRow>
-              </MenuItem>
+            <div className="border-b border-line px-2.5 pb-2 pt-1">
+              <p className="text-[13px] text-ink">{staffName}</p>
+              <p className="text-2xs text-ink-faint">{ROLE_LABEL[staffRole]}</p>
             </div>
-
-            <div className="border-t border-line py-1">
-              {/*
-                "Clear cache", their word for it, though what it does is reload
-                this screen's figures from the database: reads are Server
-                Components, so a number can sit behind a change made on the
-                machine next door. The action underneath is unchanged.
-              */}
+            <div className="pt-1">
+              <MenuItem href="/profile">Profile</MenuItem>
+              <MenuItem href={`/book/${propertyId}`}>Guest booking page</MenuItem>
+              <MenuItem href="/settings">Settings</MenuItem>
               <MenuItem
                 onSelect={() => {
                   if (refreshing) return;
                   setRefreshing(true);
+                  // The menu stays open while this runs, which is the only
+                  // place there is to say it is happening — every screen this
+                  // sits over is a table that will look identical until the
+                  // new data lands. It closes once the refresh is through.
                   void clearCache().then(() => {
                     router.refresh();
                     setRefreshing(false);
@@ -272,62 +241,17 @@ export function TopNav({
                   });
                 }}
               >
-                <MenuRow icon={<WarningIcon />}>
-                  {staffT(lang, refreshing ? "clearing" : "clearCache")}
-                </MenuRow>
+                {refreshing ? "Reloading\u2026" : "Reload data"}
               </MenuItem>
-            </div>
-
-            {/*
-              THE LANGUAGE GRID, and it DOES something. Twice before a language
-              item here changed nothing and the client was right to object both
-              times. This one switches the frame -- the section names, this
-              menu, the business date line -- and the choice sticks to the
-              browser. The screens themselves stay English until each is
-              translated properly; see `src/lib/i18n/staff.ts` for where that
-              line is drawn and why.
-            */}
-            <div
-              role="group"
-              aria-label="Language"
-              className={cn(
-                "grid grid-cols-4 gap-0.5 border-t border-line px-1.5 py-1.5",
-                switching && "opacity-60",
-              )}
-            >
-              {STAFF_LOCALES.map((code) => {
-                const current = code === lang;
-                return (
-                  <button
-                    key={code}
-                    type="button"
-                    data-menu-item
-                    role="menuitemradio"
-                    aria-checked={current}
-                    disabled={switching !== null}
-                    onClick={() => chooseLanguage(code)}
-                    className={cn(
-                      "rounded py-1.5 text-center text-[12.5px] outline-none transition-colors",
-                      "focus-visible:bg-brass-wash focus-visible:text-brass",
-                      current
-                        ? "bg-brass-wash font-medium text-brass"
-                        : "text-ink-muted hover:bg-shell hover:text-ink",
-                    )}
-                  >
-                    {code}
-                  </button>
-                );
-              })}
-            </div>
-
-            <p className="tnum border-t border-line px-3 py-2 text-[11px] text-ink-faint">
-              build: {process.env.APP_BUILD}
-            </p>
-
-            <div className="border-t border-line py-1">
-              <MenuItem onSelect={() => void signOut()}>
-                <MenuRow icon={<KeyIcon />}>{staffT(lang, "logOut")}</MenuRow>
-              </MenuItem>
+              {/*
+                There is no Language item. These screens are English, so a
+                control that cannot change anything was worse than nothing —
+                first it read as broken, then as pointless, and both were fair.
+                The nineteen languages live on the guest booking page, where
+                the person reading might not speak English. If the staff app is
+                ever translated this is where the switcher goes back.
+              */}
+              <MenuItem onSelect={() => void signOut()}>Log out</MenuItem>
             </div>
           </Menu>
         </div>
@@ -371,7 +295,7 @@ export function TopNav({
                             : "text-white/55 hover:bg-white/[0.04] hover:text-white/90",
                         )}
                       >
-                        {staffT(lang, s.id)}
+                        {s.label}
                         <Chevron open={isOpen} />
                       </button>
                       {isOpen && (
@@ -412,7 +336,7 @@ export function TopNav({
                     {active && (
                       <span className="absolute inset-y-1.5 left-0 w-[3px] rounded-full bg-brass" />
                     )}
-                    {staffT(lang, s.id)}
+                    {s.label}
                   </Link>
                 );
               })}
@@ -426,67 +350,3 @@ export function TopNav({
   );
 }
 
-/** An icon and a label on one line, as every item in the reference's menu. */
-function MenuRow({
-  icon,
-  children,
-}: {
-  icon: React.ReactNode;
-  children: React.ReactNode;
-}) {
-  return (
-    <span className="flex items-center gap-2.5">
-      <span className="grid h-4 w-4 shrink-0 place-items-center text-ink-faint">
-        {icon}
-      </span>
-      {children}
-    </span>
-  );
-}
-
-/*
- * The reference's five marks, drawn rather than imported: there is no icon
- * library here, and five small SVGs are not a reason to add one.
- */
-const ICON = "h-4 w-4";
-
-function ProfileIcon() {
-  return (
-    <svg viewBox="0 0 16 16" aria-hidden="true" className={ICON} fill="currentColor">
-      <circle cx="8" cy="5" r="3" />
-      <path d="M2 14.5c0-3 2.7-5 6-5s6 2 6 5z" />
-    </svg>
-  );
-}
-
-function CaseIcon() {
-  return (
-    <svg viewBox="0 0 16 16" aria-hidden="true" className={ICON} fill="currentColor">
-      <path d="M5.5 3.5A1.5 1.5 0 0 1 7 2h2a1.5 1.5 0 0 1 1.5 1.5V4H13a1.5 1.5 0 0 1 1.5 1.5v7A1.5 1.5 0 0 1 13 14H3a1.5 1.5 0 0 1-1.5-1.5v-7A1.5 1.5 0 0 1 3 4h2.5zM7 3.5V4h2v-.5z" />
-    </svg>
-  );
-}
-
-function GearIcon() {
-  return (
-    <svg viewBox="0 0 16 16" aria-hidden="true" className={ICON} fill="currentColor">
-      <path d="M9.2 1.5l.3 1.7c.4.1.8.3 1.1.5l1.4-1 1.7 1.7-1 1.4c.2.3.4.7.5 1.1l1.7.3v2.4l-1.7.3c-.1.4-.3.8-.5 1.1l1 1.4-1.7 1.7-1.4-1c-.3.2-.7.4-1.1.5l-.3 1.7H6.8l-.3-1.7c-.4-.1-.8-.3-1.1-.5l-1.4 1-1.7-1.7 1-1.4c-.2-.3-.4-.7-.5-1.1l-1.7-.3V6.8l1.7-.3c.1-.4.3-.8.5-1.1l-1-1.4 1.7-1.7 1.4 1c.3-.2.7-.4 1.1-.5l.3-1.7zM8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5z" />
-    </svg>
-  );
-}
-
-function WarningIcon() {
-  return (
-    <svg viewBox="0 0 16 16" aria-hidden="true" className={ICON} fill="currentColor">
-      <path d="M8 1.5c.4 0 .7.2.9.5l6 10.5c.4.7-.1 1.5-.9 1.5H2c-.8 0-1.3-.8-.9-1.5l6-10.5c.2-.3.5-.5.9-.5zm-.8 4.5.2 4h1.2l.2-4zM8 11a.9.9 0 1 0 0 1.8.9.9 0 0 0 0-1.8z" />
-    </svg>
-  );
-}
-
-function KeyIcon() {
-  return (
-    <svg viewBox="0 0 16 16" aria-hidden="true" className={ICON} fill="currentColor">
-      <path d="M10.5 1.5a4 4 0 1 1-1.3 7.8L8 10.5H6.5V12H5v1.5H2.5v-2.2l4.2-4.2a4 4 0 0 1 3.8-5.6zm1 2a1 1 0 1 0 0 2 1 1 0 0 0 0-2z" />
-    </svg>
-  );
-}
