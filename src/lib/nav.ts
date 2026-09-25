@@ -1,9 +1,17 @@
+import type { StaffKey } from "@/lib/i18n/staff";
+
 export interface NavItem {
   label: string;
   href: string;
 }
 
 export interface NavSection {
+  /**
+   * The key into the staff dictionary (`src/lib/i18n/staff.ts`). The English
+   * `label` stays the internal identifier -- React keys and which menu is open
+   * both hang off it -- so switching language never reshuffles state.
+   */
+  id: StaffKey;
   label: string;
   href?: string;
   items?: NavItem[];
@@ -14,9 +22,10 @@ export interface NavSection {
 }
 
 export const SECTIONS: NavSection[] = [
-  { label: "Dashboard", href: "/dashboard" },
-  { label: "Calendar", href: "/calendar" },
+  { id: "dashboard", label: "Dashboard", href: "/dashboard" },
+  { id: "calendar", label: "Calendar", href: "/calendar" },
   {
+    id: "inventory",
     label: "Inventory",
     /*
       Eleven items, matching the client's reference system exactly and in its
@@ -43,6 +52,7 @@ export const SECTIONS: NavSection[] = [
     ],
   },
   {
+    id: "bookings",
     label: "Bookings",
     /*
       Three items, matching the client's reference system exactly.
@@ -58,8 +68,9 @@ export const SECTIONS: NavSection[] = [
       { label: "Search", href: "/bookings" },
     ],
   },
-  { label: "Offers", href: "/offers" },
+  { id: "offers", label: "Offers", href: "/offers" },
   {
+    id: "reports",
     label: "Reports",
     scroll: true,
     /*
@@ -93,9 +104,9 @@ export const SECTIONS: NavSection[] = [
       { label: "Booking Waitlist Report", href: "/reports/waitlist" },
     ],
   },
-  { label: "Customers", href: "/customers" },
-  { label: "Cashier", href: "/cashier" },
-  { label: "Meeting Rooms", href: "/meeting-rooms" },
+  { id: "customers", label: "Customers", href: "/customers" },
+  { id: "cashier", label: "Cashier", href: "/cashier" },
+  { id: "meetingRooms", label: "Meeting Rooms", href: "/meeting-rooms" },
 ];
 
 export function isHrefActive(href: string, pathname: string): boolean {

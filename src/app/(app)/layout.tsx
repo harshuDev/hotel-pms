@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { cookies } from "next/headers";
 import { format, parseISO } from "date-fns";
 import { TopNav } from "@/components/top-nav";
 import { TopBar } from "@/components/top-bar";
@@ -8,6 +9,11 @@ import {
   getCurrentStaffUser,
   getProperty,
 } from "@/lib/queries";
+import {
+  DEFAULT_STAFF_LOCALE,
+  STAFF_LANG_COOKIE,
+  isStaffLocale,
+} from "@/lib/i18n/staff";
 
 /**
  * The browser tab carries the property's real name, not a hard-coded one.
@@ -80,18 +86,25 @@ export default async function AppLayout({
 
   const businessDate = format(parseISO(today), "EEE d MMM yyyy");
 
+  // The language the frame is drawn in. Read on the server so the first paint
+  // is already in it -- choosing it in the browser would flash English first.
+  // Validated again here, since a cookie is a string anybody can edit.
+  const langCookie = (await cookies()).get(STAFF_LANG_COOKIE)?.value;
+  const lang = isStaffLocale(langCookie) ? langCookie : DEFAULT_STAFF_LOCALE;
+
   return (
     <div className="min-h-screen">
       <TopNav
         propertyId={property.id}
         propertyName={property.name}
         staffName={staff.fullName}
-        staffRole={staff.role}
+        lang={lang}
       />
 
       <TopBar
         propertyName={property.name}
         businessDate={businessDate}
+        lang={lang}
       />
 
       <main className="p-3 sm:p-5">

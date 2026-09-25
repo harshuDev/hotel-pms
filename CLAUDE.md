@@ -164,18 +164,64 @@ current design, not as drift.
    - `src/components/menu.tsx` is the shared dropdown primitive — hover
      intent, click-outside, Escape, arrow keys. Inventory, Bookings, Reports
      and the user menu all use it. Do not hand-roll another one.
-   - **The user menu is Profile, Guest booking page, Settings, Reload data and
-     Log out. There is no Language item and no footnote.** Both were removed
-     after the client asked what the point of a control that changes nothing
-     was. A disabled row was tried twice — silent, then labelled "English" —
-     and read as broken the first time and pointless the second. **Do not add a
-     control to this menu that cannot do anything.** The nineteen languages
-     live on the guest booking page, where the reader might not speak English;
-     if the staff app is ever translated, the switcher goes back here. The logo
-     is `/public/logo-mark.png`, supplied by the client in the first commit,
-     and it is now the favicon too — `src/app/icon.png`, `apple-icon.png` and
-     `favicon.ico` are generated from that same mark, trimmed to its own bounds
-     and squared.
+   - **THE USER MENU IS THE CLIENT'S REFERENCE MENU, ITEM FOR ITEM. This
+     reverses what this file said**, which was that the menu had no Language
+     item and no footnote. The client sent a screenshot of their old system's
+     menu and asked for ours to be the same:
+     Profile, Guest Booking Page, Settings — rule — Clear cache — rule — a grid
+     of twelve language codes — rule — `build: <date>-<commit>` — rule — Log
+     Out. Every item carries an icon, and the casing is theirs exactly, "Guest
+     Booking Page" and "Log Out" in Title Case beside "Clear cache", on the
+     same rule the Inventory menu follows. The name-and-role heading that used
+     to open the menu is gone because theirs has none.
+     - **THE LANGUAGE GRID DOES SOMETHING, AND THAT IS THE WHOLE POINT.** A
+       language item was removed from here twice because it changed nothing —
+       a silent disabled row, then a row reading "English" — and the client
+       was right both times. A third dead control would have been worse than
+       leaving it out. **Do not ship one of these that switches nothing.**
+     - **What it switches is the frame**, from `src/lib/i18n/staff.ts`: the
+       nine section names in the bar and the phone drawer, this menu, and
+       "Business date". Navigation words, not accounting ones. **The screens
+       stay English, and so do the entries inside the Inventory, Bookings and
+       Reports menus** — a screen's name is translated with the screen it
+       names, and those are hotel and accounting terms (blind close, close
+       out, paid-out, folio) that want a translator rather than a best guess.
+       The frame is the foundation, not the finish: each screen translated
+       later adds its keys to the same dictionary.
+     - **The translations have not been reviewed by a native speaker.** They
+       are short navigation words and low-risk, but "Inventory" in the hotel
+       sense has no single obvious word in several of these languages, and a
+       hotel that uses one of them should be asked whether it reads right.
+     - **The twelve codes and their order are the reference's**, in their own
+       list separate from the guest page's nineteen, with `sl-SI` written as
+       they write it.
+     - **Per browser, in a `staff_lang` cookie**, read on the server so the
+       first paint is already in the chosen language. A front desk terminal is
+       shared and the reference behaves the same way; per-account would be a
+       column and a migration for no difference anyone at a desk would see.
+       `setStaffLanguage()` validates the code against the twelve before
+       setting it, and the layout validates it again on the way back in.
+     - **`lang` is set on the header and the business-date label, not on
+       `<html>`**: the frame is in the chosen language while every page body
+       is still English, and a screen reader takes its pronunciation from the
+       nearest `lang`.
+     - **The English label stays the internal key.** `NavSection` carries an
+       `id` into the dictionary for display, while React keys and which menu is
+       open still hang off the English `label`, so switching language never
+       reshuffles state.
+     - **"Clear cache" is their word; what it does is unchanged** — it reloads
+       this screen's figures (see the "Reload data" note below, which is the
+       same action under its old name).
+     - **The build line** is `APP_BUILD`, worked out once in `next.config.mjs`
+       at build time — the build's UTC day and the first eight characters of
+       `VERCEL_GIT_COMMIT_SHA`, or `local` off Vercel — and inlined into both
+       bundles, so the server and browser renders cannot disagree. It exists
+       for support: once hotels are logged in, the first question on any fault
+       report is which version they are looking at.
+     The logo is `/public/logo-mark.png`, supplied by the client in the first
+     commit, and it is now the favicon too — `src/app/icon.png`,
+     `apple-icon.png` and `favicon.ico` are generated from that same mark,
+     trimmed to its own bounds and squared.
    - **Search works, as of 0049**, and `src/components/search-overlay.tsx` owns
      it. `global_search()` returns bookings, customers and rooms — a reference,
      a name, a room number, which is what somebody at a front desk has in their
@@ -1645,11 +1691,11 @@ anywhere else. Collapsed height must stay constant regardless of room count.
   often than anyone admits, so `/profile` re-authenticates with
   `signInWithPassword` before setting the new password. Somebody who has
   genuinely forgotten theirs uses the reset flow instead.
-- **"Reload data" is `revalidatePath("/", "layout")`.** Reads are Server
+- **"Clear cache" is `revalidatePath("/", "layout")`.** Reads are Server
   Components, so a figure can sit behind a change made on the machine next
   door. This is the button to reach for instead of teaching people to
-  hard-reload, and it is why the item is labelled by its result rather than
-  "Clear cache".
+  hard-reload. It was labelled "Reload data", by its result, until the client
+  asked for their reference's menu word for word; the action did not change.
 - **The guest booking page is `/book/[propertyId]`, and it is the only thing
   in this codebase that runs without a staff session.** A guest has no
   `staff_users` row, so `current_property_id()` is null and the ordinary reads

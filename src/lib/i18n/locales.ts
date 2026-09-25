@@ -1,5 +1,6 @@
 /**
- * The guest booking page speaks these; the staff app does not.
+ * The guest booking page speaks these. The staff app has its own, shorter
+ * list and only translates its frame so far -- see `staff.ts`.
  *
  * That split is deliberate. A guest arrives from anywhere and reads a handful
  * of screens, so translating them is worth it and the vocabulary is ordinary
