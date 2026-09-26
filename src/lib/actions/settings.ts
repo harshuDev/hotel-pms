@@ -1528,58 +1528,64 @@ export async function deleteTaxRate(id: string): Promise<ActionResult<null>> {
  * that is an invite flow with its own decisions about who may send one.
  */
 /**
- * A season: a named date range that labels the calendar.
- *
- * It changes no price. Pricing is `rate_plan_days` and stays there — a season
- * that quietly moved rates would be a second price list nobody could see.
- *
- * Seasons may not overlap, which Postgres enforces with an exclusion
- * constraint rather than this action: two bands over one date has no sensible
- * drawing, and the rule belongs where every writer meets it.
+ * A season or an event (0095): a name and a colour. Its dates are ranges added
+ * with addSeasonRange(). It changes no price -- rates stay in `rate_plan_days`.
+ * The kind is fixed once made.
  */
-export async function saveSeason(input: {
+export async function saveSeasonType(input: {
   id: string | null;
+  kind: "season" | "event";
   name: string;
-  startsOn: string;
-  endsOn: string;
+  color: string;
 }): Promise<ActionResult<{ id: string }>> {
-  if (input.name.trim() === "") {
-    return { ok: false, error: "A season needs a name." };
-  }
-  if (!input.startsOn || !input.endsOn) {
-    return { ok: false, error: "A season needs a first and a last day." };
-  }
-  if (input.endsOn < input.startsOn) {
-    return { ok: false, error: "A season cannot end before it starts." };
-  }
-
   const supabase = await createClient();
-  const { data, error } = await supabase.rpc("save_season", {
+  const { data, error } = await supabase.rpc("save_season_type", {
+    // Null adds a new season or event.
+    p_id: nullableArg(input.id),
+    p_kind: input.kind,
     p_name: input.name,
-    p_starts_on: input.startsOn,
-    p_ends_on: input.endsOn,
-    p_id: input.id,
+    p_color: input.color,
   });
-
-  if (error) {
-    // The exclusion constraint is the likely refusal, and its raw text names a
-    // constraint rather than the thing the manager did.
-    if (error.message.includes("seasons_no_overlap")) {
-      return {
-        ok: false,
-        error: "Those dates overlap a season that already exists. Seasons cannot overlap.",
-      };
-    }
-    return { ok: false, error: error.message };
-  }
-
+  if (error) return { ok: false, error: error.message };
   revalidateSettings();
   revalidatePath("/calendar");
   return { ok: true, data: { id: data as string } };
 }
 
+/** Deletes a season or event with all its ranges. */
+export async function deleteSeasonType(id: string): Promise<ActionResult<null>> {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("delete_season_type", { p_id: id });
+  if (error) return { ok: false, error: error.message };
+  revalidateSettings();
+  revalidatePath("/calendar");
+  return { ok: true, data: null };
+}
+
+/** One more date range. Postgres refuses a season range overlapping another season, by name. */
+export async function addSeasonRange(input: {
+  seasonTypeId: string;
+  startsOn: string;
+  endsOn: string;
+}): Promise<ActionResult<null>> {
+  if (!input.startsOn || !input.endsOn) {
+    return { ok: false, error: "Choose the start and the end." };
+  }
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("add_season_range", {
+    p_season_type_id: input.seasonTypeId,
+    p_starts_on: input.startsOn,
+    p_ends_on: input.endsOn,
+  });
+  if (error) return { ok: false, error: error.message };
+  revalidateSettings();
+  revalidatePath("/calendar");
+  return { ok: true, data: null };
+}
+
 /**
- * Unlike a room, a room type or a tax rate, a season really is deleted.
+ * One date range of a season or event (0095). Unlike a room, a room type or a
+ * tax rate, it really is deleted.
  * Nothing points at one — it is a label over dates — so removing it loses no
  * history and there is nothing to retire it from.
  */

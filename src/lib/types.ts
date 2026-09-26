@@ -324,6 +324,21 @@ export interface CalendarSeason {
   startsOn: string;
   /** Inclusive: a season runs to the end of this day. */
   endsOn: string;
+  /** The season's own colour (0095), "#rrggbb": the calendar band's fill. */
+  color: string;
+}
+
+/**
+ * A season or an event (0095): a name and a colour that own date ranges.
+ * Seasons never overlap one another; events may overlap anything.
+ */
+export interface SeasonType {
+  id: string;
+  kind: "season" | "event";
+  name: string;
+  color: string;
+  /** Oldest first. Each is inclusive at both ends. */
+  ranges: { id: string; startsOn: string; endsOn: string }[];
 }
 
 /** What a debt is owed against. The debtors report returns both. */

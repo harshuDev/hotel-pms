@@ -1352,6 +1352,10 @@ export function CalendarBoard({
                     style={{
                       left: startIdx * COL_W,
                       width: (endIdx - startIdx) * COL_W,
+                      // The season's own colour (0095), set in Seasons and
+                      // Events. Data, so a style and never a class.
+                      backgroundColor: s.color,
+                      color: inkOn(s.color),
                     }}
                   >
                     {/*
@@ -1361,7 +1365,7 @@ export function CalendarBoard({
                       nothing at all.
                     */}
                     <span
-                      className="sticky truncate whitespace-nowrap px-2 text-xxs font-bold uppercase tracking-[0.14em] text-white"
+                      className="sticky truncate whitespace-nowrap px-2 text-xxs font-bold uppercase tracking-[0.14em]"
                       style={{ left: railW + 28 }}
                     >
                       {s.name}

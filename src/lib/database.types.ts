@@ -3365,29 +3365,70 @@ export type Database = {
           },
         ]
       }
+      season_types: {
+        Row: {
+          color: string
+          created_at: string
+          id: string
+          kind: string
+          name: string
+          property_id: string
+        }
+        Insert: {
+          color?: string
+          created_at?: string
+          id?: string
+          kind: string
+          name: string
+          property_id: string
+        }
+        Update: {
+          color?: string
+          created_at?: string
+          id?: string
+          kind?: string
+          name?: string
+          property_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "season_types_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       seasons: {
         Row: {
           created_at: string
           ends_on: string
           id: string
+          kind: string
           name: string
           property_id: string
+          season_type_id: string
           starts_on: string
         }
         Insert: {
           created_at?: string
           ends_on: string
           id?: string
+          kind?: string
           name: string
           property_id: string
+          season_type_id: string
           starts_on: string
         }
         Update: {
           created_at?: string
           ends_on?: string
           id?: string
+          kind?: string
           name?: string
           property_id?: string
+          season_type_id?: string
           starts_on?: string
         }
         Relationships: [
@@ -3397,6 +3438,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "properties"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "seasons_type_fkey"
+            columns: ["season_type_id", "property_id"]
+            isOneToOne: false
+            referencedRelation: "season_types"
+            referencedColumns: ["id", "property_id"]
           },
         ]
       }
@@ -3795,6 +3843,14 @@ export type Database = {
           p_file_name: string
           p_size_bytes: number
           p_storage_path: string
+        }
+        Returns: string
+      }
+      add_season_range: {
+        Args: {
+          p_ends_on: string
+          p_season_type_id: string
+          p_starts_on: string
         }
         Returns: string
       }
@@ -4228,6 +4284,7 @@ export type Database = {
       calendar_seasons: {
         Args: { p_days?: number; p_from: string }
         Returns: {
+          color: string
           ends_on: string
           id: string
           name: string
@@ -4675,6 +4732,7 @@ export type Database = {
       delete_room: { Args: { p_room_id: string }; Returns: undefined }
       delete_room_type: { Args: { p_room_type_id: string }; Returns: undefined }
       delete_season: { Args: { p_id: string }; Returns: undefined }
+      delete_season_type: { Args: { p_id: string }; Returns: undefined }
       delete_tax_rate: { Args: { p_id: string }; Returns: undefined }
       delete_virtual_room_type: { Args: { p_id: string }; Returns: undefined }
       deposit_report: {
@@ -5821,13 +5879,8 @@ export type Database = {
         Args: { p_enabled: boolean; p_time: string }
         Returns: undefined
       }
-      save_season: {
-        Args: {
-          p_ends_on: string
-          p_id?: string
-          p_name: string
-          p_starts_on: string
-        }
+      save_season_type: {
+        Args: { p_color: string; p_id: string; p_kind: string; p_name: string }
         Returns: string
       }
       save_staff_user: {
