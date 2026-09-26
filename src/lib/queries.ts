@@ -86,6 +86,7 @@ import type {
   CalendarBar,
   CalendarSeason,
   SeasonType,
+  WeekRate,
   RoomTypeStatus,
   BookingAttachment,
   BookingEmail,
@@ -1988,6 +1989,30 @@ export async function getRoomStatusByType(): Promise<RoomTypeStatus[]> {
     vacantDirty: row.vacant_dirty,
     occupied: row.occupied,
     outOfOrder: row.out_of_order,
+  }));
+}
+
+/** Every stored weekday template (0096), for Room Rate Combinations. A handful per plan and type. */
+export async function getWeekRates(): Promise<WeekRate[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("rate_plan_week_rates")
+    .select(
+      "rate_plan_id, room_type_id, season_type_id, weekday, rate_cents, min_stay_through, min_stay_arrival, max_stay, closed_to_arrival, closed_to_departure, stop_sell",
+    );
+  if (error) throw new Error(`Failed to load the weekly rates: ${error.message}`);
+  return (data ?? []).map((r) => ({
+    ratePlanId: r.rate_plan_id,
+    roomTypeId: r.room_type_id,
+    seasonTypeId: r.season_type_id,
+    weekday: r.weekday,
+    rateCents: r.rate_cents === null ? null : Number(r.rate_cents),
+    minStayThrough: r.min_stay_through,
+    minStayArrival: r.min_stay_arrival,
+    maxStay: r.max_stay,
+    closedToArrival: r.closed_to_arrival,
+    closedToDeparture: r.closed_to_departure,
+    stopSell: r.stop_sell,
   }));
 }
 

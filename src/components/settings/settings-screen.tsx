@@ -41,6 +41,7 @@ import { InventorySettingsPanel } from "@/components/settings/inventory-settings
 import { RoomSetupPanel, RoomTypesPanel } from "@/components/settings/room-panels";
 import { CancellationPolicyPanel } from "@/components/settings/cancellation-policy-panel";
 import { RatePlansPanel } from "@/components/settings/rate-plans-panel";
+import { RateCombinations } from "@/components/settings/rate-combinations";
 import { SeasonsPanel } from "@/components/settings/seasons-panel";
 import { DiscountsPanel } from "@/components/settings/discounts-panel";
 import type { InventorySettings } from "@/lib/inventory-settings";
@@ -80,6 +81,7 @@ import {
 } from "@/lib/actions/settings";
 import type {
   SeasonType,
+  WeekRate,
   RatePlan,
   CancellationPolicy,
   ChannelKind,
@@ -217,6 +219,7 @@ export function SettingsScreen({
   businessDate,
   discounts,
   virtualRoomTypes,
+  weekRates,
 }: {
   tab: SettingsTab;
   property: PropertySettings;
@@ -260,6 +263,8 @@ export function SettingsScreen({
   discounts: Discount[];
   /** Inventory -> Room Type -> Virtual Room Types (0091). Stored. */
   virtualRoomTypes: VirtualRoomType[];
+  /** The weekly rate templates (0096); loaded only on the Rate Plans tab. */
+  weekRates: WeekRate[];
   roomTypes: RoomTypeSetting[];
   rooms: RoomSettingsPage;
   roomQuery: string;
@@ -1289,13 +1294,25 @@ export function SettingsScreen({
       )}
 
       {tab === "rate-plans" && (
-        <RatePlansPanel
-          ratePlans={ratePlans}
-          cancellationPolicies={cancellationPolicies}
-          canEdit={canEdit}
-          pending={pending}
-          run={run}
-        />
+        <div className="space-y-6">
+          <RatePlansPanel
+            ratePlans={ratePlans}
+            cancellationPolicies={cancellationPolicies}
+            canEdit={canEdit}
+            pending={pending}
+            run={run}
+          />
+          <RateCombinations
+            ratePlans={ratePlans.filter((p) => p.isActive)}
+            roomTypes={roomTypes}
+            seasons={seasons.filter((s) => s.kind === "season")}
+            cancellationPolicies={cancellationPolicies}
+            weekRates={weekRates}
+            canEdit={canEdit}
+            pending={pending}
+            run={run}
+          />
+        </div>
       )}
 
       {tab === "cancellation" && (

@@ -329,6 +329,26 @@ export interface CalendarSeason {
 }
 
 /**
+ * One weekday of a rate plan's week on one room type, for a season or the
+ * Default Season (null) -- Settings -> Rate Plans -> Room Rate Combinations
+ * (0096). Saving it FILLS nights that have no value yet; it never overwrites.
+ */
+export interface WeekRate {
+  ratePlanId: string;
+  roomTypeId: string;
+  seasonTypeId: string | null;
+  /** ISO: 1 = Monday ... 7 = Sunday. */
+  weekday: number;
+  rateCents: number | null;
+  minStayThrough: number | null;
+  minStayArrival: number | null;
+  maxStay: number | null;
+  closedToArrival: boolean;
+  closedToDeparture: boolean;
+  stopSell: boolean;
+}
+
+/**
  * A season or an event (0095): a name and a colour that own date ranges.
  * Seasons never overlap one another; events may overlap anything.
  */

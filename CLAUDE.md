@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0095` are
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0096` are
 applied to the hosted database.
 
 Working on real data: dashboard (house board, movements, pace, activity feed),
@@ -228,6 +228,7 @@ Each read is a Postgres view or RPC, never aggregation in the client:
 | `getCalendarSeasons(from, n)`       | `calendar_seasons(from, n)`        |
 | `getCalendarNotes(from, n)`         | `calendar_notes_for(from, n)`      |
 | `getSeasonSettings()`               | `season_types` with their `seasons` ranges (0095) |
+| `getWeekRates()`                    | `rate_plan_week_rates` (0096)     |
 | `getRoomStatusByType()` (unused)    | `room_status_by_type()`            |
 | `getOccupancyReport(from, to)`      | `occupancy_report(from, to)`      |
 | `getDebtorsReport()`                | `debtors_report()`                |
@@ -1172,12 +1173,30 @@ anywhere else. Collapsed height must stay constant regardless of room count.
     takes the default policy by trigger (0093).
     - "Show Special Offer Rates" is not copied: offers here reduce a stay,
       they do not create rate plans, so there would be nothing to show.
-    - **THE REFERENCE'S WEEKLY RATE GRID IS NOT BUILT YET** ("Room Rate
-      Combinations": per season, per room type and plan, a Monday-to-Sunday
-      rate with MST/MSA/MXS/CTA/CTD/SS). Prices here are per night in
-      `rate_plan_days`, so a weekday template has to be APPLIED to nights --
-      which overwrites nights priced by hand in Inventory. That is the
-      client's call, and was asked.
+    - **THE WEEKLY RATE GRID IS BUILT (0096), AND IT ONLY FILLS.** "Room
+      Rate Combinations" (`rate-combinations.tsx`, under the list): Season
+      (Default Season or one of the seasons), Room types and Rate Categories
+      as removable chips, then per room type a row per plan -- sleeps,
+      policy and currency -- with a Monday-to-Sunday rate, MST/MSA/MXS and
+      CTA/CTD/SS, and a Save per row.
+      - `rate_plan_week_rates` stores the template; `save_week_rates()`
+        stores it and then writes it onto the nights. **THE CLIENT'S RULE:
+        "Only fill nights that have no price yet."** A night's rate is set
+        only where it has none, a min or max stay only where none is set, and
+        CTA, CTD and stop sell are only ever switched ON -- an unticked box
+        removes nothing. Nothing priced or restricted in Inventory is ever
+        overwritten; Inventory stays the way to change a night that has a
+        value. Save reports how many nights it priced.
+      - **Which nights:** from the open business date on. A season: its own
+        ranges, up to two years out. The Default Season: the next 365 nights
+        that no season covers. `inventory_guard()` does the role check.
+      - **A restriction cleared by hand in Inventory is empty again, so the
+        next Save of that row fills it back in.** That is what "fill" means
+        for a rule whose absence is null; tell the client if they clear rules
+        night by night and then re-save the week.
+      - Not copied: "Show Multi Occupancy Rates" and "Show derived and
+        calculated rates" (no per-occupancy or derived rates exist), and each
+        row's menu and arrow, whose actions have not been seen.
   - **A property always keeps one default plan.** `save_rate_plan()` promotes
     the first active plan if the last default is retired or stood down —
     otherwise a booking naming no plan has nowhere to fall back to.
