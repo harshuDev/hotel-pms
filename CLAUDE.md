@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0087` are
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0089` are
 applied to the hosted database.
 
 Working on real data: dashboard (house board, movements, pace, activity feed),
@@ -264,6 +264,7 @@ Each read is a Postgres view or RPC, never aggregation in the client:
 | `getAccountingSettings()`           | `accounting_categories` + `accounting_defaults` (0085) |
 | `getPaymentGateways()`              | `payment_gateways` (0086)         |
 | `getAccountingSystems()`            | `accounting_systems` (0087)       |
+| `getInventorySettings()`            | `inventory_settings` (0088)       |
 | `getMealReport(from, to)`           | `meal_report(from, to)`           |
 
 **Two signatures carry the room-count rule.** The client operates properties
@@ -1595,11 +1596,11 @@ anywhere else. Collapsed height must stay constant regardless of room count.
     (0079): Custom Payment Types, Tax Information, Invoice Settings (0080),
     Pos Profiles (0084), Currencies (0083), Accounting Categories (0085),
     Payment Gateway (0086), Accounting Systems (0087);
-    Room Type, Room Setup,
+    Settings (0088-0089), Room Type, Room Setup,
     Cancellation Policy, Rate Plans, Seasons and Events. Room Type and Room
     Setup moved there from Hotel Content, where the reference does not have
-    them. Their other items —
-    Inventory's Settings and Discounts — go in as each is built. Tab ids did
+    them. Their one other item —
+    Inventory's Discounts — goes in as each is built. Tab ids did
     not change, so every existing link still lands.
   - **INVOICE SETTINGS (0080-0082) HAS A READER: THE PRINTABLE INVOICE.**
     Nothing printed an invoice before, so `/bookings/[id]/invoice` (linked
@@ -1692,6 +1693,33 @@ anywhere else. Collapsed height must stay constant regardless of room count.
       points at one.
     - Names are unique per property, case-insensitively. Blank codes are
       stored as null.
+  - **INVENTORY -> SETTINGS (0088-0089) IS LIVE, ALL THREE CARDS.**
+    - **The two cut-offs govern the guest booking page only**; staff still
+      take any booking through `create_booking()`. *Cut-off date*: no online
+      stay may include a night after it. *Same-day time*: after it, on the
+      HOTEL's clock (`properties.timezone`), nothing arriving today books
+      online.
+    - **Decided in one place, `public_booking_cutoff_reason()`**, which
+      `public_room_types()` puts into `unavailable_reason` ahead of the stay
+      rules. The guest page already shows that reason on each room, and
+      `create_public_booking()` already refuses whatever it holds, with
+      `HP002` -- so the page and a curl cannot disagree. The helper is
+      security definer with no grant to anyone; the public surface did not
+      grow. The reason is English, like the stay-rule reasons beside it.
+    - **The six visibility ticks** take a restriction's entry out of the
+      Inventory menu (`hiddenInventoryHrefs()`, joined to the Hotel Features
+      list in `(app)/layout.tsx`), make its screen a refusal that links back
+      here, and drop its row from the All screen.
+    - **A FIELD CANNOT BE HIDDEN WHILE IT STILL HOLDS A VALUE** on a night from
+      the business date on, on an active plan. `save_inventory_visibility()`
+      refuses by name with the number of nights. A stop sell nobody can see is
+      still stopping sales; hiding must never produce that. The All screen
+      keeps a hidden row anyway if its window shows a value, which can happen
+      looking back into the past.
+    - **0089 exists because 0088's saves called `open_business_date()`,**
+      which staff cannot execute -- every save raised a permission error. They
+      read `business_dates` under RLS now. Found by the rolled-back test
+      before any code shipped.
   - **PAYMENT GATEWAY (0086) AND ACCOUNTING SYSTEMS (0087) ARE STORED, NOT
     YET LIVE, BY DECISION.** The client: gateways are connected per client, as
     each asks for one. A row says which gateway or ledger the hotel uses; no

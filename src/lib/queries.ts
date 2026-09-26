@@ -23,6 +23,10 @@ import {
   ROUND_TO,
   type InvoiceSettings,
 } from "@/lib/invoice-settings";
+import {
+  DEFAULT_INVENTORY_SETTINGS,
+  type InventorySettings,
+} from "@/lib/inventory-settings";
 import type {
   AccountingSettings,
   AccountingSystem,
@@ -2853,6 +2857,37 @@ export async function getAccountingSystems(): Promise<AccountingSystem[]> {
   if (error) throw new Error(`Failed to load the accounting systems: ${error.message}`);
   return (data ?? []).map((r) => ({ id: r.id, provider: r.provider, isEnabled: r.is_enabled }));
 }
+
+/**
+ * Inventory -> Settings (0088). Cached: the layout reads it for the menu and
+ * the Inventory screens read it again. No row reads as the defaults.
+ */
+export const getInventorySettings = cache(async (): Promise<InventorySettings> => {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("inventory_settings")
+    .select(
+      "online_cutoff_enabled, online_cutoff_date, same_day_cutoff_enabled, same_day_cutoff_time, show_min_stay_through, show_min_stay_arrival, show_closed_to_arrival, show_closed_to_departure, show_max_stay, show_stop_sell",
+    )
+    .maybeSingle();
+  if (error) throw new Error(`Failed to load the inventory settings: ${error.message}`);
+  if (!data) return DEFAULT_INVENTORY_SETTINGS;
+  return {
+    onlineCutoffEnabled: data.online_cutoff_enabled,
+    onlineCutoffDate: data.online_cutoff_date,
+    sameDayCutoffEnabled: data.same_day_cutoff_enabled,
+    // Postgres gives "HH:MM:SS"; the time field wants "HH:MM".
+    sameDayCutoffTime: data.same_day_cutoff_time?.slice(0, 5) ?? null,
+    visibility: {
+      min_stay_through: data.show_min_stay_through,
+      min_stay_arrival: data.show_min_stay_arrival,
+      closed_to_arrival: data.show_closed_to_arrival,
+      closed_to_departure: data.show_closed_to_departure,
+      max_stay: data.show_max_stay,
+      stop_sell: data.show_stop_sell,
+    },
+  };
+});
 
 /** One charge on a booking's folios, split for the invoice (0080). */
 export interface InvoiceLine {

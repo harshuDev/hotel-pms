@@ -8,9 +8,11 @@ import {
   getBusinessDate,
   getCurrentStaffUser,
   getHotelFeatures,
+  getInventorySettings,
   getProperty,
 } from "@/lib/queries";
 import { hiddenNavHrefs } from "@/lib/hotel-features";
+import { hiddenInventoryHrefs } from "@/lib/inventory-settings";
 
 /**
  * The browser tab carries the property's real name, not a hard-coded one.
@@ -76,10 +78,11 @@ export default async function AppLayout({
     );
   }
 
-  const [property, today, features] = await Promise.all([
+  const [property, today, features, inventorySettings] = await Promise.all([
     getProperty(),
     getBusinessDate(),
     getHotelFeatures(),
+    getInventorySettings(),
   ]);
 
   const businessDate = format(parseISO(today), "EEE d MMM yyyy");
@@ -91,7 +94,8 @@ export default async function AppLayout({
         propertyName={property.name}
         staffName={staff.fullName}
         staffRole={staff.role}
-        hiddenHrefs={hiddenNavHrefs(features)}
+        // Hotel Features (0076) and Inventory -> Settings visibility (0088).
+        hiddenHrefs={[...hiddenNavHrefs(features), ...hiddenInventoryHrefs(inventorySettings)]}
       />
 
       <TopBar

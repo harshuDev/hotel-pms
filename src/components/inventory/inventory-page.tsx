@@ -1,5 +1,7 @@
 import { isValid, parseISO } from "date-fns";
+import Link from "next/link";
 import { PageHeader } from "@/components/ui";
+import { INVENTORY_VISIBILITY, isInventoryFieldHidden } from "@/lib/inventory-settings";
 import { InventoryScreen } from "@/components/inventory/inventory-screen";
 import { SCREENS } from "@/components/inventory/field-spec";
 import {
@@ -7,6 +9,7 @@ import {
   getBusinessDate,
   getCurrentStaffUser,
   getInventoryGrid,
+  getInventorySettings,
   getRatePlans,
 } from "@/lib/queries";
 import type { InventoryField } from "@/lib/types";
@@ -35,6 +38,27 @@ export async function InventoryPage({
 }) {
   const spec = SCREENS[fieldName];
   const sp = await searchParams;
+
+  // Inventory -> Settings -> Inventory Options Visibility (0088). The menu
+  // entry goes with the tick; this answers a bookmark or a typed address.
+  if (isInventoryFieldHidden(await getInventorySettings(), fieldName)) {
+    const label = INVENTORY_VISIBILITY.find((v) => v.field === fieldName)?.label;
+    return (
+      <div>
+        <PageHeader title={title ?? spec.title} />
+        <div className="rounded-lg border border-line bg-white p-5 text-[13px] text-ink shadow-card">
+          This screen is switched off.{" "}
+          <Link
+            href="/settings?tab=inventory-settings"
+            className="text-brass underline-offset-2 hover:underline"
+          >
+            {label} in Inventory Settings
+          </Link>{" "}
+          turns it back on.
+        </div>
+      </div>
+    );
+  }
 
   const [staff, businessDate, plans] = await Promise.all([
     getCurrentStaffUser(),

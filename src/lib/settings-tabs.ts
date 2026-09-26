@@ -29,6 +29,7 @@ export const SETTINGS_TABS = [
   "hotel-features",
   "calendar-settings",
   "language-settings",
+  "inventory-settings",
   "room-types",
   "rooms",
   "staff",
@@ -66,8 +67,7 @@ export function isSettingsTab(value: string | undefined): value is SettingsTab {
  *
  * FINANCES AND INVENTORY carry the reference's labels in its order (0079),
  * and Room Type and Room Setup moved under Inventory, where the reference
- * keeps them. Their items not listed -- Inventory's own Settings and
- * Discounts -- go in as each is built, for the
+ * keeps them. Their item not listed -- Inventory's Discounts -- go in as each is built, for the
  * same reason Other is left out: an item that opens onto nothing is a dead
  * control. The tab ids did not change, so every existing link still lands.
  *
@@ -136,6 +136,7 @@ export const SETTINGS_NAV: {
   {
     title: "Inventory",
     items: [
+      { id: "inventory-settings", label: "Settings" },
       { id: "room-types", label: "Room Type" },
       { id: "rooms", label: "Room Setup" },
       { id: "cancellation", label: "Cancellation Policy" },

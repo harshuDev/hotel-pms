@@ -4,7 +4,8 @@ import { format, parseISO } from "date-fns";
 import { cn } from "@/components/ui";
 import { formatMoney } from "@/lib/money";
 import type { InventoryCell } from "@/lib/types";
-import { getPropertyCurrency } from "@/lib/queries";
+import { getInventorySettings, getPropertyCurrency } from "@/lib/queries";
+import type { VisibilityField } from "@/lib/inventory-settings";
 
 /**
  * Every inventory field at once, for one rate plan.
@@ -25,6 +26,8 @@ import { getPropertyCurrency } from "@/lib/queries";
 
 interface FieldRow {
   key: string;
+  /** The Inventory Options Visibility tick that hides this row, if any. */
+  visibility?: VisibilityField;
   label: string;
   href: string;
   /** What the cell shows. Null renders as the "no rule" dash. */
@@ -58,24 +61,28 @@ const ROWS: FieldRow[] = [
   },
   {
     key: "min_stay_through",
+    visibility: "min_stay_through",
     label: "Min stay through",
     href: "/inventory/min-stay-through",
     read: (c) => (c.minStayThrough === null ? null : String(c.minStayThrough)),
   },
   {
     key: "min_stay_arrival",
+    visibility: "min_stay_arrival",
     label: "Min stay arrival",
     href: "/inventory/min-stay-arrival",
     read: (c) => (c.minStayArrival === null ? null : String(c.minStayArrival)),
   },
   {
     key: "max_stay",
+    visibility: "max_stay",
     label: "Max stay",
     href: "/inventory/max-stay",
     read: (c) => (c.maxStay === null ? null : String(c.maxStay)),
   },
   {
     key: "cta",
+    visibility: "closed_to_arrival",
     label: "Closed to arrival",
     href: "/inventory/cta",
     read: (c) => (c.closedToArrival ? "Yes" : null),
@@ -83,6 +90,7 @@ const ROWS: FieldRow[] = [
   },
   {
     key: "ctd",
+    visibility: "closed_to_departure",
     label: "Closed to departure",
     href: "/inventory/ctd",
     read: (c) => (c.closedToDeparture ? "Yes" : null),
@@ -90,6 +98,7 @@ const ROWS: FieldRow[] = [
   },
   {
     key: "stop_sell",
+    visibility: "stop_sell",
     label: "Stop sell",
     href: "/inventory/stop-sell",
     read: (c) => (c.stopSell ? "Yes" : null),
@@ -105,10 +114,23 @@ const ROWS: FieldRow[] = [
 ];
 
 export async function InventoryAll({ cells }: { cells: InventoryCell[] }) {
-  const currency = await getPropertyCurrency();
+  const [currency, inventorySettings] = await Promise.all([
+    getPropertyCurrency(),
+    getInventorySettings(),
+  ]);
   const dates = [...new Set(cells.map((c) => c.date))].sort();
   const types = [...new Map(cells.map((c) => [c.roomTypeId, c])).values()];
   const at = new Map(cells.map((c) => [`${c.roomTypeId}|${c.date}`, c]));
+  // A row switched off in Inventory Options Visibility (0088) is dropped --
+  // unless something in this window still holds a value for it, which Postgres
+  // stops happening from the business date on but a window reaching back into
+  // the past can still show. A rule that is set is never hidden.
+  const rows = ROWS.filter(
+    (row) =>
+      !row.visibility ||
+      inventorySettings.visibility[row.visibility] ||
+      cells.some((c) => row.read(c, currency) !== null),
+  );
 
   if (dates.length === 0 || types.length === 0) {
     return (
@@ -168,7 +190,7 @@ export async function InventoryAll({ cells }: { cells: InventoryCell[] }) {
                     </span>
                   </td>
                 </tr>
-                {ROWS.map((row) => (
+                {rows.map((row) => (
                   <tr key={`${t.roomTypeId}-${row.key}`}>
                     <td className="sticky left-0 z-10 whitespace-nowrap border-t border-line bg-white px-3 py-1.5">
                       <Link
