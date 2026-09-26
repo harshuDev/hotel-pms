@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0101` are
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0102` are
 applied to the hosted database.
 
 Working on real data: dashboard (house board, movements, pace, activity feed),
@@ -274,6 +274,7 @@ Each read is a Postgres view or RPC, never aggregation in the client:
 | `getBookingEngineSettings()`        | `booking_engine_settings` + `booking_engine_profiles` (0098) |
 | `getBookingWidgets()`               | `booking_widgets` (0100)          |
 | `getApiKeys()`                      | `api_keys` -- hints only (0101)   |
+| `getKeyLockSystems()`               | `key_lock_systems` (0102)         |
 | `getMealReport(from, to)`           | `meal_report(from, to)`           |
 
 **Two signatures carry the room-count rule.** The client operates properties
@@ -1934,6 +1935,18 @@ anywhere else. Collapsed height must stay constant regardless of room count.
       the button says to tick two rather than being disabled.
     - `save_channel()` was DROPPED and recreated with `p_customer_id` -- the
       overload trap.
+  - **CONNECTIVITY -> KEY LOCK SYSTEMS (0102) IS STORED, NOT YET CONNECTED.**
+    The reference's list ("No Data" when empty) and Add offering Flexipass or
+    Remotelock (`key-lock-systems-panel.tsx`), one connection per provider.
+    Nothing talks to a lock and no door code is issued; what a connection
+    will use is already on the rooms (Key Code, Common Door Name, "Use Booking
+    Room id as Key Code", 0091).
+    - **The secret is write-only in Supabase Vault**, exactly as a channel
+      manager's password (0097): security definer writes, SELECT-only table,
+      the form shows "Saved", deleting removes the secret.
+    - **THE FIELDS ARE PROVISIONAL** -- the forms were not seen: RemoteLock
+      Client ID + Client secret (its OAuth client credentials), Flexipass
+      Account + API key. Labels live in `src/lib/key-lock-systems.ts`.
   - **CONNECTIVITY -> API KEY AND DEVELOPER KEYS (0101) OPEN A READ-ONLY
     PUBLIC API, at the client's request.** `/api/public/v1/<property>/` --
     the reference's "Endpoint" -- with `room-types`, `rate-plans`,

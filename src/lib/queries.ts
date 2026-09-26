@@ -28,6 +28,7 @@ import type { ChannelManager, ChannelManagerProvider } from "@/lib/channel-manag
 import type { BookingEngineProfile, BookingEngineTexts } from "@/lib/booking-engine";
 import type { BookingWidget } from "@/lib/booking-widgets";
 import type { ApiPermission } from "@/lib/api-keys";
+import type { KeyLockProvider, KeyLockSystem } from "@/lib/key-lock-systems";
 import {
   DEFAULT_INVENTORY_SETTINGS,
   type InventorySettings,
@@ -3032,6 +3033,24 @@ export async function getApiKeys(): Promise<{
         isActive: r.is_active,
       })),
   };
+}
+
+/** Key lock systems (0102), in the order they were added. Stored, not yet connected. */
+export async function getKeyLockSystems(): Promise<KeyLockSystem[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("key_lock_systems")
+    .select("id, provider, name, is_active, account_id, secret_id")
+    .order("created_at");
+  if (error) throw new Error(`Failed to load the key lock systems: ${error.message}`);
+  return (data ?? []).map((r) => ({
+    id: r.id,
+    provider: r.provider as KeyLockProvider,
+    name: r.name,
+    isActive: r.is_active,
+    accountId: r.account_id,
+    hasSecret: r.secret_id !== null,
+  }));
 }
 
 /** Accounting Systems (0087), in the order they were added. Stored, not live. */

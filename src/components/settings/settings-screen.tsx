@@ -47,6 +47,8 @@ import { BookingEnginePanel } from "@/components/settings/booking-engine-panel";
 import { SalesChannelsPanel } from "@/components/settings/sales-channels-panel";
 import { BookingWidgetPanel } from "@/components/settings/booking-widget-panel";
 import { ApiKeyPanel, DeveloperKeysPanel, type DeveloperKey } from "@/components/settings/api-keys-panel";
+import { KeyLockSystemsPanel } from "@/components/settings/key-lock-systems-panel";
+import type { KeyLockSystem } from "@/lib/key-lock-systems";
 import type { BookingWidget } from "@/lib/booking-widgets";
 import type { BookingEngineProfile, BookingEngineTexts } from "@/lib/booking-engine";
 import type { ChannelManager } from "@/lib/channel-managers";
@@ -223,6 +225,7 @@ export function SettingsScreen({
   bookingEngine,
   bookingWidgets,
   apiKeys,
+  keyLockSystems,
 }: {
   tab: SettingsTab;
   property: PropertySettings;
@@ -276,6 +279,8 @@ export function SettingsScreen({
   bookingWidgets: BookingWidget[];
   /** API Key and Developer Keys (0101), hints only; loaded only on their tabs. */
   apiKeys: { main: { hint: string; createdAt: string } | null; developer: DeveloperKey[] } | null;
+  /** Key lock systems (0102); loaded only on their tab. */
+  keyLockSystems: KeyLockSystem[];
   roomTypes: RoomTypeSetting[];
   rooms: RoomSettingsPage;
   roomQuery: string;
@@ -1143,6 +1148,10 @@ export function SettingsScreen({
           pending={pending}
           run={run}
         />
+      )}
+
+      {tab === "key-lock-systems" && (
+        <KeyLockSystemsPanel systems={keyLockSystems} canEdit={canEdit} pending={pending} run={run} />
       )}
 
       {tab === "channels" && (

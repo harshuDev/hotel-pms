@@ -50,6 +50,7 @@ export const SETTINGS_TABS = [
   "booking-widget",
   "api-key",
   "developer-keys",
+  "key-lock-systems",
   "channels",
 ] as const;
 
@@ -159,6 +160,7 @@ export const SETTINGS_NAV: {
       { id: "booking-widget", label: "Booking Widget" },
       { id: "api-key", label: "API Key" },
       { id: "developer-keys", label: "Developers Keys" },
+      { id: "key-lock-systems", label: "Key Lock Systems" },
     ],
   },
 ];

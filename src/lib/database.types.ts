@@ -2422,6 +2422,47 @@ export type Database = {
           },
         ]
       }
+      key_lock_systems: {
+        Row: {
+          account_id: string | null
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          property_id: string
+          provider: string
+          secret_id: string | null
+        }
+        Insert: {
+          account_id?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          property_id: string
+          provider: string
+          secret_id?: string | null
+        }
+        Update: {
+          account_id?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          property_id?: string
+          provider?: string
+          secret_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "key_lock_systems_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       language_settings: {
         Row: {
           default_locale: string
@@ -5217,6 +5258,7 @@ export type Database = {
       delete_extra_category: { Args: { p_id: string }; Returns: undefined }
       delete_facility: { Args: { p_id: string }; Returns: undefined }
       delete_identification_type: { Args: { p_id: string }; Returns: undefined }
+      delete_key_lock_system: { Args: { p_id: string }; Returns: undefined }
       delete_payment_gateway: { Args: { p_id: string }; Returns: undefined }
       delete_pos_profile: { Args: { p_id: string }; Returns: undefined }
       delete_rate_plan: { Args: { p_rate_plan_id: string }; Returns: undefined }
@@ -6318,6 +6360,17 @@ export type Database = {
         Returns: undefined
       }
       save_key_code_setting: { Args: { p_on: boolean }; Returns: undefined }
+      save_key_lock_system: {
+        Args: {
+          p_account_id: string
+          p_id: string
+          p_is_active: boolean
+          p_name: string
+          p_provider: string
+          p_secret: string
+        }
+        Returns: string
+      }
       save_meeting_room: {
         Args: {
           p_capacity?: number
