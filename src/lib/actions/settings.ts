@@ -11,6 +11,7 @@ import type { ExtraItemType } from "@/lib/extras";
 import type { FacilityIcon } from "@/lib/facilities";
 import type { GuestFieldKind } from "@/lib/guest-config";
 import type { CalendarSettings } from "@/lib/calendar-settings";
+import { HOTEL_ASSETS_BUCKET } from "@/lib/invoice-settings";
 import type {
   CancellationPolicyKind,
   HousekeepingChoice,
@@ -495,6 +496,116 @@ export async function saveCalendarSettings(
   if (error) return { ok: false, error: error.message };
   revalidateSettings();
   revalidatePath("/calendar");
+  return { ok: true, data: null };
+}
+
+/* -- Finances -> Invoice Settings (0080) ------------------------------------ */
+
+function revalidateInvoice() {
+  revalidateSettings();
+  // The printable invoice reads every one of these.
+  revalidatePath("/bookings", "layout");
+}
+
+export async function saveInvoiceGeneral(input: {
+  showRoomNumberForExtras: boolean;
+  showNightsBreakdown: boolean;
+  vatRegistered: boolean;
+  companyName: string;
+  country: string;
+  region: string;
+  city: string;
+  address: string;
+  postcode: string;
+}): Promise<ActionResult<null>> {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("save_invoice_general", {
+    p_show_room_number_for_extras: input.showRoomNumberForExtras,
+    p_show_nights_breakdown: input.showNightsBreakdown,
+    p_vat_registered: input.vatRegistered,
+    // Blanks are stored as no override; the invoice falls back to the hotel.
+    p_company_name: input.companyName,
+    p_country: input.country,
+    p_region: input.region,
+    p_city: input.city,
+    p_address: input.address,
+    p_postcode: input.postcode,
+  });
+  if (error) return { ok: false, error: error.message };
+  revalidateInvoice();
+  return { ok: true, data: null };
+}
+
+export async function saveInvoiceLogoAndNotes(input: {
+  useTextInsteadOfLogo: boolean;
+  logoText: string;
+  notes: string;
+}): Promise<ActionResult<null>> {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("save_invoice_logo_and_notes", {
+    p_use_text_instead_of_logo: input.useTextInsteadOfLogo,
+    p_logo_text: input.logoText,
+    p_notes: input.notes,
+  });
+  if (error) return { ok: false, error: error.message };
+  revalidateInvoice();
+  return { ok: true, data: null };
+}
+
+export async function saveRoundingOptions(input: {
+  roundLogic: string;
+  roundTo: string;
+}): Promise<ActionResult<null>> {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("save_rounding_options", {
+    p_round_logic: input.roundLogic,
+    p_round_to: input.roundTo,
+  });
+  if (error) return { ok: false, error: error.message };
+  revalidateInvoice();
+  return { ok: true, data: null };
+}
+
+export async function saveInvoiceNumberSettings(customInvoiceNumbers: boolean): Promise<ActionResult<null>> {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("save_invoice_number_settings", {
+    p_custom_invoice_numbers: customInvoiceNumbers,
+  });
+  if (error) return { ok: false, error: error.message };
+  revalidateInvoice();
+  return { ok: true, data: null };
+}
+
+export async function saveStatementSettings(input: {
+  reminderText: string;
+  termsText: string;
+}): Promise<ActionResult<null>> {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("save_statement_settings", {
+    p_reminder_text: input.reminderText,
+    p_terms_text: input.termsText,
+  });
+  if (error) return { ok: false, error: error.message };
+  revalidateInvoice();
+  return { ok: true, data: null };
+}
+
+/**
+ * Records a logo the browser has already uploaded, or takes it off with null.
+ * The replaced file is removed only once Postgres has recorded the new path,
+ * as with a room photograph.
+ */
+export async function setInvoiceLogo(path: string | null): Promise<ActionResult<null>> {
+  const supabase = await createClient();
+  const { data: previous, error } = await supabase.rpc("set_invoice_logo", {
+    // Null takes the logo off.
+    p_logo_path: nullableArg(path),
+  });
+  if (error) return { ok: false, error: error.message };
+  if (previous && previous !== path) {
+    await supabase.storage.from(HOTEL_ASSETS_BUCKET).remove([previous]);
+  }
+  revalidateInvoice();
   return { ok: true, data: null };
 }
 

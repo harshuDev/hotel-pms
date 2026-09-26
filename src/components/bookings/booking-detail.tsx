@@ -1312,12 +1312,24 @@ export function BookingDetailView({
           <h2 className="font-display text-[15px] font-semibold tracking-tightest text-ink">
             Folio
           </h2>
-          <Link
-            href="/cashier"
-            className="text-[13px] text-ink-muted underline-offset-2 hover:text-ink hover:underline"
-          >
-            Take a payment
-          </Link>
+          <span className="flex gap-4">
+            {/* The printable invoice Invoice Settings feeds (0080). A new
+                tab, like the registration card, so the calendar's panel is
+                still there afterwards. */}
+            <Link
+              href={`/bookings/${detail.bookingId}/invoice`}
+              target="_blank"
+              className="text-[13px] text-ink-muted underline-offset-2 hover:text-ink hover:underline"
+            >
+              Print invoice
+            </Link>
+            <Link
+              href="/cashier"
+              className="text-[13px] text-ink-muted underline-offset-2 hover:text-ink hover:underline"
+            >
+              Take a payment
+            </Link>
+          </span>
         </div>
         {folio.length === 0 ? (
           <p className="py-6 text-center text-[13px] text-ink-muted">

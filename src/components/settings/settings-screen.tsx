@@ -22,6 +22,8 @@ import { CalendarSettingsPanel } from "@/components/settings/calendar-settings-p
 import type { CalendarSettings } from "@/lib/calendar-settings";
 import { LanguageSettingsPanel } from "@/components/settings/language-settings-panel";
 import type { LanguageSettings } from "@/lib/language-settings";
+import { InvoiceSettingsPanel } from "@/components/settings/invoice-settings-panel";
+import type { InvoiceSettings } from "@/lib/invoice-settings";
 import type { EmailSetup, EmailTemplate, HotelEmailSettings } from "@/lib/email-preferences";
 import { EmailSetupPanel } from "@/components/settings/email-setup-panel";
 import { FacilityIcon } from "@/components/settings/facility-icon";
@@ -212,6 +214,7 @@ export function SettingsScreen({
   hotelFeatures,
   calendarSettings,
   languageSettings,
+  invoiceSettings,
 }: {
   tab: SettingsTab;
   property: PropertySettings;
@@ -238,6 +241,8 @@ export function SettingsScreen({
   calendarSettings: CalendarSettings;
   /** System Settings -> Language Settings (0078). */
   languageSettings: LanguageSettings;
+  /** Finances -> Invoice Settings (0080). */
+  invoiceSettings: InvoiceSettings;
   roomTypes: RoomTypeSetting[];
   rooms: RoomSettingsPage;
   roomQuery: string;
@@ -1026,6 +1031,19 @@ export function SettingsScreen({
           // (or another tab's) is what the ticks show.
           key={JSON.stringify(hotelFeatures)}
           features={hotelFeatures}
+          canEdit={canEdit}
+          pending={pending}
+          run={run}
+        />
+      )}
+
+      {tab === "invoice-settings" && (
+        <InvoiceSettingsPanel
+          // Not keyed: each card keeps what was typed in it, so saving one
+          // never throws away unsaved edits in the other. The logo is read
+          // from the settings directly and needs no re-seeding.
+          settings={invoiceSettings}
+          propertyId={property.id}
           canEdit={canEdit}
           pending={pending}
           run={run}
