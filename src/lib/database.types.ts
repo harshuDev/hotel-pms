@@ -894,38 +894,95 @@ export type Database = {
       }
       cancellation_policies: {
         Row: {
+          balance_due: string | null
+          breakfast_custom: string | null
+          breakfast_omit: boolean
+          cancel_custom: string | null
+          cancel_rule: string | null
+          cancel_unit: string | null
+          cancel_value: number | null
           created_at: string
+          deposit_amount_cents: number | null
+          deposit_nights: number | null
+          deposit_percent_bps: number | null
+          deposit_rule: string | null
           description: string | null
           free_cancellation_days: number | null
           id: string
           is_active: boolean
+          is_default: boolean
           kind: Database["public"]["Enums"]["cancellation_policy_kind"]
           name: string
+          no_show_custom: string | null
+          no_show_rule: string | null
+          other_custom: string | null
+          preauthorise_card: boolean
           property_id: string
+          refund_custom: string | null
+          refund_days: number | null
+          refund_rule: string | null
           sort_order: number
           updated_at: string
         }
         Insert: {
+          balance_due?: string | null
+          breakfast_custom?: string | null
+          breakfast_omit?: boolean
+          cancel_custom?: string | null
+          cancel_rule?: string | null
+          cancel_unit?: string | null
+          cancel_value?: number | null
           created_at?: string
+          deposit_amount_cents?: number | null
+          deposit_nights?: number | null
+          deposit_percent_bps?: number | null
+          deposit_rule?: string | null
           description?: string | null
           free_cancellation_days?: number | null
           id?: string
           is_active?: boolean
+          is_default?: boolean
           kind: Database["public"]["Enums"]["cancellation_policy_kind"]
           name: string
+          no_show_custom?: string | null
+          no_show_rule?: string | null
+          other_custom?: string | null
+          preauthorise_card?: boolean
           property_id: string
+          refund_custom?: string | null
+          refund_days?: number | null
+          refund_rule?: string | null
           sort_order?: number
           updated_at?: string
         }
         Update: {
+          balance_due?: string | null
+          breakfast_custom?: string | null
+          breakfast_omit?: boolean
+          cancel_custom?: string | null
+          cancel_rule?: string | null
+          cancel_unit?: string | null
+          cancel_value?: number | null
           created_at?: string
+          deposit_amount_cents?: number | null
+          deposit_nights?: number | null
+          deposit_percent_bps?: number | null
+          deposit_rule?: string | null
           description?: string | null
           free_cancellation_days?: number | null
           id?: string
           is_active?: boolean
+          is_default?: boolean
           kind?: Database["public"]["Enums"]["cancellation_policy_kind"]
           name?: string
+          no_show_custom?: string | null
+          no_show_rule?: string | null
+          other_custom?: string | null
+          preauthorise_card?: boolean
           property_id?: string
+          refund_custom?: string | null
+          refund_days?: number | null
+          refund_rule?: string | null
           sort_order?: number
           updated_at?: string
         }
@@ -4194,13 +4251,32 @@ export type Database = {
       cancellation_policies_list: {
         Args: never
         Returns: {
+          balance_due: string
+          breakfast_custom: string
+          breakfast_omit: boolean
+          cancel_custom: string
+          cancel_rule: string
+          cancel_unit: string
+          cancel_value: number
+          deposit_amount_cents: number
+          deposit_nights: number
+          deposit_percent_bps: number
+          deposit_rule: string
           description: string
           free_cancellation_days: number
           id: string
           is_active: boolean
+          is_default: boolean
           kind: Database["public"]["Enums"]["cancellation_policy_kind"]
           name: string
+          no_show_custom: string
+          no_show_rule: string
+          other_custom: string
+          preauthorise_card: boolean
           rate_plan_count: number
+          refund_custom: string
+          refund_days: number
+          refund_rule: string
           sort_order: number
         }[]
       }
@@ -4585,6 +4661,7 @@ export type Database = {
         Returns: string
       }
       delete_calendar_note: { Args: { p_id: string }; Returns: undefined }
+      delete_cancellation_policy: { Args: { p_id: string }; Returns: undefined }
       delete_currency_profile: { Args: { p_id: string }; Returns: undefined }
       delete_discount: { Args: { p_id: string }; Returns: undefined }
       delete_email_template: { Args: { p_id: string }; Returns: undefined }
@@ -5402,15 +5479,30 @@ export type Database = {
         }
         Returns: undefined
       }
-      save_cancellation_policy: {
+      save_cancellation_policy_terms: {
         Args: {
-          p_description?: string
-          p_free_cancellation_days?: number
-          p_id?: string
-          p_is_active?: boolean
-          p_kind: Database["public"]["Enums"]["cancellation_policy_kind"]
+          p_balance_due: string
+          p_breakfast_custom: string
+          p_breakfast_omit: boolean
+          p_cancel_custom: string
+          p_cancel_rule: string
+          p_cancel_unit: string
+          p_cancel_value: number
+          p_deposit_amount_cents: number
+          p_deposit_nights: number
+          p_deposit_percent_bps: number
+          p_deposit_rule: string
+          p_id: string
+          p_is_default: boolean
           p_name: string
-          p_sort_order?: number
+          p_no_show_custom: string
+          p_no_show_rule: string
+          p_other_custom: string
+          p_preauthorise_card: boolean
+          p_refund_custom: string
+          p_refund_days: number
+          p_refund_rule: string
+          p_summary: string
         }
         Returns: string
       }
@@ -6042,7 +6134,7 @@ export type Database = {
         | "canceled"
         | "no_show"
       business_date_status: "open" | "closed"
-      cancellation_policy_kind: "flexible" | "non_refundable"
+      cancellation_policy_kind: "flexible" | "non_refundable" | "custom"
       cash_movement_direction: "in" | "out"
       cash_movement_type:
         | "paid_out"
@@ -6239,7 +6331,7 @@ export const Constants = {
         "no_show",
       ],
       business_date_status: ["open", "closed"],
-      cancellation_policy_kind: ["flexible", "non_refundable"],
+      cancellation_policy_kind: ["flexible", "non_refundable", "custom"],
       cash_movement_direction: ["in", "out"],
       cash_movement_type: [
         "paid_out",

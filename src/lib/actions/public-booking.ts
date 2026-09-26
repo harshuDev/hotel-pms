@@ -45,7 +45,7 @@ export interface PublicRatePlan {
    * translated; only the label around them is.
    */
   cancellationName: string | null;
-  cancellationKind: "flexible" | "non_refundable" | null;
+  cancellationKind: "flexible" | "non_refundable" | "custom" | null;
   cancellationFreeDays: number | null;
   cancellationDescription: string | null;
 }

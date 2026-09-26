@@ -1,6 +1,7 @@
 "use server";
 
 import type { InventoryVisibility } from "@/lib/inventory-settings";
+import type { CancellationTerms } from "@/lib/cancellation-policy";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { nullableArg } from "@/lib/supabase/database";
@@ -14,7 +15,6 @@ import type { GuestFieldKind } from "@/lib/guest-config";
 import type { CalendarSettings } from "@/lib/calendar-settings";
 import { HOTEL_ASSETS_BUCKET } from "@/lib/invoice-settings";
 import type {
-  CancellationPolicyKind,
   HousekeepingChoice,
   ChannelKind,
   PaymentMethodKind,
@@ -1662,50 +1662,60 @@ export async function saveRatePlan(input: {
 }
 
 /**
- * A cancellation policy (0060).
- *
- * Thin, like every other write here: the role gate is the RLS policy on
- * `cancellation_policies`, so it applies however the row is written rather
- * than only when it is written through this file.
- *
- * There is no delete. `rate_plans.cancellation_policy_id` points at a policy
- * under `on delete restrict`, and a booking taken on one keeps meaning what it
- * was sold under, so a policy no longer offered is retired.
+ * A cancellation policy (0093): the reference's form as structured choices,
+ * and the sentence they add up to, which is stored as the policy's wording.
+ * Postgres derives the kind and the free days the booking screen enforces
+ * from the cancellation choice, so the two cannot disagree.
  */
-export async function saveCancellationPolicy(input: {
+export async function saveCancellationPolicyTerms(input: {
   id: string | null;
   name: string;
-  kind: CancellationPolicyKind;
-  /** Flexible only. Ignored by the RPC on a non-refundable policy. */
-  freeCancellationDays: number | null;
-  description: string;
-  isActive: boolean;
-  sortOrder: number;
+  terms: CancellationTerms;
+  isDefault: boolean;
+  summary: string;
 }): Promise<ActionResult<{ id: string }>> {
-  if (input.name.trim() === "") {
-    return { ok: false, error: "Give the policy a name the guest will read." };
-  }
-
+  const t = input.terms;
   const supabase = await createClient();
-
-  const { data, error } = await supabase.rpc("save_cancellation_policy", {
+  const { data, error } = await supabase.rpc("save_cancellation_policy_terms", {
+    // Null adds a new policy; every other null is "not answered".
+    p_id: nullableArg(input.id),
     p_name: input.name,
-    p_kind: input.kind,
-    p_free_cancellation_days:
-      input.kind === "flexible" ? (input.freeCancellationDays ?? 0) : null,
-    p_description: input.description.trim() || null,
-    p_is_active: input.isActive,
-    p_sort_order: input.sortOrder,
-    p_id: input.id,
+    p_deposit_rule: nullableArg(t.depositRule),
+    p_deposit_nights: nullableArg(t.depositNights),
+    p_deposit_percent_bps: nullableArg(t.depositPercentBps),
+    p_deposit_amount_cents: nullableArg(t.depositAmountCents),
+    p_refund_rule: nullableArg(t.refundRule),
+    p_refund_days: nullableArg(t.refundDays),
+    p_refund_custom: nullableArg(t.refundCustom),
+    p_balance_due: nullableArg(t.balanceDue),
+    p_preauthorise_card: t.preauthoriseCard,
+    p_other_custom: nullableArg(t.otherCustom),
+    p_cancel_rule: nullableArg(t.cancelRule),
+    p_cancel_value: nullableArg(t.cancelValue),
+    p_cancel_unit: nullableArg(t.cancelUnit),
+    p_cancel_custom: nullableArg(t.cancelCustom),
+    p_no_show_rule: nullableArg(t.noShowRule),
+    p_no_show_custom: nullableArg(t.noShowCustom),
+    p_breakfast_omit: t.breakfastOmit,
+    p_breakfast_custom: nullableArg(t.breakfastCustom),
+    p_is_default: input.isDefault,
+    p_summary: input.summary,
   });
-
   if (error) return { ok: false, error: error.message };
-
   revalidatePath("/settings");
   // The guest booking page quotes the terms, and a booking screen reads them.
   revalidatePath("/book", "layout");
   revalidatePath("/bookings", "layout");
   return { ok: true, data: { id: data as string } };
+}
+
+/** Refused by name when it is the default or any rate plan uses it. */
+export async function deleteCancellationPolicy(id: string): Promise<ActionResult<null>> {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("delete_cancellation_policy", { p_id: id });
+  if (error) return { ok: false, error: error.message };
+  revalidatePath("/settings");
+  return { ok: true, data: null };
 }
 
 /**

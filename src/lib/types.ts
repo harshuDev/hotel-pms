@@ -1,3 +1,4 @@
+import type { CancellationTerms } from "@/lib/cancellation-policy";
 export type BookingStatus =
   | "pending"
   | "confirmed"
@@ -639,7 +640,7 @@ export interface RatePlan {
  * the guest can cancel for free. Non Refundable: Means that the guests cannot
  * cancel or modify and the hotel can charge the guest card anytime."
  */
-export type CancellationPolicyKind = "flexible" | "non_refundable";
+export type CancellationPolicyKind = "flexible" | "non_refundable" | "custom";
 
 export interface CancellationPolicy {
   id: string;
@@ -657,6 +658,10 @@ export interface CancellationPolicy {
   sortOrder: number;
   /** How many rate plans are sold on it, so retiring a live one is visible. */
   ratePlanCount: number;
+  /** One per property (0093); a new rate plan with no policy takes it. */
+  isDefault: boolean;
+  /** The reference's form, as structured choices (0093). */
+  terms: CancellationTerms;
 }
 
 /** A booking's cancellation terms, dated against the open business date. */
