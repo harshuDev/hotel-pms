@@ -1763,37 +1763,85 @@ export type Database = {
       }
       properties: {
         Row: {
+          address_line1: string | null
+          address_line2: string | null
           audit_close_time: string
           check_in_time: string
           check_out_time: string
+          city: string | null
+          company_name: string | null
+          company_registration_id: string | null
+          country: string | null
           created_at: string
           currency: string
+          email: string | null
+          fax: string | null
           id: string
           is_active: boolean
+          latitude: number | null
+          longitude: number | null
           name: string
+          phone: string | null
+          postcode: string | null
+          property_type: string
+          region: string | null
+          slug: string | null
           timezone: string
+          website: string | null
         }
         Insert: {
+          address_line1?: string | null
+          address_line2?: string | null
           audit_close_time?: string
           check_in_time: string
           check_out_time: string
+          city?: string | null
+          company_name?: string | null
+          company_registration_id?: string | null
+          country?: string | null
           created_at?: string
           currency: string
+          email?: string | null
+          fax?: string | null
           id?: string
           is_active?: boolean
+          latitude?: number | null
+          longitude?: number | null
           name: string
+          phone?: string | null
+          postcode?: string | null
+          property_type?: string
+          region?: string | null
+          slug?: string | null
           timezone: string
+          website?: string | null
         }
         Update: {
+          address_line1?: string | null
+          address_line2?: string | null
           audit_close_time?: string
           check_in_time?: string
           check_out_time?: string
+          city?: string | null
+          company_name?: string | null
+          company_registration_id?: string | null
+          country?: string | null
           created_at?: string
           currency?: string
+          email?: string | null
+          fax?: string | null
           id?: string
           is_active?: boolean
+          latitude?: number | null
+          longitude?: number | null
           name?: string
+          phone?: string | null
+          postcode?: string | null
+          property_type?: string
+          region?: string | null
+          slug?: string | null
           timezone?: string
+          website?: string | null
         }
         Relationships: []
       }
@@ -4161,6 +4209,37 @@ export type Database = {
           p_currency: string
           p_name: string
           p_timezone: string
+        }
+        Returns: undefined
+      }
+      save_property_details: {
+        Args: {
+          p_address_line1?: string
+          p_address_line2?: string
+          p_city?: string
+          p_company_name?: string
+          p_company_registration_id?: string
+          p_country?: string
+          p_currency: string
+          p_email?: string
+          p_fax?: string
+          p_latitude?: number
+          p_longitude?: number
+          p_name: string
+          p_phone?: string
+          p_postcode?: string
+          p_property_type?: string
+          p_region?: string
+          p_timezone: string
+          p_website?: string
+        }
+        Returns: undefined
+      }
+      save_property_times: {
+        Args: {
+          p_audit_close_time: string
+          p_check_in_time: string
+          p_check_out_time: string
         }
         Returns: undefined
       }

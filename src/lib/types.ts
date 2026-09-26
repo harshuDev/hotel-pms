@@ -915,6 +915,29 @@ export interface PropertySettings {
    * hotel in Mexico City both close at 02:00 and never at the same instant.
    */
   auditCloseTime: string;
+  /*
+   * Hotel Details (0067) -- everything the client's reference keeps about a
+   * hotel. Nullable because a property set up before 0067 has none of them.
+   */
+  /** Read-only, as theirs is. Worked out once from the name and left alone. */
+  slug: string | null;
+  propertyType: string;
+  companyName: string | null;
+  companyRegistrationId: string | null;
+  /** ISO 3166-1 alpha-2, from `src/lib/countries.ts`. */
+  country: string | null;
+  addressLine1: string | null;
+  addressLine2: string | null;
+  city: string | null;
+  region: string | null;
+  postcode: string | null;
+  /** A pair or nothing -- Postgres refuses half a location. */
+  latitude: number | null;
+  longitude: number | null;
+  phone: string | null;
+  fax: string | null;
+  email: string | null;
+  website: string | null;
 }
 
 export interface RoomTypeSetting {

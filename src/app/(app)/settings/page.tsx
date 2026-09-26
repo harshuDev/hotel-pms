@@ -1,8 +1,8 @@
-import { PageHeader } from "@/components/ui";
+import { SettingsScreen } from "@/components/settings/settings-screen";
 import {
-  SettingsScreen,
-  type SettingsTab,
-} from "@/components/settings/settings-screen";
+  DEFAULT_SETTINGS_TAB,
+  isSettingsTab,
+} from "@/lib/settings-tabs";
 import {
   getChannelSettings,
   getCurrentStaffUser,
@@ -19,28 +19,13 @@ import {
 
 export const metadata = { title: "Settings" };
 
-const TABS: SettingsTab[] = [
-  "property",
-  "room-types",
-  "rooms",
-  "channels",
-  "tax",
-  "seasons",
-  "payment-methods",
-  "staff",
-];
-
-function isTab(value: string | undefined): value is SettingsTab {
-  return TABS.includes(value as SettingsTab);
-}
-
 export default async function SettingsPage({
   searchParams,
 }: {
   searchParams: Promise<{ tab?: string; q?: string; page?: string; edit?: string }>;
 }) {
   const sp = await searchParams;
-  const tab = isTab(sp.tab) ? sp.tab : "property";
+  const tab = isSettingsTab(sp.tab) ? sp.tab : DEFAULT_SETTINGS_TAB;
   const roomQuery = sp.q?.trim() ?? "";
   const roomPage = Math.max(1, Number(sp.page) || 1);
   // The calendar rail links here with a room type to rename.
@@ -72,11 +57,18 @@ export default async function SettingsPage({
     getCurrentStaffUser(),
   ]);
 
+  /*
+   * The timezone list is worked out here, on the server, and handed down: if
+   * the browser built its own, Node's ICU and the browser's can list different
+   * zones, and the select would render one way on the server and another in
+   * the browser -- a hydration mismatch.
+   */
+  const timezones = Intl.supportedValuesOf("timeZone");
+
   return (
+    // No page heading: the reference's Settings has none -- its sidebar says
+    // where you are and each panel carries its own title.
     <div>
-      <PageHeader
-        title="Settings"
-      />
       <SettingsScreen
         tab={tab}
         property={property}
@@ -94,6 +86,7 @@ export default async function SettingsPage({
         meId={me?.id ?? null}
         canEdit={me !== null && ["admin", "manager"].includes(me.role)}
         isAdmin={me?.role === "admin"}
+        timezones={timezones}
       />
     </div>
   );
