@@ -1748,14 +1748,28 @@ export const INVENTORY_NIGHTS = 28;
 
 /** The rate plans this property sells, default first. */
 export async function getRatePlans(): Promise<RatePlan[]> {
+  return loadRatePlans(false);
+}
+
+/**
+ * Every rate plan, retired ones included -- Settings -> Rate Plans, where
+ * "Show Expired Rates" brings back the ones no longer selling so one can be
+ * put back on sale. Everywhere that SELLS reads getRatePlans() instead.
+ */
+export async function getRatePlanSettings(): Promise<RatePlan[]> {
+  return loadRatePlans(true);
+}
+
+async function loadRatePlans(includeRetired: boolean): Promise<RatePlan[]> {
   const supabase = await createClient();
 
-  const { data, error } = await supabase
+  let query = supabase
     .from("rate_plans")
     .select(
       "id, code, name, description, is_default, is_active, is_public, cancellation_policy_id, rate_plan_meals(meal, value_cents)",
-    )
-    .eq("is_active", true)
+    );
+  if (!includeRetired) query = query.eq("is_active", true);
+  const { data, error } = await query
     .order("is_default", { ascending: false })
     .order("sort_order")
     .order("name");

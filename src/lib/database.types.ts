@@ -4671,6 +4671,7 @@ export type Database = {
       delete_identification_type: { Args: { p_id: string }; Returns: undefined }
       delete_payment_gateway: { Args: { p_id: string }; Returns: undefined }
       delete_pos_profile: { Args: { p_id: string }; Returns: undefined }
+      delete_rate_plan: { Args: { p_rate_plan_id: string }; Returns: undefined }
       delete_room: { Args: { p_room_id: string }; Returns: undefined }
       delete_room_type: { Args: { p_room_type_id: string }; Returns: undefined }
       delete_season: { Args: { p_id: string }; Returns: undefined }

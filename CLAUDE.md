@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0093` are
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0094` are
 applied to the hosted database.
 
 Working on real data: dashboard (house board, movements, pace, activity feed),
@@ -244,6 +244,7 @@ Each read is a Postgres view or RPC, never aggregation in the client:
 | `getBookableRoomTypes(from, to)`    | `bookable_room_types(from, to)`   |
 | `getInventoryGrid(plan, from, n)`   | `inventory_grid(plan, from, n)`   |
 | `getRatePlans()`                    | `rate_plans` where active         |
+| `getRatePlanSettings()`             | `rate_plans` incl. retired (Settings) |
 | `getBookingDetail(id)`              | `booking_detail(id)`              |
 | `getBookingRoomLines(id)`           | `booking_room_lines(id)`          |
 | `getBookingNights(id)`              | `booking_nights(id)`              |
@@ -1134,10 +1135,28 @@ anywhere else. Collapsed height must stay constant regardless of room count.
   which is why the hosted property had exactly one. Setting up what the hotel
   sells belongs beside the room types and the tax rates, not inside a week's
   pricing.
-  - **There is no delete**, like a room type or a tax rate: `rate_plan_days`
-    and `booking_rooms` point at a plan, so one no longer sold is
-    `is_active = false` and a booking taken on it keeps saying what it was sold
-    as.
+  - **A plan CAN be deleted as of 0094, but only one nothing was sold on and
+    that is not the main rate** -- `delete_rate_plan()` refuses the rest by
+    name. `booking_rooms` points at a plan under `on delete restrict`, so a
+    sold plan stays and a booking keeps saying what it was sold as; one no
+    longer sold is `is_active = false`. An unused plan's nightly prices,
+    offer links and meal inclusions go with it.
+  - **SETTINGS -> RATE PLANS IS THE REFERENCE'S "RATE CATEGORIES"**
+    (`rate-plans-panel.tsx`): Title (sort, search), Currency (the property's),
+    Cancellation Policy (sort, filter), the main rate's tick, a pencil and a
+    red bin (not on the main rate), "Add New Rate Plan" and "Show Expired
+    Rates" -- "expired" being a plan no longer selling, which
+    `getRatePlanSettings()` returns and `getRatePlans()` does not. The form
+    sets the cancellation policy through its own RPC, as before; a new plan
+    takes the default policy by trigger (0093).
+    - "Show Special Offer Rates" is not copied: offers here reduce a stay,
+      they do not create rate plans, so there would be nothing to show.
+    - **THE REFERENCE'S WEEKLY RATE GRID IS NOT BUILT YET** ("Room Rate
+      Combinations": per season, per room type and plan, a Monday-to-Sunday
+      rate with MST/MSA/MXS/CTA/CTD/SS). Prices here are per night in
+      `rate_plan_days`, so a weekday template has to be APPLIED to nights --
+      which overwrites nights priced by hand in Inventory. That is the
+      client's call, and was asked.
   - **A property always keeps one default plan.** `save_rate_plan()` promotes
     the first active plan if the last default is retired or stood down —
     otherwise a booking naming no plan has nowhere to fall back to.

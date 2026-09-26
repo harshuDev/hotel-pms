@@ -40,6 +40,7 @@ import { AccountingCategoriesPanel } from "@/components/settings/accounting-cate
 import { InventorySettingsPanel } from "@/components/settings/inventory-settings-panel";
 import { RoomSetupPanel, RoomTypesPanel } from "@/components/settings/room-panels";
 import { CancellationPolicyPanel } from "@/components/settings/cancellation-policy-panel";
+import { RatePlansPanel } from "@/components/settings/rate-plans-panel";
 import { DiscountsPanel } from "@/components/settings/discounts-panel";
 import type { InventorySettings } from "@/lib/inventory-settings";
 import type { EmailSetup, EmailTemplate, HotelEmailSettings } from "@/lib/email-preferences";
@@ -77,12 +78,9 @@ import {
   saveSeason,
   deleteSeason,
   saveStaffUser,
-  saveRatePlan,
-  setRatePlanCancellationPolicy,
 } from "@/lib/actions/settings";
 import type {
   CalendarSeason,
-  MealType,
   RatePlan,
   CancellationPolicy,
   ChannelKind,
@@ -98,13 +96,6 @@ import type {
 } from "@/lib/types";
 
 export type { SettingsTab } from "@/lib/settings-tabs";
-
-/** What a plan includes, in a guest's words. The set of meals IS the board type. */
-const MEAL_LABEL: Record<MealType, string> = {
-  breakfast: "Breakfast",
-  lunch: "Lunch",
-  dinner: "Dinner",
-};
 
 const CHANNEL_KINDS: { value: ChannelKind; label: string }[] = [
   { value: "direct", label: "Direct" },
@@ -379,14 +370,6 @@ export function SettingsScreen({
     endsOn: string;
   } | null>(null);
 
-  const [rp, setRp] = useState<{
-    id: string | null;
-    code: string;
-    name: string;
-    description: string;
-    isDefault: boolean;
-    isActive: boolean;
-  } | null>(null);
 
 
   return (
@@ -1454,244 +1437,14 @@ export function SettingsScreen({
 
       {/* Rate plans ------------------------------------------------------ */}
       {tab === "rate-plans" && (
-        <>
-          <div className={card}>
-            <div className="mb-4 flex items-center justify-between">
-              <h2 className="font-display text-[15px] font-semibold tracking-tightest text-ink">
-                Rate plans
-              </h2>
-              {canEdit && (
-                <button
-                  onClick={() =>
-                    setRp({
-                      id: null,
-                      code: "",
-                      name: "",
-                      description: "",
-                      isDefault: false,
-                      isActive: true,
-                    })
-                  }
-                  className={secondary}
-                >
-                  New rate plan
-                </button>
-              )}
-            </div>
-
-            {ratePlans.length === 0 ? (
-              <p className="text-[13px] text-ink-muted">
-                No rate plans yet. Add one.
-              </p>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full min-w-[620px] text-[13px]">
-                  <thead>
-                    <tr className="border-b border-line text-left text-ink-faint">
-                      {["Code", "Name", "Includes", "Cancellation", "Guest page", "Status", ""].map(
-                        (c, i) => (
-                          <th
-                            key={c || `c${i}`}
-                            className="whitespace-nowrap px-3 pb-2.5 text-xxs font-semibold uppercase tracking-[0.1em]"
-                          >
-                            {c}
-                          </th>
-                        ),
-                      )}
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-line">
-                    {ratePlans.map((p) => (
-                      <tr key={p.id}>
-                        <td className="tnum px-3 py-2.5 font-medium text-ink">
-                          {p.code}
-                        </td>
-                        <td className="px-3 py-2.5 text-ink">
-                          {p.name}
-                          {p.isDefault && (
-                            <span className="ml-2 text-xxs text-ink-faint">main</span>
-                          )}
-                          {p.description && (
-                            <span className="block text-xxs text-ink-faint">
-                              {p.description}
-                            </span>
-                          )}
-                        </td>
-                        <td className="px-3 py-2.5 text-ink-muted">
-                          {/* The board type IS the set of meals. "Half board" is
-                              two rows here and "B&B" is one, which is why there
-                              is no board-type enum to keep in step. */}
-                          {p.meals.length === 0
-                            ? "Room only"
-                            : p.meals
-                                .map((m) => MEAL_LABEL[m])
-                                .join(", ")}
-                        </td>
-                        <td className="px-3 py-2.5">
-                          {/*
-                            Set here rather than in the form below, because it
-                            goes through its own RPC: an optional parameter on
-                            save_rate_plan() would be an overload for PostgREST
-                            to choose between, and a rename would then have to
-                            resend the policy or silently clear it.
-                          */}
-                          {canEdit ? (
-                            <select
-                              aria-label={`Cancellation policy for ${p.name}`}
-                              value={p.cancellationPolicyId ?? ""}
-                              disabled={pending}
-                              onChange={(e) =>
-                                run(
-                                  () =>
-                                    setRatePlanCancellationPolicy(
-                                      p.id,
-                                      e.target.value || null,
-                                    ),
-                                  "Cancellation terms saved.",
-                                )
-                              }
-                              className="w-full min-w-[150px] rounded border border-line bg-white px-2 py-1 text-[12.5px] text-ink"
-                            >
-                              <option value="">Not set</option>
-                              {cancellationPolicies
-                                .filter(
-                                  (c) =>
-                                    c.isActive || c.id === p.cancellationPolicyId,
-                                )
-                                .map((c) => (
-                                  <option key={c.id} value={c.id}>
-                                    {c.name}
-                                    {c.isActive ? "" : " (retired)"}
-                                  </option>
-                                ))}
-                            </select>
-                          ) : (
-                            <span className="text-ink-muted">
-                              {cancellationPolicies.find(
-                                (c) => c.id === p.cancellationPolicyId,
-                              )?.name ?? "Not set"}
-                            </span>
-                          )}
-                        </td>
-                        <td className="px-3 py-2.5">
-                          <span
-                            className={
-                              p.isPublic ? "text-emerald-600" : "text-ink-faint"
-                            }
-                          >
-                            {p.isPublic ? "Published" : "Not published"}
-                          </span>
-                        </td>
-                        <td className="px-3 py-2.5">
-                          <span
-                            className={p.isActive ? "text-ink" : "text-ink-faint"}
-                          >
-                            {p.isActive ? "Selling" : "Retired"}
-                          </span>
-                        </td>
-                        <td className="whitespace-nowrap px-3 py-2.5 text-right">
-                          {canEdit && (
-                            <button
-                              onClick={() =>
-                                setRp({
-                                  id: p.id,
-                                  code: p.code,
-                                  name: p.name,
-                                  description: p.description ?? "",
-                                  isDefault: p.isDefault,
-                                  isActive: p.isActive,
-                                })
-                              }
-                              className="rounded border border-line px-2 py-1 text-xxs text-ink-muted hover:bg-shell"
-                            >
-                              Edit
-                            </button>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
-
-          {rp && canEdit && (
-            <div className={card}>
-              <h2 className="mb-3 font-display text-[15px] font-semibold tracking-tightest text-ink">
-                {rp.id ? "Edit rate plan" : "New rate plan"}
-              </h2>
-              <div className="grid gap-3 sm:grid-cols-2">
-                <div>
-                  <label className={label} htmlFor="rp-code">Code</label>
-                  <input
-                    id="rp-code"
-                    value={rp.code}
-                    onChange={(e) => setRp({ ...rp, code: e.target.value })}
-                    placeholder="BB"
-                    className={field}
-                  />
-                </div>
-                <div>
-                  <label className={label} htmlFor="rp-name">Name</label>
-                  <input
-                    id="rp-name"
-                    value={rp.name}
-                    onChange={(e) => setRp({ ...rp, name: e.target.value })}
-                    placeholder="Bed and Breakfast"
-                    className={field}
-                  />
-                </div>
-                <div className="sm:col-span-2">
-                  <label className={label} htmlFor="rp-desc">Description</label>
-                  <input
-                    id="rp-desc"
-                    value={rp.description}
-                    onChange={(e) => setRp({ ...rp, description: e.target.value })}
-                    placeholder="What a guest gets on this rate"
-                    className={field}
-                  />
-                </div>
-              </div>
-
-              <label className="mt-3 flex items-center gap-2 text-[13px] text-ink">
-                <input
-                  type="checkbox"
-                  checked={rp.isDefault}
-                  onChange={(e) => setRp({ ...rp, isDefault: e.target.checked })}
-                  className="h-3.5 w-3.5 accent-brass"
-                />
-                The main rate — used when a booking names no plan
-              </label>
-              <label className="mt-2 flex items-center gap-2 text-[13px] text-ink">
-                <input
-                  type="checkbox"
-                  checked={rp.isActive}
-                  onChange={(e) => setRp({ ...rp, isActive: e.target.checked })}
-                  className="h-3.5 w-3.5 accent-brass"
-                />
-                Still selling
-              </label>
-
-              <div className="mt-4 flex gap-2">
-                <button
-                  onClick={() =>
-                    run(() => saveRatePlan(rp), rp.id ? "Rate plan saved." : "Rate plan created.")
-                  }
-                  disabled={pending}
-                  className={primary}
-                >
-                  {pending ? "Saving\u2026" : "Save"}
-                </button>
-                <button onClick={() => setRp(null)} className={secondary}>
-                  Cancel
-                </button>
-              </div>
-            </div>
-          )}
-        </>
+        <RatePlansPanel
+          ratePlans={ratePlans}
+          cancellationPolicies={cancellationPolicies}
+          canEdit={canEdit}
+          pending={pending}
+          run={run}
+        />
       )}
-
 
       {tab === "cancellation" && (
         <CancellationPolicyPanel
