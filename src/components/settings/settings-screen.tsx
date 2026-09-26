@@ -46,6 +46,7 @@ import { ChannelManagerPanel } from "@/components/settings/channel-manager-panel
 import { BookingEnginePanel } from "@/components/settings/booking-engine-panel";
 import { SalesChannelsPanel } from "@/components/settings/sales-channels-panel";
 import { BookingWidgetPanel } from "@/components/settings/booking-widget-panel";
+import { ApiKeyPanel, DeveloperKeysPanel, type DeveloperKey } from "@/components/settings/api-keys-panel";
 import type { BookingWidget } from "@/lib/booking-widgets";
 import type { BookingEngineProfile, BookingEngineTexts } from "@/lib/booking-engine";
 import type { ChannelManager } from "@/lib/channel-managers";
@@ -221,6 +222,7 @@ export function SettingsScreen({
   channelManagers,
   bookingEngine,
   bookingWidgets,
+  apiKeys,
 }: {
   tab: SettingsTab;
   property: PropertySettings;
@@ -272,6 +274,8 @@ export function SettingsScreen({
   bookingEngine: { texts: BookingEngineTexts; profiles: BookingEngineProfile[] } | null;
   /** Booking widgets (0100); loaded only on their tab. */
   bookingWidgets: BookingWidget[];
+  /** API Key and Developer Keys (0101), hints only; loaded only on their tabs. */
+  apiKeys: { main: { hint: string; createdAt: string } | null; developer: DeveloperKey[] } | null;
   roomTypes: RoomTypeSetting[];
   rooms: RoomSettingsPage;
   roomQuery: string;
@@ -1121,6 +1125,20 @@ export function SettingsScreen({
         <BookingWidgetPanel
           widgets={bookingWidgets}
           supportedLocales={languageSettings.supportedLocales}
+          canEdit={canEdit}
+          pending={pending}
+          run={run}
+        />
+      )}
+
+      {tab === "api-key" && (
+        <ApiKeyPanel hint={apiKeys?.main?.hint ?? null} canEdit={canEdit} pending={pending} run={run} />
+      )}
+
+      {tab === "developer-keys" && (
+        <DeveloperKeysPanel
+          propertyId={property.id}
+          keys={apiKeys?.developer ?? []}
           canEdit={canEdit}
           pending={pending}
           run={run}

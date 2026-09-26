@@ -195,6 +195,53 @@ export type Database = {
           },
         ]
       }
+      api_keys: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          is_active: boolean
+          key_hash: string
+          key_hint: string
+          kind: string
+          name: string | null
+          permissions: string[]
+          property_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          key_hash: string
+          key_hint: string
+          kind: string
+          name?: string | null
+          permissions?: string[]
+          property_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          key_hash?: string
+          key_hint?: string
+          kind?: string
+          name?: string | null
+          permissions?: string[]
+          property_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "api_keys_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       booking_attachments: {
         Row: {
           booking_id: string
@@ -4211,6 +4258,97 @@ export type Database = {
         }
         Returns: string
       }
+      api_authorize: {
+        Args: { p_key: string; p_permission: string; p_property_id: string }
+        Returns: undefined
+      }
+      api_availability: {
+        Args: {
+          p_from: string
+          p_key: string
+          p_property_id: string
+          p_to: string
+        }
+        Returns: {
+          available: number
+          close_out: boolean
+          room_type_code: string
+          room_type_id: string
+          sellable: number
+          sold: number
+          stay_date: string
+        }[]
+      }
+      api_check_range: {
+        Args: { p_from: string; p_to: string }
+        Returns: number
+      }
+      api_key_hash: { Args: { p_key: string }; Returns: string }
+      api_key_hint: { Args: { p_key: string }; Returns: string }
+      api_key_new: { Args: never; Returns: string }
+      api_property: {
+        Args: { p_key: string; p_property_id: string }
+        Returns: {
+          business_date: string
+          currency: string
+          name: string
+          property_id: string
+          timezone: string
+        }[]
+      }
+      api_rate_plans: {
+        Args: { p_key: string; p_property_id: string }
+        Returns: {
+          cancellation_kind: string
+          cancellation_policy: string
+          code: string
+          description: string
+          free_cancellation_days: number
+          is_default: boolean
+          is_public: boolean
+          meals: string[]
+          name: string
+          rate_plan_id: string
+        }[]
+      }
+      api_rates: {
+        Args: {
+          p_from: string
+          p_key: string
+          p_property_id: string
+          p_rate_plan_id: string
+          p_to: string
+        }
+        Returns: {
+          close_out: boolean
+          closed_to_arrival: boolean
+          closed_to_departure: boolean
+          currency: string
+          max_stay: number
+          min_stay_arrival: number
+          min_stay_through: number
+          rate_cents: number
+          rate_plan_id: string
+          room_type_code: string
+          room_type_id: string
+          stay_date: string
+          stop_sell: boolean
+        }[]
+      }
+      api_room_types: {
+        Args: { p_key: string; p_property_id: string }
+        Returns: {
+          base_occupancy: number
+          code: string
+          description: string
+          display_name: string
+          max_occupancy: number
+          name: string
+          room_type_id: string
+          rooms: number
+          rooms_online: number
+        }[]
+      }
       apply_tax_rate: {
         Args: { p_amount_cents: number; p_tax_rate_id: string }
         Returns: {
@@ -4849,6 +4987,10 @@ export type Database = {
           reference: string
         }[]
       }
+      create_developer_key: {
+        Args: { p_name: string; p_permissions: string[] }
+        Returns: string
+      }
       create_folio: {
         Args: {
           p_booking_id: string
@@ -5068,6 +5210,7 @@ export type Database = {
       delete_cancellation_policy: { Args: { p_id: string }; Returns: undefined }
       delete_channel_manager: { Args: { p_id: string }; Returns: undefined }
       delete_currency_profile: { Args: { p_id: string }; Returns: undefined }
+      delete_developer_key: { Args: { p_id: string }; Returns: undefined }
       delete_discount: { Args: { p_id: string }; Returns: undefined }
       delete_email_template: { Args: { p_id: string }; Returns: undefined }
       delete_extra: { Args: { p_id: string }; Returns: undefined }
@@ -5203,6 +5346,7 @@ export type Database = {
           status: string
         }[]
       }
+      generate_api_key: { Args: never; Returns: string }
       get_folio_balance: {
         Args: { p_folio_id: string }
         Returns: {
@@ -5315,6 +5459,33 @@ export type Database = {
       }
       inventory_grid: {
         Args: { p_days?: number; p_from: string; p_rate_plan_id: string }
+        Returns: {
+          allotment: number
+          close_out: boolean
+          closed_to_arrival: boolean
+          closed_to_departure: boolean
+          max_stay: number
+          min_stay_arrival: number
+          min_stay_through: number
+          out_of_order: number
+          physical_rooms: number
+          rate_cents: number
+          room_type_code: string
+          room_type_id: string
+          room_type_name: string
+          sellable: number
+          sold: number
+          stay_date: string
+          stop_sell: boolean
+        }[]
+      }
+      inventory_grid_for: {
+        Args: {
+          p_days: number
+          p_from: string
+          p_property_id: string
+          p_rate_plan_id: string
+        }
         Returns: {
           allotment: number
           close_out: boolean
@@ -6629,6 +6800,15 @@ export type Database = {
           p_guest_notes?: string
           p_internal_notes?: string
           p_settlement?: Database["public"]["Enums"]["booking_settlement"]
+        }
+        Returns: undefined
+      }
+      update_developer_key: {
+        Args: {
+          p_id: string
+          p_is_active: boolean
+          p_name: string
+          p_permissions: string[]
         }
         Returns: undefined
       }

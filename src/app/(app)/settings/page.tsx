@@ -39,6 +39,7 @@ import {
   getChannelManagers,
   getBookingEngineSettings,
   getBookingWidgets,
+  getApiKeys,
   getStaffSettings,
   getTaxRateSettings,
 } from "@/lib/queries";
@@ -95,6 +96,7 @@ export default async function SettingsPage({
     channelManagers,
     bookingEngine,
     bookingWidgets,
+    apiKeys,
   ] = await Promise.all([
     getPropertySettings(),
     getRoomTypeSettings(),
@@ -133,6 +135,7 @@ export default async function SettingsPage({
     tab === "channel-manager" ? getChannelManagers() : Promise.resolve([]),
     tab === "booking-engine" ? getBookingEngineSettings() : Promise.resolve(null),
     tab === "booking-widget" ? getBookingWidgets() : Promise.resolve([]),
+    tab === "api-key" || tab === "developer-keys" ? getApiKeys() : Promise.resolve(null),
   ]);
 
   /*
@@ -191,6 +194,7 @@ export default async function SettingsPage({
         channelManagers={channelManagers}
         bookingEngine={bookingEngine}
         bookingWidgets={bookingWidgets}
+        apiKeys={apiKeys}
       />
     </div>
   );
