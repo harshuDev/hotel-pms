@@ -753,6 +753,91 @@ export async function deletePaymentGateway(id: string): Promise<ActionResult<nul
   return { ok: true, data: null };
 }
 
+/* -- Connectivity -> Channel Manager (0097) ------------------------------- */
+
+/**
+ * A configuration file: `undefined` keeps the saved one, `null` removes it,
+ * and a name with its text replaces it.
+ */
+type ConfigFile = { name: string; csv: string } | null | undefined;
+
+function configArgs(file: ConfigFile): { name: string | null; csv: string | null } {
+  if (file === undefined) return { name: null, csv: null };
+  if (file === null) return { name: "", csv: null };
+  return { name: file.name, csv: file.csv };
+}
+
+export async function saveChannelManager(input: {
+  id: string | null;
+  provider: string;
+  connectionName: string;
+  isActive: boolean;
+  username: string;
+  /** Blank keeps the saved password. It is written to the vault, never to a row. */
+  password: string;
+  hotelCode: string;
+  requestorId: string;
+  region: string | null;
+  daysToSync: number;
+  syncMultiOccupancy: boolean;
+  roomConfig: ConfigFile;
+  rateConfig: ConfigFile;
+}): Promise<ActionResult<null>> {
+  const supabase = await createClient();
+  const room = configArgs(input.roomConfig);
+  const rate = configArgs(input.rateConfig);
+  const { error } = await supabase.rpc("save_channel_manager", {
+    // Null adds a new connection.
+    p_id: nullableArg(input.id),
+    p_provider: input.provider,
+    p_connection_name: input.connectionName,
+    p_is_active: input.isActive,
+    p_username: input.username,
+    // Null keeps the saved password.
+    p_password: nullableArg(input.password === "" ? null : input.password),
+    p_hotel_code: input.hotelCode,
+    p_requestor_id: input.requestorId,
+    // Null is no region chosen.
+    p_region: nullableArg(input.region),
+    p_days_to_sync: input.daysToSync,
+    p_sync_multi_occupancy: input.syncMultiOccupancy,
+    // Null keeps the saved file; '' removes it.
+    p_room_config_name: nullableArg(room.name),
+    p_room_config_csv: nullableArg(room.csv),
+    p_rate_config_name: nullableArg(rate.name),
+    p_rate_config_csv: nullableArg(rate.csv),
+  });
+  if (error) return { ok: false, error: error.message };
+  revalidateSettings();
+  return { ok: true, data: null };
+}
+
+export async function deleteChannelManager(id: string): Promise<ActionResult<null>> {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("delete_channel_manager", { p_id: id });
+  if (error) return { ok: false, error: error.message };
+  revalidateSettings();
+  return { ok: true, data: null };
+}
+
+/** A saved configuration file's text, for download. Read under RLS. */
+export async function getChannelManagerConfig(
+  id: string,
+  which: "room" | "rate",
+): Promise<ActionResult<{ name: string; csv: string }>> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("channel_managers")
+    .select("room_config_name, room_config_csv, rate_config_name, rate_config_csv")
+    .eq("id", id)
+    .maybeSingle();
+  if (error) return { ok: false, error: error.message };
+  const name = which === "room" ? data?.room_config_name : data?.rate_config_name;
+  const csv = which === "room" ? data?.room_config_csv : data?.rate_config_csv;
+  if (!name || csv == null) return { ok: false, error: "That file is no longer saved." };
+  return { ok: true, data: { name, csv } };
+}
+
 /* -- Finances -> Accounting Systems (0087) -------------------------------- */
 
 export async function saveAccountingSystem(input: {

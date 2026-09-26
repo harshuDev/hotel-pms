@@ -24,6 +24,7 @@ import {
   type InvoiceSettings,
 } from "@/lib/invoice-settings";
 import type { CancellationTerms } from "@/lib/cancellation-policy";
+import type { ChannelManager, ChannelManagerProvider } from "@/lib/channel-managers";
 import {
   DEFAULT_INVENTORY_SETTINGS,
   type InventorySettings,
@@ -2906,6 +2907,39 @@ export async function getPaymentGateways(): Promise<PaymentGateway[]> {
     provider: r.provider,
     title: r.title,
     isDefault: r.is_default,
+  }));
+}
+
+/**
+ * Channel managers (0097), in the order they were added. Stored, not yet
+ * connected. The configuration files' text is not read here -- only their
+ * names; the password is never readable at all.
+ */
+export async function getChannelManagers(): Promise<ChannelManager[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("channel_managers")
+    .select(
+      "id, provider, connection_name, is_active, username, password_secret_id, hotel_code, requestor_id, region, days_to_sync, sync_multi_occupancy, room_config_name, rate_config_name, is_synced, synced_at",
+    )
+    .order("created_at");
+  if (error) throw new Error(`Failed to load the channel managers: ${error.message}`);
+  return (data ?? []).map((r) => ({
+    id: r.id,
+    provider: r.provider as ChannelManagerProvider,
+    connectionName: r.connection_name,
+    isActive: r.is_active,
+    username: r.username,
+    hasPassword: r.password_secret_id !== null,
+    hotelCode: r.hotel_code,
+    requestorId: r.requestor_id,
+    region: r.region,
+    daysToSync: r.days_to_sync,
+    syncMultiOccupancy: r.sync_multi_occupancy,
+    roomConfigName: r.room_config_name,
+    rateConfigName: r.rate_config_name,
+    isSynced: r.is_synced,
+    syncedAt: r.synced_at,
   }));
 }
 

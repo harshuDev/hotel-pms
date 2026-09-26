@@ -1183,6 +1183,80 @@ export type Database = {
           },
         ]
       }
+      channel_managers: {
+        Row: {
+          connection_name: string
+          created_at: string
+          days_to_sync: number
+          hotel_code: string | null
+          id: string
+          is_active: boolean
+          is_synced: boolean
+          password_secret_id: string | null
+          property_id: string
+          provider: string
+          rate_config_csv: string | null
+          rate_config_name: string | null
+          region: string | null
+          requestor_id: string | null
+          room_config_csv: string | null
+          room_config_name: string | null
+          sync_multi_occupancy: boolean
+          synced_at: string | null
+          username: string | null
+        }
+        Insert: {
+          connection_name: string
+          created_at?: string
+          days_to_sync?: number
+          hotel_code?: string | null
+          id?: string
+          is_active?: boolean
+          is_synced?: boolean
+          password_secret_id?: string | null
+          property_id: string
+          provider: string
+          rate_config_csv?: string | null
+          rate_config_name?: string | null
+          region?: string | null
+          requestor_id?: string | null
+          room_config_csv?: string | null
+          room_config_name?: string | null
+          sync_multi_occupancy?: boolean
+          synced_at?: string | null
+          username?: string | null
+        }
+        Update: {
+          connection_name?: string
+          created_at?: string
+          days_to_sync?: number
+          hotel_code?: string | null
+          id?: string
+          is_active?: boolean
+          is_synced?: boolean
+          password_secret_id?: string | null
+          property_id?: string
+          provider?: string
+          rate_config_csv?: string | null
+          rate_config_name?: string | null
+          region?: string | null
+          requestor_id?: string | null
+          room_config_csv?: string | null
+          room_config_name?: string | null
+          sync_multi_occupancy?: boolean
+          synced_at?: string | null
+          username?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "channel_managers_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       channels: {
         Row: {
           code: string
@@ -4802,6 +4876,7 @@ export type Database = {
       }
       delete_calendar_note: { Args: { p_id: string }; Returns: undefined }
       delete_cancellation_policy: { Args: { p_id: string }; Returns: undefined }
+      delete_channel_manager: { Args: { p_id: string }; Returns: undefined }
       delete_currency_profile: { Args: { p_id: string }; Returns: undefined }
       delete_discount: { Args: { p_id: string }; Returns: undefined }
       delete_email_template: { Args: { p_id: string }; Returns: undefined }
@@ -5656,6 +5731,26 @@ export type Database = {
           p_is_active?: boolean
           p_kind: Database["public"]["Enums"]["channel_kind"]
           p_name: string
+        }
+        Returns: string
+      }
+      save_channel_manager: {
+        Args: {
+          p_connection_name: string
+          p_days_to_sync: number
+          p_hotel_code: string
+          p_id: string
+          p_is_active: boolean
+          p_password: string
+          p_provider: string
+          p_rate_config_csv: string
+          p_rate_config_name: string
+          p_region: string
+          p_requestor_id: string
+          p_room_config_csv: string
+          p_room_config_name: string
+          p_sync_multi_occupancy: boolean
+          p_username: string
         }
         Returns: string
       }
