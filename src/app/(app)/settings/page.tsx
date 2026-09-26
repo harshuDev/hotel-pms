@@ -18,6 +18,8 @@ import {
   getPosProfiles,
   getCurrencyProfiles,
   getAccountingSettings,
+  getPaymentGateways,
+  getAccountingSystems,
   getEmailSetup,
   getEmailTemplates,
   getIdentificationTypes,
@@ -75,6 +77,8 @@ export default async function SettingsPage({
     posProfiles,
     currencyProfiles,
     accountingSettings,
+    paymentGateways,
+    accountingSystems,
   ] = await Promise.all([
     getPropertySettings(),
     getRoomTypeSettings(),
@@ -103,6 +107,8 @@ export default async function SettingsPage({
     getPosProfiles(),
     getCurrencyProfiles(),
     getAccountingSettings(),
+    getPaymentGateways(),
+    getAccountingSystems(),
   ]);
 
   /*
@@ -151,6 +157,8 @@ export default async function SettingsPage({
         posProfiles={posProfiles}
         currencyProfiles={currencyProfiles}
         accountingSettings={accountingSettings}
+        paymentGateways={paymentGateways}
+        accountingSystems={accountingSystems}
       />
     </div>
   );

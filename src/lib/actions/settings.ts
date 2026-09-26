@@ -636,6 +636,62 @@ export async function deletePosProfile(id: string): Promise<ActionResult<null>> 
   return { ok: true, data: null };
 }
 
+/* -- Finances -> Payment Gateway (0086) ----------------------------------- */
+
+export async function savePaymentGateway(input: {
+  id: string | null;
+  provider: string;
+  title: string;
+  isDefault: boolean;
+}): Promise<ActionResult<null>> {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("save_payment_gateway", {
+    // Null adds a new gateway.
+    p_id: nullableArg(input.id),
+    p_provider: input.provider,
+    p_title: input.title,
+    p_is_default: input.isDefault,
+  });
+  if (error) return { ok: false, error: error.message };
+  revalidateSettings();
+  return { ok: true, data: null };
+}
+
+export async function deletePaymentGateway(id: string): Promise<ActionResult<null>> {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("delete_payment_gateway", { p_id: id });
+  if (error) return { ok: false, error: error.message };
+  revalidateSettings();
+  return { ok: true, data: null };
+}
+
+/* -- Finances -> Accounting Systems (0087) -------------------------------- */
+
+export async function saveAccountingSystem(input: {
+  id: string | null;
+  provider: string;
+  isEnabled: boolean;
+}): Promise<ActionResult<null>> {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("save_accounting_system", {
+    // Null adds a new system.
+    p_id: nullableArg(input.id),
+    p_provider: input.provider,
+    p_is_enabled: input.isEnabled,
+  });
+  if (error) return { ok: false, error: error.message };
+  revalidateSettings();
+  return { ok: true, data: null };
+}
+
+export async function deleteAccountingSystem(id: string): Promise<ActionResult<null>> {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("delete_accounting_system", { p_id: id });
+  if (error) return { ok: false, error: error.message };
+  revalidateSettings();
+  return { ok: true, data: null };
+}
+
 /* -- Finances -> Accounting Categories (0085) ----------------------------- */
 
 function revalidateAccounting() {

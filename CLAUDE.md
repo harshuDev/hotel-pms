@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0085` are
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0087` are
 applied to the hosted database.
 
 Working on real data: dashboard (house board, movements, pace, activity feed),
@@ -262,6 +262,8 @@ Each read is a Postgres view or RPC, never aggregation in the client:
 | `getRoomsForSettings({ q, page })`  | `rooms_for_settings(...)`         |
 | `getPaymentMethodSettings()`        | `payment_methods` incl. retired   |
 | `getAccountingSettings()`           | `accounting_categories` + `accounting_defaults` (0085) |
+| `getPaymentGateways()`              | `payment_gateways` (0086)         |
+| `getAccountingSystems()`            | `accounting_systems` (0087)       |
 | `getMealReport(from, to)`           | `meal_report(from, to)`           |
 
 **Two signatures carry the room-count rule.** The client operates properties
@@ -1591,12 +1593,12 @@ anywhere else. Collapsed height must stay constant regardless of room count.
     0074-0075, System Settings grew its three with 0076-0078.
   - **FINANCES AND INVENTORY are the reference's labels in its order**
     (0079): Custom Payment Types, Tax Information, Invoice Settings (0080),
-    Pos Profiles (0084), Currencies (0083), Accounting Categories (0085);
+    Pos Profiles (0084), Currencies (0083), Accounting Categories (0085),
+    Payment Gateway (0086), Accounting Systems (0087);
     Room Type, Room Setup,
     Cancellation Policy, Rate Plans, Seasons and Events. Room Type and Room
     Setup moved there from Hotel Content, where the reference does not have
     them. Their other items —
-    Payment Gateway, Accounting Systems, and
     Inventory's Settings and Discounts — go in as each is built. Tab ids did
     not change, so every existing link still lands.
   - **INVOICE SETTINGS (0080-0082) HAS A READER: THE PRINTABLE INVOICE.**
@@ -1690,6 +1692,28 @@ anywhere else. Collapsed height must stay constant regardless of room count.
       points at one.
     - Names are unique per property, case-insensitively. Blank codes are
       stored as null.
+  - **PAYMENT GATEWAY (0086) AND ACCOUNTING SYSTEMS (0087) ARE STORED, NOT
+    YET LIVE, BY DECISION.** The client: gateways are connected per client, as
+    each asks for one. A row says which gateway or ledger the hotel uses; no
+    payment goes through one and nothing is exported to one.
+    - **NEITHER TABLE HOLDS A CREDENTIAL, AND NEITHER EVER SHOULD.** Anybody
+      the select policy admits can read a row. When a gateway or ledger is
+      wired its secret key or OAuth token lives on the server, and a
+      publishable key is the most a row could carry. See "Card capture is not
+      built" for how a gateway is meant to land.
+    - **Payment Gateways**: Title and Is Default, as the reference's. The
+      providers are the two the reference lists, Stripe SCA and ChannexPCI --
+      `known_payment_gateways()` and `PAYMENT_GATEWAYS` change together. The
+      title starts as the provider's name and stays editable. One default per
+      property by a partial unique index; ticking Default on one stands the
+      old one down. The reference draws no cross on ChannexPCI -- a system
+      gateway there; there are none here, so every row can be deleted.
+    - **Accounting Systems**: the reference's empty state and Add button are
+      all that has been seen, so the list (System, Is Enabled) and **THE
+      PROVIDER LIST ARE PROVISIONAL** -- QuickBooks Online, Xero, Sage, in
+      `known_accounting_systems()` and `ACCOUNTING_SYSTEMS`. One row per
+      system. The Accounting Categories' External Code is what an export
+      would key by.
   - **COMMUNICATIONS & NOTIFICATIONS IS STORED, NOT YET SENT** (0074, 0075) --
     Hotel Emails Preferences and Email Setup, cloned from the reference, all
     in one row per property, `hotel_email_settings`.

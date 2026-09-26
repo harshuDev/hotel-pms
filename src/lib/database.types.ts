@@ -112,6 +112,38 @@ export type Database = {
           },
         ]
       }
+      accounting_systems: {
+        Row: {
+          created_at: string
+          id: string
+          is_enabled: boolean
+          property_id: string
+          provider: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_enabled?: boolean
+          property_id: string
+          provider: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_enabled?: boolean
+          property_id?: string
+          provider?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "accounting_systems_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       activity_log: {
         Row: {
           action: string
@@ -2113,6 +2145,41 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "meeting_rooms_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payment_gateways: {
+        Row: {
+          created_at: string
+          id: string
+          is_default: boolean
+          property_id: string
+          provider: string
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_default?: boolean
+          property_id: string
+          provider: string
+          title: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_default?: boolean
+          property_id?: string
+          provider?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_gateways_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "properties"
@@ -4353,6 +4420,7 @@ export type Database = {
         }[]
       }
       delete_accounting_category: { Args: { p_id: string }; Returns: undefined }
+      delete_accounting_system: { Args: { p_id: string }; Returns: undefined }
       delete_booking_attachment: {
         Args: { p_attachment_id: string }
         Returns: string
@@ -4364,6 +4432,7 @@ export type Database = {
       delete_extra_category: { Args: { p_id: string }; Returns: undefined }
       delete_facility: { Args: { p_id: string }; Returns: undefined }
       delete_identification_type: { Args: { p_id: string }; Returns: undefined }
+      delete_payment_gateway: { Args: { p_id: string }; Returns: undefined }
       delete_pos_profile: { Args: { p_id: string }; Returns: undefined }
       delete_room: { Args: { p_room_id: string }; Returns: undefined }
       delete_season: { Args: { p_id: string }; Returns: undefined }
@@ -4647,7 +4716,9 @@ export type Database = {
       invoice_settings_row: { Args: never; Returns: string }
       is_front_office_staff: { Args: never; Returns: boolean }
       is_revenue_staff: { Args: never; Returns: boolean }
+      known_accounting_systems: { Args: never; Returns: string[] }
       known_locales: { Args: never; Returns: string[] }
+      known_payment_gateways: { Args: never; Returns: string[] }
       known_pos_types: { Args: never; Returns: string[] }
       log_booking_email: {
         Args: {
@@ -5115,6 +5186,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      save_accounting_system: {
+        Args: { p_id: string; p_is_enabled: boolean; p_provider: string }
+        Returns: string
+      }
       save_booking_confirmation_email: {
         Args: {
           p_checkin_notes: string
@@ -5290,6 +5365,15 @@ export type Database = {
         Returns: string
       }
       save_own_profile: { Args: { p_full_name: string }; Returns: string }
+      save_payment_gateway: {
+        Args: {
+          p_id: string
+          p_is_default: boolean
+          p_provider: string
+          p_title: string
+        }
+        Returns: string
+      }
       save_payment_request_email: {
         Args: { p_body: string; p_subject: string }
         Returns: undefined
