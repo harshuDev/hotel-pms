@@ -1,5 +1,6 @@
 "use client";
 
+import { useT } from "@/components/i18n";
 import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { cn, EmptyState } from "@/components/ui";
@@ -41,6 +42,7 @@ export function AttachmentsTab({
   /** Front office and above. A reader still sees the list and can open a file. */
   canEdit: boolean;
 }) {
+  const tr = useT();
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState<string | null>(null);
@@ -123,7 +125,7 @@ export function AttachmentsTab({
     <div className="rounded-lg border border-line bg-white shadow-card">
       <div className="flex items-center justify-between gap-3 border-b border-line px-4 py-3">
         <h2 className="font-display text-[15px] font-semibold tracking-tightest text-ink">
-          Attachments
+          {tr("Attachments")}
         </h2>
         {canEdit && (
           <>
@@ -142,7 +144,7 @@ export function AttachmentsTab({
               onClick={() => inputRef.current?.click()}
               className="rounded-md bg-chrome-800 px-3 py-1.5 text-[13px] font-medium text-white transition hover:bg-chrome-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brass disabled:opacity-50"
             >
-              {busy ? "Uploading…" : "Add file"}
+              {busy ? tr("Uploading…") : tr("Add file")}
             </button>
           </>
         )}
@@ -156,8 +158,8 @@ export function AttachmentsTab({
 
       {attachments.length === 0 ? (
         <EmptyState
-          title="No files yet"
-          hint={canEdit ? "Add a passport scan, a registration card or a purchase order." : undefined}
+          title={tr("No files yet")}
+          hint={canEdit ? tr("Add a passport scan, a registration card or a purchase order.") : undefined}
         />
       ) : (
         <ul className="divide-y divide-line">
@@ -192,7 +194,7 @@ export function AttachmentsTab({
                     pending && "opacity-50",
                   )}
                 >
-                  Remove
+                  {tr("Remove")}
                 </button>
               )}
             </li>

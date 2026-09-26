@@ -1,5 +1,9 @@
 "use client";
 
+import { useT } from "@/components/i18n";
+import { LanguageChoices, LanguageConfirm } from "@/components/language-switch";
+import { msg } from "@/lib/i18n/translate";
+import type { StaffLocale } from "@/lib/i18n/staff-locales";
 import Link from "next/link";
 import { SearchOverlay } from "@/components/search-overlay";
 import { usePathname, useRouter } from "next/navigation";
@@ -12,11 +16,11 @@ import { clearCache } from "@/lib/actions/profile";
 import type { StaffRole } from "@/lib/types";
 
 const ROLE_LABEL: Record<StaffRole, string> = {
-  admin: "Administrator",
-  manager: "Manager",
-  front_desk: "Front desk",
-  cashier: "Cashier",
-  housekeeping: "Housekeeping",
+  admin: msg("Administrator"),
+  manager: msg("Manager"),
+  front_desk: msg("Front desk"),
+  cashier: msg("Cashier"),
+  housekeeping: msg("Housekeeping"),
 };
 
 const USER_MENU = "__user";
@@ -44,6 +48,7 @@ export function TopNav({
   staffRole,
   hiddenHrefs,
 }: TopNavProps) {
+  const tr = useT();
   const pathname = usePathname();
   // One filtered list for the bar and the drawer alike, so the two cannot
   // disagree about what the hotel has switched off.
@@ -80,6 +85,7 @@ export function TopNav({
   }, []);
   const [expanded, setExpanded] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [pendingLocale, setPendingLocale] = useState<StaffLocale | null>(null);
 
   useEffect(() => {
     setOpenMenu(null);
@@ -108,7 +114,7 @@ export function TopNav({
         <button
           type="button"
           onClick={() => setDrawerOpen(true)}
-          aria-label="Open navigation"
+          aria-label={tr("Open navigation")}
           className="mr-1 grid h-8 w-8 place-items-center rounded text-white/70 transition-colors hover:bg-white/[0.08] hover:text-white lg:hidden"
         >
           <svg
@@ -132,7 +138,7 @@ export function TopNav({
         */}
         <Link
           href="/dashboard"
-          aria-label={`${propertyName} dashboard`}
+          aria-label={tr("{name} dashboard", { name: propertyName })}
           className="flex shrink-0 items-center rounded p-1 outline-none focus-visible:ring-1 focus-visible:ring-white/40"
         >
           <img
@@ -143,7 +149,7 @@ export function TopNav({
           />
         </Link>
 
-        <nav aria-label="Main" className="ml-2 hidden items-center lg:flex">
+        <nav aria-label={tr("Main")} className="ml-2 hidden items-center lg:flex">
           {sections.map((s) => {
             const active = isSectionActive(s, pathname);
 
@@ -151,7 +157,7 @@ export function TopNav({
               return (
                 <Menu
                   key={s.label}
-                  label={s.label}
+                  label={tr(s.label)}
                   active={active}
                   columns={s.columns ?? 1}
                   scroll={s.scroll ?? false}
@@ -166,7 +172,7 @@ export function TopNav({
                 >
                   {s.items.map((i) => (
                     <MenuItem key={i.href} href={i.href}>
-                      {i.label}
+                      {tr(i.label)}
                     </MenuItem>
                   ))}
                 </Menu>
@@ -187,7 +193,7 @@ export function TopNav({
                     : "text-white/60 hover:text-white",
                 )}
               >
-                {s.label}
+                {tr(s.label)}
                 {active && (
                   <span className="absolute inset-x-2.5 bottom-0 h-[2px] rounded-full bg-brass" />
                 )}
@@ -200,8 +206,8 @@ export function TopNav({
           <button
             type="button"
             onClick={() => setSearchOpen(true)}
-            aria-label="Search bookings, guests and rooms"
-            title="Search bookings, guests and rooms (Ctrl K)"
+            aria-label={tr("Search bookings, guests and rooms")}
+            title={tr("Search bookings, guests and rooms (Ctrl K)")}
             className="grid h-8 w-8 place-items-center rounded text-white/60 outline-none transition-colors hover:bg-white/[0.08] hover:text-white focus-visible:ring-1 focus-visible:ring-white/40 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent"
           >
             <svg
@@ -236,12 +242,12 @@ export function TopNav({
           >
             <div className="border-b border-line px-2.5 pb-2 pt-1">
               <p className="text-[13px] text-ink">{staffName}</p>
-              <p className="text-2xs text-ink-faint">{ROLE_LABEL[staffRole]}</p>
+              <p className="text-2xs text-ink-faint">{tr(ROLE_LABEL[staffRole])}</p>
             </div>
             <div className="pt-1">
-              <MenuItem href="/profile">Profile</MenuItem>
-              <MenuItem href={`/book/${propertyId}`}>Guest booking page</MenuItem>
-              <MenuItem href="/settings">Settings</MenuItem>
+              <MenuItem href="/profile">{tr("Profile")}</MenuItem>
+              <MenuItem href={`/book/${propertyId}`}>{tr("Guest booking page")}</MenuItem>
+              <MenuItem href="/settings">{tr("Settings")}</MenuItem>
               <MenuItem
                 onSelect={() => {
                   if (refreshing) return;
@@ -257,17 +263,22 @@ export function TopNav({
                   });
                 }}
               >
-                {refreshing ? "Reloading\u2026" : "Reload data"}
+                {refreshing ? tr("Reloading…") : tr("Reload data")}
               </MenuItem>
               {/*
-                There is no Language item. These screens are English, so a
-                control that cannot change anything was worse than nothing —
-                first it read as broken, then as pointless, and both were fair.
-                The nineteen languages live on the guest booking page, where
-                the person reading might not speak English. If the staff app is
-                ever translated this is where the switcher goes back.
+                The language switch is back (0106). It was taken out while the
+                staff app spoke only English, when it changed nothing; every
+                screen is translated now, so it changes all of them.
               */}
-              <MenuItem onSelect={() => void signOut()}>Log out</MenuItem>
+              <div className="my-1">
+                <LanguageChoices
+                  onChoose={(code) => {
+                    setOpenMenu(null);
+                    if (code !== tr.locale) setPendingLocale(code);
+                  }}
+                />
+              </div>
+              <MenuItem onSelect={() => void signOut()}>{tr("Log out")}</MenuItem>
             </div>
           </Menu>
         </div>
@@ -290,7 +301,7 @@ export function TopNav({
               />
             </div>
             <nav
-              aria-label="Main"
+              aria-label={tr("Main")}
               className="flex-1 overflow-y-auto px-2.5 pb-4 pt-3"
             >
               {sections.map((s) => {
@@ -311,7 +322,7 @@ export function TopNav({
                             : "text-white/55 hover:bg-white/[0.04] hover:text-white/90",
                         )}
                       >
-                        {s.label}
+                        {tr(s.label)}
                         <Chevron open={isOpen} />
                       </button>
                       {isOpen && (
@@ -327,7 +338,7 @@ export function TopNav({
                                   : "text-white/40 hover:text-white/80",
                               )}
                             >
-                              {i.label}
+                              {tr(i.label)}
                             </Link>
                           ))}
                         </div>
@@ -352,7 +363,7 @@ export function TopNav({
                     {active && (
                       <span className="absolute inset-y-1.5 left-0 w-[3px] rounded-full bg-brass" />
                     )}
-                    {s.label}
+                    {tr(s.label)}
                   </Link>
                 );
               })}
@@ -362,6 +373,9 @@ export function TopNav({
       )}
 
       {searchOpen && <SearchOverlay onClose={() => setSearchOpen(false)} />}
+      {pendingLocale && (
+        <LanguageConfirm locale={pendingLocale} onCancel={() => setPendingLocale(null)} />
+      )}
     </header>
   );
 }

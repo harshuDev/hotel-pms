@@ -1,3 +1,4 @@
+import { getT } from "@/lib/i18n/server";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { format, parseISO } from "date-fns";
@@ -34,6 +35,7 @@ export default async function RegistrationCardPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
+  const tr = await getT();
   const { id } = await params;
   if (!UUID.test(id)) notFound();
 
@@ -100,26 +102,26 @@ export default async function RegistrationCardPage({
           </div>
           <div className="text-right">
             <p className="font-display text-[16px] font-semibold tracking-tightest text-ink">
-              Guest Registration Card
+              {tr("Guest Registration Card")}
             </p>
             <p className="tnum mt-1 text-[13px] text-ink-muted">{detail.reference}</p>
           </div>
         </header>
 
         <section className="mt-5">
-          <h2 className="text-[13px] font-semibold uppercase tracking-[0.1em] text-ink">Stay</h2>
+          <h2 className="text-[13px] font-semibold uppercase tracking-[0.1em] text-ink">{tr("Stay")}</h2>
           <div className="grid gap-x-8 sm:grid-cols-2">
-            <Line label="Arrival" value={date(detail.checkIn)} />
-            <Line label="Departure" value={date(detail.checkOut)} />
-            <Line label="Nights" value={detail.nights} />
+            <Line label={tr("Arrival")} value={date(detail.checkIn)} />
+            <Line label={tr("Departure")} value={date(detail.checkOut)} />
+            <Line label={tr("Nights")} value={detail.nights} />
             <Line
-              label="Guests"
+              label={tr("Guests")}
               value={`${detail.adults} adult${detail.adults === 1 ? "" : "s"}${
                 detail.children > 0 ? `, ${detail.children} child${detail.children === 1 ? "" : "ren"}` : ""
               }`}
             />
             <Line
-              label={liveRooms.length === 1 ? "Room" : "Rooms"}
+              label={liveRooms.length === 1 ? tr("Room") : tr("Rooms")}
               value={liveRooms
                 .map((r) => (r.roomNumber ? `${r.roomNumber} · ${r.roomTypeName}` : r.roomTypeName))
                 .join(", ")}
@@ -128,17 +130,17 @@ export default async function RegistrationCardPage({
         </section>
 
         <section className="mt-6">
-          <h2 className="text-[13px] font-semibold uppercase tracking-[0.1em] text-ink">Guest</h2>
+          <h2 className="text-[13px] font-semibold uppercase tracking-[0.1em] text-ink">{tr("Guest")}</h2>
           <div className="grid gap-x-8 sm:grid-cols-2">
-            <Line label="Name" value={detail.customerName} />
-            <Line label="Date of birth" value={date(g?.dateOfBirth)} />
-            <Line label="Nationality" value={country(g?.nationality)} />
-            <Line label="Country of residence" value={country(g?.country)} />
-            <Line label="Identification type" value={idType} />
-            <Line label="Document number" value={g?.passportNumber} />
-            <Line label="Document expiry" value={date(g?.passportExpiry)} />
-            <Line label="Email" value={g?.email || detail.customerEmail} />
-            <Line label="Phone" value={g?.phone || detail.customerPhone} />
+            <Line label={tr("Name")} value={detail.customerName} />
+            <Line label={tr("Date of birth")} value={date(g?.dateOfBirth)} />
+            <Line label={tr("Nationality")} value={country(g?.nationality)} />
+            <Line label={tr("Country of residence")} value={country(g?.country)} />
+            <Line label={tr("Identification type")} value={idType} />
+            <Line label={tr("Document number")} value={g?.passportNumber} />
+            <Line label={tr("Document expiry")} value={date(g?.passportExpiry)} />
+            <Line label={tr("Email")} value={g?.email || detail.customerEmail} />
+            <Line label={tr("Phone")} value={g?.phone || detail.customerPhone} />
             {fields.map((f) => (
               <Line key={f.id} label={f.label} value={guestFieldDisplay(f.kind, g?.customFields[f.id])} />
             ))}
@@ -162,7 +164,7 @@ export default async function RegistrationCardPage({
         {form.terms && (
           <section className="mt-6">
             <h2 className="text-[13px] font-semibold uppercase tracking-[0.1em] text-ink">
-              Terms and conditions
+              {tr("Terms and conditions")}
             </h2>
             <p className="mt-2 whitespace-pre-line text-[12.5px] leading-relaxed text-ink-muted">
               {form.terms}
@@ -173,11 +175,11 @@ export default async function RegistrationCardPage({
         <section className="mt-10 grid gap-8 sm:grid-cols-2">
           <div>
             <div className="h-10 border-b border-ink" />
-            <p className="mt-1 text-[12px] uppercase tracking-[0.08em] text-ink-faint">Guest signature</p>
+            <p className="mt-1 text-[12px] uppercase tracking-[0.08em] text-ink-faint">{tr("Guest signature")}</p>
           </div>
           <div>
             <div className="h-10 border-b border-ink" />
-            <p className="mt-1 text-[12px] uppercase tracking-[0.08em] text-ink-faint">Date</p>
+            <p className="mt-1 text-[12px] uppercase tracking-[0.08em] text-ink-faint">{tr("Date")}</p>
           </div>
         </section>
       </article>

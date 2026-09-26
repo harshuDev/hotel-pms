@@ -1,3 +1,4 @@
+import { getT } from "@/lib/i18n/server";
 import { Fragment } from "react";
 import Link from "next/link";
 import { format, parseISO } from "date-fns";
@@ -114,6 +115,7 @@ const ROWS: FieldRow[] = [
 ];
 
 export async function InventoryAll({ cells }: { cells: InventoryCell[] }) {
+  const tr = await getT();
   const [currency, inventorySettings] = await Promise.all([
     getPropertyCurrency(),
     getInventorySettings(),
@@ -135,7 +137,7 @@ export async function InventoryAll({ cells }: { cells: InventoryCell[] }) {
   if (dates.length === 0 || types.length === 0) {
     return (
       <div className="rounded-lg border border-line bg-white p-4 text-[13px] text-ink-muted shadow-card">
-        No room types are set up yet. Add one under Settings.
+        {tr("No room types are set up yet. Add one under Settings.")}
       </div>
     );
   }
@@ -147,7 +149,7 @@ export async function InventoryAll({ cells }: { cells: InventoryCell[] }) {
           <thead>
             <tr>
               <th className="sticky left-0 z-10 bg-white px-3 pb-2.5 text-left text-xxs font-semibold uppercase tracking-[0.1em] text-ink-faint">
-                Room type
+                {tr("Room type")}
               </th>
               {dates.map((d) => {
                 const day = parseISO(d);
@@ -185,7 +187,7 @@ export async function InventoryAll({ cells }: { cells: InventoryCell[] }) {
                   >
                     {t.roomTypeName}
                     <span className="ml-2 text-xxs font-normal text-ink-faint">
-                      {t.physicalRooms} room{t.physicalRooms === 1 ? "" : "s"}
+                      {t.physicalRooms} {tr("room")}{t.physicalRooms === 1 ? "" : "s"}
                       {t.outOfOrder > 0 ? `, ${t.outOfOrder} out of order` : ""}
                     </span>
                   </td>

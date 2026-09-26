@@ -1,5 +1,6 @@
 "use client";
 
+import { useT } from "@/components/i18n";
 import { useMemo, useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -30,6 +31,7 @@ function Sheet({
   onClose: () => void;
   children: React.ReactNode;
 }) {
+  const tr = useT();
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/40 p-4 pt-16">
       <div className="w-full max-w-lg rounded-lg border border-line bg-white shadow-xl">
@@ -40,7 +42,7 @@ function Sheet({
           <button
             onClick={onClose}
             className="text-ink-faint hover:text-ink"
-            aria-label="Close"
+            aria-label={tr("Close")}
           >
             ✕
           </button>
@@ -67,6 +69,7 @@ export function MeetingRoomsScreen({
   canBook: boolean;
   canConfigure: boolean;
 }) {
+  const tr = useT();
   const currency = useCurrency();
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -199,20 +202,20 @@ export function MeetingRoomsScreen({
               onClick={() => setNewRoom({ name: "", capacity: "" })}
               className="rounded-md border border-line px-3 py-1.5 text-[13px] text-ink-muted hover:bg-shell hover:text-ink"
             >
-              Add a room
+              {tr("Add a room")}
             </button>
           )}
           <Link
             href={href(format(addDays(parseISO(from), -days), "yyyy-MM-dd"))}
             className="rounded-md border border-line px-3 py-1.5 text-[13px] text-ink-muted hover:bg-shell hover:text-ink"
           >
-            Earlier
+            {tr("Earlier")}
           </Link>
           <Link
             href={href(format(addDays(parseISO(from), days), "yyyy-MM-dd"))}
             className="rounded-md border border-line px-3 py-1.5 text-[13px] text-ink-muted hover:bg-shell hover:text-ink"
           >
-            Later
+            {tr("Later")}
           </Link>
         </div>
       </div>
@@ -232,12 +235,12 @@ export function MeetingRoomsScreen({
         {rooms.length === 0 ? (
           <div className="py-10 text-center">
             <p className="font-display text-lg font-semibold tracking-tightest text-ink">
-              No meeting rooms yet
+              {tr("No meeting rooms yet")}
             </p>
             <p className="mx-auto mt-2 max-w-md text-[13px] leading-relaxed text-ink-muted">
               {canConfigure
-                ? "Add the rooms this property lets out — Meeting Room A, the boardroom — and they will appear here with their calendars."
-                : "A manager or administrator sets these up."}
+                ? tr("Add the rooms this property lets out — Meeting Room A, the boardroom — and they will appear here with their calendars.")
+                : tr("A manager or administrator sets these up.")}
             </p>
           </div>
         ) : (
@@ -246,7 +249,7 @@ export function MeetingRoomsScreen({
               <thead>
                 <tr>
                   <th className="sticky left-0 z-10 bg-white px-3 pb-2.5 text-left text-xxs font-semibold uppercase tracking-[0.1em] text-ink-faint">
-                    Meeting room
+                    {tr("Meeting room")}
                   </th>
                   {dates.map((d) => {
                     const day = parseISO(d);
@@ -277,7 +280,7 @@ export function MeetingRoomsScreen({
                       </span>
                       {room.capacity !== null && (
                         <span className="tnum ml-1.5 text-xxs text-ink-faint">
-                          seats {room.capacity}
+                          {tr("seats")}{" "}{room.capacity}
                         </span>
                       )}
                     </td>
@@ -294,7 +297,7 @@ export function MeetingRoomsScreen({
                             <button
                               onClick={() => cell && openSlot(cell, d)}
                               disabled={!canBook}
-                              title={canBook ? "Book this day" : undefined}
+                              title={canBook ? tr("Book this day") : undefined}
                               className={cn(
                                 "h-8 w-full rounded text-xxs",
                                 canBook
@@ -347,7 +350,7 @@ export function MeetingRoomsScreen({
         <Sheet title={`Book ${newBooking.roomName}`} onClose={() => setNewBooking(null)}>
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <label htmlFor="mr-from" className={label}>First day</label>
+              <label htmlFor="mr-from" className={label}>{tr("First day")}</label>
               <input
                 id="mr-from"
                 type="date"
@@ -366,7 +369,7 @@ export function MeetingRoomsScreen({
               />
             </div>
             <div>
-              <label htmlFor="mr-to" className={label}>Last day</label>
+              <label htmlFor="mr-to" className={label}>{tr("Last day")}</label>
               <input
                 id="mr-to"
                 type="date"
@@ -376,21 +379,21 @@ export function MeetingRoomsScreen({
                 className={cn(fieldClass, "tnum")}
               />
               <p className="mt-1 text-xxs text-ink-faint">
-                Inclusive — the room is held on this day too.
+                {tr("Inclusive — the room is held on this day too.")}
               </p>
             </div>
             <div className="sm:col-span-2">
-              <label htmlFor="mr-event" className={label}>Event name</label>
+              <label htmlFor="mr-event" className={label}>{tr("Event name")}</label>
               <input
                 id="mr-event"
                 value={newBooking.eventName}
-                placeholder="Northern sales conference"
+                placeholder={tr("Northern sales conference")}
                 onChange={(e) => setNewBooking({ ...newBooking, eventName: e.target.value })}
                 className={fieldClass}
               />
             </div>
             <div>
-              <label htmlFor="mr-guests" className={label}>People</label>
+              <label htmlFor="mr-guests" className={label}>{tr("People")}</label>
               <input
                 id="mr-guests"
                 inputMode="numeric"
@@ -400,12 +403,12 @@ export function MeetingRoomsScreen({
               />
               {newBooking.capacity !== null && (
                 <p className="mt-1 text-xxs text-ink-faint">
-                  Seats {newBooking.capacity}.
+                  {tr("Seats")}{" "}{newBooking.capacity}.
                 </p>
               )}
             </div>
             <div>
-              <label htmlFor="mr-customer" className={label}>Customer</label>
+              <label htmlFor="mr-customer" className={label}>{tr("Customer")}</label>
               {newBooking.customerId ? (
                 <div className="flex items-center justify-between rounded-md border border-line bg-shell px-3 py-2">
                   <span className="text-[13px] text-ink">{newBooking.customerName}</span>
@@ -415,7 +418,7 @@ export function MeetingRoomsScreen({
                     }
                     className="text-xxs text-ink-muted hover:text-ink"
                   >
-                    Change
+                    {tr("Change")}
                   </button>
                 </div>
               ) : (
@@ -424,7 +427,7 @@ export function MeetingRoomsScreen({
                     id="mr-customer"
                     type="search"
                     value={query}
-                    placeholder="Optional — search by name"
+                    placeholder={tr("Optional — search by name")}
                     onChange={(e) => lookUp(e.target.value)}
                     className={fieldClass}
                   />
@@ -454,11 +457,11 @@ export function MeetingRoomsScreen({
               )}
             </div>
             <div className="sm:col-span-2">
-              <label htmlFor="mr-comments" className={label}>Comments</label>
+              <label htmlFor="mr-comments" className={label}>{tr("Comments")}</label>
               <input
                 id="mr-comments"
                 value={newBooking.comments}
-                placeholder="Optional — layout, equipment, catering"
+                placeholder={tr("Optional — layout, equipment, catering")}
                 onChange={(e) => setNewBooking({ ...newBooking, comments: e.target.value })}
                 className={fieldClass}
               />
@@ -466,7 +469,7 @@ export function MeetingRoomsScreen({
           </div>
 
           <p className="text-xs leading-relaxed text-ink-faint">
-            A customer is needed before any money can be charged.
+            {tr("A customer is needed before any money can be charged.")}
           </p>
 
           <div className="flex justify-end gap-2">
@@ -474,14 +477,14 @@ export function MeetingRoomsScreen({
               onClick={() => setNewBooking(null)}
               className="rounded-md border border-line px-4 py-2 text-[13px] text-ink-muted hover:bg-shell hover:text-ink"
             >
-              Cancel
+              {tr("Cancel")}
             </button>
             <button
               onClick={submitBooking}
               disabled={pending}
               className="rounded-md bg-chrome-800 px-5 py-2 text-[13px] font-medium text-white hover:bg-chrome-900 disabled:opacity-50"
             >
-              {pending ? "Booking…" : "Book it"}
+              {pending ? tr("Booking…") : tr("Book it")}
             </button>
           </div>
         </Sheet>
@@ -495,43 +498,43 @@ export function MeetingRoomsScreen({
         >
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <p className={label}>Event</p>
+              <p className={label}>{tr("Event")}</p>
               <p className="text-[13px] text-ink">{booking.eventName}</p>
             </div>
             <div>
-              <p className={label}>People</p>
+              <p className={label}>{tr("People")}</p>
               <p className="tnum text-[13px] text-ink">{booking.guestCount}</p>
             </div>
             <div>
-              <p className={label}>When</p>
+              <p className={label}>{tr("When")}</p>
               <p className="text-[13px] text-ink">
-                {format(parseISO(booking.startsOn), "EEE d MMM")} to{" "}
+                {format(parseISO(booking.startsOn), "EEE d MMM")} {tr("to")}{" "}
                 {format(parseISO(booking.endsOn), "EEE d MMM")}
                 <span className="ml-1.5 text-xxs text-ink-faint">
-                  {booking.days} day{booking.days === 1 ? "" : "s"}
+                  {booking.days} {tr("day")}{booking.days === 1 ? "" : "s"}
                 </span>
               </p>
             </div>
             <div>
-              <p className={label}>Customer</p>
-              <p className="text-[13px] text-ink">{booking.customerName ?? "Internal event"}</p>
+              <p className={label}>{tr("Customer")}</p>
+              <p className="text-[13px] text-ink">{booking.customerName ?? tr("Internal event")}</p>
             </div>
             <div>
-              <p className={label}>Status</p>
+              <p className={label}>{tr("Status")}</p>
               <p
                 className={cn(
                   "text-[13px]",
                   booking.status === "canceled" ? "text-rose-600" : "text-ink",
                 )}
               >
-                {booking.status === "canceled" ? "Cancelled" : "Confirmed"}
+                {booking.status === "canceled" ? tr("Cancelled") : tr("Confirmed")}
               </p>
             </div>
             <div>
-              <p className={label}>Charged</p>
+              <p className={label}>{tr("Charged")}</p>
               <p className="tnum text-[13px] text-ink">
                 {booking.folioId === null ? (
-                  <span className="text-ink-faint">Nothing yet</span>
+                  <span className="text-ink-faint">{tr("Nothing yet")}</span>
                 ) : (
                   <>
                     {formatMoney(booking.chargesCents, currency)}
@@ -543,7 +546,7 @@ export function MeetingRoomsScreen({
                     >
                       {booking.balanceCents > 0
                         ? `${formatMoney(booking.balanceCents, currency)} owing`
-                        : "settled"}
+                        : tr("settled")}
                     </span>
                   </>
                 )}
@@ -551,7 +554,7 @@ export function MeetingRoomsScreen({
             </div>
             {booking.comments && (
               <div className="sm:col-span-2">
-                <p className={label}>Comments</p>
+                <p className={label}>{tr("Comments")}</p>
                 <p className="whitespace-pre-line text-[13px] text-ink-muted">
                   {booking.comments}
                 </p>
@@ -562,7 +565,7 @@ export function MeetingRoomsScreen({
           {canBook && booking.status !== "canceled" && (
             <>
               <div className="border-t border-line pt-4">
-                <label htmlFor="mr-charge" className={label}>Charge for the room</label>
+                <label htmlFor="mr-charge" className={label}>{tr("Charge for the room")}</label>
                 <div className="flex gap-2">
                   <input
                     id="mr-charge"
@@ -588,24 +591,24 @@ export function MeetingRoomsScreen({
                             amountCents: cents,
                             description: "",
                           }),
-                        "Charged to the folio.",
+                        tr("Charged to the folio."),
                       );
                     }}
                     disabled={pending}
                     className="shrink-0 rounded-md bg-chrome-800 px-4 py-2 text-[13px] font-medium text-white hover:bg-chrome-900 disabled:opacity-50"
                   >
-                    Charge
+                    {tr("Charge")}
                   </button>
                 </div>
               </div>
 
               <div className="border-t border-line pt-4">
-                <label htmlFor="mr-cancel" className={label}>Cancel this booking</label>
+                <label htmlFor="mr-cancel" className={label}>{tr("Cancel this booking")}</label>
                 <div className="flex gap-2">
                   <input
                     id="mr-cancel"
                     value={cancelReason}
-                    placeholder="Reason, kept on the booking"
+                    placeholder={tr("Reason, kept on the booking")}
                     onChange={(e) => setCancelReason(e.target.value)}
                     className={fieldClass}
                   />
@@ -617,19 +620,18 @@ export function MeetingRoomsScreen({
                             bookingId: booking.bookingId,
                             reason: cancelReason,
                           }),
-                        "Booking cancelled — the room is free again.",
+                        tr("Booking cancelled — the room is free again."),
                       )
                     }
                     disabled={pending}
                     className="shrink-0 rounded-md border border-line px-4 py-2 text-[13px] text-rose-700 hover:bg-rose-50 disabled:opacity-50"
                   >
-                    Cancel it
+                    {tr("Cancel it")}
                   </button>
                 </div>
                 {booking.balanceCents > 0 && (
                   <p className="mt-1.5 text-xs leading-relaxed text-warn-deep">
-                    This booking still owes {formatMoney(booking.balanceCents, currency)}.
-                    Cancelling frees the room but does not write that off.
+                    {tr("This booking still owes")}{" "}{formatMoney(booking.balanceCents, currency)}{tr(". Cancelling frees the room but does not write that off.")}
                   </p>
                 )}
               </div>
@@ -637,7 +639,7 @@ export function MeetingRoomsScreen({
           )}
 
           <p className="text-xs text-ink-faint">
-            Booked by {booking.bookedBy ?? "someone"} on{" "}
+            {tr("Booked by")}{" "}{booking.bookedBy ?? tr("someone")} {tr("on")}{" "}
             {format(parseISO(booking.createdAt), "d MMM yyyy")}.
           </p>
         </Sheet>
@@ -645,25 +647,25 @@ export function MeetingRoomsScreen({
 
       {/* Adding a room -------------------------------------------------- */}
       {newRoom && (
-        <Sheet title="Add a meeting room" onClose={() => setNewRoom(null)}>
+        <Sheet title={tr("Add a meeting room")} onClose={() => setNewRoom(null)}>
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <label htmlFor="room-name" className={label}>Name</label>
+              <label htmlFor="room-name" className={label}>{tr("Name")}</label>
               <input
                 id="room-name"
                 value={newRoom.name}
-                placeholder="Meeting Room A"
+                placeholder={tr("Meeting Room A")}
                 onChange={(e) => setNewRoom({ ...newRoom, name: e.target.value })}
                 className={fieldClass}
               />
             </div>
             <div>
-              <label htmlFor="room-cap" className={label}>Seats</label>
+              <label htmlFor="room-cap" className={label}>{tr("Seats")}</label>
               <input
                 id="room-cap"
                 inputMode="numeric"
                 value={newRoom.capacity}
-                placeholder="Optional"
+                placeholder={tr("Optional")}
                 onChange={(e) => setNewRoom({ ...newRoom, capacity: e.target.value })}
                 className={cn(fieldClass, "tnum")}
               />
@@ -674,7 +676,7 @@ export function MeetingRoomsScreen({
               onClick={() => setNewRoom(null)}
               className="rounded-md border border-line px-4 py-2 text-[13px] text-ink-muted hover:bg-shell hover:text-ink"
             >
-              Cancel
+              {tr("Cancel")}
             </button>
             <button
               onClick={() => {
@@ -697,7 +699,7 @@ export function MeetingRoomsScreen({
               disabled={pending}
               className="rounded-md bg-chrome-800 px-5 py-2 text-[13px] font-medium text-white hover:bg-chrome-900 disabled:opacity-50"
             >
-              Add it
+              {tr("Add it")}
             </button>
           </div>
         </Sheet>

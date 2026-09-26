@@ -1,4 +1,5 @@
 "use server";
+import { localised } from "@/lib/i18n/localised";
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
@@ -43,23 +44,23 @@ export async function savePromotion(
   input: PromotionInput,
 ): Promise<ActionResult<{ id: string }>> {
   if (input.name.trim() === "") {
-    return { ok: false, error: "Give the promotion a name." };
+    return { ok: false, error: await localised("Give the promotion a name.") };
   }
 
   switch (input.kind) {
     case "percent_off":
       if (!input.percentBps || input.percentBps <= 0 || input.percentBps > 10000) {
-        return { ok: false, error: "Enter a percentage between 0 and 100." };
+        return { ok: false, error: await localised("Enter a percentage between 0 and 100.") };
       }
       break;
     case "amount_off":
       if (!input.amountOffCents || input.amountOffCents <= 0) {
-        return { ok: false, error: "Enter how much comes off each night." };
+        return { ok: false, error: await localised("Enter how much comes off each night.") };
       }
       break;
     case "free_nights":
       if (!input.freeNights || input.freeNights <= 0 || !input.paidNights || input.paidNights <= 0) {
-        return { ok: false, error: "Enter how many nights are paid for and how many are free." };
+        return { ok: false, error: await localised("Enter how many nights are paid for and how many are free.") };
       }
       break;
   }
@@ -91,7 +92,7 @@ export async function savePromotion(
     p_is_active: input.isActive,
   });
 
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
 
   revalidatePath("/offers");
   revalidatePath("/bookings/new");

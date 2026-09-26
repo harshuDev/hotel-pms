@@ -1,5 +1,6 @@
 "use client";
 
+import { useT } from "@/components/i18n";
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { cn } from "@/components/ui";
@@ -66,6 +67,7 @@ export function AssignRoom({
   /** Set when the bar already sits on a room, which turns this into a move. */
   currentRoomId?: string | null;
 }) {
+  const tr = useT();
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -141,7 +143,7 @@ export function AssignRoom({
       >
         {r.roomNumber}
         {r.roomId === currentRoomId && (
-          <span className="ml-1 text-xxs text-ink-faint">current</span>
+          <span className="ml-1 text-xxs text-ink-faint">{tr("current")}</span>
         )}
       </button>
     );
@@ -160,8 +162,8 @@ export function AssignRoom({
           setUpgrade(null);
           setOpenType(null);
         }}
-        aria-label={currentRoomId ? "Move to another room" : "Put in a room"}
-        title={currentRoomId ? "Move to another room" : "Put in a room"}
+        aria-label={currentRoomId ? tr("Move to another room") : tr("Put in a room")}
+        title={currentRoomId ? tr("Move to another room") : tr("Put in a room")}
         className="grid h-5 w-5 place-items-center rounded border border-line bg-white text-[11px] text-ink-muted transition hover:bg-shell hover:text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-brass"
       >
         {currentRoomId ? "⇄" : "+"}
@@ -186,13 +188,13 @@ export function AssignRoom({
             }}
           >
             <span className="block px-1.5 pb-1 text-xxs font-semibold uppercase tracking-[0.1em] text-ink-faint">
-              {currentRoomId ? "Move to" : "Put in room"}
+              {currentRoomId ? tr("Move to") : tr("Put in room")}
             </span>
 
             <span className="block max-h-[220px] overflow-y-auto">
               {!sold || sold.rooms.length === 0 ? (
                 <span className="block px-1.5 py-2 text-[12px] text-ink-muted">
-                  This room type has no rooms set up yet.
+                  {tr("This room type has no rooms set up yet.")}
                 </span>
               ) : (
                 sold.rooms.map(roomButton)
@@ -207,7 +209,7 @@ export function AssignRoom({
               {others.length > 0 && (
                 <span className="mt-1 block border-t border-line pt-1">
                   <span className="block px-1.5 pb-0.5 text-xxs font-semibold uppercase tracking-[0.1em] text-ink-faint">
-                    Upgrade or move type
+                    {tr("Upgrade or move type")}
                   </span>
                   {others.map((g) => (
                     <span key={g.roomTypeId} className="block">
@@ -253,7 +255,7 @@ export function AssignRoom({
                 onClick={remove}
                 className="mt-1 block w-full rounded border-t border-line px-1.5 py-1 text-left text-[12px] text-ink-muted transition hover:bg-shell hover:text-ink disabled:opacity-50"
               >
-                Cancel the room
+                {tr("Cancel the room")}
               </button>
             )}
 
@@ -273,14 +275,14 @@ export function AssignRoom({
                     onClick={() => place(upgrade.roomId, true)}
                     className="rounded bg-warn px-1.5 py-0.5 text-[11px] font-medium text-white transition hover:brightness-95 disabled:opacity-50"
                   >
-                    Confirm the upgrade
+                    {tr("Confirm the upgrade")}
                   </button>
                   <button
                     type="button"
                     onClick={() => setUpgrade(null)}
                     className="rounded border border-line bg-white px-1.5 py-0.5 text-[11px] text-ink-muted transition hover:bg-shell"
                   >
-                    Cancel
+                    {tr("Cancel")}
                   </button>
                 </span>
               </span>

@@ -1,5 +1,6 @@
 "use client";
 
+import { useT } from "@/components/i18n";
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -32,6 +33,7 @@ export function NoteForm({
   /** Front office writes; everyone else reads. Postgres decides either way. */
   canEdit: boolean;
 }) {
+  const tr = useT();
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -82,14 +84,14 @@ export function NoteForm({
                       }
                       className="rounded-md bg-chrome-800 px-3 py-1.5 text-[12.5px] font-medium text-white hover:bg-chrome-900 disabled:opacity-50"
                     >
-                      Save
+                      {tr("Save")}
                     </button>
                     <button
                       type="button"
                       onClick={() => setEditing(null)}
                       className="rounded-md border border-line px-3 py-1.5 text-[12.5px] text-ink-muted hover:bg-white hover:text-ink"
                     >
-                      Cancel
+                      {tr("Cancel")}
                     </button>
                   </div>
                 </div>
@@ -100,7 +102,7 @@ export function NoteForm({
                   </p>
                   <div className="mt-1.5 flex items-center justify-between gap-3">
                     <span className="text-xxs text-ink-faint">
-                      {n.author ?? "Unknown"} ·{" "}
+                      {n.author ?? tr("Unknown")} ·{" "}
                       {formatStampInProperty(n.createdAt, timezone)}
                     </span>
                     {canEdit && (
@@ -113,18 +115,18 @@ export function NoteForm({
                           }}
                           className="text-ink-muted underline-offset-2 hover:text-ink hover:underline"
                         >
-                          Edit
+                          {tr("Edit")}
                         </button>
                         <button
                           type="button"
                           disabled={pending}
                           onClick={() => {
-                            if (!confirm("Delete this note?")) return;
+                            if (!confirm(tr("Delete this note?"))) return;
                             run(() => deleteCalendarNote(n.id), () => {});
                           }}
                           className="text-rose-600 underline-offset-2 hover:underline disabled:opacity-40"
                         >
-                          Delete
+                          {tr("Delete")}
                         </button>
                       </span>
                     )}
@@ -142,7 +144,7 @@ export function NoteForm({
             htmlFor="note-body"
             className="mb-1 block text-xxs font-semibold uppercase tracking-[0.1em] text-ink-faint"
           >
-            Note
+            {tr("Note")}
           </label>
           <textarea
             id="note-body"
@@ -164,7 +166,7 @@ export function NoteForm({
               href={closeHref}
               className="rounded-md border border-line px-4 py-2 text-[13px] text-ink-muted hover:bg-shell hover:text-ink"
             >
-              Cancel
+              {tr("Cancel")}
             </Link>
             <button
               type="button"
@@ -179,20 +181,20 @@ export function NoteForm({
                 "disabled:cursor-not-allowed disabled:opacity-50",
               )}
             >
-              {pending ? "Saving…" : "Save"}
+              {pending ? tr("Saving…") : tr("Save")}
             </button>
           </div>
         </>
       ) : (
         <div className="flex items-center justify-between gap-4">
           <p className="text-[13px] text-ink-muted">
-            Notes are added by front desk, manager and admin accounts.
+            {tr("Notes are added by front desk, manager and admin accounts.")}
           </p>
           <Link
             href={closeHref}
             className="rounded-md border border-line px-4 py-2 text-[13px] text-ink-muted hover:bg-shell hover:text-ink"
           >
-            Close
+            {tr("Close")}
           </Link>
         </div>
       )}

@@ -1,5 +1,6 @@
 "use client";
 
+import { useT } from "@/components/i18n";
 import { useState } from "react";
 import { useCurrency } from "@/components/currency";
 import { formatMoneyInput, parseMoney } from "@/lib/money";
@@ -92,6 +93,7 @@ export function RateCombinations({
   pending: boolean;
   run: Run;
 }) {
+  const tr = useT();
   const currency = useCurrency();
   const [season, setSeason] = useState<string | null>(null);
   const [typeIds, setTypeIds] = useState<string[]>(roomTypes.map((t) => t.id));
@@ -189,7 +191,7 @@ export function RateCombinations({
         {rest.length > 0 && (
           <select aria-label={`Add ${l}`} value="" onChange={(e) => e.target.value && set([...chosen, e.target.value])}
             className="min-w-[4rem] flex-1 border-0 bg-transparent text-[11.5px] text-ink-muted outline-none">
-            <option value="">Add…</option>
+            <option value="">{tr("Add…")}</option>
             {rest.map((a) => (
               <option key={a.id} value={a.id}>{a.name}</option>
             ))}
@@ -201,50 +203,50 @@ export function RateCombinations({
 
   return (
     <section className="rounded border border-line bg-white p-4 shadow-card sm:p-6">
-      <h3 className="border-b border-line pb-1 text-[14px] text-ink">Filters</h3>
+      <h3 className="border-b border-line pb-1 text-[14px] text-ink">{tr("Filters")}</h3>
       <div className="mt-3 grid gap-4 md:grid-cols-[14rem_1fr_1fr]">
         <label className="block text-[11px] text-ink-muted">
-          Season
+          {tr("Season")}
           <select value={season ?? ""} onChange={(e) => setSeason(e.target.value || null)}
             className="mt-1 w-full rounded border border-line bg-white px-2 py-1.5 text-[12.5px] text-ink">
-            <option value="">Default Season</option>
+            <option value="">{tr("Default Season")}</option>
             {seasons.map((s) => (
               <option key={s.id} value={s.id}>{s.name}</option>
             ))}
           </select>
         </label>
         <div className="text-[11px] text-ink-muted">
-          Room types
+          {tr("Room types")}
           <div className="mt-1">
-            {Chips({ all: roomTypes.map((t) => ({ id: t.id, name: t.displayName ?? t.name })), chosen: typeIds, set: setTypeIds, label: "room type" })}
+            {Chips({ all: roomTypes.map((t) => ({ id: t.id, name: t.displayName ?? t.name })), chosen: typeIds, set: setTypeIds, label: tr("room type") })}
           </div>
         </div>
         <div className="text-[11px] text-ink-muted">
-          Rate Categories
+          {tr("Rate Categories")}
           <div className="mt-1">
-            {Chips({ all: ratePlans.map((p) => ({ id: p.id, name: p.name })), chosen: planIds, set: setPlanIds, label: "rate category" })}
+            {Chips({ all: ratePlans.map((p) => ({ id: p.id, name: p.name })), chosen: planIds, set: setPlanIds, label: tr("rate category") })}
           </div>
         </div>
       </div>
 
-      <h3 className="mt-6 border-b border-line pb-1 text-[14px] text-ink">Room Rate Combinations</h3>
+      <h3 className="mt-6 border-b border-line pb-1 text-[14px] text-ink">{tr("Room Rate Combinations")}</h3>
       {shownTypes.length === 0 || shownPlans.length === 0 ? (
-        <p className="mt-3 text-[12.5px] text-ink-muted">Choose at least one room type and one rate category.</p>
+        <p className="mt-3 text-[12.5px] text-ink-muted">{tr("Choose at least one room type and one rate category.")}</p>
       ) : (
         <div className="mt-2 overflow-x-auto">
           <table className="w-full min-w-[64rem] text-[11.5px]">
             <thead>
               <tr>
-                <th className="px-2 py-2 text-left align-bottom text-[12px] font-semibold text-ink">Room types</th>
+                <th className="px-2 py-2 text-left align-bottom text-[12px] font-semibold text-ink">{tr("Room types")}</th>
                 {DAYS.map((d) => (
                   <th key={d} className="px-1 py-2 text-center font-normal text-ink-muted">
                     <span className="block text-[12px] font-semibold text-ink">{d}</span>
-                    <span className="block">Rate</span>
-                    <span className="block text-[9.5px]">MST MSA MXS</span>
-                    <span className="block text-[9.5px]">CTA CTD SS</span>
+                    <span className="block">{tr("Rate")}</span>
+                    <span className="block text-[9.5px]">{tr("MST MSA MXS")}</span>
+                    <span className="block text-[9.5px]">{tr("CTA CTD SS")}</span>
                   </th>
                 ))}
-                <th className="w-20" aria-label="Save" />
+                <th className="w-20" aria-label={tr("Save")} />
               </tr>
             </thead>
             <tbody>
@@ -261,7 +263,7 @@ export function RateCombinations({
                         <td className="px-2 py-2">
                           <p className="text-[12.5px] font-semibold text-ink">{p.name}</p>
                           <p className="text-[11px] text-ink-muted">
-                            Sleeps {t.baseOccupancy}
+                            {tr("Sleeps")}{" "}{t.baseOccupancy}
                             {t.maxOccupancy > t.baseOccupancy ? ` + ${t.maxOccupancy - t.baseOccupancy}` : ""}
                           </p>
                           <p className="text-[11px] text-ink-muted">
@@ -296,7 +298,7 @@ export function RateCombinations({
                           {canEdit && (
                             <button type="button" disabled={pending} onClick={() => save(p, t)}
                               className="rounded-md bg-chrome-800 px-3 py-1.5 text-[11.5px] font-semibold text-white hover:bg-chrome-900 disabled:opacity-50">
-                              Save
+                              {tr("Save")}
                             </button>
                           )}
                           {note && <p className="mt-1 text-[10.5px] text-ink-muted">{note}</p>}

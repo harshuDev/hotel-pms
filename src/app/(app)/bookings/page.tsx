@@ -1,3 +1,4 @@
+import { getT } from "@/lib/i18n/server";
 import Link from "next/link";
 import { format, parseISO } from "date-fns";
 import { EmptyState, PageHeader, StatusBadge, cn } from "@/components/ui";
@@ -34,6 +35,7 @@ export default async function BookingsPage({
 }: {
   searchParams: Promise<{ q?: string; status?: string; page?: string }>;
 }) {
+  const tr = await getT();
   const currency = await getPropertyCurrency();
   const sp = await searchParams;
   const status = sp.status ?? "all";
@@ -53,7 +55,7 @@ export default async function BookingsPage({
   return (
     <div>
       <PageHeader
-        title="Bookings"
+        title={tr("Bookings")}
       />
       <div className="rounded-lg border border-line bg-white p-4 shadow-card">
       <form className="mb-3 flex flex-wrap gap-2">
@@ -61,7 +63,7 @@ export default async function BookingsPage({
           type="search"
           name="q"
           defaultValue={q}
-          placeholder="Search bookings by reservation id, token or invoice number"
+          placeholder={tr("Search bookings by reservation id, token or invoice number")}
           className="min-w-[240px] flex-1 rounded-md border border-line px-3.5 py-2 text-[13px] placeholder:text-ink-faint"
         />
         <select
@@ -76,7 +78,7 @@ export default async function BookingsPage({
           ))}
         </select>
         <button className="rounded-md bg-chrome-800 px-5 py-2 text-[13px] font-medium text-white hover:bg-chrome-900">
-          Search
+          {tr("Search")}
         </button>
       </form>
 
@@ -91,26 +93,26 @@ export default async function BookingsPage({
       */}
       <div className="mb-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-[13px]">
         <span className="text-xxs font-semibold uppercase tracking-[0.1em] text-ink-faint">
-          Today
+          {tr("Today")}
         </span>
         <Link href="/bookings/arrivals" className="text-brass hover:underline">
-          Arrivals
+          {tr("Arrivals")}
         </Link>
         <Link href="/bookings/departures" className="text-brass hover:underline">
-          Departures
+          {tr("Departures")}
         </Link>
         <Link
           href="/bookings?status=checked_in"
           className="text-brass hover:underline"
         >
-          In house
+          {tr("In house")}
         </Link>
       </div>
 
       {rows.length === 0 ? (
         <EmptyState
-          title="No bookings match these filters"
-          hint="Try clearing the search box or setting status back to all."
+          title={tr("No bookings match these filters")}
+          hint={tr("Try clearing the search box or setting status back to all.")}
         />
       ) : (
         <>
@@ -157,7 +159,7 @@ export default async function BookingsPage({
                       {b.channelName}
                       {b.settlement !== "at_property" && (
                         <span className="ml-1.5 rounded bg-slate-100 px-1.5 py-0.5 text-[10px] text-slate-600">
-                          prepaid
+                          {tr("prepaid")}
                         </span>
                       )}
                     </td>
@@ -183,7 +185,7 @@ export default async function BookingsPage({
 
           <div className="mt-3 flex items-center justify-between text-sm text-ink-muted">
             <p>
-              {(page - 1) * perPage + 1}–{Math.min(page * perPage, total)} of{" "}
+              {(page - 1) * perPage + 1}–{Math.min(page * perPage, total)} {tr("of")}{" "}
               {total}
             </p>
             <div className="flex gap-1">
@@ -194,7 +196,7 @@ export default async function BookingsPage({
                   page === 1 && "pointer-events-none opacity-40",
                 )}
               >
-                Previous
+                {tr("Previous")}
               </Link>
               <Link
                 href={href({ page: String(Math.min(pages, page + 1)) })}
@@ -203,7 +205,7 @@ export default async function BookingsPage({
                   page === pages && "pointer-events-none opacity-40",
                 )}
               >
-                Next
+                {tr("Next")}
               </Link>
             </div>
           </div>

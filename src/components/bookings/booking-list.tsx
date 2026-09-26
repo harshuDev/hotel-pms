@@ -1,3 +1,4 @@
+import { getT } from "@/lib/i18n/server";
 import Link from "next/link";
 import { format, parseISO } from "date-fns";
 import { EmptyState, StatusBadge, cn } from "@/components/ui";
@@ -34,6 +35,7 @@ export async function BookingList({
   empty: string;
   hint: string;
 }) {
+  const tr = await getT();
   const currency = await getPropertyCurrency();
   if (rows.length === 0) {
     return (
@@ -108,7 +110,7 @@ export async function BookingList({
                   {b.channelName}
                   {b.settlement !== "at_property" && (
                     <span className="ml-1.5 rounded bg-slate-100 px-1.5 py-0.5 text-[10px] text-slate-600">
-                      prepaid
+                      {tr("prepaid")}
                     </span>
                   )}
                 </td>

@@ -1,5 +1,6 @@
 "use client";
 
+import { useT } from "@/components/i18n";
 import { useState } from "react";
 import { cn } from "@/components/ui";
 import {
@@ -72,6 +73,7 @@ export function Dialog({
   children: React.ReactNode;
   footer: React.ReactNode;
 }) {
+  const tr = useT();
   return (
     <div
       className="fixed inset-0 z-50 flex items-start justify-center bg-ink/40 px-4 pt-[12vh]"
@@ -90,7 +92,7 @@ export function Dialog({
           <button
             type="button"
             onClick={onClose}
-            aria-label="Close"
+            aria-label={tr("Close")}
             className="rounded p-1 text-ink-muted hover:bg-shell hover:text-ink"
           >
             <span aria-hidden="true" className="text-lg leading-none">✕</span>
@@ -143,6 +145,7 @@ export function PaymentTypesPanel({
   pending: boolean;
   run: Run;
 }) {
+  const tr = useT();
   const [draft, setDraft] = useState<PaymentDraft | null>(null);
 
   function save(d: PaymentDraft) {
@@ -162,16 +165,16 @@ export function PaymentTypesPanel({
   return (
     <div className="max-w-4xl">
       <section className={card}>
-        <h2 className="border-b border-line px-4 py-4 text-[19px] text-ink">Payment Types</h2>
+        <h2 className="border-b border-line px-4 py-4 text-[19px] text-ink">{tr("Payment Types")}</h2>
         {methods.length === 0 ? (
-          <p className="px-4 py-6 text-[13px] text-ink-muted">None yet. Add at least cash and card.</p>
+          <p className="px-4 py-6 text-[13px] text-ink-muted">{tr("None yet. Add at least cash and card.")}</p>
         ) : (
           <table className="w-full text-[13.5px]">
             <thead>
               <tr className="border-b border-line">
-                <th className={cn(th, "w-[34%]")}>Title</th>
-                <th className={th}>Description</th>
-                <th className="w-12" aria-label="Edit" />
+                <th className={cn(th, "w-[34%]")}>{tr("Title")}</th>
+                <th className={th}>{tr("Description")}</th>
+                <th className="w-12" aria-label={tr("Edit")} />
               </tr>
             </thead>
             <tbody>
@@ -179,7 +182,7 @@ export function PaymentTypesPanel({
                 <tr key={m.id} className="border-b border-line even:bg-shell/70">
                   <td className={cn("px-2 py-2", m.isActive ? "text-ink" : "text-ink-faint")}>
                     {m.name}
-                    {!m.isActive && <span className="ml-2 text-xxs uppercase tracking-wide">Inactive</span>}
+                    {!m.isActive && <span className="ml-2 text-xxs uppercase tracking-wide">{tr("Inactive")}</span>}
                   </td>
                   <td className="px-2 py-2 text-ink-muted">{m.description}</td>
                   <td className="px-2 py-1 text-right">
@@ -224,7 +227,7 @@ export function PaymentTypesPanel({
                 })
               }
             >
-              Add new payment type
+              {tr("Add new payment type")}
             </button>
           </div>
         )}
@@ -232,21 +235,21 @@ export function PaymentTypesPanel({
 
       {draft && (
         <Dialog
-          title={draft.id ? "Edit payment type" : "New payment type"}
+          title={draft.id ? tr("Edit payment type") : tr("New payment type")}
           onClose={() => setDraft(null)}
           footer={
             <>
               <button type="button" className={secondary} onClick={() => setDraft(null)}>
-                Cancel
+                {tr("Cancel")}
               </button>
               <button type="button" className={primary} disabled={pending} onClick={() => save(draft)}>
-                Save
+                {tr("Save")}
               </button>
             </>
           }
         >
           <label className={label}>
-            Title
+            {tr("Title")}
             <input
               autoFocus
               value={draft.title}
@@ -256,7 +259,7 @@ export function PaymentTypesPanel({
             />
           </label>
           <label className={label}>
-            Description
+            {tr("Description")}
             <textarea
               rows={2}
               value={draft.description}
@@ -272,14 +275,14 @@ export function PaymentTypesPanel({
           */}
           {draft.frozen ? (
             <p className="text-[13px] text-ink">
-              <span className={label}>Kind</span>
+              <span className={label}>{tr("Kind")}</span>
               <span className="mt-1 block">
                 {PAYMENT_KINDS.find((k) => k.value === draft.kind)?.label ?? draft.kind}
               </span>
             </p>
           ) : (
             <label className={label}>
-              Kind
+              {tr("Kind")}
               <select
                 value={draft.kind}
                 onChange={(e) => setDraft({ ...draft, kind: e.target.value as PaymentMethodKind })}
@@ -300,7 +303,7 @@ export function PaymentTypesPanel({
               onChange={(e) => setDraft({ ...draft, isActive: e.target.checked })}
               className="h-4 w-4 accent-brass"
             />
-            Active
+            {tr("Active")}
           </label>
         </Dialog>
       )}
@@ -338,6 +341,7 @@ export function TaxesPanel({
   pending: boolean;
   run: Run;
 }) {
+  const tr = useT();
   const [draft, setDraft] = useState<TaxDraft | null>(null);
   const [order, setOrder] = useState<string[]>(taxRates.map((t) => t.id));
   const [dragging, setDragging] = useState<string | null>(null);
@@ -350,7 +354,7 @@ export function TaxesPanel({
   function commit(next: string[]) {
     if (next.join() === order.join()) return;
     setOrder(next);
-    run(() => setTaxRateOrder(next), "Order saved.");
+    run(() => setTaxRateOrder(next), tr("Order saved."));
   }
 
   function move(id: string, to: number) {
@@ -379,19 +383,19 @@ export function TaxesPanel({
   return (
     <div className="max-w-4xl">
       <section className={card}>
-        <h2 className="border-b border-line px-4 py-4 text-[19px] text-ink">Taxes And Fees</h2>
+        <h2 className="border-b border-line px-4 py-4 text-[19px] text-ink">{tr("Taxes And Fees")}</h2>
         {rows.length === 0 ? (
-          <p className="px-4 py-6 text-[13px] text-ink-muted">None yet. Without one, charges post with no tax.</p>
+          <p className="px-4 py-6 text-[13px] text-ink-muted">{tr("None yet. Without one, charges post with no tax.")}</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full min-w-[34rem] text-[13.5px]">
               <thead>
                 <tr className="border-b border-line">
-                  <th className={cn(th, "w-[32%]")}>Name</th>
-                  <th className={th}>Type</th>
-                  <th className={th}>Value</th>
-                  <th className={th}>Applicable</th>
-                  <th className="w-24" aria-label="Actions" />
+                  <th className={cn(th, "w-[32%]")}>{tr("Name")}</th>
+                  <th className={th}>{tr("Type")}</th>
+                  <th className={th}>{tr("Value")}</th>
+                  <th className={th}>{tr("Applicable")}</th>
+                  <th className="w-24" aria-label={tr("Actions")} />
                 </tr>
               </thead>
               <tbody>
@@ -446,10 +450,10 @@ export function TaxesPanel({
                         {t.name}
                       </span>
                     </td>
-                    <td className="px-2 py-1.5">Tax</td>
+                    <td className="px-2 py-1.5">{tr("Tax")}</td>
                     <td className="tnum px-2 py-1.5">{percentOf(t.rateBps)}</td>
                     <td className="px-2 py-1.5">
-                      {!t.isActive ? "Retired" : t.id === defaultId ? "By default" : "When chosen"}
+                      {!t.isActive ? tr("Retired") : t.id === defaultId ? tr("By default") : tr("When chosen")}
                     </td>
                     <td className="px-2 py-1">
                       {canEdit && (
@@ -512,7 +516,7 @@ export function TaxesPanel({
                 })
               }
             >
-              Add tax
+              {tr("Add tax")}
             </button>
           </div>
         )}
@@ -520,21 +524,21 @@ export function TaxesPanel({
 
       {draft && (
         <Dialog
-          title={draft.id ? "Edit tax" : "New tax"}
+          title={draft.id ? tr("Edit tax") : tr("New tax")}
           onClose={() => setDraft(null)}
           footer={
             <>
               <button type="button" className={secondary} onClick={() => setDraft(null)}>
-                Cancel
+                {tr("Cancel")}
               </button>
               <button type="button" className={primary} disabled={pending} onClick={() => save(draft)}>
-                Save
+                {tr("Save")}
               </button>
             </>
           }
         >
           <label className={label}>
-            Name
+            {tr("Name")}
             <input
               autoFocus
               value={draft.name}
@@ -551,23 +555,23 @@ export function TaxesPanel({
           {draft.frozen ? (
             <div className="grid grid-cols-2 gap-4 text-[14px] text-ink">
               <p>
-                <span className={label}>Value</span>
+                <span className={label}>{tr("Value")}</span>
                 <span className="tnum mt-1 block">{draft.percent}%</span>
               </p>
               <p>
-                <span className={label}>Quoted</span>
+                <span className={label}>{tr("Quoted")}</span>
                 <span className="mt-1 block">
-                  {draft.inclusion === "inclusive" ? "Included in the rate" : "On top of the rate"}
+                  {draft.inclusion === "inclusive" ? tr("Included in the rate") : tr("On top of the rate")}
                 </span>
               </p>
               <p className="col-span-2 text-[12.5px] text-ink-muted">
-                Charges have been posted at this rate, so its value is fixed.
+                {tr("Charges have been posted at this rate, so its value is fixed.")}
               </p>
             </div>
           ) : (
             <div className="grid grid-cols-2 gap-4">
               <label className={label}>
-                Value %
+                {tr("Value %")}
                 <input
                   inputMode="decimal"
                   value={draft.percent}
@@ -576,7 +580,7 @@ export function TaxesPanel({
                 />
               </label>
               <label className={label}>
-                Quoted
+                {tr("Quoted")}
                 <select
                   value={draft.inclusion}
                   onChange={(e) =>
@@ -584,8 +588,8 @@ export function TaxesPanel({
                   }
                   className={field}
                 >
-                  <option value="inclusive">Included in the rate</option>
-                  <option value="exclusive">On top of the rate</option>
+                  <option value="inclusive">{tr("Included in the rate")}</option>
+                  <option value="exclusive">{tr("On top of the rate")}</option>
                 </select>
               </label>
             </div>
@@ -597,7 +601,7 @@ export function TaxesPanel({
               onChange={(e) => setDraft({ ...draft, isActive: e.target.checked })}
               className="h-4 w-4 accent-brass"
             />
-            Active
+            {tr("Active")}
           </label>
         </Dialog>
       )}

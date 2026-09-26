@@ -1,3 +1,4 @@
+import { getT } from "@/lib/i18n/server";
 import { format, parseISO } from "date-fns";
 import { EmptyState, cn } from "@/components/ui";
 import {
@@ -24,6 +25,7 @@ export default async function MealReportPage({
 }: {
   searchParams: Promise<{ from?: string; to?: string }>;
 }) {
+  const tr = await getT();
   const sp = await searchParams;
   const businessDate = await getBusinessDate();
   const range = reportRange(businessDate, sp.from, sp.to);
@@ -48,7 +50,7 @@ export default async function MealReportPage({
 
   return (
     <ReportShell
-      title="Meals"
+      title={tr("Meals")}
       action="/reports/meal"
       range={range}
     >
@@ -59,7 +61,7 @@ export default async function MealReportPage({
               key={t.meal}
               label={MEAL_LABEL[t.meal]}
               value={String(t.covers)}
-              detail="covers in this range"
+              detail={tr("covers in this range")}
               emphasis={i === 0}
             />
           ))}
@@ -69,8 +71,8 @@ export default async function MealReportPage({
       <div className="rounded-lg border border-line bg-white p-4 shadow-card">
         {byDate.size === 0 ? (
           <EmptyState
-            title="No meals to cater for in this range"
-            hint="Meals come from the rate plan a stay was sold on. Set what a plan includes on the Inventory screen, under the rate plan."
+            title={tr("No meals to cater for in this range")}
+            hint={tr("Meals come from the rate plan a stay was sold on. Set what a plan includes on the Inventory screen, under the rate plan.")}
           />
         ) : (
           <div className="overflow-x-auto">

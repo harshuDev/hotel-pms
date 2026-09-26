@@ -1,10 +1,12 @@
 "use client";
 
+import { useT } from "@/components/i18n";
 import { FormEvent, useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 
 export default function ForgotPasswordPage() {
+  const tr = useT();
   const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);
   const [error, setError] = useState("");
@@ -43,13 +45,13 @@ export default function ForgotPasswordPage() {
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
           <p className="text-xxs font-semibold uppercase tracking-[0.18em] text-brass">
-            Hotel Operations
+            {tr("Hotel Operations")}
           </p>
           <h1 className="mt-3 font-display text-[28px] font-semibold tracking-tightest text-ink">
-            Reset your password
+            {tr("Reset your password")}
           </h1>
           <p className="mt-2 text-[13px] text-ink-muted">
-            We will email you a link to set a new one
+            {tr("We will email you a link to set a new one")}
           </p>
         </div>
 
@@ -60,20 +62,16 @@ export default function ForgotPasswordPage() {
                 role="status"
                 className="rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2.5 text-xs leading-relaxed text-emerald-800"
               >
-                If {email.trim()} belongs to a staff account, a link to set a
-                new password is on its way. It expires in an hour, and it only
-                works once.
+                {tr("If")}{" "}{email.trim()} {tr("belongs to a staff account, a link to set a new password is on its way. It expires in an hour, and it only works once.")}
               </div>
               <p className="text-xs leading-relaxed text-ink-muted">
-                Nothing arrived? Check the spam folder, then try again. If the
-                address was wrong, an administrator can tell you which one the
-                account uses.
+                {tr("Nothing arrived? Check the spam folder, then try again. If the address was wrong, an administrator can tell you which one the account uses.")}
               </p>
               <Link
                 href="/login"
                 className="block w-full rounded-md border border-line px-4 py-2.5 text-center text-sm font-medium text-ink-muted transition hover:bg-shell hover:text-ink"
               >
-                Back to sign in
+                {tr("Back to sign in")}
               </Link>
             </div>
           ) : (
@@ -83,7 +81,7 @@ export default function ForgotPasswordPage() {
                   htmlFor="email"
                   className="mb-1.5 block text-xs font-medium text-ink"
                 >
-                  Email
+                  {tr("Email")}
                 </label>
                 <input
                   id="email"
@@ -95,10 +93,10 @@ export default function ForgotPasswordPage() {
                   value={email}
                   onChange={(event) => setEmail(event.target.value)}
                   className="w-full rounded-md border border-line bg-white px-3 py-2.5 text-sm text-ink outline-none transition focus:border-brass focus:ring-2 focus:ring-brass/20"
-                  placeholder="you@example.com"
+                  placeholder={tr("you@example.com")}
                 />
                 <p className="mt-1.5 text-xxs leading-relaxed text-ink-faint">
-                  The address your staff account was set up with.
+                  {tr("The address your staff account was set up with.")}
                 </p>
               </div>
 
@@ -116,21 +114,21 @@ export default function ForgotPasswordPage() {
                 disabled={loading}
                 className="w-full rounded-md bg-ink px-4 py-2.5 text-sm font-medium text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                {loading ? "Sending…" : "Send the link"}
+                {loading ? tr("Sending…") : tr("Send the link")}
               </button>
 
               <Link
                 href="/login"
                 className="block text-center text-xs text-ink-muted underline-offset-2 transition hover:text-ink hover:underline"
               >
-                Back to sign in
+                {tr("Back to sign in")}
               </Link>
             </form>
           )}
         </section>
 
         <p className="mt-5 text-center text-xxs text-ink-faint">
-          Secure property access
+          {tr("Secure property access")}
         </p>
       </div>
     </main>

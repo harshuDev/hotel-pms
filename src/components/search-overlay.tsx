@@ -1,5 +1,6 @@
 "use client";
 
+import { useT } from "@/components/i18n";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { cn } from "@/components/ui";
@@ -40,6 +41,7 @@ function hrefFor(hit: SearchHit) {
 }
 
 export function SearchOverlay({ onClose }: { onClose: () => void }) {
+  const tr = useT();
   const router = useRouter();
   const [term, setTerm] = useState("");
   const [hits, setHits] = useState<SearchHit[]>([]);
@@ -132,7 +134,7 @@ export function SearchOverlay({ onClose }: { onClose: () => void }) {
         ref={panelRef}
         role="dialog"
         aria-modal="true"
-        aria-label="Search"
+        aria-label={tr("Search")}
         className="w-full max-w-xl overflow-hidden rounded-lg border border-line bg-white shadow-lift"
       >
         <div className="flex items-center gap-2.5 border-b border-line px-4">
@@ -153,11 +155,11 @@ export function SearchOverlay({ onClose }: { onClose: () => void }) {
             value={term}
             onChange={(e) => setTerm(e.target.value)}
             onKeyDown={onKeyDown}
-            placeholder="Booking reference, guest name or room number"
-            aria-label="Search bookings, guests and rooms"
+            placeholder={tr("Booking reference, guest name or room number")}
+            aria-label={tr("Search bookings, guests and rooms")}
             className="w-full bg-transparent py-3.5 text-[14px] text-ink outline-none placeholder:text-ink-faint"
           />
-          {busy && <span className="shrink-0 text-xxs text-ink-faint">Searching…</span>}
+          {busy && <span className="shrink-0 text-xxs text-ink-faint">{tr("Searching…")}</span>}
         </div>
 
         {groups.length > 0 && (
@@ -208,21 +210,20 @@ export function SearchOverlay({ onClose }: { onClose: () => void }) {
 
         {showEmpty && (
           <p className="px-4 py-6 text-center text-[13px] text-ink-muted">
-            Nothing matches “{term.trim()}”. Search covers booking references,
-            guest names and room numbers.
+            {tr("Nothing matches “")}{term.trim()}{tr("”. Search covers booking references, guest names and room numbers.")}
           </p>
         )}
 
         {term.trim().length < 2 && (
           <p className="px-4 py-6 text-center text-[13px] text-ink-faint">
-            Type at least two characters.
+            {tr("Type at least two characters.")}
           </p>
         )}
 
         <div className="flex items-center gap-3 border-t border-line bg-shell/60 px-4 py-2 text-xxs text-ink-faint">
-          <span>↑↓ to move</span>
-          <span>↵ to open</span>
-          <span>Esc to close</span>
+          <span>{tr("↑↓ to move")}</span>
+          <span>{tr("↵ to open")}</span>
+          <span>{tr("Esc to close")}</span>
         </div>
       </div>
     </div>

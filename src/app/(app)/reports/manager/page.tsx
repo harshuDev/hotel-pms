@@ -1,3 +1,4 @@
+import { getT } from "@/lib/i18n/server";
 import { format, parseISO } from "date-fns";
 import {
   ReportFigure,
@@ -27,6 +28,7 @@ export default async function ManagerReportPage({
 }: {
   searchParams: Promise<{ from?: string; to?: string }>;
 }) {
+  const tr = await getT();
   const currency = await getPropertyCurrency();
   const sp = await searchParams;
   const businessDate = await getBusinessDate();
@@ -38,7 +40,7 @@ export default async function ManagerReportPage({
   } catch (error) {
     if (error instanceof ReportAccessError) {
       return (
-        <ReportShell title="Manager">
+        <ReportShell title={tr("Manager")}>
           <ReportNoAccess />
         </ReportShell>
       );
@@ -68,25 +70,25 @@ export default async function ManagerReportPage({
 
   return (
     <ReportShell
-      title="Manager"
+      title={tr("Manager")}
       action="/reports/manager"
       range={range}
     >
       <ReportFigures>
         <ReportFigure
-          label="Occupancy"
+          label={tr("Occupancy")}
           value={`${occupancy}%`}
           detail={`${roomsSold} of ${sellable * nights} room nights`}
           emphasis
         />
-        <ReportFigure label="ADR" value={formatMoneyShort(adr, currency)} detail="Per room sold" />
+        <ReportFigure label={tr("ADR")} value={formatMoneyShort(adr, currency)} detail={tr("Per room sold")} />
         <ReportFigure
-          label="RevPAR"
+          label={tr("RevPAR")}
           value={formatMoneyShort(revpar, currency)}
-          detail="Per room available"
+          detail={tr("Per room available")}
         />
         <ReportFigure
-          label="Revenue"
+          label={tr("Revenue")}
           value={formatMoneyShort(totalRevenue, currency)}
           detail={`${formatMoneyShort(roomRevenue, currency)} rooms, ${formatMoneyShort(otherRevenue, currency)} other`}
         />
@@ -96,12 +98,12 @@ export default async function ManagerReportPage({
         rows={rows}
         rowKey={(r) => r.businessDate}
         minWidth="980px"
-        emptyTitle="Nothing happened in this range"
-        emptyHint="Pick a range that covers dates the hotel has traded."
+        emptyTitle={tr("Nothing happened in this range")}
+        emptyHint={tr("Pick a range that covers dates the hotel has traded.")}
         footLabel={`${nights} night${nights === 1 ? "" : "s"}`}
         columns={[
           {
-            header: "Date",
+            header: tr("Date"),
             cell: (r) => (
               <span className="whitespace-nowrap font-medium text-ink">
                 {format(parseISO(r.businessDate), "EEE d MMM")}
@@ -109,43 +111,43 @@ export default async function ManagerReportPage({
             ),
           },
           {
-            header: "Sold",
+            header: tr("Sold"),
             align: "right",
             cell: (r) => <span className="tnum text-ink-muted">{r.roomsSold}</span>,
             foot: String(roomsSold),
           },
           {
-            header: "Occ",
+            header: tr("Occ"),
             align: "right",
             cell: (r) => <span className="tnum text-ink-muted">{r.occupancyPct}%</span>,
             foot: `${occupancy}%`,
           },
           {
-            header: "ADR",
+            header: tr("ADR"),
             align: "right",
             cell: (r) => <span className="tnum text-ink-muted">{formatMoney(r.adrCents, currency)}</span>,
             foot: formatMoney(adr, currency),
           },
           {
-            header: "RevPAR",
+            header: tr("RevPAR"),
             align: "right",
             cell: (r) => <span className="tnum text-ink-muted">{formatMoney(r.revparCents, currency)}</span>,
             foot: formatMoney(revpar, currency),
           },
           {
-            header: "Rooms",
+            header: tr("Rooms"),
             align: "right",
             cell: (r) => <span className="tnum text-ink-muted">{formatMoney(r.roomRevenueCents, currency)}</span>,
             foot: formatMoney(roomRevenue, currency),
           },
           {
-            header: "Other",
+            header: tr("Other"),
             align: "right",
             cell: (r) => <span className="tnum text-ink-faint">{formatMoney(r.otherRevenueCents, currency)}</span>,
             foot: formatMoney(otherRevenue, currency),
           },
           {
-            header: "Total",
+            header: tr("Total"),
             align: "right",
             cell: (r) => (
               <span className="tnum font-medium text-ink">
@@ -155,13 +157,13 @@ export default async function ManagerReportPage({
             foot: formatMoney(totalRevenue, currency),
           },
           {
-            header: "Collected",
+            header: tr("Collected"),
             align: "right",
             cell: (r) => <span className="tnum text-ink-muted">{formatMoney(r.paymentsCents, currency)}</span>,
             foot: formatMoney(payments, currency),
           },
           {
-            header: "In / out",
+            header: tr("In / out"),
             align: "right",
             cell: (r) => (
               <span className="tnum text-ink-faint">

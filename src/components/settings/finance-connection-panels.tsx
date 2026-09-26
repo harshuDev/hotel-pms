@@ -1,5 +1,6 @@
 "use client";
 
+import { useT } from "@/components/i18n";
 import { useState } from "react";
 import { cn } from "@/components/ui";
 import { EditIcon } from "@/components/settings/finance-panels";
@@ -78,6 +79,7 @@ function FormFrame({
   onSave: () => void;
   children: React.ReactNode;
 }) {
+  const tr = useT();
   return (
     <form
       className="mt-4 rounded border border-line p-4"
@@ -90,10 +92,10 @@ function FormFrame({
       {children}
       <div className="mt-5 flex justify-end gap-3">
         <button type="button" className={secondary} onClick={onCancel}>
-          Cancel
+          {tr("Cancel")}
         </button>
         <button type="submit" className={primary} disabled={pending}>
-          Save
+          {tr("Save")}
         </button>
       </div>
     </form>
@@ -117,6 +119,7 @@ export function PaymentGatewaysPanel({
   pending: boolean;
   run: Run;
 }) {
+  const tr = useT();
   const [draft, setDraft] = useState<GatewayDraft | null>(null);
 
   function save(d: GatewayDraft) {
@@ -129,16 +132,16 @@ export function PaymentGatewaysPanel({
 
   return (
     <div className="max-w-5xl space-y-2">
-      <PageHeading title="Payment Gateways" />
+      <PageHeading title={tr("Payment Gateways")} />
       <section className={cn(card, "px-4 pb-6 pt-6 sm:px-8")}>
         {gateways.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="w-full min-w-[30rem] text-[13px]">
               <thead>
                 <tr className="border-b border-line">
-                  <th className={cn(th, "w-[70%]")}>Title</th>
-                  <th className={th}>Is Default</th>
-                  <th className="w-20" aria-label="Actions" />
+                  <th className={cn(th, "w-[70%]")}>{tr("Title")}</th>
+                  <th className={th}>{tr("Is Default")}</th>
+                  <th className="w-20" aria-label={tr("Actions")} />
                 </tr>
               </thead>
               <tbody>
@@ -148,7 +151,7 @@ export function PaymentGatewaysPanel({
                     className={cn("border-b border-line", draft?.id === g.id && "bg-shell/70")}
                   >
                     <td className="px-1.5 py-1.5 text-ink">{g.title}</td>
-                    <td className="px-1.5 py-1.5">{g.isDefault ? <Tick label="Default" /> : null}</td>
+                    <td className="px-1.5 py-1.5">{g.isDefault ? <Tick label={tr("Default")} /> : null}</td>
                     <td className="py-0.5">
                       {canEdit && (
                         <span className="flex justify-end">
@@ -192,20 +195,20 @@ export function PaymentGatewaysPanel({
           </div>
         ) : (
           <p className="pb-2 text-center text-[13px] text-ink">
-            You do not have any payment gateways added
+            {tr("You do not have any payment gateways added")}
           </p>
         )}
 
         {draft && (
           <FormFrame
-            title={draft.id ? "Edit Gateway" : "Add Gateway"}
+            title={draft.id ? tr("Edit Gateway") : tr("Add Gateway")}
             pending={pending}
             onCancel={() => setDraft(null)}
             onSave={() => save(draft)}
           >
             <div className="mt-4 grid items-end gap-6 sm:grid-cols-3">
               <select
-                aria-label="Gateway"
+                aria-label={tr("Gateway")}
                 value={draft.provider}
                 onChange={(e) => {
                   const provider = e.target.value;
@@ -218,7 +221,7 @@ export function PaymentGatewaysPanel({
                 }}
                 className={cn(line, "cursor-pointer", draft.provider === "" && "text-ink-muted")}
               >
-                <option value="">Gateway</option>
+                <option value="">{tr("Gateway")}</option>
                 {PAYMENT_GATEWAYS.map((p) => (
                   <option key={p.id} value={p.id} className="text-ink">
                     {p.label}
@@ -226,8 +229,8 @@ export function PaymentGatewaysPanel({
                 ))}
               </select>
               <input
-                aria-label="Title"
-                placeholder="Title"
+                aria-label={tr("Title")}
+                placeholder={tr("Title")}
                 value={draft.title}
                 maxLength={80}
                 onChange={(e) => setDraft({ ...draft, title: e.target.value })}
@@ -240,7 +243,7 @@ export function PaymentGatewaysPanel({
                   onChange={(e) => setDraft({ ...draft, isDefault: e.target.checked })}
                   className={tickbox}
                 />
-                Default
+                {tr("Default")}
               </label>
             </div>
           </FormFrame>
@@ -254,7 +257,7 @@ export function PaymentGatewaysPanel({
               setDraft({ id: null, provider: "", title: "", isDefault: gateways.length === 0 })
             }
           >
-            Add gateway
+            {tr("Add gateway")}
           </button>
         )}
       </section>
@@ -279,6 +282,7 @@ export function AccountingSystemsPanel({
   pending: boolean;
   run: Run;
 }) {
+  const tr = useT();
   const [draft, setDraft] = useState<SystemDraft | null>(null);
   // One row per system: a new one is offered only the systems not yet added.
   const taken = new Set(systems.filter((s) => s.id !== draft?.id).map((s) => s.provider));
@@ -294,16 +298,16 @@ export function AccountingSystemsPanel({
 
   return (
     <div className="max-w-5xl space-y-2">
-      <PageHeading title="Accounting Systems" />
+      <PageHeading title={tr("Accounting Systems")} />
       <section className={cn(card, "px-4 pb-6 pt-6 sm:px-8")}>
         {systems.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="w-full min-w-[30rem] text-[13px]">
               <thead>
                 <tr className="border-b border-line">
-                  <th className={cn(th, "w-[70%]")}>System</th>
-                  <th className={th}>Is Enabled</th>
-                  <th className="w-20" aria-label="Actions" />
+                  <th className={cn(th, "w-[70%]")}>{tr("System")}</th>
+                  <th className={th}>{tr("Is Enabled")}</th>
+                  <th className="w-20" aria-label={tr("Actions")} />
                 </tr>
               </thead>
               <tbody>
@@ -315,7 +319,7 @@ export function AccountingSystemsPanel({
                       className={cn("border-b border-line", draft?.id === s.id && "bg-shell/70")}
                     >
                       <td className="px-1.5 py-1.5 text-ink">{label}</td>
-                      <td className="px-1.5 py-1.5">{s.isEnabled ? <Tick label="Enabled" /> : null}</td>
+                      <td className="px-1.5 py-1.5">{s.isEnabled ? <Tick label={tr("Enabled")} /> : null}</td>
                       <td className="py-0.5">
                         {canEdit && (
                           <span className="flex justify-end">
@@ -355,25 +359,25 @@ export function AccountingSystemsPanel({
           </div>
         ) : (
           <p className="pb-2 text-center text-[13px] text-ink">
-            You do not have any accounting systems connected
+            {tr("You do not have any accounting systems connected")}
           </p>
         )}
 
         {draft && (
           <FormFrame
-            title={draft.id ? "Edit Accounting System" : "Add Accounting System"}
+            title={draft.id ? tr("Edit Accounting System") : tr("Add Accounting System")}
             pending={pending}
             onCancel={() => setDraft(null)}
             onSave={() => save(draft)}
           >
             <div className="mt-4 grid items-end gap-6 sm:grid-cols-2">
               <select
-                aria-label="System"
+                aria-label={tr("System")}
                 value={draft.provider}
                 onChange={(e) => setDraft({ ...draft, provider: e.target.value })}
                 className={cn(line, "cursor-pointer", draft.provider === "" && "text-ink-muted")}
               >
-                <option value="">System</option>
+                <option value="">{tr("System")}</option>
                 {free.map((s) => (
                   <option key={s.id} value={s.id} className="text-ink">
                     {s.label}
@@ -387,7 +391,7 @@ export function AccountingSystemsPanel({
                   onChange={(e) => setDraft({ ...draft, isEnabled: e.target.checked })}
                   className={tickbox}
                 />
-                Enabled
+                {tr("Enabled")}
               </label>
             </div>
           </FormFrame>
@@ -399,7 +403,7 @@ export function AccountingSystemsPanel({
             className={cn(primary, "mt-3")}
             onClick={() => setDraft({ id: null, provider: "", isEnabled: true })}
           >
-            Add accounting system
+            {tr("Add accounting system")}
           </button>
         )}
       </section>

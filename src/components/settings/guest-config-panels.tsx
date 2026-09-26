@@ -1,5 +1,6 @@
 "use client";
 
+import { useT } from "@/components/i18n";
 import { Fragment, useState } from "react";
 import { cn } from "@/components/ui";
 import {
@@ -69,6 +70,7 @@ export function RegistrationFormPanel({
   pending: boolean;
   run: Run;
 }) {
+  const tr = useT();
   const [draft, setDraft] = useState({
     question1: form.question1 ?? "",
     question2: form.question2 ?? "",
@@ -80,22 +82,22 @@ export function RegistrationFormPanel({
   return (
     <div className="max-w-4xl space-y-4">
       <h2 className="font-display text-[26px] font-semibold tracking-tightest text-ink">
-        Guest Registration Form Settings
+        {tr("Guest Registration Form Settings")}
       </h2>
       <div className={cn(card, "px-6 py-8 sm:px-10")}>
         <div className="space-y-4">
           <div className={row}>
-            <label htmlFor="reg-q1" className={labelCls}>Custom Question 1 Title:</label>
+            <label htmlFor="reg-q1" className={labelCls}>{tr("Custom Question 1 Title:")}</label>
             <textarea id="reg-q1" rows={2} value={draft.question1} disabled={!canEdit}
               onChange={(e) => setDraft({ ...draft, question1: e.target.value })} className={field} />
           </div>
           <div className={row}>
-            <label htmlFor="reg-q2" className={labelCls}>Custom Question 2 Title:</label>
+            <label htmlFor="reg-q2" className={labelCls}>{tr("Custom Question 2 Title:")}</label>
             <textarea id="reg-q2" rows={2} value={draft.question2} disabled={!canEdit}
               onChange={(e) => setDraft({ ...draft, question2: e.target.value })} className={field} />
           </div>
           <div className={row}>
-            <label htmlFor="reg-terms" className={labelCls}>Your Terms and Conditions:</label>
+            <label htmlFor="reg-terms" className={labelCls}>{tr("Your Terms and Conditions:")}</label>
             <textarea id="reg-terms" rows={9} value={draft.terms} disabled={!canEdit}
               onChange={(e) => setDraft({ ...draft, terms: e.target.value })} className={field} />
           </div>
@@ -104,11 +106,11 @@ export function RegistrationFormPanel({
           <div className="mt-7 flex justify-center">
             <button
               type="button"
-              onClick={() => run(() => saveRegistrationForm(draft), "Registration form saved.")}
+              onClick={() => run(() => saveRegistrationForm(draft), tr("Registration form saved."))}
               disabled={pending}
               className={primary}
             >
-              Save
+              {tr("Save")}
             </button>
           </div>
         )}
@@ -130,6 +132,7 @@ export function IdentificationTypesPanel({
   pending: boolean;
   run: Run;
 }) {
+  const tr = useT();
   const [draft, setDraft] = useState<{ id: string | null; title: string } | null>(null);
 
   function save() {
@@ -149,7 +152,7 @@ export function IdentificationTypesPanel({
         <td className="px-5 py-3">
           <input
             autoFocus
-            aria-label="Identification type title"
+            aria-label={tr("Identification type title")}
             value={draft.title}
             onChange={(e) => setDraft({ ...draft, title: e.target.value })}
             onKeyDown={(e) => {
@@ -161,10 +164,10 @@ export function IdentificationTypesPanel({
         </td>
         <td className="whitespace-nowrap px-5 py-3 text-right">
           <button type="button" onClick={() => setDraft(null)} className={cn(secondary, "mr-2")}>
-            Cancel
+            {tr("Cancel")}
           </button>
           <button type="button" onClick={save} disabled={pending} className={primary}>
-            Save
+            {tr("Save")}
           </button>
         </td>
       </tr>
@@ -173,12 +176,12 @@ export function IdentificationTypesPanel({
 
   return (
     <div className={cn(card, "max-w-4xl overflow-hidden")}>
-      <h2 className="border-b border-line px-5 py-5 text-[20px] text-ink">Identification Types</h2>
+      <h2 className="border-b border-line px-5 py-5 text-[20px] text-ink">{tr("Identification Types")}</h2>
       <table className="w-full text-[14px]">
         <thead>
           <tr className="border-b-2 border-line text-left">
-            <th className="px-2 py-3 font-semibold text-ink">Title</th>
-            <th className="w-48 py-3" aria-label="Actions" />
+            <th className="px-2 py-3 font-semibold text-ink">{tr("Title")}</th>
+            <th className="w-48 py-3" aria-label={tr("Actions")} />
           </tr>
         </thead>
         <tbody>
@@ -193,7 +196,7 @@ export function IdentificationTypesPanel({
                     <span className="flex flex-col items-end gap-1">
                       <button
                         type="button"
-                        title="Edit"
+                        title={tr("Edit")}
                         aria-label={`Edit ${t.title}`}
                         onClick={() => setDraft({ id: t.id, title: t.title })}
                         className={iconButton}
@@ -202,7 +205,7 @@ export function IdentificationTypesPanel({
                       </button>
                       <button
                         type="button"
-                        title="Delete"
+                        title={tr("Delete")}
                         aria-label={`Delete ${t.title}`}
                         disabled={pending}
                         onClick={() => {
@@ -223,7 +226,7 @@ export function IdentificationTypesPanel({
           {types.length === 0 && draft === null && (
             <tr>
               <td colSpan={2} className="px-5 py-6 text-center text-[13px] text-ink-muted">
-                None yet. Add Passport, National Identity Card or whatever your guests show.
+                {tr("None yet. Add Passport, National Identity Card or whatever your guests show.")}
               </td>
             </tr>
           )}
@@ -236,7 +239,7 @@ export function IdentificationTypesPanel({
             onClick={() => setDraft({ id: null, title: "" })}
             className={cn(primary, "text-[12.5px] font-semibold uppercase tracking-wide")}
           >
-            Create new identification type
+            {tr("Create new identification type")}
           </button>
         </div>
       )}
@@ -259,6 +262,7 @@ export function GuestDetailsPanel({
   pending: boolean;
   run: Run;
 }) {
+  const tr = useT();
   // A stable React key per row, because a new row has no id until it is saved.
   const [rows, setRows] = useState<FieldDraft[]>(() =>
     fields.map((f) => ({ key: f.id, id: f.id, label: f.label, kind: f.kind })),
@@ -281,16 +285,16 @@ export function GuestDetailsPanel({
     }
     run(
       () => saveGuestFields(rows.map((r) => ({ id: r.id, label: r.label, kind: r.kind }))),
-      "Guest details saved.",
+      tr("Guest details saved."),
     );
   }
 
   return (
     <div className={cn(card, "max-w-4xl overflow-hidden")}>
-      <h2 className="border-b border-line px-5 py-5 text-[20px] text-ink">Guest Details Settings</h2>
+      <h2 className="border-b border-line px-5 py-5 text-[20px] text-ink">{tr("Guest Details Settings")}</h2>
       {rows.length === 0 ? (
         <p className="border-b border-line px-5 py-6 text-center text-[14px] text-ink">
-          You do not have any additional guest fields.
+          {tr("You do not have any additional guest fields.")}
         </p>
       ) : (
         <ul className="divide-y divide-line border-b border-line">
@@ -299,7 +303,7 @@ export function GuestDetailsPanel({
               <span className="tnum w-5 text-[13px] text-ink-faint">{i + 1}</span>
               <input
                 aria-label={`Field ${i + 1} name`}
-                placeholder="Field name"
+                placeholder={tr("Field name")}
                 value={r.label}
                 disabled={!canEdit}
                 onChange={(e) => update(r.key, { label: e.target.value })}
@@ -321,7 +325,7 @@ export function GuestDetailsPanel({
               {canEdit && (
                 <button
                   type="button"
-                  title="Remove"
+                  title={tr("Remove")}
                   aria-label={`Remove ${r.label || `field ${i + 1}`}`}
                   onClick={() => setRows(rows.filter((x) => x.key !== r.key))}
                   className={cn(iconButton, "text-[16px] font-bold leading-none")}
@@ -343,7 +347,7 @@ export function GuestDetailsPanel({
             }}
             className={cn(primary, "px-8 text-[12.5px] font-semibold uppercase tracking-wide")}
           >
-            Add
+            {tr("Add")}
           </button>
           <button
             type="button"
@@ -351,7 +355,7 @@ export function GuestDetailsPanel({
             disabled={pending}
             className={cn(primary, "px-8 text-[12.5px] font-semibold uppercase tracking-wide")}
           >
-            Save
+            {tr("Save")}
           </button>
         </div>
       )}

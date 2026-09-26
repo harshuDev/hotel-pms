@@ -1,3 +1,5 @@
+import { msg } from "@/lib/i18n/translate";
+
 export interface NavItem {
   label: string;
   href: string;
@@ -14,10 +16,10 @@ export interface NavSection {
 }
 
 export const SECTIONS: NavSection[] = [
-  { label: "Dashboard", href: "/dashboard" },
-  { label: "Calendar", href: "/calendar" },
+  { label: msg("Dashboard"), href: "/dashboard" },
+  { label: msg("Calendar"), href: "/calendar" },
   {
-    label: "Inventory",
+    label: msg("Inventory"),
     /*
       Eleven items, matching the client's reference system exactly and in its
       order. "All" is every field on one read-only grid; the other ten each
@@ -29,21 +31,21 @@ export const SECTIONS: NavSection[] = [
       is a click that is always the same click.
     */
     items: [
-      { label: "All", href: "/inventory/all" },
-      { label: "Rates (All)", href: "/inventory/rates-all" },
-      { label: "Rates (Main)", href: "/inventory/rates-main" },
-      { label: "Availability", href: "/inventory/availability" },
-      { label: "Min Stay Through", href: "/inventory/min-stay-through" },
-      { label: "Min Stay Arrival", href: "/inventory/min-stay-arrival" },
-      { label: "Max Stay", href: "/inventory/max-stay" },
-      { label: "Closed to arrival", href: "/inventory/cta" },
-      { label: "Closed to departure", href: "/inventory/ctd" },
-      { label: "Stop Sell", href: "/inventory/stop-sell" },
-      { label: "Close Out", href: "/inventory/close-out" },
+      { label: msg("All"), href: "/inventory/all" },
+      { label: msg("Rates (All)"), href: "/inventory/rates-all" },
+      { label: msg("Rates (Main)"), href: "/inventory/rates-main" },
+      { label: msg("Availability"), href: "/inventory/availability" },
+      { label: msg("Min Stay Through"), href: "/inventory/min-stay-through" },
+      { label: msg("Min Stay Arrival"), href: "/inventory/min-stay-arrival" },
+      { label: msg("Max Stay"), href: "/inventory/max-stay" },
+      { label: msg("Closed to arrival"), href: "/inventory/cta" },
+      { label: msg("Closed to departure"), href: "/inventory/ctd" },
+      { label: msg("Stop Sell"), href: "/inventory/stop-sell" },
+      { label: msg("Close Out"), href: "/inventory/close-out" },
     ],
   },
   {
-    label: "Bookings",
+    label: msg("Bookings"),
     /*
       Three items, matching the client's reference system exactly.
       
@@ -53,14 +55,14 @@ export const SECTIONS: NavSection[] = [
       of the application.
     */
     items: [
-      { label: "Add Simple Booking", href: "/bookings/new" },
-      { label: "Add Group Booking", href: "/bookings/new?group=1" },
-      { label: "Search", href: "/bookings" },
+      { label: msg("Add Simple Booking"), href: "/bookings/new" },
+      { label: msg("Add Group Booking"), href: "/bookings/new?group=1" },
+      { label: msg("Search"), href: "/bookings" },
     ],
   },
-  { label: "Offers", href: "/offers" },
+  { label: msg("Offers"), href: "/offers" },
   {
-    label: "Reports",
+    label: msg("Reports"),
     scroll: true,
     /*
       Twenty-two, matching the reference's list and its order. The first
@@ -69,33 +71,33 @@ export const SECTIONS: NavSection[] = [
       moving between the two systems finds the same item in the same place.
     */
     items: [
-      { label: "Payments Report", href: "/reports/payments" },
-      { label: "Daily Checkout Report", href: "/reports/daily-checkout" },
-      { label: "Booking Report", href: "/reports/booking" },
-      { label: "Cancellation Report", href: "/reports/cancellation" },
-      { label: "Housekeeping Report", href: "/reports/housekeeping" },
-      { label: "Channel Report", href: "/reports/channel" },
-      { label: "Extras Report", href: "/reports/extras" },
-      { label: "Meal Report", href: "/reports/meal" },
-      { label: "Occupancy Report", href: "/reports/occupancy" },
-      { label: "Financial Report", href: "/reports/financial" },
-      { label: "Debtors Report", href: "/reports/debtors" },
-      { label: "In House Report", href: "/reports/in-house" },
-      { label: "Reservations Report", href: "/reports/reservations" },
-      { label: "Manager Report", href: "/reports/manager" },
-      { label: "Folio Report", href: "/reports/folio" },
-      { label: "Immigration Report", href: "/reports/immigration" },
-      { label: "Country Report", href: "/reports/country" },
-      { label: "Deposit Report", href: "/reports/deposit" },
-      { label: "Rate Plan Report", href: "/reports/rate-plan" },
-      { label: "Accounting Report", href: "/reports/accounting" },
-      { label: "End Of Day Report", href: "/reports/end-of-day" },
-      { label: "Booking Waitlist Report", href: "/reports/waitlist" },
+      { label: msg("Payments Report"), href: "/reports/payments" },
+      { label: msg("Daily Checkout Report"), href: "/reports/daily-checkout" },
+      { label: msg("Booking Report"), href: "/reports/booking" },
+      { label: msg("Cancellation Report"), href: "/reports/cancellation" },
+      { label: msg("Housekeeping Report"), href: "/reports/housekeeping" },
+      { label: msg("Channel Report"), href: "/reports/channel" },
+      { label: msg("Extras Report"), href: "/reports/extras" },
+      { label: msg("Meal Report"), href: "/reports/meal" },
+      { label: msg("Occupancy Report"), href: "/reports/occupancy" },
+      { label: msg("Financial Report"), href: "/reports/financial" },
+      { label: msg("Debtors Report"), href: "/reports/debtors" },
+      { label: msg("In House Report"), href: "/reports/in-house" },
+      { label: msg("Reservations Report"), href: "/reports/reservations" },
+      { label: msg("Manager Report"), href: "/reports/manager" },
+      { label: msg("Folio Report"), href: "/reports/folio" },
+      { label: msg("Immigration Report"), href: "/reports/immigration" },
+      { label: msg("Country Report"), href: "/reports/country" },
+      { label: msg("Deposit Report"), href: "/reports/deposit" },
+      { label: msg("Rate Plan Report"), href: "/reports/rate-plan" },
+      { label: msg("Accounting Report"), href: "/reports/accounting" },
+      { label: msg("End Of Day Report"), href: "/reports/end-of-day" },
+      { label: msg("Booking Waitlist Report"), href: "/reports/waitlist" },
     ],
   },
-  { label: "Customers", href: "/customers" },
-  { label: "Cashier", href: "/cashier" },
-  { label: "Meeting Rooms", href: "/meeting-rooms" },
+  { label: msg("Customers"), href: "/customers" },
+  { label: msg("Cashier"), href: "/cashier" },
+  { label: msg("Meeting Rooms"), href: "/meeting-rooms" },
 ];
 
 export function isHrefActive(href: string, pathname: string): boolean {

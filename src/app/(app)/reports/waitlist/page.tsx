@@ -1,3 +1,4 @@
+import { getT } from "@/lib/i18n/server";
 import { ReportShell } from "@/components/reports/report-shell";
 import { ReportNoAccess } from "@/components/reports/report-table";
 import { WaitlistScreen } from "@/components/reports/waitlist-screen";
@@ -37,6 +38,7 @@ export default async function WaitlistReportPage({
 }: {
   searchParams: Promise<{ from?: string; to?: string; status?: string }>;
 }) {
+  const tr = await getT();
   const sp = await searchParams;
   const businessDate = await getBusinessDate();
 
@@ -56,7 +58,7 @@ export default async function WaitlistReportPage({
   } catch (error) {
     if (error instanceof ReportAccessError) {
       return (
-        <ReportShell title="Booking waitlist">
+        <ReportShell title={tr("Booking waitlist")}>
           <ReportNoAccess />
         </ReportShell>
       );
@@ -71,7 +73,7 @@ export default async function WaitlistReportPage({
 
   return (
     <ReportShell
-      title="Booking waitlist"
+      title={tr("Booking waitlist")}
       action="/reports/waitlist"
       range={range}
     >

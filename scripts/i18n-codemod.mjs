@@ -122,8 +122,12 @@ for (const file of process.argv.slice(2)) {
         if (decoded === null) {
           notes.push(`line ${line}: unknown entity in "${core}"`);
         } else {
-          const lead = str.startsWith(" ") ? '{" "}' : "";
-          const trail = str.endsWith(" ") ? '{" "}' : "";
+          // Whitespace that spans a line break means nothing to JSX, so it is
+          // kept exactly as written; a space on the same line is real text.
+          const rawLead = /^\s*/.exec(raw)[0];
+          const rawTrail = /\s*$/.exec(raw)[0];
+          const lead = /\n/.test(rawLead) ? rawLead : str.startsWith(" ") ? '{" "}' : "";
+          const trail = /\n/.test(rawTrail) ? rawTrail : str.endsWith(" ") ? '{" "}' : "";
           edits.push([node.getStart(), node.getEnd(), `${lead}{tr(${JSON.stringify(decoded)})}${trail}`]);
           need(node);
           const siblings = node.parent.children ?? [];

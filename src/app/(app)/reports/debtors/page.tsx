@@ -1,3 +1,4 @@
+import { getT } from "@/lib/i18n/server";
 import { format, parseISO } from "date-fns";
 import { EmptyState, StatusBadge, cn } from "@/components/ui";
 import { ReportShell } from "@/components/reports/report-shell";
@@ -8,19 +9,20 @@ import { getPropertyCurrency } from "@/lib/queries";
 export const metadata = { title: "Debtors report" };
 
 export default async function DebtorsReportPage() {
+  const tr = await getT();
   const currency = await getPropertyCurrency();
   const rows = await getDebtorsReport();
   const total = rows.reduce((sum, r) => sum + r.outstandingCents, 0);
 
   return (
     <ReportShell
-      title="Debtors"
+      title={tr("Debtors")}
     >
       <div className="rounded-lg border border-line bg-white p-4 shadow-card">
         {rows.length === 0 ? (
           <EmptyState
-            title="Nobody owes anything"
-            hint="Every folio with a balance appears here, for room bookings and meeting rooms alike."
+            title={tr("Nobody owes anything")}
+            hint={tr("Every folio with a balance appears here, for room bookings and meeting rooms alike.")}
           />
         ) : (
           <>
@@ -68,7 +70,7 @@ export default async function DebtorsReportPage() {
                               : "bg-shell text-ink-muted ring-line",
                           )}
                         >
-                          {r.kind === "meeting_room" ? "Meeting room" : "Room"}
+                          {r.kind === "meeting_room" ? tr("Meeting room") : tr("Room")}
                         </span>
                       </td>
                       <td className="px-3 py-3">
@@ -102,7 +104,7 @@ export default async function DebtorsReportPage() {
                 <tfoot>
                   <tr className="border-t border-line-strong">
                     <td colSpan={7} className="px-3 pt-3 text-right font-medium text-ink">
-                      {rows.length} booking{rows.length === 1 ? "" : "s"} owing
+                      {rows.length} {tr("booking")}{rows.length === 1 ? "" : "s"} {tr("owing")}
                     </td>
                     <td className="tnum whitespace-nowrap px-3 pt-3 text-right font-semibold text-rose-600">
                       {formatMoney(total, currency)}

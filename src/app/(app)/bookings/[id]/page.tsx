@@ -1,3 +1,5 @@
+import { getT } from "@/lib/i18n/server";
+import type { Translator } from "@/lib/i18n/translate";
 import { notFound } from "next/navigation";
 import { BookingDetailView } from "@/components/bookings/booking-detail";
 import { getCustomerForEdit } from "@/lib/actions/customers";
@@ -33,11 +35,11 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
  * protocol-relative "//evil.example" is a link off this site wearing a path's
  * clothes.
  */
-function backTarget(back: string | undefined) {
+function backTarget(back: string | undefined, tr: Translator) {
   if (back && back.startsWith("/") && !back.startsWith("//")) {
-    return { href: back, label: back.startsWith("/calendar") ? "Calendar" : "Back" };
+    return { href: back, label: back.startsWith("/calendar") ? tr("Calendar") : tr("Back") };
   }
-  return { href: "/bookings", label: "All bookings" };
+  return { href: "/bookings", label: tr("All bookings") };
 }
 
 export default async function BookingPage({
@@ -98,7 +100,7 @@ export default async function BookingPage({
       getEmailTemplates(),
     ]);
 
-  const back = backTarget(sp.back);
+  const back = backTarget(sp.back, await getT());
 
   return (
     <BookingDetailView

@@ -1,3 +1,4 @@
+import { getT } from "@/lib/i18n/server";
 import Link from "next/link";
 import { cn } from "@/components/ui";
 import {
@@ -55,12 +56,13 @@ export default async function HousekeepingReportPage({
 }: {
   searchParams: Promise<{ floor?: string; state?: string; page?: string }>;
 }) {
+  const tr = await getT();
   // Hotel Features (0076): "Enable Housekeeping Feature" is this report, and
   // "... Status Modification ..." is its Mark it column.
   const features = await getHotelFeatures();
   if (!features.housekeeping) {
     return (
-      <ReportShell title="Housekeeping">
+      <ReportShell title={tr("Housekeeping")}>
         <ReportFeatureOff feature="Enable Housekeeping Feature" />
       </ReportShell>
     );
@@ -95,29 +97,29 @@ export default async function HousekeepingReportPage({
 
   return (
     <ReportShell
-      title="Housekeeping"
+      title={tr("Housekeeping")}
       date={businessDate}
     >
       <ReportFigures>
         <ReportFigure
-          label="To clean"
+          label={tr("To clean")}
           value={String(toClean + dueOut)}
           detail={`${toClean} vacant dirty, ${dueOut} due out`}
           emphasis
         />
         <ReportFigure
-          label="Rooms"
+          label={tr("Rooms")}
           value={String(roomCount)}
           detail={`Across ${floors.length} floor${floors.length === 1 ? "" : "s"}`}
         />
         <ReportFigure
-          label="Ready to sell"
+          label={tr("Ready to sell")}
           value={String(total((f) => f.vacantClean))}
         />
         <ReportFigure
-          label="Out of order"
+          label={tr("Out of order")}
           value={String(ooo)}
-          detail={ooo === 0 ? "Every room sellable" : "Not sellable"}
+          detail={ooo === 0 ? tr("Every room sellable") : tr("Not sellable")}
         />
       </ReportFigures>
 
@@ -126,29 +128,29 @@ export default async function HousekeepingReportPage({
           rows={floors}
           rowKey={(f) => String(f.floor ?? "none")}
           minWidth="640px"
-          emptyTitle="No rooms are set up"
-          emptyHint="Add rooms before housekeeping has anything to work from."
+          emptyTitle={tr("No rooms are set up")}
+          emptyHint={tr("Add rooms before housekeeping has anything to work from.")}
           footLabel={`${floors.length} floor${floors.length === 1 ? "" : "s"}`}
           columns={[
             {
-              header: "Floor",
+              header: tr("Floor"),
               cell: (f) => (
                 <Link
                   href={href({ floor: f.floor, state })}
                   className="font-medium text-ink underline-offset-2 hover:underline"
                 >
-                  {f.floor === null ? "Unnumbered" : `Floor ${f.floor}`}
+                  {f.floor === null ? tr("Unnumbered") : `Floor ${f.floor}`}
                 </Link>
               ),
             },
             {
-              header: "Rooms",
+              header: tr("Rooms"),
               align: "right",
               cell: (f) => <span className="text-ink-muted">{f.roomCount}</span>,
               foot: String(roomCount),
             },
             {
-              header: "To clean",
+              header: tr("To clean"),
               align: "right",
               cell: (f) => (
                 <span className={f.vacantDirty > 0 ? "font-medium text-rose-600" : "text-ink-faint"}>
@@ -158,7 +160,7 @@ export default async function HousekeepingReportPage({
               foot: String(toClean),
             },
             {
-              header: "Due out",
+              header: tr("Due out"),
               align: "right",
               cell: (f) => (
                 <span className={f.dueOut > 0 ? "font-medium text-warn-deep" : "text-ink-faint"}>
@@ -168,7 +170,7 @@ export default async function HousekeepingReportPage({
               foot: String(dueOut),
             },
             {
-              header: "Occupied",
+              header: tr("Occupied"),
               align: "right",
               cell: (f) => (
                 <span className="text-ink-muted">{f.occupied || "—"}</span>
@@ -176,7 +178,7 @@ export default async function HousekeepingReportPage({
               foot: String(total((x) => x.occupied)),
             },
             {
-              header: "Arriving",
+              header: tr("Arriving"),
               align: "right",
               cell: (f) => (
                 <span className="text-ink-muted">{f.arriving || "—"}</span>
@@ -184,7 +186,7 @@ export default async function HousekeepingReportPage({
               foot: String(total((x) => x.arriving)),
             },
             {
-              header: "Ready",
+              header: tr("Ready"),
               align: "right",
               cell: (f) => (
                 <span className="text-ink-muted">{f.vacantClean || "—"}</span>
@@ -192,7 +194,7 @@ export default async function HousekeepingReportPage({
               foot: String(total((x) => x.vacantClean)),
             },
             {
-              header: "Out of order",
+              header: tr("Out of order"),
               align: "right",
               cell: (f) => (
                 <span className={f.ooo > 0 ? "text-slate-500" : "text-ink-faint"}>
@@ -215,7 +217,7 @@ export default async function HousekeepingReportPage({
               : "border-line text-ink-muted hover:bg-shell hover:text-ink",
           )}
         >
-          All states
+          {tr("All states")}
         </Link>
         {STATES.map((s) => (
           <Link
@@ -237,7 +239,7 @@ export default async function HousekeepingReportPage({
             href={href({ state })}
             className="ml-1 rounded-md border border-line px-3 py-1.5 text-[13px] text-ink-muted hover:bg-shell hover:text-ink"
           >
-            Floor {floor} ✕
+            {tr("Floor")}{" "}{floor} ✕
           </Link>
         )}
       </div>
@@ -246,8 +248,8 @@ export default async function HousekeepingReportPage({
         rows={rooms.rooms}
         rowKey={(r) => r.roomId}
         minWidth="720px"
-        emptyTitle="No rooms match these filters"
-        emptyHint="Clear the state or floor filter to see the whole house."
+        emptyTitle={tr("No rooms match these filters")}
+        emptyHint={tr("Clear the state or floor filter to see the whole house.")}
         footLabel={
           rooms.totalCount > HOUSEKEEPING_PAGE_SIZE
             ? `${rooms.rooms.length} of ${rooms.totalCount} rooms`
@@ -255,7 +257,7 @@ export default async function HousekeepingReportPage({
         }
         columns={[
           {
-            header: "Room",
+            header: tr("Room"),
             cell: (r) => (
               <>
                 <span className="tnum font-medium text-ink">{r.number}</span>
@@ -264,7 +266,7 @@ export default async function HousekeepingReportPage({
             ),
           },
           {
-            header: "Floor",
+            header: tr("Floor"),
             cell: (r) => (
               <span className="text-ink-muted">
                 {r.floor === null ? "—" : r.floor}
@@ -272,7 +274,7 @@ export default async function HousekeepingReportPage({
             ),
           },
           {
-            header: "State",
+            header: tr("State"),
             cell: (r) => {
               const s = STATES.find((x) => x.value === r.state);
               return (
@@ -284,7 +286,7 @@ export default async function HousekeepingReportPage({
             },
           },
           {
-            header: "Housekeeping",
+            header: tr("Housekeeping"),
             cell: (r) => (
               <span className="text-ink-faint">
                 {r.housekeepingStatus.replace("_", " ")}
@@ -292,13 +294,13 @@ export default async function HousekeepingReportPage({
             ),
           },
           {
-            header: "Guest",
+            header: tr("Guest"),
             cell: (r) => (
               <span className="text-ink-muted">{r.guestName ?? "—"}</span>
             ),
           },
           {
-            header: "Nights left",
+            header: tr("Nights left"),
             align: "right",
             cell: (r) => (
               <span className="text-ink-faint">
@@ -309,7 +311,7 @@ export default async function HousekeepingReportPage({
           ...(canMark
             ? [
                 {
-                  header: "Mark it",
+                  header: tr("Mark it"),
                   cell: (r: HousekeepingRoom) => (
                     <RoomStatusAction roomId={r.roomId} status={r.housekeepingStatus} />
                   ),
@@ -322,7 +324,7 @@ export default async function HousekeepingReportPage({
       {lastPage > 1 && (
         <div className="mt-3 flex items-center justify-between text-[13px]">
           <p className="text-ink-faint">
-            Page {page} of {lastPage}
+            {tr("Page")}{" "}{page} {tr("of")}{" "}{lastPage}
           </p>
           <div className="flex gap-2">
             {page > 1 && (
@@ -330,7 +332,7 @@ export default async function HousekeepingReportPage({
                 href={href({ floor, state, page: page - 1 })}
                 className="rounded-md border border-line px-3 py-1.5 text-ink-muted hover:bg-shell hover:text-ink"
               >
-                Previous
+                {tr("Previous")}
               </Link>
             )}
             {page < lastPage && (
@@ -338,7 +340,7 @@ export default async function HousekeepingReportPage({
                 href={href({ floor, state, page: page + 1 })}
                 className="rounded-md border border-line px-3 py-1.5 text-ink-muted hover:bg-shell hover:text-ink"
               >
-                Next
+                {tr("Next")}
               </Link>
             )}
           </div>

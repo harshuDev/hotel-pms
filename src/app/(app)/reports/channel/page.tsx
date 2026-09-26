@@ -1,3 +1,4 @@
+import { getT } from "@/lib/i18n/server";
 import {
   ReportFigure,
   ReportFigures,
@@ -17,6 +18,7 @@ export default async function ChannelReportPage({
 }: {
   searchParams: Promise<{ from?: string; to?: string }>;
 }) {
+  const tr = await getT();
   const currency = await getPropertyCurrency();
   const sp = await searchParams;
   const businessDate = await getBusinessDate();
@@ -34,30 +36,30 @@ export default async function ChannelReportPage({
 
   return (
     <ReportShell
-      title="Channel"
+      title={tr("Channel")}
       action="/reports/channel"
       range={range}
     >
       <ReportFigures>
         <ReportFigure
-          label="Room revenue"
+          label={tr("Room revenue")}
           value={formatMoneyShort(revenue, currency)}
           detail={`${roomNights} room night${roomNights === 1 ? "" : "s"}`}
         />
         <ReportFigure
-          label="Commission"
+          label={tr("Commission")}
           value={formatMoneyShort(commission, currency)}
-          detail="What the channels are owed"
+          detail={tr("What the channels are owed")}
         />
         <ReportFigure
-          label="Net to the hotel"
+          label={tr("Net to the hotel")}
           value={formatMoneyShort(net, currency)}
           emphasis
         />
         <ReportFigure
-          label="Direct share"
+          label={tr("Direct share")}
           value={revenue > 0 ? `${Math.round((direct / revenue) * 100)}%` : "—"}
-          detail="Revenue booked with no commission"
+          detail={tr("Revenue booked with no commission")}
         />
       </ReportFigures>
 
@@ -65,20 +67,20 @@ export default async function ChannelReportPage({
         rows={rows}
         rowKey={(r) => r.channelName}
         minWidth="820px"
-        emptyTitle="Nothing was stayed in this range"
-        emptyHint="Room nights are counted against the nights stayed, so widen the dates."
+        emptyTitle={tr("Nothing was stayed in this range")}
+        emptyHint={tr("Room nights are counted against the nights stayed, so widen the dates.")}
         footLabel={`${rows.length} channel${rows.length === 1 ? "" : "s"}`}
         columns={[
           {
-            header: "Channel",
+            header: tr("Channel"),
             cell: (r) => <span className="font-medium text-ink">{r.channelName}</span>,
           },
           {
-            header: "Kind",
+            header: tr("Kind"),
             cell: (r) => <span className="text-ink-faint">{r.channelKind ?? "—"}</span>,
           },
           {
-            header: "Rate",
+            header: tr("Rate"),
             align: "right",
             cell: (r) => (
               <span className="text-ink-faint">
@@ -87,24 +89,24 @@ export default async function ChannelReportPage({
             ),
           },
           {
-            header: "Bookings",
+            header: tr("Bookings"),
             align: "right",
             cell: (r) => <span className="text-ink-muted">{r.bookingCount}</span>,
           },
           {
-            header: "Room nights",
+            header: tr("Room nights"),
             align: "right",
             cell: (r) => <span className="text-ink-muted">{r.roomNights}</span>,
             foot: String(roomNights),
           },
           {
-            header: "Room revenue",
+            header: tr("Room revenue"),
             align: "right",
             cell: (r) => <span className="text-ink-muted">{formatMoney(r.roomRevenueCents, currency)}</span>,
             foot: formatMoney(revenue, currency),
           },
           {
-            header: "Commission",
+            header: tr("Commission"),
             align: "right",
             cell: (r) => (
               <span className={r.commissionCents > 0 ? "text-warn-deep" : "text-ink-faint"}>
@@ -114,7 +116,7 @@ export default async function ChannelReportPage({
             foot: formatMoney(commission, currency),
           },
           {
-            header: "Net",
+            header: tr("Net"),
             align: "right",
             cell: (r) => (
               <span className="font-medium text-ink">{formatMoney(r.netRevenueCents, currency)}</span>

@@ -1,4 +1,5 @@
 "use server";
+import { localisedAs } from "@/lib/i18n/localised";
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
@@ -19,7 +20,7 @@ export async function markActivitySeen(): Promise<ActionResult> {
   const { error } = await supabase.rpc("mark_activity_seen");
 
   if (error) {
-    return { ok: false, error: `The feed was not marked read: ${error.message}` };
+    return { ok: false, error: await localisedAs("The feed was not marked read", error.message) };
   }
 
   revalidatePath("/dashboard");

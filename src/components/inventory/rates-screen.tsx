@@ -1,5 +1,6 @@
 "use client";
 
+import { useT } from "@/components/i18n";
 import { Fragment, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -63,6 +64,7 @@ export function RatesScreen({
   from: string;
   canEdit: boolean;
 }) {
+  const tr = useT();
   const currency = useCurrency();
   const router = useRouter();
   const [selected, setSelected] = useState<string[]>([]);
@@ -172,13 +174,11 @@ export function RatesScreen({
   if (groups.length === 0) {
     return (
       <div className="rounded-lg border border-line bg-white p-4 text-[13px] text-ink-muted shadow-card">
-        There are no rate plans yet, so there is nothing to price. Create one
-        under{" "}
+        {tr("There are no rate plans yet, so there is nothing to price. Create one under")}{" "}
         <Link href="/settings?tab=rate-plans" className="underline underline-offset-2">
-          Settings → Rate plans
+          {tr("Settings → Rate plans")}
         </Link>{" "}
-        — a hotel usually has several, like Room Only, Bed and Breakfast and
-        Non-refundable.
+        {tr("— a hotel usually has several, like Room Only, Bed and Breakfast and Non-refundable.")}
       </div>
     );
   }
@@ -204,7 +204,7 @@ export function RatesScreen({
             <thead>
               <tr>
                 <th className="sticky left-0 z-10 bg-white px-3 pb-2.5 text-left text-xxs font-semibold uppercase tracking-[0.1em] text-ink-faint">
-                  Room type / rate
+                  {tr("Room type / rate")}
                 </th>
                 {dates.map((d) => {
                   const day = parseISO(d);
@@ -249,7 +249,7 @@ export function RatesScreen({
                           />
                           <span className="font-medium text-ink">{t.roomTypeName}</span>
                           <span className="text-xxs text-ink-faint">
-                            {t.roomTypeCode} · {plans.length} rate
+                            {t.roomTypeCode} · {plans.length} {tr("rate")}
                             {plans.length === 1 ? "" : "s"}
                           </span>
                         </label>
@@ -272,7 +272,7 @@ export function RatesScreen({
                               />
                               <span className="text-ink">{p.ratePlanName}</span>
                               {p.isDefault && (
-                                <span className="text-xxs text-ink-faint">main</span>
+                                <span className="text-xxs text-ink-faint">{tr("main")}</span>
                               )}
                             </label>
                           </td>
@@ -312,12 +312,9 @@ export function RatesScreen({
         </div>
 
         <p className="mt-4 text-xs leading-relaxed text-ink-faint">
-          A dash means no rate is loaded for that rate on that room type, which
-          is not the same as free — a booking against it is refused. That is also
-          how a room type is taken off a rate: clear the price rather than
-          looking for a switch. Rates are created and renamed under{" "}
+          {tr("A dash means no rate is loaded for that rate on that room type, which is not the same as free — a booking against it is refused. That is also how a room type is taken off a rate: clear the price rather than looking for a switch. Rates are created and renamed under")}{" "}
           <Link href="/settings?tab=rate-plans" className="underline underline-offset-2">
-            Settings → Rate plans
+            {tr("Settings → Rate plans")}
           </Link>
           .
         </p>
@@ -326,11 +323,11 @@ export function RatesScreen({
       {canEdit && (
         <div className="rounded-lg border border-line bg-white p-4 shadow-card">
           <h2 className="mb-3 font-display text-[15px] tracking-tightest text-ink">
-            Set a price
+            {tr("Set a price")}
           </h2>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             <div>
-              <label className={label} htmlFor="r-from">From</label>
+              <label className={label} htmlFor="r-from">{tr("From")}</label>
               <input
                 id="r-from"
                 type="date"
@@ -340,7 +337,7 @@ export function RatesScreen({
               />
             </div>
             <div>
-              <label className={label} htmlFor="r-to">To</label>
+              <label className={label} htmlFor="r-to">{tr("To")}</label>
               <input
                 id="r-to"
                 type="date"
@@ -350,19 +347,19 @@ export function RatesScreen({
               />
             </div>
             <div>
-              <label className={label} htmlFor="r-value">Rate a night</label>
+              <label className={label} htmlFor="r-value">{tr("Rate a night")}</label>
               <input
                 id="r-value"
                 type="text"
                 inputMode="decimal"
                 value={value}
-                placeholder="120.00, or blank to clear"
+                placeholder={tr("120.00, or blank to clear")}
                 onChange={(e) => setValue(e.target.value)}
                 className={cn(field, "tnum")}
               />
             </div>
             <div>
-              <span className={label}>Only these days</span>
+              <span className={label}>{tr("Only these days")}</span>
               <div className="flex gap-1">
                 {DOW.map((d, i) => (
                   <button
@@ -395,11 +392,11 @@ export function RatesScreen({
               disabled={pending || selected.length === 0}
               className="rounded-md bg-chrome-800 px-5 py-2 text-[13px] font-medium text-white hover:bg-chrome-900 disabled:opacity-50"
             >
-              {pending ? "Applying…" : "Apply"}
+              {pending ? tr("Applying…") : tr("Apply")}
             </button>
             <p className="text-xs text-ink-faint">
               {selected.length === 0
-                ? "Tick the rates on the left to apply this to."
+                ? tr("Tick the rates on the left to apply this to.")
                 : `${selected.length} rate${selected.length === 1 ? "" : "s"} selected. Leave the box empty to clear the price and take them off sale.`}
             </p>
           </div>

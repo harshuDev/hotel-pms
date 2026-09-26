@@ -1,5 +1,6 @@
 "use client";
 
+import { useT } from "@/components/i18n";
 import { useMemo, useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -61,6 +62,7 @@ export function InventoryScreen({
    */
   lockedToDefaultPlan?: boolean;
 }) {
+  const tr = useT();
   const currency = useCurrency();
   const spec = SCREENS[fieldName];
   const router = useRouter();
@@ -177,9 +179,9 @@ export function InventoryScreen({
   const selectedPlan = plans.find((p) => p.id === planId) ?? null;
 
   const MEALS: { value: MealType; label: string }[] = [
-    { value: "breakfast", label: "Breakfast" },
-    { value: "lunch", label: "Lunch" },
-    { value: "dinner", label: "Dinner" },
+    { value: "breakfast", label: tr("Breakfast") },
+    { value: "lunch", label: tr("Lunch") },
+    { value: "dinner", label: tr("Dinner") },
   ];
 
   function priceMeal(
@@ -303,19 +305,19 @@ export function InventoryScreen({
         <div className="flex flex-wrap items-end gap-3">
           {spec.needsPlan && (
             <div className="min-w-[200px]">
-              <span className={label}>Rate plan</span>
+              <span className={label}>{tr("Rate plan")}</span>
               {plans.length === 0 ? (
-                <p className="text-[13px] text-ink-muted">None yet</p>
+                <p className="text-[13px] text-ink-muted">{tr("None yet")}</p>
               ) : lockedToDefaultPlan ? (
                 <p className="text-[13px] text-ink">
                   <span className="font-medium">
-                    {plans.find((p) => p.id === planId)?.name ?? "None"}
+                    {plans.find((p) => p.id === planId)?.name ?? tr("None")}
                   </span>
                   <Link
                     href="/inventory/rates-all"
                     className="ml-2 text-xxs text-ink-faint underline underline-offset-2 hover:text-ink"
                   >
-                    all plans
+                    {tr("all plans")}
                   </Link>
                 </p>
               ) : (
@@ -333,10 +335,10 @@ export function InventoryScreen({
                     >
                       {p.name}
                       {p.isDefault && (
-                        <span className="ml-1.5 text-xxs opacity-70">default</span>
+                        <span className="ml-1.5 text-xxs opacity-70">{tr("default")}</span>
                       )}
                       {p.isPublic && (
-                        <span className="ml-1.5 text-xxs opacity-70">published</span>
+                        <span className="ml-1.5 text-xxs opacity-70">{tr("published")}</span>
                       )}
                     </Link>
                   ))}
@@ -352,13 +354,13 @@ export function InventoryScreen({
                     className="mt-0.5"
                   />
                   <span>
-                    Sell this rate on the guest booking page.
+                    {tr("Sell this rate on the guest booking page.")}
                   </span>
                 </label>
               )}
               {selectedPlan && (
                 <div className="mt-3">
-                  <span className={label}>Includes</span>
+                  <span className={label}>{tr("Includes")}</span>
                   <div className="flex flex-col gap-2">
                     {MEALS.map((m) => {
                       const on = selectedPlan.meals.includes(m.value);
@@ -383,7 +385,7 @@ export function InventoryScreen({
                               defaultValue={
                                 value === undefined ? "" : formatMoneyInput(value)
                               }
-                              placeholder="Worth nothing"
+                              placeholder={tr("Worth nothing")}
                               disabled={pending}
                               aria-label={`What ${m.label.toLowerCase()} on this rate is worth`}
                               onBlur={(e) =>
@@ -410,13 +412,13 @@ export function InventoryScreen({
             href={href({ from: format(addDays(parseISO(from), -nights), "yyyy-MM-dd") })}
             className="rounded-md border border-line px-3 py-1.5 text-[13px] text-ink-muted hover:bg-shell hover:text-ink"
           >
-            Earlier
+            {tr("Earlier")}
           </Link>
           <Link
             href={href({ from: format(addDays(parseISO(from), nights), "yyyy-MM-dd") })}
             className="rounded-md border border-line px-3 py-1.5 text-[13px] text-ink-muted hover:bg-shell hover:text-ink"
           >
-            Later
+            {tr("Later")}
           </Link>
         </div>
       </div>
@@ -424,19 +426,19 @@ export function InventoryScreen({
       {spec.needsPlan && plans.length === 0 && (
         <div className="rounded-lg border border-line bg-white p-6 shadow-card">
           <p className="font-display text-[15px] font-semibold tracking-tightest text-ink">
-            No rate plan yet
+            {tr("No rate plan yet")}
           </p>
           {canEdit ? (
             newPlan ? (
               <div className="mt-4 flex flex-wrap items-end gap-3">
                 <div>
                   <label htmlFor="plan-code" className={label}>
-                    Code
+                    {tr("Code")}
                   </label>
                   <input
                     id="plan-code"
                     value={newPlan.code}
-                    placeholder="BAR"
+                    placeholder={tr("BAR")}
                     onChange={(e) =>
                       setNewPlan({ ...newPlan, code: e.target.value })
                     }
@@ -445,12 +447,12 @@ export function InventoryScreen({
                 </div>
                 <div>
                   <label htmlFor="plan-name" className={label}>
-                    Name
+                    {tr("Name")}
                   </label>
                   <input
                     id="plan-name"
                     value={newPlan.name}
-                    placeholder="Best available rate"
+                    placeholder={tr("Best available rate")}
                     onChange={(e) =>
                       setNewPlan({ ...newPlan, name: e.target.value })
                     }
@@ -462,13 +464,13 @@ export function InventoryScreen({
                   disabled={pending}
                   className="rounded-md bg-chrome-800 px-5 py-2 text-[13px] font-medium text-white hover:bg-chrome-900 disabled:opacity-50"
                 >
-                  Create it
+                  {tr("Create it")}
                 </button>
                 <button
                   onClick={() => setNewPlan(null)}
                   className="rounded-md border border-line px-4 py-2 text-[13px] text-ink-muted hover:bg-shell hover:text-ink"
                 >
-                  Cancel
+                  {tr("Cancel")}
                 </button>
               </div>
             ) : (
@@ -476,12 +478,12 @@ export function InventoryScreen({
                 onClick={() => setNewPlan({ code: "", name: "" })}
                 className="mt-4 rounded-md bg-chrome-800 px-5 py-2 text-[13px] font-medium text-white hover:bg-chrome-900"
               >
-                New rate plan
+                {tr("New rate plan")}
               </button>
             )
           ) : (
             <p className="mt-3 text-[13px] text-ink-faint">
-              A manager or administrator can create one.
+              {tr("A manager or administrator can create one.")}
             </p>
           )}
         </div>
@@ -491,8 +493,7 @@ export function InventoryScreen({
       <div className="rounded-lg border border-line bg-white p-4 shadow-card">
         {types.length === 0 ? (
           <p className="py-8 text-center text-[13px] text-ink-muted">
-            No room types are set up. Add room types and rooms before loading
-            rates.
+            {tr("No room types are set up. Add room types and rooms before loading rates.")}
           </p>
         ) : (
           <>
@@ -501,7 +502,7 @@ export function InventoryScreen({
                 <thead>
                   <tr>
                     <th className="sticky left-0 z-10 bg-white px-3 pb-2.5 text-left text-xxs font-semibold uppercase tracking-[0.1em] text-ink-faint">
-                      Room type
+                      {tr("Room type")}
                     </th>
                     {dates.map((d) => {
                       const day = parseISO(d);
@@ -566,9 +567,7 @@ export function InventoryScreen({
               </table>
             </div>
             <p className="mt-3 text-xs leading-relaxed text-ink-faint">
-              {spec.note} Rows are room types, not rooms — a property can run
-              well over a thousand rooms and this grid is the same height
-              whatever the count.
+              {spec.note} {tr("Rows are room types, not rooms — a property can run well over a thousand rooms and this grid is the same height whatever the count.")}
             </p>
           </>
         )}
@@ -578,13 +577,13 @@ export function InventoryScreen({
       {canEdit && types.length > 0 && (!spec.needsPlan || planId) && (
         <div className="rounded-lg border border-line bg-white p-5 shadow-card">
           <h2 className="mb-4 font-display text-[15px] font-semibold tracking-tightest text-ink">
-            Set {spec.title.toLowerCase()}
+            {tr("Set")}{" "}{spec.title.toLowerCase()}
           </h2>
 
           <div className="grid gap-4 sm:grid-cols-4">
             <div>
               <label htmlFor="edit-from" className={label}>
-                From
+                {tr("From")}
               </label>
               <input
                 id="edit-from"
@@ -596,7 +595,7 @@ export function InventoryScreen({
             </div>
             <div>
               <label htmlFor="edit-to" className={label}>
-                To
+                {tr("To")}
               </label>
               <input
                 id="edit-to"
@@ -607,7 +606,7 @@ export function InventoryScreen({
               />
             </div>
             <div className="sm:col-span-2">
-              <span className={label}>Only on these days</span>
+              <span className={label}>{tr("Only on these days")}</span>
               <div className="flex flex-wrap gap-1">
                 {DOW.map((d) => (
                   <button
@@ -630,7 +629,7 @@ export function InventoryScreen({
                     onClick={() => setDow([])}
                     className="rounded-md px-2 py-1.5 text-xs text-ink-faint underline-offset-2 hover:text-ink hover:underline"
                   >
-                    Every day
+                    {tr("Every day")}
                   </button>
                 )}
               </div>
@@ -646,8 +645,8 @@ export function InventoryScreen({
                   onChange={(e) => setFlag(e.target.value === "on")}
                   className={field}
                 >
-                  <option value="on">Yes</option>
-                  <option value="off">No</option>
+                  <option value="on">{tr("Yes")}</option>
+                  <option value="off">{tr("No")}</option>
                 </select>
               ) : (
                 <input
@@ -655,7 +654,7 @@ export function InventoryScreen({
                   type="text"
                   inputMode={spec.kind === "money" ? "decimal" : "numeric"}
                   value={value}
-                  placeholder={spec.kind === "money" ? "120.00" : "Blank clears"}
+                  placeholder={spec.kind === "money" ? "120.00" : tr("Blank clears")}
                   onChange={(e) => setValue(e.target.value)}
                   className={cn(field, "tnum")}
                 />
@@ -664,7 +663,7 @@ export function InventoryScreen({
             <div className="sm:col-span-3 flex items-end">
               <p className="text-xs leading-relaxed text-ink-faint">
                 {selected.length === 0
-                  ? "Tick the room types on the left to apply this to."
+                  ? tr("Tick the room types on the left to apply this to.")
                   : `${selected.length} room type${selected.length === 1 ? "" : "s"} selected.`}
               </p>
             </div>
@@ -690,7 +689,7 @@ export function InventoryScreen({
               disabled={pending || selected.length === 0}
               className="rounded-md bg-chrome-800 px-6 py-2.5 text-[13px] font-medium text-white hover:bg-chrome-900 disabled:opacity-50"
             >
-              {pending ? "Applying…" : "Apply"}
+              {pending ? tr("Applying…") : tr("Apply")}
             </button>
           </div>
         </div>
@@ -698,8 +697,7 @@ export function InventoryScreen({
 
       {!canEdit && types.length > 0 && (
         <p className="rounded-lg border border-line bg-white px-5 py-4 text-[13px] leading-relaxed text-ink-muted shadow-card">
-          You can read the inventory but not change it. Rates, restrictions and
-          availability are set by managers and administrators.
+          {tr("You can read the inventory but not change it. Rates, restrictions and availability are set by managers and administrators.")}
         </p>
       )}
     </div>

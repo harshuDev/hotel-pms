@@ -1,3 +1,4 @@
+import { getT } from "@/lib/i18n/server";
 import { ReportFigure, ReportFigures, ReportShell } from "@/components/reports/report-shell";
 import { ReportNoAccess, ReportTable } from "@/components/reports/report-table";
 import { formatMoney, formatMoneyShort } from "@/lib/money";
@@ -21,6 +22,7 @@ export default async function RatePlanReportPage({
 }: {
   searchParams: Promise<{ from?: string; to?: string }>;
 }) {
+  const tr = await getT();
   const currency = await getPropertyCurrency();
   const sp = await searchParams;
   const businessDate = await getBusinessDate();
@@ -32,7 +34,7 @@ export default async function RatePlanReportPage({
   } catch (error) {
     if (error instanceof ReportAccessError) {
       return (
-        <ReportShell title="Rate plans">
+        <ReportShell title={tr("Rate plans")}>
           <ReportNoAccess />
         </ReportShell>
       );
@@ -50,27 +52,27 @@ export default async function RatePlanReportPage({
 
   return (
     <ReportShell
-      title="Rate plans"
+      title={tr("Rate plans")}
       action="/reports/rate-plan"
       range={range}
     >
       <ReportFigures>
         <ReportFigure
-          label="Room nights"
+          label={tr("Room nights")}
           value={String(nights)}
           detail={`Across ${rows.length} plan${rows.length === 1 ? "" : "s"}`}
           emphasis
         />
         {top && (
           <ReportFigure
-            label="Best seller"
+            label={tr("Best seller")}
             value={top.planName}
             detail={`${top.roomNights} night${top.roomNights === 1 ? "" : "s"}`}
           />
         )}
-        <ReportFigure label="ADR" value={formatMoneyShort(adr, currency)} detail="Net of discount" />
+        <ReportFigure label={tr("ADR")} value={formatMoneyShort(adr, currency)} detail={tr("Net of discount")} />
         <ReportFigure
-          label="Discount given"
+          label={tr("Discount given")}
           value={formatMoneyShort(discount, currency)}
           detail={gross > 0 ? `${Math.round((discount / gross) * 100)}% of rack` : "—"}
         />
@@ -80,12 +82,12 @@ export default async function RatePlanReportPage({
         rows={rows}
         rowKey={(r) => r.ratePlanId ?? "unrecorded"}
         minWidth="860px"
-        emptyTitle="Nothing sold in this range"
-        emptyHint="Pick a range that covers dates guests have stayed."
+        emptyTitle={tr("Nothing sold in this range")}
+        emptyHint={tr("Pick a range that covers dates guests have stayed.")}
         footLabel={`${rows.length} plan${rows.length === 1 ? "" : "s"}`}
         columns={[
           {
-            header: "Plan",
+            header: tr("Plan"),
             cell: (r) => (
               <span
                 className={
@@ -97,35 +99,35 @@ export default async function RatePlanReportPage({
             ),
           },
           {
-            header: "Published",
+            header: tr("Published"),
             cell: (r) =>
               r.ratePlanId === null ? (
                 <span className="text-ink-faint">—</span>
               ) : (
                 <span className={r.isPublic ? "text-emerald-600" : "text-ink-faint"}>
-                  {r.isPublic ? "Yes" : "No"}
+                  {r.isPublic ? tr("Yes") : tr("No")}
                 </span>
               ),
           },
           {
-            header: "Bookings",
+            header: tr("Bookings"),
             align: "right",
             cell: (r) => <span className="tnum text-ink-muted">{r.bookings}</span>,
           },
           {
-            header: "Nights",
+            header: tr("Nights"),
             align: "right",
             cell: (r) => <span className="tnum font-medium text-ink">{r.roomNights}</span>,
             foot: String(nights),
           },
           {
-            header: "Rack",
+            header: tr("Rack"),
             align: "right",
             cell: (r) => <span className="tnum text-ink-faint">{formatMoney(r.grossCents, currency)}</span>,
             foot: formatMoney(gross, currency),
           },
           {
-            header: "Discount",
+            header: tr("Discount"),
             align: "right",
             cell: (r) => (
               <span className={r.discountCents > 0 ? "tnum text-warn-deep" : "tnum text-ink-faint"}>
@@ -135,13 +137,13 @@ export default async function RatePlanReportPage({
             foot: formatMoney(discount, currency),
           },
           {
-            header: "Net",
+            header: tr("Net"),
             align: "right",
             cell: (r) => <span className="tnum text-ink-muted">{formatMoney(r.netCents, currency)}</span>,
             foot: formatMoney(net, currency),
           },
           {
-            header: "ADR",
+            header: tr("ADR"),
             align: "right",
             cell: (r) => <span className="tnum font-medium text-ink">{formatMoney(r.adrCents, currency)}</span>,
             foot: formatMoney(adr, currency),

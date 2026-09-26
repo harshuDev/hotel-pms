@@ -1,5 +1,6 @@
 "use client";
 
+import { useT } from "@/components/i18n";
 import { useState } from "react";
 import { cn } from "@/components/ui";
 import { Menu, MenuItem } from "@/components/menu";
@@ -63,6 +64,7 @@ export function SystemConnectionsPanel({
   pending: boolean;
   run: Run;
 }) {
+  const tr = useT();
   const [draft, setDraft] = useState<Draft | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const taken = new Set(systems.map((s) => s.provider));
@@ -95,16 +97,16 @@ export function SystemConnectionsPanel({
               <path d="M6 20 12 6h24l6 14v10H6z" />
               <path d="M6 20h11l2 4h10l2-4h11" />
             </svg>
-            <p className="mt-2 text-[13px]">No Data</p>
+            <p className="mt-2 text-[13px]">{tr("No Data")}</p>
           </div>
         ) : (
           <table className="w-full text-[13px]">
             <thead>
               <tr className="border-b border-line">
-                <th className="px-2 py-2.5 text-left font-semibold text-ink">Title</th>
-                <th className="px-2 py-2.5 text-left font-semibold text-ink">System</th>
-                <th className="px-2 py-2.5 text-left font-semibold text-ink">Is Active</th>
-                <th className="w-20" aria-label="Actions" />
+                <th className="px-2 py-2.5 text-left font-semibold text-ink">{tr("Title")}</th>
+                <th className="px-2 py-2.5 text-left font-semibold text-ink">{tr("System")}</th>
+                <th className="px-2 py-2.5 text-left font-semibold text-ink">{tr("Is Active")}</th>
+                <th className="w-20" aria-label={tr("Actions")} />
               </tr>
             </thead>
             <tbody>
@@ -112,7 +114,7 @@ export function SystemConnectionsPanel({
                 <tr key={s.id} className={cn("border-b border-line", draft?.id === s.id && "bg-shell/70")}>
                   <td className="px-2 py-1.5 text-ink">{s.name}</td>
                   <td className="px-2 py-1.5 text-ink-muted">{systemProvider(category, s.provider).label}</td>
-                  <td className="px-2 py-1.5 text-ink">{s.isActive ? "Yes" : "No"}</td>
+                  <td className="px-2 py-1.5 text-ink">{s.isActive ? tr("Yes") : tr("No")}</td>
                   <td className="py-0.5">
                     {canEdit && (
                       <span className="flex justify-end">
@@ -162,7 +164,7 @@ export function SystemConnectionsPanel({
             }}
           >
             <h3 className="border-b border-line pb-1 text-[15px] text-ink">{labels.label}</h3>
-            <Row label="Name" htmlFor="kl-name">
+            <Row label={tr("Name")} htmlFor="kl-name">
               <input id="kl-name" value={draft.name} maxLength={80} autoFocus
                 onChange={(e) => setDraft({ ...draft, name: e.target.value })} className={field} />
             </Row>
@@ -172,25 +174,25 @@ export function SystemConnectionsPanel({
             </Row>
             <Row label={labels.secret} htmlFor="kl-secret">
               <input id="kl-secret" type="password" value={draft.secret} maxLength={500} autoComplete="new-password"
-                placeholder={draft.hasSecret ? "Saved" : ""}
+                placeholder={draft.hasSecret ? tr("Saved") : ""}
                 onChange={(e) => setDraft({ ...draft, secret: e.target.value })} className={field} />
             </Row>
             <label className="flex items-center gap-2 text-[13px] text-ink sm:pl-[13rem]">
               <input type="checkbox" className="h-4 w-4 accent-brass" checked={draft.isActive}
                 onChange={(e) => setDraft({ ...draft, isActive: e.target.checked })} />
-              Is Active
+              {tr("Is Active")}
             </label>
             <div className="flex justify-end gap-3">
-              <button type="button" className={secondary} onClick={() => setDraft(null)}>Cancel</button>
-              <button type="submit" className={primary} disabled={pending}>Save</button>
+              <button type="button" className={secondary} onClick={() => setDraft(null)}>{tr("Cancel")}</button>
+              <button type="submit" className={primary} disabled={pending}>{tr("Save")}</button>
             </div>
           </form>
         )}
 
         {canEdit && !draft && free.length > 0 && (
           <div className="mt-4">
-            <Menu label="Add" open={menuOpen} onOpenChange={setMenuOpen} triggerClassName={primary}
-              triggerContent={<span>Add</span>}>
+            <Menu label={tr("Add")} open={menuOpen} onOpenChange={setMenuOpen} triggerClassName={primary}
+              triggerContent={<span>{tr("Add")}</span>}>
               {free.map((p) => (
                 <MenuItem
                   key={p.id}

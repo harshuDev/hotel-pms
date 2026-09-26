@@ -1,5 +1,6 @@
 "use client";
 
+import { useT } from "@/components/i18n";
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { cn } from "@/components/ui";
@@ -30,6 +31,7 @@ export function RoomStatusAction({
   roomId: string;
   status: RoomStatus;
 }) {
+  const tr = useT();
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -37,7 +39,7 @@ export function RoomStatusAction({
   if (status === "occupied") {
     return (
       <span className="text-xxs text-ink-faint">
-        Occupied — check the guest out
+        {tr("Occupied — check the guest out")}
       </span>
     );
   }

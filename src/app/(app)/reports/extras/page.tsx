@@ -1,3 +1,4 @@
+import { getT } from "@/lib/i18n/server";
 import {
   ReportFigure,
   ReportFigures,
@@ -31,6 +32,7 @@ export default async function ExtrasReportPage({
 }: {
   searchParams: Promise<{ from?: string; to?: string }>;
 }) {
+  const tr = await getT();
   const currency = await getPropertyCurrency();
   const sp = await searchParams;
   const businessDate = await getBusinessDate();
@@ -42,7 +44,7 @@ export default async function ExtrasReportPage({
   } catch (error) {
     if (error instanceof ReportAccessError) {
       return (
-        <ReportShell title="Extras">
+        <ReportShell title={tr("Extras")}>
           <ReportNoAccess />
         </ReportShell>
       );
@@ -58,26 +60,26 @@ export default async function ExtrasReportPage({
 
   return (
     <ReportShell
-      title="Extras"
+      title={tr("Extras")}
       action="/reports/extras"
       range={range}
     >
       <ReportFigures>
         <ReportFigure
-          label="Extras revenue"
+          label={tr("Extras revenue")}
           value={formatMoneyShort(net, currency)}
-          detail="Before tax"
+          detail={tr("Before tax")}
           emphasis
         />
-        <ReportFigure label="Tax" value={formatMoneyShort(tax, currency)} />
+        <ReportFigure label={tr("Tax")} value={formatMoneyShort(tax, currency)} />
         <ReportFigure
-          label="Charges"
+          label={tr("Charges")}
           value={String(items)}
           detail={`Across ${rows.length} type${rows.length === 1 ? "" : "s"}`}
         />
         {best && (
           <ReportFigure
-            label="Biggest earner"
+            label={tr("Biggest earner")}
             value={ITEM_LABELS[best.itemType]}
             detail={formatMoney(best.netCents, currency)}
           />
@@ -88,24 +90,24 @@ export default async function ExtrasReportPage({
         rows={rows}
         rowKey={(r) => r.itemType}
         minWidth="660px"
-        emptyTitle="Nothing but rooms was charged in this range"
-        emptyHint="Minibar, laundry and food charges posted to a folio appear here."
+        emptyTitle={tr("Nothing but rooms was charged in this range")}
+        emptyHint={tr("Minibar, laundry and food charges posted to a folio appear here.")}
         footLabel={`${rows.length} type${rows.length === 1 ? "" : "s"}`}
         columns={[
           {
-            header: "Type",
+            header: tr("Type"),
             cell: (r) => (
               <span className="font-medium text-ink">{ITEM_LABELS[r.itemType]}</span>
             ),
           },
           {
-            header: "Charges",
+            header: tr("Charges"),
             align: "right",
             cell: (r) => <span className="text-ink-muted">{r.itemCount}</span>,
             foot: String(items),
           },
           {
-            header: "Reversed",
+            header: tr("Reversed"),
             align: "right",
             cell: (r) => (
               <span className={r.reversalCount > 0 ? "text-warn-deep" : "text-ink-faint"}>
@@ -114,19 +116,19 @@ export default async function ExtrasReportPage({
             ),
           },
           {
-            header: "Net",
+            header: tr("Net"),
             align: "right",
             cell: (r) => <span className="text-ink-muted">{formatMoney(r.netCents, currency)}</span>,
             foot: formatMoney(net, currency),
           },
           {
-            header: "Tax",
+            header: tr("Tax"),
             align: "right",
             cell: (r) => <span className="text-ink-faint">{formatMoney(r.taxCents, currency)}</span>,
             foot: formatMoney(tax, currency),
           },
           {
-            header: "Gross",
+            header: tr("Gross"),
             align: "right",
             cell: (r) => (
               <span className="font-medium text-ink">{formatMoney(r.grossCents, currency)}</span>

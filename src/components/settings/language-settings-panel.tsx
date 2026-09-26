@@ -1,5 +1,6 @@
 "use client";
 
+import { useT } from "@/components/i18n";
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/components/ui";
 import { LOCALES, type Locale } from "@/lib/i18n/locales";
@@ -41,6 +42,7 @@ export function LanguageSettingsPanel({
   pending: boolean;
   run: Run;
 }) {
+  const tr = useT();
   const [defaultLocale, setDefaultLocale] = useState<Locale>(settings.defaultLocale);
   const [supported, setSupported] = useState<Locale[]>(settings.supportedLocales);
   const [open, setOpen] = useState(false);
@@ -73,14 +75,14 @@ export function LanguageSettingsPanel({
   return (
     <div className="max-w-4xl space-y-8">
       <h2 className="border-b border-line pb-1 font-display text-[26px] font-semibold tracking-tightest text-ink">
-        Language Settings
+        {tr("Language Settings")}
       </h2>
 
       <section className={cn(card, "overflow-hidden")}>
         <div className="px-6 pb-6 pt-7 sm:px-8">
-          <h3 className="border-b border-line pb-1 text-[19px] text-ink">Default language</h3>
+          <h3 className="border-b border-line pb-1 text-[19px] text-ink">{tr("Default language")}</h3>
           <label htmlFor="default-language" className="mt-2 block text-[11.5px] text-ink-muted">
-            Default language
+            {tr("Default language")}
           </label>
           {/* Only the languages the hotel supports -- the guest page falls
               back to this one, so it has to be one the page offers. */}
@@ -103,10 +105,10 @@ export function LanguageSettingsPanel({
             <button
               type="button"
               disabled={pending}
-              onClick={() => run(() => saveDefaultLanguage(defaultLocale), "Default language saved.")}
+              onClick={() => run(() => saveDefaultLanguage(defaultLocale), tr("Default language saved."))}
               className={primary}
             >
-              Save
+              {tr("Save")}
             </button>
           </div>
         )}
@@ -114,12 +116,12 @@ export function LanguageSettingsPanel({
 
       <section className={card}>
         <div className="px-6 pb-6 pt-7 sm:px-8">
-          <h3 className="text-[19px] text-ink">Supported languages</h3>
+          <h3 className="text-[19px] text-ink">{tr("Supported languages")}</h3>
           <p className="border-b border-line pb-1 text-[14px] text-ink">
-            Here you can choose subset of languages you want to support
+            {tr("Here you can choose subset of languages you want to support")}
           </p>
           <span id="locales-label" className="mt-2 block text-[11.5px] text-ink-muted">
-            Locales
+            {tr("Locales")}
           </span>
           <div ref={pickerRef} className="relative">
             <button
@@ -132,7 +134,7 @@ export function LanguageSettingsPanel({
               className={cn(field, "flex items-center justify-between gap-3")}
             >
               <span className="truncate">
-                {supported.length === 0 ? "None" : supported.map(labelOf).join(", ")}
+                {supported.length === 0 ? tr("None") : supported.map(labelOf).join(", ")}
               </span>
               <span aria-hidden className="shrink-0 text-[11px] text-ink">
                 ▼
@@ -169,11 +171,11 @@ export function LanguageSettingsPanel({
               disabled={pending}
               onClick={() => {
                 setOpen(false);
-                run(() => saveSupportedLanguages(supported), "Supported languages saved.");
+                run(() => saveSupportedLanguages(supported), tr("Supported languages saved."));
               }}
               className={primary}
             >
-              Save
+              {tr("Save")}
             </button>
           </div>
         )}

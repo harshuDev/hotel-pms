@@ -1,5 +1,6 @@
 "use client";
 
+import { useT } from "@/components/i18n";
 import { useMemo, useState } from "react";
 import { addDays, format, getDay, getDaysInMonth, parseISO } from "date-fns";
 import { cn } from "@/components/ui";
@@ -92,6 +93,7 @@ export function SeasonsPanel({
   pending: boolean;
   run: Run;
 }) {
+  const tr = useT();
   const [year, setYear] = useState(Number(businessDate.slice(0, 4)));
   const [add, setAdd] = useState<AddDraft | null>(null);
   const [range, setRange] = useState<RangeDraft | null>(null);
@@ -156,7 +158,7 @@ export function SeasonsPanel({
     return (
       <div className="mt-4">
         <h3 className="text-[17px] text-ink">{title}</h3>
-        {items.length === 0 && <p className="mt-1 text-[12px] text-ink-muted">None yet.</p>}
+        {items.length === 0 && <p className="mt-1 text-[12px] text-ink-muted">{tr("None yet.")}</p>}
         {items.map((t) => (
           <div key={t.id} className="mt-2.5">
             <div className="flex items-center gap-1.5">
@@ -192,7 +194,7 @@ export function SeasonsPanel({
                     className={icon}
                     onClick={() => {
                       if (!confirm(`Delete ${t.name}, ${day(r.startsOn)} - ${day(r.endsOn)}?`)) return;
-                      run(() => deleteSeason(r.id), "Dates deleted.");
+                      run(() => deleteSeason(r.id), tr("Dates deleted."));
                     }}>
                     <BinIcon />
                   </button>
@@ -207,14 +209,14 @@ export function SeasonsPanel({
 
   return (
     <div className="max-w-6xl space-y-2">
-      <h2 className="border-b border-line pb-1 text-[22px] text-ink">Seasons And Events</h2>
+      <h2 className="border-b border-line pb-1 text-[22px] text-ink">{tr("Seasons And Events")}</h2>
       <section className="grid gap-6 rounded border border-line bg-white p-4 shadow-card sm:p-7 lg:grid-cols-[1fr_16rem]">
         <div className="min-w-0">
           <div className="flex items-center justify-between">
-            <button type="button" aria-label="Previous year" onClick={() => setYear(year - 1)}
+            <button type="button" aria-label={tr("Previous year")} onClick={() => setYear(year - 1)}
               className="rounded px-2 py-1 text-[18px] text-ink hover:bg-shell">‹</button>
             <span className="tnum text-[13px] text-ink">{year}</span>
-            <button type="button" aria-label="Next year" onClick={() => setYear(year + 1)}
+            <button type="button" aria-label={tr("Next year")} onClick={() => setYear(year + 1)}
               className="rounded px-2 py-1 text-[18px] text-ink hover:bg-shell">›</button>
           </div>
           <div className="mt-3 grid gap-x-5 gap-y-5 sm:grid-cols-2 xl:grid-cols-3">
@@ -257,14 +259,14 @@ export function SeasonsPanel({
           {canEdit && (
             <button type="button" className={primary}
               onClick={() => setAdd({ kind: "season", name: "", color: "#6b7f99", from: businessDate, to: businessDate })}>
-              Add season or event
+              {tr("Add season or event")}
             </button>
           )}
           {list("Seasons", seasons)}
           <div className="mt-4">
             <div className="flex items-center gap-1.5">
               <span className="h-3 w-3 shrink-0 rounded-sm" style={{ backgroundColor: DEFAULT_GREY }} />
-              <span className="text-[12px] font-bold text-ink">Default Season</span>
+              <span className="text-[12px] font-bold text-ink">{tr("Default Season")}</span>
             </div>
             {defaultRanges.map((r) => (
               <p key={r.from} className="tnum text-[11.5px] text-ink">
@@ -278,16 +280,16 @@ export function SeasonsPanel({
 
       {add && (
         <Dialog
-          title="Add season or event"
+          title={tr("Add season or event")}
           onClose={() => setAdd(null)}
           footer={
             <>
-              <button type="button" className={secondary} onClick={() => setAdd(null)}>Cancel</button>
-              <button type="button" className={primary} disabled={pending} onClick={() => saveAdd(add)}>Save</button>
+              <button type="button" className={secondary} onClick={() => setAdd(null)}>{tr("Cancel")}</button>
+              <button type="button" className={primary} disabled={pending} onClick={() => saveAdd(add)}>{tr("Save")}</button>
             </>
           }
         >
-          <div role="radiogroup" aria-label="Season or event" className="flex">
+          <div role="radiogroup" aria-label={tr("Season or event")} className="flex">
             {(["season", "event"] as const).map((k, i) => (
               <button key={k} type="button" role="radio" aria-checked={add.kind === k}
                 onClick={() => setAdd({ ...add, kind: k })}
@@ -296,28 +298,28 @@ export function SeasonsPanel({
                   i === 0 ? "rounded-l-md" : "-ml-px rounded-r-md",
                   add.kind === k ? "relative z-10 border-chrome-800 bg-chrome-800 font-semibold text-white" : "border-line bg-white text-ink hover:bg-shell",
                 )}>
-                {k === "season" ? "Season" : "Event"}
+                {k === "season" ? tr("Season") : tr("Event")}
               </button>
             ))}
           </div>
           <div className="grid gap-4 sm:grid-cols-[1fr_auto]">
             <label className={label}>
-              Name
+              {tr("Name")}
               <input autoFocus value={add.name} maxLength={80} className={field}
                 onChange={(e) => setAdd({ ...add, name: e.target.value })} />
             </label>
             <label className={label}>
-              Colour
+              {tr("Colour")}
               <input type="color" value={add.color} className="mt-1 block h-[38px] w-16 cursor-pointer rounded border border-line bg-white p-0.5"
                 onChange={(e) => setAdd({ ...add, color: e.target.value })} />
             </label>
             <label className={label}>
-              From
+              {tr("From")}
               <input type="date" value={add.from} className={cn(field, "tnum")}
                 onChange={(e) => setAdd({ ...add, from: e.target.value, to: add.to < e.target.value ? e.target.value : add.to })} />
             </label>
             <label className={label}>
-              To
+              {tr("To")}
               <input type="date" value={add.to} min={add.from} className={cn(field, "tnum")}
                 onChange={(e) => setAdd({ ...add, to: e.target.value })} />
             </label>
@@ -331,7 +333,7 @@ export function SeasonsPanel({
           onClose={() => setRange(null)}
           footer={
             <>
-              <button type="button" className={secondary} onClick={() => setRange(null)}>Cancel</button>
+              <button type="button" className={secondary} onClick={() => setRange(null)}>{tr("Cancel")}</button>
               <button type="button" className={primary} disabled={pending}
                 onClick={() =>
                   run(async () => {
@@ -340,19 +342,19 @@ export function SeasonsPanel({
                     return result;
                   }, `${range.name} dates added.`)
                 }>
-                Save
+                {tr("Save")}
               </button>
             </>
           }
         >
           <div className="grid gap-4 sm:grid-cols-2">
             <label className={label}>
-              From
+              {tr("From")}
               <input type="date" autoFocus value={range.from} className={cn(field, "tnum")}
                 onChange={(e) => setRange({ ...range, from: e.target.value, to: range.to < e.target.value ? e.target.value : range.to })} />
             </label>
             <label className={label}>
-              To
+              {tr("To")}
               <input type="date" value={range.to} min={range.from} className={cn(field, "tnum")}
                 onChange={(e) => setRange({ ...range, to: e.target.value })} />
             </label>
@@ -366,7 +368,7 @@ export function SeasonsPanel({
           onClose={() => setEdit(null)}
           footer={
             <>
-              <button type="button" className={secondary} onClick={() => setEdit(null)}>Cancel</button>
+              <button type="button" className={secondary} onClick={() => setEdit(null)}>{tr("Cancel")}</button>
               <button type="button" className={primary} disabled={pending}
                 onClick={() =>
                   run(async () => {
@@ -375,19 +377,19 @@ export function SeasonsPanel({
                     return result;
                   }, `${edit.name.trim() || "Season"} saved.`)
                 }>
-                Save
+                {tr("Save")}
               </button>
             </>
           }
         >
           <div className="grid gap-4 sm:grid-cols-[1fr_auto]">
             <label className={label}>
-              Name
+              {tr("Name")}
               <input autoFocus value={edit.name} maxLength={80} className={field}
                 onChange={(e) => setEdit({ ...edit, name: e.target.value })} />
             </label>
             <label className={label}>
-              Colour
+              {tr("Colour")}
               <input type="color" value={edit.color} className="mt-1 block h-[38px] w-16 cursor-pointer rounded border border-line bg-white p-0.5"
                 onChange={(e) => setEdit({ ...edit, color: e.target.value })} />
             </label>

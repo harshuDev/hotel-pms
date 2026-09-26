@@ -1,4 +1,6 @@
 "use server";
+import { getT } from "@/lib/i18n/server";
+import { localised, localisedAs } from "@/lib/i18n/localised";
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
@@ -86,26 +88,26 @@ export async function createBooking(
   // Cheap checks first, so an obviously wrong form comes back without a round
   // trip. Postgres repeats every one of them — these are for speed, not safety.
   if (input.checkOut <= input.checkIn) {
-    return { ok: false, error: "The departure date must be after the arrival date." };
+    return { ok: false, error: await localised("The departure date must be after the arrival date.") };
   }
   if (input.rooms.length === 0) {
-    return { ok: false, error: "Add at least one room to the booking." };
+    return { ok: false, error: await localised("Add at least one room to the booking.") };
   }
   if (!input.customerId && !input.newCustomer) {
-    return { ok: false, error: "Pick an existing guest, or enter a new one." };
+    return { ok: false, error: await localised("Pick an existing guest, or enter a new one.") };
   }
   for (const line of input.rooms) {
     if (!Number.isSafeInteger(line.quantity) || line.quantity < 1) {
-      return { ok: false, error: "Each room line needs a whole number of rooms." };
+      return { ok: false, error: await localised("Each room line needs a whole number of rooms.") };
     }
     if (line.rateCents !== null) {
       if (!Number.isSafeInteger(line.rateCents) || line.rateCents < 0) {
-        return { ok: false, error: "A nightly rate cannot be negative." };
+        return { ok: false, error: await localised("A nightly rate cannot be negative.") };
       }
     } else if (!input.ratePlanId) {
       return {
         ok: false,
-        error: "Give a nightly rate, or pick a rate plan that has one loaded.",
+        error: await localised("Give a nightly rate, or pick a rate plan that has one loaded."),
       };
     }
   }
@@ -154,7 +156,7 @@ export async function createBooking(
     // the form should offer to wave it through.
     return {
       ok: false,
-      error: error.message,
+      error: await localised(error.message),
       block: BLOCK_BY_SQLSTATE[error.code ?? ""],
     };
   }
@@ -170,7 +172,7 @@ export async function createBooking(
   if (!row) {
     return {
       ok: false,
-      error: "The booking was not returned. Check the bookings list before taking it again.",
+      error: await localised("The booking was not returned. Check the bookings list before taking it again."),
     };
   }
 
@@ -196,7 +198,7 @@ export async function loadAvailability(
   to: string,
 ): Promise<ActionResult<BookableRoomType[]>> {
   if (to <= from) {
-    return { ok: false, error: "The departure date must be after the arrival date." };
+    return { ok: false, error: await localised("The departure date must be after the arrival date.") };
   }
 
   const supabase = await createClient();
@@ -206,7 +208,7 @@ export async function loadAvailability(
   });
 
   if (error) {
-    return { ok: false, error: `Availability did not load: ${error.message}` };
+    return { ok: false, error: await localisedAs("Availability did not load", error.message) };
   }
 
   return {
@@ -248,9 +250,10 @@ export async function searchCustomers(
   });
 
   if (error) {
-    return { ok: false, error: `The guest lookup failed: ${error.message}` };
+    return { ok: false, error: await localisedAs("The guest lookup failed", error.message) };
   }
 
+  const tr = await getT();
   return {
     ok: true,
     data: (
@@ -266,7 +269,7 @@ export async function searchCustomers(
       name: row.name,
       detail:
         [row.email, row.phone].filter(Boolean).join(" · ") ||
-        `Customer ${row.customer_number}`,
+        tr("Customer {n}", { n: row.customer_number }),
     })),
   };
 }

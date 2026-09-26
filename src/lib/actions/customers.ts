@@ -1,4 +1,6 @@
 "use server";
+import { getT } from "@/lib/i18n/server";
+import { localised } from "@/lib/i18n/localised";
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
@@ -51,8 +53,9 @@ type Result<T = undefined> =
   | { ok: false; error: string };
 
 /** Postgres raises these with a message meant to be read; pass it through. */
-function failure(message: string): { ok: false; error: string } {
-  return { ok: false, error: message };
+/** A refusal, in the reader's language (0106). */
+async function failure(message: string): Promise<{ ok: false; error: string }> {
+  return { ok: false, error: await localised(message) };
 }
 
 export async function saveCustomer(
@@ -275,18 +278,20 @@ export async function exportCustomersCsv(filters: {
       perPage: EXPORT_LIMIT,
     });
 
+    // Headings in the reader's language; the data stays data.
+    const tr = await getT();
     const header = [
-      "Id",
-      "Name",
-      "Kind",
-      "National Id Number",
-      "Email",
-      "Phone",
-      "Exclude from email",
-      "No of bookings",
-      "Total revenue",
-      "Last booking date",
-      "Balance",
+      tr("Id"),
+      tr("Name"),
+      tr("Kind"),
+      tr("National Id Number"),
+      tr("Email"),
+      tr("Phone"),
+      tr("Exclude from email"),
+      tr("No of bookings"),
+      tr("Total revenue"),
+      tr("Last booking date"),
+      tr("Balance"),
     ];
 
     const body = rows.map((c) => [
@@ -296,7 +301,7 @@ export async function exportCustomersCsv(filters: {
       c.nationalIdNumber ?? "",
       c.email ?? "",
       c.phone ?? "",
-      c.excludeFromEmail ? "yes" : "no",
+      c.excludeFromEmail ? tr("yes") : tr("no"),
       String(c.bookingCount),
       // Plain decimal, not a formatted currency string: a spreadsheet should
       // get a number it can total, not "£1,284.00". Integer pence divided at

@@ -1,5 +1,6 @@
 "use client";
 
+import { useT } from "@/components/i18n";
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { formatDistanceToNowStrict } from "date-fns";
@@ -30,6 +31,7 @@ function Emphasised({ text, terms }: { text: string; terms: string[] }) {
 }
 
 export function LiveFeed({ items }: { items: ActivityItem[] }) {
+  const tr = useT();
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   // Marked optimistically so the highlight goes at once; the server decides
@@ -51,8 +53,8 @@ export function LiveFeed({ items }: { items: ActivityItem[] }) {
 
   return (
     <Card
-      eyebrow="Activity"
-      title="What just happened"
+      eyebrow={tr("Activity")}
+      title={tr("What just happened")}
       className="h-[588px]"
       bodyClassName="overflow-y-auto"
       action={
@@ -68,7 +70,7 @@ export function LiveFeed({ items }: { items: ActivityItem[] }) {
             because somebody glanced at it. The old word promised the list
             would empty, it did not, and the button got reported as broken.
           */}
-          {pending ? "Marking…" : read || !anyUnread ? "All read" : "Mark all read"}
+          {pending ? tr("Marking…") : read || !anyUnread ? tr("All read") : tr("Mark all read")}
         </button>
       }
     >
@@ -94,7 +96,7 @@ export function LiveFeed({ items }: { items: ActivityItem[] }) {
                 <Emphasised text={item.summary} terms={item.emphasis} />
               </p>
               <p className="mt-0.5 text-xxs text-ink-faint">
-                {formatDistanceToNowStrict(new Date(item.createdAt))} ago
+                {formatDistanceToNowStrict(new Date(item.createdAt))} {tr("ago")}
               </p>
             </div>
           </li>

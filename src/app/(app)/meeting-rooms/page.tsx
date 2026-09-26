@@ -1,3 +1,4 @@
+import { getT } from "@/lib/i18n/server";
 import { isValid, parseISO } from "date-fns";
 import { PageHeader } from "@/components/ui";
 import { MeetingRoomsScreen } from "@/components/meeting-rooms/meeting-rooms-screen";
@@ -19,6 +20,7 @@ export default async function MeetingRoomsPage({
 }: {
   searchParams: Promise<{ from?: string; booking?: string }>;
 }) {
+  const tr = await getT();
   const sp = await searchParams;
   const businessDate = await getBusinessDate();
 
@@ -39,7 +41,7 @@ export default async function MeetingRoomsPage({
   return (
     <div>
       <PageHeader
-        title="Meeting rooms"
+        title={tr("Meeting rooms")}
       />
       <MeetingRoomsScreen
         cells={cells}

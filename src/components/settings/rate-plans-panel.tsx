@@ -1,5 +1,6 @@
 "use client";
 
+import { useT } from "@/components/i18n";
 import { useMemo, useState } from "react";
 import { cn } from "@/components/ui";
 import { useCurrency } from "@/components/currency";
@@ -90,8 +91,9 @@ function BinIcon() {
 }
 
 function TickCircle() {
+  const tr = useT();
   return (
-    <svg viewBox="0 0 16 16" role="img" aria-label="Main rate" className="h-3.5 w-3.5">
+    <svg viewBox="0 0 16 16" role="img" aria-label={tr("Main rate")} className="h-3.5 w-3.5">
       <circle cx="8" cy="8" r="8" className="fill-emerald-500" />
       <path d="M4.5 8.2l2.2 2.2 4.8-4.8" fill="none" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
@@ -112,6 +114,7 @@ export function RatePlansPanel({
   pending: boolean;
   run: Run;
 }) {
+  const tr = useT();
   const currency = useCurrency();
   const [showExpired, setShowExpired] = useState(false);
   const [sortBy, setSortBy] = useState<"title" | "policy" | null>(null);
@@ -189,10 +192,10 @@ export function RatePlansPanel({
 
   return (
     <div className="max-w-6xl space-y-2">
-      <h2 className="border-b border-line pb-1 text-[20px] text-ink">Rate Plans</h2>
+      <h2 className="border-b border-line pb-1 text-[20px] text-ink">{tr("Rate Plans")}</h2>
       <section className="rounded border border-line bg-white p-4 shadow-card sm:p-10">
         <div className="rounded border border-line">
-          <h3 className="border-b border-line px-4 py-3 text-[13px] font-semibold text-ink">Rate categories</h3>
+          <h3 className="border-b border-line px-4 py-3 text-[13px] font-semibold text-ink">{tr("Rate categories")}</h3>
           <div className="p-3 sm:p-4">
             <div className="overflow-x-auto">
               <table className="w-full min-w-[46rem] text-[12.5px]">
@@ -201,24 +204,24 @@ export function RatePlansPanel({
                     <th className={cn(th, "w-[34%]")}>
                       <span className="flex items-center justify-between gap-2">
                         {search === null ? (
-                          "Title"
+                          tr("Title")
                         ) : (
                           <input
                             autoFocus
-                            aria-label="Search rate plans"
+                            aria-label={tr("Search rate plans")}
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
-                            placeholder="Search"
+                            placeholder={tr("Search")}
                             className="w-full rounded border border-line bg-white px-2 py-0.5 text-[12px] font-normal text-ink outline-none focus:border-brass"
                           />
                         )}
                         <span className="flex shrink-0 items-center gap-1.5">
-                          <button type="button" aria-label="Sort by title" onClick={() => sort("title")} className="p-0.5">
+                          <button type="button" aria-label={tr("Sort by title")} onClick={() => sort("title")} className="p-0.5">
                             <SortIcon active={sortBy === "title"} desc={desc} />
                           </button>
                           <button
                             type="button"
-                            aria-label={search === null ? "Search titles" : "Stop searching"}
+                            aria-label={search === null ? tr("Search titles") : tr("Stop searching")}
                             onClick={() => setSearch(search === null ? "" : null)}
                             className="p-0.5"
                           >
@@ -227,17 +230,17 @@ export function RatePlansPanel({
                         </span>
                       </span>
                     </th>
-                    <th className={cn(th, "w-[22%]")}>Currency</th>
+                    <th className={cn(th, "w-[22%]")}>{tr("Currency")}</th>
                     <th className={cn(th, "relative w-[30%]")}>
                       <span className="flex items-center justify-between gap-2">
-                        Cancellation Policy
+                        {tr("Cancellation Policy")}
                         <span className="flex items-center gap-1.5">
-                          <button type="button" aria-label="Sort by cancellation policy" onClick={() => sort("policy")} className="p-0.5">
+                          <button type="button" aria-label={tr("Sort by cancellation policy")} onClick={() => sort("policy")} className="p-0.5">
                             <SortIcon active={sortBy === "policy"} desc={desc} />
                           </button>
                           <button
                             type="button"
-                            aria-label="Filter by cancellation policy"
+                            aria-label={tr("Filter by cancellation policy")}
                             aria-expanded={filterOpen}
                             onClick={() => setFilterOpen(!filterOpen)}
                             className="p-0.5"
@@ -267,8 +270,8 @@ export function RatePlansPanel({
                         </div>
                       )}
                     </th>
-                    <th className="w-16" aria-label="Main rate" />
-                    <th className="w-24" aria-label="Actions" />
+                    <th className="w-16" aria-label={tr("Main rate")} />
+                    <th className="w-24" aria-label={tr("Actions")} />
                   </tr>
                 </thead>
                 <tbody>
@@ -318,7 +321,7 @@ export function RatePlansPanel({
                   {rows.length === 0 && (
                     <tr>
                       <td colSpan={5} className="px-3 py-5 text-ink-muted">
-                        {ratePlans.length === 0 ? "None yet. Add the rate the hotel sells." : "No rate plan matches."}
+                        {ratePlans.length === 0 ? tr("None yet. Add the rate the hotel sells.") : tr("No rate plan matches.")}
                       </td>
                     </tr>
                   )}
@@ -335,29 +338,29 @@ export function RatePlansPanel({
                 }}
               >
                 <h4 className="border-b border-line pb-1 text-[16px] text-ink">
-                  {draft.id ? `Edit ${draft.name || "rate plan"}` : "Add New Rate Plan"}
+                  {draft.id ? `Edit ${draft.name || "rate plan"}` : tr("Add New Rate Plan")}
                 </h4>
                 <div className="mt-4 grid gap-4 sm:grid-cols-4">
                   <label className={label}>
-                    Code
-                    <input value={draft.code} placeholder="BB" className={cn(field, "uppercase")}
+                    {tr("Code")}
+                    <input value={draft.code} placeholder={tr("BB")} className={cn(field, "uppercase")}
                       onChange={(e) => setDraft({ ...draft, code: e.target.value })} />
                   </label>
                   <label className={cn(label, "sm:col-span-3")}>
-                    Title
-                    <input autoFocus value={draft.name} placeholder="Bed and Breakfast" className={field}
+                    {tr("Title")}
+                    <input autoFocus value={draft.name} placeholder={tr("Bed and Breakfast")} className={field}
                       onChange={(e) => setDraft({ ...draft, name: e.target.value })} />
                   </label>
                   <label className={cn(label, "sm:col-span-2")}>
-                    Description
-                    <input value={draft.description} placeholder="What a guest gets on this rate" className={field}
+                    {tr("Description")}
+                    <input value={draft.description} placeholder={tr("What a guest gets on this rate")} className={field}
                       onChange={(e) => setDraft({ ...draft, description: e.target.value })} />
                   </label>
                   <label className={cn(label, "sm:col-span-2")}>
-                    Cancellation Policy
+                    {tr("Cancellation Policy")}
                     <select value={draft.cancellationPolicyId} className={field}
                       onChange={(e) => setDraft({ ...draft, cancellationPolicyId: e.target.value })}>
-                      <option value="">Not set</option>
+                      <option value="">{tr("Not set")}</option>
                       {cancellationPolicies.map((c) => (
                         <option key={c.id} value={c.id}>{c.name}</option>
                       ))}
@@ -368,20 +371,20 @@ export function RatePlansPanel({
                   <label className="flex items-center gap-2">
                     <input type="checkbox" checked={draft.isDefault} className="h-4 w-4 accent-brass"
                       onChange={(e) => setDraft({ ...draft, isDefault: e.target.checked })} />
-                    Main rate
+                    {tr("Main rate")}
                   </label>
                   <label className="flex items-center gap-2">
                     <input type="checkbox" checked={draft.isActive} className="h-4 w-4 accent-brass"
                       onChange={(e) => setDraft({ ...draft, isActive: e.target.checked })} />
-                    Still selling
+                    {tr("Still selling")}
                   </label>
                 </div>
                 <div className="mt-5 flex justify-end gap-3">
                   <button type="button" className={secondary} onClick={() => setDraft(null)}>
-                    Cancel
+                    {tr("Cancel")}
                   </button>
                   <button type="submit" className={primary} disabled={pending}>
-                    Save
+                    {tr("Save")}
                   </button>
                 </div>
               </form>
@@ -390,13 +393,13 @@ export function RatePlansPanel({
             <div className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-2">
               {canEdit && (
                 <button type="button" className={primary} onClick={() => open(null)}>
-                  Add New Rate Plan
+                  {tr("Add New Rate Plan")}
                 </button>
               )}
               <label className="flex items-center gap-2 text-[12.5px] text-ink">
                 <input type="checkbox" checked={showExpired} className="h-3.5 w-3.5 accent-brass"
                   onChange={(e) => setShowExpired(e.target.checked)} />
-                Show Expired Rates
+                {tr("Show Expired Rates")}
               </label>
             </div>
           </div>

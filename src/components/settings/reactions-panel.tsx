@@ -1,5 +1,6 @@
 "use client";
 
+import { useT } from "@/components/i18n";
 import { useState } from "react";
 import { cn } from "@/components/ui";
 import { EditIcon } from "@/components/settings/finance-panels";
@@ -149,6 +150,7 @@ function ConditionRow({
   onRemove: () => void;
   lists: Record<"channel" | "room_type" | "rate_plan", Option[]>;
 }) {
+  const tr = useT();
   const spec = CONDITION_FIELDS.find((f) => f.id === c.field);
   const numeric = spec?.kind === "number";
   const ops = CONDITION_OPS.filter((o) => !o.numeric || numeric);
@@ -162,7 +164,7 @@ function ConditionRow({
   return (
     <div className="grid grid-cols-[1fr_1.75rem] items-center gap-2 sm:grid-cols-[2fr_1fr_2fr_1.75rem] sm:gap-4">
       <select
-        aria-label="Condition"
+        aria-label={tr("Condition")}
         value={c.field}
         className={cn(field, "col-span-2 sm:col-span-1")}
         onChange={(e) => {
@@ -175,22 +177,22 @@ function ConditionRow({
         <option value="" />
         {CONDITION_FIELDS.map((f) => <option key={f.id} value={f.id}>{f.label}</option>)}
       </select>
-      <select aria-label="Comparison" value={c.op} className={cn(field, "col-span-2 sm:col-span-1")}
+      <select aria-label={tr("Comparison")} value={c.op} className={cn(field, "col-span-2 sm:col-span-1")}
         onChange={(e) => onChange({ ...c, op: e.target.value })}>
         {ops.map((o) => <option key={o.id} value={o.id}>{o.label}</option>)}
       </select>
       {choices ? (
-        <select aria-label="Value" value={c.value} className={field}
+        <select aria-label={tr("Value")} value={c.value} className={field}
           onChange={(e) => onChange({ ...c, value: e.target.value })}>
           <option value="" />
           {choices.map((o) => <option key={o.id} value={o.id}>{o.label}</option>)}
         </select>
       ) : (
-        <input aria-label="Value" value={c.value} className={field}
+        <input aria-label={tr("Value")} value={c.value} className={field}
           inputMode={numeric ? "numeric" : undefined} maxLength={numeric ? 4 : 200}
           onChange={(e) => onChange({ ...c, value: e.target.value })} />
       )}
-      <button type="button" aria-label="Remove condition" className="grid h-7 w-7 place-items-center rounded text-brass hover:bg-shell"
+      <button type="button" aria-label={tr("Remove condition")} className="grid h-7 w-7 place-items-center rounded text-brass hover:bg-shell"
         onClick={onRemove}>
         <CrossIcon className="h-3.5 w-3.5" />
       </button>
@@ -211,6 +213,7 @@ function GroupEditor({
   onRemove?: () => void;
   lists: Record<"channel" | "room_type" | "rate_plan", Option[]>;
 }) {
+  const tr = useT();
   function setItem(i: number, item: DraftCondition | DraftGroup) {
     onChange({ ...group, items: group.items.map((x, j) => (j === i ? item : x)) });
   }
@@ -223,29 +226,29 @@ function GroupEditor({
   return (
     <div className={cn("space-y-3 rounded border border-line p-3", depth > 1 && "bg-shell/40")}>
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="inline-flex divide-x divide-line overflow-hidden rounded border border-line" role="group" aria-label="Match">
+        <div className="inline-flex divide-x divide-line overflow-hidden rounded border border-line" role="group" aria-label={tr("Match")}>
           <button type="button" aria-pressed={group.match === "all"} className={seg(group.match === "all")}
             onClick={() => onChange({ ...group, match: "all" })}>
-            All Conditions Match
+            {tr("All Conditions Match")}
           </button>
           <button type="button" aria-pressed={group.match === "any"} className={seg(group.match === "any")}
             onClick={() => onChange({ ...group, match: "any" })}>
-            Any Conditions Matches
+            {tr("Any Conditions Matches")}
           </button>
         </div>
         <div className="flex items-center gap-1">
           <button type="button" className={small}
             onClick={() => onChange({ ...group, items: [...group.items, emptyCondition()] })}>
-            Add Condition
+            {tr("Add Condition")}
           </button>
           {depth < 3 && (
             <button type="button" className={small}
               onClick={() => onChange({ ...group, items: [...group.items, { key: key(), match: "all", items: [emptyCondition()] }] })}>
-              Add Group
+              {tr("Add Group")}
             </button>
           )}
           {onRemove && (
-            <button type="button" aria-label="Remove group" className={iconBtn} onClick={onRemove}>
+            <button type="button" aria-label={tr("Remove group")} className={iconBtn} onClick={onRemove}>
               <CrossIcon className="h-3.5 w-3.5" />
             </button>
           )}
@@ -281,6 +284,7 @@ export function ReactionsPanel({
   pending: boolean;
   run: Run;
 }) {
+  const tr = useT();
   const [view, setView] = useState<"tasks" | "triggers">("tasks");
   const [draft, setDraft] = useState<Draft | null>(null);
   const lists = { channel: channels, room_type: roomTypes, rate_plan: ratePlans };
@@ -315,7 +319,7 @@ export function ReactionsPanel({
     >
       <div className="space-y-3">
         <div className="grid gap-1 sm:grid-cols-[12rem_1fr] sm:gap-4">
-          <Label htmlFor="reaction-task">Task:</Label>
+          <Label htmlFor="reaction-task">{tr("Task:")}</Label>
           <select
             id="reaction-task"
             value={draft.task}
@@ -335,17 +339,17 @@ export function ReactionsPanel({
           </select>
         </div>
         <div className="grid gap-1 sm:grid-cols-[12rem_1fr] sm:gap-4">
-          <Label htmlFor="reaction-title">Title</Label>
+          <Label htmlFor="reaction-title">{tr("Title")}</Label>
           <input id="reaction-title" value={draft.title} maxLength={120} className={field}
             onChange={(e) => set({ title: e.target.value })} />
         </div>
         <div className="grid gap-1 sm:grid-cols-[12rem_1fr] sm:gap-4">
-          <Label htmlFor="reaction-description">Description</Label>
+          <Label htmlFor="reaction-description">{tr("Description")}</Label>
           <input id="reaction-description" value={draft.description} maxLength={500} className={field}
             onChange={(e) => set({ description: e.target.value })} />
         </div>
         <div>
-          <Label>Conditions:</Label>
+          <Label>{tr("Conditions:")}</Label>
           <div className="mt-3">
             <GroupEditor group={draft.conditions} depth={1} lists={lists}
               onChange={(conditions) => set({ conditions })} />
@@ -353,11 +357,11 @@ export function ReactionsPanel({
         </div>
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <h4 className="text-[14px] text-ink">Triggers</h4>
+            <h4 className="text-[14px] text-ink">{tr("Triggers")}</h4>
             {draft.events.length < REACTION_EVENTS.length && (
               <button type="button" className={cn(small, "uppercase tracking-wide text-ink-muted")}
                 onClick={() => set({ events: [...draft.events, { key: key(), event: "" }] })}>
-                Create new trigger
+                {tr("Create new trigger")}
               </button>
             )}
           </div>
@@ -365,7 +369,7 @@ export function ReactionsPanel({
             const taken = new Set(draft.events.filter((_, j) => j !== i).map((x) => x.event));
             return (
               <div key={ev.key} className="grid grid-cols-[1fr_1.75rem] items-center gap-2 sm:grid-cols-[2fr_3fr_1.75rem] sm:gap-4">
-                <select aria-label="Event" value={ev.event} className={field}
+                <select aria-label={tr("Event")} value={ev.event} className={field}
                   onChange={(e) => set({ events: draft.events.map((x, j) => (j === i ? { ...x, event: e.target.value } : x)) })}>
                   <option value="" />
                   {REACTION_EVENTS.filter((o) => !taken.has(o.id)).map((o) => (
@@ -373,7 +377,7 @@ export function ReactionsPanel({
                   ))}
                 </select>
                 <span className="hidden sm:block" />
-                <button type="button" aria-label="Remove trigger" className={iconBtn}
+                <button type="button" aria-label={tr("Remove trigger")} className={iconBtn}
                   onClick={() => set({ events: draft.events.filter((_, j) => j !== i) })}>
                   <CrossIcon className="h-3.5 w-3.5" />
                 </button>
@@ -386,16 +390,16 @@ export function ReactionsPanel({
         <label className="flex items-center gap-2 text-[13px] text-ink-muted">
           <input type="checkbox" className="h-4 w-4 accent-brass" checked={draft.isEnabled}
             onChange={(e) => set({ isEnabled: e.target.checked })} />
-          Enabled
+          {tr("Enabled")}
         </label>
         <div className="flex gap-3">
           <button type="button" onClick={() => setDraft(null)}
             className="rounded-md border border-line bg-white px-5 py-2 text-[11.5px] font-semibold uppercase tracking-wide text-ink hover:bg-shell">
-            Cancel
+            {tr("Cancel")}
           </button>
           <button type="submit" disabled={pending}
             className="rounded-md bg-chrome-800 px-6 py-2 text-[11.5px] font-semibold uppercase tracking-wide text-white hover:bg-chrome-900 disabled:opacity-50">
-            Save
+            {tr("Save")}
           </button>
         </div>
       </div>
@@ -406,16 +410,16 @@ export function ReactionsPanel({
     <div className="max-w-6xl space-y-4">
       <section className={cn(card, "overflow-hidden")}>
         <div className="flex items-center justify-between border-b border-line px-4 py-3 sm:px-6">
-          <h2 className="text-[18px] text-ink">Reactions</h2>
+          <h2 className="text-[18px] text-ink">{tr("Reactions")}</h2>
           <div className="flex items-center gap-2 text-[15px]">
             <button type="button" aria-pressed={view === "triggers"} onClick={() => setView("triggers")}
               className={view === "triggers" ? "text-ink" : "text-brass hover:underline"}>
-              Triggers
+              {tr("Triggers")}
             </button>
             <span className="text-brass">|</span>
             <button type="button" aria-pressed={view === "tasks"} onClick={() => setView("tasks")}
               className={view === "tasks" ? "text-ink" : "text-brass hover:underline"}>
-              Tasks
+              {tr("Tasks")}
             </button>
           </div>
         </div>
@@ -425,16 +429,16 @@ export function ReactionsPanel({
             <table className="w-full min-w-[40rem] text-[12px]">
               <thead>
                 <tr className="border-b border-line text-left">
-                  <th className="px-2 py-2 font-semibold text-ink">Title / Description</th>
-                  <th className="px-2 py-2 font-semibold text-ink">Event</th>
-                  <th className="px-2 py-2 text-center font-semibold text-ink">Enabled</th>
-                  <th className="w-24" aria-label="Actions" />
+                  <th className="px-2 py-2 font-semibold text-ink">{tr("Title / Description")}</th>
+                  <th className="px-2 py-2 font-semibold text-ink">{tr("Event")}</th>
+                  <th className="px-2 py-2 text-center font-semibold text-ink">{tr("Enabled")}</th>
+                  <th className="w-24" aria-label={tr("Actions")} />
                 </tr>
               </thead>
               <tbody>
                 {reactions.length === 0 && (
                   <tr>
-                    <td colSpan={4} className="px-2 py-3 text-center text-ink-muted">None yet. Add a reaction.</td>
+                    <td colSpan={4} className="px-2 py-3 text-center text-ink-muted">{tr("None yet. Add a reaction.")}</td>
                   </tr>
                 )}
                 {reactions.map((r) => (
@@ -449,7 +453,7 @@ export function ReactionsPanel({
                       </ul>
                     </td>
                     <td className="px-2 py-2 text-center">
-                      {r.isEnabled ? <TickIcon /> : <span className="sr-only">No</span>}
+                      {r.isEnabled ? <TickIcon /> : <span className="sr-only">{tr("No")}</span>}
                     </td>
                     <td className="px-2 py-1">
                       {canEdit && (
@@ -485,8 +489,8 @@ export function ReactionsPanel({
           <table className="w-full text-[12px]">
             <thead>
               <tr className="border-b border-line text-left">
-                <th className="px-2 py-2 font-semibold text-ink">Event</th>
-                <th className="px-2 py-2 font-semibold text-ink">Reactions</th>
+                <th className="px-2 py-2 font-semibold text-ink">{tr("Event")}</th>
+                <th className="px-2 py-2 font-semibold text-ink">{tr("Reactions")}</th>
               </tr>
             </thead>
             <tbody>
@@ -519,7 +523,7 @@ export function ReactionsPanel({
           <div className="border-t border-line bg-shell/40 px-4 py-4 sm:px-6">
             <button type="button" onClick={() => { setView("tasks"); setDraft(newDraft()); }}
               className="rounded-md bg-chrome-800 px-3 py-2 text-[11px] font-semibold uppercase tracking-wide text-white hover:bg-chrome-900">
-              Add Reaction
+              {tr("Add Reaction")}
             </button>
           </div>
         )}

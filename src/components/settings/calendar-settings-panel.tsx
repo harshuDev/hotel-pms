@@ -1,5 +1,6 @@
 "use client";
 
+import { useT } from "@/components/i18n";
 import { useState } from "react";
 import { cn } from "@/components/ui";
 import {
@@ -42,6 +43,7 @@ export function CalendarSettingsPanel({
   pending: boolean;
   run: Run;
 }) {
+  const tr = useT();
   const [values, setValues] = useState<CalendarSettings>(settings);
 
   function save() {
@@ -53,13 +55,13 @@ export function CalendarSettingsPanel({
       const result = await saveCalendarSettings(next);
       if (result.ok) setValues(next);
       return result;
-    }, "Calendar settings saved.");
+    }, tr("Calendar settings saved."));
   }
 
   return (
     <div className="max-w-4xl">
       <section className={card}>
-        <h2 className="border-b border-line px-5 py-4 text-[19px] text-ink">Calendar Settings</h2>
+        <h2 className="border-b border-line px-5 py-4 text-[19px] text-ink">{tr("Calendar Settings")}</h2>
 
         <div className="px-5 pb-6 pt-2">
           {CALENDAR_COLORS.map((c) => {
@@ -129,10 +131,10 @@ export function CalendarSettingsPanel({
               disabled={pending}
               className={secondary}
             >
-              Reset
+              {tr("Reset")}
             </button>
             <button type="button" onClick={save} disabled={pending} className={primary}>
-              Save
+              {tr("Save")}
             </button>
           </div>
         )}

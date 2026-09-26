@@ -1,3 +1,4 @@
+import { getT } from "@/lib/i18n/server";
 import { format, parseISO } from "date-fns";
 import { cn } from "@/components/ui";
 import {
@@ -24,6 +25,7 @@ export default async function PaymentsReportPage({
 }: {
   searchParams: Promise<{ from?: string; to?: string }>;
 }) {
+  const tr = await getT();
   const currency = await getPropertyCurrency();
   const sp = await searchParams;
   const businessDate = await getBusinessDate();
@@ -39,7 +41,7 @@ export default async function PaymentsReportPage({
   } catch (error) {
     if (error instanceof ReportAccessError) {
       return (
-        <ReportShell title="Payments">
+        <ReportShell title={tr("Payments")}>
           <ReportNoAccess />
         </ReportShell>
       );
@@ -55,29 +57,29 @@ export default async function PaymentsReportPage({
 
   return (
     <ReportShell
-      title="Payments"
+      title={tr("Payments")}
       action="/reports/payments"
       range={range}
     >
       <ReportFigures>
         <ReportFigure
-          label="Taken"
+          label={tr("Taken")}
           value={formatMoneyShort(net, currency)}
-          detail="Net of reversals"
+          detail={tr("Net of reversals")}
           emphasis
         />
         <ReportFigure
-          label="Through the drawer"
+          label={tr("Through the drawer")}
           value={formatMoneyShort(drawer, currency)}
-          detail="Methods that move physical cash"
+          detail={tr("Methods that move physical cash")}
         />
         <ReportFigure
-          label="Payments"
+          label={tr("Payments")}
           value={String(rows.length - reversals)}
           detail={
             reversals > 0
               ? `${reversals} reversed`
-              : "None reversed in this range"
+              : tr("None reversed in this range")
           }
         />
       </ReportFigures>
@@ -87,31 +89,31 @@ export default async function PaymentsReportPage({
           rows={totals}
           rowKey={(t) => t.methodName}
           minWidth="560px"
-          emptyTitle="No payments in this range"
-          emptyHint="Widen the dates, or take a payment on the cashier screen."
+          emptyTitle={tr("No payments in this range")}
+          emptyHint={tr("Widen the dates, or take a payment on the cashier screen.")}
           footLabel={`${totals.length} method${totals.length === 1 ? "" : "s"}`}
           columns={[
             {
-              header: "Method",
+              header: tr("Method"),
               cell: (t) => (
                 <span className="font-medium text-ink">{t.methodName}</span>
               ),
             },
             {
-              header: "Drawer",
+              header: tr("Drawer"),
               cell: (t) => (
                 <span className="text-ink-muted">
-                  {t.affectsDrawer ? "Cash" : "Not cash"}
+                  {t.affectsDrawer ? tr("Cash") : tr("Not cash")}
                 </span>
               ),
             },
             {
-              header: "Payments",
+              header: tr("Payments"),
               align: "right",
               cell: (t) => <span className="text-ink-muted">{t.paymentCount}</span>,
             },
             {
-              header: "Reversed",
+              header: tr("Reversed"),
               align: "right",
               cell: (t) => (
                 <span
@@ -122,7 +124,7 @@ export default async function PaymentsReportPage({
               ),
             },
             {
-              header: "Net taken",
+              header: tr("Net taken"),
               align: "right",
               cell: (t) => (
                 <span className="font-medium text-ink">{formatMoney(t.netCents, currency)}</span>
@@ -137,11 +139,11 @@ export default async function PaymentsReportPage({
         rows={rows}
         rowKey={(r) => r.paymentId}
         minWidth="880px"
-        emptyTitle="No payments in this range"
-        emptyHint="Widen the dates, or take a payment on the cashier screen."
+        emptyTitle={tr("No payments in this range")}
+        emptyHint={tr("Widen the dates, or take a payment on the cashier screen.")}
         columns={[
           {
-            header: "Business date",
+            header: tr("Business date"),
             cell: (r) => (
               <span className="whitespace-nowrap text-ink-muted">
                 {format(parseISO(r.businessDate), "EEE d MMM")}
@@ -149,7 +151,7 @@ export default async function PaymentsReportPage({
             ),
           },
           {
-            header: "Booking",
+            header: tr("Booking"),
             cell: (r) => (
               <>
                 <span className="font-medium text-ink">{r.reference}</span>
@@ -158,7 +160,7 @@ export default async function PaymentsReportPage({
             ),
           },
           {
-            header: "Method",
+            header: tr("Method"),
             cell: (r) => (
               <>
                 <span className="text-ink-muted">{r.methodName}</span>
@@ -171,13 +173,13 @@ export default async function PaymentsReportPage({
             ),
           },
           {
-            header: "Taken by",
+            header: tr("Taken by"),
             cell: (r) => (
               <span className="text-ink-faint">{r.receivedBy ?? "—"}</span>
             ),
           },
           {
-            header: "Amount",
+            header: tr("Amount"),
             align: "right",
             cell: (r) => (
               <span

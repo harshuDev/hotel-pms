@@ -1,3 +1,4 @@
+import { getT } from "@/lib/i18n/server";
 import { InventoryPage } from "@/components/inventory/inventory-page";
 
 export const metadata = { title: "Rates (Main)" };
@@ -15,12 +16,13 @@ export default async function Page({
 }: {
   searchParams: Promise<{ plan?: string; from?: string }>;
 }) {
+  const tr = await getT();
   return (
     <InventoryPage
       fieldName="rate"
       searchParams={searchParams}
       lockedToDefaultPlan
-      title="Rates (Main)"
+      title={tr("Rates (Main)")}
     />
   );
 }

@@ -1,3 +1,4 @@
+import { getT } from "@/lib/i18n/server";
 import { format, parseISO } from "date-fns";
 import { EmptyState, cn } from "@/components/ui";
 import {
@@ -21,6 +22,7 @@ export default async function OccupancyReportPage({
 }: {
   searchParams: Promise<{ from?: string; to?: string }>;
 }) {
+  const tr = await getT();
   const currency = await getPropertyCurrency();
   const sp = await searchParams;
   const businessDate = await getBusinessDate();
@@ -33,39 +35,39 @@ export default async function OccupancyReportPage({
 
   return (
     <ReportShell
-      title="Occupancy"
+      title={tr("Occupancy")}
       action="/reports/occupancy"
       range={range}
     >
       <ReportFigures>
         <ReportFigure
-          label="Occupancy"
+          label={tr("Occupancy")}
           value={`${summary.occupancyPct}%`}
           detail={`${summary.roomsSold} of ${summary.roomNightsAvailable} room nights`}
         />
         <ReportFigure
-          label="Room revenue"
+          label={tr("Room revenue")}
           value={formatMoneyShort(summary.roomRevenueCents, currency)}
-          detail="Rate less discount, excluding tax"
+          detail={tr("Rate less discount, excluding tax")}
         />
         <ReportFigure
-          label="ADR"
+          label={tr("ADR")}
           value={formatMoney(summary.adrCents, currency)}
-          detail="Revenue over rooms sold"
+          detail={tr("Revenue over rooms sold")}
           emphasis
         />
         <ReportFigure
-          label="RevPAR"
+          label={tr("RevPAR")}
           value={formatMoney(summary.revparCents, currency)}
-          detail="Revenue over rooms available"
+          detail={tr("Revenue over rooms available")}
         />
       </ReportFigures>
 
       <div className="rounded-lg border border-line bg-white p-4 shadow-card">
         {rows.length === 0 ? (
           <EmptyState
-            title="No nights in this range"
-            hint="Widen the dates, or check that the range runs forwards."
+            title={tr("No nights in this range")}
+            hint={tr("Widen the dates, or check that the range runs forwards.")}
           />
         ) : (
           <div className="overflow-x-auto">

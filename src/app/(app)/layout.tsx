@@ -1,6 +1,7 @@
+import { getT } from "@/lib/i18n/server";
 import type { Metadata } from "next";
-import { format, parseISO } from "date-fns";
 import { TopNav } from "@/components/top-nav";
+import { StaffI18n } from "@/components/staff-i18n";
 import { TopBar } from "@/components/top-bar";
 import { CurrencyProvider } from "@/components/currency";
 import { signOut } from "@/lib/actions/auth";
@@ -43,6 +44,7 @@ export default async function AppLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const tr = await getT();
   // Read first and alone. Without a staff_users row, current_property_id() is
   // null, so getProperty() and getBusinessDate() find no rows and throw — the
   // panel below would never render if they ran alongside this.
@@ -57,20 +59,17 @@ export default async function AppLayout({
       <main className="grid min-h-screen place-items-center bg-shell px-5">
         <div className="w-full max-w-md rounded-lg border border-line bg-white p-8 text-center shadow-card">
           <h1 className="font-display text-[22px] font-semibold tracking-tightest text-ink">
-            No staff account
+            {tr("No staff account")}
           </h1>
           <p className="mt-2 text-[13px] leading-relaxed text-ink-muted">
-            Your sign-in worked, but it is not linked to an active staff
-            account, so there is nothing to show. Either the account was never
-            set up or it has been deactivated. An administrator can sort it
-            out.
+            {tr("Your sign-in worked, but it is not linked to an active staff account, so there is nothing to show. Either the account was never set up or it has been deactivated. An administrator can sort it out.")}
           </p>
           <form action={signOut}>
             <button
               type="submit"
               className="mt-6 rounded-md bg-chrome-800 px-5 py-2 text-sm font-medium text-white hover:bg-chrome-900"
             >
-              Log out
+              {tr("Log out")}
             </button>
           </form>
         </div>
@@ -85,31 +84,34 @@ export default async function AppLayout({
     getInventorySettings(),
   ]);
 
-  const businessDate = format(parseISO(today), "EEE d MMM yyyy");
+  const businessDate = tr.date(today, "EEE d MMM yyyy");
 
   return (
-    <div className="min-h-screen">
-      <TopNav
-        propertyId={property.id}
-        propertyName={property.name}
-        staffName={staff.fullName}
-        staffRole={staff.role}
-        // Hotel Features (0076) and Inventory -> Settings visibility (0088).
-        hiddenHrefs={[...hiddenNavHrefs(features), ...hiddenInventoryHrefs(inventorySettings)]}
-      />
+    // Every client component below reads the staff language from here (0106).
+    <StaffI18n>
+      <div className="min-h-screen">
+        <TopNav
+          propertyId={property.id}
+          propertyName={property.name}
+          staffName={staff.fullName}
+          staffRole={staff.role}
+          // Hotel Features (0076) and Inventory -> Settings visibility (0088).
+          hiddenHrefs={[...hiddenNavHrefs(features), ...hiddenInventoryHrefs(inventorySettings)]}
+        />
 
-      <TopBar
-        propertyName={property.name}
-        businessDate={businessDate}
-      />
+        <TopBar
+          propertyName={property.name}
+          businessDate={businessDate}
+        />
 
-      <main className="p-3 sm:p-5">
-        {/* Every amount in the staff app is written in the property's own
-            currency; client components read it from here. */}
-        <CurrencyProvider currency={property.currency.trim()}>
-          {children}
-        </CurrencyProvider>
-      </main>
-    </div>
+        <main className="p-3 sm:p-5">
+          {/* Every amount in the staff app is written in the property's own
+              currency; client components read it from here. */}
+          <CurrencyProvider currency={property.currency.trim()}>
+            {children}
+          </CurrencyProvider>
+        </main>
+      </div>
+    </StaffI18n>
   );
 }

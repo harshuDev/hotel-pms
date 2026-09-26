@@ -1,5 +1,6 @@
 "use client";
 
+import { useT } from "@/components/i18n";
 import { useState } from "react";
 import { cn } from "@/components/ui";
 import { HOTEL_FEATURES, type HotelFeatures } from "@/lib/hotel-features";
@@ -32,16 +33,17 @@ export function HotelFeaturesPanel({
   pending: boolean;
   run: Run;
 }) {
+  const tr = useT();
   const [values, setValues] = useState<HotelFeatures>(features);
 
   function save() {
-    run(() => saveHotelFeatures(values), "Hotel features saved.");
+    run(() => saveHotelFeatures(values), tr("Hotel features saved."));
   }
 
   return (
     <div className="max-w-4xl space-y-6">
       <h2 className="border-b border-line pb-1 font-display text-[26px] font-semibold tracking-tightest text-ink">
-        Hotel Features
+        {tr("Hotel Features")}
       </h2>
 
       <section className={cn(card, "overflow-hidden")}>
@@ -49,8 +51,8 @@ export function HotelFeaturesPanel({
           <table className="w-full text-[13.5px]">
             <thead>
               <tr className="border-b border-line text-left">
-                <th className="py-2 pr-4 font-semibold text-ink">Name</th>
-                <th className="w-20 py-2 text-center font-semibold text-ink">Active</th>
+                <th className="py-2 pr-4 font-semibold text-ink">{tr("Name")}</th>
+                <th className="w-20 py-2 text-center font-semibold text-ink">{tr("Active")}</th>
               </tr>
             </thead>
             <tbody>
@@ -77,7 +79,7 @@ export function HotelFeaturesPanel({
         {canEdit && (
           <div className="mt-6 flex justify-end bg-shell/60 px-6 py-5 sm:px-10">
             <button type="button" onClick={save} disabled={pending} className={primary}>
-              Save
+              {tr("Save")}
             </button>
           </div>
         )}

@@ -1,5 +1,6 @@
 "use client";
 
+import { useT } from "@/components/i18n";
 import { Fragment, useState } from "react";
 import { cn } from "@/components/ui";
 import {
@@ -63,6 +64,7 @@ function Section({
   pending: boolean;
   canEdit: boolean;
 }) {
+  const tr = useT();
   return (
     <section className={cn(card, "overflow-hidden")}>
       <div className="px-6 pb-7 pt-7 sm:px-8">
@@ -73,7 +75,7 @@ function Section({
       {onSave && canEdit && (
         <div className="flex justify-end border-t border-line bg-shell/60 px-6 py-4 sm:px-8">
           <button type="button" onClick={onSave} disabled={pending} className={save}>
-            Save
+            {tr("Save")}
           </button>
         </div>
       )}
@@ -171,6 +173,7 @@ function TemplateField({
   onChange: (next: string) => void;
   canEdit: boolean;
 }) {
+  const tr = useT();
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState(value);
   return (
@@ -185,7 +188,7 @@ function TemplateField({
           }}
           className={editorButton}
         >
-          Open template editor
+          {tr("Open template editor")}
         </button>
         {value && <span className="truncate text-[12px] text-ink-faint">{value.split("\n")[0]}</span>}
       </div>
@@ -194,17 +197,17 @@ function TemplateField({
           className="fixed inset-0 z-50 flex items-start justify-center bg-ink/40 px-4 pt-[10vh]"
           role="dialog"
           aria-modal="true"
-          aria-label={label || "Template"}
+          aria-label={label || tr("Template")}
           onKeyDown={(e) => {
             if (e.key === "Escape") setOpen(false);
           }}
         >
           <div className="w-full max-w-2xl rounded-lg bg-white shadow-xl">
             <div className="flex items-center justify-between border-b border-line px-5 py-3">
-              <h4 className="text-[15px] text-ink">{label || "Template"}</h4>
+              <h4 className="text-[15px] text-ink">{label || tr("Template")}</h4>
               <button
                 type="button"
-                aria-label="Close"
+                aria-label={tr("Close")}
                 onClick={() => setOpen(false)}
                 className="rounded p-1 text-ink-muted hover:bg-shell hover:text-ink"
               >
@@ -227,7 +230,7 @@ function TemplateField({
                 onClick={() => setOpen(false)}
                 className="rounded-md border border-line px-4 py-2 text-[13px] text-ink-muted hover:bg-shell hover:text-ink"
               >
-                Cancel
+                {tr("Cancel")}
               </button>
               {canEdit && (
                 <button
@@ -238,7 +241,7 @@ function TemplateField({
                   }}
                   className="rounded-md bg-chrome-800 px-5 py-2 text-[13px] font-medium text-white hover:bg-chrome-900"
                 >
-                  Done
+                  {tr("Done")}
                 </button>
               )}
             </div>
@@ -286,6 +289,7 @@ export function EmailSetupPanel({
   pending: boolean;
   run: Run;
 }) {
+  const tr = useT();
   // General Settings
   const [replyTo, setReplyTo] = useState(setup.replyToEmails);
   const [fromText, setFromText] = useState(setup.fromText ?? "");
@@ -330,24 +334,24 @@ export function EmailSetupPanel({
       <tr className="border-b border-line bg-shell/60">
         <td colSpan={2} className="px-2 py-4">
           <div className="grid gap-3">
-            <input aria-label="Template title" placeholder="Title" autoFocus value={tpl.title}
+            <input aria-label={tr("Template title")} placeholder={tr("Title")} autoFocus value={tpl.title}
               onChange={(e) => setTpl({ ...tpl, title: e.target.value })} className={underline} />
             <div>
-              <input aria-label="Template subject" placeholder="Email subject" value={tpl.subject}
+              <input aria-label={tr("Template subject")} placeholder={tr("Email subject")} value={tpl.subject}
                 onChange={(e) => setTpl({ ...tpl, subject: e.target.value })} className={underline} />
               <Counter value={tpl.subject} />
             </div>
-            <textarea aria-label="Template body" placeholder="Mail body" rows={6} value={tpl.body}
+            <textarea aria-label={tr("Template body")} placeholder={tr("Mail body")} rows={6} value={tpl.body}
               onChange={(e) => setTpl({ ...tpl, body: e.target.value })}
               className="w-full rounded-md border border-line px-3 py-2 text-[13.5px] text-ink focus:border-brass focus:outline-none focus:ring-1 focus:ring-brass" />
             <div className="flex justify-end gap-2">
               <button type="button" onClick={() => setTpl(null)}
                 className="rounded-md border border-line px-4 py-2 text-[13px] text-ink-muted hover:bg-shell hover:text-ink">
-                Cancel
+                {tr("Cancel")}
               </button>
               <button type="button" onClick={saveTemplate} disabled={pending}
                 className="rounded-md bg-chrome-800 px-5 py-2 text-[13px] font-medium text-white hover:bg-chrome-900 disabled:opacity-50">
-                Save
+                {tr("Save")}
               </button>
             </div>
           </div>
@@ -358,46 +362,46 @@ export function EmailSetupPanel({
 
   return (
     <div className="max-w-5xl space-y-6">
-      <h2 className="font-display text-[26px] font-semibold tracking-tightest text-ink">Email Setup</h2>
+      <h2 className="font-display text-[26px] font-semibold tracking-tightest text-ink">{tr("Email Setup")}</h2>
 
       {/* General Settings ------------------------------------------------ */}
       <Section
-        title="General Settings"
+        title={tr("General Settings")}
         canEdit={canEdit}
         pending={pending}
         onSave={() =>
           run(
             () => saveEmailGeneral({ replyToEmails: replyTo, fromText, notificationEmails: notify }),
-            "General settings saved.",
+            tr("General settings saved."),
           )
         }
       >
         <div className="space-y-6">
-          <EmailChips id="reply-to" label="Reply to Email Address" emails={replyTo} onChange={setReplyTo} canEdit={canEdit} />
+          <EmailChips id="reply-to" label={tr("Reply to Email Address")} emails={replyTo} onChange={setReplyTo} canEdit={canEdit} />
           <div>
-            <label htmlFor="from-text" className={tiny}>From text</label>
+            <label htmlFor="from-text" className={tiny}>{tr("From text")}</label>
             <input id="from-text" value={fromText} disabled={disabled} placeholder={propertyName}
               onChange={(e) => setFromText(e.target.value)} className={underline} />
             <Counter value={fromText} />
           </div>
-          <EmailChips id="notify" label="Booking Notification Email Address" emails={notify} onChange={setNotify} canEdit={canEdit} />
+          <EmailChips id="notify" label={tr("Booking Notification Email Address")} emails={notify} onChange={setNotify} canEdit={canEdit} />
         </div>
       </Section>
 
       {/* Footer Template -------------------------------------------------- */}
       <Section
-        title="Footer Template"
-        subtitle="Please add a footer which will be added to all new emails"
+        title={tr("Footer Template")}
+        subtitle={tr("Please add a footer which will be added to all new emails")}
         canEdit={canEdit}
         pending={pending}
-        onSave={() => run(() => saveEmailFooter(footer), "Footer saved.")}
+        onSave={() => run(() => saveEmailFooter(footer), tr("Footer saved."))}
       >
         <TemplateField label="" value={footer} onChange={setFooter} canEdit={canEdit} />
       </Section>
 
       {/* Booking Confirmation Email settings ------------------------------ */}
       <Section
-        title="Booking Confirmation Email settings"
+        title={tr("Booking Confirmation Email settings")}
         canEdit={canEdit}
         pending={pending}
         onSave={() => {
@@ -418,41 +422,41 @@ export function EmailSetupPanel({
                 showHotelLogo: showLogo,
                 includeFooter,
               }),
-            "Booking confirmation email saved.",
+            tr("Booking confirmation email saved."),
           );
         }}
       >
         <div className="space-y-5">
-          <TemplateField label="Check In Notes:" value={checkinNotes} onChange={setCheckinNotes} canEdit={canEdit} />
-          <TemplateField label="Directions:" value={directions} onChange={setDirections} canEdit={canEdit} />
+          <TemplateField label={tr("Check In Notes:")} value={checkinNotes} onChange={setCheckinNotes} canEdit={canEdit} />
+          <TemplateField label={tr("Directions:")} value={directions} onChange={setDirections} canEdit={canEdit} />
 
           <fieldset>
-            <legend className="text-[13px] text-ink-muted">Single-property bookings:</legend>
+            <legend className="text-[13px] text-ink-muted">{tr("Single-property bookings:")}</legend>
             <div className="mt-1.5 space-y-1.5">
               <Radio name="single" checked={single === "hotel"} onChange={() => setSingle("hotel")} disabled={disabled}
-                label="Use hotel address in greetings section" />
+                label={tr("Use hotel address in greetings section")} />
               <Radio name="single" checked={single === "property"} onChange={() => setSingle("property")} disabled={disabled}
-                label="Use property address in greetings section" />
+                label={tr("Use property address in greetings section")} />
             </div>
           </fieldset>
           <fieldset>
-            <legend className="text-[13px] text-ink-muted">Multi-property bookings:</legend>
+            <legend className="text-[13px] text-ink-muted">{tr("Multi-property bookings:")}</legend>
             <div className="mt-1.5 space-y-1.5">
               <Radio name="multi" checked={multi === "hotel_hide_properties"} onChange={() => setMulti("hotel_hide_properties")}
-                disabled={disabled} label="Use hotel address in greetings section and hide properties" />
+                disabled={disabled} label={tr("Use hotel address in greetings section and hide properties")} />
               <Radio name="multi" checked={multi === "show_properties"} onChange={() => setMulti("show_properties")}
-                disabled={disabled} label="Hide hotel address in greetings section and show properties addresses and maps" />
+                disabled={disabled} label={tr("Hide hotel address in greetings section and show properties addresses and maps")} />
             </div>
           </fieldset>
 
           <div>
-            <label htmlFor="confirm-message" className="text-[13px] text-ink-muted">Custom confirmation message</label>
+            <label htmlFor="confirm-message" className="text-[13px] text-ink-muted">{tr("Custom confirmation message")}</label>
             <textarea id="confirm-message" rows={2} value={message} disabled={disabled}
               onChange={(e) => setMessage(e.target.value)} className={cn(underline, "resize-y")} />
           </div>
 
           <div className="border-t border-line pt-5">
-            <p className="text-[13px] text-ink-muted">Customize Confirmation Email Reservation Colors:</p>
+            <p className="text-[13px] text-ink-muted">{tr("Customize Confirmation Email Reservation Colors:")}</p>
             <div className="mt-2 space-y-3">
               {CONFIRMATION_COLORS.map((c) => (
                 <div key={c.id} className="grid items-end gap-3 sm:grid-cols-2 sm:gap-6">
@@ -483,12 +487,12 @@ export function EmailSetupPanel({
             <label className="flex w-fit items-center gap-2 text-[13px] text-ink">
               <input type="checkbox" checked={showLogo} disabled={disabled}
                 onChange={(e) => setShowLogo(e.target.checked)} className="h-4 w-4 accent-brass" />
-              Show hotel logo on the top of the email
+              {tr("Show hotel logo on the top of the email")}
             </label>
             <label className="flex w-fit items-center gap-2 text-[13px] text-ink">
               <input type="checkbox" checked={includeFooter} disabled={disabled}
                 onChange={(e) => setIncludeFooter(e.target.checked)} className="h-4 w-4 accent-brass" />
-              Include footer template
+              {tr("Include footer template")}
             </label>
           </div>
         </div>
@@ -496,27 +500,27 @@ export function EmailSetupPanel({
 
       {/* Pre Arrival Email Setup ------------------------------------------ */}
       <Section
-        title="Pre Arrival Email Setup"
+        title={tr("Pre Arrival Email Setup")}
         canEdit={canEdit}
         pending={pending}
-        onSave={() => run(() => savePreArrivalEmail(preArrival), "Pre arrival email saved.")}
+        onSave={() => run(() => savePreArrivalEmail(preArrival), tr("Pre arrival email saved."))}
       >
         <label className="flex w-fit items-center gap-2 text-[13px] text-ink">
           <input type="checkbox" checked={preArrival} disabled={disabled}
             onChange={(e) => setPreArrival(e.target.checked)} className="h-4 w-4 accent-brass" />
-          Send Email to customer before arrival
+          {tr("Send Email to customer before arrival")}
         </label>
       </Section>
 
       {/* Post Departure Email Setup --------------------------------------- */}
       <Section
-        title="Post Departure Email Setup"
+        title={tr("Post Departure Email Setup")}
         canEdit={canEdit}
         pending={pending}
         onSave={() =>
           run(
             () => savePostDepartureEmail({ enabled: postEnabled, subject: postSubject, body: postBody }),
-            "Post departure email saved.",
+            tr("Post departure email saved."),
           )
         }
       >
@@ -524,51 +528,51 @@ export function EmailSetupPanel({
           <label className="flex w-fit items-center gap-2 text-[13px] text-ink">
             <input type="checkbox" checked={postEnabled} disabled={disabled}
               onChange={(e) => setPostEnabled(e.target.checked)} className="h-4 w-4 accent-brass" />
-            Send Email to customer after departure
+            {tr("Send Email to customer after departure")}
           </label>
           <div>
-            <label htmlFor="post-subject" className={tiny}>Email subject</label>
+            <label htmlFor="post-subject" className={tiny}>{tr("Email subject")}</label>
             <input id="post-subject" value={postSubject} disabled={disabled}
               placeholder={`Your Recent Stay at ${propertyName}`}
               onChange={(e) => setPostSubject(e.target.value)} className={underline} />
             <Counter value={postSubject} />
           </div>
-          <TemplateField label="Mail Body:" value={postBody} onChange={setPostBody} canEdit={canEdit} />
+          <TemplateField label={tr("Mail Body:")} value={postBody} onChange={setPostBody} canEdit={canEdit} />
         </div>
       </Section>
 
       {/* Request Payment Email Setup -------------------------------------- */}
       <Section
-        title="Request Payment Email Setup"
+        title={tr("Request Payment Email Setup")}
         canEdit={canEdit}
         pending={pending}
         onSave={() =>
-          run(() => savePaymentRequestEmail({ subject: paySubject, body: payBody }), "Request payment email saved.")
+          run(() => savePaymentRequestEmail({ subject: paySubject, body: payBody }), tr("Request payment email saved."))
         }
       >
         <div className="space-y-4">
           <div>
-            <label htmlFor="pay-subject" className={tiny}>Email subject</label>
+            <label htmlFor="pay-subject" className={tiny}>{tr("Email subject")}</label>
             <input id="pay-subject" value={paySubject} disabled={disabled}
               onChange={(e) => setPaySubject(e.target.value)} className={underline} />
             <Counter value={paySubject} />
           </div>
-          <TemplateField label="Mail Body:" value={payBody} onChange={setPayBody} canEdit={canEdit} />
+          <TemplateField label={tr("Mail Body:")} value={payBody} onChange={setPayBody} canEdit={canEdit} />
         </div>
       </Section>
 
       {/* Email Templates -------------------------------------------------- */}
       <Section
-        title="Email Templates"
-        subtitle="Here you can add templates for faster communication with your guests"
+        title={tr("Email Templates")}
+        subtitle={tr("Here you can add templates for faster communication with your guests")}
         canEdit={canEdit}
         pending={pending}
       >
         <table className="w-full text-[13.5px]">
           <thead>
             <tr className="border-b border-line text-left">
-              <th className="px-2 py-2 font-semibold text-ink">Title</th>
-              <th className="w-24 py-2" aria-label="Actions" />
+              <th className="px-2 py-2 font-semibold text-ink">{tr("Title")}</th>
+              <th className="w-24 py-2" aria-label={tr("Actions")} />
             </tr>
           </thead>
           <tbody>
@@ -586,7 +590,7 @@ export function EmailSetupPanel({
                       <span className="flex justify-end gap-1">
                         <button
                           type="button"
-                          title="Edit"
+                          title={tr("Edit")}
                           aria-label={`Edit ${t.title}`}
                           onClick={() => setTpl({ id: t.id, title: t.title, subject: t.subject ?? "", body: t.body ?? "" })}
                           className="grid h-7 w-7 place-items-center rounded text-brass hover:bg-shell"
@@ -599,7 +603,7 @@ export function EmailSetupPanel({
                         </button>
                         <button
                           type="button"
-                          title="Delete"
+                          title={tr("Delete")}
                           aria-label={`Delete ${t.title}`}
                           disabled={pending}
                           onClick={() => {
@@ -625,7 +629,7 @@ export function EmailSetupPanel({
             onClick={() => setTpl({ id: null, title: "", subject: "", body: "" })}
             className={cn(editorButton, "mt-4")}
           >
-            + Add email template
+            {tr("+ Add email template")}
           </button>
         )}
       </Section>

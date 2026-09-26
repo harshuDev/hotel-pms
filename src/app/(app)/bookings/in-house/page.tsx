@@ -1,3 +1,4 @@
+import { getT } from "@/lib/i18n/server";
 import { PageHeader } from "@/components/ui";
 import { BookingList } from "@/components/bookings/booking-list";
 import { getBookings } from "@/lib/queries";
@@ -5,6 +6,7 @@ import { getBookings } from "@/lib/queries";
 export const metadata = { title: "In house" };
 
 export default async function InHousePage() {
+  const tr = await getT();
   // Everyone currently checked in, however long ago they arrived.
   const { rows, total } = await getBookings({
     status: "checked_in",
@@ -14,12 +16,12 @@ export default async function InHousePage() {
   return (
     <div>
       <PageHeader
-        title="In house"
+        title={tr("In house")}
       />
       <BookingList
         rows={rows}
-        empty="Nobody is in house"
-        hint="A booking appears here once a guest checks in, and leaves when they check out."
+        empty={tr("Nobody is in house")}
+        hint={tr("A booking appears here once a guest checks in, and leaves when they check out.")}
       />
     </div>
   );

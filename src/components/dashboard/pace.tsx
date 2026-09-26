@@ -1,5 +1,6 @@
 "use client";
 
+import { useT } from "@/components/i18n";
 import { format, parseISO } from "date-fns";
 import {
   Bar,
@@ -41,6 +42,7 @@ function Tip({
   active?: boolean;
   payload?: { payload: Row }[];
 }) {
+  const tr = useT();
   const currency = useCurrency();
   if (!active || !payload?.length) return null;
   const r = payload[0].payload;
@@ -48,10 +50,10 @@ function Tip({
     <div className="rounded-md border border-line bg-white px-3 py-2 shadow-lift">
       <p className="text-xxs uppercase tracking-wide text-ink-faint">
         {format(parseISO(r.date), "EEE d MMM")}
-        {r.future && " · forecast"}
+        {r.future && tr(" · forecast")}
       </p>
       <p className="tnum mt-1 text-[13px] font-semibold text-ink">
-        {r.occupancy.toFixed(1)}% occupied
+        {r.occupancy.toFixed(1)}{tr("% occupied")}
       </p>
       <p className="tnum text-xs text-ink-muted">{formatMoney(r.revenue, currency)}</p>
     </div>
@@ -67,6 +69,7 @@ export function Pace({
   revenue: SeriesPoint[];
   today: string;
 }) {
+  const tr = useT();
   const currency = useCurrency();
   // Revenue runs backwards 28 days, occupancy forwards 28. Stitch into one
   // continuous timeline so the eye reads past and future as one story.
@@ -102,8 +105,8 @@ export function Pace({
 
   return (
     <Card
-      eyebrow="Pace"
-      title="Where the month is going"
+      eyebrow={tr("Pace")}
+      title={tr("Where the month is going")}
       bodyClassName="px-4 pb-4"
       action={
         <div className="flex gap-6 text-right">
@@ -111,13 +114,13 @@ export function Pace({
             <p className="tnum font-display text-[15px] font-semibold text-ink">
               {formatMoneyShort(totalPast, currency)}
             </p>
-            <p className="text-xxs text-ink-faint">Revenue, 28 days back</p>
+            <p className="text-xxs text-ink-faint">{tr("Revenue, 28 days back")}</p>
           </div>
           <div>
             <p className="tnum font-display text-[15px] font-semibold text-brass">
               {avgFuture.toFixed(1)}%
             </p>
-            <p className="text-xxs text-ink-faint">On the books, 28 ahead</p>
+            <p className="text-xxs text-ink-faint">{tr("On the books, 28 ahead")}</p>
           </div>
         </div>
       }

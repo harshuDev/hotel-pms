@@ -1,5 +1,6 @@
 "use client";
 
+import { useT } from "@/components/i18n";
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/components/ui";
 import {
@@ -108,6 +109,7 @@ export function TemplatesPanel({
   pending: boolean;
   run: Run;
 }) {
+  const tr = useT();
   const [liquid, setLiquid] = useState(template?.liquid ?? "");
   const [css, setCss] = useState(template?.css ?? "");
   const [isActive, setIsActive] = useState(template?.isActive ?? false);
@@ -120,9 +122,9 @@ export function TemplatesPanel({
     <div className="max-w-6xl space-y-4">
       <section className="rounded-lg border border-line bg-white shadow-card">
         <div className="relative flex items-center justify-between border-b border-line px-4 py-3 sm:px-6">
-          <h2 className="text-[16px] text-ink">Folio/invoice template</h2>
+          <h2 className="text-[16px] text-ink">{tr("Folio/invoice template")}</h2>
           <div className="flex items-center gap-1 text-ink-muted">
-            <button type="button" aria-label="Template variables" aria-expanded={help}
+            <button type="button" aria-label={tr("Template variables")} aria-expanded={help}
               onClick={() => setHelp(!help)}
               className="grid h-7 w-7 place-items-center rounded hover:bg-shell">
               <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
@@ -131,7 +133,7 @@ export function TemplatesPanel({
                 <circle cx="12" cy="17" r=".6" fill="currentColor" />
               </svg>
             </button>
-            <button type="button" aria-label={stacked ? "Editors side by side" : "Editors one above the other"}
+            <button type="button" aria-label={stacked ? tr("Editors side by side") : tr("Editors one above the other")}
               aria-pressed={stacked}
               onClick={() => setStacked(!stacked)}
               className="grid h-7 w-7 place-items-center rounded hover:bg-shell">
@@ -146,7 +148,7 @@ export function TemplatesPanel({
           </div>
           {help && (
             <div className="absolute right-4 top-12 z-20 w-[min(26rem,calc(100vw-3rem))] rounded-md border border-line bg-white p-3 text-[12px] shadow-card">
-              <p className="mb-2 font-mono text-ink">{"{{ guest.name }}  {% for line in lines %}"}</p>
+              <p className="mb-2 font-mono text-ink">{tr("{{ guest.name }}  {% for line in lines %}")}</p>
               <dl className="space-y-1.5">
                 {TEMPLATE_VARIABLES.map((g) => (
                   <div key={g.name}>
@@ -161,22 +163,22 @@ export function TemplatesPanel({
 
         <div className="space-y-4 px-4 py-4 sm:px-3">
           <input
-            aria-label="Preview Folio Number"
-            placeholder="Preview Folio Number"
+            aria-label={tr("Preview Folio Number")}
+            placeholder={tr("Preview Folio Number")}
             inputMode="numeric"
             value={folioNumber}
             onChange={(e) => setFolioNumber(e.target.value)}
             className="w-full max-w-xl border-0 border-b border-line bg-transparent px-0.5 py-1.5 text-[13px] text-ink outline-none placeholder:text-ink-muted focus:border-brass"
           />
           <div className={cn("grid gap-3", !stacked && "lg:grid-cols-2")}>
-            <CodeEditor id="template-liquid" label="Liquid Editor" value={liquid} onChange={setLiquid} readOnly={!canEdit} />
-            <CodeEditor id="template-css" label="CSS Editor" value={css} onChange={setCss} readOnly={!canEdit} />
+            <CodeEditor id="template-liquid" label={tr("Liquid Editor")} value={liquid} onChange={setLiquid} readOnly={!canEdit} />
+            <CodeEditor id="template-css" label={tr("CSS Editor")} value={css} onChange={setCss} readOnly={!canEdit} />
           </div>
           {preview !== null && (
             <div>
               <div className="mb-1 flex items-center justify-between">
-                <span className="text-[13px] font-semibold text-ink">Preview</span>
-                <button type="button" aria-label="Close preview" onClick={() => setPreview(null)}
+                <span className="text-[13px] font-semibold text-ink">{tr("Preview")}</span>
+                <button type="button" aria-label={tr("Close preview")} onClick={() => setPreview(null)}
                   className="grid h-7 w-7 place-items-center rounded text-brass hover:bg-shell">
                   <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor"
                     strokeWidth="3.2" strokeLinecap="round" aria-hidden="true">
@@ -185,7 +187,7 @@ export function TemplatesPanel({
                 </button>
               </div>
               <iframe
-                title="Template preview"
+                title={tr("Template preview")}
                 sandbox=""
                 srcDoc={preview}
                 className="h-[40rem] w-full rounded border border-line bg-white"
@@ -199,10 +201,10 @@ export function TemplatesPanel({
             <label className="flex items-center gap-2 text-[13px] text-ink">
               <input type="checkbox" className="h-4 w-4 accent-brass" checked={isActive}
                 onChange={(e) => setIsActive(e.target.checked)} />
-              Is Active
+              {tr("Is Active")}
             </label>
           ) : (
-            <span className="text-[13px] text-ink">{isActive ? "Active" : "Not active"}</span>
+            <span className="text-[13px] text-ink">{isActive ? tr("Active") : tr("Not active")}</span>
           )}
           <div className="flex flex-wrap items-center gap-2">
             <button
@@ -218,10 +220,10 @@ export function TemplatesPanel({
                     );
                   }
                   return result;
-                }, "Preview ready.")
+                }, tr("Preview ready."))
               }
             >
-              Preview
+              {tr("Preview")}
             </button>
             {canEdit && (
               <>
@@ -229,20 +231,20 @@ export function TemplatesPanel({
                   type="button"
                   className="rounded-md border border-line bg-white px-3 py-2 text-[11.5px] font-semibold uppercase tracking-wide text-ink hover:bg-shell"
                   onClick={() => {
-                    if ((liquid.trim() || css.trim()) && !confirm("Replace both editors with the default template?")) return;
+                    if ((liquid.trim() || css.trim()) && !confirm(tr("Replace both editors with the default template?"))) return;
                     setLiquid(DEFAULT_FOLIO_LIQUID);
                     setCss(DEFAULT_FOLIO_CSS);
                   }}
                 >
-                  Load Defaults
+                  {tr("Load Defaults")}
                 </button>
                 <button
                   type="button"
                   disabled={pending}
                   className="rounded-md bg-chrome-800 px-3 py-2 text-[11.5px] font-semibold uppercase tracking-wide text-white hover:bg-chrome-900 disabled:opacity-50"
-                  onClick={() => run(() => saveDocumentTemplate({ liquid, css, isActive }), "Template saved.")}
+                  onClick={() => run(() => saveDocumentTemplate({ liquid, css, isActive }), tr("Template saved."))}
                 >
-                  Save Template
+                  {tr("Save Template")}
                 </button>
               </>
             )}

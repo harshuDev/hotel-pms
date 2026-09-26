@@ -1,5 +1,6 @@
 "use client";
 
+import { useT } from "@/components/i18n";
 import { useState } from "react";
 import { Card, EmptyState, cn } from "@/components/ui";
 import { formatMoney } from "@/lib/money";
@@ -21,14 +22,15 @@ export function Movements({
   departures: Booking[];
   canMoveGuests: boolean;
 }) {
+  const tr = useT();
   const currency = useCurrency();
   const [tab, setTab] = useState<Tab>("arrivals");
   const rows = tab === "arrivals" ? arrivals : departures;
 
   return (
     <Card
-      eyebrow="Today"
-      title="Movements"
+      eyebrow={tr("Today")}
+      title={tr("Movements")}
       className="h-[358px]"
       bodyClassName="overflow-y-auto"
       action={
@@ -56,12 +58,12 @@ export function Movements({
       {rows.length === 0 ? (
         <EmptyState
           title={
-            tab === "arrivals" ? "Nobody arriving today" : "Everyone has left"
+            tab === "arrivals" ? tr("Nobody arriving today") : tr("Everyone has left")
           }
           hint={
             tab === "arrivals"
-              ? "Confirmed bookings for today appear here."
-              : "Departures clear from this list once the folio settles."
+              ? tr("Confirmed bookings for today appear here.")
+              : tr("Departures clear from this list once the folio settles.")
           }
         />
       ) : (
@@ -96,10 +98,10 @@ export function Movements({
                     b.balanceCents > 0 ? "text-rose-600" : "text-emerald-600",
                   )}
                 >
-                  {b.balanceCents > 0 ? formatMoney(b.balanceCents, currency) : "Settled"}
+                  {b.balanceCents > 0 ? formatMoney(b.balanceCents, currency) : tr("Settled")}
                 </p>
                 <p className="text-xxs text-ink-faint">
-                  {b.adults + b.children} pax
+                  {b.adults + b.children} {tr("pax")}
                 </p>
               </div>
               {/* A guest can only move one way, and only from the right state:

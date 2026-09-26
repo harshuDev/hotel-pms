@@ -1,5 +1,6 @@
 "use client";
 
+import { useT } from "@/components/i18n";
 import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { format, parseISO } from "date-fns";
@@ -75,6 +76,7 @@ export function CashierClient({
   suggestedFloatCents: number | null;
   canSeeExpected: boolean;
 }) {
+  const tr = useT();
   const currency = useCurrency();
   const [modal, setModal] = useState<null | "payment" | "paidout" | "close">(
     null,
@@ -128,11 +130,11 @@ export function CashierClient({
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="font-display text-[26px] font-semibold tracking-tightest text-ink">
-            Cashier
+            {tr("Cashier")}
           </h1>
           <p className="mt-1 text-sm text-ink-muted">
-            {shift.userName} · opened{" "}
-            {format(parseISO(shift.openedAt), "h:mm a")} · business date{" "}
+            {shift.userName} {tr("· opened")}{" "}
+            {format(parseISO(shift.openedAt), "h:mm a")} {tr("· business date")}{" "}
             {format(parseISO(shift.businessDate), "d MMM yyyy")}
           </p>
         </div>
@@ -141,56 +143,56 @@ export function CashierClient({
             onClick={() => setModal("payment")}
             className="rounded bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-emerald-700"
           >
-            Take payment
+            {tr("Take payment")}
           </button>
           <button
             onClick={() => setModal("paidout")}
             className="rounded bg-brass px-4 py-2.5 text-sm font-medium text-white hover:bg-[#9C6F32]"
           >
-            Record paid-out
+            {tr("Record paid-out")}
           </button>
           <button
             onClick={() => setModal("close")}
             className="rounded-lg border border-line bg-white px-4 py-2.5 text-sm font-medium text-ink hover:bg-shell"
           >
-            Close shift
+            {tr("Close shift")}
           </button>
         </div>
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <Stat
-          label="Opening float"
+          label={tr("Opening float")}
           value={formatMoney(shift.openingFloatCents, currency)}
         />
         <Stat
-          label="Payments taken"
+          label={tr("Payments taken")}
           value={formatMoney(totals.allIn, currency)}
           hint={`${formatMoney(totals.drawerIn, currency)} of it in cash`}
           tone="positive"
         />
         <Stat
-          label="Paid out"
+          label={tr("Paid out")}
           value={formatMoney(totals.out, currency)}
           hint={`${shift.paidOuts.length} transactions`}
           tone="negative"
         />
         <Stat
-          label="Expected in drawer"
+          label={tr("Expected in drawer")}
           value={canSeeExpected ? formatMoney(totals.expected, currency) : "—"}
           hint={
             canSeeExpected
-              ? "Cash only — non-cash payments excluded"
-              : "You count it blind; the figure appears at close"
+              ? tr("Cash only — non-cash payments excluded")
+              : tr("You count it blind; the figure appears at close")
           }
         />
       </div>
 
       <div className="grid gap-3 xl:grid-cols-2">
-        <Card title="Payments this shift">
+        <Card title={tr("Payments this shift")}>
           {shift.payments.length === 0 ? (
             <p className="px-4 py-6 text-center text-[13px] text-ink-muted">
-              No payments yet. Take one with the button above.
+              {tr("No payments yet. Take one with the button above.")}
             </p>
           ) : (
             <table className="w-full text-[13px]">
@@ -223,10 +225,10 @@ export function CashierClient({
           )}
         </Card>
 
-        <Card title="Paid-outs this shift">
+        <Card title={tr("Paid-outs this shift")}>
           {shift.paidOuts.length === 0 ? (
             <p className="px-4 py-6 text-center text-[13px] text-ink-muted">
-              Nothing has left the drawer this shift.
+              {tr("Nothing has left the drawer this shift.")}
             </p>
           ) : (
             <table className="w-full text-[13px]">
@@ -239,7 +241,7 @@ export function CashierClient({
                         {p.payee} ·{" "}
                         {p.rechargeBookingRef
                           ? `recharged to ${p.rechargeBookingRef}`
-                          : "house expense"}
+                          : tr("house expense")}
                       </p>
                     </td>
                     <td className="tnum px-4 py-2.5 text-right font-medium text-rose-600">
@@ -292,13 +294,14 @@ function ClosedReceipt({
   closed: { counted: number; expected: number; variance: number };
   onOpenAnother: () => void;
 }) {
+  const tr = useT();
   const currency = useCurrency();
   const large = Math.abs(closed.variance) > LARGE_VARIANCE_CENTS;
 
   return (
     <div className="mx-auto max-w-lg rounded-lg border border-line bg-white p-8 text-center shadow-sm">
       <h1 className="font-display text-[26px] font-semibold tracking-tightest text-ink">
-        Shift closed
+        {tr("Shift closed")}
       </h1>
       <dl className="mt-6 space-y-2 text-sm">
         {[
@@ -311,7 +314,7 @@ function ClosedReceipt({
           </div>
         ))}
         <div className="flex justify-between pt-1">
-          <dt className="font-medium">Variance</dt>
+          <dt className="font-medium">{tr("Variance")}</dt>
           <dd
             className={cn(
               "tnum font-semibold",
@@ -327,19 +330,18 @@ function ClosedReceipt({
 
       {large && (
         <p className="mt-4 rounded-md border border-rose-200 bg-rose-50 px-3 py-2.5 text-xs text-rose-700">
-          That is over {formatMoney(LARGE_VARIANCE_CENTS, currency)} out. A manager should
-          look at this shift before the drawer is used again.
+          {tr("That is over")}{" "}{formatMoney(LARGE_VARIANCE_CENTS, currency)} {tr("out. A manager should look at this shift before the drawer is used again.")}
         </p>
       )}
 
       <p className="mt-6 text-xs leading-relaxed text-ink-faint">
-        The next receptionist can now open a shift.
+        {tr("The next receptionist can now open a shift.")}
       </p>
       <button
         onClick={onOpenAnother}
         className="mt-6 rounded bg-chrome-800 px-5 py-2 text-sm font-medium text-white hover:bg-chrome-900"
       >
-        Open a new shift
+        {tr("Open a new shift")}
       </button>
     </div>
   );
@@ -352,6 +354,7 @@ function OpenShiftPanel({
   businessDate: string;
   suggestedFloatCents: number | null;
 }) {
+  const tr = useT();
   const currency = useCurrency();
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -365,9 +368,9 @@ function OpenShiftPanel({
     try {
       cents = parseMoney(float);
     } catch {
-      return setError("Enter the float like 500 or 500.00");
+      return setError(tr("Enter the float like 500 or 500.00"));
     }
-    if (cents < 0) return setError("The float cannot be negative.");
+    if (cents < 0) return setError(tr("The float cannot be negative."));
 
     startTransition(async () => {
       const result = await openShift(cents);
@@ -379,15 +382,14 @@ function OpenShiftPanel({
   return (
     <div className="mx-auto max-w-lg rounded-lg border border-line bg-white p-8 shadow-sm">
       <h1 className="font-display text-[26px] font-semibold tracking-tightest text-ink">
-        Open a shift
+        {tr("Open a shift")}
       </h1>
       <p className="mt-1.5 text-sm text-ink-muted">
-        Business date {format(parseISO(businessDate), "d MMM yyyy")}. Nothing
-        can be taken or paid out until a shift is open.
+        {tr("Business date")}{" "}{format(parseISO(businessDate), "d MMM yyyy")}{tr(". Nothing can be taken or paid out until a shift is open.")}
       </p>
 
       <div className="mt-6">
-        <label className={labelCls}>Opening float</label>
+        <label className={labelCls}>{tr("Opening float")}</label>
         <input
           value={float}
           onChange={(e) => {
@@ -401,7 +403,7 @@ function OpenShiftPanel({
         />
         <p className="mt-1.5 text-xxs text-ink-faint">
           {suggestedFloatCents === null
-            ? "Count the float into the drawer and enter the total."
+            ? tr("Count the float into the drawer and enter the total.")
             : `The last shift opened at ${formatMoney(suggestedFloatCents, currency)}.`}
         </p>
       </div>
@@ -413,7 +415,7 @@ function OpenShiftPanel({
         disabled={pending}
         className="mt-6 w-full rounded bg-chrome-800 px-5 py-2.5 text-sm font-medium text-white hover:bg-chrome-900 disabled:opacity-60"
       >
-        {pending ? "Opening…" : "Open shift"}
+        {pending ? tr("Opening…") : tr("Open shift")}
       </button>
     </div>
   );
@@ -428,6 +430,7 @@ function Modal({
   children: React.ReactNode;
   onClose: () => void;
 }) {
+  const tr = useT();
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
       <div className="w-full max-w-md rounded-lg border border-line bg-white shadow-xl">
@@ -436,7 +439,7 @@ function Modal({
           <button
             onClick={onClose}
             className="text-ink-faint hover:text-ink"
-            aria-label="Close"
+            aria-label={tr("Close")}
           >
             ✕
           </button>
@@ -464,6 +467,7 @@ function PaymentModal({
   businessDate: string;
   onClose: () => void;
 }) {
+  const tr = useT();
   const currency = useCurrency();
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -475,15 +479,15 @@ function PaymentModal({
   const booking = bookings.find((b) => b.id === bookingId);
 
   const submit = () => {
-    if (!booking) return setError("Choose a booking first.");
-    if (!methodId) return setError("Choose a payment method.");
+    if (!booking) return setError(tr("Choose a booking first."));
+    if (!methodId) return setError(tr("Choose a payment method."));
     let cents: number;
     try {
       cents = parseMoney(amount);
     } catch {
-      return setError("Enter an amount like 2500 or 2500.50");
+      return setError(tr("Enter an amount like 2500 or 2500.50"));
     }
-    if (cents <= 0) return setError("Amount must be more than zero.");
+    if (cents <= 0) return setError(tr("Amount must be more than zero."));
 
     startTransition(async () => {
       const result = await takePayment({
@@ -500,13 +504,13 @@ function PaymentModal({
   };
 
   return (
-    <Modal title="Take payment" onClose={onClose}>
+    <Modal title={tr("Take payment")} onClose={onClose}>
       <div className="space-y-4">
         <div>
-          <label className={labelCls}>Booking</label>
+          <label className={labelCls}>{tr("Booking")}</label>
           {bookings.length === 0 ? (
             <p className="text-[13px] text-ink-muted">
-              No booking has an outstanding balance right now.
+              {tr("No booking has an outstanding balance right now.")}
             </p>
           ) : (
             <select
@@ -523,13 +527,13 @@ function PaymentModal({
           )}
           {booking && (
             <p className="mt-1 text-xxs text-ink-faint">
-              Outstanding balance {formatMoney(booking.balanceCents, currency)}
+              {tr("Outstanding balance")}{" "}{formatMoney(booking.balanceCents, currency)}
             </p>
           )}
         </div>
 
         <div>
-          <label className={labelCls}>Method</label>
+          <label className={labelCls}>{tr("Method")}</label>
           <div className="flex flex-wrap gap-2">
             {methods.map((m) => (
               <button
@@ -548,13 +552,13 @@ function PaymentModal({
           </div>
           <p className="mt-1.5 text-xxs text-ink-faint">
             {methods.find((m) => m.id === methodId)?.affectsDrawer
-              ? "Cash — this will change the drawer total."
-              : "Not cash — recorded against the folio but the drawer is unaffected."}
+              ? tr("Cash — this will change the drawer total.")
+              : tr("Not cash — recorded against the folio but the drawer is unaffected.")}
           </p>
         </div>
 
         <div>
-          <label className={labelCls}>Amount</label>
+          <label className={labelCls}>{tr("Amount")}</label>
           <input
             value={amount}
             onChange={(e) => {
@@ -570,7 +574,7 @@ function PaymentModal({
               onClick={() => setAmount(formatMoneyInput(booking.balanceCents))}
               className="mt-1.5 text-xxs text-brass hover:underline"
             >
-              Use full balance
+              {tr("Use full balance")}
             </button>
           )}
         </div>
@@ -582,14 +586,14 @@ function PaymentModal({
             onClick={onClose}
             className="rounded border border-line px-4 py-2 text-sm hover:bg-shell"
           >
-            Cancel
+            {tr("Cancel")}
           </button>
           <button
             onClick={submit}
             disabled={pending}
             className="rounded bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-60"
           >
-            {pending ? "Taking…" : "Take payment"}
+            {pending ? tr("Taking…") : tr("Take payment")}
           </button>
         </div>
       </div>
@@ -606,6 +610,7 @@ function PaidOutModal({
   shiftId: string;
   onClose: () => void;
 }) {
+  const tr = useT();
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [amount, setAmount] = useState("");
@@ -621,12 +626,12 @@ function PaidOutModal({
     try {
       cents = parseMoney(amount);
     } catch {
-      return setError("Enter an amount like 450 or 450.00");
+      return setError(tr("Enter an amount like 450 or 450.00"));
     }
-    if (cents <= 0) return setError("Amount must be more than zero.");
-    if (!reason.trim()) return setError("Say what the money was for.");
+    if (cents <= 0) return setError(tr("Amount must be more than zero."));
+    if (!reason.trim()) return setError(tr("Say what the money was for."));
     if (recharge && !bookingId) {
-      return setError("Choose the booking to charge, or untick the box.");
+      return setError(tr("Choose the booking to charge, or untick the box."));
     }
 
     startTransition(async () => {
@@ -645,11 +650,11 @@ function PaidOutModal({
   };
 
   return (
-    <Modal title="Record paid-out" onClose={onClose}>
+    <Modal title={tr("Record paid-out")} onClose={onClose}>
       <div className="space-y-4">
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className={labelCls}>Amount</label>
+            <label className={labelCls}>{tr("Amount")}</label>
             <input
               value={amount}
               onChange={(e) => {
@@ -662,7 +667,7 @@ function PaidOutModal({
             />
           </div>
           <div>
-            <label className={labelCls}>Category</label>
+            <label className={labelCls}>{tr("Category")}</label>
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value as PaidOutCategory)}
@@ -678,24 +683,24 @@ function PaidOutModal({
         </div>
 
         <div>
-          <label className={labelCls}>What was it for</label>
+          <label className={labelCls}>{tr("What was it for")}</label>
           <input
             value={reason}
             onChange={(e) => {
               setReason(e.target.value);
               setError("");
             }}
-            placeholder="Airport transfer for arriving guest"
+            placeholder={tr("Airport transfer for arriving guest")}
             className={inputCls}
           />
         </div>
 
         <div>
-          <label className={labelCls}>Paid to</label>
+          <label className={labelCls}>{tr("Paid to")}</label>
           <input
             value={payee}
             onChange={(e) => setPayee(e.target.value)}
-            placeholder="City Cabs"
+            placeholder={tr("City Cabs")}
             className={inputCls}
           />
         </div>
@@ -710,11 +715,11 @@ function PaidOutModal({
               className="mt-0.5 h-4 w-4 accent-brass"
             />
             <span className="text-sm">
-              Charge this back to a guest
+              {tr("Charge this back to a guest")}
               <span className="mt-0.5 block text-xxs text-ink-faint">
                 {bookings.length === 0
-                  ? "No booking has an open balance, so this must be a house expense."
-                  : "Unticked, the hotel absorbs it as a house expense."}
+                  ? tr("No booking has an open balance, so this must be a house expense.")
+                  : tr("Unticked, the hotel absorbs it as a house expense.")}
               </span>
             </span>
           </label>
@@ -740,14 +745,14 @@ function PaidOutModal({
             onClick={onClose}
             className="rounded border border-line px-4 py-2 text-sm hover:bg-shell"
           >
-            Cancel
+            {tr("Cancel")}
           </button>
           <button
             onClick={submit}
             disabled={pending}
             className="rounded bg-brass px-4 py-2 text-sm font-medium text-white hover:bg-[#9C6F32] disabled:opacity-60"
           >
-            {pending ? "Recording…" : "Record paid-out"}
+            {pending ? tr("Recording…") : tr("Record paid-out")}
           </button>
         </div>
       </div>
@@ -773,6 +778,7 @@ function CloseShiftModal({
     variance: number;
   }) => void;
 }) {
+  const tr = useT();
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [counted, setCounted] = useState("");
@@ -784,9 +790,9 @@ function CloseShiftModal({
     try {
       cents = parseMoney(counted);
     } catch {
-      return setError("Enter the counted total, e.g. 18400");
+      return setError(tr("Enter the counted total, e.g. 18400"));
     }
-    if (cents < 0) return setError("The counted total cannot be negative.");
+    if (cents < 0) return setError(tr("The counted total cannot be negative."));
 
     startTransition(async () => {
       const result = await closeShift({
@@ -805,13 +811,13 @@ function CloseShiftModal({
   };
 
   return (
-    <Modal title="Close shift" onClose={onCancel}>
+    <Modal title={tr("Close shift")} onClose={onCancel}>
       <div className="space-y-4">
         <p className="text-sm leading-relaxed text-ink-muted">
-          Count the cash in the drawer and enter the total.
+          {tr("Count the cash in the drawer and enter the total.")}
         </p>
         <div>
-          <label className={labelCls}>Cash counted</label>
+          <label className={labelCls}>{tr("Cash counted")}</label>
           <input
             value={counted}
             onChange={(e) => {
@@ -825,13 +831,13 @@ function CloseShiftModal({
           />
         </div>
         <div>
-          <label className={labelCls}>Note (optional)</label>
+          <label className={labelCls}>{tr("Note (optional)")}</label>
           <textarea
             value={note}
             onChange={(e) => setNote(e.target.value)}
             rows={2}
             className={inputCls}
-            placeholder="Anything the next shift or a manager should know."
+            placeholder={tr("Anything the next shift or a manager should know.")}
           />
         </div>
         {error && <p className="text-xs text-rose-600">{error}</p>}
@@ -840,14 +846,14 @@ function CloseShiftModal({
             onClick={onCancel}
             className="rounded border border-line px-4 py-2 text-sm hover:bg-shell"
           >
-            Cancel
+            {tr("Cancel")}
           </button>
           <button
             onClick={submit}
             disabled={pending}
             className="rounded bg-chrome-800 px-4 py-2 text-sm font-medium text-white hover:bg-chrome-900 disabled:opacity-60"
           >
-            {pending ? "Closing…" : "Close shift"}
+            {pending ? tr("Closing…") : tr("Close shift")}
           </button>
         </div>
       </div>

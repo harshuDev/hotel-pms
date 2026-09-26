@@ -1,5 +1,6 @@
 "use client";
 
+import { useT } from "@/components/i18n";
 import { useState } from "react";
 import { cn } from "@/components/ui";
 import { EditIcon } from "@/components/settings/finance-panels";
@@ -64,6 +65,7 @@ export function AccountingCategoriesPanel({
   pending: boolean;
   run: Run;
 }) {
+  const tr = useT();
   const { categories } = settings;
   const [draft, setDraft] = useState<Draft | null>(null);
 
@@ -87,15 +89,15 @@ export function AccountingCategoriesPanel({
   return (
     <div className="max-w-5xl space-y-7">
       <section className={card}>
-        <h2 className="border-b border-line px-4 py-4 text-[17px] text-ink">Accounting Categories</h2>
+        <h2 className="border-b border-line px-4 py-4 text-[17px] text-ink">{tr("Accounting Categories")}</h2>
         <div className="overflow-x-auto">
           <table className="w-full min-w-[34rem] text-[13px]">
             <thead>
               <tr className="border-b border-line">
-                <th className={cn(th, "w-[40%]")}>Name</th>
-                <th className={cn(th, "w-[24%]")}>Internal Code</th>
-                <th className={th}>External Code</th>
-                <th className="w-20" aria-label="Actions" />
+                <th className={cn(th, "w-[40%]")}>{tr("Name")}</th>
+                <th className={cn(th, "w-[24%]")}>{tr("Internal Code")}</th>
+                <th className={th}>{tr("External Code")}</th>
+                <th className="w-20" aria-label={tr("Actions")} />
               </tr>
             </thead>
             <tbody>
@@ -141,7 +143,7 @@ export function AccountingCategoriesPanel({
               {categories.length === 0 && (
                 <tr>
                   <td colSpan={4} className="px-3 py-5 text-[13px] text-ink-muted">
-                    None yet. Add the accounts your books post to.
+                    {tr("None yet. Add the accounts your books post to.")}
                   </td>
                 </tr>
               )}
@@ -159,12 +161,12 @@ export function AccountingCategoriesPanel({
           >
             <div className="px-4 pb-6 pt-3">
               <h3 className="border-b border-line pb-2 text-[17px] text-ink">
-                {draft.id ? "Edit" : "Create"}
+                {draft.id ? tr("Edit") : tr("Create")}
               </h3>
               <div className="mt-4 space-y-5">
                 <input
-                  aria-label="Name"
-                  placeholder="Name"
+                  aria-label={tr("Name")}
+                  placeholder={tr("Name")}
                   autoFocus
                   value={draft.name}
                   onChange={(e) => setDraft({ ...draft, name: e.target.value })}
@@ -172,16 +174,16 @@ export function AccountingCategoriesPanel({
                   className={line}
                 />
                 <input
-                  aria-label="Internal Code"
-                  placeholder="Internal Code"
+                  aria-label={tr("Internal Code")}
+                  placeholder={tr("Internal Code")}
                   value={draft.internalCode}
                   onChange={(e) => setDraft({ ...draft, internalCode: e.target.value })}
                   maxLength={60}
                   className={cn(line, "tnum")}
                 />
                 <input
-                  aria-label="External Code"
-                  placeholder="External Code"
+                  aria-label={tr("External Code")}
+                  placeholder={tr("External Code")}
                   value={draft.externalCode}
                   onChange={(e) => setDraft({ ...draft, externalCode: e.target.value })}
                   maxLength={60}
@@ -191,10 +193,10 @@ export function AccountingCategoriesPanel({
             </div>
             <div className={cn(footer, "flex justify-end gap-3")}>
               <button type="button" className={secondary} onClick={() => setDraft(null)}>
-                Cancel
+                {tr("Cancel")}
               </button>
               <button type="submit" className={primary} disabled={pending}>
-                Save
+                {tr("Save")}
               </button>
             </div>
           </form>
@@ -207,7 +209,7 @@ export function AccountingCategoriesPanel({
               className={primary}
               onClick={() => setDraft({ id: null, name: "", internalCode: "", externalCode: "" })}
             >
-              Add new accounting category
+              {tr("Add new accounting category")}
             </button>
           </div>
         )}
@@ -237,6 +239,7 @@ function DefaultsCard({
   pending: boolean;
   run: Run;
 }) {
+  const tr = useT();
   const { categories, defaults } = settings;
   const [form, setForm] = useState<AccountingDefaults>(
     defaults ?? { accommodationId: "", extrasId: "", taxesId: "", paymentsId: "" },
@@ -244,7 +247,7 @@ function DefaultsCard({
 
   return (
     <section className={card}>
-      <h2 className="border-b border-line px-4 py-4 text-[17px] text-ink">Default Accounting Categories</h2>
+      <h2 className="border-b border-line px-4 py-4 text-[17px] text-ink">{tr("Default Accounting Categories")}</h2>
       <div className="space-y-1 px-3 pb-2 pt-1">
         {ACCOUNTING_DEFAULT_KINDS.map((k) => {
           // A category deleted since the page loaded is not offered.
@@ -258,7 +261,7 @@ function DefaultsCard({
                 onChange={(e) => setForm({ ...form, [k.key]: e.target.value })}
                 className={cn(line, "cursor-pointer px-3 pt-1 disabled:cursor-default disabled:opacity-100")}
               >
-                {value === "" && <option value="">Choose a category</option>}
+                {value === "" && <option value="">{tr("Choose a category")}</option>}
                 {categories.map((c) => (
                   <option key={c.id} value={c.id}>
                     {c.name}
@@ -275,9 +278,9 @@ function DefaultsCard({
             type="button"
             className={primary}
             disabled={pending}
-            onClick={() => run(() => saveAccountingDefaults(form), "Default accounting categories saved.")}
+            onClick={() => run(() => saveAccountingDefaults(form), tr("Default accounting categories saved."))}
           >
-            Save
+            {tr("Save")}
           </button>
         </div>
       )}

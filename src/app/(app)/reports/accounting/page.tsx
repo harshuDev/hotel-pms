@@ -1,3 +1,4 @@
+import { getT } from "@/lib/i18n/server";
 import { ReportFigure, ReportFigures, ReportShell } from "@/components/reports/report-shell";
 import { ReportFeatureOff, ReportNoAccess, ReportTable } from "@/components/reports/report-table";
 import { formatMoney, formatMoneyShort } from "@/lib/money";
@@ -27,11 +28,12 @@ export default async function AccountingReportPage({
 }: {
   searchParams: Promise<{ from?: string; to?: string }>;
 }) {
+  const tr = await getT();
   // Hotel Features -> "Enable Accounting Report" (0076). The menu entry goes
   // with the switch; this answers a bookmark or a typed address.
   if (!(await getHotelFeatures()).accounting_report) {
     return (
-      <ReportShell title="Accounting">
+      <ReportShell title={tr("Accounting")}>
         <ReportFeatureOff feature="Enable Accounting Report" />
       </ReportShell>
     );
@@ -47,7 +49,7 @@ export default async function AccountingReportPage({
   } catch (error) {
     if (error instanceof ReportAccessError) {
       return (
-        <ReportShell title="Accounting">
+        <ReportShell title={tr("Accounting")}>
           <ReportNoAccess />
         </ReportShell>
       );
@@ -90,68 +92,68 @@ export default async function AccountingReportPage({
 
   return (
     <ReportShell
-      title="Accounting"
+      title={tr("Accounting")}
       action="/reports/accounting"
       range={range}
     >
       <ReportFigures>
         <ReportFigure
-          label="Revenue"
+          label={tr("Revenue")}
           value={formatMoneyShort(net, currency)}
-          detail="Net of tax"
+          detail={tr("Net of tax")}
           emphasis
         />
         <ReportFigure
-          label="Tax"
+          label={tr("Tax")}
           value={formatMoneyShort(tax, currency)}
           detail={taxAccount ? [taxAccount.name, codes(taxAccount)].filter(Boolean).join(" · ") : undefined}
         />
-        <ReportFigure label="Gross" value={formatMoneyShort(gross, currency)} />
+        <ReportFigure label={tr("Gross")} value={formatMoneyShort(gross, currency)} />
         <ReportFigure
-          label="Collected"
+          label={tr("Collected")}
           value={formatMoneyShort(collected, currency)}
-          detail="Money received in this range"
+          detail={tr("Money received in this range")}
         />
       </ReportFigures>
 
       <div className="mb-4">
         <h2 className="mb-2 font-display text-[15px] tracking-tightest text-ink">
-          Revenue earned
+          {tr("Revenue earned")}
         </h2>
         <ReportTable<AccountingRow>
           rows={revenue}
           rowKey={(r) => `revenue-${r.code}`}
           minWidth="780px"
-          emptyTitle="Nothing was earned in this range"
-          emptyHint="Revenue posts on the night audit, so a range with no closed days shows nothing."
+          emptyTitle={tr("Nothing was earned in this range")}
+          emptyHint={tr("Revenue posts on the night audit, so a range with no closed days shows nothing.")}
           footLabel={`${revenue.length} categor${revenue.length === 1 ? "y" : "ies"}`}
           columns={[
             {
-              header: "Category",
+              header: tr("Category"),
               cell: (r) => <span className="font-medium text-ink">{r.label}</span>,
             },
             {
-              header: "Code",
+              header: tr("Code"),
               cell: (r) => <span className="text-ink-faint">{r.code}</span>,
             },
             {
-              header: "Account",
+              header: tr("Account"),
               cell: (r) => accountCell(revenueAccount(r)),
             },
             {
-              header: "Net",
+              header: tr("Net"),
               align: "right",
               cell: (r) => <span className="tnum text-ink-muted">{formatMoney(r.netCents, currency)}</span>,
               foot: formatMoney(net, currency),
             },
             {
-              header: "Tax",
+              header: tr("Tax"),
               align: "right",
               cell: (r) => <span className="tnum text-ink-faint">{formatMoney(r.taxCents, currency)}</span>,
               foot: formatMoney(tax, currency),
             },
             {
-              header: "Gross",
+              header: tr("Gross"),
               align: "right",
               cell: (r) => (
                 <span className="tnum font-medium text-ink">{formatMoney(r.grossCents, currency)}</span>
@@ -164,30 +166,30 @@ export default async function AccountingReportPage({
 
       <div>
         <h2 className="mb-2 font-display text-[15px] tracking-tightest text-ink">
-          Money received
+          {tr("Money received")}
         </h2>
         <ReportTable<AccountingRow>
           rows={receipts}
           rowKey={(r) => `payments-${r.code}-${r.label}`}
           minWidth="780px"
-          emptyTitle="Nothing was collected in this range"
-          emptyHint="Payments are dated to the business date they were taken on."
+          emptyTitle={tr("Nothing was collected in this range")}
+          emptyHint={tr("Payments are dated to the business date they were taken on.")}
           footLabel={`${receipts.length} method${receipts.length === 1 ? "" : "s"}`}
           columns={[
             {
-              header: "Method",
+              header: tr("Method"),
               cell: (r) => <span className="font-medium text-ink">{r.label}</span>,
             },
             {
-              header: "Kind",
+              header: tr("Kind"),
               cell: (r) => <span className="text-ink-faint">{r.code}</span>,
             },
             {
-              header: "Account",
+              header: tr("Account"),
               cell: () => accountCell(paymentsAccount),
             },
             {
-              header: "Received",
+              header: tr("Received"),
               align: "right",
               cell: (r) => (
                 <span className="tnum font-medium text-ink">{formatMoney(r.grossCents, currency)}</span>

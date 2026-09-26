@@ -1,5 +1,6 @@
 "use client";
 
+import { useT } from "@/components/i18n";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Card, cn } from "@/components/ui";
 import { loadRooms } from "@/lib/actions/rooms";
@@ -75,6 +76,7 @@ export function HouseBoard({
   counts: HouseStateCounts;
   total: number;
 }) {
+  const tr = useT();
   const [filter, setFilter] = useState<RoomState | null>(null);
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState("");
@@ -119,7 +121,7 @@ export function HouseBoard({
       } catch {
         if (id !== request.current) return;
         setError(
-          "The room list did not load. Check your connection, then try again.",
+          tr("The room list did not load. Check your connection, then try again."),
         );
       } finally {
         if (id === request.current) setLoading(false);
@@ -142,15 +144,15 @@ export function HouseBoard({
 
   return (
     <Card
-      eyebrow="Right now"
-      title="The house"
+      eyebrow={tr("Right now")}
+      title={tr("The house")}
       bodyClassName="px-5 pb-4"
       action={
         <button
           onClick={() => setOpen((o) => !o)}
           className="rounded-md border border-line px-3 py-1.5 text-xs text-ink-muted transition-colors hover:bg-shell hover:text-ink"
         >
-          {open ? "Hide rooms" : `View rooms (${total})`}
+          {open ? tr("Hide rooms") : `View rooms (${total})`}
         </button>
       }
     >
@@ -196,7 +198,7 @@ export function HouseBoard({
               type="search"
               value={q}
               onChange={(e) => setQ(e.target.value)}
-              placeholder="Room number, guest or room type"
+              placeholder={tr("Room number, guest or room type")}
               className="min-w-[220px] flex-1 rounded-md border border-line px-3 py-1.5 text-[13px] placeholder:text-ink-faint"
             />
             {filter && (
@@ -204,11 +206,11 @@ export function HouseBoard({
                 onClick={() => setFilter(null)}
                 className="rounded-md border border-line px-2.5 py-1.5 text-xs text-ink-muted hover:bg-shell"
               >
-                Clear filter
+                {tr("Clear filter")}
               </button>
             )}
             <p className="tnum text-xs text-ink-faint">
-              {matches} of {total}
+              {matches} {tr("of")}{" "}{total}
             </p>
           </div>
 
@@ -219,16 +221,16 @@ export function HouseBoard({
                 onClick={() => void fetchPage(1, false)}
                 className="mt-2 rounded-md border border-line px-2.5 py-1.5 text-xs text-ink-muted hover:bg-shell"
               >
-                Try again
+                {tr("Try again")}
               </button>
             </div>
           ) : loading && rooms.length === 0 ? (
             <p className="py-6 text-center text-[13px] text-ink-faint">
-              Loading rooms…
+              {tr("Loading rooms…")}
             </p>
           ) : rooms.length === 0 ? (
             <p className="py-6 text-center text-[13px] text-ink-muted">
-              No rooms match. Clear the search box or pick a different state.
+              {tr("No rooms match. Clear the search box or pick a different state.")}
             </p>
           ) : (
             <>
@@ -253,7 +255,7 @@ export function HouseBoard({
                   className="mt-3 w-full rounded-md border border-line py-2 text-xs text-ink-muted hover:bg-shell disabled:opacity-60"
                 >
                   {loading
-                    ? "Loading…"
+                    ? tr("Loading…")
                     : `Show ${Math.min(PAGE, remaining)} more`}
                 </button>
               )}

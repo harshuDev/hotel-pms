@@ -1,5 +1,6 @@
 "use client";
 
+import { useT } from "@/components/i18n";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -62,6 +63,7 @@ export function DateJump({
    */
   todayFrom: string;
 }) {
+  const tr = useT();
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [month, setMonth] = useState(() => startOfMonth(parseISO(from)));
@@ -128,13 +130,13 @@ export function DateJump({
           business date a week later. One word, and the field now says which
           of the two it is.
         */}
-        <span className="truncate">From {format(first, "d MMM yyyy")}</span>
+        <span className="truncate">{tr("From")}{" "}{format(first, "d MMM yyyy")}</span>
       </button>
 
       {open && (
         <div
           role="dialog"
-          aria-label="Go to a date"
+          aria-label={tr("Go to a date")}
           /*
             Left-aligned to the rail and above the board's sticky header, which
             is z-30. A popover under the header is one nobody can click.
@@ -145,7 +147,7 @@ export function DateJump({
             <button
               type="button"
               onClick={() => setMonth((m) => subMonths(m, 1))}
-              aria-label="Previous month"
+              aria-label={tr("Previous month")}
               className="flex h-6 w-6 items-center justify-center rounded text-ink-muted transition hover:bg-shell hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brass"
             >
               ‹
@@ -156,7 +158,7 @@ export function DateJump({
             <button
               type="button"
               onClick={() => setMonth((m) => addMonths(m, 1))}
-              aria-label="Next month"
+              aria-label={tr("Next month")}
               className="flex h-6 w-6 items-center justify-center rounded text-ink-muted transition hover:bg-shell hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brass"
             >
               ›
@@ -206,7 +208,7 @@ export function DateJump({
             onClick={() => go(parseISO(todayFrom))}
             className="mt-2 w-full rounded-md border border-line py-1.5 text-[12px] font-medium text-ink transition hover:bg-shell focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brass"
           >
-            Today
+            {tr("Today")}
           </button>
         </div>
       )}

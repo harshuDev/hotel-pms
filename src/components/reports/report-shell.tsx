@@ -1,3 +1,4 @@
+import { getT } from "@/lib/i18n/server";
 import { format, parseISO } from "date-fns";
 import { PageHeader } from "@/components/ui";
 import type { DateRange } from "@/lib/reports";
@@ -7,7 +8,7 @@ import type { DateRange } from "@/lib/reports";
  * report itself. The range is a plain GET form, so a report is a URL that can
  * be bookmarked and sent to someone.
  */
-export function ReportShell({
+export async function ReportShell({
   title,
   action,
   range,
@@ -21,6 +22,7 @@ export function ReportShell({
   date?: string;
   children: React.ReactNode;
 }) {
+  const tr = await getT();
   return (
     <div>
       <PageHeader
@@ -33,7 +35,7 @@ export function ReportShell({
                   htmlFor="date"
                   className="mb-1 block text-xxs font-semibold uppercase tracking-[0.1em] text-ink-faint"
                 >
-                  Business date
+                  {tr("Business date")}
                 </label>
                 <input
                   id="date"
@@ -44,7 +46,7 @@ export function ReportShell({
                 />
               </div>
               <button className="rounded-md bg-chrome-800 px-5 py-2 text-[13px] font-medium text-white hover:bg-chrome-900">
-                Run
+                {tr("Run")}
               </button>
             </form>
           ) : range && action ? (
@@ -54,7 +56,7 @@ export function ReportShell({
                   htmlFor="from"
                   className="mb-1 block text-xxs font-semibold uppercase tracking-[0.1em] text-ink-faint"
                 >
-                  From
+                  {tr("From")}
                 </label>
                 <input
                   id="from"
@@ -69,7 +71,7 @@ export function ReportShell({
                   htmlFor="to"
                   className="mb-1 block text-xxs font-semibold uppercase tracking-[0.1em] text-ink-faint"
                 >
-                  To
+                  {tr("To")}
                 </label>
                 <input
                   id="to"
@@ -80,7 +82,7 @@ export function ReportShell({
                 />
               </div>
               <button className="rounded-md bg-chrome-800 px-5 py-2 text-[13px] font-medium text-white hover:bg-chrome-900">
-                Run
+                {tr("Run")}
               </button>
             </form>
           ) : undefined
@@ -88,7 +90,7 @@ export function ReportShell({
       />
       {range && (
         <p className="mb-3 text-xs text-ink-faint">
-          {format(parseISO(range.from), "d MMM yyyy")} to{" "}
+          {format(parseISO(range.from), "d MMM yyyy")} {tr("to")}{" "}
           {format(parseISO(range.to), "d MMM yyyy")}
         </p>
       )}

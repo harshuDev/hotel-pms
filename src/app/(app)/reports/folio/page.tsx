@@ -1,3 +1,4 @@
+import { getT } from "@/lib/i18n/server";
 import { format, parseISO } from "date-fns";
 import {
   ReportFigure,
@@ -26,6 +27,7 @@ export default async function FolioReportPage({
 }: {
   searchParams: Promise<{ from?: string; to?: string }>;
 }) {
+  const tr = await getT();
   const currency = await getPropertyCurrency();
   const sp = await searchParams;
   const businessDate = await getBusinessDate();
@@ -37,7 +39,7 @@ export default async function FolioReportPage({
   } catch (error) {
     if (error instanceof ReportAccessError) {
       return (
-        <ReportShell title="Folios">
+        <ReportShell title={tr("Folios")}>
           <ReportNoAccess />
         </ReportShell>
       );
@@ -52,23 +54,23 @@ export default async function FolioReportPage({
 
   return (
     <ReportShell
-      title="Folios"
+      title={tr("Folios")}
       action="/reports/folio"
       range={range}
     >
       <ReportFigures>
         <ReportFigure
-          label="Outstanding"
+          label={tr("Outstanding")}
           value={formatMoneyShort(balance, currency)}
           detail={`Across ${owing} folio${owing === 1 ? "" : "s"}`}
           emphasis
         />
-        <ReportFigure label="Charged" value={formatMoneyShort(charges, currency)} />
-        <ReportFigure label="Paid" value={formatMoneyShort(payments, currency)} />
+        <ReportFigure label={tr("Charged")} value={formatMoneyShort(charges, currency)} />
+        <ReportFigure label={tr("Paid")} value={formatMoneyShort(payments, currency)} />
         <ReportFigure
-          label="Folios"
+          label={tr("Folios")}
           value={String(rows.length)}
-          detail="Touched in this range"
+          detail={tr("Touched in this range")}
         />
       </ReportFigures>
 
@@ -76,16 +78,16 @@ export default async function FolioReportPage({
         rows={rows}
         rowKey={(r) => r.folioId}
         minWidth="900px"
-        emptyTitle="No folio was charged or paid in this range"
-        emptyHint="A folio is created on its first charge, so a booking that has taken no money yet has none."
+        emptyTitle={tr("No folio was charged or paid in this range")}
+        emptyHint={tr("A folio is created on its first charge, so a booking that has taken no money yet has none.")}
         footLabel={`${rows.length} folio${rows.length === 1 ? "" : "s"}`}
         columns={[
           {
-            header: "Folio",
+            header: tr("Folio"),
             cell: (r) => <span className="tnum text-ink-muted">#{r.folioNumber}</span>,
           },
           {
-            header: "Reference",
+            header: tr("Reference"),
             cell: (r) =>
               r.reference === "Meeting room" ? (
                 <span className="text-ink-muted">{r.reference}</span>
@@ -94,11 +96,11 @@ export default async function FolioReportPage({
               ),
           },
           {
-            header: "Guest",
+            header: tr("Guest"),
             cell: (r) => <span className="text-ink-muted">{r.guestName}</span>,
           },
           {
-            header: "Opened",
+            header: tr("Opened"),
             cell: (r) => (
               <span className="whitespace-nowrap text-ink-faint">
                 {format(parseISO(r.openedAt), "d MMM yyyy")}
@@ -106,7 +108,7 @@ export default async function FolioReportPage({
             ),
           },
           {
-            header: "Status",
+            header: tr("Status"),
             cell: (r) => (
               <span
                 className={
@@ -120,19 +122,19 @@ export default async function FolioReportPage({
             ),
           },
           {
-            header: "Charged",
+            header: tr("Charged"),
             align: "right",
             cell: (r) => <span className="tnum text-ink-muted">{formatMoney(r.chargesCents, currency)}</span>,
             foot: formatMoney(charges, currency),
           },
           {
-            header: "Paid",
+            header: tr("Paid"),
             align: "right",
             cell: (r) => <span className="tnum text-ink-muted">{formatMoney(r.paymentsCents, currency)}</span>,
             foot: formatMoney(payments, currency),
           },
           {
-            header: "Balance",
+            header: tr("Balance"),
             align: "right",
             cell: (r) => (
               <span

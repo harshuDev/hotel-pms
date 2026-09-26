@@ -1,3 +1,4 @@
+import { getT } from "@/lib/i18n/server";
 import { isValid, parseISO } from "date-fns";
 import Link from "next/link";
 import { PageHeader } from "@/components/ui";
@@ -36,6 +37,7 @@ export async function InventoryPage({
   /** Two routes share the `rate` field and need different headings. */
   title?: string;
 }) {
+  const tr = await getT();
   const spec = SCREENS[fieldName];
   const sp = await searchParams;
 
@@ -47,14 +49,14 @@ export async function InventoryPage({
       <div>
         <PageHeader title={title ?? spec.title} />
         <div className="rounded-lg border border-line bg-white p-5 text-[13px] text-ink shadow-card">
-          This screen is switched off.{" "}
+          {tr("This screen is switched off.")}{" "}
           <Link
             href="/settings?tab=inventory-settings"
             className="text-brass underline-offset-2 hover:underline"
           >
-            {label} in Inventory Settings
+            {label} {tr("in Inventory Settings")}
           </Link>{" "}
-          turns it back on.
+          {tr("turns it back on.")}
         </div>
       </div>
     );

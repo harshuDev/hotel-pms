@@ -1,3 +1,4 @@
+import { getT } from "@/lib/i18n/server";
 import { Fragment, type CSSProperties } from "react";
 import Link from "next/link";
 import { AssignRoom } from "@/components/calendar/assign-room";
@@ -856,7 +857,7 @@ const EMPTY_CELLS = new Map<string, AvailabilityCell>();
  * one. It keeps its height when empty so the board does not jump as rooms are
  * allocated through the day.
  */
-function UnassignedRow({
+async function UnassignedRow({
   bars,
   dates,
   railW,
@@ -886,6 +887,7 @@ function UnassignedRow({
   /** Opens the details popup instead of navigating away. */
   bookingHref?: (bookingId: string) => string;
 }) {
+  const tr = await getT();
   const { placed, lanes } = packLanes(bars, dates);
   return (
     <div className="flex items-stretch">
@@ -894,7 +896,7 @@ function UnassignedRow({
         style={{ width: railW }}
       >
         <span className="truncate text-[12px] font-medium uppercase tracking-[0.06em] text-white/70">
-          Unassigned
+          {tr("Unassigned")}
         </span>
         {/*
           HOLDING AREA IS THIS BAND NOW. The client removed the standalone
@@ -905,7 +907,7 @@ function UnassignedRow({
           systems will look for it.
         */}
         <span className="truncate text-xxs uppercase tracking-[0.06em] text-white/40">
-          (Holding area)
+          {tr("(Holding area)")}
         </span>
         {/*
           The count and nothing else. There was a line of prose under this
@@ -939,7 +941,7 @@ function UnassignedRow({
   );
 }
 
-export function CalendarBoard({
+export async function CalendarBoard({
   dates,
   businessDate,
   types,
@@ -1031,6 +1033,7 @@ export function CalendarBoard({
    */
   look: CalendarSettings;
 }) {
+  const tr = await getT();
   const gridW = dates.length * COL_W;
   const first = parseISO(dates[0]);
 
@@ -1112,7 +1115,7 @@ export function CalendarBoard({
       */}
       <Link
         href={shiftHref(-days)}
-        aria-label="Earlier dates"
+        aria-label={tr("Earlier dates")}
         className="absolute z-40 flex h-5 w-5 items-center justify-center rounded-full bg-white/90 text-ink-muted shadow-card hover:text-ink"
         style={{ left: railW + 6, top: HEAD_H + (SEASON_H - 20) / 2 }}
       >
@@ -1120,7 +1123,7 @@ export function CalendarBoard({
       </Link>
       <Link
         href={shiftHref(days)}
-        aria-label="Later dates"
+        aria-label={tr("Later dates")}
         className="absolute right-2 z-40 flex h-5 w-5 items-center justify-center rounded-full bg-white/90 text-ink-muted shadow-card hover:text-ink"
         style={{ top: HEAD_H + (SEASON_H - 20) / 2 }}
       >
@@ -1163,21 +1166,21 @@ export function CalendarBoard({
             >
               <div className="flex items-center justify-between">
                 <span className="text-xxs font-semibold uppercase tracking-[0.12em] text-white/70">
-                  Date
+                  {tr("Date")}
                 </span>
                 <span className="flex items-center gap-1">
                   <Link
                     href={railHref(RAIL_STEP)}
-                    aria-label="Widen the room column"
-                    title="Widen the room column"
+                    aria-label={tr("Widen the room column")}
+                    title={tr("Widen the room column")}
                     className="flex h-4 w-4 items-center justify-center rounded-sm bg-white/15 text-xs leading-none text-white hover:bg-white/30"
                   >
                     +
                   </Link>
                   <Link
                     href={railHref(-RAIL_STEP)}
-                    aria-label="Narrow the room column"
-                    title="Narrow the room column"
+                    aria-label={tr("Narrow the room column")}
+                    title={tr("Narrow the room column")}
                     className="flex h-4 w-4 items-center justify-center rounded-sm bg-white/15 text-xs leading-none text-white hover:bg-white/30"
                   >
                     −
@@ -1202,10 +1205,10 @@ export function CalendarBoard({
               */}
               <Link
                 href={todayHref}
-                title="Back to the current dates"
+                title={tr("Back to the current dates")}
                 className="mt-0.5 inline-flex rounded-sm bg-white/15 px-1.5 py-[1px] text-xxs font-medium text-white transition hover:bg-white/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
               >
-                Today
+                {tr("Today")}
               </Link>
               {/*
                 Paging a month at a time is fine for next week and useless for
@@ -1453,7 +1456,7 @@ export function CalendarBoard({
                         {t.roomTypeName}
                       </div>
                       <div className="tnum mt-0.5 text-xxs text-white/50">
-                        {typeRooms.length} room{typeRooms.length === 1 ? "" : "s"}
+                        {typeRooms.length} {tr("room")}{typeRooms.length === 1 ? "" : "s"}
                       </div>
                     </div>
                   </div>
@@ -1630,7 +1633,7 @@ export function CalendarBoard({
             <>
               <Gutter railW={railW} gridW={gridW} />
               <ExtraRow
-                label="Cancelled"
+                label={tr("Cancelled")}
                 canRestore
                 pinned={canceledBars.length > 0}
                 backHref={selfHref}

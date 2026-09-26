@@ -1,4 +1,5 @@
 "use server";
+import { localised } from "@/lib/i18n/localised";
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
@@ -34,7 +35,7 @@ export async function updateBooking(input: {
   allowOverbook?: boolean;
 }): Promise<ActionResult<null> & { block?: "overbook" }> {
   if (input.checkIn && input.checkOut && input.checkOut <= input.checkIn) {
-    return { ok: false, error: "The departure date must be after the arrival date." };
+    return { ok: false, error: await localised("The departure date must be after the arrival date.") };
   }
 
   const supabase = await createClient();
@@ -57,7 +58,7 @@ export async function updateBooking(input: {
   if (error) {
     return {
       ok: false,
-      error: error.message,
+      error: await localised(error.message),
       block: error.code === "HP001" ? "overbook" : undefined,
     };
   }
@@ -75,7 +76,7 @@ export async function setBookingRoomRate(input: {
   to?: string;
 }): Promise<ActionResult<{ nightsPriced: number }>> {
   if (!Number.isSafeInteger(input.rateCents) || input.rateCents < 0) {
-    return { ok: false, error: "A nightly rate cannot be negative." };
+    return { ok: false, error: await localised("A nightly rate cannot be negative.") };
   }
 
   const supabase = await createClient();
@@ -87,7 +88,7 @@ export async function setBookingRoomRate(input: {
     p_tax_rate_id: null,
   });
 
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
 
   revalidateBooking(input.bookingId);
   return { ok: true, data: { nightsPriced: Number(data ?? 0) } };
@@ -105,7 +106,7 @@ export async function cancelBooking(input: {
     p_reason: input.reason || null,
   });
 
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
 
   revalidateBooking(input.bookingId);
   return { ok: true, data: { outstandingCents: Number(data ?? 0) } };
@@ -136,7 +137,7 @@ export async function cancelBookingRoom(input: {
     p_reason: input.reason || null,
   });
 
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
 
   revalidateBooking(input.bookingId);
   return { ok: true, data: null };
@@ -165,7 +166,7 @@ export async function restoreBookingRoom(input: {
     p_allow_overbook: input.allowOverbook ?? false,
   });
 
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
 
   revalidateBooking(input.bookingId);
   return { ok: true, data: null };
@@ -190,7 +191,7 @@ export async function restoreBooking(
     p_allow_overbook: allowOverbook,
   });
 
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
 
   revalidateBooking(bookingId);
   // The board draws cancelled bars in their own band, so it moves too.
@@ -206,7 +207,7 @@ export async function confirmBooking(
     p_booking_id: bookingId,
   });
 
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
 
   revalidateBooking(bookingId);
   return { ok: true, data: null };
@@ -226,7 +227,7 @@ export async function chargeExtra(input: {
   quantity: number;
 }): Promise<ActionResult<null>> {
   if (!Number.isInteger(input.quantity) || input.quantity < 1) {
-    return { ok: false, error: "The quantity must be a whole number, 1 or more." };
+    return { ok: false, error: await localised("The quantity must be a whole number, 1 or more.") };
   }
   const supabase = await createClient();
   const { error } = await supabase.rpc("charge_extra", {
@@ -234,7 +235,7 @@ export async function chargeExtra(input: {
     p_extra_id: input.extraId,
     p_quantity: input.quantity,
   });
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
   revalidateBooking(input.bookingId);
   return { ok: true, data: null };
 }

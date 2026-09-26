@@ -1,3 +1,4 @@
+import { getT } from "@/lib/i18n/server";
 import { format, parseISO } from "date-fns";
 import Link from "next/link";
 import { ReportFigure, ReportFigures, ReportShell } from "@/components/reports/report-shell";
@@ -22,6 +23,7 @@ export const metadata = { title: "Deposit report" };
  * thing to set correctly and a new way for this and the drawer to disagree.
  */
 export default async function DepositReportPage() {
+  const tr = await getT();
   const currency = await getPropertyCurrency();
   let rows: DepositRow[];
   try {
@@ -29,7 +31,7 @@ export default async function DepositReportPage() {
   } catch (error) {
     if (error instanceof ReportAccessError) {
       return (
-        <ReportShell title="Deposits">
+        <ReportShell title={tr("Deposits")}>
           <ReportNoAccess />
         </ReportShell>
       );
@@ -43,24 +45,24 @@ export default async function DepositReportPage() {
 
   return (
     <ReportShell
-      title="Deposits"
+      title={tr("Deposits")}
     >
       <ReportFigures>
         <ReportFigure
-          label="Held"
+          label={tr("Held")}
           value={formatMoneyShort(held, currency)}
           detail={`Across ${rows.length} booking${rows.length === 1 ? "" : "s"}`}
           emphasis
         />
         <ReportFigure
-          label="Stay value"
+          label={tr("Stay value")}
           value={formatMoneyShort(value, currency)}
-          detail="What those stays are worth"
+          detail={tr("What those stays are worth")}
         />
         <ReportFigure
-          label="Arriving within a week"
+          label={tr("Arriving within a week")}
           value={String(arrivingSoon)}
-          detail="Of the bookings holding a deposit"
+          detail={tr("Of the bookings holding a deposit")}
         />
       </ReportFigures>
 
@@ -68,12 +70,12 @@ export default async function DepositReportPage() {
         rows={rows}
         rowKey={(r) => r.bookingId}
         minWidth="900px"
-        emptyTitle="No deposits are being held"
-        emptyHint="A booking appears here once a payment is taken against it and before the guest checks in."
+        emptyTitle={tr("No deposits are being held")}
+        emptyHint={tr("A booking appears here once a payment is taken against it and before the guest checks in.")}
         footLabel={`${rows.length} booking${rows.length === 1 ? "" : "s"}`}
         columns={[
           {
-            header: "Reference",
+            header: tr("Reference"),
             cell: (r) => (
               <Link
                 href={`/bookings/${r.bookingId}`}
@@ -84,11 +86,11 @@ export default async function DepositReportPage() {
             ),
           },
           {
-            header: "Guest",
+            header: tr("Guest"),
             cell: (r) => <span className="text-ink-muted">{r.guestName}</span>,
           },
           {
-            header: "Status",
+            header: tr("Status"),
             cell: (r) => (
               <span
                 className={
@@ -100,7 +102,7 @@ export default async function DepositReportPage() {
             ),
           },
           {
-            header: "Arrives",
+            header: tr("Arrives"),
             cell: (r) => (
               <span className="tnum whitespace-nowrap text-ink-muted">
                 {format(parseISO(r.checkIn), "EEE d MMM")}
@@ -108,7 +110,7 @@ export default async function DepositReportPage() {
             ),
           },
           {
-            header: "In",
+            header: tr("In"),
             align: "right",
             cell: (r) => (
               <span
@@ -127,18 +129,18 @@ export default async function DepositReportPage() {
             ),
           },
           {
-            header: "Nights",
+            header: tr("Nights"),
             align: "right",
             cell: (r) => <span className="tnum text-ink-faint">{r.nights}</span>,
           },
           {
-            header: "Stay value",
+            header: tr("Stay value"),
             align: "right",
             cell: (r) => <span className="tnum text-ink-muted">{formatMoney(r.stayValueCents, currency)}</span>,
             foot: formatMoney(value, currency),
           },
           {
-            header: "Held",
+            header: tr("Held"),
             align: "right",
             cell: (r) => (
               <span className="tnum font-medium text-ink">{formatMoney(r.depositCents, currency)}</span>

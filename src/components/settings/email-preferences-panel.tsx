@@ -1,5 +1,6 @@
 "use client";
 
+import { useT } from "@/components/i18n";
 import { useState } from "react";
 import { cn } from "@/components/ui";
 import {
@@ -36,6 +37,7 @@ export function EmailPreferencesPanel({
   pending: boolean;
   run: Run;
 }) {
+  const tr = useT();
   const [emails, setEmails] = useState<string[]>(settings.notificationEmails);
   const [draft, setDraft] = useState("");
   const [prefs, setPrefs] = useState<Record<EmailPreferenceId, boolean>>(settings.preferences);
@@ -59,19 +61,19 @@ export function EmailPreferencesPanel({
         setDraft("");
       }
       return result;
-    }, "Email preferences saved.");
+    }, tr("Email preferences saved."));
   }
 
   return (
     <div className="max-w-4xl space-y-6">
       <h2 className="font-display text-[26px] font-semibold tracking-tightest text-ink">
-        Hotel Emails Preferences
+        {tr("Hotel Emails Preferences")}
       </h2>
 
       <section className={cn(card, "px-6 py-8 sm:px-10")}>
-        <h3 className="border-b border-line pb-2 text-[20px] text-ink">General Settings</h3>
+        <h3 className="border-b border-line pb-2 text-[20px] text-ink">{tr("General Settings")}</h3>
         <p className="mt-7 text-[12px] text-ink-muted" id="notify-label">
-          Emails that will be used for notifications
+          {tr("Emails that will be used for notifications")}
         </p>
         <div className="mt-1 flex flex-wrap items-center gap-2" aria-labelledby="notify-label">
           {emails.map((e) => (
@@ -96,7 +98,7 @@ export function EmailPreferencesPanel({
             <span className="flex min-w-[14rem] flex-1 items-center gap-2">
               <input
                 type="email"
-                aria-label="Add an email address"
+                aria-label={tr("Add an email address")}
                 value={draft}
                 onChange={(e) => setDraft(e.target.value)}
                 onKeyDown={(e) => {
@@ -109,7 +111,7 @@ export function EmailPreferencesPanel({
               />
               <button
                 type="button"
-                aria-label="Add email address"
+                aria-label={tr("Add email address")}
                 onClick={add}
                 className="grid h-8 w-8 place-items-center rounded text-[22px] leading-none text-ink-faint hover:bg-shell hover:text-ink"
               >
@@ -122,16 +124,16 @@ export function EmailPreferencesPanel({
 
       <section className={cn(card, "overflow-hidden")}>
         <div className="px-6 pt-8 sm:px-10">
-          <h3 className="text-[20px] text-ink">Email preferences</h3>
+          <h3 className="text-[20px] text-ink">{tr("Email preferences")}</h3>
           <p className="mt-1 border-b border-line pb-2 text-[14px] text-ink">
-            Here you can choose what type of emails you want to receive
+            {tr("Here you can choose what type of emails you want to receive")}
           </p>
           <table className="mt-4 w-full text-[13.5px]">
             <thead>
               <tr className="border-b-2 border-line text-left">
-                <th className="w-[36%] py-2 pr-4 font-semibold text-ink">Name</th>
-                <th className="py-2 pr-4 font-semibold text-ink">Description</th>
-                <th className="w-16 py-2 text-center font-semibold text-ink">Active</th>
+                <th className="w-[36%] py-2 pr-4 font-semibold text-ink">{tr("Name")}</th>
+                <th className="py-2 pr-4 font-semibold text-ink">{tr("Description")}</th>
+                <th className="w-16 py-2 text-center font-semibold text-ink">{tr("Active")}</th>
               </tr>
             </thead>
             <tbody>
@@ -157,7 +159,7 @@ export function EmailPreferencesPanel({
         {canEdit && (
           <div className="mt-6 flex justify-end bg-shell/60 px-6 py-5 sm:px-10">
             <button type="button" onClick={save} disabled={pending} className={primary}>
-              Save
+              {tr("Save")}
             </button>
           </div>
         )}

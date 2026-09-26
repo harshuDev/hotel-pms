@@ -1,5 +1,6 @@
 "use client";
 
+import { useT } from "@/components/i18n";
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -194,6 +195,7 @@ export function BookingDetailView({
    */
   inDialog?: boolean;
 }) {
+  const tr = useT();
   const currency = useCurrency();
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -381,11 +383,11 @@ export function BookingDetailView({
           <div className="flex flex-wrap items-center gap-2">
             {canEdit && detail.status === "pending" && (
               <button
-                onClick={() => run(() => confirmBooking(detail.bookingId), "Booking confirmed.")}
+                onClick={() => run(() => confirmBooking(detail.bookingId), tr("Booking confirmed."))}
                 disabled={pending}
                 className="rounded-md bg-chrome-800 px-4 py-2 text-[13px] font-medium text-white hover:bg-chrome-900 disabled:opacity-50"
               >
-                Confirm
+                {tr("Confirm")}
               </button>
             )}
             {canEdit && ["pending", "confirmed"].includes(detail.status) && (
@@ -399,7 +401,7 @@ export function BookingDetailView({
                 onClick={() => setEditing((e) => !e)}
                 className="rounded-md border border-line px-4 py-2 text-[13px] text-ink-muted hover:bg-shell hover:text-ink"
               >
-                {editing ? "Stop editing" : "Edit"}
+                {editing ? tr("Stop editing") : tr("Edit")}
               </button>
             )}
             {/*
@@ -415,14 +417,14 @@ export function BookingDetailView({
                   setRestoreBlocked(null);
                   run(
                     () => restoreBooking(detail.bookingId),
-                    "Booking restored.",
+                    tr("Booking restored."),
                     (message) => setRestoreBlocked(message),
                   );
                 }}
                 disabled={pending}
                 className="rounded-md border border-emerald-300 px-4 py-2 text-[13px] text-emerald-700 hover:bg-emerald-50 disabled:opacity-50"
               >
-                {pending ? "Restoring\u2026" : "Restore booking"}
+                {pending ? tr("Restoring…") : tr("Restore booking")}
               </button>
             )}
             {canEdit && ["pending", "confirmed"].includes(detail.status) && (
@@ -430,7 +432,7 @@ export function BookingDetailView({
                 onClick={() => setCancelling((c) => !c)}
                 className="rounded-md border border-line px-4 py-2 text-[13px] text-rose-700 hover:bg-rose-50"
               >
-                Cancel booking
+                {tr("Cancel booking")}
               </button>
             )}
           </div>
@@ -444,7 +446,7 @@ export function BookingDetailView({
           </Fact>
           <Fact name="Guests">
             <span className="tnum">
-              {detail.adults} adult{detail.adults === 1 ? "" : "s"}
+              {detail.adults} {tr("adult")}{detail.adults === 1 ? "" : "s"}
               {detail.children > 0 && `, ${detail.children} child${detail.children === 1 ? "" : "ren"}`}
             </span>
           </Fact>
@@ -454,17 +456,17 @@ export function BookingDetailView({
             </span>
             {detail.roomsAssigned < detail.roomCount && (
               <span className="ml-1.5 text-xxs text-warn-deep">
-                {detail.roomCount - detail.roomsAssigned} unassigned
+                {detail.roomCount - detail.roomsAssigned} {tr("unassigned")}
               </span>
             )}
           </Fact>
           <Fact name="Source">{detail.channelName ?? "—"}</Fact>
           <Fact name="Settlement">
             {detail.settlement === "at_property"
-              ? "Pays at the property"
+              ? tr("Pays at the property")
               : detail.settlement === "prepaid_to_channel"
-                ? "Prepaid to the channel"
-                : "Virtual card"}
+                ? tr("Prepaid to the channel")
+                : tr("Virtual card")}
           </Fact>
           <Fact name="Booked">
             {format(parseISO(detail.bookedOn), "d MMM yyyy")}
@@ -480,19 +482,19 @@ export function BookingDetailView({
               /* "Not set" is not "free". Saying "free cancellation" here
                  because no policy is attached would be inventing a promise
                  the hotel never made. */
-              <span className="text-ink-muted">Not set</span>
+              <span className="text-ink-muted">{tr("Not set")}</span>
             ) : cancellationTerms.kind === "custom" ? (
               /* A custom policy is the hotel's own words (0092): no date can
                  be worked out from it, so none is claimed. */
               <>
-                <span className="font-medium text-ink">Custom terms</span>
+                <span className="font-medium text-ink">{tr("Custom terms")}</span>
                 <span className="block text-xxs text-ink-faint">
                   {cancellationTerms.policyName}
                 </span>
               </>
             ) : cancellationTerms.kind === "non_refundable" ? (
               <>
-                <span className="font-medium text-rose-600">Non-refundable</span>
+                <span className="font-medium text-rose-600">{tr("Non-refundable")}</span>
                 <span className="block text-xxs text-ink-faint">
                   {cancellationTerms.policyName}
                 </span>
@@ -505,7 +507,7 @@ export function BookingDetailView({
                     cancellationTerms.isFreeNow ? "text-emerald-600" : "text-warn-deep",
                   )}
                 >
-                  {cancellationTerms.isFreeNow ? "Free to cancel" : "Past the free window"}
+                  {cancellationTerms.isFreeNow ? tr("Free to cancel") : tr("Past the free window")}
                 </span>
                 <span className="block text-xxs text-ink-faint">
                   {cancellationTerms.freeUntil
@@ -516,13 +518,13 @@ export function BookingDetailView({
             )}
             {cancellationTerms?.isMixed && (
               <span className="block text-xxs text-warn-deep">
-                Rooms differ — strictest shown
+                {tr("Rooms differ — strictest shown")}
               </span>
             )}
           </Fact>
           <Fact name="Reservation value">
             <span className="tnum">{formatMoney(detail.reservationValueCents, currency)}</span>
-            <span className="block text-xxs text-ink-faint">Rate less discount, before tax</span>
+            <span className="block text-xxs text-ink-faint">{tr("Rate less discount, before tax")}</span>
           </Fact>
           <Fact name="Balance">
             <span
@@ -531,10 +533,10 @@ export function BookingDetailView({
                 detail.balanceCents > 0 ? "text-rose-600" : "text-ink",
               )}
             >
-              {settled ? "Settled" : formatMoney(detail.balanceCents, currency)}
+              {settled ? tr("Settled") : formatMoney(detail.balanceCents, currency)}
             </span>
             <span className="block text-xxs text-ink-faint">
-              {formatMoney(detail.chargesCents, currency)} charged, {formatMoney(detail.paymentsCents, currency)} paid
+              {formatMoney(detail.chargesCents, currency)} {tr("charged,")}{" "}{formatMoney(detail.paymentsCents, currency)} {tr("paid")}
             </span>
           </Fact>
         </div>
@@ -543,13 +545,13 @@ export function BookingDetailView({
           <div className="mt-4 space-y-2 border-t border-line pt-4">
             {detail.guestNotes && (
               <p className="text-[13px] text-ink-muted">
-                <span className="font-medium text-ink">Guest notes </span>
+                <span className="font-medium text-ink">{tr("Guest notes")}{" "}</span>
                 {detail.guestNotes}
               </p>
             )}
             {detail.internalNotes && (
               <p className="whitespace-pre-line text-[13px] text-ink-muted">
-                <span className="font-medium text-ink">Staff notes </span>
+                <span className="font-medium text-ink">{tr("Staff notes")}{" "}</span>
                 {detail.internalNotes}
               </p>
             )}
@@ -572,11 +574,11 @@ export function BookingDetailView({
       {editing && (
         <div className="rounded-lg border border-line bg-white p-5 shadow-card">
           <h2 className="mb-4 font-display text-[15px] font-semibold tracking-tightest text-ink">
-            Change the booking
+            {tr("Change the booking")}
           </h2>
           <div className="grid gap-4 sm:grid-cols-4">
             <div>
-              <label htmlFor="e-in" className={label}>Arrival</label>
+              <label htmlFor="e-in" className={label}>{tr("Arrival")}</label>
               <input
                 id="e-in"
                 type="date"
@@ -587,7 +589,7 @@ export function BookingDetailView({
               />
             </div>
             <div>
-              <label htmlFor="e-out" className={label}>Departure</label>
+              <label htmlFor="e-out" className={label}>{tr("Departure")}</label>
               <input
                 id="e-out"
                 type="date"
@@ -597,7 +599,7 @@ export function BookingDetailView({
               />
             </div>
             <div>
-              <label htmlFor="e-adults" className={label}>Adults</label>
+              <label htmlFor="e-adults" className={label}>{tr("Adults")}</label>
               <input
                 id="e-adults"
                 type="number"
@@ -608,7 +610,7 @@ export function BookingDetailView({
               />
             </div>
             <div>
-              <label htmlFor="e-children" className={label}>Children</label>
+              <label htmlFor="e-children" className={label}>{tr("Children")}</label>
               <input
                 id="e-children"
                 type="number"
@@ -619,7 +621,7 @@ export function BookingDetailView({
               />
             </div>
             <div>
-              <label htmlFor="e-channel" className={label}>Came from</label>
+              <label htmlFor="e-channel" className={label}>{tr("Came from")}</label>
               <select
                 id="e-channel"
                 value={form.channelId}
@@ -632,20 +634,20 @@ export function BookingDetailView({
               </select>
             </div>
             <div>
-              <label htmlFor="e-settlement" className={label}>Settlement</label>
+              <label htmlFor="e-settlement" className={label}>{tr("Settlement")}</label>
               <select
                 id="e-settlement"
                 value={form.settlement}
                 onChange={(e) => setForm({ ...form, settlement: e.target.value as Settlement })}
                 className={field}
               >
-                <option value="at_property">Pays at the property</option>
-                <option value="prepaid_to_channel">Prepaid to the channel</option>
-                <option value="virtual_card">Virtual card</option>
+                <option value="at_property">{tr("Pays at the property")}</option>
+                <option value="prepaid_to_channel">{tr("Prepaid to the channel")}</option>
+                <option value="virtual_card">{tr("Virtual card")}</option>
               </select>
             </div>
             <div className="sm:col-span-2">
-              <label htmlFor="e-guest" className={label}>Notes for the guest</label>
+              <label htmlFor="e-guest" className={label}>{tr("Notes for the guest")}</label>
               <input
                 id="e-guest"
                 value={form.guestNotes}
@@ -654,11 +656,11 @@ export function BookingDetailView({
               />
             </div>
             <div className="sm:col-span-4">
-              <label htmlFor="e-internal" className={label}>Add a staff note</label>
+              <label htmlFor="e-internal" className={label}>{tr("Add a staff note")}</label>
               <input
                 id="e-internal"
                 value={form.internalNotes}
-                placeholder="Appended to the existing notes; the guest never sees these"
+                placeholder={tr("Appended to the existing notes; the guest never sees these")}
                 onChange={(e) => setForm({ ...form, internalNotes: e.target.value })}
                 className={field}
               />
@@ -674,7 +676,7 @@ export function BookingDetailView({
                 className="mt-0.5"
               />
               <span className="text-[13px] leading-relaxed text-warn-deep">
-                Extend anyway, overbooking the house.
+                {tr("Extend anyway, overbooking the house.")}
               </span>
             </label>
           )}
@@ -697,13 +699,13 @@ export function BookingDetailView({
                       externalReference: form.externalReference,
                       allowOverbook,
                     }),
-                  "Booking changed.",
+                  tr("Booking changed."),
                 )
               }
               disabled={pending}
               className="shrink-0 rounded-md bg-chrome-800 px-6 py-2.5 text-[13px] font-medium text-white hover:bg-chrome-900 disabled:opacity-50"
             >
-              {pending ? "Saving…" : "Save changes"}
+              {pending ? tr("Saving…") : tr("Save changes")}
             </button>
           </div>
         </div>
@@ -713,28 +715,27 @@ export function BookingDetailView({
       {cancelling && (
         <div className="rounded-lg border border-rose-200 bg-white p-5 shadow-card">
           <h2 className="mb-2 font-display text-[15px] font-semibold tracking-tightest text-ink">
-            Cancel {detail.reference}
+            {tr("Cancel")}{" "}{detail.reference}
           </h2>
           <p className="mb-4 max-w-2xl text-[13px] leading-relaxed text-ink-muted">
-            The rooms come off the house immediately, which frees the inventory.
+            {tr("The rooms come off the house immediately, which frees the inventory.")}
             {detail.balanceCents > 0 && (
               <>
-                {" "}This booking still owes{" "}
+                {" "}{tr("This booking still owes")}{" "}
                 <span className="tnum font-medium text-rose-600">
                   {formatMoney(detail.balanceCents, currency)}
                 </span>
-                . Cancelling does not write that off — a cancellation fee is a
-                real charge and somebody still has to chase it.
+                {tr(". Cancelling does not write that off — a cancellation fee is a real charge and somebody still has to chase it.")}
               </>
             )}
           </p>
           <div className="flex flex-wrap items-end gap-3">
             <div className="min-w-[280px] flex-1">
-              <label htmlFor="c-reason" className={label}>Reason</label>
+              <label htmlFor="c-reason" className={label}>{tr("Reason")}</label>
               <input
                 id="c-reason"
                 value={cancelReason}
-                placeholder="Recorded on the booking's staff notes"
+                placeholder={tr("Recorded on the booking's staff notes")}
                 onChange={(e) => setCancelReason(e.target.value)}
                 className={field}
               />
@@ -745,7 +746,7 @@ export function BookingDetailView({
                 checked={noShow}
                 onChange={(e) => setNoShow(e.target.checked)}
               />
-              They did not turn up (no show)
+              {tr("They did not turn up (no show)")}
             </label>
             {/*
               The terms, at the moment somebody is about to cancel — which is
@@ -790,7 +791,7 @@ export function BookingDetailView({
               disabled={pending}
               className="rounded-md bg-rose-600 px-5 py-2.5 text-[13px] font-medium text-white hover:bg-rose-700 disabled:opacity-50"
             >
-              {noShow ? "Mark no show" : "Cancel it"}
+              {noShow ? tr("Mark no show") : tr("Cancel it")}
             </button>
           </div>
         </div>
@@ -828,7 +829,7 @@ export function BookingDetailView({
       {tab === "rooms" && (
       <div className="rounded-lg border border-line bg-white p-5 shadow-card">
         <h2 className="mb-4 font-display text-[15px] font-semibold tracking-tightest text-ink">
-          Rooms
+          {tr("Rooms")}
         </h2>
         <div className="space-y-4">
           {rooms.map((room) => {
@@ -876,14 +877,14 @@ export function BookingDetailView({
                     </svg>
                     <span className="min-w-0">
                       <span className="font-medium text-ink">
-                        {room.roomNumber ? `Room ${room.roomNumber}` : "No room assigned"}
+                        {room.roomNumber ? `Room ${room.roomNumber}` : tr("No room assigned")}
                       </span>
                       <span className="ml-2 text-[13px] text-ink-muted">{room.roomTypeName}</span>
                       <span className="ml-2 text-xxs text-ink-faint">
-                        {room.adults} adult{room.adults === 1 ? "" : "s"}
+                        {room.adults} {tr("adult")}{room.adults === 1 ? "" : "s"}
                         {room.children > 0 && ` + ${room.children}`}
                         {" · "}
-                        {room.nights} night{room.nights === 1 ? "" : "s"}
+                        {room.nights} {tr("night")}{room.nights === 1 ? "" : "s"}
                       </span>
                       {/*
                         Only when this room does not agree with the booking --
@@ -904,7 +905,7 @@ export function BookingDetailView({
                     </span>
                     {room.discountCents > 0 && (
                       <span className="tnum rounded bg-emerald-50 px-2 py-0.5 text-xxs font-medium text-emerald-800">
-                        {formatMoney(room.discountCents, currency)} off
+                        {formatMoney(room.discountCents, currency)} {tr("off")}
                       </span>
                     )}
                     {canEdit && editable && !roomCanceled && (
@@ -914,7 +915,7 @@ export function BookingDetailView({
                         }
                         className="rounded border border-line px-2.5 py-1 text-xxs text-ink-muted hover:bg-shell hover:text-ink"
                       >
-                        Set rate
+                        {tr("Set rate")}
                       </button>
                     )}
                     {/*
@@ -934,7 +935,7 @@ export function BookingDetailView({
                         }}
                         className="rounded border border-rose-300 px-2.5 py-1 text-xxs text-rose-700 hover:bg-rose-50"
                       >
-                        Cancel this room
+                        {tr("Cancel this room")}
                       </button>
                     )}
                     {canEdit && editable && room.canceledSeparately && (
@@ -947,7 +948,7 @@ export function BookingDetailView({
                                 bookingId: detail.bookingId,
                                 bookingRoomId: room.bookingRoomId,
                               }),
-                            "Room restored.",
+                            tr("Room restored."),
                             (m) =>
                               setRoomRestoreBlocked({
                                 bookingRoomId: room.bookingRoomId,
@@ -958,7 +959,7 @@ export function BookingDetailView({
                         disabled={pending}
                         className="rounded border border-emerald-300 px-2.5 py-1 text-xxs text-emerald-700 hover:bg-emerald-50 disabled:opacity-50"
                       >
-                        Restore this room
+                        {tr("Restore this room")}
                       </button>
                     )}
                   </div>
@@ -968,12 +969,12 @@ export function BookingDetailView({
                   <div className="flex flex-wrap items-end gap-3 border-b border-line bg-rose-50/50 px-4 py-3">
                     <div className="min-w-[240px] flex-1">
                       <label htmlFor={`rc-${room.bookingRoomId}`} className={label}>
-                        Reason
+                        {tr("Reason")}
                       </label>
                       <input
                         id={`rc-${room.bookingRoomId}`}
                         value={roomCancelReason}
-                        placeholder="Recorded on the booking's staff notes"
+                        placeholder={tr("Recorded on the booking's staff notes")}
                         onChange={(e) => setRoomCancelReason(e.target.value)}
                         className={field}
                       />
@@ -987,19 +988,19 @@ export function BookingDetailView({
                               bookingRoomId: room.bookingRoomId,
                               reason: roomCancelReason,
                             }),
-                          "Room cancelled. The rest of the booking is unchanged.",
+                          tr("Room cancelled. The rest of the booking is unchanged."),
                         )
                       }
                       disabled={pending}
                       className="rounded-md bg-rose-600 px-4 py-2 text-[13px] font-medium text-white hover:bg-rose-700 disabled:opacity-50"
                     >
-                      Cancel this room
+                      {tr("Cancel this room")}
                     </button>
                     <button
                       onClick={() => setRoomCancelling(null)}
                       className="rounded-md border border-line px-4 py-2 text-[13px] text-ink-muted hover:bg-shell hover:text-ink"
                     >
-                      Keep it
+                      {tr("Keep it")}
                     </button>
                   </div>
                 )}
@@ -1023,13 +1024,13 @@ export function BookingDetailView({
                               bookingRoomId: room.bookingRoomId,
                               allowOverbook: true,
                             }),
-                          "Room restored, and the house is oversold for those nights.",
+                          tr("Room restored, and the house is oversold for those nights."),
                         )
                       }
                       disabled={pending}
                       className="rounded-md bg-rose-600 px-4 py-2 text-[13px] font-medium text-white hover:bg-rose-700 disabled:opacity-50"
                     >
-                      Restore it anyway
+                      {tr("Restore it anyway")}
                     </button>
                   </div>
                 )}
@@ -1037,7 +1038,7 @@ export function BookingDetailView({
                 {pricing === room.bookingRoomId && (
                   <div className="flex flex-wrap items-end gap-3 border-b border-line bg-shell px-4 py-3">
                     <div>
-                      <label className={label}>Rate a night</label>
+                      <label className={label}>{tr("Rate a night")}</label>
                       <input
                         value={newRate}
                         inputMode="decimal"
@@ -1062,13 +1063,13 @@ export function BookingDetailView({
                               bookingRoomId: room.bookingRoomId,
                               rateCents: cents,
                             }),
-                          "Rate set on the nights that have not been charged.",
+                          tr("Rate set on the nights that have not been charged."),
                         );
                       }}
                       disabled={pending}
                       className="rounded-md bg-chrome-800 px-4 py-2 text-[13px] font-medium text-white hover:bg-chrome-900 disabled:opacity-50"
                     >
-                      Apply
+                      {tr("Apply")}
                     </button>
                   </div>
                 )}
@@ -1102,7 +1103,7 @@ export function BookingDetailView({
                             n.roomRateCents === 0 ? "text-warn-deep" : "text-ink-muted",
                           )}
                         >
-                          {n.roomRateCents === 0 ? "Not priced" : formatMoney(n.roomRateCents, currency)}
+                          {n.roomRateCents === 0 ? tr("Not priced") : formatMoney(n.roomRateCents, currency)}
                         </td>
                         <td className="tnum px-4 py-2 text-right text-emerald-700">
                           {n.discountCents > 0 ? formatMoney(n.discountCents, currency) : "—"}
@@ -1114,7 +1115,7 @@ export function BookingDetailView({
                           {formatMoney(n.roomRateCents - n.discountCents + n.taxCents, currency)}
                         </td>
                         <td className="px-4 py-2 text-xxs text-ink-faint">
-                          {n.charged ? "Charged" : ""}
+                          {n.charged ? tr("Charged") : ""}
                         </td>
                       </tr>
                     ))}
@@ -1127,10 +1128,7 @@ export function BookingDetailView({
         </div>
         {unpriced.length > 0 && (
           <p className="mt-3 rounded-md bg-warn-wash px-3 py-2.5 text-[13px] leading-relaxed text-warn-deep">
-            {unpriced.length} night{unpriced.length === 1 ? " has" : "s have"} no
-            rate. Nights added by an extension come in at zero because no rate
-            plan was named — set a rate before the night audit runs, or the stay
-            will be charged as free.
+            {unpriced.length} {tr("night")}{unpriced.length === 1 ? tr(" has") : tr("s have")} {tr("no rate. Nights added by an extension come in at zero because no rate plan was named — set a rate before the night audit runs, or the stay will be charged as free.")}
           </p>
         )}
       </div>
@@ -1141,7 +1139,7 @@ export function BookingDetailView({
       {tab === "extras" && (
         <div className="rounded-lg border border-line bg-white p-5 shadow-card">
           <h2 className="mb-4 font-display text-[15px] font-semibold tracking-tightest text-ink">
-            Extras
+            {tr("Extras")}
           </h2>
           {canCharge && (
             <div className="mb-5 border-b border-line pb-5">
@@ -1150,7 +1148,7 @@ export function BookingDetailView({
           )}
           {extras.length === 0 ? (
             <p className="py-6 text-center text-[13px] text-ink-muted">
-              Nothing charged beyond the room.
+              {tr("Nothing charged beyond the room.")}
             </p>
           ) : (
             <table className="w-full text-[13px]">
@@ -1181,7 +1179,7 @@ export function BookingDetailView({
                     <td className="px-3 py-2.5 text-ink">
                       {l.description}
                       {l.isReversal && (
-                        <span className="ml-2 text-xxs text-warn-deep">reversed</span>
+                        <span className="ml-2 text-xxs text-warn-deep">{tr("reversed")}</span>
                       )}
                     </td>
                     <td
@@ -1203,7 +1201,7 @@ export function BookingDetailView({
               <tfoot>
                 <tr className="border-t border-line-strong">
                   <td className="px-3 pt-3 font-semibold text-ink" colSpan={3}>
-                    Extras charged
+                    {tr("Extras charged")}
                   </td>
                   <td className="tnum whitespace-nowrap px-3 pt-3 text-right font-semibold text-ink">
                     {formatMoney(extrasCents, currency)}
@@ -1220,7 +1218,7 @@ export function BookingDetailView({
         <div className="rounded-lg border border-line bg-white p-5 shadow-card">
           <div className="mb-4 flex items-center justify-between">
             <h2 className="font-display text-[15px] font-semibold tracking-tightest text-ink">
-              Guests
+              {tr("Guests")}
             </h2>
             <span className="flex gap-4">
               {/* The printable card Guest Configuration feeds (0073). A new
@@ -1230,20 +1228,20 @@ export function BookingDetailView({
                 target="_blank"
                 className="text-[13px] text-ink-muted underline-offset-2 hover:text-ink hover:underline"
               >
-                Registration card
+                {tr("Registration card")}
               </Link>
               <Link
                 href={`/customers?q=${encodeURIComponent(detail.customerName)}`}
                 className="text-[13px] text-ink-muted underline-offset-2 hover:text-ink hover:underline"
               >
-                Open in Customers
+                {tr("Open in Customers")}
               </Link>
             </span>
           </div>
 
           {guest === null ? (
             <p className="py-6 text-center text-[13px] text-ink-muted">
-              The guest record could not be read.
+              {tr("The guest record could not be read.")}
             </p>
           ) : (
             <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-4">
@@ -1305,7 +1303,7 @@ export function BookingDetailView({
                 {rooms.map((r) => (
                   <tr key={r.bookingRoomId}>
                     <td className="tnum px-3 py-2.5 font-medium text-ink">
-                      {r.roomNumber ?? "Not assigned"}
+                      {r.roomNumber ?? tr("Not assigned")}
                     </td>
                     <td className="px-3 py-2.5 text-ink-muted">{r.roomTypeName}</td>
                     <td className="tnum px-3 py-2.5 text-right text-ink">{r.adults}</td>
@@ -1323,7 +1321,7 @@ export function BookingDetailView({
       <div className="rounded-lg border border-line bg-white p-5 shadow-card">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="font-display text-[15px] font-semibold tracking-tightest text-ink">
-            Folio
+            {tr("Folio")}
           </h2>
           <span className="flex gap-4">
             {/* The printable invoice Invoice Settings feeds (0080). A new
@@ -1334,19 +1332,19 @@ export function BookingDetailView({
               target="_blank"
               className="text-[13px] text-ink-muted underline-offset-2 hover:text-ink hover:underline"
             >
-              Print invoice
+              {tr("Print invoice")}
             </Link>
             <Link
               href="/cashier"
               className="text-[13px] text-ink-muted underline-offset-2 hover:text-ink hover:underline"
             >
-              Take a payment
+              {tr("Take a payment")}
             </Link>
           </span>
         </div>
         {folio.length === 0 ? (
           <p className="py-6 text-center text-[13px] text-ink-muted">
-            Nothing posted yet.
+            {tr("Nothing posted yet.")}
           </p>
         ) : (
           <table className="w-full text-[13px]">
@@ -1375,8 +1373,8 @@ export function BookingDetailView({
                   <td className="px-3 py-2.5 text-ink">
                     {l.description}
                     <span className="ml-2 text-xxs text-ink-faint">
-                      {l.kind === "payment" ? "payment" : "charge"}
-                      {l.isReversal && " · reversed"}
+                      {l.kind === "payment" ? tr("payment") : tr("charge")}
+                      {l.isReversal && tr(" · reversed")}
                     </span>
                   </td>
                   <td
@@ -1421,10 +1419,10 @@ export function BookingDetailView({
       {tab === "history" && (
       <div className="rounded-lg border border-line bg-white p-5 shadow-card">
         <h2 className="mb-4 font-display text-[15px] font-semibold tracking-tightest text-ink">
-          History
+          {tr("History")}
         </h2>
         {activity.length === 0 ? (
-          <p className="text-[13px] text-ink-muted">Nothing recorded yet.</p>
+          <p className="text-[13px] text-ink-muted">{tr("Nothing recorded yet.")}</p>
         ) : (
           <ul className="space-y-2.5">
             {activity.map((a) => (

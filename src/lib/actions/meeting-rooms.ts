@@ -1,4 +1,5 @@
 "use server";
+import { localised } from "@/lib/i18n/localised";
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
@@ -28,13 +29,13 @@ export async function bookMeetingRoom(
   input: MeetingRoomBookingInput,
 ): Promise<ActionResult<{ bookingId: string; reference: string }>> {
   if (input.eventName.trim() === "") {
-    return { ok: false, error: "Give the event a name." };
+    return { ok: false, error: await localised("Give the event a name.") };
   }
   if (!Number.isSafeInteger(input.guestCount) || input.guestCount < 1) {
-    return { ok: false, error: "How many people is it for?" };
+    return { ok: false, error: await localised("How many people is it for?") };
   }
   if (input.endsOn < input.startsOn) {
-    return { ok: false, error: "The last day must not be before the first." };
+    return { ok: false, error: await localised("The last day must not be before the first.") };
   }
 
   const supabase = await createClient();
@@ -49,13 +50,13 @@ export async function bookMeetingRoom(
     p_status: "confirmed",
   });
 
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
 
   const row = ((data ?? []) as { booking_id: string; reference: string }[])[0];
   if (!row) {
     return {
       ok: false,
-      error: "The booking was not returned. Check the calendar before trying again.",
+      error: await localised("The booking was not returned. Check the calendar before trying again."),
     };
   }
 
@@ -73,7 +74,7 @@ export async function cancelMeetingRoomBooking(input: {
     p_reason: input.reason || null,
   });
 
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
 
   revalidatePath("/meeting-rooms");
   return { ok: true, data: { outstandingCents: Number(data ?? 0) } };
@@ -92,7 +93,7 @@ export async function chargeMeetingRoomBooking(input: {
   description: string;
 }): Promise<ActionResult<null>> {
   if (!Number.isSafeInteger(input.amountCents) || input.amountCents <= 0) {
-    return { ok: false, error: "A charge must be more than nothing." };
+    return { ok: false, error: await localised("A charge must be more than nothing.") };
   }
 
   const supabase = await createClient();
@@ -103,7 +104,7 @@ export async function chargeMeetingRoomBooking(input: {
     p_tax_rate_id: null,
   });
 
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
 
   revalidatePath("/meeting-rooms");
   revalidatePath("/cashier");
@@ -117,10 +118,10 @@ export async function saveMeetingRoom(input: {
   description: string;
 }): Promise<ActionResult<{ id: string }>> {
   if (input.name.trim() === "") {
-    return { ok: false, error: "Give the meeting room a name." };
+    return { ok: false, error: await localised("Give the meeting room a name.") };
   }
   if (input.capacity !== null && (!Number.isSafeInteger(input.capacity) || input.capacity < 1)) {
-    return { ok: false, error: "A capacity has to be a whole number of seats." };
+    return { ok: false, error: await localised("A capacity has to be a whole number of seats.") };
   }
 
   const supabase = await createClient();
@@ -133,7 +134,7 @@ export async function saveMeetingRoom(input: {
     p_is_active: true,
   });
 
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
 
   revalidatePath("/meeting-rooms");
   return { ok: true, data: { id: data as string } };

@@ -1,3 +1,4 @@
+import { getT } from "@/lib/i18n/server";
 import { format, parseISO } from "date-fns";
 import { StatusBadge } from "@/components/ui";
 import {
@@ -19,6 +20,7 @@ export default async function CancellationReportPage({
 }: {
   searchParams: Promise<{ from?: string; to?: string }>;
 }) {
+  const tr = await getT();
   const currency = await getPropertyCurrency();
   const sp = await searchParams;
   const businessDate = await getBusinessDate();
@@ -32,25 +34,25 @@ export default async function CancellationReportPage({
 
   return (
     <ReportShell
-      title="Cancellation"
+      title={tr("Cancellation")}
       action="/reports/cancellation"
       range={range}
     >
       <ReportFigures>
         <ReportFigure
-          label="Lost arrivals"
+          label={tr("Lost arrivals")}
           value={String(rows.length)}
           detail={
             noShows > 0
               ? `${noShows} no show${noShows === 1 ? "" : "s"}`
-              : "No no-shows"
+              : tr("No no-shows")
           }
         />
-        <ReportFigure label="Room nights lost" value={String(roomNights)} />
+        <ReportFigure label={tr("Room nights lost")} value={String(roomNights)} />
         <ReportFigure
-          label="Value lost"
+          label={tr("Value lost")}
           value={formatMoneyShort(lost, currency)}
-          detail="Rate less discount, before tax"
+          detail={tr("Rate less discount, before tax")}
           emphasis
         />
       </ReportFigures>
@@ -59,12 +61,12 @@ export default async function CancellationReportPage({
         rows={rows}
         rowKey={(r) => r.bookingId}
         minWidth="920px"
-        emptyTitle="Nothing was cancelled for these arrival dates"
-        emptyHint="Cancellations and no-shows appear here against the date they were due to arrive."
+        emptyTitle={tr("Nothing was cancelled for these arrival dates")}
+        emptyHint={tr("Cancellations and no-shows appear here against the date they were due to arrive.")}
         footLabel={`${rows.length} booking${rows.length === 1 ? "" : "s"}`}
         columns={[
           {
-            header: "Arrival",
+            header: tr("Arrival"),
             cell: (r) => (
               <span className="whitespace-nowrap text-ink">
                 {format(parseISO(r.checkIn), "d MMM yyyy")}
@@ -72,7 +74,7 @@ export default async function CancellationReportPage({
             ),
           },
           {
-            header: "Booking",
+            header: tr("Booking"),
             cell: (r) => (
               <>
                 <span className="font-medium text-ink">{r.reference}</span>
@@ -81,17 +83,17 @@ export default async function CancellationReportPage({
             ),
           },
           {
-            header: "Status",
+            header: tr("Status"),
             cell: (r) => <StatusBadge status={r.status} />,
           },
           {
-            header: "Channel",
+            header: tr("Channel"),
             cell: (r) => (
               <span className="text-ink-faint">{r.channelName ?? "—"}</span>
             ),
           },
           {
-            header: "Booked",
+            header: tr("Booked"),
             cell: (r) => (
               <span className="whitespace-nowrap text-ink-muted">
                 {format(parseISO(r.bookedOn), "d MMM")}
@@ -99,27 +101,27 @@ export default async function CancellationReportPage({
             ),
           },
           {
-            header: "Cancelled",
+            header: tr("Cancelled"),
             cell: (r) => (
               <span className="whitespace-nowrap text-ink-muted">
                 {r.cancelledOn
                   ? format(parseISO(r.cancelledOn), "d MMM")
-                  : "Not recorded"}
+                  : tr("Not recorded")}
               </span>
             ),
           },
           {
-            header: "Nights",
+            header: tr("Nights"),
             align: "right",
             cell: (r) => <span className="text-ink-muted">{r.nights}</span>,
           },
           {
-            header: "Rooms",
+            header: tr("Rooms"),
             align: "right",
             cell: (r) => <span className="text-ink-muted">{r.roomCount}</span>,
           },
           {
-            header: "Value lost",
+            header: tr("Value lost"),
             align: "right",
             cell: (r) => (
               <span className="font-medium text-warn-deep">

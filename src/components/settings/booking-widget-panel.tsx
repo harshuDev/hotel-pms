@@ -1,5 +1,6 @@
 "use client";
 
+import { useT } from "@/components/i18n";
 import { useEffect, useState } from "react";
 import { cn } from "@/components/ui";
 import { EditIcon } from "@/components/settings/finance-panels";
@@ -62,6 +63,7 @@ function TextField({
 }
 
 function ColorField({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
+  const tr = useT();
   const valid = /^#[0-9a-fA-F]{6}$/.test(value);
   return (
     <div className="grid items-end gap-4 sm:grid-cols-2">
@@ -71,7 +73,7 @@ function ColorField({ label, value, onChange }: { label: string; value: string; 
           onChange={(e) => onChange(e.target.value.trim())} className={line} />
       </label>
       <label className="block">
-        <span className="sr-only">{label} picker</span>
+        <span className="sr-only">{label} {tr("picker")}</span>
         <input
           type="color"
           value={valid ? value.toLowerCase() : "#000000"}
@@ -96,6 +98,7 @@ export function BookingWidgetPanel({
   pending: boolean;
   run: Run;
 }) {
+  const tr = useT();
   const [draft, setDraft] = useState<Draft | null>(
     widgets.length === 0 && canEdit ? { ...NEW_WIDGET, id: null, hash: null } : null,
   );
@@ -127,22 +130,22 @@ export function BookingWidgetPanel({
       // Stay on the widget, now saved, so its embed code is on screen.
       if (result.ok) setDraft({ ...d, hash: result.data.hash });
       return result;
-    }, "Widget saved.");
+    }, tr("Widget saved."));
   }
 
   const embed = draft?.hash && origin ? widgetEmbedCode(origin, { ...draft, hash: draft.hash }) : null;
 
   return (
     <div className="max-w-6xl space-y-4">
-      <h2 className="border-b border-line pb-1 text-[20px] text-ink">Booking Widget Generation</h2>
+      <h2 className="border-b border-line pb-1 text-[20px] text-ink">{tr("Booking Widget Generation")}</h2>
 
       <section className={cn(card, "px-4 py-5 sm:px-6")}>
-        <h3 className="border-b border-line pb-2 text-[15px] text-ink">Saved Widgets</h3>
+        <h3 className="border-b border-line pb-2 text-[15px] text-ink">{tr("Saved Widgets")}</h3>
         <table className="mt-2 w-full text-[12.5px]">
           <thead>
             <tr className="border-b border-line">
-              <th className="px-2 py-2 text-left font-semibold text-ink">Hash code</th>
-              <th className="w-20" aria-label="Actions" />
+              <th className="px-2 py-2 text-left font-semibold text-ink">{tr("Hash code")}</th>
+              <th className="w-20" aria-label={tr("Actions")} />
             </tr>
           </thead>
           <tbody>
@@ -182,7 +185,7 @@ export function BookingWidgetPanel({
         {canEdit && (
           <button type="button" className="mt-2 text-[12px] text-brass hover:underline"
             onClick={() => { setCopied(false); setDraft({ ...NEW_WIDGET, id: null, hash: null }); }}>
-            Create new widget
+            {tr("Create new widget")}
           </button>
         )}
       </section>
@@ -196,48 +199,48 @@ export function BookingWidgetPanel({
           }}
         >
           <h3 className="border-b border-line pb-2 text-[15px] text-ink">
-            {draft.hash ? `Booking Widget ${draft.hash}` : "New Booking Widget"}
+            {draft.hash ? `Booking Widget ${draft.hash}` : tr("New Booking Widget")}
           </h3>
           <div className="mt-3 space-y-3">
-            <TextField label="Title Text" value={draft.titleText} onChange={(titleText) => set({ titleText })} />
-            <TextField label="Button Text" value={draft.buttonText} onChange={(buttonText) => set({ buttonText })} />
-            <TextField label="Check-In Text" value={draft.checkInText} onChange={(checkInText) => set({ checkInText })} />
-            <TextField label="Check-Out Text" value={draft.checkOutText} onChange={(checkOutText) => set({ checkOutText })} />
-            <TextField label="Nights Text" value={draft.nightsText} onChange={(nightsText) => set({ nightsText })} />
+            <TextField label={tr("Title Text")} value={draft.titleText} onChange={(titleText) => set({ titleText })} />
+            <TextField label={tr("Button Text")} value={draft.buttonText} onChange={(buttonText) => set({ buttonText })} />
+            <TextField label={tr("Check-In Text")} value={draft.checkInText} onChange={(checkInText) => set({ checkInText })} />
+            <TextField label={tr("Check-Out Text")} value={draft.checkOutText} onChange={(checkOutText) => set({ checkOutText })} />
+            <TextField label={tr("Nights Text")} value={draft.nightsText} onChange={(nightsText) => set({ nightsText })} />
             <label className="flex items-center gap-2 text-[12.5px] text-ink">
               <input type="checkbox" className="h-4 w-4 accent-brass" checked={draft.showOccupancy}
                 onChange={(e) => set({ showOccupancy: e.target.checked })} />
-              Show occupancy options
+              {tr("Show occupancy options")}
             </label>
             <label className="flex items-center gap-2 text-[12.5px] text-ink">
               <input type="checkbox" className="h-4 w-4 accent-brass" checked={draft.useCheckoutDate}
                 onChange={(e) => set({ useCheckoutDate: e.target.checked })} />
-              Use Checkout Date Instead Nights Count
+              {tr("Use Checkout Date Instead Nights Count")}
             </label>
-            <TextField label="Month names" value={draft.monthNames} onChange={(monthNames) => set({ monthNames })} />
-            <TextField label="Week day names" value={draft.weekdayNames} onChange={(weekdayNames) => set({ weekdayNames })} />
-            <ColorField label="Primary color" value={draft.primaryColor} onChange={(primaryColor) => set({ primaryColor })} />
-            <ColorField label="Text color" value={draft.textColor} onChange={(textColor) => set({ textColor })} />
-            <ColorField label="Background color" value={draft.backgroundColor} onChange={(backgroundColor) => set({ backgroundColor })} />
-            <ColorField label="Label color" value={draft.labelColor} onChange={(labelColor) => set({ labelColor })} />
-            <ColorField label="Border color" value={draft.borderColor} onChange={(borderColor) => set({ borderColor })} />
+            <TextField label={tr("Month names")} value={draft.monthNames} onChange={(monthNames) => set({ monthNames })} />
+            <TextField label={tr("Week day names")} value={draft.weekdayNames} onChange={(weekdayNames) => set({ weekdayNames })} />
+            <ColorField label={tr("Primary color")} value={draft.primaryColor} onChange={(primaryColor) => set({ primaryColor })} />
+            <ColorField label={tr("Text color")} value={draft.textColor} onChange={(textColor) => set({ textColor })} />
+            <ColorField label={tr("Background color")} value={draft.backgroundColor} onChange={(backgroundColor) => set({ backgroundColor })} />
+            <ColorField label={tr("Label color")} value={draft.labelColor} onChange={(labelColor) => set({ labelColor })} />
+            <ColorField label={tr("Border color")} value={draft.borderColor} onChange={(borderColor) => set({ borderColor })} />
             <div className="grid gap-4 pt-2 sm:grid-cols-2">
               <div />
               <div>
-                <select aria-label="Language (optional)" value={draft.language ?? ""}
+                <select aria-label={tr("Language (optional)")} value={draft.language ?? ""}
                   onChange={(e) => set({ language: e.target.value || null })}
                   className={cn(line, "cursor-pointer", !draft.language && "text-ink-muted")}>
-                  <option value="">Language (optional)</option>
+                  <option value="">{tr("Language (optional)")}</option>
                   {LOCALES.filter((l) => supportedLocales.includes(l.code)).map((l) => (
                     <option key={l.code} value={l.code} className="text-ink">{l.label}</option>
                   ))}
                 </select>
-                {!draft.hash && <p className="mt-1 text-[11px] text-ink">Save widget to get embed code</p>}
+                {!draft.hash && <p className="mt-1 text-[11px] text-ink">{tr("Save widget to get embed code")}</p>}
               </div>
             </div>
             {embed && (
               <div>
-                <span className={small}>Embed code</span>
+                <span className={small}>{tr("Embed code")}</span>
                 <textarea readOnly value={embed} rows={3} onFocus={(e) => e.target.select()}
                   className="mt-1 w-full rounded border border-line bg-shell px-2.5 py-2 font-mono text-[11.5px] text-ink" />
                 <div className="mt-1 flex items-center gap-4 text-[12px]">
@@ -250,10 +253,10 @@ export function BookingWidgetPanel({
                         setCopied(false);
                       }
                     }}>
-                    {copied ? "Copied" : "Copy"}
+                    {copied ? tr("Copied") : tr("Copy")}
                   </button>
                   <a href={`/book/widget/${draft.hash}`} target="_blank" rel="noopener" className="text-brass hover:underline">
-                    Open
+                    {tr("Open")}
                   </a>
                 </div>
               </div>
@@ -261,8 +264,8 @@ export function BookingWidgetPanel({
           </div>
           {canEdit && (
             <div className="mt-6 flex justify-end gap-3">
-              <button type="button" className={secondary} onClick={() => setDraft(null)}>Cancel</button>
-              <button type="submit" className={primary} disabled={pending}>Save</button>
+              <button type="button" className={secondary} onClick={() => setDraft(null)}>{tr("Cancel")}</button>
+              <button type="submit" className={primary} disabled={pending}>{tr("Save")}</button>
             </div>
           )}
         </form>

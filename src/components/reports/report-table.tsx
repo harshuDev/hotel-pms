@@ -1,3 +1,4 @@
+import { getT } from "@/lib/i18n/server";
 import Link from "next/link";
 import { EmptyState, cn } from "@/components/ui";
 
@@ -108,15 +109,15 @@ export function ReportTable<T>({
  * refusal. Showing an empty report instead would read as "the hotel took
  * nothing today", which is worse than saying no.
  */
-export function ReportNoAccess() {
+export async function ReportNoAccess() {
+  const tr = await getT();
   return (
     <div className="rounded-lg border border-line bg-white p-8 text-center shadow-card">
       <p className="font-display text-lg font-semibold tracking-tightest text-ink">
-        This report is not available to your role
+        {tr("This report is not available to your role")}
       </p>
       <p className="mx-auto mt-2 max-w-md text-[13px] leading-relaxed text-ink-muted">
-        Revenue and payment reports are open to front desk, cashier, manager and
-        admin accounts. Ask a manager if you need access.
+        {tr("Revenue and payment reports are open to front desk, cashier, manager and admin accounts. Ask a manager if you need access.")}
       </p>
     </div>
   );
@@ -127,16 +128,17 @@ export function ReportNoAccess() {
  * why and where the switch is -- a manager who turned it off by mistake has a
  * way back, and a deep link does not open onto an empty page.
  */
-export function ReportFeatureOff({ feature }: { feature: string }) {
+export async function ReportFeatureOff({ feature }: { feature: string }) {
+  const tr = await getT();
   return (
     <div className="rounded-lg border border-line bg-white p-8 text-center shadow-card">
       <p className="font-display text-lg font-semibold tracking-tightest text-ink">
-        This report is switched off for this hotel
+        {tr("This report is switched off for this hotel")}
       </p>
       <p className="mx-auto mt-2 max-w-md text-[13px] leading-relaxed text-ink-muted">
-        A manager can turn it back on with &ldquo;{feature}&rdquo; in{" "}
+        {tr("A manager can turn it back on with “")}{feature}{tr("” in")}{" "}
         <Link href="/settings?tab=hotel-features" className="text-brass underline-offset-2 hover:underline">
-          Settings &rarr; Hotel Features
+          {tr("Settings → Hotel Features")}
         </Link>
         .
       </p>

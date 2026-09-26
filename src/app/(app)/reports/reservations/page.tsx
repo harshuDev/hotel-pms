@@ -1,3 +1,4 @@
+import { getT } from "@/lib/i18n/server";
 import { addDays, format, parseISO } from "date-fns";
 import { cn } from "@/components/ui";
 import {
@@ -22,6 +23,7 @@ export default async function ReservationsReportPage({
 }: {
   searchParams: Promise<{ from?: string; to?: string }>;
 }) {
+  const tr = await getT();
   const currency = await getPropertyCurrency();
   const sp = await searchParams;
   const businessDate = await getBusinessDate();
@@ -49,24 +51,24 @@ export default async function ReservationsReportPage({
 
   return (
     <ReportShell
-      title="Reservations"
+      title={tr("Reservations")}
       action="/reports/reservations"
       range={range}
     >
       <ReportFigures>
         <ReportFigure
-          label="Arrivals expected"
+          label={tr("Arrivals expected")}
           value={String(bookings)}
-          detail={pending > 0 ? `${pending} still pending` : "All confirmed"}
+          detail={pending > 0 ? `${pending} still pending` : tr("All confirmed")}
         />
         <ReportFigure
-          label="Rooms"
+          label={tr("Rooms")}
           value={String(rooms)}
           detail={`${roomNights} room night${roomNights === 1 ? "" : "s"}`}
         />
-        <ReportFigure label="Guests" value={String(guests)} detail="Adults and children" />
+        <ReportFigure label={tr("Guests")} value={String(guests)} detail={tr("Adults and children")} />
         <ReportFigure
-          label="Value"
+          label={tr("Value")}
           value={formatMoneyShort(value, currency)}
           detail={
             busiest && busiest.roomCount > 0
@@ -81,12 +83,12 @@ export default async function ReservationsReportPage({
         rows={rows}
         rowKey={(r) => r.arrivalDate}
         minWidth="800px"
-        emptyTitle="No days in this range"
-        emptyHint="Widen the dates, or check that the range runs forwards."
+        emptyTitle={tr("No days in this range")}
+        emptyHint={tr("Widen the dates, or check that the range runs forwards.")}
         footLabel={`${rows.length} day${rows.length === 1 ? "" : "s"}`}
         columns={[
           {
-            header: "Arrival",
+            header: tr("Arrival"),
             cell: (r) => (
               <span
                 className={cn(
@@ -99,7 +101,7 @@ export default async function ReservationsReportPage({
             ),
           },
           {
-            header: "Bookings",
+            header: tr("Bookings"),
             align: "right",
             cell: (r) => (
               <span className={r.bookingCount > 0 ? "text-ink-muted" : "text-ink-faint"}>
@@ -109,7 +111,7 @@ export default async function ReservationsReportPage({
             foot: String(bookings),
           },
           {
-            header: "Pending",
+            header: tr("Pending"),
             align: "right",
             cell: (r) => (
               <span className={r.pendingCount > 0 ? "text-warn-deep" : "text-ink-faint"}>
@@ -119,7 +121,7 @@ export default async function ReservationsReportPage({
             foot: pending === 0 ? "—" : String(pending),
           },
           {
-            header: "Rooms",
+            header: tr("Rooms"),
             align: "right",
             cell: (r) => (
               <span className={r.roomCount > 0 ? "text-ink-muted" : "text-ink-faint"}>
@@ -129,21 +131,21 @@ export default async function ReservationsReportPage({
             foot: String(rooms),
           },
           {
-            header: "Adults",
+            header: tr("Adults"),
             align: "right",
             cell: (r) => (
               <span className="text-ink-faint">{r.adults || "—"}</span>
             ),
           },
           {
-            header: "Children",
+            header: tr("Children"),
             align: "right",
             cell: (r) => (
               <span className="text-ink-faint">{r.children || "—"}</span>
             ),
           },
           {
-            header: "Room nights",
+            header: tr("Room nights"),
             align: "right",
             cell: (r) => (
               <span className={r.roomNights > 0 ? "text-ink-muted" : "text-ink-faint"}>
@@ -153,7 +155,7 @@ export default async function ReservationsReportPage({
             foot: String(roomNights),
           },
           {
-            header: "Value",
+            header: tr("Value"),
             align: "right",
             cell: (r) => (
               <span className={r.valueCents > 0 ? "font-medium text-ink" : "text-ink-faint"}>

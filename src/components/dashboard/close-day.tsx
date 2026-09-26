@@ -1,5 +1,6 @@
 "use client";
 
+import { useT } from "@/components/i18n";
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { format, parseISO } from "date-fns";
@@ -17,6 +18,7 @@ import { useCurrency } from "@/components/currency";
  * gate.
  */
 export function CloseDay({ businessDate }: { businessDate: string }) {
+  const tr = useT();
   const currency = useCurrency();
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -46,7 +48,7 @@ export function CloseDay({ businessDate }: { businessDate: string }) {
         }}
         className="rounded-md border border-line bg-white px-3.5 py-2 text-[13px] font-medium text-ink transition-colors hover:bg-shell"
       >
-        Close the day
+        {tr("Close the day")}
       </button>
 
       {open && (
@@ -54,12 +56,12 @@ export function CloseDay({ businessDate }: { businessDate: string }) {
           <div className="w-full max-w-md rounded-lg border border-line bg-white shadow-xl">
             <header className="flex items-center justify-between border-b border-line px-5 py-3.5">
               <h2 className="text-[17px] font-medium">
-                {done ? "Day closed" : "Close the day"}
+                {done ? tr("Day closed") : tr("Close the day")}
               </h2>
               <button
                 onClick={() => setOpen(false)}
                 className="text-ink-faint hover:text-ink"
-                aria-label="Close"
+                aria-label={tr("Close")}
               >
                 ✕
               </button>
@@ -70,19 +72,19 @@ export function CloseDay({ businessDate }: { businessDate: string }) {
                 <>
                   <dl className="space-y-2 text-sm">
                     <div className="flex justify-between border-b border-line pb-2">
-                      <dt className="text-ink-muted">Room charges posted</dt>
+                      <dt className="text-ink-muted">{tr("Room charges posted")}</dt>
                       <dd className="tnum font-medium">
                         {done.roomChargesPosted}
                       </dd>
                     </div>
                     <div className="flex justify-between border-b border-line pb-2">
-                      <dt className="text-ink-muted">Charged</dt>
+                      <dt className="text-ink-muted">{tr("Charged")}</dt>
                       <dd className="tnum font-medium">
                         {formatMoney(done.roomChargesCents, currency)}
                       </dd>
                     </div>
                     <div className="flex justify-between pt-1">
-                      <dt className="font-medium">Business date</dt>
+                      <dt className="font-medium">{tr("Business date")}</dt>
                       <dd className="tnum font-semibold text-brass">
                         {format(parseISO(done.nextDate), "EEE d MMM yyyy")}
                       </dd>
@@ -92,7 +94,7 @@ export function CloseDay({ businessDate }: { businessDate: string }) {
                     onClick={() => setOpen(false)}
                     className="w-full rounded bg-chrome-800 px-4 py-2 text-sm font-medium text-white hover:bg-chrome-900"
                   >
-                    Done
+                    {tr("Done")}
                   </button>
                 </>
               ) : (
@@ -105,9 +107,7 @@ export function CloseDay({ businessDate }: { businessDate: string }) {
                     and there is nothing to warn anybody about.
                   */}
                   <p className="text-sm leading-relaxed text-ink-muted">
-                    This posts tonight&rsquo;s room charge for every guest in
-                    house, closes <span className="font-medium text-ink">{day}</span>,
-                    and opens the next day. It cannot be undone.
+                    {tr("This posts tonight’s room charge for every guest in house, closes")}{" "}<span className="font-medium text-ink">{day}</span>{tr(", and opens the next day. It cannot be undone.")}
                   </p>
 
                   {error && (
@@ -121,7 +121,7 @@ export function CloseDay({ businessDate }: { businessDate: string }) {
                       onClick={() => setOpen(false)}
                       className="rounded border border-line px-4 py-2 text-sm hover:bg-shell"
                     >
-                      Cancel
+                      {tr("Cancel")}
                     </button>
                     <button
                       onClick={run}
@@ -131,7 +131,7 @@ export function CloseDay({ businessDate }: { businessDate: string }) {
                         pending && "opacity-60",
                       )}
                     >
-                      {pending ? "Closing…" : "Close the day"}
+                      {pending ? tr("Closing…") : tr("Close the day")}
                     </button>
                   </div>
                 </>

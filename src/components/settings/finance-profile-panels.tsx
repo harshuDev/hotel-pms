@@ -1,5 +1,6 @@
 "use client";
 
+import { useT } from "@/components/i18n";
 import { useState } from "react";
 import { cn } from "@/components/ui";
 import { EditIcon, TrashIcon } from "@/components/settings/finance-panels";
@@ -78,6 +79,7 @@ export function PosProfilesPanel({
   pending: boolean;
   run: Run;
 }) {
+  const tr = useT();
   const [draft, setDraft] = useState<PosDraft | null>(null);
   // One profile per type: a new one is offered only the types not yet taken.
   const taken = new Set(profiles.filter((p) => p.id !== draft?.id).map((p) => p.posType));
@@ -93,22 +95,22 @@ export function PosProfilesPanel({
 
   return (
     <div className="max-w-5xl space-y-3">
-      <PageHeading title="Pos Profiles" subtitle="You can add up to one profile per each pos type" />
+      <PageHeading title={tr("Pos Profiles")} subtitle={tr("You can add up to one profile per each pos type")} />
       <section className={card}>
-        <h3 className="border-b border-line px-4 py-4 text-[19px] text-ink">Pos Profiles List</h3>
+        <h3 className="border-b border-line px-4 py-4 text-[19px] text-ink">{tr("Pos Profiles List")}</h3>
         <table className="w-full text-[13.5px]">
           <thead>
             <tr className="border-b border-line">
-              <th className={cn(th, "w-1/2")}>Pos Type</th>
-              <th className={th}>Is Enabled</th>
-              <th className="w-24" aria-label="Actions" />
+              <th className={cn(th, "w-1/2")}>{tr("Pos Type")}</th>
+              <th className={th}>{tr("Is Enabled")}</th>
+              <th className="w-24" aria-label={tr("Actions")} />
             </tr>
           </thead>
           <tbody>
             {profiles.map((p) => (
               <tr key={p.id} className="border-b border-line even:bg-shell/70">
                 <td className="px-4 py-2 text-ink">{posTypeLabel(p.posType)}</td>
-                <td className="px-4 py-2">{p.isEnabled ? <Tick label="Enabled" /> : null}</td>
+                <td className="px-4 py-2">{p.isEnabled ? <Tick label={tr("Enabled")} /> : null}</td>
                 <td className="px-2 py-1">
                   {canEdit && (
                     <span className="flex justify-end">
@@ -142,16 +144,16 @@ export function PosProfilesPanel({
         {draft && (
           <div className="m-1 rounded border border-line p-4">
             <h4 className="border-b border-line pb-1 text-[18px] text-ink">
-              {draft.id ? "Edit Pos Profile" : "Create Pos Profile"}
+              {draft.id ? tr("Edit Pos Profile") : tr("Create Pos Profile")}
             </h4>
             <div className="mt-4 grid items-end gap-6 sm:grid-cols-2">
               <select
-                aria-label="Type"
+                aria-label={tr("Type")}
                 value={draft.posType}
                 onChange={(e) => setDraft({ ...draft, posType: e.target.value })}
                 className={cn(line, "cursor-pointer", draft.posType === "" && "text-ink-muted")}
               >
-                <option value="">Type</option>
+                <option value="">{tr("Type")}</option>
                 {free.map((t) => (
                   <option key={t.id} value={t.id} className="text-ink">
                     {t.label}
@@ -165,12 +167,12 @@ export function PosProfilesPanel({
                   onChange={(e) => setDraft({ ...draft, isEnabled: e.target.checked })}
                   className="h-[18px] w-[18px] accent-brass"
                 />
-                Enabled
+                {tr("Enabled")}
               </label>
             </div>
             <div className="mt-5 flex justify-end gap-3">
               <button type="button" className={secondary} onClick={() => setDraft(null)}>
-                Cancel
+                {tr("Cancel")}
               </button>
               <button
                 type="button"
@@ -178,7 +180,7 @@ export function PosProfilesPanel({
                 disabled={pending}
                 onClick={() => save(draft)}
               >
-                Save
+                {tr("Save")}
               </button>
             </div>
           </div>
@@ -191,7 +193,7 @@ export function PosProfilesPanel({
               className={primary}
               onClick={() => setDraft({ id: null, posType: "", isEnabled: true })}
             >
-              Add new pos profile
+              {tr("Add new pos profile")}
             </button>
           </div>
         )}
@@ -225,6 +227,7 @@ export function CurrenciesPanel({
   pending: boolean;
   run: Run;
 }) {
+  const tr = useT();
   const [draft, setDraft] = useState<CurrencyDraft | null>(null);
   const [error, setError] = useState<string | null>(null);
   const taken = new Set([
@@ -239,7 +242,7 @@ export function CurrenciesPanel({
     setError(null);
     const micros = d.rateKind === "fixed" ? parseRateMicros(d.rate) : null;
     if (d.rateKind === "fixed" && micros === null) {
-      setError("Write the rate as a number above zero, with up to six decimals.");
+      setError(tr("Write the rate as a number above zero, with up to six decimals."));
       return;
     }
     run(async () => {
@@ -256,16 +259,16 @@ export function CurrenciesPanel({
 
   return (
     <div className="max-w-5xl space-y-3">
-      <PageHeading title="Currencies" subtitle="At this part you can manage hotel currencies" />
+      <PageHeading title={tr("Currencies")} subtitle={tr("At this part you can manage hotel currencies")} />
       <section className={card}>
         <div className="overflow-x-auto px-4 pt-6 sm:px-8">
           <table className="w-full min-w-[30rem] text-[13.5px]">
             <thead>
               <tr className="border-b border-line">
-                <th className={cn(th, "w-[30%] px-1")}>Currency</th>
-                <th className={cn(th, "w-[30%] px-1")}>Is Default</th>
-                <th className={cn(th, "px-1")}>Rate</th>
-                <th className="w-20" aria-label="Actions" />
+                <th className={cn(th, "w-[30%] px-1")}>{tr("Currency")}</th>
+                <th className={cn(th, "w-[30%] px-1")}>{tr("Is Default")}</th>
+                <th className={cn(th, "px-1")}>{tr("Rate")}</th>
+                <th className="w-20" aria-label={tr("Actions")} />
               </tr>
             </thead>
             <tbody>
@@ -274,7 +277,7 @@ export function CurrenciesPanel({
               <tr className="border-b border-line bg-shell/70">
                 <td className="px-1 py-2.5 text-ink">{defaultCurrency}</td>
                 <td className="px-1 py-2.5">
-                  <Tick label="Default" />
+                  <Tick label={tr("Default")} />
                 </td>
                 <td className="px-1 py-2.5 text-ink-muted">—</td>
                 <td />
@@ -326,16 +329,16 @@ export function CurrenciesPanel({
         {draft && (
           <div className="mx-4 mt-4 rounded border border-line p-4 sm:mx-8">
             <h4 className="border-b border-line pb-1 text-[18px] text-ink">
-              {draft.id ? "Edit Currency Profile" : "Create Currency Profile"}
+              {draft.id ? tr("Edit Currency Profile") : tr("Create Currency Profile")}
             </h4>
             <div className="mt-4 grid items-end gap-6 sm:grid-cols-3">
               <select
-                aria-label="Currency"
+                aria-label={tr("Currency")}
                 value={draft.currency}
                 onChange={(e) => setDraft({ ...draft, currency: e.target.value })}
                 className={cn(line, "cursor-pointer", draft.currency === "" && "text-ink-muted")}
               >
-                <option value="">Currency</option>
+                <option value="">{tr("Currency")}</option>
                 {free.map((c) => (
                   <option key={c.code} value={c.code} className="text-ink">
                     {c.code} - {c.symbol}
@@ -343,19 +346,19 @@ export function CurrenciesPanel({
                 ))}
               </select>
               <select
-                aria-label="Rate"
+                aria-label={tr("Rate")}
                 value={draft.rateKind}
                 onChange={(e) => setDraft({ ...draft, rateKind: e.target.value as CurrencyRateKind })}
                 className={cn(line, "cursor-pointer")}
               >
-                <option value="live">Live Exchange</option>
-                <option value="fixed">Fixed rate</option>
+                <option value="live">{tr("Live Exchange")}</option>
+                <option value="fixed">{tr("Fixed rate")}</option>
               </select>
               {draft.rateKind === "fixed" && (
                 <label className="flex items-end gap-2 text-[14px] text-ink">
                   <span className="shrink-0 pb-1.5">1 {draft.currency || "…"} =</span>
                   <input
-                    aria-label="Fixed rate"
+                    aria-label={tr("Fixed rate")}
                     inputMode="decimal"
                     value={draft.rate}
                     onChange={(e) => setDraft({ ...draft, rate: e.target.value })}
@@ -372,7 +375,7 @@ export function CurrenciesPanel({
             )}
             <div className="mt-5 flex justify-end gap-3">
               <button type="button" className={secondary} onClick={() => setDraft(null)}>
-                Cancel
+                {tr("Cancel")}
               </button>
               <button
                 type="button"
@@ -380,7 +383,7 @@ export function CurrenciesPanel({
                 disabled={pending}
                 onClick={() => save(draft)}
               >
-                Save
+                {tr("Save")}
               </button>
             </div>
           </div>
@@ -396,7 +399,7 @@ export function CurrenciesPanel({
                 setDraft({ id: null, currency: "", rateKind: "live", rate: "" });
               }}
             >
-              Add currency profile
+              {tr("Add currency profile")}
             </button>
           </div>
         )}

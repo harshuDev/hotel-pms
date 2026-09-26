@@ -1,4 +1,5 @@
 "use server";
+import { localisedAs } from "@/lib/i18n/localised";
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
@@ -28,7 +29,7 @@ export async function loadBookingRooms(
   });
 
   if (error) {
-    return { ok: false, error: `The booking's rooms did not load: ${error.message}` };
+    return { ok: false, error: await localisedAs("The booking's rooms did not load", error.message) };
   }
 
   return {
@@ -60,7 +61,7 @@ export async function loadAvailableRooms(
   );
 
   if (error) {
-    return { ok: false, error: `Available rooms did not load: ${error.message}` };
+    return { ok: false, error: await localisedAs("Available rooms did not load", error.message) };
   }
 
   return {
@@ -91,7 +92,7 @@ export async function assignRoom(
     p_room_id: roomId,
   });
 
-  if (error) return { ok: false, error: `The room was not assigned: ${error.message}` };
+  if (error) return { ok: false, error: await localisedAs("The room was not assigned", error.message) };
 
   revalidatePath("/dashboard");
   return { ok: true, data: null };
@@ -103,7 +104,7 @@ export async function checkIn(bookingId: string): Promise<ActionResult> {
     p_booking_id: bookingId,
   });
 
-  if (error) return { ok: false, error: `The check-in did not go through: ${error.message}` };
+  if (error) return { ok: false, error: await localisedAs("The check-in did not go through", error.message) };
 
   revalidatePath("/dashboard");
   revalidatePath("/bookings");
@@ -118,7 +119,7 @@ export async function checkOut(
     p_booking_id: bookingId,
   });
 
-  if (error) return { ok: false, error: `The check-out did not go through: ${error.message}` };
+  if (error) return { ok: false, error: await localisedAs("The check-out did not go through", error.message) };
 
   const row = ((data ?? []) as { outstanding_cents: number }[])[0];
 

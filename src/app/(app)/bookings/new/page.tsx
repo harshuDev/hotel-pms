@@ -1,3 +1,4 @@
+import { getT } from "@/lib/i18n/server";
 import { addDays, format, parseISO } from "date-fns";
 import { PageHeader } from "@/components/ui";
 import { NewBookingForm } from "@/components/bookings/new-booking-form";
@@ -20,6 +21,7 @@ export default async function NewBookingPage({
 }: {
   searchParams: Promise<{ check_in?: string; room_type?: string; group?: string }>;
 }) {
+  const tr = await getT();
   const sp = await searchParams;
   const staff = await getCurrentStaffUser();
 
@@ -28,14 +30,13 @@ export default async function NewBookingPage({
   if (staff && !["admin", "manager", "front_desk"].includes(staff.role)) {
     return (
       <div>
-        <PageHeader title="New booking" />
+        <PageHeader title={tr("New booking")} />
         <div className="rounded-lg border border-line bg-white p-8 text-center shadow-card">
           <p className="font-display text-lg font-semibold tracking-tightest text-ink">
-            Taking bookings is not available to your role
+            {tr("Taking bookings is not available to your role")}
           </p>
           <p className="mx-auto mt-2 max-w-md text-[13px] leading-relaxed text-ink-muted">
-            Front desk, manager and admin accounts can take a booking. Ask a
-            manager if you need access.
+            {tr("Front desk, manager and admin accounts can take a booking. Ask a manager if you need access.")}
           </p>
         </div>
       </div>
@@ -84,7 +85,7 @@ export default async function NewBookingPage({
   return (
     <div>
       <PageHeader
-        title={group ? "New group booking" : "New booking"}
+        title={group ? tr("New group booking") : tr("New booking")}
       />
       <NewBookingForm
         businessDate={businessDate}

@@ -1,5 +1,6 @@
 "use client";
 
+import { useT } from "@/components/i18n";
 import { useState } from "react";
 import { cn } from "@/components/ui";
 import {
@@ -46,6 +47,7 @@ function Card({
   onSave: () => void;
   children: React.ReactNode;
 }) {
+  const tr = useT();
   return (
     <section className={card}>
       <div className="px-5 pb-6 pt-5">
@@ -55,7 +57,7 @@ function Card({
       {canEdit && (
         <div className="flex justify-end border-t border-line bg-shell/60 px-4 py-3">
           <button type="button" className={primary} disabled={pending} onClick={onSave}>
-            Save
+            {tr("Save")}
           </button>
         </div>
       )}
@@ -102,6 +104,7 @@ export function InventorySettingsPanel({
   pending: boolean;
   run: Run;
 }) {
+  const tr = useT();
   const [cutoff, setCutoff] = useState({
     enabled: settings.onlineCutoffEnabled,
     date: settings.onlineCutoffDate ?? "",
@@ -114,21 +117,21 @@ export function InventorySettingsPanel({
 
   return (
     <div className="max-w-5xl space-y-5">
-      <h2 className="border-b border-line pb-0.5 text-[17px] text-ink">Inventory Settings</h2>
+      <h2 className="border-b border-line pb-0.5 text-[17px] text-ink">{tr("Inventory Settings")}</h2>
 
       <Card
-        title="Online Booking Cut Off Date"
+        title={tr("Online Booking Cut Off Date")}
         canEdit={canEdit}
         pending={pending}
         onSave={() =>
           run(
             () => saveOnlineBookingCutoff({ enabled: cutoff.enabled, date: cutoff.date || null }),
-            "Online booking cut-off date saved.",
+            tr("Online booking cut-off date saved."),
           )
         }
       >
         <Tick
-          label="Set Cut-Off Date"
+          label={tr("Set Cut-Off Date")}
           checked={cutoff.enabled}
           disabled={!canEdit}
           onChange={(enabled) => setCutoff({ ...cutoff, enabled })}
@@ -136,7 +139,7 @@ export function InventorySettingsPanel({
         {cutoff.enabled && (
           <input
             type="date"
-            aria-label="Cut-off date"
+            aria-label={tr("Cut-off date")}
             value={cutoff.date}
             min={businessDate}
             disabled={!canEdit}
@@ -147,18 +150,18 @@ export function InventorySettingsPanel({
       </Card>
 
       <Card
-        title="Same Day Booking Cut Off Time"
+        title={tr("Same Day Booking Cut Off Time")}
         canEdit={canEdit}
         pending={pending}
         onSave={() =>
           run(
             () => saveSameDayBookingCutoff({ enabled: sameDay.enabled, time: sameDay.time || null }),
-            "Same day booking cut-off time saved.",
+            tr("Same day booking cut-off time saved."),
           )
         }
       >
         <Tick
-          label="Set Time"
+          label={tr("Set Time")}
           checked={sameDay.enabled}
           disabled={!canEdit}
           onChange={(enabled) => setSameDay({ ...sameDay, enabled })}
@@ -166,7 +169,7 @@ export function InventorySettingsPanel({
         {sameDay.enabled && (
           <input
             type="time"
-            aria-label="Cut-off time"
+            aria-label={tr("Cut-off time")}
             value={sameDay.time}
             disabled={!canEdit}
             onChange={(e) => setSameDay({ ...sameDay, time: e.target.value })}
@@ -176,10 +179,10 @@ export function InventorySettingsPanel({
       </Card>
 
       <Card
-        title="Inventory Options Visibility"
+        title={tr("Inventory Options Visibility")}
         canEdit={canEdit}
         pending={pending}
-        onSave={() => run(() => saveInventoryVisibility(visibility), "Inventory options visibility saved.")}
+        onSave={() => run(() => saveInventoryVisibility(visibility), tr("Inventory options visibility saved."))}
       >
         <div className="space-y-1.5">
           {INVENTORY_VISIBILITY.map((v) => (

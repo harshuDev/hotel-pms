@@ -1,3 +1,4 @@
+import { getT } from "@/lib/i18n/server";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PrintButton } from "@/components/bookings/print-button";
@@ -46,6 +47,7 @@ export default async function InvoicePage({
 }: {
   params: Promise<{ id: string }>;
 }) {
+  const tr = await getT();
   const { id } = await params;
   if (!UUID.test(id)) notFound();
 
@@ -92,7 +94,7 @@ export default async function InvoicePage({
       {toolbar}
       {rendered && !rendered.ok && (
         <p role="alert" className="mb-3 rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-[12.5px] text-rose-800 print:hidden">
-          The folio template could not be rendered: {rendered.error}. This is the built-in layout.
+          {tr("The folio template could not be rendered:")}{" "}{rendered.error}{tr(". This is the built-in layout.")}
         </p>
       )}
 
@@ -117,9 +119,9 @@ export default async function InvoicePage({
             )}
           </div>
           <div className="text-right">
-            <p className="font-display text-[20px] font-semibold tracking-tightest text-ink">Invoice</p>
+            <p className="font-display text-[20px] font-semibold tracking-tightest text-ink">{tr("Invoice")}</p>
             {v.invoiceNumber !== null && (
-              <p className="tnum mt-1 text-[13px] text-ink">No. {v.invoiceNumber}</p>
+              <p className="tnum mt-1 text-[13px] text-ink">{tr("No.")}{" "}{v.invoiceNumber}</p>
             )}
             <p className="tnum text-[13px] text-ink-muted">{v.reference}</p>
             <p className="tnum text-[13px] text-ink-muted">{day(v.date)}</p>
@@ -128,13 +130,13 @@ export default async function InvoicePage({
 
         <section className="mt-5 grid gap-6 sm:grid-cols-2">
           <div>
-            <p className="text-[11.5px] font-semibold uppercase tracking-[0.08em] text-ink-faint">Bill to</p>
+            <p className="text-[11.5px] font-semibold uppercase tracking-[0.08em] text-ink-faint">{tr("Bill to")}</p>
             <p className="mt-1 text-[14px] text-ink">{v.guest.name}</p>
             {v.guest.email && <p className="text-[12.5px] text-ink-muted">{v.guest.email}</p>}
             {v.guest.phone && <p className="text-[12.5px] text-ink-muted">{v.guest.phone}</p>}
           </div>
           <div className="sm:text-right">
-            <p className="text-[11.5px] font-semibold uppercase tracking-[0.08em] text-ink-faint">Stay</p>
+            <p className="text-[11.5px] font-semibold uppercase tracking-[0.08em] text-ink-faint">{tr("Stay")}</p>
             <p className="tnum mt-1 text-[13px] text-ink">
               {day(v.checkIn)} – {day(v.checkOut)}
             </p>
@@ -145,19 +147,19 @@ export default async function InvoicePage({
         <table className="mt-6 w-full">
           <thead>
             <tr className="border-b border-line">
-              <th className={th}>Date</th>
-              <th className={th}>Description</th>
-              {v.showRoom && <th className={th}>Room</th>}
-              {vat && <th className={`${th} text-right`}>Net</th>}
-              {vat && <th className={`${th} text-right`}>VAT</th>}
-              <th className={`${th} text-right`}>{vat ? "Total" : "Amount"}</th>
+              <th className={th}>{tr("Date")}</th>
+              <th className={th}>{tr("Description")}</th>
+              {v.showRoom && <th className={th}>{tr("Room")}</th>}
+              {vat && <th className={`${th} text-right`}>{tr("Net")}</th>}
+              {vat && <th className={`${th} text-right`}>{tr("VAT")}</th>}
+              <th className={`${th} text-right`}>{vat ? tr("Total") : tr("Amount")}</th>
             </tr>
           </thead>
           <tbody>
             {v.rows.length === 0 ? (
               <tr>
                 <td colSpan={6} className="px-2 py-6 text-center text-[13px] text-ink-muted">
-                  Nothing charged yet.
+                  {tr("Nothing charged yet.")}
                 </td>
               </tr>
             ) : (
@@ -179,33 +181,33 @@ export default async function InvoicePage({
           {vat && (
             <>
               <div className="flex justify-between py-0.5 text-ink-muted">
-                <span>Net</span>
+                <span>{tr("Net")}</span>
                 <span className="tnum">{money(v.netCents)}</span>
               </div>
               <div className="flex justify-between py-0.5 text-ink-muted">
-                <span>VAT</span>
+                <span>{tr("VAT")}</span>
                 <span className="tnum">{money(v.taxCents)}</span>
               </div>
             </>
           )}
           <div className="flex justify-between border-t border-line py-1 font-semibold text-ink">
-            <span>Total</span>
+            <span>{tr("Total")}</span>
             <span className="tnum">{money(v.totalCents)}</span>
           </div>
           {v.payments.length > 0 && (
-            <p className="pt-2 text-[11.5px] font-semibold uppercase tracking-[0.08em] text-ink-faint">Paid</p>
+            <p className="pt-2 text-[11.5px] font-semibold uppercase tracking-[0.08em] text-ink-faint">{tr("Paid")}</p>
           )}
           {v.payments.map((p) => (
             <div key={p.key} className="flex justify-between py-0.5 text-ink-muted">
               <span>
                 {p.description}
-                {p.reversed ? " (reversed)" : ""}, {day(p.date)}
+                {p.reversed ? tr(" (reversed)") : ""}, {day(p.date)}
               </span>
               <span className="tnum">{money(p.amountCents)}</span>
             </div>
           ))}
           <div className="mt-1 flex justify-between border-t-2 border-ink py-1 font-semibold text-ink">
-            <span>Balance due</span>
+            <span>{tr("Balance due")}</span>
             <span className="tnum">{money(v.balanceCents)}</span>
           </div>
         </section>
