@@ -948,6 +948,8 @@ export interface RoomTypeSetting {
   maxOccupancy: number;
   sortOrder: number;
   roomCount: number;
+  /** The facilities ticked on this room type (0070). */
+  facilityIds: string[];
 }
 
 export interface TaxRateSetting {

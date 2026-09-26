@@ -7,6 +7,9 @@ import { useRouter } from "next/navigation";
 import { cn } from "@/components/ui";
 import { RoomPhoto } from "@/components/settings/room-photo";
 import { ExtrasPanel } from "@/components/settings/extras-panel";
+import { FacilitiesPanel } from "@/components/settings/facilities-panel";
+import { FacilityIcon } from "@/components/settings/facility-icon";
+import type { Facility } from "@/lib/facilities";
 import type { ExtrasCatalog } from "@/lib/extras";
 import { SETTINGS_NAV, type SettingsTab } from "@/lib/settings-tabs";
 import { COUNTRIES } from "@/lib/countries";
@@ -40,6 +43,7 @@ import {
   saveHotelTimes,
   saveRoom,
   saveRoomType,
+  setRoomTypeFacilities,
   saveSeason,
   deleteSeason,
   saveStaffUser,
@@ -200,6 +204,7 @@ export function SettingsScreen({
   timezones,
   hotelPolicies,
   extrasCatalog,
+  facilities,
 }: {
   tab: SettingsTab;
   property: PropertySettings;
@@ -209,6 +214,8 @@ export function SettingsScreen({
   hotelPolicies: HotelPolicies;
   /** Hotel Content -> Extras (0069). */
   extrasCatalog: ExtrasCatalog;
+  /** Hotel Content -> Room Type Facilities (0070). */
+  facilities: Facility[];
   roomTypes: RoomTypeSetting[];
   rooms: RoomSettingsPage;
   roomQuery: string;
@@ -308,6 +315,8 @@ export function SettingsScreen({
     name: string;
     baseOccupancy: string;
     maxOccupancy: string;
+    /** Ticked facilities (0070), saved with the room type as one set. */
+    facilityIds: string[];
   } | null>(() => {
     // The calendar's rail links here to rename a type, so arriving with that
     // id opens its form rather than a list somebody then has to search. An id
@@ -320,6 +329,7 @@ export function SettingsScreen({
       name: t.name,
       baseOccupancy: String(t.baseOccupancy),
       maxOccupancy: String(t.maxOccupancy),
+      facilityIds: t.facilityIds,
     };
   });
 
@@ -961,6 +971,15 @@ export function SettingsScreen({
         />
       )}
 
+      {tab === "facilities" && (
+        <FacilitiesPanel
+          facilities={facilities}
+          canEdit={canEdit}
+          pending={pending}
+          run={run}
+        />
+      )}
+
       {/* Room types ---------------------------------------------------- */}
       {tab === "room-types" && (
         <>
@@ -972,7 +991,14 @@ export function SettingsScreen({
               {canEdit && (
                 <button
                   onClick={() =>
-                    setRt({ id: null, code: "", name: "", baseOccupancy: "2", maxOccupancy: "2" })
+                    setRt({
+                      id: null,
+                      code: "",
+                      name: "",
+                      baseOccupancy: "2",
+                      maxOccupancy: "2",
+                      facilityIds: [],
+                    })
                   }
                   className={secondary}
                 >
@@ -1026,6 +1052,7 @@ export function SettingsScreen({
                                 name: t.name,
                                 baseOccupancy: String(t.baseOccupancy),
                                 maxOccupancy: String(t.maxOccupancy),
+                                facilityIds: t.facilityIds,
                               })
                             }
                             className="text-ink-muted underline-offset-2 hover:text-ink hover:underline"
@@ -1090,21 +1117,55 @@ export function SettingsScreen({
                   </div>
                 </div>
               </div>
+              {facilities.length > 0 && (
+                <fieldset className="mt-5">
+                  <legend className={label}>Facilities</legend>
+                  <div className="mt-1 grid gap-x-4 gap-y-2 sm:grid-cols-2 lg:grid-cols-3">
+                    {facilities.map((f) => (
+                      <label
+                        key={f.id}
+                        className="flex items-center gap-2 text-[13px] text-ink"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={rt.facilityIds.includes(f.id)}
+                          onChange={(e) =>
+                            setRt({
+                              ...rt,
+                              facilityIds: e.target.checked
+                                ? [...rt.facilityIds, f.id]
+                                : rt.facilityIds.filter((id) => id !== f.id),
+                            })
+                          }
+                          className="h-3.5 w-3.5 accent-brass"
+                        />
+                        <FacilityIcon name={f.icon} className="h-[15px] w-[15px] text-ink-muted" />
+                        {f.title}
+                      </label>
+                    ))}
+                  </div>
+                </fieldset>
+              )}
               <div className="mt-4 flex justify-end gap-2">
                 <button onClick={() => setRt(null)} className={secondary}>Cancel</button>
                 <button
                   onClick={() =>
-                    run(
-                      () =>
-                        saveRoomType({
-                          id: rt.id,
-                          code: rt.code,
-                          name: rt.name,
-                          baseOccupancy: Number(rt.baseOccupancy) || 1,
-                          maxOccupancy: Number(rt.maxOccupancy) || 1,
-                        }),
-                      `${rt.name || "Room type"} saved.`,
-                    )
+                    run(async () => {
+                      const saved = await saveRoomType({
+                        id: rt.id,
+                        code: rt.code,
+                        name: rt.name,
+                        baseOccupancy: Number(rt.baseOccupancy) || 1,
+                        maxOccupancy: Number(rt.maxOccupancy) || 1,
+                      });
+                      if (!saved.ok || facilities.length === 0) return saved;
+                      // The room type first, so a new one has an id to tick
+                      // facilities against.
+                      return setRoomTypeFacilities({
+                        roomTypeId: saved.data.id,
+                        facilityIds: rt.facilityIds,
+                      });
+                    }, `${rt.name || "Room type"} saved.`)
                   }
                   disabled={pending}
                   className={primary}

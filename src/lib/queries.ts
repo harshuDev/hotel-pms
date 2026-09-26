@@ -15,6 +15,7 @@
 import { cache } from "react";
 import { EMPTY_HOTEL_POLICIES, type HotelPolicies } from "@/lib/hotel-policies";
 import type { ExtraItemType, ExtrasCatalog } from "@/lib/extras";
+import type { Facility, FacilityIcon } from "@/lib/facilities";
 
 import { createClient } from "@/lib/supabase/server";
 import { nullableArg } from "@/lib/supabase/database";
@@ -2541,6 +2542,18 @@ export async function getExtrasCatalog(): Promise<ExtrasCatalog> {
   };
 }
 
+/** Hotel Content -> Room Type Facilities (0070), in the order they were added. */
+export async function getFacilities(): Promise<Facility[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("facilities")
+    .select("id, title, icon")
+    .order("created_at");
+
+  if (error) throw new Error(`Failed to load the facilities: ${error.message}`);
+  return data.map((f) => ({ id: f.id, title: f.title, icon: f.icon as FacilityIcon }));
+}
+
 export async function getPropertySettings(): Promise<PropertySettings> {
   const supabase = await createClient();
   const { data, error } = await supabase
@@ -2613,7 +2626,9 @@ export async function getRoomTypeSettings(): Promise<RoomTypeSetting[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("room_types")
-    .select("id, code, name, base_occupancy, max_occupancy, sort_order, rooms(count)")
+    .select(
+      "id, code, name, base_occupancy, max_occupancy, sort_order, rooms(count), room_type_facilities(facility_id)",
+    )
     .order("sort_order")
     .order("name");
 
@@ -2628,6 +2643,7 @@ export async function getRoomTypeSettings(): Promise<RoomTypeSetting[]> {
       max_occupancy: number;
       sort_order: number;
       rooms: { count: number }[];
+      room_type_facilities: { facility_id: string }[] | null;
     }[]
   ).map((row) => ({
     id: row.id,
@@ -2637,6 +2653,7 @@ export async function getRoomTypeSettings(): Promise<RoomTypeSetting[]> {
     maxOccupancy: row.max_occupancy,
     sortOrder: row.sort_order,
     roomCount: row.rooms?.[0]?.count ?? 0,
+    facilityIds: (row.room_type_facilities ?? []).map((f) => f.facility_id),
   }));
 }
 

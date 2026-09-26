@@ -20,6 +20,7 @@ export const SETTINGS_TABS = [
   "hotel-properties",
   "hotel-policy",
   "extras",
+  "facilities",
   "room-types",
   "rooms",
   "staff",
@@ -50,7 +51,8 @@ export function isSettingsTab(value: string | undefined): value is SettingsTab {
  * them -- and the reference's own contents for them have not been seen.
  *
  * `Hotel Details` and `Hotel Properties` are their two items under Hotel
- * Profile, and `Hotel Policy` is their first under Hotel Content. The rest of
+ * Profile, and `Hotel Policy`, `Extras` and `Room Type Facilities` are their
+ * three under Hotel Content. The rest of
  * the item names are ours, in their Title Case.
  */
 export const SETTINGS_NAV: {
@@ -69,6 +71,7 @@ export const SETTINGS_NAV: {
     items: [
       { id: "hotel-policy", label: "Hotel Policy" },
       { id: "extras", label: "Extras" },
+      { id: "facilities", label: "Room Type Facilities" },
       { id: "room-types", label: "Room Types" },
       { id: "rooms", label: "Rooms" },
     ],

@@ -1135,6 +1135,38 @@ export type Database = {
           },
         ]
       }
+      facilities: {
+        Row: {
+          created_at: string
+          icon: string
+          id: string
+          property_id: string
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          icon?: string
+          id?: string
+          property_id: string
+          title: string
+        }
+        Update: {
+          created_at?: string
+          icon?: string
+          id?: string
+          property_id?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "facilities_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       folio_items: {
         Row: {
           amount_cents: number
@@ -2295,6 +2327,46 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "staff_users"
             referencedColumns: ["id", "property_id"]
+          },
+        ]
+      }
+      room_type_facilities: {
+        Row: {
+          facility_id: string
+          property_id: string
+          room_type_id: string
+        }
+        Insert: {
+          facility_id: string
+          property_id: string
+          room_type_id: string
+        }
+        Update: {
+          facility_id?: string
+          property_id?: string
+          room_type_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "room_type_facilities_facility_id_fkey"
+            columns: ["facility_id"]
+            isOneToOne: false
+            referencedRelation: "facilities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "room_type_facilities_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "room_type_facilities_room_type_id_fkey"
+            columns: ["room_type_id"]
+            isOneToOne: false
+            referencedRelation: "room_types"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -3593,6 +3665,7 @@ export type Database = {
       delete_calendar_note: { Args: { p_id: string }; Returns: undefined }
       delete_extra: { Args: { p_id: string }; Returns: undefined }
       delete_extra_category: { Args: { p_id: string }; Returns: undefined }
+      delete_facility: { Args: { p_id: string }; Returns: undefined }
       delete_room: { Args: { p_room_id: string }; Returns: undefined }
       delete_season: { Args: { p_id: string }; Returns: undefined }
       deposit_report: {
@@ -4334,6 +4407,10 @@ export type Database = {
         Args: { p_id: string; p_tax_rate_id: string; p_title: string }
         Returns: string
       }
+      save_facility: {
+        Args: { p_icon: string; p_id: string; p_title: string }
+        Returns: string
+      }
       save_meeting_room: {
         Args: {
           p_capacity?: number
@@ -4642,6 +4719,10 @@ export type Database = {
           p_room_id: string
           p_status: Database["public"]["Enums"]["room_status"]
         }
+        Returns: undefined
+      }
+      set_room_type_facilities: {
+        Args: { p_facility_ids: string[]; p_room_type_id: string }
         Returns: undefined
       }
       set_stop_sell: {

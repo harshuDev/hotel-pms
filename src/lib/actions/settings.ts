@@ -8,6 +8,7 @@ import { parseMoney } from "@/lib/money";
 import type { ActionResult } from "@/lib/actions/cashier";
 import type { HotelPolicies } from "@/lib/hotel-policies";
 import type { ExtraItemType } from "@/lib/extras";
+import type { FacilityIcon } from "@/lib/facilities";
 import type {
   CancellationPolicyKind,
   HousekeepingChoice,
@@ -270,6 +271,49 @@ export async function deleteExtra(id: string): Promise<ActionResult<null>> {
   const { error } = await supabase.rpc("delete_extra", { p_id: id });
   if (error) return { ok: false, error: error.message };
   revalidateExtras();
+  return { ok: true, data: null };
+}
+
+/* -- Hotel Content -> Room Type Facilities (0070) ------------------------- */
+
+export async function saveFacility(input: {
+  id: string | null;
+  title: string;
+  icon: FacilityIcon;
+}): Promise<ActionResult<{ id: string }>> {
+  if (input.title.trim() === "") return { ok: false, error: "A facility needs a title." };
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("save_facility", {
+    // Null is a new facility; an id is the one being corrected.
+    p_id: nullableArg(input.id),
+    p_title: input.title,
+    p_icon: input.icon,
+  });
+  if (error) return { ok: false, error: error.message };
+  revalidateSettings();
+  return { ok: true, data: { id: data } };
+}
+
+export async function deleteFacility(id: string): Promise<ActionResult<null>> {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("delete_facility", { p_id: id });
+  if (error) return { ok: false, error: error.message };
+  revalidateSettings();
+  return { ok: true, data: null };
+}
+
+/** The whole set for one room type, as `set_rate_plan_meals()` takes its set. */
+export async function setRoomTypeFacilities(input: {
+  roomTypeId: string;
+  facilityIds: string[];
+}): Promise<ActionResult<null>> {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("set_room_type_facilities", {
+    p_room_type_id: input.roomTypeId,
+    p_facility_ids: input.facilityIds,
+  });
+  if (error) return { ok: false, error: error.message };
+  revalidateSettings();
   return { ok: true, data: null };
 }
 

@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0069` are
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0070` are
 applied to the hosted database.
 
 Working on real data: dashboard (house board, movements, pace, activity feed),
@@ -253,7 +253,8 @@ Each read is a Postgres view or RPC, never aggregation in the client:
 | `getPropertySettings()`             | `properties` row incl. 0067 details |
 | `getHotelPolicies()`                | `property_policies` row (0068)    |
 | `getExtrasCatalog()`                | `extra_categories` + `extras` (0069) |
-| `getRoomTypeSettings()`             | `room_types` with room counts     |
+| `getFacilities()`                   | `facilities` (0070)               |
+| `getRoomTypeSettings()`             | `room_types` with room counts and facility ids |
 | `getChannelSettings()`              | `channels`                        |
 | `getTaxRateSettings()`              | `tax_rates`                       |
 | `getStaffSettings()`                | `staff_users`                     |
@@ -1632,6 +1633,29 @@ anywhere else. Collapsed height must stay constant regardless of room count.
     - Search and paging are in the browser. The catalog is dozens of rows,
       not thousands, so the ~1,800 rule does not reach it -- the same
       judgement as meeting rooms.
+  - **HOTEL CONTENT -> ROOM TYPE FACILITIES is `facilities`, and they are
+    ticked on room types through `room_type_facilities`** (0070). The screen
+    is the reference's: Icon (glyph and its name), Title, edit, delete,
+    "+ Add Facility".
+    - **The link is the point.** The reference's own name says facilities
+      belong to room types, and a list attached to nothing would be a screen
+      whose only effect was itself. The Room Types form carries a tick per
+      facility and saves the set with `set_room_type_facilities()`, which
+      takes the WHOLE set, for the same reason `set_rate_plan_meals()` does.
+    - The room type saves first and the facilities second, so a new type has
+      an id to tick against. Two calls rather than one transaction, which is
+      acceptable here because it is content: a failure leaves the type saved
+      with its old ticks, and says so.
+    - **The icon is one of ten**, checked by `facilities_icon_known` and drawn
+      by `facility-icon.tsx` from `FACILITY_ICONS` in `src/lib/facilities.ts`.
+      There is no icon library in this app; ten strokes in one file were
+      cheaper than adding one. Adding an icon is all three.
+    - **A facility is genuinely deleted** and comes off every room type it was
+      on -- it describes a room, it is not a record of anything that happened.
+    - **Nothing outside Settings shows them yet**, exactly like the hotel
+      policy. The guest booking page is the obvious reader; it would mean
+      adding them to `public_room_types()`, which is on the anonymous surface
+      and wants asking for.
   - **Country is ISO alpha-2 under a check constraint**, the same list and the
     same reasoning as `customers.country`. Latitude and longitude are set
     together or not at all, and range-checked.
