@@ -9,6 +9,7 @@ import { AttachmentsTab } from "@/components/bookings/attachments-tab";
 import { EmailTab } from "@/components/bookings/email-tab";
 import { ChargeExtra } from "@/components/bookings/charge-extra";
 import type { ExtrasCatalog } from "@/lib/extras";
+import type { EmailTemplate } from "@/lib/email-preferences";
 import { StatusBadge, cn } from "@/components/ui";
 import { CheckInAction, CheckOutAction } from "@/components/dashboard/movement-actions";
 import { formatMoney, parseMoney } from "@/lib/money";
@@ -133,6 +134,7 @@ export function BookingDetailView({
   canEdit,
   canCharge,
   extrasCatalog,
+  emailTemplates,
   guest,
   cancellationTerms,
   timezone,
@@ -164,6 +166,9 @@ export function BookingDetailView({
    * silently lost `bookingHref`.
    */
   extrasCatalog: ExtrasCatalog;
+  /** Email Setup -> Email Templates (0075), offered on the Email tab. Required,
+      like the catalog above, so both frames must pass it. */
+  emailTemplates: EmailTemplate[];
   /** Null when the guest record could not be read; the tab then says so. */
   guest: BookingGuest | null;
   /**
@@ -1384,6 +1389,7 @@ export function BookingDetailView({
           defaultTo={guest?.email ?? null}
           timezone={timezone}
           canEdit={canEdit}
+          templates={emailTemplates}
         />
       )}
 

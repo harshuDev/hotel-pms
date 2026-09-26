@@ -1054,6 +1054,41 @@ export type Database = {
           },
         ]
       }
+      email_templates: {
+        Row: {
+          body: string | null
+          created_at: string
+          id: string
+          property_id: string
+          subject: string | null
+          title: string
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          property_id: string
+          subject?: string | null
+          title: string
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          property_id?: string
+          subject?: string | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_templates_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       extra_categories: {
         Row: {
           created_at: string
@@ -1438,6 +1473,96 @@ export type Database = {
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hotel_email_settings: {
+        Row: {
+          checkin_notes: string | null
+          confirmation_colors: Json
+          confirmation_message: string | null
+          directions: string | null
+          footer_template: string | null
+          from_text: string | null
+          include_footer: boolean
+          multi_property_address: string
+          notification_emails: string[]
+          payment_request_body: string | null
+          payment_request_subject: string | null
+          post_departure_body: string | null
+          post_departure_enabled: boolean
+          post_departure_subject: string | null
+          pre_arrival_enabled: boolean
+          preferences: Json
+          property_id: string
+          reply_to_emails: string[]
+          show_hotel_logo: boolean
+          single_property_address: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          checkin_notes?: string | null
+          confirmation_colors?: Json
+          confirmation_message?: string | null
+          directions?: string | null
+          footer_template?: string | null
+          from_text?: string | null
+          include_footer?: boolean
+          multi_property_address?: string
+          notification_emails?: string[]
+          payment_request_body?: string | null
+          payment_request_subject?: string | null
+          post_departure_body?: string | null
+          post_departure_enabled?: boolean
+          post_departure_subject?: string | null
+          pre_arrival_enabled?: boolean
+          preferences?: Json
+          property_id: string
+          reply_to_emails?: string[]
+          show_hotel_logo?: boolean
+          single_property_address?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          checkin_notes?: string | null
+          confirmation_colors?: Json
+          confirmation_message?: string | null
+          directions?: string | null
+          footer_template?: string | null
+          from_text?: string | null
+          include_footer?: boolean
+          multi_property_address?: string
+          notification_emails?: string[]
+          payment_request_body?: string | null
+          payment_request_subject?: string | null
+          post_departure_body?: string | null
+          post_departure_enabled?: boolean
+          post_departure_subject?: string | null
+          pre_arrival_enabled?: boolean
+          preferences?: Json
+          property_id?: string
+          reply_to_emails?: string[]
+          show_hotel_logo?: boolean
+          single_property_address?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hotel_email_settings_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: true
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hotel_email_settings_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "staff_users"
             referencedColumns: ["id"]
           },
         ]
@@ -3513,6 +3638,7 @@ export type Database = {
           rooms_released: number
         }[]
       }
+      clean_email_list: { Args: { p_emails: string[] }; Returns: string[] }
       close_business_date: {
         Args: never
         Returns: {
@@ -3785,6 +3911,7 @@ export type Database = {
         Returns: string
       }
       delete_calendar_note: { Args: { p_id: string }; Returns: undefined }
+      delete_email_template: { Args: { p_id: string }; Returns: undefined }
       delete_extra: { Args: { p_id: string }; Returns: undefined }
       delete_extra_category: { Args: { p_id: string }; Returns: undefined }
       delete_facility: { Args: { p_id: string }; Returns: undefined }
@@ -3930,6 +4057,7 @@ export type Database = {
           title: string
         }[]
       }
+      hotel_email_settings_row: { Args: never; Returns: string }
       house_summary: {
         Args: never
         Returns: {
@@ -4509,6 +4637,19 @@ export type Database = {
           total_count: number
         }[]
       }
+      save_booking_confirmation_email: {
+        Args: {
+          p_checkin_notes: string
+          p_colors: Json
+          p_confirmation_message: string
+          p_directions: string
+          p_include_footer: boolean
+          p_multi_property_address: string
+          p_show_hotel_logo: boolean
+          p_single_property_address: string
+        }
+        Returns: undefined
+      }
       save_calendar_note: {
         Args: { p_body: string; p_id?: string; p_note_date: string }
         Returns: string
@@ -4555,6 +4696,24 @@ export type Database = {
         }
         Returns: string
       }
+      save_email_footer: { Args: { p_footer: string }; Returns: undefined }
+      save_email_general: {
+        Args: {
+          p_from_text: string
+          p_notification_emails: string[]
+          p_reply_to: string[]
+        }
+        Returns: undefined
+      }
+      save_email_template: {
+        Args: {
+          p_body: string
+          p_id: string
+          p_subject: string
+          p_title: string
+        }
+        Returns: string
+      }
       save_extra: {
         Args: {
           p_category_id: string
@@ -4575,6 +4734,10 @@ export type Database = {
         Returns: string
       }
       save_guest_fields: { Args: { p_fields: Json }; Returns: undefined }
+      save_hotel_email_settings: {
+        Args: { p_emails: string[]; p_preferences: Json }
+        Returns: undefined
+      }
       save_identification_type: {
         Args: { p_id: string; p_title: string }
         Returns: string
@@ -4599,6 +4762,18 @@ export type Database = {
           p_name: string
         }
         Returns: string
+      }
+      save_payment_request_email: {
+        Args: { p_body: string; p_subject: string }
+        Returns: undefined
+      }
+      save_post_departure_email: {
+        Args: { p_body: string; p_enabled: boolean; p_subject: string }
+        Returns: undefined
+      }
+      save_pre_arrival_email: {
+        Args: { p_enabled: boolean }
+        Returns: undefined
       }
       save_promotion: {
         Args: {

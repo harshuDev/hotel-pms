@@ -14,6 +14,9 @@ import {
   RegistrationFormPanel,
 } from "@/components/settings/guest-config-panels";
 import type { GuestField, IdentificationType, RegistrationForm } from "@/lib/guest-config";
+import { EmailPreferencesPanel } from "@/components/settings/email-preferences-panel";
+import type { EmailSetup, EmailTemplate, HotelEmailSettings } from "@/lib/email-preferences";
+import { EmailSetupPanel } from "@/components/settings/email-setup-panel";
 import { FacilityIcon } from "@/components/settings/facility-icon";
 import type { Facility } from "@/lib/facilities";
 import type { ExtrasCatalog } from "@/lib/extras";
@@ -215,6 +218,9 @@ export function SettingsScreen({
   identificationTypes,
   guestFields,
   registrationForm,
+  emailSettings,
+  emailSetup,
+  emailTemplates,
 }: {
   tab: SettingsTab;
   property: PropertySettings;
@@ -230,6 +236,11 @@ export function SettingsScreen({
   identificationTypes: IdentificationType[];
   guestFields: GuestField[];
   registrationForm: RegistrationForm;
+  /** Communications & Notifications -> Hotel Emails Preferences (0074). */
+  emailSettings: HotelEmailSettings;
+  /** Communications & Notifications -> Email Setup (0075). */
+  emailSetup: EmailSetup;
+  emailTemplates: EmailTemplate[];
   roomTypes: RoomTypeSetting[];
   rooms: RoomSettingsPage;
   roomQuery: string;
@@ -1009,6 +1020,21 @@ export function SettingsScreen({
           // their new ids -- otherwise saving twice would add them twice.
           key={guestFields.map((f) => `${f.id}:${f.label}:${f.kind}`).join("|")}
           fields={guestFields}
+          canEdit={canEdit}
+          pending={pending}
+          run={run}
+        />
+      )}
+
+      {tab === "email-preferences" && (
+        <EmailPreferencesPanel settings={emailSettings} canEdit={canEdit} pending={pending} run={run} />
+      )}
+
+      {tab === "email-setup" && (
+        <EmailSetupPanel
+          setup={emailSetup}
+          templates={emailTemplates}
+          propertyName={property.name}
           canEdit={canEdit}
           pending={pending}
           run={run}

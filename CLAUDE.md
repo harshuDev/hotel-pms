@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0073` are
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0075` are
 applied to the hosted database.
 
 Working on real data: dashboard (house board, movements, pace, activity feed),
@@ -1583,9 +1583,42 @@ anywhere else. Collapsed height must stay constant regardless of room count.
     so both screens silently opened on the property form — including from the
     two links on Inventory → Rates. Add a tab there and nowhere else.
   - **Only sections with something behind them are drawn.** The reference also
-    carries Communications & Notifications and Other; there is nothing of ours
-    to put in them, and an empty section is a dead control. They go in when
-    their contents are built. Guest Configuration went in with 0073.
+    carries Other; there is nothing of ours to put in it, and an empty section
+    is a dead control. It goes in when its contents are built. Guest
+    Configuration went in with 0073, Communications & Notifications with
+    0074-0075.
+  - **COMMUNICATIONS & NOTIFICATIONS IS STORED, NOT YET SENT** (0074, 0075) --
+    Hotel Emails Preferences and Email Setup, cloned from the reference, all
+    in one row per property, `hotel_email_settings`.
+    - **Nothing in this system sends email.** There is no mail provider and
+      no key in any environment (see the booking Email tab notes). These
+      screens are the same standing as `audit_close_time` before its job: a
+      hotel's choices kept so they are in place the day sending exists. Do
+      not describe them to a client as working notifications.
+    - **Six of the eight Email preferences are channel-manager events** --
+      a booking, change or cancellation ARRIVING from an OTA, a missing
+      booking, an overbooking on arrival, a rate-mapping error. None can occur
+      while OTA bookings are entered by hand (open decision 2). They are
+      copied because the client asked for the screen exactly; the ids are
+      checked in `save_hotel_email_settings()` and listed in
+      `src/lib/email-preferences.ts`. A kind never saved reads as active, as
+      the reference ships every one ticked.
+    - **"Booking Notification Email Address" on Email Setup and "Emails that
+      will be used for notifications" on Hotel Emails Preferences are ONE
+      column**, `notification_emails`. The reference shows the same addresses
+      on both pages; two lists meant to be one would drift.
+    - **Each Email Setup section saves only its own columns** through its own
+      function, via `hotel_email_settings_row()`, which makes the row if it is
+      not there. Saving General never clears Post Departure, and one colour
+      changed merges over the stored set rather than resetting the others.
+    - **Email Templates is the one part with a reader today**: the booking
+      screen's Email tab offers them when recording a message and fills the
+      subject and body, which stay editable. `emailTemplates` is a REQUIRED
+      prop on `BookingDetailView`, like `extrasCatalog`.
+    - **Bodies, footers and notes are plain text**, the same reason as the
+      registration card's terms: the reference's rich-text editor would mean
+      storing browser-typed HTML and sending it back out, with no sanitiser
+      in this codebase. "Open template editor" opens a plain-text dialog.
   - **GUEST CONFIGURATION IS THREE SCREENS, AND EACH IS READ BY SOMETHING**
     (0073) -- Guest Registration Form, Identification Types, Guest Details
     Settings, as the reference's.
