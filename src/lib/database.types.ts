@@ -1845,6 +1845,72 @@ export type Database = {
         }
         Relationships: []
       }
+      property_policies: {
+        Row: {
+          children: string
+          children_custom: string | null
+          internet: string
+          internet_custom: string | null
+          other_policies: string | null
+          parking: string
+          parking_custom: string | null
+          pets: string
+          pets_custom: string | null
+          property_id: string
+          smoking: string
+          smoking_custom: string | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          children?: string
+          children_custom?: string | null
+          internet?: string
+          internet_custom?: string | null
+          other_policies?: string | null
+          parking?: string
+          parking_custom?: string | null
+          pets?: string
+          pets_custom?: string | null
+          property_id: string
+          smoking?: string
+          smoking_custom?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          children?: string
+          children_custom?: string | null
+          internet?: string
+          internet_custom?: string | null
+          other_policies?: string | null
+          parking?: string
+          parking_custom?: string | null
+          pets?: string
+          pets_custom?: string | null
+          property_id?: string
+          smoking?: string
+          smoking_custom?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_policies_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: true
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_policies_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "staff_users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       rate_plan_days: {
         Row: {
           closed_to_arrival: boolean
@@ -4232,6 +4298,22 @@ export type Database = {
           p_region?: string
           p_timezone: string
           p_website?: string
+        }
+        Returns: undefined
+      }
+      save_property_policies: {
+        Args: {
+          p_children: string
+          p_children_custom: string
+          p_internet: string
+          p_internet_custom: string
+          p_other_policies: string
+          p_parking: string
+          p_parking_custom: string
+          p_pets: string
+          p_pets_custom: string
+          p_smoking: string
+          p_smoking_custom: string
         }
         Returns: undefined
       }

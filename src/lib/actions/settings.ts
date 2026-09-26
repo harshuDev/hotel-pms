@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { nullableArg } from "@/lib/supabase/database";
 import { ROOM_PHOTO_BUCKET } from "@/lib/queries";
 import type { ActionResult } from "@/lib/actions/cashier";
+import type { HotelPolicies } from "@/lib/hotel-policies";
 import type {
   CancellationPolicyKind,
   HousekeepingChoice,
@@ -153,6 +154,32 @@ export async function saveHotelTimes(input: {
     p_check_in_time: input.checkInTime || nullableArg<string>(null),
     p_check_out_time: input.checkOutTime || nullableArg<string>(null),
     p_audit_close_time: input.auditCloseTime || nullableArg<string>(null),
+  });
+
+  if (error) return { ok: false, error: error.message };
+
+  revalidateSettings();
+  return { ok: true, data: null };
+}
+
+export async function saveHotelPolicies(
+  input: HotelPolicies,
+): Promise<ActionResult<null>> {
+  const supabase = await createClient();
+  // The optional texts go as null rather than omitted: the function drops a
+  // custom text whose section is not "custom", and a blank means "nothing".
+  const { error } = await supabase.rpc("save_property_policies", {
+    p_children: input.children,
+    p_children_custom: nullableArg(input.childrenCustom),
+    p_pets: input.pets,
+    p_pets_custom: nullableArg(input.petsCustom),
+    p_smoking: input.smoking,
+    p_smoking_custom: nullableArg(input.smokingCustom),
+    p_internet: input.internet,
+    p_internet_custom: nullableArg(input.internetCustom),
+    p_parking: input.parking,
+    p_parking_custom: nullableArg(input.parkingCustom),
+    p_other_policies: nullableArg(input.otherPolicies),
   });
 
   if (error) return { ok: false, error: error.message };

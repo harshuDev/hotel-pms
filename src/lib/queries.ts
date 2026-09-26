@@ -13,6 +13,7 @@
  */
 
 import { cache } from "react";
+import { EMPTY_HOTEL_POLICIES, type HotelPolicies } from "@/lib/hotel-policies";
 
 import { createClient } from "@/lib/supabase/server";
 import { nullableArg } from "@/lib/supabase/database";
@@ -2452,6 +2453,52 @@ export async function getMeetingRoomBooking(
 /* -------------------------------------------------------------------------- */
 /* Property settings                                                          */
 /* -------------------------------------------------------------------------- */
+
+/**
+ * Hotel Content -> Hotel Policy (0068). One row per property, and none until
+ * somebody first saves the page -- which reads as every section omitted, the
+ * same as the row's own defaults.
+ */
+export async function getHotelPolicies(): Promise<HotelPolicies> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("property_policies")
+    .select(
+      "children, children_custom, pets, pets_custom, smoking, smoking_custom, " +
+        "internet, internet_custom, parking, parking_custom, other_policies",
+    )
+    .maybeSingle();
+
+  if (error) throw new Error(`Failed to load the hotel policy: ${error.message}`);
+  if (!data) return EMPTY_HOTEL_POLICIES;
+
+  const row = data as unknown as {
+    children: string;
+    children_custom: string | null;
+    pets: string;
+    pets_custom: string | null;
+    smoking: string;
+    smoking_custom: string | null;
+    internet: string;
+    internet_custom: string | null;
+    parking: string;
+    parking_custom: string | null;
+    other_policies: string | null;
+  };
+  return {
+    children: row.children,
+    childrenCustom: row.children_custom,
+    pets: row.pets,
+    petsCustom: row.pets_custom,
+    smoking: row.smoking,
+    smokingCustom: row.smoking_custom,
+    internet: row.internet,
+    internetCustom: row.internet_custom,
+    parking: row.parking,
+    parkingCustom: row.parking_custom,
+    otherPolicies: row.other_policies,
+  };
+}
 
 export async function getPropertySettings(): Promise<PropertySettings> {
   const supabase = await createClient();

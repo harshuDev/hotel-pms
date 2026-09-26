@@ -9,6 +9,14 @@ import { RoomPhoto } from "@/components/settings/room-photo";
 import { SETTINGS_NAV, type SettingsTab } from "@/lib/settings-tabs";
 import { COUNTRIES } from "@/lib/countries";
 import { CURRENCIES, currencyOptionLabel } from "@/lib/currencies";
+import {
+  CUSTOM_POLICY,
+  HOTEL_POLICY_SECTIONS,
+  OMIT_POLICY,
+  hotelPolicySummary,
+  type HotelPolicies,
+  type HotelPolicyKey,
+} from "@/lib/hotel-policies";
 
 /*
  * Browser-only: Leaflet reaches for `window` the moment it is imported, so the
@@ -26,6 +34,7 @@ import {
   saveChannel,
   savePaymentMethod,
   saveHotelDetails,
+  saveHotelPolicies,
   saveHotelTimes,
   saveRoom,
   saveRoomType,
@@ -187,11 +196,14 @@ export function SettingsScreen({
   canEdit,
   isAdmin,
   timezones,
+  hotelPolicies,
 }: {
   tab: SettingsTab;
   property: PropertySettings;
   /** IANA zones, listed on the server so both renders offer the same ones. */
   timezones: string[];
+  /** Hotel Content -> Hotel Policy (0068). */
+  hotelPolicies: HotelPolicies;
   roomTypes: RoomTypeSetting[];
   rooms: RoomSettingsPage;
   roomQuery: string;
@@ -268,6 +280,15 @@ export function SettingsScreen({
   }, []);
 
   /* -- Hotel Properties: the three times ------------------------------- */
+  /* -- Hotel Policy (0068) ------------------------------------------- */
+  const [policies, setPolicies] = useState<HotelPolicies>(hotelPolicies);
+  const customField = (key: HotelPolicyKey) => `${key}Custom` as const;
+  const policySummary = hotelPolicySummary({
+    choice: (key) => policies[key],
+    custom: (key) => policies[customField(key)],
+    other: policies.otherPolicies,
+  });
+
   const [editingTimes, setEditingTimes] = useState(false);
   const [times, setTimes] = useState({
     checkInTime: property.checkInTime?.slice(0, 5) ?? "15:00",
@@ -818,6 +839,110 @@ export function SettingsScreen({
               </div>
             </div>
           )}
+        </div>
+      )}
+
+      {tab === "hotel-policy" && (
+        /*
+          The reference's Hotel Policy, section for section. Each is a choice
+          from its own short list, "Custom policy" with the hotel's words, or
+          "Omit this policy"; the line above Save is those choices as a guest
+          would read them, following the form as it is edited.
+        */
+        <div className="max-w-5xl space-y-5">
+          <h2 className="font-display text-[26px] font-semibold tracking-tightest text-ink">
+            Hotel Policy
+          </h2>
+
+          <div className={cn(card, "px-6 py-7 sm:px-10")}>
+            <div className="space-y-8">
+              {HOTEL_POLICY_SECTIONS.map((section) => {
+                const choice = policies[section.key];
+                const custom = customField(section.key);
+                const name = `policy-${section.key}`;
+                return (
+                  <fieldset key={section.key}>
+                    <legend className="w-full border-b border-line pb-2 text-[20px] text-ink">
+                      {section.title}
+                    </legend>
+                    {section.prompt && (
+                      <p className="mt-4 text-[14px] text-ink-muted">{section.prompt}</p>
+                    )}
+                    <div className={cn("space-y-2", section.prompt ? "mt-2" : "mt-4")}>
+                      {[
+                        ...section.options,
+                        { id: CUSTOM_POLICY, label: "Custom policy" },
+                        { id: OMIT_POLICY, label: "Omit this policy" },
+                      ].map((option) => (
+                        <label
+                          key={option.id}
+                          className="flex w-fit items-center gap-2 text-[14px] text-ink-muted"
+                        >
+                          <input
+                            type="radio"
+                            name={name}
+                            value={option.id}
+                            checked={choice === option.id}
+                            disabled={!canEdit}
+                            onChange={() =>
+                              setPolicies({ ...policies, [section.key]: option.id })
+                            }
+                            className="h-3.5 w-3.5 accent-brass"
+                          />
+                          {option.label}
+                        </label>
+                      ))}
+                    </div>
+                    {choice === CUSTOM_POLICY && (
+                      <textarea
+                        aria-label={`${section.title} policy`}
+                        value={policies[custom] ?? ""}
+                        disabled={!canEdit}
+                        onChange={(e) =>
+                          setPolicies({ ...policies, [custom]: e.target.value })
+                        }
+                        rows={2}
+                        className={cn(field, "mt-3")}
+                      />
+                    )}
+                  </fieldset>
+                );
+              })}
+
+              <div>
+                <h3 className="w-full border-b border-line pb-2 text-[20px] text-ink">
+                  <label htmlFor="policy-other">Other Policies</label>
+                </h3>
+                <textarea
+                  id="policy-other"
+                  value={policies.otherPolicies ?? ""}
+                  disabled={!canEdit}
+                  onChange={(e) =>
+                    setPolicies({ ...policies, otherPolicies: e.target.value })
+                  }
+                  rows={3}
+                  className={cn(field, "mt-5")}
+                />
+              </div>
+            </div>
+
+            {policySummary && (
+              <p className="mt-6 text-[14px] leading-relaxed text-ink">{policySummary}</p>
+            )}
+
+            {canEdit && (
+              <div className="mt-5 flex justify-center">
+                <button
+                  type="button"
+                  onClick={() => run(() => saveHotelPolicies(policies), "Hotel policy saved.")}
+                  disabled={pending}
+                  className={primary}
+                >
+                  Save
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       )}
 

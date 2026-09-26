@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0067` are
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0068` are
 applied to the hosted database.
 
 Working on real data: dashboard (house board, movements, pace, activity feed),
@@ -251,6 +251,7 @@ Each read is a Postgres view or RPC, never aggregation in the client:
 | `getMeetingRoomCalendar(from, n)`   | `meeting_room_calendar(from, n)`  |
 | `getMeetingRoomBooking(id)`         | `meeting_room_booking_detail(id)` |
 | `getPropertySettings()`             | `properties` row incl. 0067 details |
+| `getHotelPolicies()`                | `property_policies` row (0068)    |
 | `getRoomTypeSettings()`             | `room_types` with room counts     |
 | `getChannelSettings()`              | `channels`                        |
 | `getTaxRateSettings()`              | `tax_rates`                       |
@@ -1556,6 +1557,31 @@ anywhere else. Collapsed height must stay constant regardless of room count.
       the reference's way round: postcode, city, region, then the street.
     - Their "LOCALE" picker is not copied. It chooses which language the
       hotel's content is edited in, and nothing here is stored per language.
+  - **HOTEL CONTENT -> HOTEL POLICY is `property_policies`** (0068), cloned
+    from the reference: Children, Pets, Smoking, Internet Access, Parking and
+    Other Policies. Each of the five is one of the reference's listed options,
+    "Custom policy" with the hotel's own words, or "Omit this policy".
+    - **One row per property, and none until the page is first saved.** No row
+      reads as every section omitted, never as "All ages welcome": a default
+      here would put words in a hotel's mouth, the same reason a cancellation
+      policy reads "Not set".
+    - **The options live in `src/lib/hotel-policies.ts`**, and their ids are
+      the values a check constraint allows. Adding an option is both: a line
+      there and a constraint change in a migration.
+    - **Custom text exists only beside "Custom policy"**, enforced by a check
+      constraint. Switching away from Custom drops the text rather than
+      refusing; choosing Custom with nothing written is refused by name.
+    - The sentence above Save is the choices as a guest would read them,
+      assembled by `hotelPolicySummary()` from the form as it stands.
+    - **Nothing outside Settings reads it yet.** The guest booking page is the
+      obvious reader and has not been asked for. When it is, it reads the same
+      module rather than copying the sentences.
+    - The labels are the reference's exactly, "Free Wifi" beside "Free WiFi"
+      included. Its prompt lines are kept, as the label of each group of
+      options rather than explanation. "Let you guests know" was a typo and
+      reads "your".
+    - The reference's LOCALE picker and per-field translate button are not
+      copied, for the same reason as on Hotel Properties.
   - **Country is ISO alpha-2 under a check constraint**, the same list and the
     same reasoning as `customers.country`. Latitude and longitude are set
     together or not at all, and range-checked.
