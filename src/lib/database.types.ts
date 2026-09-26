@@ -1041,6 +1041,100 @@ export type Database = {
           },
         ]
       }
+      extra_categories: {
+        Row: {
+          created_at: string
+          id: string
+          property_id: string
+          tax_rate_id: string | null
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          property_id: string
+          tax_rate_id?: string | null
+          title: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          property_id?: string
+          tax_rate_id?: string | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "extra_categories_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "extra_categories_tax_rate_id_fkey"
+            columns: ["tax_rate_id"]
+            isOneToOne: false
+            referencedRelation: "tax_rates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      extras: {
+        Row: {
+          category_id: string
+          created_at: string
+          id: string
+          item_type: Database["public"]["Enums"]["folio_item_type"]
+          price_cents: number
+          property_id: string
+          tax_rate_id: string | null
+          title: string
+        }
+        Insert: {
+          category_id: string
+          created_at?: string
+          id?: string
+          item_type?: Database["public"]["Enums"]["folio_item_type"]
+          price_cents: number
+          property_id: string
+          tax_rate_id?: string | null
+          title: string
+        }
+        Update: {
+          category_id?: string
+          created_at?: string
+          id?: string
+          item_type?: Database["public"]["Enums"]["folio_item_type"]
+          price_cents?: number
+          property_id?: string
+          tax_rate_id?: string | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "extras_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "extra_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "extras_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "extras_tax_rate_id_fkey"
+            columns: ["tax_rate_id"]
+            isOneToOne: false
+            referencedRelation: "tax_rates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       folio_items: {
         Row: {
           amount_cents: number
@@ -3199,6 +3293,10 @@ export type Database = {
           room_revenue_cents: number
         }[]
       }
+      charge_extra: {
+        Args: { p_booking_id: string; p_extra_id: string; p_quantity?: number }
+        Returns: string
+      }
       charge_meeting_room_booking: {
         Args: {
           p_amount_cents: number
@@ -3493,6 +3591,8 @@ export type Database = {
         Returns: string
       }
       delete_calendar_note: { Args: { p_id: string }; Returns: undefined }
+      delete_extra: { Args: { p_id: string }; Returns: undefined }
+      delete_extra_category: { Args: { p_id: string }; Returns: undefined }
       delete_room: { Args: { p_room_id: string }; Returns: undefined }
       delete_season: { Args: { p_id: string }; Returns: undefined }
       deposit_report: {
@@ -4217,6 +4317,21 @@ export type Database = {
           p_passport_number?: string
           p_phone?: string
         }
+        Returns: string
+      }
+      save_extra: {
+        Args: {
+          p_category_id: string
+          p_id: string
+          p_item_type: Database["public"]["Enums"]["folio_item_type"]
+          p_price_cents: number
+          p_tax_rate_id: string
+          p_title: string
+        }
+        Returns: string
+      }
+      save_extra_category: {
+        Args: { p_id: string; p_tax_rate_id: string; p_title: string }
         Returns: string
       }
       save_meeting_room: {

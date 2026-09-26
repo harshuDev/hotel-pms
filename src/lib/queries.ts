@@ -14,6 +14,7 @@
 
 import { cache } from "react";
 import { EMPTY_HOTEL_POLICIES, type HotelPolicies } from "@/lib/hotel-policies";
+import type { ExtraItemType, ExtrasCatalog } from "@/lib/extras";
 
 import { createClient } from "@/lib/supabase/server";
 import { nullableArg } from "@/lib/supabase/database";
@@ -2497,6 +2498,46 @@ export async function getHotelPolicies(): Promise<HotelPolicies> {
     parking: row.parking,
     parkingCustom: row.parking_custom,
     otherPolicies: row.other_policies,
+  };
+}
+
+/**
+ * Hotel Content -> Extras (0069): the catalog the front desk charges from.
+ * Two plain table reads under RLS -- a property's extras run to dozens, not
+ * thousands, so the Settings screen searches and pages them itself.
+ */
+export async function getExtrasCatalog(): Promise<ExtrasCatalog> {
+  const supabase = await createClient();
+  const [categories, extras] = await Promise.all([
+    supabase
+      .from("extra_categories")
+      .select("id, title, tax_rate_id")
+      .order("title"),
+    supabase
+      .from("extras")
+      .select("id, category_id, title, price_cents, tax_rate_id, item_type")
+      .order("title"),
+  ]);
+
+  if (categories.error) {
+    throw new Error(`Failed to load the extra categories: ${categories.error.message}`);
+  }
+  if (extras.error) throw new Error(`Failed to load the extras: ${extras.error.message}`);
+
+  return {
+    categories: categories.data.map((c) => ({
+      id: c.id,
+      title: c.title,
+      taxRateId: c.tax_rate_id,
+    })),
+    extras: extras.data.map((e) => ({
+      id: e.id,
+      categoryId: e.category_id,
+      title: e.title,
+      priceCents: Number(e.price_cents),
+      taxRateId: e.tax_rate_id,
+      itemType: e.item_type as ExtraItemType,
+    })),
   };
 }
 

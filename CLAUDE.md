@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0068` are
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0069` are
 applied to the hosted database.
 
 Working on real data: dashboard (house board, movements, pace, activity feed),
@@ -252,6 +252,7 @@ Each read is a Postgres view or RPC, never aggregation in the client:
 | `getMeetingRoomBooking(id)`         | `meeting_room_booking_detail(id)` |
 | `getPropertySettings()`             | `properties` row incl. 0067 details |
 | `getHotelPolicies()`                | `property_policies` row (0068)    |
+| `getExtrasCatalog()`                | `extra_categories` + `extras` (0069) |
 | `getRoomTypeSettings()`             | `room_types` with room counts     |
 | `getChannelSettings()`              | `channels`                        |
 | `getTaxRateSettings()`              | `tax_rates`                       |
@@ -1285,7 +1286,10 @@ anywhere else. Collapsed height must stay constant regardless of room count.
   The header above them carries the reference, status, guest, dates, nights,
   party size, room count, source, settlement, channel reference, reservation
   value, balance and notes — that was already there and did not move.
-  - **EXTRAS ARE NOT A NEW THING AND HAVE NO TABLE.** An extra is a folio item
+  - **A CHARGED EXTRA IS STILL A FOLIO ITEM, AND THAT HAS NOT CHANGED.** 0069
+    added a CATALOG (`extras`, see the Settings notes) -- the menu a front desk
+    picks from -- but not a ledger: what the guest owes is still only ever in
+    `folio_items`. An extra is a folio item
     that is not the room, which `folio_item_type` has expressed since 0002 and
     `extras_report()` has read since 0038. 0057 adds `item_type` to
     `booking_folio_lines()` — `effective_item_type`, per the reports rule, so a
@@ -1294,8 +1298,24 @@ anywhere else. Collapsed height must stay constant regardless of room count.
     `not in ('room_charge', 'tax', 'discount')`.
   - **The extras total is a column sum over those same rows**, not a second
     set of books. Deriving rather than fetching is what stops this screen and
-    the folio balance ever disagreeing. Do not give extras their own read, own
-    total, or own table.
+    the folio balance ever disagreeing. Do not give CHARGED extras their own
+    read, own total, or own table.
+  - **The Extras tab charges from the catalog** (0069), through
+    `charge_extra()`. The browser sends which extra and how many, never an
+    amount: the price, the tax and the accounting category are read from the
+    catalog in Postgres, and the posting is `post_charge()`, so the business
+    date, the role check and append-only are the ones every charge already
+    has. It lands on the booking's open primary folio, the same one a paid-out
+    recharge uses. **Until 0069 nothing in the staff application could put an
+    extra on a folio at all** -- the empty state sent people to the cashier,
+    which could not do it either.
+    - `canCharge` is every role `require_financial_staff()` admits (all but
+      housekeeping), which is wider than `canEdit`: a cashier charges a
+      minibar without being able to change the stay.
+    - `extrasCatalog` and `canCharge` are REQUIRED props on
+      `BookingDetailView`, so both frames -- the page and the calendar's panel
+      -- had to pass them. The optional `bookingHref` is the precedent for
+      why.
   - **The Guests tab shows ONE guest, because that is all there is.**
     `bookings.customer_id` is a single row and `booking_rooms` carries adults
     and children as counts with no names against them. So the tab shows the
@@ -1582,6 +1602,36 @@ anywhere else. Collapsed height must stay constant regardless of room count.
       reads "your".
     - The reference's LOCALE picker and per-field translate button are not
       copied, for the same reason as on Hotel Properties.
+  - **HOTEL CONTENT -> EXTRAS is a catalog: `extra_categories` and `extras`**
+    (0069), cloned from the reference -- a categories table with Title and
+    Taxes, then a searchable, paged extras table with Title, Category, Is
+    Meal, Price, Taxes and Accounting Category.
+    - **It is the menu, not the ledger.** A charged extra is a folio item that
+      COPIES the title, type and price when posted and holds no foreign key
+      back. So repricing, renaming or deleting an extra restates nothing
+      already billed -- which is why an extra is genuinely DELETED, like a
+      season, rather than retired like a tax rate.
+    - **A category with extras in it is refused by name**, never cascaded.
+    - **"Accounting Category" IS `folio_item_type`**, limited by a check
+      constraint to the five a person may post: food and beverage, laundry,
+      minibar, transport, miscellaneous. It is the bucket the Extras,
+      Financial and Accounting reports already split by, so a new extra lands
+      in the right report line with nothing else to set.
+    - **"Is Meal" is not stored.** The fork and knife is drawn on any extra
+      whose accounting category is food and beverage. A separate flag would be
+      a second way to say one thing, free to disagree with the first.
+    - **Tax is the extra's own rate, else its category's, else none**, decided
+      in `charge_extra()`. The list shows an inherited rate faint and an own
+      rate solid, so it is visible which one applies without a sentence
+      saying so.
+    - **The reference's third, arrows icon on each row is NOT copied.** What it
+      does in their system has not been seen, and an icon that does nothing is
+      the dead control this application does not ship. Nor is the reference's
+      split between rows that can be deleted and rows that cannot -- there are
+      no system extras here, so every one the hotel added, it can remove.
+    - Search and paging are in the browser. The catalog is dozens of rows,
+      not thousands, so the ~1,800 rule does not reach it -- the same
+      judgement as meeting rooms.
   - **Country is ISO alpha-2 under a check constraint**, the same list and the
     same reasoning as `customers.country`. Latitude and longitude are set
     together or not at all, and range-checked.

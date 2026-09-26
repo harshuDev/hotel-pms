@@ -6,6 +6,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { cn } from "@/components/ui";
 import { RoomPhoto } from "@/components/settings/room-photo";
+import { ExtrasPanel } from "@/components/settings/extras-panel";
+import type { ExtrasCatalog } from "@/lib/extras";
 import { SETTINGS_NAV, type SettingsTab } from "@/lib/settings-tabs";
 import { COUNTRIES } from "@/lib/countries";
 import { CURRENCIES, currencyOptionLabel } from "@/lib/currencies";
@@ -197,6 +199,7 @@ export function SettingsScreen({
   isAdmin,
   timezones,
   hotelPolicies,
+  extrasCatalog,
 }: {
   tab: SettingsTab;
   property: PropertySettings;
@@ -204,6 +207,8 @@ export function SettingsScreen({
   timezones: string[];
   /** Hotel Content -> Hotel Policy (0068). */
   hotelPolicies: HotelPolicies;
+  /** Hotel Content -> Extras (0069). */
+  extrasCatalog: ExtrasCatalog;
   roomTypes: RoomTypeSetting[];
   rooms: RoomSettingsPage;
   roomQuery: string;
@@ -944,6 +949,16 @@ export function SettingsScreen({
             )}
           </div>
         </div>
+      )}
+
+      {tab === "extras" && (
+        <ExtrasPanel
+          catalog={extrasCatalog}
+          taxRates={taxRates}
+          canEdit={canEdit}
+          pending={pending}
+          run={run}
+        />
       )}
 
       {/* Room types ---------------------------------------------------- */}

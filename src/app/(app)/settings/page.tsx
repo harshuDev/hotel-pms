@@ -7,6 +7,7 @@ import {
   getChannelSettings,
   getCurrentStaffUser,
   getHotelPolicies,
+  getExtrasCatalog,
   getPaymentMethodSettings,
   getPropertySettings,
   getRoomsForSettings,
@@ -45,6 +46,7 @@ export default async function SettingsPage({
     staff,
     me,
     hotelPolicies,
+    extrasCatalog,
   ] = await Promise.all([
     getPropertySettings(),
     getRoomTypeSettings(),
@@ -58,6 +60,7 @@ export default async function SettingsPage({
     getStaffSettings(),
     getCurrentStaffUser(),
     getHotelPolicies(),
+    getExtrasCatalog(),
   ]);
 
   /*
@@ -91,6 +94,7 @@ export default async function SettingsPage({
         isAdmin={me?.role === "admin"}
         timezones={timezones}
         hotelPolicies={hotelPolicies}
+        extrasCatalog={extrasCatalog}
       />
     </div>
   );

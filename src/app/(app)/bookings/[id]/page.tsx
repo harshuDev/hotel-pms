@@ -13,6 +13,7 @@ import {
   getCurrentStaffUser,
   getProperty,
   getBookingCancellationTerms,
+  getExtrasCatalog,
 } from "@/lib/queries";
 
 export const metadata = { title: "Booking" };
@@ -66,6 +67,7 @@ export default async function BookingPage({
     guest,
     property,
     cancellationTerms,
+    extrasCatalog,
   ] =
     await Promise.all([
       getBookingRoomLines(id),
@@ -89,6 +91,8 @@ export default async function BookingPage({
       // the Cancel button, because a hotel has to be able to cancel its own
       // booking whatever the guest was sold.
       getBookingCancellationTerms(id),
+      // The catalog the Extras tab charges from (0069).
+      getExtrasCatalog(),
     ]);
 
   const back = backTarget(sp.back);
@@ -112,6 +116,11 @@ export default async function BookingPage({
         staff !== null &&
         ["admin", "manager", "front_desk"].includes(staff.role)
       }
+      canCharge={
+        staff !== null &&
+        ["admin", "manager", "front_desk", "cashier"].includes(staff.role)
+      }
+      extrasCatalog={extrasCatalog}
     />
   );
 }

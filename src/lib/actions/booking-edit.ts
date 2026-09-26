@@ -211,3 +211,30 @@ export async function confirmBooking(
   revalidateBooking(bookingId);
   return { ok: true, data: null };
 }
+
+/**
+ * Charges an extra from the property's catalog (0069) to the booking's open
+ * folio. The price, the tax and the accounting category all come from the
+ * catalog inside Postgres -- the browser sends which extra and how many, never
+ * an amount -- and the posting itself is `post_charge()`, so the business
+ * date, the role check and the append-only rules are the ones every other
+ * charge already has.
+ */
+export async function chargeExtra(input: {
+  bookingId: string;
+  extraId: string;
+  quantity: number;
+}): Promise<ActionResult<null>> {
+  if (!Number.isInteger(input.quantity) || input.quantity < 1) {
+    return { ok: false, error: "The quantity must be a whole number, 1 or more." };
+  }
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("charge_extra", {
+    p_booking_id: input.bookingId,
+    p_extra_id: input.extraId,
+    p_quantity: input.quantity,
+  });
+  if (error) return { ok: false, error: error.message };
+  revalidateBooking(input.bookingId);
+  return { ok: true, data: null };
+}

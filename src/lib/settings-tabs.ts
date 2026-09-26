@@ -19,6 +19,7 @@ export const SETTINGS_TABS = [
   "property",
   "hotel-properties",
   "hotel-policy",
+  "extras",
   "room-types",
   "rooms",
   "staff",
@@ -67,6 +68,7 @@ export const SETTINGS_NAV: {
     title: "Hotel Content",
     items: [
       { id: "hotel-policy", label: "Hotel Policy" },
+      { id: "extras", label: "Extras" },
       { id: "room-types", label: "Room Types" },
       { id: "rooms", label: "Rooms" },
     ],
