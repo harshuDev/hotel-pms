@@ -87,7 +87,7 @@ export function TopNav({
       way. Do not lower this back to z-40 to "match" the top bar -- that strip
       is z-30 and sits under this by design.
     */
-    <header className="sticky top-0 z-50 bg-chrome-900">
+    <header className="sticky top-0 z-50 bg-chrome-900 print:hidden">
       <div className="flex h-14 items-center px-3 lg:px-4">
         <button
           type="button"

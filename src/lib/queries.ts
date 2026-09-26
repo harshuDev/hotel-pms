@@ -16,6 +16,12 @@ import { cache } from "react";
 import { EMPTY_HOTEL_POLICIES, type HotelPolicies } from "@/lib/hotel-policies";
 import type { ExtraItemType, ExtrasCatalog } from "@/lib/extras";
 import type { Facility, FacilityIcon } from "@/lib/facilities";
+import type {
+  GuestField,
+  GuestFieldKind,
+  IdentificationType,
+  RegistrationForm,
+} from "@/lib/guest-config";
 
 import { createClient } from "@/lib/supabase/server";
 import { nullableArg } from "@/lib/supabase/database";
@@ -2562,6 +2568,44 @@ export async function getFacilities(): Promise<Facility[]> {
 
   if (error) throw new Error(`Failed to load the facilities: ${error.message}`);
   return data.map((f) => ({ id: f.id, title: f.title, icon: f.icon as FacilityIcon }));
+}
+
+/* -- Settings -> Guest Configuration (0073) ------------------------------- */
+
+export async function getIdentificationTypes(): Promise<IdentificationType[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("identification_types")
+    .select("id, title")
+    .order("created_at");
+  if (error) throw new Error(`Failed to load the identification types: ${error.message}`);
+  return data.map((t) => ({ id: t.id, title: t.title }));
+}
+
+export async function getGuestFields(): Promise<GuestField[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("guest_fields")
+    .select("id, label, kind")
+    .order("sort_order")
+    .order("created_at");
+  if (error) throw new Error(`Failed to load the guest fields: ${error.message}`);
+  return data.map((f) => ({ id: f.id, label: f.label, kind: f.kind as GuestFieldKind }));
+}
+
+/** None until the page is first saved, which reads as nothing set. */
+export async function getRegistrationForm(): Promise<RegistrationForm> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("registration_form_settings")
+    .select("question_1, question_2, terms")
+    .maybeSingle();
+  if (error) throw new Error(`Failed to load the registration form: ${error.message}`);
+  return {
+    question1: data?.question_1 ?? null,
+    question2: data?.question_2 ?? null,
+    terms: data?.terms ?? null,
+  };
 }
 
 export async function getPropertySettings(): Promise<PropertySettings> {

@@ -961,12 +961,14 @@ export type Database = {
           company_name: string | null
           country: string | null
           created_at: string
+          custom_fields: Json
           customer_number: number
           date_of_birth: string | null
           email: string | null
           exclude_from_email: boolean
           first_name: string | null
           id: string
+          identification_type_id: string | null
           kind: Database["public"]["Enums"]["customer_kind"]
           last_name: string | null
           merged_into_id: string | null
@@ -981,12 +983,14 @@ export type Database = {
           company_name?: string | null
           country?: string | null
           created_at?: string
+          custom_fields?: Json
           customer_number?: number
           date_of_birth?: string | null
           email?: string | null
           exclude_from_email?: boolean
           first_name?: string | null
           id?: string
+          identification_type_id?: string | null
           kind: Database["public"]["Enums"]["customer_kind"]
           last_name?: string | null
           merged_into_id?: string | null
@@ -1001,12 +1005,14 @@ export type Database = {
           company_name?: string | null
           country?: string | null
           created_at?: string
+          custom_fields?: Json
           customer_number?: number
           date_of_birth?: string | null
           email?: string | null
           exclude_from_email?: boolean
           first_name?: string | null
           id?: string
+          identification_type_id?: string | null
           kind?: Database["public"]["Enums"]["customer_kind"]
           last_name?: string | null
           merged_into_id?: string | null
@@ -1018,6 +1024,13 @@ export type Database = {
           property_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "customers_identification_type_id_fkey"
+            columns: ["identification_type_id"]
+            isOneToOne: false
+            referencedRelation: "identification_types"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "customers_merged_into_id_property_id_fkey"
             columns: ["merged_into_id", "property_id"]
@@ -1387,6 +1400,70 @@ export type Database = {
           },
           {
             foreignKeyName: "folios_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      guest_fields: {
+        Row: {
+          created_at: string
+          id: string
+          kind: string
+          label: string
+          property_id: string
+          sort_order: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          kind?: string
+          label: string
+          property_id: string
+          sort_order?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          kind?: string
+          label?: string
+          property_id?: string
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guest_fields_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      identification_types: {
+        Row: {
+          created_at: string
+          id: string
+          property_id: string
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          property_id: string
+          title: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          property_id?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "identification_types_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "properties"
@@ -2212,6 +2289,48 @@ export type Database = {
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      registration_form_settings: {
+        Row: {
+          property_id: string
+          question_1: string | null
+          question_2: string | null
+          terms: string | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          property_id: string
+          question_1?: string | null
+          question_2?: string | null
+          terms?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          property_id?: string
+          question_1?: string | null
+          question_2?: string | null
+          terms?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "registration_form_settings_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: true
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "registration_form_settings_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "staff_users"
             referencedColumns: ["id"]
           },
         ]
@@ -3669,6 +3788,7 @@ export type Database = {
       delete_extra: { Args: { p_id: string }; Returns: undefined }
       delete_extra_category: { Args: { p_id: string }; Returns: undefined }
       delete_facility: { Args: { p_id: string }; Returns: undefined }
+      delete_identification_type: { Args: { p_id: string }; Returns: undefined }
       delete_room: { Args: { p_room_id: string }; Returns: undefined }
       delete_season: { Args: { p_id: string }; Returns: undefined }
       deposit_report: {
@@ -4454,6 +4574,11 @@ export type Database = {
         Args: { p_icon: string; p_id: string; p_title: string }
         Returns: string
       }
+      save_guest_fields: { Args: { p_fields: Json }; Returns: undefined }
+      save_identification_type: {
+        Args: { p_id: string; p_title: string }
+        Returns: string
+      }
       save_meeting_room: {
         Args: {
           p_capacity?: number
@@ -4571,6 +4696,10 @@ export type Database = {
         }
         Returns: string
       }
+      save_registration_form: {
+        Args: { p_question_1: string; p_question_2: string; p_terms: string }
+        Returns: undefined
+      }
       save_room: {
         Args: {
           p_floor?: number
@@ -4670,6 +4799,14 @@ export type Database = {
           p_to: string
         }
         Returns: number
+      }
+      set_customer_details: {
+        Args: {
+          p_custom_fields: Json
+          p_customer_id: string
+          p_identification_type_id: string
+        }
+        Returns: undefined
       }
       set_customer_exclude_from_email: {
         Args: { p_id: string; p_value: boolean }

@@ -9,6 +9,9 @@ import {
   getHotelPolicies,
   getExtrasCatalog,
   getFacilities,
+  getGuestFields,
+  getIdentificationTypes,
+  getRegistrationForm,
   getPaymentMethodSettings,
   getPropertySettings,
   getRoomsForSettings,
@@ -49,6 +52,9 @@ export default async function SettingsPage({
     hotelPolicies,
     extrasCatalog,
     facilities,
+    identificationTypes,
+    guestFields,
+    registrationForm,
   ] = await Promise.all([
     getPropertySettings(),
     getRoomTypeSettings(),
@@ -64,6 +70,9 @@ export default async function SettingsPage({
     getHotelPolicies(),
     getExtrasCatalog(),
     getFacilities(),
+    getIdentificationTypes(),
+    getGuestFields(),
+    getRegistrationForm(),
   ]);
 
   /*
@@ -99,6 +108,9 @@ export default async function SettingsPage({
         hotelPolicies={hotelPolicies}
         extrasCatalog={extrasCatalog}
         facilities={facilities}
+        identificationTypes={identificationTypes}
+        guestFields={guestFields}
+        registrationForm={registrationForm}
       />
     </div>
   );

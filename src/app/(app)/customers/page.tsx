@@ -1,5 +1,10 @@
 import { CustomersScreen } from "@/components/customers/customers-screen";
-import { getCurrentStaffUser, getCustomers } from "@/lib/queries";
+import {
+  getCurrentStaffUser,
+  getCustomers,
+  getGuestFields,
+  getIdentificationTypes,
+} from "@/lib/queries";
 
 export const metadata = { title: "Customers" };
 
@@ -17,10 +22,14 @@ export default async function CustomersPage({
   const kind = sp.kind ?? "all";
   const q = sp.q ?? "";
 
-  const [{ rows, total, page, perPage }, staff] = await Promise.all([
-    getCustomers({ q, kind, page: Number(sp.page ?? 1) }),
-    getCurrentStaffUser(),
-  ]);
+  const [{ rows, total, page, perPage }, staff, identificationTypes, guestFields] =
+    await Promise.all([
+      getCustomers({ q, kind, page: Number(sp.page ?? 1) }),
+      getCurrentStaffUser(),
+      // Settings -> Guest Configuration (0073), drawn on the edit form.
+      getIdentificationTypes(),
+      getGuestFields(),
+    ]);
 
   /*
    * The read stays here, in a Server Component, and the rows go to the client
@@ -41,6 +50,8 @@ export default async function CustomersPage({
       kind={kind}
       canEdit={staff !== null && CAN_EDIT.includes(staff.role)}
       canMerge={staff !== null && CAN_MERGE.includes(staff.role)}
+      identificationTypes={identificationTypes}
+      guestFields={guestFields}
     />
   );
 }

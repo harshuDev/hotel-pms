@@ -8,6 +8,12 @@ import { cn } from "@/components/ui";
 import { RoomPhoto } from "@/components/settings/room-photo";
 import { ExtrasPanel } from "@/components/settings/extras-panel";
 import { FacilitiesPanel } from "@/components/settings/facilities-panel";
+import {
+  GuestDetailsPanel,
+  IdentificationTypesPanel,
+  RegistrationFormPanel,
+} from "@/components/settings/guest-config-panels";
+import type { GuestField, IdentificationType, RegistrationForm } from "@/lib/guest-config";
 import { FacilityIcon } from "@/components/settings/facility-icon";
 import type { Facility } from "@/lib/facilities";
 import type { ExtrasCatalog } from "@/lib/extras";
@@ -206,6 +212,9 @@ export function SettingsScreen({
   hotelPolicies,
   extrasCatalog,
   facilities,
+  identificationTypes,
+  guestFields,
+  registrationForm,
 }: {
   tab: SettingsTab;
   property: PropertySettings;
@@ -217,6 +226,10 @@ export function SettingsScreen({
   extrasCatalog: ExtrasCatalog;
   /** Hotel Content -> Room Type Facilities (0070). */
   facilities: Facility[];
+  /** Settings -> Guest Configuration (0073). */
+  identificationTypes: IdentificationType[];
+  guestFields: GuestField[];
+  registrationForm: RegistrationForm;
   roomTypes: RoomTypeSetting[];
   rooms: RoomSettingsPage;
   roomQuery: string;
@@ -978,6 +991,24 @@ export function SettingsScreen({
       {tab === "facilities" && (
         <FacilitiesPanel
           facilities={facilities}
+          canEdit={canEdit}
+          pending={pending}
+          run={run}
+        />
+      )}
+
+      {tab === "guest-registration" && (
+        <RegistrationFormPanel form={registrationForm} canEdit={canEdit} pending={pending} run={run} />
+      )}
+      {tab === "identification-types" && (
+        <IdentificationTypesPanel types={identificationTypes} canEdit={canEdit} pending={pending} run={run} />
+      )}
+      {tab === "guest-details" && (
+        <GuestDetailsPanel
+          // Remounts on the saved list, so rows added before a save pick up
+          // their new ids -- otherwise saving twice would add them twice.
+          key={guestFields.map((f) => `${f.id}:${f.label}:${f.kind}`).join("|")}
+          fields={guestFields}
           canEdit={canEdit}
           pending={pending}
           run={run}

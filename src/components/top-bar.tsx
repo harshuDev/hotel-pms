@@ -6,7 +6,7 @@ export function TopBar({
   businessDate: string;
 }) {
   return (
-    <div className="sticky top-14 z-30 flex h-9 items-center justify-between border-b border-line bg-white px-4 lg:px-5">
+    <div className="sticky top-14 z-30 flex h-9 items-center justify-between border-b border-line bg-white px-4 lg:px-5 print:hidden">
       <p className="font-display text-[13.5px] font-medium tracking-tightest text-ink">
         {propertyName}
       </p>

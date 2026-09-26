@@ -21,6 +21,9 @@ export const SETTINGS_TABS = [
   "hotel-policy",
   "extras",
   "facilities",
+  "guest-registration",
+  "identification-types",
+  "guest-details",
   "room-types",
   "rooms",
   "staff",
@@ -43,9 +46,9 @@ export function isSettingsTab(value: string | undefined): value is SettingsTab {
 /**
  * THE SIDEBAR, in the client's reference system's order and wording.
  *
- * Theirs has nine sections. Six are here, each holding panels this system
- * already has. **Guest Configuration, Communications & Notifications and
- * Other are left out on purpose**: nothing here belongs in them yet, and a
+ * Theirs has nine sections. Seven are here, each holding panels this system
+ * already has. **Communications & Notifications and Other are left out on
+ * purpose**: nothing here belongs in them yet, and a
  * section that opens onto nothing is the control that does nothing, which
  * this application does not ship. They go in when there is something behind
  * them -- and the reference's own contents for them have not been seen.
@@ -74,6 +77,14 @@ export const SETTINGS_NAV: {
       { id: "facilities", label: "Room Type Facilities" },
       { id: "room-types", label: "Room Types" },
       { id: "rooms", label: "Rooms" },
+    ],
+  },
+  {
+    title: "Guest Configuration",
+    items: [
+      { id: "guest-registration", label: "Guest Registration Form" },
+      { id: "identification-types", label: "Identification Types" },
+      { id: "guest-details", label: "Guest Details Settings" },
     ],
   },
   {
