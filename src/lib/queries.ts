@@ -85,6 +85,7 @@ import type {
   AvailabilityCell,
   CalendarBar,
   CalendarSeason,
+  SeasonType,
   RoomTypeStatus,
   BookingAttachment,
   BookingEmail,
@@ -1990,26 +1991,27 @@ export async function getRoomStatusByType(): Promise<RoomTypeStatus[]> {
   }));
 }
 
-/** Every season on the property, for the Settings screen. */
-export async function getSeasonSettings(): Promise<CalendarSeason[]> {
+/** Every season and event with its ranges, for Settings -> Seasons and Events (0095). */
+export async function getSeasonSettings(): Promise<SeasonType[]> {
   const supabase = await createClient();
 
   const { data, error } = await supabase
-    .from("seasons")
-    .select("id, name, starts_on, ends_on")
-    .order("starts_on");
+    .from("season_types")
+    .select("id, kind, name, color, seasons(id, starts_on, ends_on)")
+    .order("created_at");
 
   if (error) {
     throw new Error(`Failed to load the seasons: ${error.message}`);
   }
 
-  return (
-    (data ?? []) as { id: string; name: string; starts_on: string; ends_on: string }[]
-  ).map((row) => ({
+  return (data ?? []).map((row) => ({
     id: row.id,
+    kind: row.kind === "event" ? "event" : "season",
     name: row.name,
-    startsOn: row.starts_on,
-    endsOn: row.ends_on,
+    color: row.color,
+    ranges: (row.seasons ?? [])
+      .map((s) => ({ id: s.id, startsOn: s.starts_on, endsOn: s.ends_on }))
+      .sort((a, b) => a.startsOn.localeCompare(b.startsOn)),
   }));
 }
 
@@ -2029,18 +2031,12 @@ export async function getCalendarSeasons(
     throw new Error(`Failed to load the seasons: ${error.message}`);
   }
 
-  return (
-    (data ?? []) as {
-      id: string;
-      name: string;
-      starts_on: string;
-      ends_on: string;
-    }[]
-  ).map((row) => ({
+  return (data ?? []).map((row) => ({
     id: row.id,
     name: row.name,
     startsOn: row.starts_on,
     endsOn: row.ends_on,
+    color: row.color,
   }));
 }
 

@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0094` are
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0095` are
 applied to the hosted database.
 
 Working on real data: dashboard (house board, movements, pace, activity feed),
@@ -227,7 +227,7 @@ Each read is a Postgres view or RPC, never aggregation in the client:
 | `getCalendarBookings(from, n, cap)` | `calendar_bookings(from, n, cap)`  |
 | `getCalendarSeasons(from, n)`       | `calendar_seasons(from, n)`        |
 | `getCalendarNotes(from, n)`         | `calendar_notes_for(from, n)`      |
-| `getSeasonSettings()`               | `seasons` table                    |
+| `getSeasonSettings()`               | `season_types` with their `seasons` ranges (0095) |
 | `getRoomStatusByType()` (unused)    | `room_status_by_type()`            |
 | `getOccupancyReport(from, to)`      | `occupancy_report(from, to)`      |
 | `getDebtorsReport()`                | `debtors_report()`                |
@@ -679,6 +679,27 @@ showed the Reservation Centric calendar and asked for it by name.
   one date has no sensible drawing) and the last day is included.
   - A season is genuinely deleted, unlike a room, a room type or a payment
     method. Nothing points at one, so removing it loses no history.
+  - **SEASONS AND EVENTS ARE THE REFERENCE'S MODEL AS OF 0095.** A season or
+    event is a NAME AND A COLOUR (`season_types`, kind `season | event`) that
+    owns several date ranges (`seasons`, now pointing at its type and carrying
+    its kind). Settings -> Seasons and Events (`seasons-panel.tsx`) draws the
+    year as twelve month grids, each day in its season's colour with an
+    event underlined in its own, and lists Seasons, Default Season and Events
+    with + (add dates), edit (name, colour) and delete, per season and per
+    range.
+    - **The no-overlap constraint now applies to seasons only**
+      (`where kind = 'season'`): a day is in one season, which is what this
+      band and the Default Season need. Events may overlap anything, so the
+      calendar band draws seasons only -- `calendar_seasons()` returns
+      seasons, with their colour, which fills the band (`inkOn()` picks the
+      text colour).
+    - **The Default Season is not a row**: every day no season covers,
+      computed in the panel from the first season year to the last.
+    - `add_season_range()` names the season an overlap hits rather than
+      letting the constraint's raw text through. A new season is its type and
+      its first range; if the range is refused the type is taken back.
+    - The kind is fixed once made -- turning a season into an event would
+      lift the no-overlap rule from ranges already checked against it.
   - The band's label is `sticky` inside its segment so it rides the left edge
     of what is on screen. Do not put `overflow-hidden` on that segment: it
     becomes the sticky containing block and pins the label, which is the bug

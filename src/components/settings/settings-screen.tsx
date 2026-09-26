@@ -41,6 +41,7 @@ import { InventorySettingsPanel } from "@/components/settings/inventory-settings
 import { RoomSetupPanel, RoomTypesPanel } from "@/components/settings/room-panels";
 import { CancellationPolicyPanel } from "@/components/settings/cancellation-policy-panel";
 import { RatePlansPanel } from "@/components/settings/rate-plans-panel";
+import { SeasonsPanel } from "@/components/settings/seasons-panel";
 import { DiscountsPanel } from "@/components/settings/discounts-panel";
 import type { InventorySettings } from "@/lib/inventory-settings";
 import type { EmailSetup, EmailTemplate, HotelEmailSettings } from "@/lib/email-preferences";
@@ -75,12 +76,10 @@ import {
   saveHotelDetails,
   saveHotelPolicies,
   saveHotelTimes,
-  saveSeason,
-  deleteSeason,
   saveStaffUser,
 } from "@/lib/actions/settings";
 import type {
-  CalendarSeason,
+  SeasonType,
   RatePlan,
   CancellationPolicy,
   ChannelKind,
@@ -266,7 +265,7 @@ export function SettingsScreen({
   roomQuery: string;
   channels: ChannelSetting[];
   taxRates: TaxRateSetting[];
-  seasons: CalendarSeason[];
+  seasons: SeasonType[];
   ratePlans: RatePlan[];
   cancellationPolicies: CancellationPolicy[];
   paymentMethods: PaymentMethodSetting[];
@@ -363,12 +362,6 @@ export function SettingsScreen({
     isActive: boolean;
   } | null>(null);
 
-  const [sn, setSn] = useState<{
-    id: string | null;
-    name: string;
-    startsOn: string;
-    endsOn: string;
-  } | null>(null);
 
 
 
@@ -1286,156 +1279,15 @@ export function SettingsScreen({
 
       {/* Payment methods ----------------------------------------------- */}
       {tab === "seasons" && (
-        <>
-          <div className={card}>
-            <div className="mb-4 flex items-center justify-between">
-              <h2 className="font-display text-[15px] font-semibold tracking-tightest text-ink">
-                Seasons
-              </h2>
-              {canEdit && (
-                <button
-                  onClick={() =>
-                    setSn({ id: null, name: "", startsOn: "", endsOn: "" })
-                  }
-                  className={secondary}
-                >
-                  New season
-                </button>
-              )}
-            </div>
-
-            {seasons.length === 0 ? (
-              <p className="py-6 text-center text-[13px] leading-relaxed text-ink-muted">
-                None yet.
-              </p>
-            ) : (
-              <table className="w-full text-[13px]">
-                <thead>
-                  <tr className="border-b border-line text-left text-ink-faint">
-                    {["Season", "First day", "Last day", ""].map((c, i) => (
-                      <th
-                        key={c || i}
-                        className="whitespace-nowrap px-3 pb-2.5 text-xxs font-semibold uppercase tracking-[0.1em]"
-                      >
-                        {c}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-line">
-                  {seasons.map((s) => (
-                    <tr key={s.id}>
-                      <td className="px-3 py-2.5 font-medium text-ink">{s.name}</td>
-                      <td className="tnum px-3 py-2.5 text-ink-muted">{s.startsOn}</td>
-                      <td className="tnum px-3 py-2.5 text-ink-muted">{s.endsOn}</td>
-                      <td className="px-3 py-2.5 text-right">
-                        {canEdit && (
-                          <span className="flex justify-end gap-3">
-                            <button
-                              onClick={() =>
-                                setSn({
-                                  id: s.id,
-                                  name: s.name,
-                                  startsOn: s.startsOn,
-                                  endsOn: s.endsOn,
-                                })
-                              }
-                              className="text-ink-muted underline-offset-2 hover:text-ink hover:underline"
-                            >
-                              Edit
-                            </button>
-                            <button
-                              onClick={() =>
-                                startTransition(async () => {
-                                  const result = await deleteSeason(s.id);
-                                  if (!result.ok) {
-                                    setMessage({ ok: false, text: result.error });
-                                    return;
-                                  }
-                                  setMessage({ ok: true, text: `${s.name} removed.` });
-                                  router.refresh();
-                                })
-                              }
-                              className="text-rose-600 underline-offset-2 hover:underline"
-                            >
-                              Remove
-                            </button>
-                          </span>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-          </div>
-
-          {sn && (
-            <div className={card}>
-              <h3 className="mb-4 font-display text-[15px] font-semibold tracking-tightest text-ink">
-                {sn.id ? "Edit season" : "New season"}
-              </h3>
-              <div className="grid gap-4 sm:grid-cols-3">
-                <div>
-                  <label className={label} htmlFor="season-name">Name</label>
-                  <input
-                    id="season-name"
-                    value={sn.name}
-                    onChange={(e) => setSn({ ...sn, name: e.target.value })}
-                    placeholder="Low season"
-                    className={field}
-                  />
-                </div>
-                <div>
-                  <label className={label} htmlFor="season-from">First day</label>
-                  <input
-                    id="season-from"
-                    type="date"
-                    value={sn.startsOn}
-                    onChange={(e) => setSn({ ...sn, startsOn: e.target.value })}
-                    className={field}
-                  />
-                </div>
-                <div>
-                  <label className={label} htmlFor="season-to">Last day</label>
-                  <input
-                    id="season-to"
-                    type="date"
-                    value={sn.endsOn}
-                    onChange={(e) => setSn({ ...sn, endsOn: e.target.value })}
-                    className={field}
-                  />
-                </div>
-              </div>
-              <div className="mt-4 flex gap-2">
-                <button
-                  disabled={pending}
-                  onClick={() =>
-                    startTransition(async () => {
-                      const result = await saveSeason(sn);
-                      if (!result.ok) {
-                        setMessage({ ok: false, text: result.error });
-                        return;
-                      }
-                      setMessage({ ok: true, text: `${sn.name} saved.` });
-                      setSn(null);
-                      router.refresh();
-                    })
-                  }
-                  className={primary}
-                >
-                  {pending ? "Saving…" : "Save season"}
-                </button>
-                <button onClick={() => setSn(null)} className={secondary}>
-                  Cancel
-                </button>
-              </div>
-            </div>
-          )}
-        </>
+        <SeasonsPanel
+          types={seasons}
+          businessDate={businessDate}
+          canEdit={canEdit}
+          pending={pending}
+          run={run}
+        />
       )}
 
-      {/* Rate plans ------------------------------------------------------ */}
       {tab === "rate-plans" && (
         <RatePlansPanel
           ratePlans={ratePlans}
