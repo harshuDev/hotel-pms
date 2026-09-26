@@ -268,6 +268,7 @@ export function SettingsScreen({
   }, []);
 
   /* -- Hotel Properties: the three times ------------------------------- */
+  const [editingTimes, setEditingTimes] = useState(false);
   const [times, setTimes] = useState({
     checkInTime: property.checkInTime?.slice(0, 5) ?? "15:00",
     checkOutTime: property.checkOutTime?.slice(0, 5) ?? "11:00",
@@ -684,57 +685,137 @@ export function SettingsScreen({
       {/* Hotel Properties ------------------------------------------------ */}
       {tab === "hotel-properties" && (
         /*
-          The three times that used to sit on the Property form. The
-          reference's Hotel Details carries none of them, so they moved here,
-          beside it under Hotel Profile. Same refusals as before: each is
-          required, because every arrival, departure and night audit is timed
-          against it.
+          The reference's Properties list. One row, because a staff login
+          belongs to one property: staff_users.property_id is a single column
+          and every RLS policy keys off it. So there is no Add New Property and
+          no delete — a second property would be one nobody here could open,
+          and every table points at this one under on delete restrict. The
+          pencil opens the three times that used to sit on the Property form.
         */
-        <div className={cn(card, "max-w-3xl p-6 sm:p-7")}>
-          <h2 className="mb-6 font-display text-[26px] font-semibold tracking-tightest text-ink">
+        <div className="max-w-5xl space-y-5">
+          <h2 className="font-display text-[26px] font-semibold tracking-tightest text-ink">
             Hotel Properties
           </h2>
-          <div className="space-y-4">
-            <DetailRow label="Check-in from" htmlFor="h-in">
-              <input
-                id="h-in"
-                type="time"
-                value={times.checkInTime}
-                disabled={!canEdit}
-                onChange={(e) => setTimes({ ...times, checkInTime: e.target.value })}
-                className={cn(field, "tnum")}
-              />
-            </DetailRow>
-            <DetailRow label="Check-out by" htmlFor="h-out">
-              <input
-                id="h-out"
-                type="time"
-                value={times.checkOutTime}
-                disabled={!canEdit}
-                onChange={(e) => setTimes({ ...times, checkOutTime: e.target.value })}
-                className={cn(field, "tnum")}
-              />
-            </DetailRow>
-            <DetailRow label="Night audit at" htmlFor="h-audit">
-              <input
-                id="h-audit"
-                type="time"
-                value={times.auditCloseTime}
-                disabled={!canEdit}
-                onChange={(e) => setTimes({ ...times, auditCloseTime: e.target.value })}
-                className={cn(field, "tnum")}
-              />
-            </DetailRow>
+
+          <div className="overflow-hidden rounded-lg border border-line bg-white shadow-card">
+            <h3 className="border-b border-line px-6 py-4 text-[16px] text-ink">
+              Properties list
+            </h3>
+            <div className="overflow-x-auto px-6 py-6">
+              <table className="w-full min-w-[34rem] text-[13.5px]">
+                <thead>
+                  <tr className="bg-shell text-left text-ink">
+                    <th className="w-[38%] px-4 py-4 font-normal">
+                      <span className="block border-r border-line">Property name</span>
+                    </th>
+                    <th className="px-4 py-4 font-normal">
+                      <span className="block border-r border-line">Address</span>
+                    </th>
+                    <th className="w-20 px-4 py-4" aria-label="Actions" />
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr className="border-b border-line">
+                    <td className="px-4 py-5 text-ink">{property.name}</td>
+                    <td className="px-4 py-5 text-ink">
+                      {[
+                        property.postcode,
+                        property.city,
+                        property.region,
+                        property.addressLine1,
+                        property.addressLine2,
+                      ]
+                        .filter((part) => part && part.trim() !== "")
+                        .join(", ") || "—"}
+                    </td>
+                    <td className="px-4 py-5 text-right">
+                      {canEdit && (
+                        <button
+                          type="button"
+                          onClick={() => setEditingTimes(true)}
+                          aria-label={`Edit ${property.name}`}
+                          title="Edit"
+                          className="rounded p-1 text-ink hover:bg-shell"
+                        >
+                          <svg
+                            viewBox="0 0 24 24"
+                            className="h-[18px] w-[18px]"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="1.8"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            aria-hidden="true"
+                          >
+                            <path d="M4 20h16" />
+                            <path d="M14.5 5.5l3 3L8 18H5v-3z" />
+                          </svg>
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
-          {canEdit && (
-            <div className="mt-6 flex justify-end">
-              <button
-                onClick={() => run(() => saveHotelTimes(times), "Hotel properties saved.")}
-                disabled={pending}
-                className={primary}
-              >
-                Save
-              </button>
+
+          {editingTimes && canEdit && (
+            <div className={cn(card, "p-6 sm:p-7")}>
+              <h3 className="mb-6 font-display text-[18px] font-semibold tracking-tightest text-ink">
+                {property.name}
+              </h3>
+              <div className="space-y-4">
+                <DetailRow label="Check-in from" htmlFor="h-in">
+                  <input
+                    id="h-in"
+                    type="time"
+                    value={times.checkInTime}
+                    onChange={(e) => setTimes({ ...times, checkInTime: e.target.value })}
+                    className={cn(field, "tnum")}
+                  />
+                </DetailRow>
+                <DetailRow label="Check-out by" htmlFor="h-out">
+                  <input
+                    id="h-out"
+                    type="time"
+                    value={times.checkOutTime}
+                    onChange={(e) => setTimes({ ...times, checkOutTime: e.target.value })}
+                    className={cn(field, "tnum")}
+                  />
+                </DetailRow>
+                <DetailRow label="Night audit at" htmlFor="h-audit">
+                  <input
+                    id="h-audit"
+                    type="time"
+                    value={times.auditCloseTime}
+                    onChange={(e) => setTimes({ ...times, auditCloseTime: e.target.value })}
+                    className={cn(field, "tnum")}
+                  />
+                </DetailRow>
+              </div>
+              <div className="mt-6 flex justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setEditingTimes(false)}
+                  className={secondary}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={() =>
+                    run(async () => {
+                      const result = await saveHotelTimes(times);
+                      if (result.ok) setEditingTimes(false);
+                      return result;
+                    }, "Hotel properties saved.")
+                  }
+                  disabled={pending}
+                  className={primary}
+                >
+                  Save
+                </button>
+              </div>
             </div>
           )}
         </div>
