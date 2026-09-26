@@ -47,6 +47,7 @@ export const SETTINGS_TABS = [
   "discounts",
   "channel-manager",
   "booking-engine",
+  "booking-widget",
   "channels",
 ] as const;
 
@@ -153,6 +154,7 @@ export const SETTINGS_NAV: {
       { id: "channel-manager", label: "Channel Manager" },
       { id: "booking-engine", label: "Booking Engine Settings" },
       { id: "channels", label: "Sales Channels" },
+      { id: "booking-widget", label: "Booking Widget" },
     ],
   },
 ];

@@ -684,6 +684,80 @@ export type Database = {
           },
         ]
       }
+      booking_widgets: {
+        Row: {
+          background_color: string
+          border_color: string
+          button_text: string | null
+          check_in_text: string | null
+          check_out_text: string | null
+          created_at: string
+          hash: string
+          id: string
+          label_color: string
+          language: string | null
+          month_names: string | null
+          nights_text: string | null
+          primary_color: string
+          property_id: string
+          show_occupancy: boolean
+          text_color: string
+          title_text: string | null
+          use_checkout_date: boolean
+          weekday_names: string | null
+        }
+        Insert: {
+          background_color?: string
+          border_color?: string
+          button_text?: string | null
+          check_in_text?: string | null
+          check_out_text?: string | null
+          created_at?: string
+          hash: string
+          id?: string
+          label_color?: string
+          language?: string | null
+          month_names?: string | null
+          nights_text?: string | null
+          primary_color?: string
+          property_id: string
+          show_occupancy?: boolean
+          text_color?: string
+          title_text?: string | null
+          use_checkout_date?: boolean
+          weekday_names?: string | null
+        }
+        Update: {
+          background_color?: string
+          border_color?: string
+          button_text?: string | null
+          check_in_text?: string | null
+          check_out_text?: string | null
+          created_at?: string
+          hash?: string
+          id?: string
+          label_color?: string
+          language?: string | null
+          month_names?: string | null
+          nights_text?: string | null
+          primary_color?: string
+          property_id?: string
+          show_occupancy?: boolean
+          text_color?: string
+          title_text?: string | null
+          use_checkout_date?: boolean
+          weekday_names?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "booking_widgets_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bookings: {
         Row: {
           adults: number
@@ -4989,6 +5063,7 @@ export type Database = {
         Args: { p_id: string }
         Returns: undefined
       }
+      delete_booking_widget: { Args: { p_id: string }; Returns: undefined }
       delete_calendar_note: { Args: { p_id: string }; Returns: undefined }
       delete_cancellation_policy: { Args: { p_id: string }; Returns: undefined }
       delete_channel_manager: { Args: { p_id: string }; Returns: undefined }
@@ -5551,6 +5626,27 @@ export type Database = {
           terms: string
         }[]
       }
+      public_booking_widget: {
+        Args: { p_hash: string }
+        Returns: {
+          background_color: string
+          border_color: string
+          button_text: string
+          check_in_text: string
+          check_out_text: string
+          label_color: string
+          language: string
+          month_names: string
+          nights_text: string
+          primary_color: string
+          property_id: string
+          show_occupancy: boolean
+          text_color: string
+          title_text: string
+          use_checkout_date: boolean
+          weekday_names: string
+        }[]
+      }
       public_hotel_policies: {
         Args: { p_property_id: string }
         Returns: {
@@ -5821,6 +5917,27 @@ export type Database = {
       save_booking_engine_texts: {
         Args: { p_privacy_policy: string; p_terms: string }
         Returns: undefined
+      }
+      save_booking_widget: {
+        Args: {
+          p_background_color: string
+          p_border_color: string
+          p_button_text: string
+          p_check_in_text: string
+          p_check_out_text: string
+          p_id: string
+          p_label_color: string
+          p_language: string
+          p_month_names: string
+          p_nights_text: string
+          p_primary_color: string
+          p_show_occupancy: boolean
+          p_text_color: string
+          p_title_text: string
+          p_use_checkout_date: boolean
+          p_weekday_names: string
+        }
+        Returns: string
       }
       save_calendar_note: {
         Args: { p_body: string; p_id?: string; p_note_date: string }

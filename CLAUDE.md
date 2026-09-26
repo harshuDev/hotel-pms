@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0099` are
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0100` are
 applied to the hosted database.
 
 Working on real data: dashboard (house board, movements, pace, activity feed),
@@ -272,6 +272,7 @@ Each read is a Postgres view or RPC, never aggregation in the client:
 | `getDiscounts()`                    | `discounts` (0090)                |
 | `getChannelManagers()`              | `channel_managers` (0097)         |
 | `getBookingEngineSettings()`        | `booking_engine_settings` + `booking_engine_profiles` (0098) |
+| `getBookingWidgets()`               | `booking_widgets` (0100)          |
 | `getMealReport(from, to)`           | `meal_report(from, to)`           |
 
 **Two signatures carry the room-count rule.** The client operates properties
@@ -400,11 +401,12 @@ the component.
   and the check is
   `select proname from pg_proc p join pg_namespace n on n.oid = p.pronamespace
   where n.nspname='public' and has_function_privilege('anon', p.oid, 'execute')`
-  — it should return only the public booking surface (nine functions since
-  0098: the four below plus `public_hotel_policies`,
+  — it should return only the public booking surface (ten functions since
+  0100: the four below plus `public_hotel_policies`,
   `public_room_type_facilities`, `public_room_type_content`,
-  `public_language_settings` (0078) and `public_booking_engine` (0098)) and
-  the two policy helpers. Four older functions held it through PUBLIC instead and needed
+  `public_language_settings` (0078), `public_booking_engine` (0098) and
+  `public_booking_widget` (0100)), the two policy helpers, and the
+  `btree_gist` extension's own internals. Four older functions held it through PUBLIC instead and needed
   `from public`; both revokes exist for a reason.
 - **A null role is not a refusal unless you write it as one.**
   `current_role()` returns null for anyone with no active `staff_users` row —
@@ -1926,6 +1928,31 @@ anywhere else. Collapsed height must stay constant regardless of room count.
       the button says to tick two rather than being disabled.
     - `save_channel()` was DROPPED and recreated with `p_customer_id` -- the
       overload trap.
+  - **CONNECTIVITY -> BOOKING WIDGET (0100) IS LIVE.** The reference's Saved
+    Widgets (hash code, edit, delete, "Create new widget") and the widget form
+    -- five texts with 0/255 counters, "Show occupancy options", "Use Checkout
+    Date Instead Nights Count", month and weekday names, five colours with a
+    swatch, a language -- in `booking-widget-panel.tsx`. Saving shows the
+    embed code (Copy, Open).
+    - **The embed code is an `<iframe>` of `/book/widget/<hash>`** (a static
+      segment, so it wins over `/book/[propertyId]`, and public like all of
+      `/book/`). An iframe, not a script tag: nothing of ours runs in the
+      hotel's page and the hotel's page cannot reach into ours. The page
+      clears the app's grey body so the widget sits on the hotel's own
+      background.
+    - **The widget is a plain GET form with `target="_top"`** to
+      `/book/<property>` with `lang`, `from`, `to` and, with occupancy on,
+      `adults` and `children` (`embed-widget.tsx`). Its calendar draws from
+      names made on the server -- the hotel's own twelve and seven if it wrote
+      exactly that many, else the language's (`customNames()`,
+      `src/lib/i18n/calendar-names.ts`, now shared with the booking page) --
+      and "today" is the hotel's, in its own zone.
+    - **The hash is public** (it is on the hotel's website), so
+      `public_booking_widget()` answers it with the look, the property id and
+      the language, and nothing else. Eight hex, unique, kept on edit.
+    - Blank texts fall back to the widget's defaults; a language the hotel no
+      longer offers falls back to its default. **"Currency (optional)" is NOT
+      copied**: one currency per property and nothing converts.
   - **CONNECTIVITY -> BOOKING ENGINE SETTINGS (0098) IS LIVE on the guest
     booking page.** `booking-engine-panel.tsx`: Booking Engine Profiles
     (Title, Slug, Link, ADD NEW PROFILE), then the Privacy Policy and the
@@ -2428,13 +2455,17 @@ anywhere else. Collapsed height must stay constant regardless of room count.
 - **The guest booking page is `/book/[propertyId]`, and it is the only thing
   in this codebase that runs without a staff session.** A guest has no
   `staff_users` row, so `current_property_id()` is null and the ordinary reads
-  see nothing. The property is therefore named in the URL and passed to nine
+  see nothing. The property is therefore named in the URL and passed to ten
   `security definer` RPCs granted to `anon`: `public_property`,
   `public_rate_plans`, `public_room_types`, `create_public_booking`, and the
   read-only `public_hotel_policies`, `public_room_type_facilities` (0071),
-  `public_room_type_content` (0072), `public_language_settings` (0078) and
-  `public_booking_engine` (0098). That is the entire public surface — no
-  table, no view, none of the staff functions.
+  `public_room_type_content` (0072), `public_language_settings` (0078),
+  `public_booking_engine` (0098) and `public_booking_widget` (0100). That is
+  the entire public surface — no table, no view, none of the staff functions.
+  - **The page takes `?from=&to=&adults=&children=`** (0100), which a Booking
+    Widget sends. `stayFromWidget()` drops anything malformed or in the past
+    rather than trusting a URL; a good stay opens the page searched, on the
+    room step. Everything that decides a sale is still Postgres's.
   - **THE PAGE IS A FOUR-STEP FLOW CLONED FROM THE CLIENT'S CURRENT BOOKING
     ENGINE** (0072). They sent five screenshots of a live hotel's page and
     asked for ours to look like it: a stepper across the top, then Select

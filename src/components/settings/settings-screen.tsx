@@ -45,6 +45,8 @@ import { RateCombinations } from "@/components/settings/rate-combinations";
 import { ChannelManagerPanel } from "@/components/settings/channel-manager-panel";
 import { BookingEnginePanel } from "@/components/settings/booking-engine-panel";
 import { SalesChannelsPanel } from "@/components/settings/sales-channels-panel";
+import { BookingWidgetPanel } from "@/components/settings/booking-widget-panel";
+import type { BookingWidget } from "@/lib/booking-widgets";
 import type { BookingEngineProfile, BookingEngineTexts } from "@/lib/booking-engine";
 import type { ChannelManager } from "@/lib/channel-managers";
 import { SeasonsPanel } from "@/components/settings/seasons-panel";
@@ -218,6 +220,7 @@ export function SettingsScreen({
   weekRates,
   channelManagers,
   bookingEngine,
+  bookingWidgets,
 }: {
   tab: SettingsTab;
   property: PropertySettings;
@@ -267,6 +270,8 @@ export function SettingsScreen({
   channelManagers: ChannelManager[];
   /** Booking Engine Settings (0098); loaded only on their tab. */
   bookingEngine: { texts: BookingEngineTexts; profiles: BookingEngineProfile[] } | null;
+  /** Booking widgets (0100); loaded only on their tab. */
+  bookingWidgets: BookingWidget[];
   roomTypes: RoomTypeSetting[];
   rooms: RoomSettingsPage;
   roomQuery: string;
@@ -1106,6 +1111,16 @@ export function SettingsScreen({
           profiles={bookingEngine.profiles}
           texts={bookingEngine.texts}
           roomTypes={roomTypes}
+          canEdit={canEdit}
+          pending={pending}
+          run={run}
+        />
+      )}
+
+      {tab === "booking-widget" && (
+        <BookingWidgetPanel
+          widgets={bookingWidgets}
+          supportedLocales={languageSettings.supportedLocales}
           canEdit={canEdit}
           pending={pending}
           run={run}
