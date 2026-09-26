@@ -11,8 +11,9 @@ import {
   getPublicRoomTypeFacilities,
 } from "@/lib/actions/public-booking";
 import { getCurrentStaffUser } from "@/lib/queries";
-import { LOCALES, bcp47, isLocale, type Locale } from "@/lib/i18n/locales";
+import { LOCALES, isLocale, type Locale } from "@/lib/i18n/locales";
 import { dictionaryFor } from "@/lib/i18n/dictionary";
+import { hotelToday, monthNames, weekdayNames } from "@/lib/i18n/calendar-names";
 
 export const metadata = { title: "Book a room" };
 
@@ -37,10 +38,17 @@ export default async function BookPage({
   searchParams,
 }: {
   params: Promise<{ propertyId: string }>;
-  searchParams: Promise<{ lang?: string; profile?: string }>;
+  searchParams: Promise<{
+    lang?: string;
+    profile?: string;
+    from?: string;
+    to?: string;
+    adults?: string;
+    children?: string;
+  }>;
 }) {
   const { propertyId } = await params;
-  const { lang, profile } = await searchParams;
+  const { lang, profile, from, to, adults, children } = await searchParams;
 
   const property = await getPublicProperty(propertyId);
   if (!property) notFound();
@@ -153,46 +161,30 @@ export default async function BookPage({
       weekdayNames={weekdayNames(locale)}
       roomTypeIds={engine.roomTypeIds}
       hasTerms={engine.terms !== null}
+      initialStay={stayFromWidget(from, to, adults, children, hotelToday(property.timezone))}
     />
   );
 }
 
-/*
- * The calendar's words and today's date, worked out HERE rather than in the
- * browser. Node's ICU and the browser's name months and weekdays differently
- * often enough ("Sep"/"Sept", "mié"/"mié.") that formatting them in a client
- * component is a hydration mismatch waiting for the right locale. Computed
- * once on the server and handed down, both renders print the same string.
- */
-function capitalise(s: string) {
-  return s.charAt(0).toLocaleUpperCase() + s.slice(1);
-}
-
-function monthNames(locale: Locale): string[] {
-  const f = new Intl.DateTimeFormat(bcp47(locale), { month: "long", timeZone: "UTC" });
-  return Array.from({ length: 12 }, (_, m) => capitalise(f.format(new Date(Date.UTC(2024, m, 1)))));
-}
-
-/** Sunday first, as the client's current booking engine draws its weeks. */
-function weekdayNames(locale: Locale): string[] {
-  const f = new Intl.DateTimeFormat(bcp47(locale), { weekday: "short", timeZone: "UTC" });
-  // 2024-01-07 was a Sunday.
-  return Array.from({ length: 7 }, (_, d) => capitalise(f.format(new Date(Date.UTC(2024, 0, 7 + d)))));
-}
-
 /**
- * Today on the hotel's own clock, never the server's: a guest in Mexico at
- * 23:00 is still on today, while a UTC server is already on tomorrow.
+ * The stay a Booking Widget (0100) sent, or null. A URL is not a form, so
+ * anything malformed or in the past is dropped rather than trusted; the
+ * party is only a starting value, capped again by each room on step 4.
  */
-function hotelToday(timezone: string): string {
-  try {
-    return new Intl.DateTimeFormat("en-CA", {
-      timeZone: timezone,
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-    }).format(new Date());
-  } catch {
-    return new Date().toISOString().slice(0, 10);
-  }
+function stayFromWidget(
+  from: string | undefined,
+  to: string | undefined,
+  adults: string | undefined,
+  children: string | undefined,
+  today: string,
+): { from: string; to: string; adults: number | null; children: number | null } | null {
+  const iso = /^\d{4}-\d{2}-\d{2}$/;
+  if (!from || !to || !iso.test(from) || !iso.test(to)) return null;
+  if (Number.isNaN(Date.parse(from)) || Number.isNaN(Date.parse(to))) return null;
+  if (from < today || to <= from) return null;
+  const count = (v: string | undefined, min: number) => {
+    const n = Number(v);
+    return Number.isInteger(n) && n >= min && n <= 12 ? n : null;
+  };
+  return { from, to, adults: count(adults, 1), children: count(children, 0) };
 }

@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import type { ActionResult } from "@/lib/actions/cashier";
 import type { HotelPolicies } from "@/lib/hotel-policies";
 import type { FacilityIcon } from "@/lib/facilities";
+import type { BookingWidget } from "@/lib/booking-widgets";
 import { resolveLanguageSettings, type LanguageSettings } from "@/lib/language-settings";
 
 /**
@@ -98,6 +99,38 @@ export async function getPublicLanguageSettings(propertyId: string): Promise<Lan
   });
   if (error) return resolveLanguageSettings(null);
   return resolveLanguageSettings(data?.[0]);
+}
+
+/**
+ * A Booking Widget as its embed draws it (0100), or null for an unknown hash
+ * or an inactive property. Only the look, the property and the language.
+ */
+export async function getPublicBookingWidget(
+  hash: string,
+): Promise<(Omit<BookingWidget, "id"> & { propertyId: string }) | null> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("public_booking_widget", { p_hash: hash });
+  if (error || !data || data.length === 0) return null;
+  const r = data[0];
+  return {
+    propertyId: r.property_id,
+    hash,
+    titleText: r.title_text,
+    buttonText: r.button_text,
+    checkInText: r.check_in_text,
+    checkOutText: r.check_out_text,
+    nightsText: r.nights_text,
+    showOccupancy: r.show_occupancy,
+    useCheckoutDate: r.use_checkout_date,
+    monthNames: r.month_names,
+    weekdayNames: r.weekday_names,
+    primaryColor: r.primary_color,
+    textColor: r.text_color,
+    backgroundColor: r.background_color,
+    labelColor: r.label_color,
+    borderColor: r.border_color,
+    language: r.language,
+  };
 }
 
 /**

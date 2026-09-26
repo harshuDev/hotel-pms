@@ -8,6 +8,7 @@ import { nullableArg } from "@/lib/supabase/database";
 import { ROOM_PHOTO_BUCKET } from "@/lib/queries";
 import { parseMoney } from "@/lib/money";
 import type { ActionResult } from "@/lib/actions/cashier";
+import type { BookingWidget } from "@/lib/booking-widgets";
 import type { HotelPolicies } from "@/lib/hotel-policies";
 import type { ExtraItemType } from "@/lib/extras";
 import type { FacilityIcon } from "@/lib/facilities";
@@ -879,6 +880,46 @@ export async function saveBookingEngineProfile(input: {
 export async function deleteBookingEngineProfile(id: string): Promise<ActionResult<null>> {
   const supabase = await createClient();
   const { error } = await supabase.rpc("delete_booking_engine_profile", { p_id: id });
+  if (error) return { ok: false, error: error.message };
+  revalidateSettings();
+  return { ok: true, data: null };
+}
+
+/* -- Connectivity -> Booking Widget (0100) -------------------------------- */
+
+/** Saves a widget (null id makes one) and returns its hash, for the embed code. */
+export async function saveBookingWidget(
+  input: Omit<BookingWidget, "hash" | "id"> & { id: string | null },
+): Promise<ActionResult<{ hash: string }>> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("save_booking_widget", {
+    // Null makes a new widget.
+    p_id: nullableArg(input.id),
+    p_title_text: input.titleText ?? "",
+    p_button_text: input.buttonText ?? "",
+    p_check_in_text: input.checkInText ?? "",
+    p_check_out_text: input.checkOutText ?? "",
+    p_nights_text: input.nightsText ?? "",
+    p_show_occupancy: input.showOccupancy,
+    p_use_checkout_date: input.useCheckoutDate,
+    p_month_names: input.monthNames ?? "",
+    p_weekday_names: input.weekdayNames ?? "",
+    p_primary_color: input.primaryColor,
+    p_text_color: input.textColor,
+    p_background_color: input.backgroundColor,
+    p_label_color: input.labelColor,
+    p_border_color: input.borderColor,
+    // Null is the hotel's default language.
+    p_language: nullableArg(input.language),
+  });
+  if (error) return { ok: false, error: error.message };
+  revalidateSettings();
+  return { ok: true, data: { hash: data as string } };
+}
+
+export async function deleteBookingWidget(id: string): Promise<ActionResult<null>> {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("delete_booking_widget", { p_id: id });
   if (error) return { ok: false, error: error.message };
   revalidateSettings();
   return { ok: true, data: null };

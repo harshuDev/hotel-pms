@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { cn } from "@/components/ui";
 import { formatMoneyIn } from "@/lib/money";
@@ -127,6 +127,7 @@ export function BookingWidget({
   weekdayNames,
   roomTypeIds,
   hasTerms,
+  initialStay,
 }: {
   property: PublicProperty;
   ratePlans: PublicRatePlan[];
@@ -155,6 +156,11 @@ export function BookingWidget({
   roomTypeIds: string[] | null;
   /** Whether the hotel has written terms (0098); the privacy policy always exists. */
   hasTerms: boolean;
+  /**
+   * Dates and party from a Booking Widget on the hotel's own website (0100),
+   * already checked on the server; the page opens on step 2 with them.
+   */
+  initialStay: { from: string; to: string; adults: number | null; children: number | null } | null;
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -170,9 +176,10 @@ export function BookingWidget({
 
   // Step 1
   const start = parts(today);
-  const [view, setView] = useState({ y: start.y, m: start.m });
-  const [checkIn, setCheckIn] = useState<string | null>(null);
-  const [checkOut, setCheckOut] = useState<string | null>(null);
+  const seed = initialStay ? parts(initialStay.from) : start;
+  const [view, setView] = useState({ y: seed.y, m: seed.m });
+  const [checkIn, setCheckIn] = useState<string | null>(initialStay?.from ?? null);
+  const [checkOut, setCheckOut] = useState<string | null>(initialStay?.to ?? null);
   const nights = checkIn && checkOut ? nightsBetween(checkIn, checkOut) : 0;
 
   // Steps 2 and 3
@@ -189,8 +196,8 @@ export function BookingWidget({
   const [last, setLast] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
-  const [adults, setAdults] = useState(2);
-  const [children, setChildren] = useState(0);
+  const [adults, setAdults] = useState(initialStay?.adults ?? 2);
+  const [children, setChildren] = useState(initialStay?.children ?? 0);
   const [notes, setNotes] = useState("");
   const [agreed, setAgreed] = useState(false);
   const [sending, setSending] = useState(false);
@@ -243,6 +250,15 @@ export function BookingWidget({
       setStep(2);
     });
   }
+
+  // Arriving from a Booking Widget: search the stay it sent, once.
+  const searchedOnArrival = useRef(false);
+  useEffect(() => {
+    if (!initialStay || searchedOnArrival.current) return;
+    searchedOnArrival.current = true;
+    showRooms();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   /** The cheapest plan this room can actually be sold on, for "From". */
   function lowest(r: PublicStayRoom): number | null {

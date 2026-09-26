@@ -26,6 +26,7 @@ import {
 import type { CancellationTerms } from "@/lib/cancellation-policy";
 import type { ChannelManager, ChannelManagerProvider } from "@/lib/channel-managers";
 import type { BookingEngineProfile, BookingEngineTexts } from "@/lib/booking-engine";
+import type { BookingWidget } from "@/lib/booking-widgets";
 import {
   DEFAULT_INVENTORY_SETTINGS,
   type InventorySettings,
@@ -2969,6 +2970,37 @@ export async function getBookingEngineSettings(): Promise<{
       roomTypeIds: (links.data ?? []).filter((l) => l.profile_id === p.id).map((l) => l.room_type_id),
     })),
   };
+}
+
+/** Booking widgets (0100), in the order they were made. */
+export async function getBookingWidgets(): Promise<BookingWidget[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("booking_widgets")
+    .select(
+      "id, hash, title_text, button_text, check_in_text, check_out_text, nights_text, show_occupancy, use_checkout_date, month_names, weekday_names, primary_color, text_color, background_color, label_color, border_color, language",
+    )
+    .order("created_at");
+  if (error) throw new Error(`Failed to load the booking widgets: ${error.message}`);
+  return (data ?? []).map((r) => ({
+    id: r.id,
+    hash: r.hash,
+    titleText: r.title_text,
+    buttonText: r.button_text,
+    checkInText: r.check_in_text,
+    checkOutText: r.check_out_text,
+    nightsText: r.nights_text,
+    showOccupancy: r.show_occupancy,
+    useCheckoutDate: r.use_checkout_date,
+    monthNames: r.month_names,
+    weekdayNames: r.weekday_names,
+    primaryColor: r.primary_color,
+    textColor: r.text_color,
+    backgroundColor: r.background_color,
+    labelColor: r.label_color,
+    borderColor: r.border_color,
+    language: r.language,
+  }));
 }
 
 /** Accounting Systems (0087), in the order they were added. Stored, not live. */
