@@ -3253,29 +3253,33 @@ export async function getChannelSettings(): Promise<ChannelSetting[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("channels")
-    .select("id, code, name, kind, commission_bps, is_active")
-    .order("kind")
-    .order("name");
+    .select(
+      "id, code, name, kind, commission_bps, is_active, customer_id, customer:customers!channels_customer_fkey(kind, first_name, last_name, company_name)",
+    )
+    .order("created_at");
 
-  if (error) throw new Error(`Failed to load the booking sources: ${error.message}`);
+  if (error) throw new Error(`Failed to load the sales channels: ${error.message}`);
 
-  return (
-    (data ?? []) as {
-      id: string;
-      code: string;
-      name: string;
-      kind: ChannelKind;
-      commission_bps: number;
-      is_active: boolean;
-    }[]
-  ).map((row) => ({
-    id: row.id,
-    code: row.code,
-    name: row.name,
-    kind: row.kind,
-    commissionBps: row.commission_bps,
-    isActive: row.is_active,
-  }));
+  return (data ?? []).map((row) => {
+    const c = row.customer as
+      | { kind: string; first_name: string | null; last_name: string | null; company_name: string | null }
+      | null;
+    const customerName = c
+      ? c.kind === "company"
+        ? (c.company_name ?? "")
+        : [c.first_name, c.last_name].filter(Boolean).join(" ")
+      : null;
+    return {
+      id: row.id,
+      code: row.code,
+      name: row.name,
+      kind: row.kind as ChannelKind,
+      commissionBps: row.commission_bps,
+      isActive: row.is_active,
+      customerId: row.customer_id,
+      customerName,
+    };
+  });
 }
 
 /** Every tax rate, retired ones included — this is where they are managed. */

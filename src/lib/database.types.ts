@@ -1356,6 +1356,7 @@ export type Database = {
           code: string
           commission_bps: number
           created_at: string
+          customer_id: string | null
           id: string
           is_active: boolean
           kind: Database["public"]["Enums"]["channel_kind"]
@@ -1366,6 +1367,7 @@ export type Database = {
           code: string
           commission_bps?: number
           created_at?: string
+          customer_id?: string | null
           id?: string
           is_active?: boolean
           kind: Database["public"]["Enums"]["channel_kind"]
@@ -1376,6 +1378,7 @@ export type Database = {
           code?: string
           commission_bps?: number
           created_at?: string
+          customer_id?: string | null
           id?: string
           is_active?: boolean
           kind?: Database["public"]["Enums"]["channel_kind"]
@@ -1383,6 +1386,20 @@ export type Database = {
           property_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "channels_customer_fkey"
+            columns: ["customer_id", "property_id"]
+            isOneToOne: false
+            referencedRelation: "customer_stats"
+            referencedColumns: ["customer_id", "property_id"]
+          },
+          {
+            foreignKeyName: "channels_customer_fkey"
+            columns: ["customer_id", "property_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id", "property_id"]
+          },
           {
             foreignKeyName: "channels_property_id_fkey"
             columns: ["property_id"]
@@ -5355,6 +5372,10 @@ export type Database = {
           stay_date: string
         }[]
       }
+      merge_channels: {
+        Args: { p_keep_id: string; p_merge_ids: string[] }
+        Returns: number
+      }
       merge_customers: {
         Args: { p_keep_id: string; p_merge_ids: string[] }
         Returns: {
@@ -5856,9 +5877,10 @@ export type Database = {
       save_channel: {
         Args: {
           p_code: string
-          p_commission_bps?: number
-          p_id?: string
-          p_is_active?: boolean
+          p_commission_bps: number
+          p_customer_id: string
+          p_id: string
+          p_is_active: boolean
           p_kind: Database["public"]["Enums"]["channel_kind"]
           p_name: string
         }

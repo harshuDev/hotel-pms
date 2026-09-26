@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0098` are
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0099` are
 applied to the hosted database.
 
 Working on real data: dashboard (house board, movements, pace, activity feed),
@@ -260,7 +260,7 @@ Each read is a Postgres view or RPC, never aggregation in the client:
 | `getFacilities()`                   | `facilities` (0070)               |
 | `getRoomTypeSettings()`             | `room_types` with room counts and facility ids |
 | `getVirtualRoomTypes()`             | `virtual_room_types` (0091)       |
-| `getChannelSettings()`              | `channels`                        |
+| `getChannelSettings()`              | `channels` + associated customer (0099) |
 | `getTaxRateSettings()`              | `tax_rates_list()` (order, in use) |
 | `getStaffSettings()`                | `staff_users`                     |
 | `getRoomsForSettings({ q, page })`  | `rooms_for_settings(...)`         |
@@ -1879,7 +1879,7 @@ anywhere else. Collapsed height must stay constant regardless of room count.
     CHANNEL offering Site Minder or Vertical Booking, each with its own form
     inside the card (`channel-manager-panel.tsx`). One connection per
     provider per property; the menu offers only the ones not yet added.
-    Booking Sources (`channels`) sits after it in the same section.
+    Sales Channels (`channels`) sits after it in the same section.
     - **Nothing syncs.** There is no SiteMinder or Vertical Booking code and
       OTA bookings are still entered by hand (open decision 2). Is Synced
       reads No and Synced At is blank, which is true. When a sync lands it
@@ -1904,6 +1904,28 @@ anywhere else. Collapsed height must stay constant regardless of room count.
       parses them. **PROVISIONAL:** the Region list (EMEA, APAC, Americas) and
       the Days to sync choices beside 400 -- neither dropdown was seen open.
       Both are in `src/lib/channel-managers.ts` and the 0097 checks.
+  - **CONNECTIVITY -> SALES CHANNELS (0099) IS `channels`, the booking
+    sources** -- it replaced the Booking Sources screen, not a second list
+    beside it (`sales-channels-panel.tsx`). The reference's Active | All |
+    Draft, tickboxes and MERGE, Name / Abbreviation / Status and a pencil,
+    the Create form under the table, ADD NEW SALES CHANNEL.
+    - **Abbreviation is `code`** (unique per property, upper-cased, 12 at
+      most), the one the calendar bar shows. **Draft is `is_active = false`**,
+      which `create_booking()` has always refused -- and the guest page's
+      direct channel too, so drafting the only Direct stops online booking.
+    - **Kind and commission stay on the form** though the reference's has
+      neither: settlement and the channel report's commission come from them.
+    - **Associated Customer is `channels.customer_id`**, picked by search
+      (`customers_page()`). STORED, NOT YET READ: nothing bills a channel's
+      bookings to it. `merge_customers()` follows it.
+    - **MERGE moves every booking of the others onto the one kept, then
+      deletes the others** (`merge_channels()`, security definer like the
+      customer merge, logged). Nothing else points at a channel. The moved
+      bookings take the keeper's commission in the channel report, which
+      reads it at run time; the dialog says so. With fewer than two ticked
+      the button says to tick two rather than being disabled.
+    - `save_channel()` was DROPPED and recreated with `p_customer_id` -- the
+      overload trap.
   - **CONNECTIVITY -> BOOKING ENGINE SETTINGS (0098) IS LIVE on the guest
     booking page.** `booking-engine-panel.tsx`: Booking Engine Profiles
     (Title, Slug, Link, ADD NEW PROFILE), then the Privacy Policy and the
@@ -2092,10 +2114,11 @@ anywhere else. Collapsed height must stay constant regardless of room count.
       single SAVE; `GuestDetailsPanel` is keyed on the saved list so rows added
       before a save pick up their ids -- without that, saving twice added them
       twice.
-      - **`merge_customers()` does not yet carry these two across.** A
-        duplicate's identification type and additional field values are lost
-        when it is merged away. Worth adding the next time that function is
-        touched.
+      - **`merge_customers()` carries both across, as of 0099.** The
+        identification type travels WITH the document number it describes: a
+        keeper with no number takes the duplicate's number and its type; a
+        keeper with a number keeps its own type. Additional field values fill
+        the keys the keeper lacks, and the keeper's own always win.
     - **The registration form** (`registration_form_settings`: two custom
       questions and the terms) prints on a booking's **Guest Registration
       Card**, `/bookings/[id]/registration`, linked from the Guests tab. The

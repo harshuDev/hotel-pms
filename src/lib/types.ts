@@ -1031,7 +1031,11 @@ export interface ChannelSetting {
   name: string;
   kind: ChannelKind;
   commissionBps: number;
+  /** Active; false is Draft, which `create_booking()` refuses. */
   isActive: boolean;
+  /** The Associated Customer (0099). Stored, not yet read elsewhere. */
+  customerId: string | null;
+  customerName: string | null;
 }
 
 export interface StaffSetting {
