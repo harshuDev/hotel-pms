@@ -2375,6 +2375,7 @@ export type Database = {
           base_occupancy: number
           code: string
           created_at: string
+          description: string | null
           id: string
           max_occupancy: number
           name: string
@@ -2385,6 +2386,7 @@ export type Database = {
           base_occupancy: number
           code: string
           created_at?: string
+          description?: string | null
           id?: string
           max_occupancy: number
           name: string
@@ -2395,6 +2397,7 @@ export type Database = {
           base_occupancy?: number
           code?: string
           created_at?: string
+          description?: string | null
           id?: string
           max_occupancy?: number
           name?: string
@@ -4038,6 +4041,10 @@ export type Database = {
         Args: { p_source_id: string; p_target_id: string }
         Returns: undefined
       }
+      merge_extra_category: {
+        Args: { p_source_id: string; p_target_id: string }
+        Returns: number
+      }
       next_booking_reference: { Args: never; Returns: string }
       next_meeting_room_reference: { Args: never; Returns: string }
       occupancy_forecast: {
@@ -4215,6 +4222,14 @@ export type Database = {
           description: string
           name: string
           rate_plan_id: string
+        }[]
+      }
+      public_room_type_content: {
+        Args: { p_property_id: string }
+        Returns: {
+          description: string
+          photo_paths: string[]
+          room_type_id: string
         }[]
       }
       public_room_type_facilities: {
@@ -4747,6 +4762,10 @@ export type Database = {
           p_room_id: string
           p_status: Database["public"]["Enums"]["room_status"]
         }
+        Returns: undefined
+      }
+      set_room_type_description: {
+        Args: { p_description: string; p_room_type_id: string }
         Returns: undefined
       }
       set_room_type_facilities: {

@@ -24,6 +24,8 @@ export interface PublicProperty {
   propertyId: string;
   name: string;
   currency: string;
+  /** The hotel's own zone, so "today" on the calendar is the hotel's today. */
+  timezone: string;
   checkInTime: string | null;
   checkOutTime: string | null;
 }
@@ -75,7 +77,8 @@ export async function getPublicProperty(
   return {
     propertyId: row.property_id,
     name: row.name,
-    currency: row.currency,
+    currency: row.currency.trim(),
+    timezone: row.timezone,
     checkInTime: row.check_in_time,
     checkOutTime: row.check_out_time,
   };
@@ -193,6 +196,112 @@ export async function searchPublicRooms(input: {
       unavailableReason: row.unavailable_reason,
     })),
   };
+}
+
+/**
+ * What the guest page shows about each room type beyond its name (0072): the
+ * hotel's description and the photographs of its rooms, as public URLs. The
+ * bucket is public and the path is resolved against it, so nothing in the
+ * column can point the browser anywhere else.
+ */
+export interface PublicRoomContent {
+  description: string | null;
+  photos: string[];
+}
+
+export async function getPublicRoomTypeContent(
+  propertyId: string,
+): Promise<Record<string, PublicRoomContent>> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("public_room_type_content", {
+    p_property_id: propertyId,
+  });
+  if (error || !data) return {};
+  const byType: Record<string, PublicRoomContent> = {};
+  for (const row of data) {
+    byType[row.room_type_id] = {
+      description: row.description,
+      photos: (row.photo_paths ?? []).map(
+        (path: string) => supabase.storage.from("room-photos").getPublicUrl(path).data.publicUrl,
+      ),
+    };
+  }
+  return byType;
+}
+
+/** One room type for a stay, priced on every published rate plan. */
+export interface PublicStayRoom {
+  roomTypeId: string;
+  name: string;
+  baseOccupancy: number;
+  maxOccupancy: number;
+  available: number;
+  nights: number;
+  offers: {
+    ratePlanId: string;
+    /** Null when a night has no rate on this plan. Not the same as free. */
+    totalCents: number | null;
+    /** Why this stay cannot be sold on this plan, as a sentence, or null. */
+    unavailableReason: string | null;
+  }[];
+}
+
+/**
+ * The rebuilt page's step 2 and 3 in one round trip: every room type for the
+ * dates, with its total on each published plan. Step 2 shows the cheapest
+ * sellable one as "From"; step 3 lists them all. Availability and every rule
+ * are still decided by public_room_types() -- this only asks it once per plan
+ * and puts the answers side by side.
+ */
+export async function searchPublicStay(input: {
+  propertyId: string;
+  from: string;
+  to: string;
+}): Promise<ActionResult<PublicStayRoom[]>> {
+  if (input.to <= input.from) {
+    return { ok: false, error: "Departure must be after arrival." };
+  }
+  const plans = await getPublicRatePlans(input.propertyId);
+  if (plans.length === 0) return { ok: true, data: [] };
+
+  const supabase = await createClient();
+  const results = await Promise.all(
+    plans.map((plan) =>
+      supabase.rpc("public_room_types", {
+        p_property_id: input.propertyId,
+        p_rate_plan_id: plan.ratePlanId,
+        p_from: input.from,
+        p_to: input.to,
+      }),
+    ),
+  );
+
+  const byType = new Map<string, PublicStayRoom>();
+  for (let i = 0; i < plans.length; i++) {
+    const { data, error } = results[i];
+    if (error) return { ok: false, error: error.message };
+    for (const row of data ?? []) {
+      let room = byType.get(row.room_type_id);
+      if (!room) {
+        room = {
+          roomTypeId: row.room_type_id,
+          name: row.name,
+          baseOccupancy: row.base_occupancy,
+          maxOccupancy: row.max_occupancy,
+          available: Number(row.available ?? 0),
+          nights: row.nights,
+          offers: [],
+        };
+        byType.set(row.room_type_id, room);
+      }
+      room.offers.push({
+        ratePlanId: plans[i].ratePlanId,
+        totalCents: row.total_cents === null ? null : Number(row.total_cents),
+        unavailableReason: row.unavailable_reason,
+      });
+    }
+  }
+  return { ok: true, data: [...byType.values()] };
 }
 
 export async function requestPublicBooking(input: {

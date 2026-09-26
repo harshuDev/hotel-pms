@@ -77,6 +77,22 @@ export interface Dict {
   pWifiMost: string;
   pParkingFree: string;
   pParkingLimited: string;
+  /** The five-step flow cloned from the client's booking engine (0072). */
+  stepDates: string;
+  stepRoom: string;
+  stepRate: string;
+  resetCalendar: string;
+  priceFrom: string;
+  maxOccupancy: string;
+  availableLabel: string;
+  bookingPolicy: string;
+  bookingSummary: string;
+  total: string;
+  agreePolicies: string;
+  agreeAndBook: string;
+  mustAgree: string;
+  prevMonth: string;
+  nextMonth: string;
 }
 
 const en: Dict = {
@@ -137,6 +153,21 @@ const en: Dict = {
   pWifiMost: "Free WiFi in most areas depending on signal",
   pParkingFree: "Free On-Site Parking",
   pParkingLimited: "Limited On-Site Parking Available",
+  stepDates: "Select dates",
+  stepRoom: "Select room",
+  stepRate: "Select rate",
+  resetCalendar: "Reset calendar",
+  priceFrom: "From",
+  maxOccupancy: "Maximum occupancy",
+  availableLabel: "Available",
+  bookingPolicy: "Booking policy",
+  bookingSummary: "Booking summary",
+  total: "Total",
+  agreePolicies: "I have read and agree to the booking policy and the hotel policy",
+  agreeAndBook: "Agree and book",
+  mustAgree: "Please confirm that you have read the policies.",
+  prevMonth: "Previous month",
+  nextMonth: "Next month",
 };
 
 const de: Dict = {
@@ -180,6 +211,21 @@ const de: Dict = {
   pWifiMost: "Kostenloses WLAN in den meisten Bereichen, je nach Empfang",
   pParkingFree: "Kostenlose Parkplätze vor Ort",
   pParkingLimited: "Begrenzte Parkplätze vor Ort",
+  stepDates: "Daten wählen",
+  stepRoom: "Zimmer wählen",
+  stepRate: "Tarif wählen",
+  resetCalendar: "Kalender zurücksetzen",
+  priceFrom: "Ab",
+  maxOccupancy: "Maximale Belegung",
+  availableLabel: "Verfügbar",
+  bookingPolicy: "Buchungsbedingungen",
+  bookingSummary: "Buchungsübersicht",
+  total: "Gesamt",
+  agreePolicies: "Ich habe die Buchungsbedingungen und die Hausregeln gelesen und stimme ihnen zu",
+  agreeAndBook: "Zustimmen und buchen",
+  mustAgree: "Bitte bestätigen Sie, dass Sie die Bedingungen gelesen haben.",
+  prevMonth: "Vorheriger Monat",
+  nextMonth: "Nächster Monat",
 };
 
 const fr: Dict = {
@@ -223,6 +269,21 @@ const fr: Dict = {
   pWifiMost: "Wi-Fi gratuit dans la plupart des zones selon le signal",
   pParkingFree: "Parking gratuit sur place",
   pParkingLimited: "Places de parking limitées sur place",
+  stepDates: "Choisir les dates",
+  stepRoom: "Choisir la chambre",
+  stepRate: "Choisir le tarif",
+  resetCalendar: "Réinitialiser le calendrier",
+  priceFrom: "À partir de",
+  maxOccupancy: "Occupation maximale",
+  availableLabel: "Disponible",
+  bookingPolicy: "Conditions de réservation",
+  bookingSummary: "Récapitulatif de la réservation",
+  total: "Total",
+  agreePolicies: "J'ai lu et j'accepte les conditions de réservation et le règlement de l'hôtel",
+  agreeAndBook: "Accepter et réserver",
+  mustAgree: "Veuillez confirmer avoir lu les conditions.",
+  prevMonth: "Mois précédent",
+  nextMonth: "Mois suivant",
 };
 
 const es: Dict = {
@@ -266,6 +327,21 @@ const es: Dict = {
   pWifiMost: "Wifi gratis en la mayoría de las áreas, según la señal",
   pParkingFree: "Aparcamiento gratuito en el alojamiento",
   pParkingLimited: "Aparcamiento limitado en el alojamiento",
+  stepDates: "Seleccionar fechas",
+  stepRoom: "Seleccionar habitación",
+  stepRate: "Seleccionar tarifa",
+  resetCalendar: "Restablecer calendario",
+  priceFrom: "Desde",
+  maxOccupancy: "Ocupación máxima",
+  availableLabel: "Disponible",
+  bookingPolicy: "Política de reserva",
+  bookingSummary: "Resumen de reserva",
+  total: "Total",
+  agreePolicies: "He leído y acepto la política de reserva y la política del hotel",
+  agreeAndBook: "De acuerdo y reservar",
+  mustAgree: "Confirme que ha leído las políticas.",
+  prevMonth: "Mes anterior",
+  nextMonth: "Mes siguiente",
 };
 
 const it: Dict = {
@@ -309,6 +385,21 @@ const it: Dict = {
   pWifiMost: "Wi-Fi gratuito nella maggior parte delle aree, a seconda del segnale",
   pParkingFree: "Parcheggio gratuito in loco",
   pParkingLimited: "Parcheggio limitato in loco",
+  stepDates: "Seleziona le date",
+  stepRoom: "Seleziona la camera",
+  stepRate: "Seleziona la tariffa",
+  resetCalendar: "Reimposta calendario",
+  priceFrom: "Da",
+  maxOccupancy: "Occupazione massima",
+  availableLabel: "Disponibili",
+  bookingPolicy: "Condizioni di prenotazione",
+  bookingSummary: "Riepilogo della prenotazione",
+  total: "Totale",
+  agreePolicies: "Ho letto e accetto le condizioni di prenotazione e il regolamento dell'hotel",
+  agreeAndBook: "Accetta e prenota",
+  mustAgree: "Conferma di aver letto le condizioni.",
+  prevMonth: "Mese precedente",
+  nextMonth: "Mese successivo",
 };
 
 const pt: Dict = {
@@ -352,6 +443,21 @@ const pt: Dict = {
   pWifiMost: "Wi-Fi gratuito na maioria das áreas, conforme o sinal",
   pParkingFree: "Estacionamento gratuito no local",
   pParkingLimited: "Estacionamento limitado no local",
+  stepDates: "Selecionar datas",
+  stepRoom: "Selecionar quarto",
+  stepRate: "Selecionar tarifa",
+  resetCalendar: "Repor calendário",
+  priceFrom: "Desde",
+  maxOccupancy: "Ocupação máxima",
+  availableLabel: "Disponível",
+  bookingPolicy: "Política de reserva",
+  bookingSummary: "Resumo da reserva",
+  total: "Total",
+  agreePolicies: "Li e aceito a política de reserva e as políticas do hotel",
+  agreeAndBook: "Aceitar e reservar",
+  mustAgree: "Confirme que leu as políticas.",
+  prevMonth: "Mês anterior",
+  nextMonth: "Mês seguinte",
 };
 
 const nl: Dict = {
@@ -395,6 +501,21 @@ const nl: Dict = {
   pWifiMost: "Gratis wifi in de meeste ruimtes, afhankelijk van het signaal",
   pParkingFree: "Gratis parkeren op het terrein",
   pParkingLimited: "Beperkte parkeergelegenheid op het terrein",
+  stepDates: "Data kiezen",
+  stepRoom: "Kamer kiezen",
+  stepRate: "Tarief kiezen",
+  resetCalendar: "Kalender wissen",
+  priceFrom: "Vanaf",
+  maxOccupancy: "Maximale bezetting",
+  availableLabel: "Beschikbaar",
+  bookingPolicy: "Boekingsvoorwaarden",
+  bookingSummary: "Boekingsoverzicht",
+  total: "Totaal",
+  agreePolicies: "Ik heb de boekingsvoorwaarden en de huisregels gelezen en ga ermee akkoord",
+  agreeAndBook: "Akkoord en boeken",
+  mustAgree: "Bevestig dat u de voorwaarden hebt gelezen.",
+  prevMonth: "Vorige maand",
+  nextMonth: "Volgende maand",
 };
 
 const pl: Dict = {
@@ -438,6 +559,21 @@ const pl: Dict = {
   pWifiMost: "Bezpłatne Wi-Fi w większości miejsc, zależnie od zasięgu",
   pParkingFree: "Bezpłatny parking na miejscu",
   pParkingLimited: "Ograniczona liczba miejsc parkingowych na miejscu",
+  stepDates: "Wybierz daty",
+  stepRoom: "Wybierz pokój",
+  stepRate: "Wybierz taryfę",
+  resetCalendar: "Wyczyść kalendarz",
+  priceFrom: "Od",
+  maxOccupancy: "Maksymalne obłożenie",
+  availableLabel: "Dostępne",
+  bookingPolicy: "Zasady rezerwacji",
+  bookingSummary: "Podsumowanie rezerwacji",
+  total: "Razem",
+  agreePolicies: "Przeczytałem(-am) i akceptuję zasady rezerwacji oraz zasady hotelu",
+  agreeAndBook: "Akceptuję i rezerwuję",
+  mustAgree: "Potwierdź, że zapoznałeś(-aś) się z zasadami.",
+  prevMonth: "Poprzedni miesiąc",
+  nextMonth: "Następny miesiąc",
 };
 
 const sv: Dict = {
@@ -481,6 +617,21 @@ const sv: Dict = {
   pWifiMost: "Gratis wifi i de flesta utrymmen beroende på signal",
   pParkingFree: "Gratis parkering på plats",
   pParkingLimited: "Begränsad parkering på plats",
+  stepDates: "Välj datum",
+  stepRoom: "Välj rum",
+  stepRate: "Välj pris",
+  resetCalendar: "Återställ kalendern",
+  priceFrom: "Från",
+  maxOccupancy: "Max antal personer",
+  availableLabel: "Tillgängliga",
+  bookingPolicy: "Bokningsvillkor",
+  bookingSummary: "Bokningsöversikt",
+  total: "Totalt",
+  agreePolicies: "Jag har läst och godkänner bokningsvillkoren och hotellets regler",
+  agreeAndBook: "Godkänn och boka",
+  mustAgree: "Bekräfta att du har läst villkoren.",
+  prevMonth: "Föregående månad",
+  nextMonth: "Nästa månad",
 };
 
 const da: Dict = {
@@ -524,6 +675,21 @@ const da: Dict = {
   pWifiMost: "Gratis wi-fi i de fleste områder afhængigt af signalet",
   pParkingFree: "Gratis parkering på stedet",
   pParkingLimited: "Begrænset parkering på stedet",
+  stepDates: "Vælg datoer",
+  stepRoom: "Vælg værelse",
+  stepRate: "Vælg pris",
+  resetCalendar: "Nulstil kalender",
+  priceFrom: "Fra",
+  maxOccupancy: "Maks. antal personer",
+  availableLabel: "Ledige",
+  bookingPolicy: "Bookingbetingelser",
+  bookingSummary: "Bookingoversigt",
+  total: "I alt",
+  agreePolicies: "Jeg har læst og accepterer bookingbetingelserne og hotellets regler",
+  agreeAndBook: "Accepter og book",
+  mustAgree: "Bekræft venligst, at du har læst betingelserne.",
+  prevMonth: "Forrige måned",
+  nextMonth: "Næste måned",
 };
 
 const no: Dict = {
@@ -567,6 +733,21 @@ const no: Dict = {
   pWifiMost: "Gratis wifi i de fleste områder, avhengig av signal",
   pParkingFree: "Gratis parkering på stedet",
   pParkingLimited: "Begrenset parkering på stedet",
+  stepDates: "Velg datoer",
+  stepRoom: "Velg rom",
+  stepRate: "Velg pris",
+  resetCalendar: "Tilbakestill kalender",
+  priceFrom: "Fra",
+  maxOccupancy: "Maks. antall personer",
+  availableLabel: "Ledige",
+  bookingPolicy: "Bestillingsvilkår",
+  bookingSummary: "Bestillingsoversikt",
+  total: "Totalt",
+  agreePolicies: "Jeg har lest og godtar bestillingsvilkårene og hotellets regler",
+  agreeAndBook: "Godta og bestill",
+  mustAgree: "Bekreft at du har lest vilkårene.",
+  prevMonth: "Forrige måned",
+  nextMonth: "Neste måned",
 };
 
 const fi: Dict = {
@@ -610,6 +791,21 @@ const fi: Dict = {
   pWifiMost: "Ilmainen wifi useimmissa tiloissa signaalista riippuen",
   pParkingFree: "Ilmainen pysäköinti paikan päällä",
   pParkingLimited: "Rajoitetusti pysäköintipaikkoja paikan päällä",
+  stepDates: "Valitse päivät",
+  stepRoom: "Valitse huone",
+  stepRate: "Valitse hinta",
+  resetCalendar: "Tyhjennä kalenteri",
+  priceFrom: "Alkaen",
+  maxOccupancy: "Enimmäishenkilömäärä",
+  availableLabel: "Vapaana",
+  bookingPolicy: "Varausehdot",
+  bookingSummary: "Varauksen yhteenveto",
+  total: "Yhteensä",
+  agreePolicies: "Olen lukenut varausehdot ja hotellin säännöt ja hyväksyn ne",
+  agreeAndBook: "Hyväksy ja varaa",
+  mustAgree: "Vahvista, että olet lukenut ehdot.",
+  prevMonth: "Edellinen kuukausi",
+  nextMonth: "Seuraava kuukausi",
 };
 
 const cs: Dict = {
@@ -653,6 +849,21 @@ const cs: Dict = {
   pWifiMost: "Wi-Fi zdarma ve většině prostor podle signálu",
   pParkingFree: "Parkování zdarma na místě",
   pParkingLimited: "Omezené parkování na místě",
+  stepDates: "Vyberte termín",
+  stepRoom: "Vyberte pokoj",
+  stepRate: "Vyberte cenu",
+  resetCalendar: "Vymazat kalendář",
+  priceFrom: "Od",
+  maxOccupancy: "Maximální obsazenost",
+  availableLabel: "K dispozici",
+  bookingPolicy: "Rezervační podmínky",
+  bookingSummary: "Souhrn rezervace",
+  total: "Celkem",
+  agreePolicies: "Přečetl(a) jsem si rezervační podmínky a pravidla hotelu a souhlasím s nimi",
+  agreeAndBook: "Souhlasit a rezervovat",
+  mustAgree: "Potvrďte prosím, že jste si podmínky přečetli.",
+  prevMonth: "Předchozí měsíc",
+  nextMonth: "Další měsíc",
 };
 
 const el: Dict = {
@@ -696,6 +907,21 @@ const el: Dict = {
   pWifiMost: "Δωρεάν Wi-Fi στους περισσότερους χώρους, ανάλογα με το σήμα",
   pParkingFree: "Δωρεάν χώρος στάθμευσης στο κατάλυμα",
   pParkingLimited: "Περιορισμένες θέσεις στάθμευσης στο κατάλυμα",
+  stepDates: "Επιλογή ημερομηνιών",
+  stepRoom: "Επιλογή δωματίου",
+  stepRate: "Επιλογή τιμής",
+  resetCalendar: "Επαναφορά ημερολογίου",
+  priceFrom: "Από",
+  maxOccupancy: "Μέγιστη πληρότητα",
+  availableLabel: "Διαθέσιμα",
+  bookingPolicy: "Πολιτική κράτησης",
+  bookingSummary: "Σύνοψη κράτησης",
+  total: "Σύνολο",
+  agreePolicies: "Έχω διαβάσει και αποδέχομαι την πολιτική κράτησης και την πολιτική του ξενοδοχείου",
+  agreeAndBook: "Αποδοχή και κράτηση",
+  mustAgree: "Επιβεβαιώστε ότι διαβάσατε τις πολιτικές.",
+  prevMonth: "Προηγούμενος μήνας",
+  nextMonth: "Επόμενος μήνας",
 };
 
 const ro: Dict = {
@@ -739,6 +965,21 @@ const ro: Dict = {
   pWifiMost: "Wi-Fi gratuit în majoritatea zonelor, în funcție de semnal",
   pParkingFree: "Parcare gratuită la proprietate",
   pParkingLimited: "Locuri de parcare limitate la proprietate",
+  stepDates: "Selectați datele",
+  stepRoom: "Selectați camera",
+  stepRate: "Selectați tariful",
+  resetCalendar: "Resetați calendarul",
+  priceFrom: "De la",
+  maxOccupancy: "Ocupare maximă",
+  availableLabel: "Disponibile",
+  bookingPolicy: "Politica de rezervare",
+  bookingSummary: "Rezumatul rezervării",
+  total: "Total",
+  agreePolicies: "Am citit și accept politica de rezervare și regulile hotelului",
+  agreeAndBook: "Accept și rezerv",
+  mustAgree: "Confirmați că ați citit politicile.",
+  prevMonth: "Luna anterioară",
+  nextMonth: "Luna următoare",
 };
 
 const hu: Dict = {
@@ -782,6 +1023,21 @@ const hu: Dict = {
   pWifiMost: "Ingyenes wifi a legtöbb területen, a jelerősségtől függően",
   pParkingFree: "Ingyenes parkolás a helyszínen",
   pParkingLimited: "Korlátozott parkolás a helyszínen",
+  stepDates: "Dátumok kiválasztása",
+  stepRoom: "Szoba kiválasztása",
+  stepRate: "Ár kiválasztása",
+  resetCalendar: "Naptár törlése",
+  priceFrom: "Ettől",
+  maxOccupancy: "Maximális létszám",
+  availableLabel: "Szabad",
+  bookingPolicy: "Foglalási feltételek",
+  bookingSummary: "Foglalás összesítése",
+  total: "Összesen",
+  agreePolicies: "Elolvastam és elfogadom a foglalási feltételeket és a házirendet",
+  agreeAndBook: "Elfogadom és foglalok",
+  mustAgree: "Kérjük, erősítse meg, hogy elolvasta a feltételeket.",
+  prevMonth: "Előző hónap",
+  nextMonth: "Következő hónap",
 };
 
 const uk: Dict = {
@@ -825,6 +1081,21 @@ const uk: Dict = {
   pWifiMost: "Безкоштовний Wi-Fi на більшій частині території, залежно від сигналу",
   pParkingFree: "Безкоштовне паркування на території",
   pParkingLimited: "Обмежена кількість місць для паркування на території",
+  stepDates: "Оберіть дати",
+  stepRoom: "Оберіть номер",
+  stepRate: "Оберіть тариф",
+  resetCalendar: "Скинути календар",
+  priceFrom: "Від",
+  maxOccupancy: "Максимальна кількість гостей",
+  availableLabel: "Доступно",
+  bookingPolicy: "Умови бронювання",
+  bookingSummary: "Підсумок бронювання",
+  total: "Разом",
+  agreePolicies: "Я прочитав(ла) і приймаю умови бронювання та правила готелю",
+  agreeAndBook: "Погодитися і забронювати",
+  mustAgree: "Підтвердьте, що ви прочитали правила.",
+  prevMonth: "Попередній місяць",
+  nextMonth: "Наступний місяць",
 };
 
 const ru: Dict = {
@@ -868,6 +1139,21 @@ const ru: Dict = {
   pWifiMost: "Бесплатный Wi-Fi на большей части территории, в зависимости от сигнала",
   pParkingFree: "Бесплатная парковка на территории",
   pParkingLimited: "Ограниченное количество парковочных мест на территории",
+  stepDates: "Выберите даты",
+  stepRoom: "Выберите номер",
+  stepRate: "Выберите тариф",
+  resetCalendar: "Сбросить календарь",
+  priceFrom: "От",
+  maxOccupancy: "Максимальное размещение",
+  availableLabel: "Доступно",
+  bookingPolicy: "Условия бронирования",
+  bookingSummary: "Сводка бронирования",
+  total: "Итого",
+  agreePolicies: "Я прочитал(а) и принимаю условия бронирования и правила отеля",
+  agreeAndBook: "Согласиться и забронировать",
+  mustAgree: "Подтвердите, что вы ознакомились с правилами.",
+  prevMonth: "Предыдущий месяц",
+  nextMonth: "Следующий месяц",
 };
 
 const tr: Dict = {
@@ -911,6 +1197,21 @@ const tr: Dict = {
   pWifiMost: "Sinyale bağlı olarak çoğu alanda ücretsiz Wi-Fi",
   pParkingFree: "Tesiste ücretsiz otopark",
   pParkingLimited: "Tesiste sınırlı otopark",
+  stepDates: "Tarihleri seçin",
+  stepRoom: "Oda seçin",
+  stepRate: "Fiyat seçin",
+  resetCalendar: "Takvimi sıfırla",
+  priceFrom: "Başlangıç",
+  maxOccupancy: "Maksimum kişi sayısı",
+  availableLabel: "Müsait",
+  bookingPolicy: "Rezervasyon koşulları",
+  bookingSummary: "Rezervasyon özeti",
+  total: "Toplam",
+  agreePolicies: "Rezervasyon koşullarını ve otel kurallarını okudum, kabul ediyorum",
+  agreeAndBook: "Kabul et ve rezervasyon yap",
+  mustAgree: "Lütfen koşulları okuduğunuzu onaylayın.",
+  prevMonth: "Önceki ay",
+  nextMonth: "Sonraki ay",
 };
 
 const DICTS: Record<Locale, Dict> = {

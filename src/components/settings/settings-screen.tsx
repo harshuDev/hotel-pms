@@ -43,6 +43,7 @@ import {
   saveHotelTimes,
   saveRoom,
   saveRoomType,
+  setRoomTypeDescription,
   setRoomTypeFacilities,
   saveSeason,
   deleteSeason,
@@ -317,6 +318,8 @@ export function SettingsScreen({
     maxOccupancy: string;
     /** Ticked facilities (0070), saved with the room type as one set. */
     facilityIds: string[];
+    /** Shown to guests on the booking page (0072). */
+    description: string;
   } | null>(() => {
     // The calendar's rail links here to rename a type, so arriving with that
     // id opens its form rather than a list somebody then has to search. An id
@@ -330,6 +333,7 @@ export function SettingsScreen({
       baseOccupancy: String(t.baseOccupancy),
       maxOccupancy: String(t.maxOccupancy),
       facilityIds: t.facilityIds,
+      description: t.description ?? "",
     };
   });
 
@@ -998,6 +1002,7 @@ export function SettingsScreen({
                       baseOccupancy: "2",
                       maxOccupancy: "2",
                       facilityIds: [],
+                      description: "",
                     })
                   }
                   className={secondary}
@@ -1053,6 +1058,7 @@ export function SettingsScreen({
                                 baseOccupancy: String(t.baseOccupancy),
                                 maxOccupancy: String(t.maxOccupancy),
                                 facilityIds: t.facilityIds,
+                                description: t.description ?? "",
                               })
                             }
                             className="text-ink-muted underline-offset-2 hover:text-ink hover:underline"
@@ -1117,6 +1123,16 @@ export function SettingsScreen({
                   </div>
                 </div>
               </div>
+              <div className="mt-4">
+                <label htmlFor="rt-description" className={label}>Description</label>
+                <textarea
+                  id="rt-description"
+                  rows={3}
+                  value={rt.description}
+                  onChange={(e) => setRt({ ...rt, description: e.target.value })}
+                  className={field}
+                />
+              </div>
               {facilities.length > 0 && (
                 <fieldset className="mt-5">
                   <legend className={label}>Facilities</legend>
@@ -1158,9 +1174,14 @@ export function SettingsScreen({
                         baseOccupancy: Number(rt.baseOccupancy) || 1,
                         maxOccupancy: Number(rt.maxOccupancy) || 1,
                       });
-                      if (!saved.ok || facilities.length === 0) return saved;
-                      // The room type first, so a new one has an id to tick
-                      // facilities against.
+                      if (!saved.ok) return saved;
+                      // The room type first, so a new one has an id to hang
+                      // its description and facilities on.
+                      const described = await setRoomTypeDescription({
+                        roomTypeId: saved.data.id,
+                        description: rt.description,
+                      });
+                      if (!described.ok || facilities.length === 0) return described;
                       return setRoomTypeFacilities({
                         roomTypeId: saved.data.id,
                         facilityIds: rt.facilityIds,

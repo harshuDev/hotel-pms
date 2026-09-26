@@ -14,6 +14,7 @@ import {
   deleteExtra,
   deleteExtraCategory,
   mergeExtra,
+  mergeExtraCategory,
   saveExtra,
   saveExtraCategory,
 } from "@/lib/actions/settings";
@@ -28,9 +29,10 @@ import { useCurrency } from "@/components/currency";
  * The "Is Meal" column is drawn but not stored -- a fork and knife on any
  * extra whose accounting category is food and beverage (see extras.ts).
  *
- * The arrows icon is MERGE (0071), as in theirs: "Merge <extra> to:" with a
- * searchable picker of the others. The kept extra stays; the other leaves
- * the catalog and the activity log says where it went.
+ * The arrows icon is MERGE, as in theirs: "Merge <x> to:" with a searchable
+ * picker of the others. On an extra (0071) the kept one stays and the other
+ * leaves the catalog; on a category (0072) its extras move to the kept one
+ * first. Either way the activity log says where it went.
  *
  * The catalog is dozens of rows, not thousands, so search and paging happen
  * here over what the page already holds.
@@ -131,6 +133,7 @@ export function ExtrasPanel({
 
   /* -- Categories ------------------------------------------------------- */
   const [cat, setCat] = useState<CategoryDraft | null>(null);
+  const [mergingCat, setMergingCat] = useState<{ id: string; title: string } | null>(null);
 
   function saveCategory() {
     if (!cat) return;
@@ -279,6 +282,15 @@ export function ExtrasPanel({
                             className={cn(iconButton, "text-brass")}
                           >
                             <PencilIcon />
+                          </button>
+                          <button
+                            type="button"
+                            title="Merge"
+                            aria-label={`Merge ${c.title}`}
+                            onClick={() => setMergingCat({ id: c.id, title: c.title })}
+                            className={cn(iconButton, "text-brass")}
+                          >
+                            <MergeIcon />
                           </button>
                           <button
                             type="button"
@@ -588,11 +600,31 @@ export function ExtrasPanel({
           </div>
         </div>
       )}
+      {mergingCat && (
+        <MergeDialog
+          key={mergingCat.id}
+          source={mergingCat}
+          options={categories.filter((c) => c.id !== mergingCat.id)}
+          placeholder="Choose category"
+          pending={pending}
+          onClose={() => setMergingCat(null)}
+          onMerge={(targetId) => {
+            const source = mergingCat;
+            const target = categories.find((c) => c.id === targetId);
+            run(async () => {
+              const result = await mergeExtraCategory({ sourceId: source.id, targetId });
+              if (result.ok) setMergingCat(null);
+              return result;
+            }, `${source.title} merged into ${target?.title ?? "the chosen category"}.`);
+          }}
+        />
+      )}
       {merging && (
         <MergeDialog
           key={merging.id}
           source={merging}
           options={extras.filter((e) => e.id !== merging.id)}
+          placeholder="Choose extra"
           pending={pending}
           onClose={() => setMerging(null)}
           onMerge={(targetId) => {
@@ -619,12 +651,14 @@ export function ExtrasPanel({
 function MergeDialog({
   source,
   options,
+  placeholder,
   pending,
   onClose,
   onMerge,
 }: {
   source: { id: string; title: string };
   options: { id: string; title: string }[];
+  placeholder: string;
   pending: boolean;
   onClose: () => void;
   onMerge: (targetId: string) => void;
@@ -672,7 +706,7 @@ function MergeDialog({
               setOpen(true);
             }}
             onFocus={() => setOpen(true)}
-            placeholder="Choose extra"
+            placeholder={placeholder}
             className={cn(field, "pr-9 text-[14px]")}
           />
           <svg viewBox="0 0 24 24" className="pointer-events-none absolute right-9 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-faint"
@@ -687,7 +721,7 @@ function MergeDialog({
               className="absolute inset-x-6 top-full z-10 -mt-3 max-h-64 overflow-y-auto rounded-md border border-line bg-white py-1 shadow-lg"
             >
               {shown.length === 0 ? (
-                <li className="px-3 py-2 text-[13px] text-ink-muted">No extra matches that search.</li>
+                <li className="px-3 py-2 text-[13px] text-ink-muted">Nothing matches that search.</li>
               ) : (
                 shown.map((o) => (
                   <li key={o.id} role="option" aria-selected={o.id === targetId}>

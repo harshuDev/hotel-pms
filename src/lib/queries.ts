@@ -2637,7 +2637,7 @@ export async function getRoomTypeSettings(): Promise<RoomTypeSetting[]> {
   const { data, error } = await supabase
     .from("room_types")
     .select(
-      "id, code, name, base_occupancy, max_occupancy, sort_order, rooms(count), room_type_facilities(facility_id)",
+      "id, code, name, base_occupancy, max_occupancy, sort_order, description, rooms(count), room_type_facilities(facility_id)",
     )
     .order("sort_order")
     .order("name");
@@ -2652,6 +2652,7 @@ export async function getRoomTypeSettings(): Promise<RoomTypeSetting[]> {
       base_occupancy: number;
       max_occupancy: number;
       sort_order: number;
+      description: string | null;
       rooms: { count: number }[];
       room_type_facilities: { facility_id: string }[] | null;
     }[]
@@ -2664,6 +2665,7 @@ export async function getRoomTypeSettings(): Promise<RoomTypeSetting[]> {
     sortOrder: row.sort_order,
     roomCount: row.rooms?.[0]?.count ?? 0,
     facilityIds: (row.room_type_facilities ?? []).map((f) => f.facility_id),
+    description: row.description,
   }));
 }
 

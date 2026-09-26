@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0071` are
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0072` are
 applied to the hosted database.
 
 Working on real data: dashboard (house board, movements, pace, activity feed),
@@ -388,9 +388,10 @@ the component.
   and the check is
   `select proname from pg_proc p join pg_namespace n on n.oid = p.pronamespace
   where n.nspname='public' and has_function_privilege('anon', p.oid, 'execute')`
-  — it should return only the public booking surface (six functions since
-  0071: the four below plus `public_hotel_policies` and
-  `public_room_type_facilities`) and the two policy
+  — it should return only the public booking surface (seven functions since
+  0072: the four below plus `public_hotel_policies`,
+  `public_room_type_facilities` and `public_room_type_content`) and the two
+  policy
   helpers. Four older functions held it through PUBLIC instead and needed
   `from public`; both revokes exist for a reason.
 - **A null role is not a refusal unless you write it as one.**
@@ -1668,6 +1669,11 @@ anywhere else. Collapsed height must stay constant regardless of room count.
       - The reference's split between rows that can be deleted and rows that
         cannot is not copied: there are no system extras here, so every extra
         a hotel added, it can remove.
+    - **A CATEGORY merges too** (0072), through the same dialog.
+      `merge_extra_category()` moves every extra in the source to the target
+      in one transaction, then removes the source, and logs how many moved.
+      A moved extra with no tax rate of its own takes its NEW category's
+      rate from then on; nothing already posted changes.
     - Search and paging are in the browser. The catalog is dozens of rows,
       not thousands, so the ~1,800 rule does not reach it -- the same
       judgement as meeting rooms.
@@ -1843,12 +1849,46 @@ anywhere else. Collapsed height must stay constant regardless of room count.
 - **The guest booking page is `/book/[propertyId]`, and it is the only thing
   in this codebase that runs without a staff session.** A guest has no
   `staff_users` row, so `current_property_id()` is null and the ordinary reads
-  see nothing. The property is therefore named in the URL and passed to six
+  see nothing. The property is therefore named in the URL and passed to seven
   `security definer` RPCs granted to `anon`: `public_property`,
-  `public_rate_plans`, `public_room_types`, `create_public_booking`, and since
-  0071 the two read-only `public_hotel_policies` and
-  `public_room_type_facilities`. That is the entire public surface — no table,
-  no view, none of the staff functions.
+  `public_rate_plans`, `public_room_types`, `create_public_booking`, and the
+  read-only `public_hotel_policies`, `public_room_type_facilities` (0071) and
+  `public_room_type_content` (0072). That is the entire public surface — no
+  table, no view, none of the staff functions.
+  - **THE PAGE IS A FOUR-STEP FLOW CLONED FROM THE CLIENT'S CURRENT BOOKING
+    ENGINE** (0072). They sent five screenshots of a live hotel's page and
+    asked for ours to look like it: a stepper across the top, then Select
+    dates (three months of calendar, arrival then departure), Select room
+    (a card per room type with photographs and "From <price>"), Select rate
+    (the room's description and facilities, then every published plan with
+    its total and terms), and Your details (the form beside the booking
+    policy, the hotel policy and a summary, behind an agreement tickbox).
+    - **Theirs has five steps; Extras is the one not built.** A guest cannot
+      buy an extra online here -- `create_public_booking()` takes a room and
+      nothing else, and a guest-facing path that posts folio charges is a
+      money change on the anonymous surface, to be asked for rather than
+      slipped in. Nor are the card form ("there is no card capture"), the
+      promotional code (the public booking takes none), a currency switcher
+      (a property has one currency) or a logo (there is no logo column): each
+      would be a control that does nothing. The hotel's name stands where
+      their logo is.
+    - **`searchPublicStay()` asks `public_room_types()` once per published
+      plan** and lays the answers side by side, so step 2 can show the
+      cheapest sellable plan as "From" and step 3 can list them all. Every
+      rule is still decided in Postgres; the action only collates.
+    - **No date is formatted in the browser.** Month and weekday names are
+      worked out on the server in the guest's language and handed down, and
+      "today" is the HOTEL's today in its own timezone, not the server's or
+      the guest's. Formatting names in a client component is the hydration
+      trap `formatStampInProperty()` exists for.
+    - **Photographs are the type's own rooms'.** There is no room TYPE
+      photograph; photos have been per room since 0055, so
+      `public_room_type_content()` returns up to eight of the type's room
+      photos. A type with none draws a plain dark tint, never a broken image.
+    - **A room type has a description** (0072, `room_types.description`),
+      edited on the Room Types form and saved by its own
+      `set_room_type_description()` -- the overload trap again, as with
+      `set_room_photo()`.
   - **`current_property_id()` was deliberately not taught about a public
     context.** It is the root of every RLS policy in the database, so anything
     able to set it would put cross-property access one bug away. That is why
