@@ -22,6 +22,15 @@ import type {
   IdentificationType,
   RegistrationForm,
 } from "@/lib/guest-config";
+import {
+  CONFIRMATION_COLORS,
+  EMAIL_PREFERENCES,
+  type ConfirmationColorId,
+  type EmailPreferenceId,
+  type EmailSetup,
+  type EmailTemplate,
+  type HotelEmailSettings,
+} from "@/lib/email-preferences";
 
 import { createClient } from "@/lib/supabase/server";
 import { nullableArg } from "@/lib/supabase/database";
@@ -2606,6 +2615,89 @@ export async function getRegistrationForm(): Promise<RegistrationForm> {
     question2: data?.question_2 ?? null,
     terms: data?.terms ?? null,
   };
+}
+
+/**
+ * Hotel Emails Preferences (0074). No row reads as no addresses and every
+ * kind active, as the reference ships.
+ */
+export async function getHotelEmailSettings(): Promise<HotelEmailSettings> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("hotel_email_settings")
+    .select("notification_emails, preferences")
+    .maybeSingle();
+  if (error) throw new Error(`Failed to load the email preferences: ${error.message}`);
+
+  const stored =
+    data?.preferences && typeof data.preferences === "object" && !Array.isArray(data.preferences)
+      ? (data.preferences as Record<string, unknown>)
+      : {};
+  const preferences = {} as Record<EmailPreferenceId, boolean>;
+  for (const p of EMAIL_PREFERENCES) {
+    preferences[p.id] = stored[p.id] === false ? false : true;
+  }
+  return { notificationEmails: data?.notification_emails ?? [], preferences };
+}
+
+/**
+ * Email Setup (0075): the same row as Hotel Emails Preferences, its other
+ * columns. No row reads as the reference's defaults.
+ */
+export async function getEmailSetup(): Promise<EmailSetup> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("hotel_email_settings")
+    .select(
+      "reply_to_emails, from_text, notification_emails, footer_template, checkin_notes, directions, single_property_address, multi_property_address, confirmation_message, confirmation_colors, show_hotel_logo, include_footer, pre_arrival_enabled, post_departure_enabled, post_departure_subject, post_departure_body, payment_request_subject, payment_request_body",
+    )
+    .maybeSingle();
+  if (error) throw new Error(`Failed to load the email setup: ${error.message}`);
+
+  const stored =
+    data?.confirmation_colors &&
+    typeof data.confirmation_colors === "object" &&
+    !Array.isArray(data.confirmation_colors)
+      ? (data.confirmation_colors as Record<string, unknown>)
+      : {};
+  const colors = {} as Record<ConfirmationColorId, string>;
+  for (const c of CONFIRMATION_COLORS) {
+    const v = stored[c.id];
+    colors[c.id] = typeof v === "string" && /^#[0-9a-fA-F]{6}$/.test(v) ? v : c.fallback;
+  }
+
+  return {
+    replyToEmails: data?.reply_to_emails ?? [],
+    fromText: data?.from_text ?? null,
+    notificationEmails: data?.notification_emails ?? [],
+    footerTemplate: data?.footer_template ?? null,
+    checkinNotes: data?.checkin_notes ?? null,
+    directions: data?.directions ?? null,
+    singlePropertyAddress: data?.single_property_address === "property" ? "property" : "hotel",
+    multiPropertyAddress:
+      data?.multi_property_address === "show_properties" ? "show_properties" : "hotel_hide_properties",
+    confirmationMessage: data?.confirmation_message ?? null,
+    colors,
+    showHotelLogo: data?.show_hotel_logo ?? false,
+    includeFooter: data?.include_footer ?? false,
+    preArrivalEnabled: data?.pre_arrival_enabled ?? false,
+    postDepartureEnabled: data?.post_departure_enabled ?? false,
+    postDepartureSubject: data?.post_departure_subject ?? null,
+    postDepartureBody: data?.post_departure_body ?? null,
+    paymentRequestSubject: data?.payment_request_subject ?? null,
+    paymentRequestBody: data?.payment_request_body ?? null,
+  };
+}
+
+/** Email Templates (0075), read by Settings and by the booking's Email tab. */
+export async function getEmailTemplates(): Promise<EmailTemplate[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("email_templates")
+    .select("id, title, subject, body")
+    .order("title");
+  if (error) throw new Error(`Failed to load the email templates: ${error.message}`);
+  return data.map((t) => ({ id: t.id, title: t.title, subject: t.subject, body: t.body }));
 }
 
 export async function getPropertySettings(): Promise<PropertySettings> {

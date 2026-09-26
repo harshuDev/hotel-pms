@@ -14,6 +14,7 @@ import {
   getProperty,
   getBookingCancellationTerms,
   getExtrasCatalog,
+  getEmailTemplates,
 } from "@/lib/queries";
 
 export const metadata = { title: "Booking" };
@@ -68,6 +69,7 @@ export default async function BookingPage({
     property,
     cancellationTerms,
     extrasCatalog,
+    emailTemplates,
   ] =
     await Promise.all([
       getBookingRoomLines(id),
@@ -93,6 +95,7 @@ export default async function BookingPage({
       getBookingCancellationTerms(id),
       // The catalog the Extras tab charges from (0069).
       getExtrasCatalog(),
+      getEmailTemplates(),
     ]);
 
   const back = backTarget(sp.back);
@@ -121,6 +124,7 @@ export default async function BookingPage({
         ["admin", "manager", "front_desk", "cashier"].includes(staff.role)
       }
       extrasCatalog={extrasCatalog}
+      emailTemplates={emailTemplates}
     />
   );
 }

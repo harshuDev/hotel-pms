@@ -6,6 +6,7 @@ import { EmptyState } from "@/components/ui";
 import { logBookingEmail } from "@/lib/actions/booking-files";
 import { formatStampInProperty } from "@/lib/dates";
 import type { BookingEmail } from "@/lib/types";
+import type { EmailTemplate } from "@/lib/email-preferences";
 
 /**
  * The Email tab, which the client's reference PMS carries and this one did
@@ -31,6 +32,7 @@ export function EmailTab({
   defaultTo,
   timezone,
   canEdit,
+  templates,
 }: {
   bookingId: string;
   emails: BookingEmail[];
@@ -38,6 +40,11 @@ export function EmailTab({
   defaultTo: string | null;
   timezone: string;
   canEdit: boolean;
+  /**
+   * Settings -> Email Setup -> Email Templates (0075). Choosing one fills the
+   * subject and body, which stay editable -- a template is a starting point.
+   */
+  templates: EmailTemplate[];
 }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -90,6 +97,31 @@ export function EmailTab({
 
       {open && (
         <div className="space-y-3 border-b border-line bg-shell px-4 py-3">
+          {templates.length > 0 && (
+            <div>
+              <label htmlFor="email-template" className={label}>
+                Template
+              </label>
+              <select
+                id="email-template"
+                defaultValue=""
+                onChange={(e) => {
+                  const t = templates.find((x) => x.id === e.target.value);
+                  if (!t) return;
+                  setSubject(t.subject ?? "");
+                  setBody(t.body ?? "");
+                }}
+                className={field}
+              >
+                <option value="">None</option>
+                {templates.map((t) => (
+                  <option key={t.id} value={t.id}>
+                    {t.title}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
           <div>
             <label htmlFor="email-to" className={label}>
               To

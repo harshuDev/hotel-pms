@@ -437,6 +437,140 @@ export async function saveRegistrationForm(input: {
   return { ok: true, data: null };
 }
 
+/* -- Communications & Notifications -> Hotel Emails Preferences (0074) ---- */
+
+export async function saveHotelEmailSettings(input: {
+  notificationEmails: string[];
+  preferences: Record<string, boolean>;
+}): Promise<ActionResult<null>> {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("save_hotel_email_settings", {
+    p_emails: input.notificationEmails,
+    p_preferences: input.preferences,
+  });
+  if (error) return { ok: false, error: error.message };
+  revalidateSettings();
+  return { ok: true, data: null };
+}
+
+/* -- Communications & Notifications -> Email Setup (0075) ----------------- */
+
+function revalidateEmail() {
+  revalidateSettings();
+  // The booking screen's Email tab offers the templates.
+  revalidatePath("/bookings", "layout");
+  revalidatePath("/calendar");
+}
+
+/** Every Email Setup save ends the same way; the RPC names stay typed. */
+function emailDone(error: { message: string } | null): ActionResult<null> {
+  if (error) return { ok: false, error: error.message };
+  revalidateEmail();
+  return { ok: true, data: null };
+}
+
+export async function saveEmailGeneral(input: {
+  replyToEmails: string[];
+  fromText: string;
+  notificationEmails: string[];
+}): Promise<ActionResult<null>> {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("save_email_general", {
+    p_reply_to: input.replyToEmails,
+    p_from_text: input.fromText,
+    p_notification_emails: input.notificationEmails,
+  });
+  return emailDone(error);
+}
+
+export async function saveEmailFooter(footer: string): Promise<ActionResult<null>> {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("save_email_footer", { p_footer: footer });
+  return emailDone(error);
+}
+
+export async function saveBookingConfirmationEmail(input: {
+  checkinNotes: string;
+  directions: string;
+  singlePropertyAddress: string;
+  multiPropertyAddress: string;
+  confirmationMessage: string;
+  colors: Record<string, string>;
+  showHotelLogo: boolean;
+  includeFooter: boolean;
+}): Promise<ActionResult<null>> {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("save_booking_confirmation_email", {
+    p_checkin_notes: input.checkinNotes,
+    p_directions: input.directions,
+    p_single_property_address: input.singlePropertyAddress,
+    p_multi_property_address: input.multiPropertyAddress,
+    p_confirmation_message: input.confirmationMessage,
+    p_colors: input.colors,
+    p_show_hotel_logo: input.showHotelLogo,
+    p_include_footer: input.includeFooter,
+  });
+  return emailDone(error);
+}
+
+export async function savePreArrivalEmail(enabled: boolean): Promise<ActionResult<null>> {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("save_pre_arrival_email", { p_enabled: enabled });
+  return emailDone(error);
+}
+
+export async function savePostDepartureEmail(input: {
+  enabled: boolean;
+  subject: string;
+  body: string;
+}): Promise<ActionResult<null>> {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("save_post_departure_email", {
+    p_enabled: input.enabled,
+    p_subject: input.subject,
+    p_body: input.body,
+  });
+  return emailDone(error);
+}
+
+export async function savePaymentRequestEmail(input: {
+  subject: string;
+  body: string;
+}): Promise<ActionResult<null>> {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("save_payment_request_email", {
+    p_subject: input.subject,
+    p_body: input.body,
+  });
+  return emailDone(error);
+}
+
+export async function saveEmailTemplate(input: {
+  id: string | null;
+  title: string;
+  subject: string;
+  body: string;
+}): Promise<ActionResult<{ id: string }>> {
+  if (input.title.trim() === "") return { ok: false, error: "An email template needs a title." };
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("save_email_template", {
+    // Null is a new template; an id is the one being corrected.
+    p_id: nullableArg(input.id),
+    p_title: input.title,
+    p_subject: input.subject,
+    p_body: input.body,
+  });
+  if (error) return { ok: false, error: error.message };
+  revalidateEmail();
+  return { ok: true, data: { id: data } };
+}
+
+export async function deleteEmailTemplate(id: string): Promise<ActionResult<null>> {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("delete_email_template", { p_id: id });
+  return emailDone(error);
+}
+
 export async function saveRoomType(input: {
   id: string | null;
   code: string;
