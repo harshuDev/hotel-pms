@@ -637,6 +637,38 @@ export async function deletePosProfile(id: string): Promise<ActionResult<null>> 
   return { ok: true, data: null };
 }
 
+/* -- Inventory -> Discounts (0090) ---------------------------------------- */
+
+export async function saveDiscount(input: {
+  id: string | null;
+  title: string;
+  kind: "percent" | "fixed";
+  percentBps: number | null;
+  amountCents: number | null;
+}): Promise<ActionResult<null>> {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("save_discount", {
+    // Null adds a new discount.
+    p_id: nullableArg(input.id),
+    p_title: input.title,
+    p_kind: input.kind,
+    // Each kind carries only its own figure; Postgres refuses a missing one.
+    p_percent_bps: nullableArg(input.kind === "percent" ? input.percentBps : null),
+    p_amount_cents: nullableArg(input.kind === "fixed" ? input.amountCents : null),
+  });
+  if (error) return { ok: false, error: error.message };
+  revalidateSettings();
+  return { ok: true, data: null };
+}
+
+export async function deleteDiscount(id: string): Promise<ActionResult<null>> {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("delete_discount", { p_id: id });
+  if (error) return { ok: false, error: error.message };
+  revalidateSettings();
+  return { ok: true, data: null };
+}
+
 /* -- Inventory -> Settings (0088) ----------------------------------------- */
 
 function revalidateInventorySettings() {

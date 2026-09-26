@@ -30,6 +30,7 @@ import {
 import type {
   AccountingSettings,
   AccountingSystem,
+  Discount,
   CurrencyProfile,
   PaymentGateway,
   PosProfile,
@@ -2888,6 +2889,23 @@ export const getInventorySettings = cache(async (): Promise<InventorySettings> =
     },
   };
 });
+
+/** Discounts (0090), by title. Stored, not yet applied to a stay. */
+export async function getDiscounts(): Promise<Discount[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("discounts")
+    .select("id, title, kind, percent_bps, amount_cents")
+    .order("title");
+  if (error) throw new Error(`Failed to load the discounts: ${error.message}`);
+  return (data ?? []).map((r) => ({
+    id: r.id,
+    title: r.title,
+    kind: r.kind === "fixed" ? "fixed" : "percent",
+    percentBps: r.percent_bps,
+    amountCents: r.amount_cents === null ? null : Number(r.amount_cents),
+  }));
+}
 
 /** One charge on a booking's folios, split for the invoice (0080). */
 export interface InvoiceLine {

@@ -133,3 +133,37 @@ export interface AccountingSystem {
   provider: string;
   isEnabled: boolean;
 }
+
+/**
+ * Settings -> Inventory -> Discounts (0090). STORED, NOT YET APPLIED: nothing
+ * takes a discount off a stay yet -- see the migration.
+ */
+export type DiscountKind = "percent" | "fixed";
+
+export interface Discount {
+  id: string;
+  title: string;
+  kind: DiscountKind;
+  /** Basis points: 1000 is 10.0 %. Set only on a percent discount. */
+  percentBps: number | null;
+  /** Minor units of the property's currency. Set only on a fixed discount. */
+  amountCents: number | null;
+}
+
+/**
+ * "10", "10.5" or "10.25" as basis points, parsed from the string so no float
+ * is involved. Null for anything else, or outside 0-100.
+ */
+export function parsePercentBps(input: string): number | null {
+  const m = /^\s*(\d{1,3})(?:\.(\d{1,2}))?\s*%?\s*$/.exec(input);
+  if (!m) return null;
+  const bps = Number(m[1]) * 100 + Number((m[2] ?? "").padEnd(2, "0"));
+  return bps >= 1 && bps <= 10000 ? bps : null;
+}
+
+/** 1000 -> "10.0", 1025 -> "10.25": at least one decimal, as the reference shows. */
+export function formatPercentBps(bps: number): string {
+  const whole = Math.trunc(bps / 100);
+  const frac = String(bps % 100).padStart(2, "0");
+  return `${whole}.${frac.endsWith("0") ? frac[0] : frac}`;
+}
