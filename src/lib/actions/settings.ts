@@ -827,7 +827,8 @@ export async function setRoomPhoto(input: {
 }
 
 /**
- * Payment methods.
+ * Payment types -- the `payment_methods` table (0079: a title, a description,
+ * and any number per kind, as the reference's Custom Payment Types).
  *
  * affects_drawer is not passed and is not a choice: a check constraint on the
  * table ties it to the kind — cash touches physical cash, nothing else does —
@@ -838,20 +839,24 @@ export async function setRoomPhoto(input: {
  * taking the payment with it, so retiring one is `isActive: false`, which every
  * other read of the table already filters on.
  */
-export async function savePaymentMethod(input: {
+export async function savePaymentType(input: {
   id: string | null;
-  name: string;
+  title: string;
+  description: string;
   kind: PaymentMethodKind;
   isActive: boolean;
 }): Promise<ActionResult<{ id: string }>> {
-  if (input.name.trim() === "") {
-    return { ok: false, error: "A payment method needs a name." };
+  if (input.title.trim() === "") {
+    return { ok: false, error: "A payment type needs a title." };
   }
 
   const supabase = await createClient();
-  const { data, error } = await supabase.rpc("save_payment_method", {
-    p_id: input.id,
-    p_name: input.name,
+  const { data, error } = await supabase.rpc("save_payment_type", {
+    // Null adds a new payment type.
+    p_id: nullableArg(input.id),
+    p_title: input.title,
+    // Blank is stored as no description.
+    p_description: input.description,
     p_kind: input.kind,
     p_is_active: input.isActive,
   });
@@ -861,7 +866,7 @@ export async function savePaymentMethod(input: {
   revalidateSettings();
   // What the cashier may take a payment by has changed.
   revalidatePath("/cashier");
-  return { ok: true, data: { id: data as string } };
+  return { ok: true, data: { id: data } };
 }
 
 /**
@@ -1005,6 +1010,27 @@ export async function saveTaxRate(input: {
 
   revalidateSettings();
   return { ok: true, data: { id: data as string } };
+}
+
+/**
+ * Taxes And Fees order (0079). The first active rate is the one the booking
+ * form seeds, so this is also how a hotel picks its default.
+ */
+export async function setTaxRateOrder(ids: string[]): Promise<ActionResult<null>> {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("set_tax_rate_order", { p_ids: ids });
+  if (error) return { ok: false, error: error.message };
+  revalidateSettings();
+  return { ok: true, data: null };
+}
+
+/** Deletes a tax nothing has used; Postgres refuses one in use by name. */
+export async function deleteTaxRate(id: string): Promise<ActionResult<null>> {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("delete_tax_rate", { p_id: id });
+  if (error) return { ok: false, error: error.message };
+  revalidateSettings();
+  return { ok: true, data: null };
 }
 
 /**

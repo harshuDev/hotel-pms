@@ -1904,6 +1904,7 @@ export type Database = {
         Row: {
           affects_drawer: boolean
           created_at: string
+          description: string | null
           id: string
           is_active: boolean
           kind: Database["public"]["Enums"]["payment_method_kind"]
@@ -1913,6 +1914,7 @@ export type Database = {
         Insert: {
           affects_drawer?: boolean
           created_at?: string
+          description?: string | null
           id?: string
           is_active?: boolean
           kind: Database["public"]["Enums"]["payment_method_kind"]
@@ -1922,6 +1924,7 @@ export type Database = {
         Update: {
           affects_drawer?: boolean
           created_at?: string
+          description?: string | null
           id?: string
           is_active?: boolean
           kind?: Database["public"]["Enums"]["payment_method_kind"]
@@ -2950,6 +2953,7 @@ export type Database = {
           name: string
           property_id: string
           rate_bps: number
+          sort_order: number
         }
         Insert: {
           created_at?: string
@@ -2959,6 +2963,7 @@ export type Database = {
           name: string
           property_id: string
           rate_bps: number
+          sort_order?: number
         }
         Update: {
           created_at?: string
@@ -2968,6 +2973,7 @@ export type Database = {
           name?: string
           property_id?: string
           rate_bps?: number
+          sort_order?: number
         }
         Relationships: [
           {
@@ -4089,6 +4095,7 @@ export type Database = {
       delete_identification_type: { Args: { p_id: string }; Returns: undefined }
       delete_room: { Args: { p_room_id: string }; Returns: undefined }
       delete_season: { Args: { p_id: string }; Returns: undefined }
+      delete_tax_rate: { Args: { p_id: string }; Returns: undefined }
       deposit_report: {
         Args: never
         Returns: {
@@ -4956,18 +4963,19 @@ export type Database = {
         Returns: string
       }
       save_own_profile: { Args: { p_full_name: string }; Returns: string }
-      save_payment_method: {
-        Args: {
-          p_id?: string
-          p_is_active?: boolean
-          p_kind: Database["public"]["Enums"]["payment_method_kind"]
-          p_name: string
-        }
-        Returns: string
-      }
       save_payment_request_email: {
         Args: { p_body: string; p_subject: string }
         Returns: undefined
+      }
+      save_payment_type: {
+        Args: {
+          p_description: string
+          p_id: string
+          p_is_active: boolean
+          p_kind: Database["public"]["Enums"]["payment_method_kind"]
+          p_title: string
+        }
+        Returns: string
       }
       save_post_departure_email: {
         Args: { p_body: string; p_enabled: boolean; p_subject: string }
@@ -5301,6 +5309,7 @@ export type Database = {
         }
         Returns: number
       }
+      set_tax_rate_order: { Args: { p_ids: string[] }; Returns: undefined }
       set_waitlist_status: {
         Args: {
           p_booking_id?: string
@@ -5333,10 +5342,12 @@ export type Database = {
         Returns: {
           charge_count: number
           id: string
+          in_use: boolean
           inclusion: Database["public"]["Enums"]["tax_inclusion"]
           is_active: boolean
           name: string
           rate_bps: number
+          sort_order: number
         }[]
       }
       unassign_room: { Args: { p_booking_room_id: string }; Returns: undefined }

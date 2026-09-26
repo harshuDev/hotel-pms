@@ -16,6 +16,7 @@ import {
 import type { GuestField, IdentificationType, RegistrationForm } from "@/lib/guest-config";
 import { EmailPreferencesPanel } from "@/components/settings/email-preferences-panel";
 import { HotelFeaturesPanel } from "@/components/settings/hotel-features-panel";
+import { PaymentTypesPanel, TaxesPanel } from "@/components/settings/finance-panels";
 import type { HotelFeatures } from "@/lib/hotel-features";
 import { CalendarSettingsPanel } from "@/components/settings/calendar-settings-panel";
 import type { CalendarSettings } from "@/lib/calendar-settings";
@@ -52,7 +53,6 @@ const LocationMap = dynamic(() => import("@/components/settings/location-map"), 
 import {
   createRooms,
   saveChannel,
-  savePaymentMethod,
   saveHotelDetails,
   saveHotelPolicies,
   saveHotelTimes,
@@ -63,7 +63,6 @@ import {
   saveSeason,
   deleteSeason,
   saveStaffUser,
-  saveTaxRate,
   saveRatePlan,
   saveCancellationPolicy,
   setRatePlanCancellationPolicy,
@@ -77,7 +76,6 @@ import type {
   CancellationPolicyKind,
   ChannelKind,
   ChannelSetting,
-  PaymentMethodKind,
   PaymentMethodSetting,
   PropertySettings,
   RoomSettingsPage,
@@ -110,22 +108,6 @@ const ROLES: { value: StaffRole; label: string; note: string }[] = [
   { value: "front_desk", label: "Front desk", note: "Bookings, check-in and out, payments" },
   { value: "cashier", label: "Cashier", note: "Payments and the drawer" },
   { value: "housekeeping", label: "Housekeeping", note: "Room status, and no money at all" },
-];
-
-/**
- * payment_methods carries `unique (property_id, kind)`, so this list is the
- * whole space of methods a property can have — never a free-form list. A kind
- * already taken is offered only on the method that holds it.
- */
-const PAYMENT_KINDS: { value: PaymentMethodKind; label: string }[] = [
-  { value: "cash", label: "Cash" },
-  { value: "card", label: "Card" },
-  { value: "bank_transfer", label: "Bank transfer" },
-  { value: "upi", label: "UPI" },
-  { value: "ota_prepaid", label: "Prepaid to the channel" },
-  { value: "virtual_card", label: "Virtual card" },
-  { value: "complimentary", label: "Complimentary" },
-  { value: "other", label: "Other" },
 ];
 
 const ROOM_STATUS_LABEL: Record<string, string> = {
@@ -401,15 +383,6 @@ export function SettingsScreen({
     router.push(`/settings?${params.toString()}`);
   }
 
-  /* -- Payment methods ------------------------------------------------- */
-  const [pm, setPm] = useState<{
-    id: string | null;
-    name: string;
-    kind: PaymentMethodKind;
-    isActive: boolean;
-    frozen: boolean;
-  } | null>(null);
-
   /* -- Channels ------------------------------------------------------- */
   const [ch, setCh] = useState<{
     id: string | null;
@@ -417,15 +390,6 @@ export function SettingsScreen({
     name: string;
     kind: ChannelKind;
     commission: string;
-    isActive: boolean;
-  } | null>(null);
-
-  /* -- Tax ------------------------------------------------------------ */
-  const [tx, setTx] = useState<{
-    id: string | null;
-    name: string;
-    percent: string;
-    inclusion: "inclusive" | "exclusive";
     isActive: boolean;
   } | null>(null);
 
@@ -1841,176 +1805,15 @@ export function SettingsScreen({
 
       {/* Tax ----------------------------------------------------------- */}
       {tab === "tax" && (
-        <>
-          <div className={card}>
-            <div className="mb-4 flex items-center justify-between">
-              <h2 className="font-display text-[15px] font-semibold tracking-tightest text-ink">
-                Tax rates
-              </h2>
-              {canEdit && (
-                <button
-                  onClick={() =>
-                    setTx({
-                      id: null,
-                      name: "VAT",
-                      percent: "20",
-                      // Inclusive, which is what a hotel selling to the public
-                      // does -- consumer prices have to be shown with tax in,
-                      // and it is the property's settled choice. It seeded
-                      // "exclusive", pointing a new rate the wrong way.
-                      inclusion: "inclusive",
-                      isActive: true,
-                    })
-                  }
-                  className={secondary}
-                >
-                  New tax rate
-                </button>
-              )}
-            </div>
-
-            {taxRates.length === 0 ? (
-              <p className="py-6 text-center text-[13px] leading-relaxed text-ink-muted">
-                None yet. Without one, charges post with no tax.
-              </p>
-            ) : (
-              <table className="w-full text-[13px]">
-                <thead>
-                  <tr className="border-b border-line text-left text-ink-faint">
-                    {["Name", "Rate", "Quoted", "Charges posted", "", ""].map((c, i) => (
-                      <th
-                        key={c || i}
-                        className="whitespace-nowrap px-3 pb-2.5 text-xxs font-semibold uppercase tracking-[0.1em]"
-                      >
-                        {c}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-line">
-                  {taxRates.map((t) => (
-                    <tr key={t.id} className={cn(!t.isActive && "opacity-55")}>
-                      <td className="px-3 py-2.5 font-medium text-ink">{t.name}</td>
-                      <td className="tnum px-3 py-2.5 text-ink-muted">
-                        {(t.rateBps / 100).toFixed(2)}%
-                      </td>
-                      <td className="px-3 py-2.5 text-ink-muted">
-                        {t.inclusion === "inclusive" ? "tax included" : "tax on top"}
-                      </td>
-                      {/*
-                        Above zero, `save_tax_rate()` refuses to move the rate
-                        or its inclusion: a folio item records which rate it
-                        used. The figure is here so that is visible before
-                        somebody types a new one, rather than only in the
-                        refusal afterwards -- the same reason the cancellation
-                        policies list carries its rate-plan count.
-                      */}
-                      <td className="tnum px-3 py-2.5 text-ink-muted">
-                        {t.chargeCount > 0 ? t.chargeCount : "\u2014"}
-                      </td>
-                      <td className="px-3 py-2.5 text-xxs text-ink-faint">
-                        {t.isActive ? "" : "retired"}
-                      </td>
-                      <td className="px-3 py-2.5 text-right">
-                        {canEdit && (
-                          <button
-                            onClick={() =>
-                              setTx({
-                                id: t.id,
-                                name: t.name,
-                                percent: String(t.rateBps / 100),
-                                inclusion: t.inclusion,
-                                isActive: t.isActive,
-                              })
-                            }
-                            className="text-ink-muted underline-offset-2 hover:text-ink hover:underline"
-                          >
-                            Edit
-                          </button>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-          </div>
-
-          {tx && (
-            <div className={card}>
-              <h3 className="mb-4 font-display text-[15px] font-semibold tracking-tightest text-ink">
-                {tx.id ? "Edit tax rate" : "New tax rate"}
-              </h3>
-              <div className="grid gap-4 sm:grid-cols-3">
-                <div>
-                  <label htmlFor="t-name" className={label}>Name</label>
-                  <input
-                    id="t-name"
-                    value={tx.name}
-                    onChange={(e) => setTx({ ...tx, name: e.target.value })}
-                    className={field}
-                  />
-                </div>
-                <div>
-                  <label htmlFor="t-pct" className={label}>Rate %</label>
-                  <input
-                    id="t-pct"
-                    inputMode="decimal"
-                    value={tx.percent}
-                    onChange={(e) => setTx({ ...tx, percent: e.target.value })}
-                    className={cn(field, "tnum")}
-                  />
-                </div>
-                <div>
-                  <label htmlFor="t-inc" className={label}>How it is quoted</label>
-                  <select
-                    id="t-inc"
-                    value={tx.inclusion}
-                    onChange={(e) =>
-                      setTx({ ...tx, inclusion: e.target.value as "inclusive" | "exclusive" })
-                    }
-                    className={field}
-                  >
-                    <option value="exclusive">Tax on top of the rate</option>
-                    <option value="inclusive">Rate already includes tax</option>
-                  </select>
-                </div>
-              </div>
-              {tx.id && (
-                <label className="mt-4 flex items-center gap-2 text-[13px] text-ink-muted">
-                  <input
-                    type="checkbox"
-                    checked={tx.isActive}
-                    onChange={(e) => setTx({ ...tx, isActive: e.target.checked })}
-                  />
-                  In use.
-                </label>
-              )}
-              <div className="mt-4 flex justify-end gap-2">
-                <button onClick={() => setTx(null)} className={secondary}>Cancel</button>
-                <button
-                  onClick={() =>
-                    run(
-                      () =>
-                        saveTaxRate({
-                          id: tx.id,
-                          name: tx.name,
-                          rateBps: Math.round((Number(tx.percent) || 0) * 100),
-                          inclusion: tx.inclusion,
-                          isActive: tx.isActive,
-                        }),
-                      `${tx.name || "Tax rate"} saved.`,
-                    )
-                  }
-                  disabled={pending}
-                  className={primary}
-                >
-                  Save
-                </button>
-              </div>
-            </div>
-          )}
-        </>
+        <TaxesPanel
+          // Re-seeded after every save, add, delete or reorder, so the order
+          // held in the panel is always the saved one.
+          key={taxRates.map((t) => `${t.id}:${t.sortOrder}:${t.isActive}:${t.inUse}`).join("|")}
+          taxRates={taxRates}
+          canEdit={canEdit}
+          pending={pending}
+          run={run}
+        />
       )}
 
       {/* Payment methods ----------------------------------------------- */}
@@ -2650,186 +2453,7 @@ export function SettingsScreen({
       )}
 
       {tab === "payment-methods" && (
-        <>
-          <div className={card}>
-            <div className="mb-4 flex items-center justify-between">
-              <h2 className="font-display text-[15px] font-semibold tracking-tightest text-ink">
-                Payment methods
-              </h2>
-              {canEdit && paymentMethods.length < PAYMENT_KINDS.length && (
-                <button
-                  onClick={() =>
-                    setPm({
-                      id: null,
-                      name: "",
-                      kind:
-                        PAYMENT_KINDS.find(
-                          (k) => !paymentMethods.some((m) => m.kind === k.value),
-                        )?.value ?? "other",
-                      isActive: true,
-                      frozen: false,
-                    })
-                  }
-                  className={secondary}
-                >
-                  New method
-                </button>
-              )}
-            </div>
-
-            {paymentMethods.length === 0 ? (
-              <p className="rounded-md bg-warn-wash px-3 py-3 text-center text-[13px] leading-relaxed text-warn-deep">
-                None yet. Add at least cash and card.
-              </p>
-            ) : (
-              <table className="w-full text-[13px]">
-                <thead>
-                  <tr className="border-b border-line text-left text-ink-faint">
-                    {["Name", "Kind", "Drawer", "Taken", "", ""].map((c, i) => (
-                      <th
-                        key={c || i}
-                        className="whitespace-nowrap px-3 pb-2.5 text-xxs font-semibold uppercase tracking-[0.1em]"
-                      >
-                        {c}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-line">
-                  {paymentMethods.map((m) => (
-                    <tr key={m.id} className={cn(!m.isActive && "opacity-55")}>
-                      <td className="px-3 py-2.5 font-medium text-ink">{m.name}</td>
-                      <td className="px-3 py-2.5 text-ink-muted">
-                        {PAYMENT_KINDS.find((k) => k.value === m.kind)?.label ??
-                          m.kind}
-                      </td>
-                      <td className="px-3 py-2.5">
-                        {m.affectsDrawer ? (
-                          <span className="rounded bg-warn-wash px-1.5 py-0.5 text-xxs font-semibold uppercase tracking-[0.08em] text-warn-deep">
-                            Physical cash
-                          </span>
-                        ) : (
-                          <span className="text-ink-faint">—</span>
-                        )}
-                      </td>
-                      <td className="tnum px-3 py-2.5 text-ink-muted">
-                        {m.paymentCount === 0 ? "\u2014" : m.paymentCount}
-                      </td>
-                      <td className="px-3 py-2.5 text-xxs text-ink-faint">
-                        {m.isActive ? "" : "retired"}
-                      </td>
-                      <td className="px-3 py-2.5 text-right">
-                        {canEdit && (
-                          <button
-                            onClick={() =>
-                              setPm({
-                                id: m.id,
-                                name: m.name,
-                                kind: m.kind,
-                                isActive: m.isActive,
-                                frozen: m.paymentCount > 0,
-                              })
-                            }
-                            className="text-ink-muted underline-offset-2 hover:text-ink hover:underline"
-                          >
-                            Edit
-                          </button>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-          </div>
-
-          {pm && (
-            <div className={card}>
-              <h3 className="mb-4 font-display text-[15px] font-semibold tracking-tightest text-ink">
-                {pm.id ? "Edit payment method" : "New payment method"}
-              </h3>
-              <div className="grid gap-4 sm:grid-cols-3">
-                <div>
-                  <label htmlFor="pm-name" className={label}>Name</label>
-                  <input
-                    id="pm-name"
-                    value={pm.name}
-                    placeholder="Card (Worldpay)"
-                    onChange={(e) => setPm({ ...pm, name: e.target.value })}
-                    className={field}
-                  />
-                </div>
-                <div>
-                  <label htmlFor="pm-kind" className={label}>Kind</label>
-                  <select
-                    id="pm-kind"
-                    value={pm.kind}
-                    disabled={pm.frozen}
-                    onChange={(e) =>
-                      setPm({ ...pm, kind: e.target.value as PaymentMethodKind })
-                    }
-                    className={cn(field, pm.frozen && "bg-shell text-ink-muted")}
-                  >
-                    {PAYMENT_KINDS.filter(
-                      (k) =>
-                        k.value === pm.kind ||
-                        !paymentMethods.some((m) => m.kind === k.value),
-                    ).map((k) => (
-                      <option key={k.value} value={k.value}>{k.label}</option>
-                    ))}
-                  </select>
-                  <p className="mt-1 text-xs text-ink-faint">
-                    {pm.frozen
-                      ? "Fixed \u2014 payments have already been taken by this method."
-                      : pm.kind === "cash"
-                        ? "Takes physical cash, so it counts towards the drawer."
-                        : "Does not touch the drawer."}
-                  </p>
-                </div>
-                <div>
-                  <label htmlFor="pm-active" className={label}>Offered</label>
-                  <select
-                    id="pm-active"
-                    value={pm.isActive ? "yes" : "no"}
-                    onChange={(e) =>
-                      setPm({ ...pm, isActive: e.target.value === "yes" })
-                    }
-                    className={field}
-                  >
-                    <option value="yes">On the cashier&rsquo;s list</option>
-                    <option value="no">Retired</option>
-                  </select>
-                </div>
-              </div>
-              <div className="mt-4 flex gap-2">
-                <button
-                  onClick={() =>
-                    run(
-                      () =>
-                        savePaymentMethod({
-                          id: pm.id,
-                          name: pm.name,
-                          kind: pm.kind,
-                          isActive: pm.isActive,
-                        }).then((r) => {
-                          if (r.ok) setPm(null);
-                          return r;
-                        }),
-                      pm.id ? "Payment method saved." : "Payment method added.",
-                    )
-                  }
-                  disabled={pending || pm.name.trim() === ""}
-                  className={primary}
-                >
-                  {pending ? "Saving\u2026" : "Save the method"}
-                </button>
-                <button onClick={() => setPm(null)} className={secondary}>
-                  Cancel
-                </button>
-              </div>
-            </div>
-          )}
-        </>
+        <PaymentTypesPanel methods={paymentMethods} canEdit={canEdit} pending={pending} run={run} />
       )}
 
       {/* Staff --------------------------------------------------------- */}

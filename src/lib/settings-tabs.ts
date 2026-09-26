@@ -58,6 +58,14 @@ export function isSettingsTab(value: string | undefined): value is SettingsTab {
  * this application does not ship. They go in when there is something behind
  * them -- and the reference's own contents for them have not been seen.
  *
+ * FINANCES AND INVENTORY carry the reference's labels in its order (0079),
+ * and Room Type and Room Setup moved under Inventory, where the reference
+ * keeps them. Their items not listed -- Invoice Settings, Pos Profiles,
+ * Currencies, Accounting Categories, Payment Gateway, Accounting Systems,
+ * Inventory's own Settings and Discounts -- go in as each is built, for the
+ * same reason Other is left out: an item that opens onto nothing is a dead
+ * control. The tab ids did not change, so every existing link still lands.
+ *
  * `Hotel Details` and `Hotel Properties` are their two items under Hotel
  * Profile, `Hotel Policy`, `Extras` and `Room Type Facilities` are their
  * three under Hotel Content, and `Hotel Features`, `Calendar Settings` and
@@ -81,8 +89,6 @@ export const SETTINGS_NAV: {
       { id: "hotel-policy", label: "Hotel Policy" },
       { id: "extras", label: "Extras" },
       { id: "facilities", label: "Room Type Facilities" },
-      { id: "room-types", label: "Room Types" },
-      { id: "rooms", label: "Rooms" },
     ],
   },
   {
@@ -112,16 +118,18 @@ export const SETTINGS_NAV: {
   {
     title: "Finances",
     items: [
-      { id: "tax", label: "Tax Rates" },
-      { id: "payment-methods", label: "Payment Methods" },
+      { id: "payment-methods", label: "Custom Payment Types" },
+      { id: "tax", label: "Tax Information" },
     ],
   },
   {
     title: "Inventory",
     items: [
+      { id: "room-types", label: "Room Type" },
+      { id: "rooms", label: "Room Setup" },
+      { id: "cancellation", label: "Cancellation Policy" },
       { id: "rate-plans", label: "Rate Plans" },
-      { id: "cancellation", label: "Cancellation Policies" },
-      { id: "seasons", label: "Seasons" },
+      { id: "seasons", label: "Seasons and Events" },
     ],
   },
   {

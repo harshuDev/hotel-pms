@@ -970,6 +970,10 @@ export interface TaxRateSetting {
    * policies list shows how many plans use each.
    */
   chargeCount: number;
+  /** Its place in the list (0079). The first active rate is the booking form's default. */
+  sortOrder: number;
+  /** Charged, or set on an extra or a category: then it cannot be deleted. */
+  inUse: boolean;
 }
 
 export interface ChannelSetting {
@@ -1043,6 +1047,8 @@ export interface PaymentMethodSetting {
   isActive: boolean;
   /** Payments taken by this method. Non-zero freezes the kind. */
   paymentCount: number;
+  /** The reference's Description column (0079). */
+  description: string | null;
 }
 
 /* -------------------------------------------------------------------------- */

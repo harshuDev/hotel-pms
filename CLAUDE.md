@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0078` are
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0079` are
 applied to the hosted database.
 
 Working on real data: dashboard (house board, movements, pace, activity feed),
@@ -32,9 +32,10 @@ by hand.
 
 Those figures are a working configuration, not the client's own property. They
 were chosen with the client and are cheap to change in the application, with
-two exceptions that Postgres will not let anyone undo: there is no delete for a
-room type or a tax rate, because bookings and folio items point at them under
-`on delete restrict`. A tax rate that should not apply is retired.
+one exception that Postgres will not let anyone undo: there is no delete for a
+room type, because bookings point at it under `on delete restrict`. **A tax
+rate CAN be deleted as of 0079, but only one nothing points at** — no charge
+posted at it, no extra or extras category set to it; one in use is retired.
 
 **A ROOM CAN BE DELETED, as of 0055, if it has never been booked.** That
 reverses what this file said from 0030 to 0054, and the reversal is narrow:
@@ -256,7 +257,7 @@ Each read is a Postgres view or RPC, never aggregation in the client:
 | `getFacilities()`                   | `facilities` (0070)               |
 | `getRoomTypeSettings()`             | `room_types` with room counts and facility ids |
 | `getChannelSettings()`              | `channels`                        |
-| `getTaxRateSettings()`              | `tax_rates`                       |
+| `getTaxRateSettings()`              | `tax_rates_list()` (order, in use) |
 | `getStaffSettings()`                | `staff_users`                     |
 | `getRoomsForSettings({ q, page })`  | `rooms_for_settings(...)`         |
 | `getPaymentMethodSettings()`        | `payment_methods` incl. retired   |
@@ -1587,6 +1588,14 @@ anywhere else. Collapsed height must stay constant regardless of room count.
     is a dead control. It goes in when its contents are built. Guest
     Configuration went in with 0073, Communications & Notifications with
     0074-0075, System Settings grew its three with 0076-0078.
+  - **FINANCES AND INVENTORY are the reference's labels in its order**
+    (0079): Custom Payment Types, Tax Information; Room Type, Room Setup,
+    Cancellation Policy, Rate Plans, Seasons and Events. Room Type and Room
+    Setup moved there from Hotel Content, where the reference does not have
+    them. Their other items — Invoice Settings, Pos Profiles, Currencies,
+    Accounting Categories, Payment Gateway, Accounting Systems, and
+    Inventory's Settings and Discounts — go in as each is built. Tab ids did
+    not change, so every existing link still lands.
   - **COMMUNICATIONS & NOTIFICATIONS IS STORED, NOT YET SENT** (0074, 0075) --
     Hotel Emails Preferences and Email Setup, cloned from the reference, all
     in one row per property, `hotel_email_settings`.
@@ -1911,16 +1920,31 @@ anywhere else. Collapsed height must stay constant regardless of room count.
     housekeeping report and the house board.
 - **`payment_methods.affects_drawer` is not a setting.** A check constraint
   ties it to the kind — cash touches physical cash, nothing else does — so
-  `save_payment_method()` derives it and takes no parameter for it. Offering
+  `save_payment_type()` derives it and takes no parameter for it. Offering
   the tickbox would be offering a choice the database refuses, on the one
   column the drawer total and every blind count are worked out from.
-  `unique (property_id, kind)` bounds the whole screen too: a property has at
-  most one method per kind, so the list is the eight kinds, each configured or
-  not, never free-form.
+- **PAYMENT TYPES ARE A FREE LIST, as of 0079** — Finances -> Custom Payment
+  Types, cloned from the reference: Title, Description, a pencil, "Add new
+  payment type". This reverses what this file said, that
+  `unique (property_id, kind)` bounded the screen to one method per kind.
+  The reference lists Credit Card and Debit Card side by side, which that
+  constraint made impossible.
+  - **The constraint was dropped only after checking that nothing read a
+    method BY its kind** — no function, no query. Titles are unique per
+    property instead, case-insensitively.
+  - **The kind still decides the money** and is picked in the edit dialog
+    ("Kind"), because the reference's list has no column for it but the
+    drawer needs it. UPI is in the enum from before and is neither offered
+    nor accepted by `save_payment_type()`.
+  - `save_payment_method()` was DROPPED, not left beside the new function:
+    its per-kind refusal is exactly what 0079 lifts. The list is in the order
+    types were added, as theirs is. No delete, as before — payments point at
+    a type; one no longer used is unticked Active.
 - **A payment method's kind is frozen once payments exist against it.** Moving
   a method across the cash line afterwards would restate every shift already
   counted. Renaming and retiring stay free; the name is what the cashier picks
-  from, the kind is what the money means.
+  from, the kind is what the money means. The dialog shows a frozen kind as
+  text rather than a select, so it is not offered only to be refused.
 - **`set_room_status()` is how a room is marked clean**, and housekeeping can
   call it. Until 0030 `rooms.status` was only ever set by check-in and
   check-out, so a room went dirty on departure and stayed dirty for ever — the
@@ -1945,6 +1969,24 @@ anywhere else. Collapsed height must stay constant regardless of room count.
     room charge on a booking carrying the rate, its figure and its inclusion
     are still editable in Settings; after that they are not. Worth knowing
     before telling a hotel they can change VAT whenever they like.
+  - **TAX INFORMATION IS THE REFERENCE'S "TAXES AND FEES" (0079)**: Name,
+    Type, Value, Applicable, a pencil and a bin, a drag handle per row.
+    - **The order is real.** `tax_rates.sort_order`, set by dragging or by the
+      arrow keys on the handle (`set_tax_rate_order()`), and the booking form
+      seeds its tax with the FIRST ACTIVE rate — so the top of this list is
+      the hotel's default. That is what "Applicable" says: "By default" for
+      that one, "When chosen" for the others, "Retired" for inactive. The
+      reference says "Always"; ours would be untrue, since a booking carries
+      one rate and staff may pick another or none. A new rate goes to the
+      foot, by trigger, so adding one never changes the default.
+    - **Type is always "Tax" and the button says "Add tax".** There are no
+      fees in this schema — a fee would need its own posting and its own
+      report bucket — so offering "Fee" would be a choice that does nothing.
+    - **The bin is drawn only on a rate nothing uses** (`in_use` from
+      `tax_rates_list()`), and `delete_tax_rate()` refuses the rest by name.
+      Bookings do not store a tax rate — the nights carry the computed
+      figure — so extras, categories and folio items are the whole check.
+    - The reference's LOCALE button is not copied, as elsewhere.
 - **Password reset is three screens and no API route.** `/login` links to
   `/forgot-password`, which calls `resetPasswordForEmail` with a `redirectTo`
   of `<origin>/reset-password`; that page turns whatever the link carried into
