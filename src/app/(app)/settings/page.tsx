@@ -42,6 +42,7 @@ import {
   getApiKeys,
   getSystemConnections,
   getReactions,
+  getDocumentTemplate,
   getStaffSettings,
   getTaxRateSettings,
 } from "@/lib/queries";
@@ -101,6 +102,7 @@ export default async function SettingsPage({
     apiKeys,
     systemConnections,
     reactions,
+    folioTemplate,
   ] = await Promise.all([
     getPropertySettings(),
     getRoomTypeSettings(),
@@ -146,6 +148,7 @@ export default async function SettingsPage({
         ? getSystemConnections("housekeeping")
         : Promise.resolve([]),
     tab === "reactions" ? getReactions() : Promise.resolve([]),
+    tab === "templates" ? getDocumentTemplate("folio") : Promise.resolve(null),
   ]);
 
   /*
@@ -207,6 +210,7 @@ export default async function SettingsPage({
         apiKeys={apiKeys}
         systemConnections={systemConnections}
         reactions={reactions}
+        folioTemplate={folioTemplate}
       />
     </div>
   );

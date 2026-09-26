@@ -5,11 +5,13 @@ import type { CancellationTerms } from "@/lib/cancellation-policy";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { nullableArg } from "@/lib/supabase/database";
-import { ROOM_PHOTO_BUCKET } from "@/lib/queries";
+import { ROOM_PHOTO_BUCKET, getBusinessDate, getPropertyCurrency } from "@/lib/queries";
 import { parseMoney } from "@/lib/money";
 import type { ActionResult } from "@/lib/actions/cashier";
 import type { BookingWidget } from "@/lib/booking-widgets";
 import type { ReactionGroup } from "@/lib/reactions";
+import { renderInvoiceTemplate } from "@/lib/document-template";
+import { invoiceLiquidData, loadInvoice, type InvoiceView } from "@/lib/invoice-data";
 import type { Json } from "@/lib/database.types";
 import type { HotelPolicies } from "@/lib/hotel-policies";
 import type { ExtraItemType } from "@/lib/extras";
@@ -2142,4 +2144,95 @@ export async function deleteReaction(id: string): Promise<ActionResult<null>> {
   if (error) return { ok: false, error: error.message };
   revalidateSettings();
   return { ok: true, data: null };
+}
+
+/* -- Other -> Templates (0105) --------------------------------------------- */
+
+export async function saveDocumentTemplate(input: {
+  liquid: string;
+  css: string;
+  isActive: boolean;
+}): Promise<ActionResult<null>> {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("save_document_template", {
+    p_kind: "folio",
+    p_liquid: input.liquid,
+    p_css: input.css,
+    p_is_active: input.isActive,
+  });
+  if (error) return { ok: false, error: error.message };
+  revalidateSettings();
+  revalidatePath("/bookings", "layout");
+  return { ok: true, data: null };
+}
+
+/** What PREVIEW fills a template with when no folio number is given. */
+function sampleInvoice(currency: string, today: string): InvoiceView {
+  return {
+    bookingId: "",
+    reference: "BK-000000",
+    issuer: "Sample Hotel",
+    issuerAddress: "1 Example Street, Example City",
+    phone: "+00 000 000 000",
+    email: "reception@example.com",
+    logoUrl: null,
+    logoText: null,
+    invoiceNumber: 1000,
+    date: today,
+    guest: { name: "Sample Guest", email: "guest@example.com", phone: null },
+    checkIn: today,
+    checkOut: today,
+    roomsLabel: "101 · Double",
+    rows: [
+      { key: "a", date: today, description: "Accommodation", room: "101", netCents: 10000, taxCents: 2000, grossCents: 12000 },
+      { key: "b", date: today, description: "Minibar", room: null, netCents: 500, taxCents: 100, grossCents: 600 },
+    ],
+    showRoom: true,
+    vatRegistered: true,
+    netCents: 10500,
+    taxCents: 2100,
+    totalCents: 12600,
+    payments: [{ key: "p", date: today, description: "Card", amountCents: 5000, reversed: false }],
+    balanceCents: 7600,
+    notes: null,
+    currency,
+  };
+}
+
+/**
+ * PREVIEW: the template as typed -- saved or not -- filled with the invoice
+ * of the folio number given, or a sample one. Rendered and sanitised exactly
+ * as the printable invoice is, so what previews is what prints.
+ */
+export async function previewInvoiceTemplate(input: {
+  folioNumber: string;
+  liquid: string;
+  css: string;
+}): Promise<ActionResult<{ html: string; css: string }>> {
+  if (input.liquid.length > 200_000 || input.css.length > 100_000) {
+    return { ok: false, error: "The template is too long" };
+  }
+  let view: InvoiceView | null;
+  const typed = input.folioNumber.trim();
+  if (typed === "") {
+    // Dated by the hotel's business date, never the server's clock.
+    const [currency, today] = await Promise.all([getPropertyCurrency(), getBusinessDate()]);
+    view = sampleInvoice(currency, today);
+  } else {
+    if (!/^[0-9]{1,12}$/.test(typed)) return { ok: false, error: "A folio number is digits only" };
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("folios")
+      .select("booking_id")
+      .eq("folio_number", Number(typed))
+      .maybeSingle();
+    if (error) return { ok: false, error: error.message };
+    if (!data) return { ok: false, error: `No folio ${typed} on this property` };
+    if (!data.booking_id) return { ok: false, error: `Folio ${typed} belongs to a meeting room booking` };
+    view = await loadInvoice(data.booking_id);
+    if (!view) return { ok: false, error: `No folio ${typed} on this property` };
+  }
+  const rendered = await renderInvoiceTemplate(input.liquid, input.css, invoiceLiquidData(view));
+  if (!rendered.ok) return { ok: false, error: rendered.error };
+  return { ok: true, data: { html: rendered.html, css: rendered.css } };
 }

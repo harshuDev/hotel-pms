@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0104` are
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0105` are
 applied to the hosted database.
 
 Working on real data: dashboard (house board, movements, pace, activity feed),
@@ -276,6 +276,7 @@ Each read is a Postgres view or RPC, never aggregation in the client:
 | `getApiKeys()`                      | `api_keys` -- hints only (0101)   |
 | `getSystemConnections(category)`    | `system_connections` (0102-0103)  |
 | `getReactions()`                    | `reactions` (0104)                |
+| `getDocumentTemplate("folio")`      | `document_templates` (0105)       |
 | `getMealReport(from, to)`           | `meal_report(from, to)`           |
 
 **Two signatures carry the room-count rule.** The client operates properties
@@ -1958,6 +1959,57 @@ anywhere else. Collapsed height must stay constant regardless of room count.
       + Client secret (its OAuth client credentials), Flexipass Account + API
       key, Sweeply Property ID + API key. Labels live in
       `src/lib/system-connections.ts`.
+  - **OTHER -> TEMPLATES (0105) IS LIVE: THE HOTEL'S OWN INVOICE LAYOUT.**
+    The reference's "Folio/invoice template" -- Preview Folio Number, a
+    Liquid editor and a CSS editor (line numbers, full screen), Is Active,
+    PREVIEW, LOAD DEFAULTS, SAVE TEMPLATE; "?" lists the variables and the
+    columns icon stacks the editors (`templates-panel.tsx`). With Is Active
+    ticked, `/bookings/[id]/invoice` prints the template instead of the
+    built-in layout. One row per property per kind; only `folio` exists.
+    - **ONE INVOICE, TWO LAYOUTS.** `loadInvoice()` in `src/lib/invoice-data.ts`
+      is what both are filled from, so a template arranges the figures and
+      can never arrive at different ones. `invoiceLiquidData()` hands a
+      template money already FORMATTED by `money.ts` beside its `_cents`, so
+      no template does arithmetic on money. `TEMPLATE_VARIABLES` in
+      `invoice-template-defaults.ts` lists them for the "?" popover; the two
+      change together. LOAD DEFAULTS is the built-in invoice written in Liquid.
+    - **THIS IS BROWSER-TYPED HTML PRINTED IN EVERY STAFF SESSION, and it is
+      only acceptable because of `src/lib/document-template.ts`, the one place
+      a template is rendered.** Unsanitised, a manager could plant script that
+      runs in an administrator's session. So:
+      - **The output goes through `sanitize-html` on the server**: layout tags,
+        images and links with class and style; no script, event handlers,
+        `javascript:` URLs, iframes, objects, forms -- and no `id`, which can
+        shadow a global the page's own scripts read.
+      - **Output is escaped by default** (`outputEscape`): a guest's name comes
+        from the public booking page and prints as text. `| raw` is the
+        template author's explicit opt-out, and the sanitiser still runs after.
+      - **The CSS cannot close its own `<style>`**: every `<` is written as a
+        CSS escape (`safeCss()`).
+      - **Liquid cannot read files**: `include`, `render` and `layout` look in
+        a file system with nothing in it. Parse, render and memory limits stop
+        a runaway loop; only own properties are readable. Each was tried
+        against the engine, not assumed.
+      - **The preview is in a sandboxed frame** (`sandbox=""`: no script, no
+        same origin) as well, so a gap in the sanitiser could not reach the
+        settings session either. The printed invoice cannot be framed that
+        way -- a frame does not print past its own height -- so there the
+        sanitiser is the defence.
+    - **The rest of the app is still plain text, deliberately.** The notes
+      elsewhere that say "no sanitiser in this codebase" were true when
+      written; there is one now (`liquidjs` and `sanitize-html` are
+      dependencies as of 0105), but moving the registration card, email
+      templates or booking-engine documents to HTML is its own decision.
+    - A template that fails to render prints the built-in layout, with the
+      error above it on screen only. PREVIEW takes a folio number (a meeting
+      room folio is refused by name) or, blank, fills a sample invoice dated
+      by the business date. Not copied: the pencil beside the title, whose
+      action has not been seen.
+  - **COUNTRY-SPECIFIC SETTINGS IS NOT DRAWN.** The reference's is an empty
+    page for this hotel ("settings that are specific for your country, if
+    present"); an item with nothing behind it is a dead control. It goes in
+    when a country needs something -- a fiscal invoice scheme, a police
+    guest register.
   - **OTHER -> REACTIONS (0104) IS STORED, NOT YET RUN.** The reference's
     list (Title / Description, Event as bullets, Enabled, copy, edit, delete),
     the Triggers | Tasks switch, ADD REACTION and the form -- Task, Title,
@@ -1984,9 +2036,6 @@ anywhere else. Collapsed height must stay constant regardless of room count.
       0104 checks change together.
     - Cancel and Save use this app's buttons, not the reference's orange and
       green: those are not in the design tokens.
-    - **Templates and Country-Specific Settings are not drawn** under Other:
-      neither has been seen, and a sidebar item with nothing behind it is a
-      dead control.
   - **CONNECTIVITY -> API KEY AND DEVELOPER KEYS (0101) OPEN A READ-ONLY
     PUBLIC API, at the client's request.** `/api/public/v1/<property>/` --
     the reference's "Endpoint" -- with `room-types`, `rate-plans`,

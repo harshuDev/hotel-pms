@@ -1,20 +1,10 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { format, parseISO } from "date-fns";
 import { PrintButton } from "@/components/bookings/print-button";
-import { countryName } from "@/lib/countries";
 import { formatMoney } from "@/lib/money";
-import {
-  getBookingDetail,
-  getBookingFolioLines,
-  getBookingInvoiceLines,
-  getBookingRoomLines,
-  getBusinessDate,
-  getInvoiceSettings,
-  getPropertyCurrency,
-  getPropertySettings,
-} from "@/lib/queries";
-import { invoiceRows } from "@/lib/invoice";
+import { getDocumentTemplate } from "@/lib/queries";
+import { invoiceDay, invoiceLiquidData, loadInvoice } from "@/lib/invoice-data";
+import { renderInvoiceTemplate } from "@/lib/document-template";
 
 export const metadata = { title: "Invoice" };
 
@@ -42,6 +32,13 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
  * folio is made on the first charge, so it is the lowest number the booking
  * carries; nothing posted means no folio and no number yet. The custom scheme
  * behind "Enable Custom Invoice Number Settings" is stored, not yet live.
+ *
+ * THE HOTEL'S OWN TEMPLATE (0105), when Settings -> Other -> Templates has one
+ * active, replaces the layout below. It is filled from the same
+ * `loadInvoice()` figures and rendered and SANITISED on the server by
+ * `renderInvoiceTemplate()` -- the only reason printing browser-typed HTML
+ * here is acceptable. A template that fails to render prints the built-in
+ * layout, with the error above it where only the screen shows it.
  */
 
 export default async function InvoicePage({
@@ -52,122 +49,96 @@ export default async function InvoicePage({
   const { id } = await params;
   if (!UUID.test(id)) notFound();
 
-  const detail = await getBookingDetail(id);
-  if (!detail) notFound();
+  const [v, template] = await Promise.all([loadInvoice(id), getDocumentTemplate("folio")]);
+  if (!v) notFound();
 
-  const [lines, folio, rooms, property, settings, currency, today] = await Promise.all([
-    getBookingInvoiceLines(id),
-    getBookingFolioLines(id),
-    getBookingRoomLines(id),
-    getPropertySettings(),
-    getInvoiceSettings(),
-    getPropertyCurrency(),
-    getBusinessDate(),
-  ]);
+  const rendered =
+    template?.isActive && template.liquid.trim() !== ""
+      ? await renderInvoiceTemplate(template.liquid, template.css, invoiceLiquidData(v))
+      : null;
 
-  const money = (cents: number) => formatMoney(cents, currency);
-  const day = (d: string) => format(parseISO(d), "d MMM yyyy");
+  const toolbar = (
+    <div className="mb-4 flex items-center justify-between gap-3 print:hidden">
+      <Link
+        href={`/bookings/${v.bookingId}`}
+        className="text-[13px] text-ink-muted underline-offset-2 hover:text-ink hover:underline"
+      >
+        ← {v.reference}
+      </Link>
+      <PrintButton />
+    </div>
+  );
 
-  /* Who the invoice is from: the override where it is set, else the hotel. */
-  const issuer = settings.companyName ?? property.name;
-  const overridden =
-    settings.address || settings.city || settings.region || settings.postcode || settings.country;
-  const issuerAddress = (
-    overridden
-      ? [settings.address, settings.city, settings.region, settings.postcode, countryName(settings.country)]
-      : [
-          property.addressLine1,
-          property.addressLine2,
-          property.city,
-          property.region,
-          property.postcode,
-          countryName(property.country),
-        ]
-  )
-    .filter((x) => x && String(x).trim() !== "")
-    .join(", ");
+  if (rendered?.ok) {
+    return (
+      <div className="mx-auto max-w-4xl">
+        {toolbar}
+        {/* Sanitised HTML and escaped CSS, from renderInvoiceTemplate(). */}
+        <style dangerouslySetInnerHTML={{ __html: rendered.css }} />
+        <div dangerouslySetInnerHTML={{ __html: rendered.html }} />
+      </div>
+    );
+  }
 
-  /* The one room an extra can be said to belong to, if there is exactly one. */
-  const liveRooms = rooms.filter((r) => r.status !== "canceled");
-  const soleRoom = liveRooms.length === 1 ? liveRooms[0].roomNumber ?? null : null;
-
-  const rows = invoiceRows(lines, {
-    showNightsBreakdown: settings.showNightsBreakdown,
-    showRoomNumberForExtras: settings.showRoomNumberForExtras,
-    soleRoom,
-  });
-
-  const payments = folio.filter((f) => f.kind === "payment");
-  const invoiceNumber = folio.length > 0 ? Math.min(...folio.map((f) => f.folioNumber)) : null;
-  const net = rows.reduce((s, r) => s + r.netCents, 0);
-  const tax = rows.reduce((s, r) => s + r.taxCents, 0);
-  // Total, paid and due are the booking's own figures -- the ones the Folio
-  // tab shows -- so the printout cannot disagree with the screen.
-  const showRoom = rows.some((r) => r.room);
-  const vat = settings.vatRegistered;
+  const money = (cents: number) => formatMoney(cents, v.currency);
+  const day = invoiceDay;
+  const vat = v.vatRegistered;
 
   const th = "px-2 py-2 text-left text-[11.5px] font-semibold uppercase tracking-[0.08em] text-ink-faint";
   const td = "px-2 py-1.5 text-[13px] text-ink";
 
   return (
     <div className="mx-auto max-w-3xl">
-      <div className="mb-4 flex items-center justify-between gap-3 print:hidden">
-        <Link
-          href={`/bookings/${detail.bookingId}`}
-          className="text-[13px] text-ink-muted underline-offset-2 hover:text-ink hover:underline"
-        >
-          ← {detail.reference}
-        </Link>
-        <PrintButton />
-      </div>
+      {toolbar}
+      {rendered && !rendered.ok && (
+        <p role="alert" className="mb-3 rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-[12.5px] text-rose-800 print:hidden">
+          The folio template could not be rendered: {rendered.error}. This is the built-in layout.
+        </p>
+      )}
 
       <article className="rounded-lg border border-line bg-white p-8 shadow-card print:rounded-none print:border-0 print:p-0 print:shadow-none">
         <header className="flex flex-wrap items-start justify-between gap-6 border-b-2 border-ink pb-4">
           <div className="min-w-0">
-            {!settings.useTextInsteadOfLogo && settings.logoUrl ? (
+            {v.logoUrl ? (
               // eslint-disable-next-line @next/next/no-img-element -- the bucket
               // is a runtime host; next/image would need it in remotePatterns.
-              <img src={settings.logoUrl} alt={issuer} className="mb-3 max-h-20 max-w-[16rem] object-contain" />
-            ) : settings.useTextInsteadOfLogo && settings.logoText ? (
+              <img src={v.logoUrl} alt={v.issuer} className="mb-3 max-h-20 max-w-[16rem] object-contain" />
+            ) : v.logoText ? (
               <p className="mb-2 font-display text-[22px] font-semibold tracking-tightest text-ink">
-                {settings.logoText}
+                {v.logoText}
               </p>
             ) : null}
-            <p className="text-[14px] font-semibold text-ink">{issuer}</p>
-            {issuerAddress && <p className="mt-0.5 text-[12.5px] text-ink-muted">{issuerAddress}</p>}
-            {(property.phone || property.email) && (
+            <p className="text-[14px] font-semibold text-ink">{v.issuer}</p>
+            {v.issuerAddress && <p className="mt-0.5 text-[12.5px] text-ink-muted">{v.issuerAddress}</p>}
+            {(v.phone || v.email) && (
               <p className="text-[12.5px] text-ink-muted">
-                {[property.phone, property.email].filter(Boolean).join(" · ")}
+                {[v.phone, v.email].filter(Boolean).join(" · ")}
               </p>
             )}
           </div>
           <div className="text-right">
             <p className="font-display text-[20px] font-semibold tracking-tightest text-ink">Invoice</p>
-            {invoiceNumber !== null && (
-              <p className="tnum mt-1 text-[13px] text-ink">No. {invoiceNumber}</p>
+            {v.invoiceNumber !== null && (
+              <p className="tnum mt-1 text-[13px] text-ink">No. {v.invoiceNumber}</p>
             )}
-            <p className="tnum text-[13px] text-ink-muted">{detail.reference}</p>
-            <p className="tnum text-[13px] text-ink-muted">{day(today)}</p>
+            <p className="tnum text-[13px] text-ink-muted">{v.reference}</p>
+            <p className="tnum text-[13px] text-ink-muted">{day(v.date)}</p>
           </div>
         </header>
 
         <section className="mt-5 grid gap-6 sm:grid-cols-2">
           <div>
             <p className="text-[11.5px] font-semibold uppercase tracking-[0.08em] text-ink-faint">Bill to</p>
-            <p className="mt-1 text-[14px] text-ink">{detail.customerName}</p>
-            {detail.customerEmail && <p className="text-[12.5px] text-ink-muted">{detail.customerEmail}</p>}
-            {detail.customerPhone && <p className="text-[12.5px] text-ink-muted">{detail.customerPhone}</p>}
+            <p className="mt-1 text-[14px] text-ink">{v.guest.name}</p>
+            {v.guest.email && <p className="text-[12.5px] text-ink-muted">{v.guest.email}</p>}
+            {v.guest.phone && <p className="text-[12.5px] text-ink-muted">{v.guest.phone}</p>}
           </div>
           <div className="sm:text-right">
             <p className="text-[11.5px] font-semibold uppercase tracking-[0.08em] text-ink-faint">Stay</p>
             <p className="tnum mt-1 text-[13px] text-ink">
-              {day(detail.checkIn)} – {day(detail.checkOut)}
+              {day(v.checkIn)} – {day(v.checkOut)}
             </p>
-            <p className="text-[12.5px] text-ink-muted">
-              {liveRooms
-                .map((r) => (r.roomNumber ? `${r.roomNumber} · ${r.roomTypeName}` : r.roomTypeName))
-                .join(", ")}
-            </p>
+            <p className="text-[12.5px] text-ink-muted">{v.roomsLabel}</p>
           </div>
         </section>
 
@@ -176,25 +147,25 @@ export default async function InvoicePage({
             <tr className="border-b border-line">
               <th className={th}>Date</th>
               <th className={th}>Description</th>
-              {showRoom && <th className={th}>Room</th>}
+              {v.showRoom && <th className={th}>Room</th>}
               {vat && <th className={`${th} text-right`}>Net</th>}
               {vat && <th className={`${th} text-right`}>VAT</th>}
               <th className={`${th} text-right`}>{vat ? "Total" : "Amount"}</th>
             </tr>
           </thead>
           <tbody>
-            {rows.length === 0 ? (
+            {v.rows.length === 0 ? (
               <tr>
                 <td colSpan={6} className="px-2 py-6 text-center text-[13px] text-ink-muted">
                   Nothing charged yet.
                 </td>
               </tr>
             ) : (
-              rows.map((r) => (
+              v.rows.map((r) => (
                 <tr key={r.key} className="border-b border-line/70">
                   <td className={`${td} tnum whitespace-nowrap`}>{day(r.date)}</td>
                   <td className={td}>{r.description}</td>
-                  {showRoom && <td className={`${td} tnum`}>{r.room ?? ""}</td>}
+                  {v.showRoom && <td className={`${td} tnum`}>{r.room ?? ""}</td>}
                   {vat && <td className={`${td} tnum text-right`}>{money(r.netCents)}</td>}
                   {vat && <td className={`${td} tnum text-right`}>{money(r.taxCents)}</td>}
                   <td className={`${td} tnum text-right`}>{money(r.grossCents)}</td>
@@ -209,39 +180,39 @@ export default async function InvoicePage({
             <>
               <div className="flex justify-between py-0.5 text-ink-muted">
                 <span>Net</span>
-                <span className="tnum">{money(net)}</span>
+                <span className="tnum">{money(v.netCents)}</span>
               </div>
               <div className="flex justify-between py-0.5 text-ink-muted">
                 <span>VAT</span>
-                <span className="tnum">{money(tax)}</span>
+                <span className="tnum">{money(v.taxCents)}</span>
               </div>
             </>
           )}
           <div className="flex justify-between border-t border-line py-1 font-semibold text-ink">
             <span>Total</span>
-            <span className="tnum">{money(detail.chargesCents)}</span>
+            <span className="tnum">{money(v.totalCents)}</span>
           </div>
-          {payments.length > 0 && (
+          {v.payments.length > 0 && (
             <p className="pt-2 text-[11.5px] font-semibold uppercase tracking-[0.08em] text-ink-faint">Paid</p>
           )}
-          {payments.map((p) => (
-            <div key={p.lineId} className="flex justify-between py-0.5 text-ink-muted">
+          {v.payments.map((p) => (
+            <div key={p.key} className="flex justify-between py-0.5 text-ink-muted">
               <span>
                 {p.description}
-                {p.isReversal ? " (reversed)" : ""}, {day(p.businessDate)}
+                {p.reversed ? " (reversed)" : ""}, {day(p.date)}
               </span>
               <span className="tnum">{money(p.amountCents)}</span>
             </div>
           ))}
           <div className="mt-1 flex justify-between border-t-2 border-ink py-1 font-semibold text-ink">
             <span>Balance due</span>
-            <span className="tnum">{money(detail.balanceCents)}</span>
+            <span className="tnum">{money(v.balanceCents)}</span>
           </div>
         </section>
 
-        {settings.notes && (
+        {v.notes && (
           <p className="mt-8 whitespace-pre-line border-t border-line pt-4 text-[12.5px] leading-relaxed text-ink-muted">
-            {settings.notes}
+            {v.notes}
           </p>
         )}
       </article>

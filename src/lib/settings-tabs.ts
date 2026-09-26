@@ -54,6 +54,7 @@ export const SETTINGS_TABS = [
   "housekeeping-systems",
   "channels",
   "reactions",
+  "templates",
 ] as const;
 
 export type SettingsTab = (typeof SETTINGS_TABS)[number];
@@ -167,10 +168,14 @@ export const SETTINGS_NAV: {
     ],
   },
   {
-    // The reference also lists Templates and Country-Specific Settings here;
-    // neither has been seen, and a sidebar item with nothing behind it is a
-    // dead control, so they go in when they are built.
+    // The reference also lists Country-Specific Settings here. Theirs is an
+    // empty page ("settings that are specific for your country, if
+    // present"), and a sidebar item with nothing behind it is a dead
+    // control, so it goes in when a country needs something.
     title: "Other",
-    items: [{ id: "reactions", label: "Reactions" }],
+    items: [
+      { id: "reactions", label: "Reactions" },
+      { id: "templates", label: "Templates" },
+    ],
   },
 ];

@@ -1701,6 +1701,44 @@ export type Database = {
           },
         ]
       }
+      document_templates: {
+        Row: {
+          css: string
+          id: string
+          is_active: boolean
+          kind: string
+          liquid: string
+          property_id: string
+          updated_at: string
+        }
+        Insert: {
+          css?: string
+          id?: string
+          is_active?: boolean
+          kind: string
+          liquid?: string
+          property_id: string
+          updated_at?: string
+        }
+        Update: {
+          css?: string
+          id?: string
+          is_active?: boolean
+          kind?: string
+          liquid?: string
+          property_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_templates_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       email_templates: {
         Row: {
           body: string | null
@@ -6326,6 +6364,15 @@ export type Database = {
           p_title: string
         }
         Returns: string
+      }
+      save_document_template: {
+        Args: {
+          p_css: string
+          p_is_active: boolean
+          p_kind: string
+          p_liquid: string
+        }
+        Returns: undefined
       }
       save_email_footer: { Args: { p_footer: string }; Returns: undefined }
       save_email_general: {

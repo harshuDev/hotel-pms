@@ -3077,6 +3077,20 @@ export async function getReactions(): Promise<Reaction[]> {
   }));
 }
 
+/** A document template (0105). Null when the hotel has never saved one. */
+export async function getDocumentTemplate(
+  kind: "folio",
+): Promise<{ liquid: string; css: string; isActive: boolean } | null> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("document_templates")
+    .select("liquid, css, is_active")
+    .eq("kind", kind)
+    .maybeSingle();
+  if (error) throw new Error(`Failed to load the template: ${error.message}`);
+  return data ? { liquid: data.liquid, css: data.css, isActive: data.is_active } : null;
+}
+
 /** Accounting Systems (0087), in the order they were added. Stored, not live. */
 export async function getAccountingSystems(): Promise<AccountingSystem[]> {
   const supabase = await createClient();

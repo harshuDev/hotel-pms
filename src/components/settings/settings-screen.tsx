@@ -49,6 +49,7 @@ import { BookingWidgetPanel } from "@/components/settings/booking-widget-panel";
 import { ApiKeyPanel, DeveloperKeysPanel, type DeveloperKey } from "@/components/settings/api-keys-panel";
 import { SystemConnectionsPanel } from "@/components/settings/system-connections-panel";
 import { ReactionsPanel } from "@/components/settings/reactions-panel";
+import { TemplatesPanel } from "@/components/settings/templates-panel";
 import type { Reaction } from "@/lib/reactions";
 import type { SystemConnection } from "@/lib/system-connections";
 import type { BookingWidget } from "@/lib/booking-widgets";
@@ -229,6 +230,7 @@ export function SettingsScreen({
   apiKeys,
   systemConnections,
   reactions,
+  folioTemplate,
 }: {
   tab: SettingsTab;
   property: PropertySettings;
@@ -286,6 +288,8 @@ export function SettingsScreen({
   systemConnections: SystemConnection[];
   /** Reactions (0104); loaded only on their tab. */
   reactions: Reaction[];
+  /** The folio/invoice template (0105); loaded only on its tab. */
+  folioTemplate: { liquid: string; css: string; isActive: boolean } | null;
   roomTypes: RoomTypeSetting[];
   rooms: RoomSettingsPage;
   roomQuery: string;
@@ -1155,6 +1159,9 @@ export function SettingsScreen({
         />
       )}
 
+      {tab === "templates" && (
+        <TemplatesPanel template={folioTemplate} canEdit={canEdit} pending={pending} run={run} />
+      )}
       {tab === "reactions" && (
         <ReactionsPanel
           reactions={reactions}
