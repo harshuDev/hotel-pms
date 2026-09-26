@@ -925,6 +925,58 @@ export async function deleteBookingWidget(id: string): Promise<ActionResult<null
   return { ok: true, data: null };
 }
 
+/* -- Connectivity -> API Key and Developer Keys (0101) --------------------- */
+
+/** Makes or replaces the hotel's API Key and returns it -- the one time it is shown. */
+export async function generateApiKey(): Promise<ActionResult<{ key: string }>> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("generate_api_key");
+  if (error) return { ok: false, error: error.message };
+  revalidateSettings();
+  return { ok: true, data: { key: data as string } };
+}
+
+/** Makes a developer key and returns it -- the one time it is shown. */
+export async function createDeveloperKey(
+  name: string,
+  permissions: string[],
+): Promise<ActionResult<{ key: string }>> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("create_developer_key", {
+    p_name: name,
+    p_permissions: permissions,
+  });
+  if (error) return { ok: false, error: error.message };
+  revalidateSettings();
+  return { ok: true, data: { key: data as string } };
+}
+
+export async function updateDeveloperKey(input: {
+  id: string;
+  name: string;
+  permissions: string[];
+  isActive: boolean;
+}): Promise<ActionResult<null>> {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("update_developer_key", {
+    p_id: input.id,
+    p_name: input.name,
+    p_permissions: input.permissions,
+    p_is_active: input.isActive,
+  });
+  if (error) return { ok: false, error: error.message };
+  revalidateSettings();
+  return { ok: true, data: null };
+}
+
+export async function deleteDeveloperKey(id: string): Promise<ActionResult<null>> {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("delete_developer_key", { p_id: id });
+  if (error) return { ok: false, error: error.message };
+  revalidateSettings();
+  return { ok: true, data: null };
+}
+
 /* -- Finances -> Accounting Systems (0087) -------------------------------- */
 
 export async function saveAccountingSystem(input: {

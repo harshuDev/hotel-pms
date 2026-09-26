@@ -27,6 +27,7 @@ import type { CancellationTerms } from "@/lib/cancellation-policy";
 import type { ChannelManager, ChannelManagerProvider } from "@/lib/channel-managers";
 import type { BookingEngineProfile, BookingEngineTexts } from "@/lib/booking-engine";
 import type { BookingWidget } from "@/lib/booking-widgets";
+import type { ApiPermission } from "@/lib/api-keys";
 import {
   DEFAULT_INVENTORY_SETTINGS,
   type InventorySettings,
@@ -3001,6 +3002,36 @@ export async function getBookingWidgets(): Promise<BookingWidget[]> {
     borderColor: r.border_color,
     language: r.language,
   }));
+}
+
+/**
+ * The API Key and the Developer Keys (0101) -- hints only. A key's full text
+ * exists once, in the response that made it; only its hash is stored.
+ */
+export async function getApiKeys(): Promise<{
+  main: { hint: string; createdAt: string } | null;
+  developer: { id: string; name: string; hint: string; permissions: ApiPermission[]; isActive: boolean }[];
+}> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("api_keys")
+    .select("id, kind, name, key_hint, permissions, is_active, created_at")
+    .order("created_at");
+  if (error) throw new Error(`Failed to load the API keys: ${error.message}`);
+  const rows = data ?? [];
+  const main = rows.find((r) => r.kind === "main");
+  return {
+    main: main ? { hint: main.key_hint, createdAt: main.created_at } : null,
+    developer: rows
+      .filter((r) => r.kind === "developer")
+      .map((r) => ({
+        id: r.id,
+        name: r.name ?? "",
+        hint: r.key_hint,
+        permissions: r.permissions as ApiPermission[],
+        isActive: r.is_active,
+      })),
+  };
 }
 
 /** Accounting Systems (0087), in the order they were added. Stored, not live. */

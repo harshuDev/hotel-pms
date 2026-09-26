@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0100` are
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0101` are
 applied to the hosted database.
 
 Working on real data: dashboard (house board, movements, pace, activity feed),
@@ -273,6 +273,7 @@ Each read is a Postgres view or RPC, never aggregation in the client:
 | `getChannelManagers()`              | `channel_managers` (0097)         |
 | `getBookingEngineSettings()`        | `booking_engine_settings` + `booking_engine_profiles` (0098) |
 | `getBookingWidgets()`               | `booking_widgets` (0100)          |
+| `getApiKeys()`                      | `api_keys` -- hints only (0101)   |
 | `getMealReport(from, to)`           | `meal_report(from, to)`           |
 
 **Two signatures carry the room-count rule.** The client operates properties
@@ -405,7 +406,9 @@ the component.
   0100: the four below plus `public_hotel_policies`,
   `public_room_type_facilities`, `public_room_type_content`,
   `public_language_settings` (0078), `public_booking_engine` (0098) and
-  `public_booking_widget` (0100)), the two policy helpers, and the
+  `public_booking_widget` (0100)), the five public API functions
+  (`api_property`, `api_room_types`, `api_rate_plans`, `api_availability`,
+  `api_rates`, 0101, useless without a key), the two policy helpers, and the
   `btree_gist` extension's own internals. Four older functions held it through PUBLIC instead and needed
   `from public`; both revokes exist for a reason.
 - **A null role is not a refusal unless you write it as one.**
@@ -457,7 +460,10 @@ the component.
 **Data access**
 
 - Server Components for reads. Server Actions for writes.
-- No API routes except external webhooks.
+- No API routes except external webhooks **and the read-only public API
+  under `/api/public/v1/` (0101)**, which the client asked for. That is the
+  whole exception: anything else that looks like it wants a route is a Server
+  Action. See the Connectivity -> API Key notes.
 - Aggregation happens in Postgres views or RPCs, never in the client.
 
 ## Design system — match it, don't invent
@@ -1928,6 +1934,42 @@ anywhere else. Collapsed height must stay constant regardless of room count.
       the button says to tick two rather than being disabled.
     - `save_channel()` was DROPPED and recreated with `p_customer_id` -- the
       overload trap.
+  - **CONNECTIVITY -> API KEY AND DEVELOPER KEYS (0101) OPEN A READ-ONLY
+    PUBLIC API, at the client's request.** `/api/public/v1/<property>/` --
+    the reference's "Endpoint" -- with `room-types`, `rate-plans`,
+    `availability?from=&to=` and `rates?from=&to=&rate_plan=` (nights
+    inclusive, at most 366). JSON `{ "data": ... }`, money as integer
+    `rate_cents` with the currency beside it, a null rate is "no rate loaded".
+    Screens in `api-keys-panel.tsx`; routes in `src/app/api/public/v1/`,
+    helper `src/lib/public-api.ts`.
+    - **THE ONE EXCEPTION TO "NO API ROUTES"**, and read-only. Writing through
+      it (a booking push) is its own decision: it would go through
+      `create_public_booking()`'s limits, never `create_booking()`'s.
+    - **No service-role key, no session.** A route calls one `api_*`
+      `security definer` function as `anon`; each calls `api_authorize()`
+      FIRST -- unknown, revoked or other-hotel key raises HA401, a developer
+      key without the endpoint's permission HA403, a bad range HA400 -- and
+      the route maps those to 401/403/400, anything else to a bare 500. An
+      unknown property answers exactly like a bad key. `api_authorize()` is
+      granted to nobody.
+    - **Keys: `Authorization: Bearer` or `X-Api-Key`, NEVER the query string**
+      (a key in a URL lands in every access log). `api_keys` holds the hotel's
+      one API Key (`kind = 'main'`, every permission) and named Developer Keys
+      (permissions per endpoint, Is Active, delete). **Only a SHA-256 hash is
+      stored**: a key is shown in full once, when made, then only as a hint.
+      This is a deliberate difference from the reference, whose key stays on
+      screen -- which is how a live one reached a screenshot in this project's
+      chat. Regenerating the API Key, unticking Is Active or deleting stops a
+      key at once. Revenue staff only, even for hints.
+    - **One copy of the inventory logic.** `inventory_grid()` is now a wrapper
+      round `inventory_grid_for(property, ...)`, which the API reads too --
+      the `stay_rule_violation_for()` move. Output unchanged (tested).
+    - `/api/public/` is excluded from the middleware matcher: no session to
+      refresh, and it must never redirect to /login.
+    - **Not done: rate limiting** (belongs in front of the API, like the guest
+      endpoint's), CORS (server-to-server use; a key in browser code is a
+      published key), and a last-used date (the read path writes nothing).
+      **The permission names are ours** -- the reference's list was empty.
   - **CONNECTIVITY -> BOOKING WIDGET (0100) IS LIVE.** The reference's Saved
     Widgets (hash code, edit, delete, "Create new widget") and the widget form
     -- five texts with 0/255 counters, "Show occupancy options", "Use Checkout
