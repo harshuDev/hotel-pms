@@ -1651,6 +1651,10 @@ export async function getTaxRates(): Promise<TaxRate[]> {
     .from("tax_rates")
     .select("id, name, rate_bps, inclusion")
     .eq("is_active", true)
+    // The order set on Tax Information (0079). The booking form seeds its tax
+    // field with the FIRST of these, so dragging a rate to the top is how a
+    // hotel says which rate a booking gets by default.
+    .order("sort_order")
     .order("name");
 
   if (error) {
@@ -2916,6 +2920,8 @@ export async function getTaxRateSettings(): Promise<TaxRateSetting[]> {
       inclusion: "inclusive" | "exclusive";
       is_active: boolean;
       charge_count: number;
+      sort_order: number;
+      in_use: boolean;
     }[]
   ).map((row) => ({
     id: row.id,
@@ -2924,6 +2930,8 @@ export async function getTaxRateSettings(): Promise<TaxRateSetting[]> {
     inclusion: row.inclusion,
     isActive: row.is_active,
     chargeCount: Number(row.charge_count ?? 0),
+    sortOrder: row.sort_order,
+    inUse: row.in_use,
   }));
 }
 
@@ -3047,8 +3055,9 @@ export async function getPaymentMethodSettings(): Promise<PaymentMethodSetting[]
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("payment_methods")
-    .select("id, name, kind, affects_drawer, is_active, payments(count)")
-    .order("is_active", { ascending: false })
+    .select("id, name, description, kind, affects_drawer, is_active, created_at, payments(count)")
+    // In the order they were added, as the reference lists its payment types.
+    .order("created_at")
     .order("name");
 
   if (error) {
@@ -3062,11 +3071,13 @@ export async function getPaymentMethodSettings(): Promise<PaymentMethodSetting[]
       kind: PaymentMethodKind;
       affects_drawer: boolean;
       is_active: boolean;
+      description: string | null;
       payments: { count: number }[];
     }[]
   ).map((row) => ({
     id: row.id,
     name: row.name,
+    description: row.description,
     kind: row.kind,
     affectsDrawer: row.affects_drawer,
     isActive: row.is_active,
