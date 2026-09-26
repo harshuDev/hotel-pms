@@ -41,6 +41,7 @@ import {
   getBookingWidgets,
   getApiKeys,
   getSystemConnections,
+  getReactions,
   getStaffSettings,
   getTaxRateSettings,
 } from "@/lib/queries";
@@ -99,6 +100,7 @@ export default async function SettingsPage({
     bookingWidgets,
     apiKeys,
     systemConnections,
+    reactions,
   ] = await Promise.all([
     getPropertySettings(),
     getRoomTypeSettings(),
@@ -143,6 +145,7 @@ export default async function SettingsPage({
       : tab === "housekeeping-systems"
         ? getSystemConnections("housekeeping")
         : Promise.resolve([]),
+    tab === "reactions" ? getReactions() : Promise.resolve([]),
   ]);
 
   /*
@@ -203,6 +206,7 @@ export default async function SettingsPage({
         bookingWidgets={bookingWidgets}
         apiKeys={apiKeys}
         systemConnections={systemConnections}
+        reactions={reactions}
       />
     </div>
   );

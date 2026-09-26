@@ -48,6 +48,8 @@ import { SalesChannelsPanel } from "@/components/settings/sales-channels-panel";
 import { BookingWidgetPanel } from "@/components/settings/booking-widget-panel";
 import { ApiKeyPanel, DeveloperKeysPanel, type DeveloperKey } from "@/components/settings/api-keys-panel";
 import { SystemConnectionsPanel } from "@/components/settings/system-connections-panel";
+import { ReactionsPanel } from "@/components/settings/reactions-panel";
+import type { Reaction } from "@/lib/reactions";
 import type { SystemConnection } from "@/lib/system-connections";
 import type { BookingWidget } from "@/lib/booking-widgets";
 import type { BookingEngineProfile, BookingEngineTexts } from "@/lib/booking-engine";
@@ -226,6 +228,7 @@ export function SettingsScreen({
   bookingWidgets,
   apiKeys,
   systemConnections,
+  reactions,
 }: {
   tab: SettingsTab;
   property: PropertySettings;
@@ -281,6 +284,8 @@ export function SettingsScreen({
   apiKeys: { main: { hint: string; createdAt: string } | null; developer: DeveloperKey[] } | null;
   /** Key lock or housekeeping systems (0102-0103), for whichever tab is open. */
   systemConnections: SystemConnection[];
+  /** Reactions (0104); loaded only on their tab. */
+  reactions: Reaction[];
   roomTypes: RoomTypeSetting[];
   rooms: RoomSettingsPage;
   roomQuery: string;
@@ -1150,6 +1155,17 @@ export function SettingsScreen({
         />
       )}
 
+      {tab === "reactions" && (
+        <ReactionsPanel
+          reactions={reactions}
+          channels={channels.map((c) => ({ id: c.id, label: c.name }))}
+          roomTypes={roomTypes.map((t) => ({ id: t.id, label: t.name }))}
+          ratePlans={ratePlans.map((p) => ({ id: p.id, label: p.name }))}
+          canEdit={canEdit}
+          pending={pending}
+          run={run}
+        />
+      )}
       {(tab === "key-lock-systems" || tab === "housekeeping-systems") && (
         <SystemConnectionsPanel
           // Remounted per tab, so a form open on one never carries to the other.

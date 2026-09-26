@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0103` are
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0104` are
 applied to the hosted database.
 
 Working on real data: dashboard (house board, movements, pace, activity feed),
@@ -275,6 +275,7 @@ Each read is a Postgres view or RPC, never aggregation in the client:
 | `getBookingWidgets()`               | `booking_widgets` (0100)          |
 | `getApiKeys()`                      | `api_keys` -- hints only (0101)   |
 | `getSystemConnections(category)`    | `system_connections` (0102-0103)  |
+| `getReactions()`                    | `reactions` (0104)                |
 | `getMealReport(from, to)`           | `meal_report(from, to)`           |
 
 **Two signatures carry the room-count rule.** The client operates properties
@@ -1957,6 +1958,35 @@ anywhere else. Collapsed height must stay constant regardless of room count.
       + Client secret (its OAuth client credentials), Flexipass Account + API
       key, Sweeply Property ID + API key. Labels live in
       `src/lib/system-connections.ts`.
+  - **OTHER -> REACTIONS (0104) IS STORED, NOT YET RUN.** The reference's
+    list (Title / Description, Event as bullets, Enabled, copy, edit, delete),
+    the Triggers | Tasks switch, ADD REACTION and the form -- Task, Title,
+    Description, Conditions (All / Any match, Add Condition, Add Group, two
+    levels of nesting) and Triggers (Create new trigger) -- in
+    `reactions-panel.tsx`. "Triggers" lists each event with the reactions it
+    would fire; "Tasks" is the list. Copy opens the form as a new reaction.
+    - **NOTHING FIRES A REACTION, and the two tasks have nothing to act on.**
+      Both are about PREPAYMENTS -- convert them to charges on check-in,
+      redeem them on cancellation -- and this schema has none: a payment
+      taken before arrival is already a payment on the folio (the Deposit
+      report's reading). Running either would change how money posts to
+      append-only tables, which is to be asked for, not slipped in.
+    - **A trigger is an event**, several per reaction, an array on the row.
+      **Conditions are a jsonb tree** (`{match, items}` of `{field, op,
+      value}` or nested groups) checked by `reaction_conditions_check()`:
+      known fields and operators, greater/less than only on numbers, a
+      channel, room type or rate plan that is on this property, a country
+      code, at most three levels and thirty conditions. Rows with no field
+      chosen are dropped on save.
+    - **PROVISIONAL, because no dropdown was seen open**: tasks beyond the two
+      shown, events beyond "After check in" and "After booking cancellation",
+      and every condition field and operator. `src/lib/reactions.ts` and the
+      0104 checks change together.
+    - Cancel and Save use this app's buttons, not the reference's orange and
+      green: those are not in the design tokens.
+    - **Templates and Country-Specific Settings are not drawn** under Other:
+      neither has been seen, and a sidebar item with nothing behind it is a
+      dead control.
   - **CONNECTIVITY -> API KEY AND DEVELOPER KEYS (0101) OPEN A READ-ONLY
     PUBLIC API, at the client's request.** `/api/public/v1/<property>/` --
     the reference's "Endpoint" -- with `room-types`, `rate-plans`,
