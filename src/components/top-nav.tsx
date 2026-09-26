@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { SearchOverlay } from "@/components/search-overlay";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { cn } from "@/components/ui";
 import { Chevron, Menu, MenuItem } from "@/components/menu";
 import { SECTIONS, isHrefActive, isSectionActive } from "@/lib/nav";
@@ -29,6 +29,12 @@ interface TopNavProps {
   propertyName: string;
   staffName: string;
   staffRole: StaffRole;
+  /**
+   * Menu entries a switched-off Hotel Feature takes away (0076). Required, so
+   * a caller that forgets the switches is a compile error rather than a nav
+   * quietly offering a screen the hotel turned off.
+   */
+  hiddenHrefs: string[];
 }
 
 export function TopNav({
@@ -36,8 +42,18 @@ export function TopNav({
   propertyName,
   staffName,
   staffRole,
+  hiddenHrefs,
 }: TopNavProps) {
   const pathname = usePathname();
+  // One filtered list for the bar and the drawer alike, so the two cannot
+  // disagree about what the hotel has switched off.
+  const sections = useMemo(
+    () =>
+      SECTIONS.map((s) =>
+        s.items ? { ...s, items: s.items.filter((i) => !hiddenHrefs.includes(i.href)) } : s,
+      ),
+    [hiddenHrefs],
+  );
   const router = useRouter();
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -128,7 +144,7 @@ export function TopNav({
         </Link>
 
         <nav aria-label="Main" className="ml-2 hidden items-center lg:flex">
-          {SECTIONS.map((s) => {
+          {sections.map((s) => {
             const active = isSectionActive(s, pathname);
 
             if (s.items) {
@@ -277,7 +293,7 @@ export function TopNav({
               aria-label="Main"
               className="flex-1 overflow-y-auto px-2.5 pb-4 pt-3"
             >
-              {SECTIONS.map((s) => {
+              {sections.map((s) => {
                 const active = isSectionActive(s, pathname);
 
                 if (s.items) {

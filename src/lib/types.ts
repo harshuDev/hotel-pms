@@ -1300,7 +1300,21 @@ export interface CalendarRoomBar {
    * board draws nothing rather than guessing one.
    */
   ratePlanName: string | null;
+  /** The booking source's code — shown when Calendar Settings asks (0077). */
+  channelCode: string | null;
+  /** Whole booking, worked out in Postgres; colours the value badge (0077). */
+  paymentState: BookingPaymentState;
+  isCompany: boolean;
+  /** Live rooms on the booking; more than one is a group. */
+  roomCount: number;
 }
+
+/**
+ * Whether a booking is paid, for the calendar (0077). Owed is the larger of
+ * what the stay is worth and what its folios have been charged; a booking
+ * prepaid to the channel is paid as far as this desk is concerned.
+ */
+export type BookingPaymentState = "unpaid" | "partial" | "paid";
 
 /* -------------------------------------------------------------------------- */
 /* The Rates grid: plans nested under room types (0054)                       */

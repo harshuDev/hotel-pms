@@ -10,6 +10,7 @@ import type { HotelPolicies } from "@/lib/hotel-policies";
 import type { ExtraItemType } from "@/lib/extras";
 import type { FacilityIcon } from "@/lib/facilities";
 import type { GuestFieldKind } from "@/lib/guest-config";
+import type { CalendarSettings } from "@/lib/calendar-settings";
 import type {
   CancellationPolicyKind,
   HousekeepingChoice,
@@ -450,6 +451,74 @@ export async function saveHotelEmailSettings(input: {
   });
   if (error) return { ok: false, error: error.message };
   revalidateSettings();
+  return { ok: true, data: null };
+}
+
+/* -- System Settings -> Hotel Features (0076) ------------------------------ */
+
+export async function saveHotelFeatures(
+  features: Record<string, boolean>,
+): Promise<ActionResult<null>> {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("save_hotel_features", { p_features: features });
+  if (error) return { ok: false, error: error.message };
+  // The switches take menu items out of the nav and change the calendar's
+  // housekeeping dots, so every page under the app layout is affected.
+  revalidatePath("/", "layout");
+  return { ok: true, data: null };
+}
+
+/* -- System Settings -> Calendar Settings (0077) --------------------------- */
+
+export async function saveCalendarSettings(
+  input: CalendarSettings,
+): Promise<ActionResult<null>> {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("save_calendar_settings", {
+    p_room_blocker_color: input.roomBlockerColor,
+    p_unpaid_booking_color: input.unpaidBookingColor,
+    p_paid_booking_color: input.paidBookingColor,
+    p_partially_paid_booking_color: input.partiallyPaidBookingColor,
+    p_company_booking_color: input.companyBookingColor,
+    p_group_booking_color: input.groupBookingColor,
+    p_weekend_border_color: input.weekendBorderColor,
+    p_rounded_corners: input.roundedCorners,
+    p_bookings_intersect_checkout: input.bookingsIntersectCheckout,
+    p_booking_marker_intersect_checkout: input.bookingMarkerIntersectCheckout,
+    p_fixed_width_zoom: input.fixedWidthZoom,
+    p_show_seasons: input.showSeasons,
+    p_show_channel_abbreviation: input.showChannelAbbreviation,
+    p_last_name_first: input.lastNameFirst,
+    p_hide_cancellation_area: input.hideCancellationArea,
+    p_show_waitlist: input.showWaitlist,
+  });
+  if (error) return { ok: false, error: error.message };
+  revalidateSettings();
+  revalidatePath("/calendar");
+  return { ok: true, data: null };
+}
+
+/* -- System Settings -> Language Settings (0078) --------------------------- */
+
+function revalidateLanguages() {
+  revalidateSettings();
+  // The guest booking page is what these settings drive.
+  revalidatePath("/book", "layout");
+}
+
+export async function saveDefaultLanguage(locale: string): Promise<ActionResult<null>> {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("save_default_language", { p_locale: locale });
+  if (error) return { ok: false, error: error.message };
+  revalidateLanguages();
+  return { ok: true, data: null };
+}
+
+export async function saveSupportedLanguages(locales: string[]): Promise<ActionResult<null>> {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("save_supported_languages", { p_locales: locales });
+  if (error) return { ok: false, error: error.message };
+  revalidateLanguages();
   return { ok: true, data: null };
 }
 

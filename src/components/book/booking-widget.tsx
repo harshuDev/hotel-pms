@@ -118,6 +118,7 @@ export function BookingWidget({
   property,
   ratePlans,
   locale,
+  languages,
   policies,
   facilities,
   content,
@@ -128,6 +129,11 @@ export function BookingWidget({
   property: PublicProperty;
   ratePlans: PublicRatePlan[];
   locale: Locale;
+  /**
+   * The languages the hotel offers, from Language Settings (0078). One
+   * language draws no picker -- a menu of one is a control that does nothing.
+   */
+  languages: Locale[];
   /** Null when the hotel has never saved its policies (0071). */
   policies: HotelPolicies | null;
   /** Each room type's facilities, keyed by room type (0071). */
@@ -349,17 +355,21 @@ export function BookingWidget({
             <span>
               {symbol} ({property.currency})
             </span>
-            <label htmlFor="lang" className="sr-only">{t.language}</label>
-            <select
-              id="lang"
-              value={locale}
-              onChange={(e) => changeLanguage(e.target.value)}
-              className="border-0 bg-transparent py-1 text-[13px] text-ink-muted outline-none focus:ring-2 focus:ring-brass/30"
-            >
-              {LOCALES.map((l) => (
-                <option key={l.code} value={l.code}>{l.label}</option>
-              ))}
-            </select>
+            {languages.length > 1 && (
+              <>
+                <label htmlFor="lang" className="sr-only">{t.language}</label>
+                <select
+                  id="lang"
+                  value={locale}
+                  onChange={(e) => changeLanguage(e.target.value)}
+                  className="border-0 bg-transparent py-1 text-[13px] text-ink-muted outline-none focus:ring-2 focus:ring-brass/30"
+                >
+                  {LOCALES.filter((l) => languages.includes(l.code)).map((l) => (
+                    <option key={l.code} value={l.code}>{l.label}</option>
+                  ))}
+                </select>
+              </>
+            )}
           </div>
         </div>
       </header>

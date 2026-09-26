@@ -1,9 +1,11 @@
-import { Fragment } from "react";
+import { Fragment, type CSSProperties } from "react";
 import Link from "next/link";
 import { AssignRoom } from "@/components/calendar/assign-room";
 import type { AssignTypeGroup } from "@/components/calendar/assign-room";
 import { RestoreBooking } from "@/components/calendar/restore-booking";
 import { RoomStatusMenu } from "@/components/calendar/room-status-menu";
+import type { HousekeepingMode } from "@/lib/hotel-features";
+import { inkOn, type CalendarSettings } from "@/lib/calendar-settings";
 import { differenceInCalendarDays, format, parseISO } from "date-fns";
 import { cn } from "@/components/ui";
 import { formatMoney } from "@/lib/money";
@@ -14,6 +16,7 @@ import type {
   BookingStatus,
   CalendarNote,
   CalendarRoom,
+  BookingPaymentState,
   CalendarRoomBar,
   RoomStatus,
   CalendarSeason,
@@ -178,6 +181,37 @@ interface BoardBar {
    * taken before 0037 recorded a plan at all.
    */
   ratePlanName?: string | null;
+  /*
+   * The four below come from the room-keyed read only (0077); the Cancelled
+   * row's read does not carry them, and a cancelled booking's payment state
+   * is not the question that band answers.
+   */
+  /** Null when Calendar Settings hides the channel, or the booking has none. */
+  channelCode?: string | null;
+  paymentState?: BookingPaymentState;
+  isCompany?: boolean;
+  roomCount?: number;
+}
+
+/**
+ * What Calendar Settings (0077) does to a bar and a column. Every one of these
+ * is set ONCE, as a CSS variable on the board's card, and read with `var()`
+ * where it is drawn -- so no row, band or bar has to be handed the settings,
+ * and a colour the hotel picks never becomes a class name Tailwind has not
+ * seen.
+ */
+const PAYMENT_LABEL: Record<BookingPaymentState, string> = {
+  unpaid: "Unpaid",
+  partial: "Part paid",
+  paid: "Paid",
+};
+
+/** Saturday and Sunday columns, edged in the Weekend Border Color. */
+const WEEKEND_EDGE = "inset 1px 0 0 var(--cal-weekend), inset -1px 0 0 var(--cal-weekend)";
+
+function isWeekend(date: string) {
+  const day = parseISO(date).getDay();
+  return day === 0 || day === 6;
 }
 
 interface Placed extends BoardBar {
@@ -331,17 +365,29 @@ async function Bars({
               `${bar.guests} guest${bar.guests === 1 ? "" : "s"}`,
               bar.ratePlanName,
               bar.roomNumber ? `room ${bar.roomNumber}` : null,
+              bar.channelCode,
+              bar.isCompany ? "Company booking" : (bar.roomCount ?? 1) > 1 ? `Group of ${bar.roomCount} rooms` : null,
               formatMoney(bar.valueCents, currency),
+              bar.paymentState ? PAYMENT_LABEL[bar.paymentState] : null,
             ]
               .filter(Boolean)
               .join(" · ")}
             className={cn(
               "absolute flex flex-col justify-between overflow-hidden border-2 bg-white pl-2 pt-1 shadow-card transition hover:shadow-lift",
               tone.edge,
-              bar.clipLeft ? "rounded-l-none border-l-0" : "rounded-l-md",
-              bar.clipRight ? "rounded-r-none border-r-0" : "rounded-r-md",
+              bar.clipLeft && "border-l-0",
+              bar.clipRight && "border-r-0",
             )}
             style={{
+              // "Use Rounded Corners" (0077): the radius is a variable on the
+              // card, 6px or nothing. A clipped end is square either way --
+              // the stay carries on past the edge of the board.
+              borderRadius: [
+                bar.clipLeft ? "0" : "var(--cal-radius)",
+                bar.clipRight ? "0" : "var(--cal-radius)",
+                bar.clipRight ? "0" : "var(--cal-radius)",
+                bar.clipLeft ? "0" : "var(--cal-radius)",
+              ].join(" "),
               left: bar.startIdx * COL_W + (bar.clipLeft ? 0 : 3),
               width:
                 (bar.endIdx - bar.startIdx) * COL_W -
@@ -351,6 +397,22 @@ async function Bars({
               height: BAR_H,
             }}
           >
+            {/*
+              Company and Group Booking Colors (0077): a stripe down the
+              leading edge, inside the border. A stripe rather than the fill,
+              so the status edge and the payment badge keep saying what they
+              already say. Company wins when both apply -- who is paying is the
+              more useful of the two at a desk.
+            */}
+            {(bar.isCompany || (bar.roomCount ?? 1) > 1) && (
+              <span
+                aria-hidden
+                className="absolute inset-y-0 left-0 w-1"
+                style={{
+                  backgroundColor: bar.isCompany ? "var(--cal-company)" : "var(--cal-group)",
+                }}
+              />
+            )}
             <span className="flex items-center gap-1.5 truncate text-[12.5px] font-medium leading-none text-ink">
               {/*
                 The reference marks a booking somebody has left a note on with
@@ -369,6 +431,12 @@ async function Bars({
               {bar.roomNumber && (
                 <span className="tnum shrink-0 rounded bg-shell px-1 text-xxs font-semibold text-ink-muted">
                   {bar.roomNumber}
+                </span>
+              )}
+              {/* "Show channel abbreviation for bookings" (0077). */}
+              {bar.channelCode && (
+                <span className="shrink-0 rounded border border-line px-1 text-xxs font-semibold uppercase text-ink-muted">
+                  {bar.channelCode}
                 </span>
               )}
               <span className="truncate">{bar.guestName}</span>
@@ -412,10 +480,27 @@ async function Bars({
               <span
                 // Flush into the corner, like the reference's, rather than
                 // floating inside the bar with padding all round it.
+                /*
+                  THE MONEY FIGURE CARRIES WHETHER IT IS PAID (0077), in the
+                  Unpaid / Partially Paid / Paid colours from Calendar
+                  Settings. It used to repeat the status colour, which the
+                  edge and the word already say. Text colour follows the fill,
+                  because white is unreadable on the reference's own amber.
+                  A bar with no payment state -- the Cancelled band -- keeps
+                  the status colour.
+                */
                 className={cn(
-                  "tnum shrink-0 rounded-tl px-1 text-xxs font-semibold text-white",
-                  tone.badge,
+                  "tnum shrink-0 rounded-tl px-1 text-xxs font-semibold",
+                  !bar.paymentState && cn("text-white", tone.badge),
                 )}
+                style={
+                  bar.paymentState
+                    ? {
+                        backgroundColor: `var(--cal-pay-${bar.paymentState})`,
+                        color: `var(--cal-pay-${bar.paymentState}-ink)`,
+                      }
+                    : undefined
+                }
               >
                 {formatMoney(bar.valueCents, currency)}
               </span>
@@ -521,7 +606,10 @@ function DayCells({
           bookHref &&
             "transition-colors hover:bg-brass-wash focus-visible:bg-brass-wash focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brass",
         );
-        const width = { width: COL_W };
+        const width = {
+          width: COL_W,
+          boxShadow: isWeekend(d) ? WEEKEND_EDGE : undefined,
+        };
         const figure =
           withFoot && cell ? (
             <span
@@ -873,6 +961,8 @@ export function CalendarBoard({
   bookHref,
   days,
   railW = RAIL_DEFAULT_W,
+  housekeeping,
+  look,
 }: {
   dates: string[];
   businessDate: string;
@@ -928,6 +1018,18 @@ export function CalendarBoard({
   bookHref: (date: string, roomTypeId: string) => string;
   days: number;
   railW?: number;
+  /**
+   * The two housekeeping Hotel Features (0076): `off` draws no dot, `view` a
+   * dot that only shows the status, `edit` the dot that opens the menu.
+   * Required, so a board drawn without the switches is a compile error.
+   */
+  housekeeping: HousekeepingMode;
+  /**
+   * Calendar Settings (0077). Required, so a board drawn without the hotel's
+   * choices is a compile error rather than one quietly in the defaults.
+   * Channel codes and name order arrive already applied to the bars.
+   */
+  look: CalendarSettings;
 }) {
   const gridW = dates.length * COL_W;
   const first = parseISO(dates[0]);
@@ -984,7 +1086,24 @@ export function CalendarBoard({
       wrong place — but that is the inner element's width, set below, not this
       one's.
     */
-    <div className="relative w-full overflow-hidden rounded-lg border border-line shadow-card">
+    <div
+      className="relative w-full overflow-hidden rounded-lg border border-line shadow-card"
+      // Calendar Settings, once, for everything inside to read with var().
+      style={
+        {
+          "--cal-radius": look.roundedCorners ? "6px" : "0px",
+          "--cal-weekend": look.weekendBorderColor,
+          "--cal-company": look.companyBookingColor,
+          "--cal-group": look.groupBookingColor,
+          "--cal-pay-unpaid": look.unpaidBookingColor,
+          "--cal-pay-unpaid-ink": inkOn(look.unpaidBookingColor),
+          "--cal-pay-partial": look.partiallyPaidBookingColor,
+          "--cal-pay-partial-ink": inkOn(look.partiallyPaidBookingColor),
+          "--cal-pay-paid": look.paidBookingColor,
+          "--cal-pay-paid-ink": inkOn(look.paidBookingColor),
+        } as CSSProperties
+      }
+    >
       {/*
         Paging sits OUTSIDE the scroller, over the season band. Inside it the
         two chevrons scrolled away with the dates, so once you had moved right
@@ -1125,7 +1244,7 @@ export function CalendarBoard({
                       "group/day shrink-0 border-b border-r border-board-line px-2 py-1.5 text-center last:border-r-0",
                       isToday ? "bg-white" : d < businessDate ? "bg-board-past" : "bg-white",
                     )}
-                    style={{ width: COL_W }}
+                    style={{ width: COL_W, boxShadow: isWeekend(d) ? WEEKEND_EDGE : undefined }}
                   >
                     <div className="flex items-center justify-center gap-1.5">
                       <span
@@ -1206,7 +1325,13 @@ export function CalendarBoard({
               className="relative border-b border-board-line bg-board"
               style={{ width: gridW }}
             >
-              {seasons.map((s) => {
+              {/*
+                "Show seasons in calendar" (0077). Off, the names and fills
+                go and the strip stays: the paging chevrons live on it, and
+                moving them into the date header would put them over the
+                first column's date.
+              */}
+              {look.showSeasons && seasons.map((s) => {
                 const startIdx = Math.max(
                   0,
                   differenceInCalendarDays(parseISO(s.startsOn), first),
@@ -1376,15 +1501,29 @@ export function CalendarBoard({
                           board is where somebody is already looking at the
                           room when they learn it has been cleaned.
                         */}
-                        <RoomStatusMenu
-                          roomId={room.roomId}
-                          roomNumber={room.roomNumber}
-                          status={room.roomStatus}
-                          isInspected={room.isInspected}
-                          doNotDisturb={room.doNotDisturb}
-                          dotClass={roomDot(room)}
-                          label={roomDotLabel(room)}
-                        />
+                        {housekeeping === "edit" && (
+                          <RoomStatusMenu
+                            roomId={room.roomId}
+                            roomNumber={room.roomNumber}
+                            status={room.roomStatus}
+                            isInspected={room.isInspected}
+                            doNotDisturb={room.doNotDisturb}
+                            dotClass={roomDot(room)}
+                            label={roomDotLabel(room)}
+                          />
+                        )}
+                        {/* Modification switched off: the status is still
+                            shown, but as a light, not a button -- a dot that
+                            looks pressable and does nothing is the thing the
+                            client had taken off the room-type rows. */}
+                        {housekeeping === "view" && (
+                          <span
+                            role="img"
+                            title={roomDotLabel(room)}
+                            aria-label={`Housekeeping for room ${room.roomNumber}: ${roomDotLabel(room)}`}
+                            className={cn("block h-2.5 w-2.5 shrink-0 rounded-full", roomDot(room))}
+                          />
+                        )}
                         <span className="tnum truncate text-[13px] font-medium text-white">
                           {room.roomNumber}
                         </span>
@@ -1469,19 +1608,26 @@ export function CalendarBoard({
             something to stick against -- an element cannot pin to the foot of
             a scroller when a flex-grow sibling sits below it.
           */}
-          <Gutter railW={railW} gridW={gridW} />
-          <ExtraRow
-            label="Cancelled"
-            canRestore
-            pinned={canceledBars.length > 0}
-            backHref={selfHref}
-            bars={canceledBars}
-            dates={dates}
-            businessDate={businessDate}
-            railW={railW}
-            gridW={gridW}
-            railCell={railCell}
-          />
+          {/* "Hide cancellation area from calendar" (0077). A cancelled
+              booking is still found from Bookings -> Search and restored
+              from its own screen. */}
+          {!look.hideCancellationArea && (
+            <>
+              <Gutter railW={railW} gridW={gridW} />
+              <ExtraRow
+                label="Cancelled"
+                canRestore
+                pinned={canceledBars.length > 0}
+                backHref={selfHref}
+                bars={canceledBars}
+                dates={dates}
+                businessDate={businessDate}
+                railW={railW}
+                gridW={gridW}
+                railCell={railCell}
+              />
+            </>
+          )}
         </div>
       </div>
     </div>

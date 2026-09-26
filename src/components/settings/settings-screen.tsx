@@ -15,6 +15,12 @@ import {
 } from "@/components/settings/guest-config-panels";
 import type { GuestField, IdentificationType, RegistrationForm } from "@/lib/guest-config";
 import { EmailPreferencesPanel } from "@/components/settings/email-preferences-panel";
+import { HotelFeaturesPanel } from "@/components/settings/hotel-features-panel";
+import type { HotelFeatures } from "@/lib/hotel-features";
+import { CalendarSettingsPanel } from "@/components/settings/calendar-settings-panel";
+import type { CalendarSettings } from "@/lib/calendar-settings";
+import { LanguageSettingsPanel } from "@/components/settings/language-settings-panel";
+import type { LanguageSettings } from "@/lib/language-settings";
 import type { EmailSetup, EmailTemplate, HotelEmailSettings } from "@/lib/email-preferences";
 import { EmailSetupPanel } from "@/components/settings/email-setup-panel";
 import { FacilityIcon } from "@/components/settings/facility-icon";
@@ -221,6 +227,9 @@ export function SettingsScreen({
   emailSettings,
   emailSetup,
   emailTemplates,
+  hotelFeatures,
+  calendarSettings,
+  languageSettings,
 }: {
   tab: SettingsTab;
   property: PropertySettings;
@@ -241,6 +250,12 @@ export function SettingsScreen({
   /** Communications & Notifications -> Email Setup (0075). */
   emailSetup: EmailSetup;
   emailTemplates: EmailTemplate[];
+  /** System Settings -> Hotel Features (0076). */
+  hotelFeatures: HotelFeatures;
+  /** System Settings -> Calendar Settings (0077). */
+  calendarSettings: CalendarSettings;
+  /** System Settings -> Language Settings (0078). */
+  languageSettings: LanguageSettings;
   roomTypes: RoomTypeSetting[];
   rooms: RoomSettingsPage;
   roomQuery: string;
@@ -1035,6 +1050,40 @@ export function SettingsScreen({
           setup={emailSetup}
           templates={emailTemplates}
           propertyName={property.name}
+          canEdit={canEdit}
+          pending={pending}
+          run={run}
+        />
+      )}
+
+      {tab === "hotel-features" && (
+        <HotelFeaturesPanel
+          // Re-seeded from what was saved, so a save that the server changed
+          // (or another tab's) is what the ticks show.
+          key={JSON.stringify(hotelFeatures)}
+          features={hotelFeatures}
+          canEdit={canEdit}
+          pending={pending}
+          run={run}
+        />
+      )}
+
+      {tab === "calendar-settings" && (
+        <CalendarSettingsPanel
+          key={JSON.stringify(calendarSettings)}
+          settings={calendarSettings}
+          canEdit={canEdit}
+          pending={pending}
+          run={run}
+        />
+      )}
+
+      {tab === "language-settings" && (
+        <LanguageSettingsPanel
+          // Re-seeded after each save, so the default's list is the saved
+          // supported set.
+          key={JSON.stringify(languageSettings)}
+          settings={languageSettings}
           canEdit={canEdit}
           pending={pending}
           run={run}

@@ -6,6 +6,7 @@ import {
   getBusinessDate,
   getChannels,
   getCurrentStaffUser,
+  getHotelFeatures,
   getRatePlans,
   getTaxRates,
 } from "@/lib/queries";
@@ -71,8 +72,14 @@ export default async function NewBookingPage({
    * no group flag in the schema and inventing one would be a second booking
    * model to keep in step with the first. What changes is the wording, so
    * somebody who picked Group is told where the rooms go.
+   *
+   * Hotel Features -> "Enable Group Booking Feature" (0076) takes the menu
+   * entry away and, here, the wording with it. It does not stop a booking
+   * carrying several rooms: that is what `create_booking()` has always
+   * taken from the simple form too, and refusing it would break a family
+   * booking two rooms.
    */
-  const group = sp.group === "1";
+  const group = sp.group === "1" && (await getHotelFeatures()).group_booking;
 
   return (
     <div>

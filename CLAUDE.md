@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0075` are
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0078` are
 applied to the hosted database.
 
 Working on real data: dashboard (house board, movements, pace, activity feed),
@@ -1586,7 +1586,7 @@ anywhere else. Collapsed height must stay constant regardless of room count.
     carries Other; there is nothing of ours to put in it, and an empty section
     is a dead control. It goes in when its contents are built. Guest
     Configuration went in with 0073, Communications & Notifications with
-    0074-0075.
+    0074-0075, System Settings grew its three with 0076-0078.
   - **COMMUNICATIONS & NOTIFICATIONS IS STORED, NOT YET SENT** (0074, 0075) --
     Hotel Emails Preferences and Email Setup, cloned from the reference, all
     in one row per property, `hotel_email_settings`.
@@ -1619,6 +1619,91 @@ anywhere else. Collapsed height must stay constant regardless of room count.
       registration card's terms: the reference's rich-text editor would mean
       storing browser-typed HTML and sending it back out, with no sanitiser
       in this codebase. "Open template editor" opens a plain-text dialog.
+  - **SYSTEM SETTINGS IS THREE SCREENS: Hotel Features (0076), Calendar
+    Settings (0077) and Language Settings (0078)**, cloned from the
+    reference, above Staff. Each is one row per property, read by everyone
+    on the property and written by revenue staff under RLS.
+    - **HOTEL FEATURES: FOUR SWITCHES ARE WIRED, SIXTEEN ARE STORED.**
+      `src/lib/hotel-features.ts` is the list, with a `wired` flag on each.
+      - *Enable Housekeeping Feature* off takes the Housekeeping Report out of
+        the Reports menu, makes the report itself a refusal
+        (`ReportFeatureOff`, which names the switch and links here), and
+        removes the housekeeping dot from the calendar's room rows.
+      - *Enable Housekeeping Status Modification Feature* off leaves the dot as
+        a plain light rather than the menu, and drops the report's "Mark it"
+        column. `CalendarBoard` takes `housekeeping: "off" | "view" | "edit"`
+        as a REQUIRED prop.
+      - *Enable Group Booking Feature* off takes "Add Group Booking" out of the
+        Bookings menu and the group wording off `/bookings/new`. It does NOT
+        stop a booking carrying several rooms: that is what
+        `create_booking()` has always taken from the simple form, and refusing
+        it would break a family booking two rooms.
+      - *Enable Accounting Report* off does the same as housekeeping for the
+        Accounting Report.
+      - Menu entries are hidden by `hiddenNavHrefs()`, computed in
+        `(app)/layout.tsx` and handed to `TopNav` as a REQUIRED prop, which
+        filters one list for both the bar and the drawer.
+      - **The two housekeeping switches default ON**, unlike the reference's
+        screenshot, because that is what this application already did; a
+        switch arriving must not quietly take a working screen away. The
+        other eighteen default to the reference's ticks.
+      - **`payment_edit` will never be wired as its label reads.** Payments
+        are append-only; a correction is a reversing row.
+      - The reference's "Superadmin settings" heading has nothing under it and
+        is not drawn.
+    - **CALENDAR SETTINGS: TEN OF SIXTEEN ARE WIRED.** Everything the board
+      needs is set ONCE as CSS variables on its card (`--cal-radius`,
+      `--cal-weekend`, `--cal-pay-*`, `--cal-company`, `--cal-group`), so no
+      row or bar is handed the settings and a hotel's colour never becomes a
+      Tailwind class. `CalendarBoard` takes `look` as a REQUIRED prop.
+      - **The value badge carries the payment state** in the Unpaid / Partially
+        Paid / Paid colours. It used to repeat the status colour, which the
+        edge and the word already carry. The text colour follows the fill
+        (`inkOn()`), because white is unreadable on the reference's own amber.
+      - **Payment state is worked out in `calendar_room_bars()`, per booking.**
+        Owed is the LARGER of what the stay is worth (its live nights, the
+        bar's own value formula) and what its folios have been charged. The
+        folio alone would call every future booking paid, since nothing is
+        charged before the audit; the nights alone would ignore extras. A
+        booking `prepaid_to_channel` is paid, because prepaid bookings never
+        read as cash owed at this desk. Checked against the hosted bookings
+        before it shipped.
+      - **Company and group are a stripe** down the bar's leading edge, company
+        winning when both apply. A group is more than one live room.
+      - **Weekend Border Color** edges Saturday and Sunday columns, grid and
+        header, with an inset box-shadow so no column changes width. The
+        reference's default is nearly the grid-line colour; that is theirs.
+      - *Use Rounded Corners* is the bar radius. *Show seasons* off removes the
+        season names and fills but KEEPS THE STRIP: the paging chevrons live
+        on it. *Hide cancellation area* removes the Cancelled band and skips
+        its read. *Show channel abbreviation* shows `channels.code` on the bar;
+        the calendar page nulls it when off, so the board never knows.
+      - **Name order is decided in Postgres**, by `calendar_guest_name()`
+        reading `last_name_first`, in both `calendar_room_bars()` and
+        `calendar_bookings()`. Before 0077 the two disagreed -- the room rows
+        said "Anna Smith" and the Cancelled band "Smith, Anna".
+        `customer_display_name()` is untouched and still used everywhere else.
+      - **Stored, not live:** Room Blocker Color (there is no room blocker),
+        the two "intersect checkout date" switches (bars are whole columns,
+        and half-column bars would collide in the lane packing), fixed width
+        for zoom (columns are always fixed here) and Show waitlist.
+      - Reset puts the form back to the reference's values and saves nothing
+        until Save.
+    - **LANGUAGE SETTINGS DRIVE THE GUEST BOOKING PAGE**, which is the only
+      part of this system that speaks more than one language. The default is
+      what a guest lands on without `?lang=`, a `?lang=` the hotel does not
+      offer falls back to the default, and the picker lists only the supported
+      set -- and is not drawn at all with one language, since a menu of one is
+      a dead control. `public_language_settings()` is the one new function on
+      the public surface; a failed read falls back to every language and
+      English, so a preference can never take the booking page down.
+      - Two cards, two Saves, two functions. Postgres refuses a default that is
+        not supported, and unticking the default, by name.
+      - **The nineteen codes are listed in Postgres too** (`known_locales()` and
+        the table's check), because SQL cannot read `locales.ts`. Adding a
+        language is a dictionary, a line there and both SQL lists.
+      - The reference's "LOCALE: ES" button is not copied, as on Hotel Details.
+      - The staff application stays in English.
   - **GUEST CONFIGURATION IS THREE SCREENS, AND EACH IS READ BY SOMETHING**
     (0073) -- Guest Registration Form, Identification Types, Guest Details
     Settings, as the reference's.
