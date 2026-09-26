@@ -11,7 +11,7 @@ import {
   getPublicRoomTypeFacilities,
 } from "@/lib/actions/public-booking";
 import { getCurrentStaffUser } from "@/lib/queries";
-import { LOCALES, bcp47, isLocale, type Locale } from "@/lib/i18n/locales";
+import { LOCALES, isLocale, type Locale } from "@/lib/i18n/locales";
 import { dictionaryFor } from "@/lib/i18n/dictionary";
 import { hotelToday, monthNames, weekdayNames } from "@/lib/i18n/calendar-names";
 
