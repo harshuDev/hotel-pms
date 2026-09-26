@@ -25,7 +25,17 @@ import type { LanguageSettings } from "@/lib/language-settings";
 import { InvoiceSettingsPanel } from "@/components/settings/invoice-settings-panel";
 import type { InvoiceSettings } from "@/lib/invoice-settings";
 import { CurrenciesPanel, PosProfilesPanel } from "@/components/settings/finance-profile-panels";
-import type { AccountingSettings, CurrencyProfile, PosProfile } from "@/lib/finance-profiles";
+import type {
+  AccountingSettings,
+  AccountingSystem,
+  CurrencyProfile,
+  PaymentGateway,
+  PosProfile,
+} from "@/lib/finance-profiles";
+import {
+  AccountingSystemsPanel,
+  PaymentGatewaysPanel,
+} from "@/components/settings/finance-connection-panels";
 import { AccountingCategoriesPanel } from "@/components/settings/accounting-categories-panel";
 import type { EmailSetup, EmailTemplate, HotelEmailSettings } from "@/lib/email-preferences";
 import { EmailSetupPanel } from "@/components/settings/email-setup-panel";
@@ -221,6 +231,8 @@ export function SettingsScreen({
   posProfiles,
   currencyProfiles,
   accountingSettings,
+  paymentGateways,
+  accountingSystems,
 }: {
   tab: SettingsTab;
   property: PropertySettings;
@@ -254,6 +266,9 @@ export function SettingsScreen({
   currencyProfiles: CurrencyProfile[];
   /** Finances -> Accounting Categories (0085). */
   accountingSettings: AccountingSettings;
+  /** Finances -> Payment Gateway (0086) and Accounting Systems (0087). */
+  paymentGateways: PaymentGateway[];
+  accountingSystems: AccountingSystem[];
   roomTypes: RoomTypeSetting[];
   rooms: RoomSettingsPage;
   roomQuery: string;
@@ -1078,6 +1093,19 @@ export function SettingsScreen({
       {tab === "accounting-categories" && (
         <AccountingCategoriesPanel
           settings={accountingSettings}
+          canEdit={canEdit}
+          pending={pending}
+          run={run}
+        />
+      )}
+
+      {tab === "payment-gateways" && (
+        <PaymentGatewaysPanel gateways={paymentGateways} canEdit={canEdit} pending={pending} run={run} />
+      )}
+
+      {tab === "accounting-systems" && (
+        <AccountingSystemsPanel
+          systems={accountingSystems}
           canEdit={canEdit}
           pending={pending}
           run={run}

@@ -90,3 +90,46 @@ export const ACCOUNTING_DEFAULT_KINDS = [
   { key: "taxesId", label: "Default for taxes" },
   { key: "paymentsId", label: "Default for payments" },
 ] as const satisfies readonly { key: keyof AccountingDefaults; label: string }[];
+
+/**
+ * Settings -> Finances -> Payment Gateway (0086). STORED, NOT YET LIVE: no
+ * gateway is connected, and none holds credentials here. The ids are what
+ * `known_payment_gateways()` accepts; the two lists change together.
+ */
+export const PAYMENT_GATEWAYS = [
+  { id: "stripe_sca", label: "Stripe SCA" },
+  { id: "channex_pci", label: "ChannexPCI" },
+] as const;
+
+export function paymentGatewayLabel(id: string): string {
+  return PAYMENT_GATEWAYS.find((g) => g.id === id)?.label ?? id;
+}
+
+export interface PaymentGateway {
+  id: string;
+  provider: string;
+  title: string;
+  isDefault: boolean;
+}
+
+/**
+ * Settings -> Finances -> Accounting Systems (0087). STORED, NOT YET LIVE:
+ * nothing is exported. PROVISIONAL list -- the reference's add form has not
+ * been seen. The ids are what `known_accounting_systems()` accepts; the two
+ * lists change together.
+ */
+export const ACCOUNTING_SYSTEMS = [
+  { id: "quickbooks_online", label: "QuickBooks Online" },
+  { id: "xero", label: "Xero" },
+  { id: "sage", label: "Sage" },
+] as const;
+
+export function accountingSystemLabel(id: string): string {
+  return ACCOUNTING_SYSTEMS.find((s) => s.id === id)?.label ?? id;
+}
+
+export interface AccountingSystem {
+  id: string;
+  provider: string;
+  isEnabled: boolean;
+}

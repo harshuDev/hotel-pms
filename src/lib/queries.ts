@@ -23,7 +23,13 @@ import {
   ROUND_TO,
   type InvoiceSettings,
 } from "@/lib/invoice-settings";
-import type { AccountingSettings, CurrencyProfile, PosProfile } from "@/lib/finance-profiles";
+import type {
+  AccountingSettings,
+  AccountingSystem,
+  CurrencyProfile,
+  PaymentGateway,
+  PosProfile,
+} from "@/lib/finance-profiles";
 import type { ExtraItemType, ExtrasCatalog } from "@/lib/extras";
 import type { Facility, FacilityIcon } from "@/lib/facilities";
 import type {
@@ -2820,6 +2826,33 @@ export const getAccountingSettings = cache(async (): Promise<AccountingSettings>
       : null,
   };
 });
+
+/** Payment Gateways (0086), in the order they were added. Stored, not live. */
+export async function getPaymentGateways(): Promise<PaymentGateway[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("payment_gateways")
+    .select("id, provider, title, is_default")
+    .order("created_at");
+  if (error) throw new Error(`Failed to load the payment gateways: ${error.message}`);
+  return (data ?? []).map((r) => ({
+    id: r.id,
+    provider: r.provider,
+    title: r.title,
+    isDefault: r.is_default,
+  }));
+}
+
+/** Accounting Systems (0087), in the order they were added. Stored, not live. */
+export async function getAccountingSystems(): Promise<AccountingSystem[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("accounting_systems")
+    .select("id, provider, is_enabled")
+    .order("created_at");
+  if (error) throw new Error(`Failed to load the accounting systems: ${error.message}`);
+  return (data ?? []).map((r) => ({ id: r.id, provider: r.provider, isEnabled: r.is_enabled }));
+}
 
 /** One charge on a booking's folios, split for the invoice (0080). */
 export interface InvoiceLine {
