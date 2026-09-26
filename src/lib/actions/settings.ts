@@ -9,6 +9,8 @@ import { ROOM_PHOTO_BUCKET } from "@/lib/queries";
 import { parseMoney } from "@/lib/money";
 import type { ActionResult } from "@/lib/actions/cashier";
 import type { BookingWidget } from "@/lib/booking-widgets";
+import type { ReactionGroup } from "@/lib/reactions";
+import type { Json } from "@/lib/database.types";
 import type { HotelPolicies } from "@/lib/hotel-policies";
 import type { ExtraItemType } from "@/lib/extras";
 import type { FacilityIcon } from "@/lib/facilities";
@@ -2103,5 +2105,41 @@ export async function setRatePlanCancellationPolicy(
   revalidatePath("/inventory", "layout");
   revalidatePath("/book", "layout");
   revalidatePath("/bookings", "layout");
+  return { ok: true, data: null };
+}
+
+/* -- Other -> Reactions (0104) --------------------------------------------- */
+
+export async function saveReaction(input: {
+  id: string | null;
+  task: string;
+  title: string;
+  description: string;
+  conditions: ReactionGroup;
+  events: string[];
+  isEnabled: boolean;
+}): Promise<ActionResult<{ id: string }>> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("save_reaction", {
+    // Null adds a new reaction.
+    p_id: nullableArg(input.id),
+    p_task: input.task,
+    p_title: input.title,
+    p_description: input.description,
+    // Postgres checks the whole tree: fields, operators, values, depth.
+    p_conditions: input.conditions as unknown as Json,
+    p_events: input.events,
+    p_is_enabled: input.isEnabled,
+  });
+  if (error) return { ok: false, error: error.message };
+  revalidateSettings();
+  return { ok: true, data: { id: data } };
+}
+
+export async function deleteReaction(id: string): Promise<ActionResult<null>> {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("delete_reaction", { p_id: id });
+  if (error) return { ok: false, error: error.message };
+  revalidateSettings();
   return { ok: true, data: null };
 }

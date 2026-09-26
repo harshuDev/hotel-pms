@@ -53,6 +53,7 @@ export const SETTINGS_TABS = [
   "key-lock-systems",
   "housekeeping-systems",
   "channels",
+  "reactions",
 ] as const;
 
 export type SettingsTab = (typeof SETTINGS_TABS)[number];
@@ -164,5 +165,12 @@ export const SETTINGS_NAV: {
       { id: "key-lock-systems", label: "Key Lock Systems" },
       { id: "housekeeping-systems", label: "Housekeeping Systems" },
     ],
+  },
+  {
+    // The reference also lists Templates and Country-Specific Settings here;
+    // neither has been seen, and a sidebar item with nothing behind it is a
+    // dead control, so they go in when they are built.
+    title: "Other",
+    items: [{ id: "reactions", label: "Reactions" }],
   },
 ];

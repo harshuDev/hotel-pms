@@ -3436,6 +3436,50 @@ export type Database = {
           },
         ]
       }
+      reactions: {
+        Row: {
+          conditions: Json
+          created_at: string
+          description: string | null
+          events: string[]
+          id: string
+          is_enabled: boolean
+          property_id: string
+          task: string
+          title: string
+        }
+        Insert: {
+          conditions?: Json
+          created_at?: string
+          description?: string | null
+          events?: string[]
+          id?: string
+          is_enabled?: boolean
+          property_id: string
+          task: string
+          title: string
+        }
+        Update: {
+          conditions?: Json
+          created_at?: string
+          description?: string | null
+          events?: string[]
+          id?: string
+          is_enabled?: boolean
+          property_id?: string
+          task?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reactions_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       registration_form_settings: {
         Row: {
           property_id: string
@@ -5264,6 +5308,7 @@ export type Database = {
       delete_payment_gateway: { Args: { p_id: string }; Returns: undefined }
       delete_pos_profile: { Args: { p_id: string }; Returns: undefined }
       delete_rate_plan: { Args: { p_rate_plan_id: string }; Returns: undefined }
+      delete_reaction: { Args: { p_id: string }; Returns: undefined }
       delete_room: { Args: { p_room_id: string }; Returns: undefined }
       delete_room_type: { Args: { p_room_type_id: string }; Returns: undefined }
       delete_season: { Args: { p_id: string }; Returns: undefined }
@@ -5959,6 +6004,10 @@ export type Database = {
           room_nights: number
         }[]
       }
+      reaction_conditions_check: {
+        Args: { p_depth: number; p_group: Json; p_property: string }
+        Returns: number
+      }
       record_cash_movement: {
         Args: {
           p_amount_cents: number
@@ -6507,6 +6556,18 @@ export type Database = {
           p_is_active?: boolean
           p_is_default?: boolean
           p_name: string
+        }
+        Returns: string
+      }
+      save_reaction: {
+        Args: {
+          p_conditions: Json
+          p_description: string
+          p_events: string[]
+          p_id: string
+          p_is_enabled: boolean
+          p_task: string
+          p_title: string
         }
         Returns: string
       }

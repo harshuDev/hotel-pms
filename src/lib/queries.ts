@@ -29,6 +29,7 @@ import type { BookingEngineProfile, BookingEngineTexts } from "@/lib/booking-eng
 import type { BookingWidget } from "@/lib/booking-widgets";
 import type { ApiPermission } from "@/lib/api-keys";
 import type { SystemCategory, SystemConnection } from "@/lib/system-connections";
+import { parseConditions, type Reaction } from "@/lib/reactions";
 import {
   DEFAULT_INVENTORY_SETTINGS,
   type InventorySettings,
@@ -3054,6 +3055,25 @@ export async function getSystemConnections(category: SystemCategory): Promise<Sy
     isActive: r.is_active,
     accountId: r.account_id,
     hasSecret: r.secret_id !== null,
+  }));
+}
+
+/** Reactions (0104), in the order they were added. Stored, not yet run. */
+export async function getReactions(): Promise<Reaction[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("reactions")
+    .select("id, task, title, description, conditions, events, is_enabled")
+    .order("created_at");
+  if (error) throw new Error(`Failed to load the reactions: ${error.message}`);
+  return (data ?? []).map((r) => ({
+    id: r.id,
+    task: r.task,
+    title: r.title,
+    description: r.description,
+    conditions: parseConditions(r.conditions),
+    events: r.events,
+    isEnabled: r.is_enabled,
   }));
 }
 
