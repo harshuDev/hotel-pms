@@ -1724,6 +1724,51 @@ export async function deleteCancellationPolicy(id: string): Promise<ActionResult
   return { ok: true, data: null };
 }
 
+/**
+ * One week of a rate plan on one room type, for a season or the Default
+ * Season (0096). Stores the template and FILLS nights that have no value yet
+ * -- the client's rule; nothing priced by hand is overwritten. Returns how
+ * many nights got a price.
+ */
+export async function saveWeekRates(input: {
+  ratePlanId: string;
+  roomTypeId: string;
+  seasonTypeId: string | null;
+  days: {
+    weekday: number;
+    rateCents: number | null;
+    minStayThrough: number | null;
+    minStayArrival: number | null;
+    maxStay: number | null;
+    closedToArrival: boolean;
+    closedToDeparture: boolean;
+    stopSell: boolean;
+  }[];
+}): Promise<ActionResult<{ filled: number }>> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("save_week_rates", {
+    p_rate_plan_id: input.ratePlanId,
+    p_room_type_id: input.roomTypeId,
+    // Null is the Default Season.
+    p_season_type_id: nullableArg(input.seasonTypeId),
+    p_days: input.days.map((d) => ({
+      weekday: d.weekday,
+      rate_cents: d.rateCents,
+      min_stay_through: d.minStayThrough,
+      min_stay_arrival: d.minStayArrival,
+      max_stay: d.maxStay,
+      closed_to_arrival: d.closedToArrival,
+      closed_to_departure: d.closedToDeparture,
+      stop_sell: d.stopSell,
+    })),
+  });
+  if (error) return { ok: false, error: error.message };
+  revalidatePath("/settings");
+  revalidatePath("/inventory", "layout");
+  revalidatePath("/calendar");
+  return { ok: true, data: { filled: Number(data ?? 0) } };
+}
+
 /** The reference's red bin: refused for the main rate and for a plan anything was sold on. */
 export async function deleteRatePlan(id: string): Promise<ActionResult<null>> {
   const supabase = await createClient();

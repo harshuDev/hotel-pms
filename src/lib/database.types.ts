@@ -2987,6 +2987,89 @@ export type Database = {
           },
         ]
       }
+      rate_plan_week_rates: {
+        Row: {
+          closed_to_arrival: boolean
+          closed_to_departure: boolean
+          id: string
+          max_stay: number | null
+          min_stay_arrival: number | null
+          min_stay_through: number | null
+          property_id: string
+          rate_cents: number | null
+          rate_plan_id: string
+          room_type_id: string
+          season_type_id: string | null
+          stop_sell: boolean
+          updated_at: string
+          updated_by: string | null
+          weekday: number
+        }
+        Insert: {
+          closed_to_arrival?: boolean
+          closed_to_departure?: boolean
+          id?: string
+          max_stay?: number | null
+          min_stay_arrival?: number | null
+          min_stay_through?: number | null
+          property_id: string
+          rate_cents?: number | null
+          rate_plan_id: string
+          room_type_id: string
+          season_type_id?: string | null
+          stop_sell?: boolean
+          updated_at?: string
+          updated_by?: string | null
+          weekday: number
+        }
+        Update: {
+          closed_to_arrival?: boolean
+          closed_to_departure?: boolean
+          id?: string
+          max_stay?: number | null
+          min_stay_arrival?: number | null
+          min_stay_through?: number | null
+          property_id?: string
+          rate_cents?: number | null
+          rate_plan_id?: string
+          room_type_id?: string
+          season_type_id?: string | null
+          stop_sell?: boolean
+          updated_at?: string
+          updated_by?: string | null
+          weekday?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rate_plan_week_rates_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rate_plan_week_rates_rate_plan_id_property_id_fkey"
+            columns: ["rate_plan_id", "property_id"]
+            isOneToOne: false
+            referencedRelation: "rate_plans"
+            referencedColumns: ["id", "property_id"]
+          },
+          {
+            foreignKeyName: "rate_plan_week_rates_room_type_id_property_id_fkey"
+            columns: ["room_type_id", "property_id"]
+            isOneToOne: false
+            referencedRelation: "room_types"
+            referencedColumns: ["id", "property_id"]
+          },
+          {
+            foreignKeyName: "rate_plan_week_rates_season_type_id_property_id_fkey"
+            columns: ["season_type_id", "property_id"]
+            isOneToOne: false
+            referencedRelation: "season_types"
+            referencedColumns: ["id", "property_id"]
+          },
+        ]
+      }
       rate_plans: {
         Row: {
           cancellation_policy_id: string | null
@@ -5917,6 +6000,15 @@ export type Database = {
           p_parent_room_type_id: string
         }
         Returns: string
+      }
+      save_week_rates: {
+        Args: {
+          p_days: Json
+          p_rate_plan_id: string
+          p_room_type_id: string
+          p_season_type_id: string
+        }
+        Returns: number
       }
       seed_accounting_categories: {
         Args: { p_property: string }
