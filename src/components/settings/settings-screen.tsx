@@ -29,6 +29,7 @@ import type {
   AccountingSettings,
   AccountingSystem,
   CurrencyProfile,
+  Discount,
   PaymentGateway,
   PosProfile,
 } from "@/lib/finance-profiles";
@@ -38,6 +39,7 @@ import {
 } from "@/components/settings/finance-connection-panels";
 import { AccountingCategoriesPanel } from "@/components/settings/accounting-categories-panel";
 import { InventorySettingsPanel } from "@/components/settings/inventory-settings-panel";
+import { DiscountsPanel } from "@/components/settings/discounts-panel";
 import type { InventorySettings } from "@/lib/inventory-settings";
 import type { EmailSetup, EmailTemplate, HotelEmailSettings } from "@/lib/email-preferences";
 import { EmailSetupPanel } from "@/components/settings/email-setup-panel";
@@ -237,6 +239,7 @@ export function SettingsScreen({
   accountingSystems,
   inventorySettings,
   businessDate,
+  discounts,
 }: {
   tab: SettingsTab;
   property: PropertySettings;
@@ -276,6 +279,8 @@ export function SettingsScreen({
   /** Inventory -> Settings (0088), and the earliest cut-off date it accepts. */
   inventorySettings: InventorySettings;
   businessDate: string;
+  /** Inventory -> Discounts (0090). */
+  discounts: Discount[];
   roomTypes: RoomTypeSetting[];
   rooms: RoomSettingsPage;
   roomQuery: string;
@@ -1114,6 +1119,10 @@ export function SettingsScreen({
           pending={pending}
           run={run}
         />
+      )}
+
+      {tab === "discounts" && (
+        <DiscountsPanel discounts={discounts} canEdit={canEdit} pending={pending} run={run} />
       )}
 
       {tab === "payment-gateways" && (

@@ -61,7 +61,7 @@ function HandleIcon() {
   );
 }
 
-function Dialog({
+export function Dialog({
   title,
   onClose,
   children,

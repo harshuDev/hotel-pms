@@ -1300,6 +1300,44 @@ export type Database = {
           },
         ]
       }
+      discounts: {
+        Row: {
+          amount_cents: number | null
+          created_at: string
+          id: string
+          kind: string
+          percent_bps: number | null
+          property_id: string
+          title: string
+        }
+        Insert: {
+          amount_cents?: number | null
+          created_at?: string
+          id?: string
+          kind: string
+          percent_bps?: number | null
+          property_id: string
+          title: string
+        }
+        Update: {
+          amount_cents?: number | null
+          created_at?: string
+          id?: string
+          kind?: string
+          percent_bps?: number | null
+          property_id?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "discounts_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       email_templates: {
         Row: {
           body: string | null
@@ -4480,6 +4518,7 @@ export type Database = {
       }
       delete_calendar_note: { Args: { p_id: string }; Returns: undefined }
       delete_currency_profile: { Args: { p_id: string }; Returns: undefined }
+      delete_discount: { Args: { p_id: string }; Returns: undefined }
       delete_email_template: { Args: { p_id: string }; Returns: undefined }
       delete_extra: { Args: { p_id: string }; Returns: undefined }
       delete_extra_category: { Args: { p_id: string }; Returns: undefined }
@@ -5338,6 +5377,16 @@ export type Database = {
         Returns: string
       }
       save_default_language: { Args: { p_locale: string }; Returns: undefined }
+      save_discount: {
+        Args: {
+          p_amount_cents: number
+          p_id: string
+          p_kind: string
+          p_percent_bps: number
+          p_title: string
+        }
+        Returns: string
+      }
       save_email_footer: { Args: { p_footer: string }; Returns: undefined }
       save_email_general: {
         Args: {

@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0089` are
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0090` are
 applied to the hosted database.
 
 Working on real data: dashboard (house board, movements, pace, activity feed),
@@ -265,6 +265,7 @@ Each read is a Postgres view or RPC, never aggregation in the client:
 | `getPaymentGateways()`              | `payment_gateways` (0086)         |
 | `getAccountingSystems()`            | `accounting_systems` (0087)       |
 | `getInventorySettings()`            | `inventory_settings` (0088)       |
+| `getDiscounts()`                    | `discounts` (0090)                |
 | `getMealReport(from, to)`           | `meal_report(from, to)`           |
 
 **Two signatures carry the room-count rule.** The client operates properties
@@ -1597,11 +1598,11 @@ anywhere else. Collapsed height must stay constant regardless of room count.
     Pos Profiles (0084), Currencies (0083), Accounting Categories (0085),
     Payment Gateway (0086), Accounting Systems (0087);
     Settings (0088-0089), Room Type, Room Setup,
-    Cancellation Policy, Rate Plans, Seasons and Events. Room Type and Room
-    Setup moved there from Hotel Content, where the reference does not have
-    them. Their one other item —
-    Inventory's Discounts — goes in as each is built. Tab ids did
-    not change, so every existing link still lands.
+    Cancellation Policy, Rate Plans, Seasons and Events, Discounts (0090).
+    Room Type and Room Setup moved there from Hotel Content, where the
+    reference does not have them. Both sections now carry every item the
+    reference lists. Tab ids did not change, so every existing link still
+    lands.
   - **INVOICE SETTINGS (0080-0082) HAS A READER: THE PRINTABLE INVOICE.**
     Nothing printed an invoice before, so `/bookings/[id]/invoice` (linked
     as "Print invoice" on the Folio tab, new tab like the registration card)
@@ -1720,6 +1721,23 @@ anywhere else. Collapsed height must stay constant regardless of room count.
       which staff cannot execute -- every save raised a permission error. They
       read `business_dates` under RLS now. Found by the rolled-back test
       before any code shipped.
+  - **INVENTORY -> DISCOUNTS (0090) IS STORED, NOT YET APPLIED.** The
+    reference's search box, list (Title sortable, Type filterable, Amount) and
+    Add Discount dialog: Title, Amount with a % or currency prefix, Type as
+    Percent or Fixed. A row opens the same dialog to edit, with Delete there,
+    since the reference's list carries no icons.
+    - **The amount is never a float.** Percent is `percent_bps` (1000 = 10.0 %)
+      parsed from the typed string by `parsePercentBps()`; Fixed is
+      `amount_cents` in the property's currency. A check constraint makes each
+      kind carry exactly its own column, and switching kind drops the other.
+    - **NOTHING TAKES A DISCOUNT OFF A STAY YET.** Applying one is a money
+      change -- to a booking's nights before the audit, or to the folio after
+      it -- and the folio path that exists, `post_discount()` (0003), posts
+      every discount with a zero tax split and nothing in the app calls it.
+      On a VAT-inclusive rate that overstates the tax. Fix that function, or
+      discount the nights instead, when this is wired -- and ask first.
+      Offers (promotions) are still what reduces a stay automatically.
+    - Genuinely deleted: nothing points at a discount.
   - **PAYMENT GATEWAY (0086) AND ACCOUNTING SYSTEMS (0087) ARE STORED, NOT
     YET LIVE, BY DECISION.** The client: gateways are connected per client, as
     each asks for one. A row says which gateway or ledger the hotel uses; no
