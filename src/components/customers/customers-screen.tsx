@@ -15,6 +15,7 @@ import {
 } from "@/lib/actions/customers";
 import { COUNTRIES } from "@/lib/countries";
 import type { Customer, CustomerKind } from "@/lib/types";
+import { useCurrency } from "@/components/currency";
 
 /**
  * The Customers table, and the three controls above it.
@@ -95,6 +96,7 @@ export function CustomersScreen({
   canMerge: boolean;
   canEdit: boolean;
 }) {
+  const currency = useCurrency();
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -712,7 +714,7 @@ export function CustomersScreen({
                       {c.bookingCount}
                     </td>
                     <td className="tnum whitespace-nowrap px-3 py-3 text-right text-ink">
-                      {formatMoney(c.totalRevenueCents)}
+                      {formatMoney(c.totalRevenueCents, currency)}
                     </td>
                     <td className="whitespace-nowrap px-3 py-3 text-ink-muted">
                       {c.lastBookingDate
@@ -725,7 +727,7 @@ export function CustomersScreen({
                         c.balanceCents > 0 ? "text-rose-600" : "text-ink-muted",
                       )}
                     >
-                      {formatDue(c.balanceCents)}
+                      {formatDue(c.balanceCents, currency)}
                     </td>
                   </tr>
                 ))}

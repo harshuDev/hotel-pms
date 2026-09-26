@@ -4,6 +4,7 @@ import { formatMoney, formatMoneyShort } from "@/lib/money";
 import { reportRange } from "@/lib/reports";
 import { ReportAccessError, getBusinessDate, getRatePlanReport } from "@/lib/queries";
 import type { RatePlanReportRow } from "@/lib/types";
+import { getPropertyCurrency } from "@/lib/queries";
 
 export const metadata = { title: "Rate plan report" };
 
@@ -20,6 +21,7 @@ export default async function RatePlanReportPage({
 }: {
   searchParams: Promise<{ from?: string; to?: string }>;
 }) {
+  const currency = await getPropertyCurrency();
   const sp = await searchParams;
   const businessDate = await getBusinessDate();
   const range = reportRange(businessDate, sp.from, sp.to);
@@ -66,10 +68,10 @@ export default async function RatePlanReportPage({
             detail={`${top.roomNights} night${top.roomNights === 1 ? "" : "s"}`}
           />
         )}
-        <ReportFigure label="ADR" value={formatMoneyShort(adr)} detail="Net of discount" />
+        <ReportFigure label="ADR" value={formatMoneyShort(adr, currency)} detail="Net of discount" />
         <ReportFigure
           label="Discount given"
-          value={formatMoneyShort(discount)}
+          value={formatMoneyShort(discount, currency)}
           detail={gross > 0 ? `${Math.round((discount / gross) * 100)}% of rack` : "—"}
         />
       </ReportFigures>
@@ -119,30 +121,30 @@ export default async function RatePlanReportPage({
           {
             header: "Rack",
             align: "right",
-            cell: (r) => <span className="tnum text-ink-faint">{formatMoney(r.grossCents)}</span>,
-            foot: formatMoney(gross),
+            cell: (r) => <span className="tnum text-ink-faint">{formatMoney(r.grossCents, currency)}</span>,
+            foot: formatMoney(gross, currency),
           },
           {
             header: "Discount",
             align: "right",
             cell: (r) => (
               <span className={r.discountCents > 0 ? "tnum text-warn-deep" : "tnum text-ink-faint"}>
-                {r.discountCents > 0 ? formatMoney(r.discountCents) : "—"}
+                {r.discountCents > 0 ? formatMoney(r.discountCents, currency) : "—"}
               </span>
             ),
-            foot: formatMoney(discount),
+            foot: formatMoney(discount, currency),
           },
           {
             header: "Net",
             align: "right",
-            cell: (r) => <span className="tnum text-ink-muted">{formatMoney(r.netCents)}</span>,
-            foot: formatMoney(net),
+            cell: (r) => <span className="tnum text-ink-muted">{formatMoney(r.netCents, currency)}</span>,
+            foot: formatMoney(net, currency),
           },
           {
             header: "ADR",
             align: "right",
-            cell: (r) => <span className="tnum font-medium text-ink">{formatMoney(r.adrCents)}</span>,
-            foot: formatMoney(adr),
+            cell: (r) => <span className="tnum font-medium text-ink">{formatMoney(r.adrCents, currency)}</span>,
+            foot: formatMoney(adr, currency),
           },
         ]}
       />

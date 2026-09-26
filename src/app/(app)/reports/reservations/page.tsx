@@ -10,6 +10,7 @@ import { formatMoney, formatMoneyShort } from "@/lib/money";
 import { reportRange } from "@/lib/reports";
 import { getBusinessDate, getReservationsReport } from "@/lib/queries";
 import type { ReservationsRow } from "@/lib/types";
+import { getPropertyCurrency } from "@/lib/queries";
 
 export const metadata = { title: "Reservations report" };
 
@@ -21,6 +22,7 @@ export default async function ReservationsReportPage({
 }: {
   searchParams: Promise<{ from?: string; to?: string }>;
 }) {
+  const currency = await getPropertyCurrency();
   const sp = await searchParams;
   const businessDate = await getBusinessDate();
   const range = sp.from || sp.to
@@ -65,7 +67,7 @@ export default async function ReservationsReportPage({
         <ReportFigure label="Guests" value={String(guests)} detail="Adults and children" />
         <ReportFigure
           label="Value"
-          value={formatMoneyShort(value)}
+          value={formatMoneyShort(value, currency)}
           detail={
             busiest && busiest.roomCount > 0
               ? `Busiest ${format(parseISO(busiest.arrivalDate), "EEE d MMM")}`
@@ -155,10 +157,10 @@ export default async function ReservationsReportPage({
             align: "right",
             cell: (r) => (
               <span className={r.valueCents > 0 ? "font-medium text-ink" : "text-ink-faint"}>
-                {r.valueCents === 0 ? "—" : formatMoney(r.valueCents)}
+                {r.valueCents === 0 ? "—" : formatMoney(r.valueCents, currency)}
               </span>
             ),
-            foot: formatMoney(value),
+            foot: formatMoney(value, currency),
           },
         ]}
       />

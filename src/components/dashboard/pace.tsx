@@ -16,6 +16,7 @@ import {
 import { Card } from "@/components/ui";
 import { formatMoney, formatMoneyShort } from "@/lib/money";
 import type { SeriesPoint } from "@/lib/types";
+import { useCurrency } from "@/components/currency";
 
 // Recharts takes SVG colour props, not Tailwind classes, so these have to be
 // literal hex. Keep them in sync with `tailwind.config.ts` by hand — a search
@@ -40,6 +41,7 @@ function Tip({
   active?: boolean;
   payload?: { payload: Row }[];
 }) {
+  const currency = useCurrency();
   if (!active || !payload?.length) return null;
   const r = payload[0].payload;
   return (
@@ -51,7 +53,7 @@ function Tip({
       <p className="tnum mt-1 text-[13px] font-semibold text-ink">
         {r.occupancy.toFixed(1)}% occupied
       </p>
-      <p className="tnum text-xs text-ink-muted">{formatMoney(r.revenue)}</p>
+      <p className="tnum text-xs text-ink-muted">{formatMoney(r.revenue, currency)}</p>
     </div>
   );
 }
@@ -65,6 +67,7 @@ export function Pace({
   revenue: SeriesPoint[];
   today: string;
 }) {
+  const currency = useCurrency();
   // Revenue runs backwards 28 days, occupancy forwards 28. Stitch into one
   // continuous timeline so the eye reads past and future as one story.
   const map = new Map<string, Row>();
@@ -106,7 +109,7 @@ export function Pace({
         <div className="flex gap-6 text-right">
           <div>
             <p className="tnum font-display text-[15px] font-semibold text-ink">
-              {formatMoneyShort(totalPast)}
+              {formatMoneyShort(totalPast, currency)}
             </p>
             <p className="text-xxs text-ink-faint">Revenue, 28 days back</p>
           </div>

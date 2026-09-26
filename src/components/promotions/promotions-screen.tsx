@@ -7,6 +7,7 @@ import { cn } from "@/components/ui";
 import { formatMoney, formatMoneyInput, parseMoney } from "@/lib/money";
 import { savePromotion } from "@/lib/actions/promotions";
 import type { Promotion, PromotionKind, RatePlan } from "@/lib/types";
+import { useCurrency } from "@/components/currency";
 
 const DOW = [
   { value: 1, label: "Mon" },
@@ -42,14 +43,14 @@ const field =
   "w-full rounded-md border border-line px-3 py-2 text-[13px] text-ink focus:border-brass focus:outline-none focus:ring-1 focus:ring-brass";
 
 /** What a promotion takes off, as a phrase rather than a column of nulls. */
-function describe(p: Promotion) {
+function describe(p: Promotion, currency: string) {
   switch (p.kind) {
     case "percent_off":
       return `${((p.percentBps ?? 0) / 100).toFixed(
         (p.percentBps ?? 0) % 100 === 0 ? 0 : 2,
       )}% off`;
     case "amount_off":
-      return `${formatMoney(p.amountOffCents ?? 0)} off a night`;
+      return `${formatMoney(p.amountOffCents ?? 0, currency)} off a night`;
     case "free_nights":
       return `Stay ${(p.paidNights ?? 0) + (p.freeNights ?? 0)}, pay ${p.paidNights ?? 0}`;
   }
@@ -126,26 +127,26 @@ const EMPTY = {
  * the poster version. Two renderings of one fact, because a card and a
  * paragraph do not want the same words.
  */
-function headline(p: Promotion) {
+function headline(p: Promotion, currency: string) {
   switch (p.kind) {
     case "percent_off": {
       const pct = (p.percentBps ?? 0) / 100;
       return `${pct % 1 === 0 ? pct.toFixed(0) : pct.toFixed(1)}%`;
     }
     case "amount_off":
-      return formatMoney(p.amountOffCents ?? 0);
+      return formatMoney(p.amountOffCents ?? 0, currency);
     case "free_nights":
       return `${p.freeNights ?? 0} free`;
   }
 }
 
 /** The line under the name: what comes off, and what it comes off. */
-function scopeLine(p: Promotion) {
+function scopeLine(p: Promotion, currency: string) {
   const off =
     p.kind === "percent_off"
       ? `${((p.percentBps ?? 0) / 100).toFixed(1)}% Discount`
       : p.kind === "amount_off"
-        ? `${formatMoney(p.amountOffCents ?? 0)} Discount`
+        ? `${formatMoney(p.amountOffCents ?? 0, currency)} Discount`
         : `Stay ${(p.paidNights ?? 0) + (p.freeNights ?? 0)}, pay ${p.paidNights ?? 0}`;
   return `${off}, ${p.roomTypeNames ?? "All Rooms"}`;
 }
@@ -212,6 +213,7 @@ const TINTS = [
 ];
 
 function Artwork({ offer, muted }: { offer: Promotion; muted: boolean }) {
+  const currency = useCurrency();
   // Deterministic: the same offer keeps the same tint across renders and
   // reloads, which a random pick would not.
   let hash = 0;
@@ -227,7 +229,7 @@ function Artwork({ offer, muted }: { offer: Promotion; muted: boolean }) {
       )}
     >
       <span className="font-display text-3xl font-semibold tracking-tightest text-white">
-        {headline(offer)}
+        {headline(offer, currency)}
       </span>
     </div>
   );
@@ -242,6 +244,7 @@ function OfferCard({
   canEdit: boolean;
   onEdit: (p: Promotion) => void;
 }) {
+  const currency = useCurrency();
   const muted = !offer.isActive;
 
   return (
@@ -258,7 +261,7 @@ function OfferCard({
           <p className="truncate font-display text-[13px] font-semibold uppercase tracking-[0.04em] text-ink">
             {offer.name}
           </p>
-          <p className="mt-0.5 truncate text-xs text-ink-muted">{scopeLine(offer)}</p>
+          <p className="mt-0.5 truncate text-xs text-ink-muted">{scopeLine(offer, currency)}</p>
         </div>
 
         <DayBoxes days={offer.arrivalDaysOfWeek} />
@@ -281,7 +284,7 @@ function OfferCard({
           <span className="tnum truncate whitespace-nowrap">
             {offer.bookingsTaken} booking{offer.bookingsTaken === 1 ? "" : "s"}
             {offer.discountGivenCents > 0 &&
-              ` · ${formatMoney(offer.discountGivenCents)}`}
+              ` · ${formatMoney(offer.discountGivenCents, currency)}`}
           </span>
         </div>
 

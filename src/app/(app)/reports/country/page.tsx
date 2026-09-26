@@ -9,6 +9,7 @@ import { formatMoney, formatMoneyShort } from "@/lib/money";
 import { reportRange } from "@/lib/reports";
 import { ReportAccessError, getBusinessDate, getCountryReport } from "@/lib/queries";
 import type { CountryRow } from "@/lib/types";
+import { getPropertyCurrency } from "@/lib/queries";
 
 export const metadata = { title: "Country report" };
 
@@ -28,6 +29,7 @@ export default async function CountryReportPage({
 }: {
   searchParams: Promise<{ from?: string; to?: string }>;
 }) {
+  const currency = await getPropertyCurrency();
   const sp = await searchParams;
   const businessDate = await getBusinessDate();
   const range = reportRange(businessDate, sp.from, sp.to);
@@ -132,8 +134,8 @@ export default async function CountryReportPage({
           {
             header: "Revenue",
             align: "right",
-            cell: (r) => <span className="tnum text-ink-muted">{formatMoney(r.revenueCents)}</span>,
-            foot: formatMoney(revenue),
+            cell: (r) => <span className="tnum text-ink-muted">{formatMoney(r.revenueCents, currency)}</span>,
+            foot: formatMoney(revenue, currency),
           },
         ]}
       />

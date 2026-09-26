@@ -14,6 +14,7 @@ import {
 } from "@/lib/actions/meeting-rooms";
 import { searchCustomers } from "@/lib/actions/bookings";
 import type { MeetingRoomBooking, MeetingRoomCell } from "@/lib/types";
+import { useCurrency } from "@/components/currency";
 
 const label =
   "mb-1 block text-xxs font-semibold uppercase tracking-[0.1em] text-ink-faint";
@@ -66,6 +67,7 @@ export function MeetingRoomsScreen({
   canBook: boolean;
   canConfigure: boolean;
 }) {
+  const currency = useCurrency();
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
@@ -532,7 +534,7 @@ export function MeetingRoomsScreen({
                   <span className="text-ink-faint">Nothing yet</span>
                 ) : (
                   <>
-                    {formatMoney(booking.chargesCents)}
+                    {formatMoney(booking.chargesCents, currency)}
                     <span
                       className={cn(
                         "ml-1.5 text-xxs",
@@ -540,7 +542,7 @@ export function MeetingRoomsScreen({
                       )}
                     >
                       {booking.balanceCents > 0
-                        ? `${formatMoney(booking.balanceCents)} owing`
+                        ? `${formatMoney(booking.balanceCents, currency)} owing`
                         : "settled"}
                     </span>
                   </>
@@ -626,7 +628,7 @@ export function MeetingRoomsScreen({
                 </div>
                 {booking.balanceCents > 0 && (
                   <p className="mt-1.5 text-xs leading-relaxed text-warn-deep">
-                    This booking still owes {formatMoney(booking.balanceCents)}.
+                    This booking still owes {formatMoney(booking.balanceCents, currency)}.
                     Cancelling frees the room but does not write that off.
                   </p>
                 )}

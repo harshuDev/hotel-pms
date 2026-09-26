@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { format, parseISO } from "date-fns";
 import { TopNav } from "@/components/top-nav";
 import { TopBar } from "@/components/top-bar";
+import { CurrencyProvider } from "@/components/currency";
 import { signOut } from "@/lib/actions/auth";
 import {
   getBusinessDate,
@@ -95,7 +96,11 @@ export default async function AppLayout({
       />
 
       <main className="p-3 sm:p-5">
-        {children}
+        {/* Every amount in the staff app is written in the property's own
+            currency; client components read it from here. */}
+        <CurrencyProvider currency={property.currency.trim()}>
+          {children}
+        </CurrencyProvider>
       </main>
     </div>
   );

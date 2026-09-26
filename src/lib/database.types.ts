@@ -2375,6 +2375,7 @@ export type Database = {
           base_occupancy: number
           code: string
           created_at: string
+          description: string | null
           id: string
           max_occupancy: number
           name: string
@@ -2385,6 +2386,7 @@ export type Database = {
           base_occupancy: number
           code: string
           created_at?: string
+          description?: string | null
           id?: string
           max_occupancy: number
           name: string
@@ -2395,6 +2397,7 @@ export type Database = {
           base_occupancy?: number
           code?: string
           created_at?: string
+          description?: string | null
           id?: string
           max_occupancy?: number
           name?: string
@@ -4034,6 +4037,14 @@ export type Database = {
           meeting_rooms_moved: number
         }[]
       }
+      merge_extra: {
+        Args: { p_source_id: string; p_target_id: string }
+        Returns: undefined
+      }
+      merge_extra_category: {
+        Args: { p_source_id: string; p_target_id: string }
+        Returns: number
+      }
       next_booking_reference: { Args: never; Returns: string }
       next_meeting_room_reference: { Args: never; Returns: string }
       occupancy_forecast: {
@@ -4173,6 +4184,22 @@ export type Database = {
           stay_to: string
         }[]
       }
+      public_hotel_policies: {
+        Args: { p_property_id: string }
+        Returns: {
+          children: string
+          children_custom: string
+          internet: string
+          internet_custom: string
+          other_policies: string
+          parking: string
+          parking_custom: string
+          pets: string
+          pets_custom: string
+          smoking: string
+          smoking_custom: string
+        }[]
+      }
       public_property: {
         Args: { p_property_id: string }
         Returns: {
@@ -4195,6 +4222,22 @@ export type Database = {
           description: string
           name: string
           rate_plan_id: string
+        }[]
+      }
+      public_room_type_content: {
+        Args: { p_property_id: string }
+        Returns: {
+          description: string
+          photo_paths: string[]
+          room_type_id: string
+        }[]
+      }
+      public_room_type_facilities: {
+        Args: { p_property_id: string }
+        Returns: {
+          icon: string
+          room_type_id: string
+          title: string
         }[]
       }
       public_room_types: {
@@ -4719,6 +4762,10 @@ export type Database = {
           p_room_id: string
           p_status: Database["public"]["Enums"]["room_status"]
         }
+        Returns: undefined
+      }
+      set_room_type_description: {
+        Args: { p_description: string; p_room_type_id: string }
         Returns: undefined
       }
       set_room_type_facilities: {

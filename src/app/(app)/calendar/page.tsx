@@ -38,6 +38,7 @@ import {
   getRatePlans,
   getTaxRates,
 } from "@/lib/queries";
+import { getPropertyCurrency } from "@/lib/queries";
 
 export const metadata = { title: "Calendar" };
 
@@ -81,6 +82,7 @@ export default async function CalendarPage({
     booking?: string;
   }>;
 }) {
+  const currency = await getPropertyCurrency();
   const sp = await searchParams;
   const businessDate = await getBusinessDate();
   const from = startDate(businessDate, sp.from);
@@ -445,16 +447,16 @@ export default async function CalendarPage({
           meta={[
             {
               label: "Total",
-              value: formatMoney(peek.detail.chargesCents),
+              value: formatMoney(peek.detail.chargesCents, currency),
             },
             {
               label: "Paid",
-              value: formatMoney(peek.detail.paymentsCents),
+              value: formatMoney(peek.detail.paymentsCents, currency),
               tone: "paid" as const,
             },
             {
               label: "Due",
-              value: formatMoney(peek.detail.balanceCents),
+              value: formatMoney(peek.detail.balanceCents, currency),
               tone: peek.detail.balanceCents > 0 ? ("due" as const) : undefined,
             },
           ]}

@@ -14,6 +14,7 @@ import {
   getBusinessDate,
 } from "@/lib/queries";
 import type { BookingProductionRow, ChannelProductionRow } from "@/lib/types";
+import { getPropertyCurrency } from "@/lib/queries";
 
 export const metadata = { title: "Booking report" };
 
@@ -22,6 +23,7 @@ export default async function BookingReportPage({
 }: {
   searchParams: Promise<{ from?: string; to?: string }>;
 }) {
+  const currency = await getPropertyCurrency();
   const sp = await searchParams;
   const businessDate = await getBusinessDate();
   const range = reportRange(businessDate, sp.from, sp.to);
@@ -53,13 +55,13 @@ export default async function BookingReportPage({
         <ReportFigure label="Room nights" value={String(roomNights)} />
         <ReportFigure
           label="Value"
-          value={formatMoneyShort(value)}
+          value={formatMoneyShort(value, currency)}
           detail="Rate less discount, before tax"
           emphasis
         />
         <ReportFigure
           label="Average booking"
-          value={rows.length > 0 ? formatMoney(Math.round(value / rows.length)) : "—"}
+          value={rows.length > 0 ? formatMoney(Math.round(value / rows.length), currency) : "—"}
         />
       </ReportFigures>
 
@@ -105,9 +107,9 @@ export default async function BookingReportPage({
               header: "Value",
               align: "right",
               cell: (r) => (
-                <span className="font-medium text-ink">{formatMoney(r.valueCents)}</span>
+                <span className="font-medium text-ink">{formatMoney(r.valueCents, currency)}</span>
               ),
-              foot: formatMoney(channelValue),
+              foot: formatMoney(channelValue, currency),
             },
           ]}
         />
@@ -170,9 +172,9 @@ export default async function BookingReportPage({
             header: "Value",
             align: "right",
             cell: (r) => (
-              <span className="font-medium text-ink">{formatMoney(r.valueCents)}</span>
+              <span className="font-medium text-ink">{formatMoney(r.valueCents, currency)}</span>
             ),
-            foot: formatMoney(value),
+            foot: formatMoney(value, currency),
           },
         ]}
       />

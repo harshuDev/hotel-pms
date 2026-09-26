@@ -1,4 +1,18 @@
-export const CURRENCY = "GBP";
+/**
+ * The staff application writes figures the English way ("1,284.00") because
+ * it speaks English. The CURRENCY is the property's own -- `properties.currency`
+ * -- and every formatter here takes it as a required argument.
+ *
+ * It used to default to a constant "GBP", so a hotel set up in pesos had every
+ * staff screen print pounds. Required rather than defaulted, so a call that
+ * forgets it is a compile error rather than a quiet pound sign; the same move
+ * as removing PageHeader's subtitle. Server pages read it with
+ * `getPropertyCurrency()`, client components with `useCurrency()`.
+ *
+ * It cannot be a module-level setting: this file renders on the server for
+ * every hotel at once, and two requests interleaving would print one hotel's
+ * money in another's currency.
+ */
 export const LOCALE = "en-GB";
 
 /**
@@ -35,30 +49,28 @@ export function formatMoneyIn(
   }).format(cents / 100);
 }
 
-export function formatMoney(
-  cents: number,
-  currency: string = CURRENCY,
-): string {
+export function formatMoney(cents: number, currency: string): string {
   assertMinorUnits(cents);
 
   return new Intl.NumberFormat(LOCALE, {
     style: "currency",
     currency,
+    // "$24.00" for a peso hotel rather than en-GB's "MX$24.00". A screen shows
+    // one property's money, so the narrow symbol is never ambiguous on it.
+    currencyDisplay: "narrowSymbol",
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format(cents / 100);
 }
 
 /** Compact form for chart axes and headline totals. */
-export function formatMoneyShort(
-  cents: number,
-  currency: string = CURRENCY,
-): string {
+export function formatMoneyShort(cents: number, currency: string): string {
   assertMinorUnits(cents);
 
   return new Intl.NumberFormat(LOCALE, {
     style: "currency",
     currency,
+    currencyDisplay: "narrowSymbol",
     notation: "compact",
     maximumFractionDigits: 1,
   }).format(cents / 100);
@@ -69,10 +81,7 @@ export function formatMoneyShort(
  * The reference PMS displays it inverted. That inversion happens here,
  * in the formatter, and nowhere else.
  */
-export function formatDue(
-  balanceCents: number,
-  currency: string = CURRENCY,
-): string {
+export function formatDue(balanceCents: number, currency: string): string {
   return formatMoney(-balanceCents, currency);
 }
 

@@ -20,6 +20,7 @@ import type {
   MealType,
   RatePlan,
 } from "@/lib/types";
+import { useCurrency } from "@/components/currency";
 
 const DOW = [
   { value: 1, label: "Mon" },
@@ -60,6 +61,7 @@ export function InventoryScreen({
    */
   lockedToDefaultPlan?: boolean;
 }) {
+  const currency = useCurrency();
   const spec = SCREENS[fieldName];
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -104,7 +106,7 @@ export function InventoryScreen({
     const raw = spec.read(cell);
     if (spec.kind === "flag") return raw ? "Yes" : "";
     if (raw === null) return spec.kind === "count" ? "All" : "—";
-    if (spec.kind === "money") return formatMoney(raw as number);
+    if (spec.kind === "money") return formatMoney(raw as number, currency);
     return String(raw);
   }
 
@@ -215,7 +217,7 @@ export function InventoryScreen({
         text:
           valueCents === null
             ? `${label} on ${plan.name} is worth nothing again, so nothing is posted for it.`
-            : `${label} on ${plan.name} is worth ${formatMoney(valueCents)}. Nights charged from the next night audit split it out as food.`,
+            : `${label} on ${plan.name} is worth ${formatMoney(valueCents, currency)}. Nights charged from the next night audit split it out as food.`,
       });
       router.refresh();
     });

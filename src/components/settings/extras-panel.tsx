@@ -13,22 +13,26 @@ import {
 import {
   deleteExtra,
   deleteExtraCategory,
+  mergeExtra,
+  mergeExtraCategory,
   saveExtra,
   saveExtraCategory,
 } from "@/lib/actions/settings";
 import type { TaxRateSetting } from "@/lib/types";
+import { useCurrency } from "@/components/currency";
 
 /*
  * Hotel Content -> Extras (0069), cloned from the client's reference: an
  * "Extras Categories" table with its own add link, then a searchable, paged
  * "Extras" table with an "Add Extra" button at its foot.
  *
- * Two things from theirs are not copied:
- *   - the "Is Meal" column is drawn but not stored -- a fork and knife on any
- *     extra whose accounting category is food and beverage (see extras.ts);
- *   - the third, arrows icon on each row. What it does in their system has
- *     not been seen, and a copied icon that does nothing is the dead control
- *     this application does not ship.
+ * The "Is Meal" column is drawn but not stored -- a fork and knife on any
+ * extra whose accounting category is food and beverage (see extras.ts).
+ *
+ * The arrows icon is MERGE, as in theirs: "Merge <x> to:" with a searchable
+ * picker of the others. On an extra (0071) the kept one stays and the other
+ * leaves the catalog; on a category (0072) its extras move to the kept one
+ * first. Either way the activity log says where it went.
  *
  * The catalog is dozens of rows, not thousands, so search and paging happen
  * here over what the page already holds.
@@ -70,6 +74,16 @@ function TrashIcon() {
   );
 }
 
+function MergeIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-[15px] w-[15px]" fill="none" stroke="currentColor"
+      strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M4 20l6-6M10 14H5.5M10 14v4.5" />
+      <path d="M20 4l-6 6M14 10h4.5M14 10V5.5" />
+    </svg>
+  );
+}
+
 function MealIcon() {
   return (
     <svg viewBox="0 0 24 24" className="h-[15px] w-[15px]" fill="none" stroke="currentColor"
@@ -104,6 +118,7 @@ export function ExtrasPanel({
   pending: boolean;
   run: Run;
 }) {
+  const currency = useCurrency();
   const { categories, extras } = catalog;
 
   const taxName = (id: string | null) =>
@@ -118,6 +133,7 @@ export function ExtrasPanel({
 
   /* -- Categories ------------------------------------------------------- */
   const [cat, setCat] = useState<CategoryDraft | null>(null);
+  const [mergingCat, setMergingCat] = useState<{ id: string; title: string } | null>(null);
 
   function saveCategory() {
     if (!cat) return;
@@ -182,6 +198,7 @@ export function ExtrasPanel({
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState<number>(PAGE_SIZES[0]);
   const [ex, setEx] = useState<ExtraDraft | null>(null);
+  const [merging, setMerging] = useState<{ id: string; title: string } | null>(null);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -265,6 +282,15 @@ export function ExtrasPanel({
                             className={cn(iconButton, "text-brass")}
                           >
                             <PencilIcon />
+                          </button>
+                          <button
+                            type="button"
+                            title="Merge"
+                            aria-label={`Merge ${c.title}`}
+                            onClick={() => setMergingCat({ id: c.id, title: c.title })}
+                            className={cn(iconButton, "text-brass")}
+                          >
+                            <MergeIcon />
                           </button>
                           <button
                             type="button"
@@ -354,7 +380,7 @@ export function ExtrasPanel({
                     <td className="px-4 py-4 text-ink">
                       {isMealExtra(e.itemType) && <MealIcon />}
                     </td>
-                    <td className="tnum px-4 py-4 text-ink">{formatMoney(e.priceCents)}</td>
+                    <td className="tnum px-4 py-4 text-ink">{formatMoney(e.priceCents, currency)}</td>
                     <td className="px-4 py-4">
                       {e.taxRateId ? (
                         <span className="text-ink">{taxName(e.taxRateId)}</span>
@@ -383,6 +409,15 @@ export function ExtrasPanel({
                             className={cn(iconButton, "text-ink")}
                           >
                             <PencilIcon />
+                          </button>
+                          <button
+                            type="button"
+                            title="Merge"
+                            aria-label={`Merge ${e.title}`}
+                            onClick={() => setMerging({ id: e.id, title: e.title })}
+                            className={cn(iconButton, "border border-line text-ink")}
+                          >
+                            <MergeIcon />
                           </button>
                           <button
                             type="button"
@@ -565,6 +600,162 @@ export function ExtrasPanel({
           </div>
         </div>
       )}
+      {mergingCat && (
+        <MergeDialog
+          key={mergingCat.id}
+          source={mergingCat}
+          options={categories.filter((c) => c.id !== mergingCat.id)}
+          placeholder="Choose category"
+          pending={pending}
+          onClose={() => setMergingCat(null)}
+          onMerge={(targetId) => {
+            const source = mergingCat;
+            const target = categories.find((c) => c.id === targetId);
+            run(async () => {
+              const result = await mergeExtraCategory({ sourceId: source.id, targetId });
+              if (result.ok) setMergingCat(null);
+              return result;
+            }, `${source.title} merged into ${target?.title ?? "the chosen category"}.`);
+          }}
+        />
+      )}
+      {merging && (
+        <MergeDialog
+          key={merging.id}
+          source={merging}
+          options={extras.filter((e) => e.id !== merging.id)}
+          placeholder="Choose extra"
+          pending={pending}
+          onClose={() => setMerging(null)}
+          onMerge={(targetId) => {
+            const source = merging;
+            const target = extras.find((e) => e.id === targetId);
+            run(async () => {
+              const result = await mergeExtra({ sourceId: source.id, targetId });
+              if (result.ok) setMerging(null);
+              return result;
+            }, `${source.title} merged into ${target?.title ?? "the chosen extra"}.`);
+          }}
+        />
+      )}
+    </div>
+  );
+}
+
+/*
+ * "Merge <extra> to:" -- the reference's dialog: a search field that lists
+ * the other extras, a close cross, and Merge. The list filters as you type.
+ * Merge is never greyed out: pressed with nothing chosen, the refusal says
+ * what to do, which is how every other control here behaves.
+ */
+function MergeDialog({
+  source,
+  options,
+  placeholder,
+  pending,
+  onClose,
+  onMerge,
+}: {
+  source: { id: string; title: string };
+  options: { id: string; title: string }[];
+  placeholder: string;
+  pending: boolean;
+  onClose: () => void;
+  onMerge: (targetId: string) => void;
+}) {
+  const [query, setQuery] = useState("");
+  const [targetId, setTargetId] = useState("");
+  const [open, setOpen] = useState(true);
+  const q = query.trim().toLowerCase();
+  const shown = q ? options.filter((o) => o.title.toLowerCase().includes(q)) : options;
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-start justify-center bg-ink/40 px-4 pt-[12vh]"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="merge-title"
+      onKeyDown={(e) => {
+        if (e.key === "Escape") onClose();
+      }}
+    >
+      <div className="w-full max-w-lg rounded-lg bg-white shadow-xl">
+        <div className="flex items-center justify-between border-b border-line px-6 py-4">
+          <h3 id="merge-title" className="text-[16px] text-ink">
+            Merge <span className="font-semibold">{source.title}</span> to:
+          </h3>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close"
+            className="rounded p-1 text-ink-muted hover:bg-shell hover:text-ink"
+          >
+            <span aria-hidden="true" className="text-lg leading-none">✕</span>
+          </button>
+        </div>
+        <div className="relative px-6 py-5">
+          <input
+            autoFocus
+            role="combobox"
+            aria-expanded={open}
+            aria-controls="merge-options"
+            value={query}
+            onChange={(e) => {
+              setQuery(e.target.value);
+              setTargetId("");
+              setOpen(true);
+            }}
+            onFocus={() => setOpen(true)}
+            placeholder={placeholder}
+            className={cn(field, "pr-9 text-[14px]")}
+          />
+          <svg viewBox="0 0 24 24" className="pointer-events-none absolute right-9 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-faint"
+            fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+            <circle cx="11" cy="11" r="7" />
+            <path d="M20 20l-4-4" />
+          </svg>
+          {open && (
+            <ul
+              id="merge-options"
+              role="listbox"
+              className="absolute inset-x-6 top-full z-10 -mt-3 max-h-64 overflow-y-auto rounded-md border border-line bg-white py-1 shadow-lg"
+            >
+              {shown.length === 0 ? (
+                <li className="px-3 py-2 text-[13px] text-ink-muted">Nothing matches that search.</li>
+              ) : (
+                shown.map((o) => (
+                  <li key={o.id} role="option" aria-selected={o.id === targetId}>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setTargetId(o.id);
+                        setQuery(o.title);
+                        setOpen(false);
+                      }}
+                      className={cn(
+                        "block w-full px-3 py-2 text-left text-[14px] text-ink hover:bg-shell",
+                        o.id === targetId && "bg-shell",
+                      )}
+                    >
+                      {o.title}
+                    </button>
+                  </li>
+                ))
+              )}
+            </ul>
+          )}
+        </div>
+        <div className="flex justify-end border-t border-line px-6 py-3">
+          <button
+            type="button"
+            onClick={() => onMerge(targetId)}
+            disabled={pending}
+            className={primary}
+          >
+            Merge
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

@@ -12,6 +12,7 @@ import {
   getDailyCheckout,
 } from "@/lib/queries";
 import type { CheckoutRow } from "@/lib/types";
+import { getPropertyCurrency } from "@/lib/queries";
 
 export const metadata = { title: "Daily checkout" };
 
@@ -22,6 +23,7 @@ export default async function DailyCheckoutPage({
 }: {
   searchParams: Promise<{ date?: string }>;
 }) {
+  const currency = await getPropertyCurrency();
   const sp = await searchParams;
   const businessDate = await getBusinessDate();
   const date =
@@ -62,11 +64,11 @@ export default async function DailyCheckoutPage({
           value={String(rows.length)}
           detail={date === businessDate ? "Due out today" : "Due out that day"}
         />
-        <ReportFigure label="Charged" value={formatMoneyShort(charges)} />
-        <ReportFigure label="Settled" value={formatMoneyShort(payments)} />
+        <ReportFigure label="Charged" value={formatMoneyShort(charges, currency)} />
+        <ReportFigure label="Settled" value={formatMoneyShort(payments, currency)} />
         <ReportFigure
           label="Left owing"
-          value={formatMoneyShort(outstanding)}
+          value={formatMoneyShort(outstanding, currency)}
           detail={
             owing === 0
               ? "Every folio settled"
@@ -121,14 +123,14 @@ export default async function DailyCheckoutPage({
           {
             header: "Charged",
             align: "right",
-            cell: (r) => <span className="text-ink-muted">{formatMoney(r.chargesCents)}</span>,
-            foot: formatMoney(charges),
+            cell: (r) => <span className="text-ink-muted">{formatMoney(r.chargesCents, currency)}</span>,
+            foot: formatMoney(charges, currency),
           },
           {
             header: "Paid",
             align: "right",
-            cell: (r) => <span className="text-ink-muted">{formatMoney(r.paymentsCents)}</span>,
-            foot: formatMoney(payments),
+            cell: (r) => <span className="text-ink-muted">{formatMoney(r.paymentsCents, currency)}</span>,
+            foot: formatMoney(payments, currency),
           },
           {
             header: "Outstanding",
@@ -141,10 +143,10 @@ export default async function DailyCheckoutPage({
                     : "text-ink-faint"
                 }
               >
-                {r.outstandingCents === 0 ? "Settled" : formatMoney(r.outstandingCents)}
+                {r.outstandingCents === 0 ? "Settled" : formatMoney(r.outstandingCents, currency)}
               </span>
             ),
-            foot: formatMoney(outstanding),
+            foot: formatMoney(outstanding, currency),
           },
         ]}
       />

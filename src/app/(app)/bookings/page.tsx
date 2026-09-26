@@ -3,6 +3,7 @@ import { format, parseISO } from "date-fns";
 import { EmptyState, PageHeader, StatusBadge, cn } from "@/components/ui";
 import { formatDue, formatMoney } from "@/lib/money";
 import { getBookings } from "@/lib/queries";
+import { getPropertyCurrency } from "@/lib/queries";
 
 export const metadata = { title: "Bookings" };
 
@@ -33,6 +34,7 @@ export default async function BookingsPage({
 }: {
   searchParams: Promise<{ q?: string; status?: string; page?: string }>;
 }) {
+  const currency = await getPropertyCurrency();
   const sp = await searchParams;
   const status = sp.status ?? "all";
   const q = sp.q ?? "";
@@ -163,7 +165,7 @@ export default async function BookingsPage({
                       <StatusBadge status={b.status} />
                     </td>
                     <td className="tnum whitespace-nowrap px-3 py-3 text-right text-ink">
-                      {formatMoney(b.totalCents)}
+                      {formatMoney(b.totalCents, currency)}
                     </td>
                     <td
                       className={cn(
@@ -171,7 +173,7 @@ export default async function BookingsPage({
                         b.balanceCents > 0 ? "text-rose-600" : "text-ink-muted",
                       )}
                     >
-                      {formatDue(b.balanceCents)}
+                      {formatDue(b.balanceCents, currency)}
                     </td>
                   </tr>
                 ))}

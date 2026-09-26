@@ -950,6 +950,8 @@ export interface RoomTypeSetting {
   roomCount: number;
   /** The facilities ticked on this room type (0070). */
   facilityIds: string[];
+  /** What the guest booking page says about the room type (0072). */
+  description: string | null;
 }
 
 export interface TaxRateSetting {

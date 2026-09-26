@@ -18,6 +18,7 @@ import type {
   RoomStatus,
   CalendarSeason,
 } from "@/lib/types";
+import { getPropertyCurrency } from "@/lib/queries";
 
 /**
  * The calendar board: room types down the rail, dates across the top, one bar
@@ -231,7 +232,7 @@ function rowHeight(lanes: number, withFoot: boolean) {
   );
 }
 
-function Bars({
+async function Bars({
   placed,
   roomsByType,
   soldTypeId,
@@ -277,6 +278,7 @@ function Bars({
       sense: a live booking has nothing to restore. */
   canRestore?: boolean;
 }) {
+  const currency = await getPropertyCurrency();
   return (
     <>
       {placed.map((bar) => {
@@ -329,7 +331,7 @@ function Bars({
               `${bar.guests} guest${bar.guests === 1 ? "" : "s"}`,
               bar.ratePlanName,
               bar.roomNumber ? `room ${bar.roomNumber}` : null,
-              formatMoney(bar.valueCents),
+              formatMoney(bar.valueCents, currency),
             ]
               .filter(Boolean)
               .join(" · ")}
@@ -415,7 +417,7 @@ function Bars({
                   tone.badge,
                 )}
               >
-                {formatMoney(bar.valueCents)}
+                {formatMoney(bar.valueCents, currency)}
               </span>
             </span>
           </Link>

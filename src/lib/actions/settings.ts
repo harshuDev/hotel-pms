@@ -266,6 +266,45 @@ export async function saveExtra(input: {
   return { ok: true, data: { id: data } };
 }
 
+/**
+ * Folds one extra into another (0071): the target stays, the source leaves
+ * the catalog, and the activity log records which went where. Nothing posted
+ * moves -- a charged extra is a folio item carrying its own copy.
+ */
+export async function mergeExtra(input: {
+  sourceId: string;
+  targetId: string;
+}): Promise<ActionResult<null>> {
+  if (!input.targetId) return { ok: false, error: "Choose the extra to merge into." };
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("merge_extra", {
+    p_source_id: input.sourceId,
+    p_target_id: input.targetId,
+  });
+  if (error) return { ok: false, error: error.message };
+  revalidateExtras();
+  return { ok: true, data: null };
+}
+
+/**
+ * Folds one extra category into another (0072): its extras move to the
+ * target, then it goes. Returns how many extras moved, for the message.
+ */
+export async function mergeExtraCategory(input: {
+  sourceId: string;
+  targetId: string;
+}): Promise<ActionResult<{ moved: number }>> {
+  if (!input.targetId) return { ok: false, error: "Choose the category to merge into." };
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("merge_extra_category", {
+    p_source_id: input.sourceId,
+    p_target_id: input.targetId,
+  });
+  if (error) return { ok: false, error: error.message };
+  revalidateExtras();
+  return { ok: true, data: { moved: data ?? 0 } };
+}
+
 export async function deleteExtra(id: string): Promise<ActionResult<null>> {
   const supabase = await createClient();
   const { error } = await supabase.rpc("delete_extra", { p_id: id });
@@ -297,6 +336,21 @@ export async function saveFacility(input: {
 export async function deleteFacility(id: string): Promise<ActionResult<null>> {
   const supabase = await createClient();
   const { error } = await supabase.rpc("delete_facility", { p_id: id });
+  if (error) return { ok: false, error: error.message };
+  revalidateSettings();
+  return { ok: true, data: null };
+}
+
+/** What the guest booking page says about a room type (0072). Blank clears it. */
+export async function setRoomTypeDescription(input: {
+  roomTypeId: string;
+  description: string;
+}): Promise<ActionResult<null>> {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("set_room_type_description", {
+    p_room_type_id: input.roomTypeId,
+    p_description: input.description,
+  });
   if (error) return { ok: false, error: error.message };
   revalidateSettings();
   return { ok: true, data: null };

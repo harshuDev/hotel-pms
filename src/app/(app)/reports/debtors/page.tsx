@@ -3,10 +3,12 @@ import { EmptyState, StatusBadge, cn } from "@/components/ui";
 import { ReportShell } from "@/components/reports/report-shell";
 import { formatMoney } from "@/lib/money";
 import { getDebtorsReport } from "@/lib/queries";
+import { getPropertyCurrency } from "@/lib/queries";
 
 export const metadata = { title: "Debtors report" };
 
 export default async function DebtorsReportPage() {
+  const currency = await getPropertyCurrency();
   const rows = await getDebtorsReport();
   const total = rows.reduce((sum, r) => sum + r.outstandingCents, 0);
 
@@ -86,13 +88,13 @@ export default async function DebtorsReportPage() {
                         {r.daysOverdue > 0 ? `${r.daysOverdue}d` : "—"}
                       </td>
                       <td className="tnum whitespace-nowrap px-3 py-3 text-right text-ink-muted">
-                        {formatMoney(r.chargesCents)}
+                        {formatMoney(r.chargesCents, currency)}
                       </td>
                       <td className="tnum whitespace-nowrap px-3 py-3 text-right text-ink-muted">
-                        {formatMoney(r.paymentsCents)}
+                        {formatMoney(r.paymentsCents, currency)}
                       </td>
                       <td className="tnum whitespace-nowrap px-3 py-3 text-right font-medium text-rose-600">
-                        {formatMoney(r.outstandingCents)}
+                        {formatMoney(r.outstandingCents, currency)}
                       </td>
                     </tr>
                   ))}
@@ -103,7 +105,7 @@ export default async function DebtorsReportPage() {
                       {rows.length} booking{rows.length === 1 ? "" : "s"} owing
                     </td>
                     <td className="tnum whitespace-nowrap px-3 pt-3 text-right font-semibold text-rose-600">
-                      {formatMoney(total)}
+                      {formatMoney(total, currency)}
                     </td>
                   </tr>
                 </tfoot>

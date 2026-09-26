@@ -14,6 +14,7 @@ import {
   type BookingRoomSlot,
 } from "@/lib/actions/front-desk";
 import type { Booking } from "@/lib/types";
+import { useCurrency } from "@/components/currency";
 
 function Sheet({
   title,
@@ -193,6 +194,7 @@ export function CheckInAction({ booking }: { booking: Booking }) {
 
 /** Move the guest out and release the room to housekeeping. */
 export function CheckOutAction({ booking }: { booking: Booking }) {
+  const currency = useCurrency();
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [open, setOpen] = useState(false);
@@ -235,7 +237,7 @@ export function CheckOutAction({ booking }: { booking: Booking }) {
                 "border-warn-light bg-warn-wash text-warn-deep",
               )}
             >
-              This folio still owes {formatMoney(booking.balanceCents)}. Checking
+              This folio still owes {formatMoney(booking.balanceCents, currency)}. Checking
               out does not settle it — take the payment first unless the balance
               is going to an account.
             </div>
