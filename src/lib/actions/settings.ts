@@ -609,6 +609,64 @@ export async function setInvoiceLogo(path: string | null): Promise<ActionResult<
   return { ok: true, data: null };
 }
 
+/* -- Finances -> Pos Profiles (0084) and Currencies (0083) ----------------- */
+
+export async function savePosProfile(input: {
+  id: string | null;
+  posType: string;
+  isEnabled: boolean;
+}): Promise<ActionResult<null>> {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("save_pos_profile", {
+    // Null adds a new profile.
+    p_id: nullableArg(input.id),
+    p_pos_type: input.posType,
+    p_is_enabled: input.isEnabled,
+  });
+  if (error) return { ok: false, error: error.message };
+  revalidateSettings();
+  return { ok: true, data: null };
+}
+
+export async function deletePosProfile(id: string): Promise<ActionResult<null>> {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("delete_pos_profile", { p_id: id });
+  if (error) return { ok: false, error: error.message };
+  revalidateSettings();
+  return { ok: true, data: null };
+}
+
+export async function saveCurrencyProfile(input: {
+  id: string | null;
+  currency: string;
+  rateKind: "live" | "fixed";
+  fixedRateMicros: number | null;
+}): Promise<ActionResult<null>> {
+  if (input.rateKind === "fixed" && (input.fixedRateMicros === null || input.fixedRateMicros <= 0)) {
+    return { ok: false, error: "Write the fixed rate, above zero." };
+  }
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("save_currency_profile", {
+    // Null adds a new currency.
+    p_id: nullableArg(input.id),
+    p_currency: input.currency,
+    p_rate_kind: input.rateKind,
+    // Null on a live rate: there is no figure to store.
+    p_fixed_rate_micros: nullableArg(input.rateKind === "fixed" ? input.fixedRateMicros : null),
+  });
+  if (error) return { ok: false, error: error.message };
+  revalidateSettings();
+  return { ok: true, data: null };
+}
+
+export async function deleteCurrencyProfile(id: string): Promise<ActionResult<null>> {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("delete_currency_profile", { p_id: id });
+  if (error) return { ok: false, error: error.message };
+  revalidateSettings();
+  return { ok: true, data: null };
+}
+
 /* -- System Settings -> Language Settings (0078) --------------------------- */
 
 function revalidateLanguages() {

@@ -23,6 +23,7 @@ import {
   ROUND_TO,
   type InvoiceSettings,
 } from "@/lib/invoice-settings";
+import type { CurrencyProfile, PosProfile } from "@/lib/finance-profiles";
 import type { ExtraItemType, ExtrasCatalog } from "@/lib/extras";
 import type { Facility, FacilityIcon } from "@/lib/facilities";
 import type {
@@ -2750,6 +2751,33 @@ export const getInvoiceSettings = cache(async (): Promise<InvoiceSettings> => {
     statementTermsText: data?.statement_terms_text ?? null,
   };
 });
+
+/** Pos Profiles (0084), in the order they were added. */
+export async function getPosProfiles(): Promise<PosProfile[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("pos_profiles")
+    .select("id, pos_type, is_enabled")
+    .order("created_at");
+  if (error) throw new Error(`Failed to load the pos profiles: ${error.message}`);
+  return (data ?? []).map((r) => ({ id: r.id, posType: r.pos_type, isEnabled: r.is_enabled }));
+}
+
+/** Currencies (0083): the additional ones. The default is the property's own. */
+export async function getCurrencyProfiles(): Promise<CurrencyProfile[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("currency_profiles")
+    .select("id, currency, rate_kind, fixed_rate_micros")
+    .order("created_at");
+  if (error) throw new Error(`Failed to load the currencies: ${error.message}`);
+  return (data ?? []).map((r) => ({
+    id: r.id,
+    currency: r.currency.trim(),
+    rateKind: r.rate_kind === "fixed" ? "fixed" : "live",
+    fixedRateMicros: r.fixed_rate_micros === null ? null : Number(r.fixed_rate_micros),
+  }));
+}
 
 /** One charge on a booking's folios, split for the invoice (0080). */
 export interface InvoiceLine {

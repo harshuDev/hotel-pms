@@ -1037,6 +1037,41 @@ export type Database = {
           },
         ]
       }
+      currency_profiles: {
+        Row: {
+          created_at: string
+          currency: string
+          fixed_rate_micros: number | null
+          id: string
+          property_id: string
+          rate_kind: string
+        }
+        Insert: {
+          created_at?: string
+          currency: string
+          fixed_rate_micros?: number | null
+          id?: string
+          property_id: string
+          rate_kind?: string
+        }
+        Update: {
+          created_at?: string
+          currency?: string
+          fixed_rate_micros?: number | null
+          id?: string
+          property_id?: string
+          rate_kind?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "currency_profiles_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       customers: {
         Row: {
           company_name: string | null
@@ -2156,6 +2191,38 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "cashier_shifts"
             referencedColumns: ["id", "property_id"]
+          },
+        ]
+      }
+      pos_profiles: {
+        Row: {
+          created_at: string
+          id: string
+          is_enabled: boolean
+          pos_type: string
+          property_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_enabled?: boolean
+          pos_type: string
+          property_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_enabled?: boolean
+          pos_type?: string
+          property_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pos_profiles_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -4192,11 +4259,13 @@ export type Database = {
         Returns: string
       }
       delete_calendar_note: { Args: { p_id: string }; Returns: undefined }
+      delete_currency_profile: { Args: { p_id: string }; Returns: undefined }
       delete_email_template: { Args: { p_id: string }; Returns: undefined }
       delete_extra: { Args: { p_id: string }; Returns: undefined }
       delete_extra_category: { Args: { p_id: string }; Returns: undefined }
       delete_facility: { Args: { p_id: string }; Returns: undefined }
       delete_identification_type: { Args: { p_id: string }; Returns: undefined }
+      delete_pos_profile: { Args: { p_id: string }; Returns: undefined }
       delete_room: { Args: { p_room_id: string }; Returns: undefined }
       delete_season: { Args: { p_id: string }; Returns: undefined }
       delete_tax_rate: { Args: { p_id: string }; Returns: undefined }
@@ -4480,6 +4549,7 @@ export type Database = {
       is_front_office_staff: { Args: never; Returns: boolean }
       is_revenue_staff: { Args: never; Returns: boolean }
       known_locales: { Args: never; Returns: string[] }
+      known_pos_types: { Args: never; Returns: string[] }
       log_booking_email: {
         Args: {
           p_body: string
@@ -4989,6 +5059,15 @@ export type Database = {
         }
         Returns: string
       }
+      save_currency_profile: {
+        Args: {
+          p_currency: string
+          p_fixed_rate_micros: number
+          p_id: string
+          p_rate_kind: string
+        }
+        Returns: string
+      }
       save_customer: {
         Args: {
           p_company_name?: string
@@ -5106,6 +5185,10 @@ export type Database = {
           p_kind: Database["public"]["Enums"]["payment_method_kind"]
           p_title: string
         }
+        Returns: string
+      }
+      save_pos_profile: {
+        Args: { p_id: string; p_is_enabled: boolean; p_pos_type: string }
         Returns: string
       }
       save_post_departure_email: {
