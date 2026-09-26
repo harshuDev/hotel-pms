@@ -1,3 +1,4 @@
+import type { StaffLocale } from "@/lib/i18n/staff-locales";
 import type { CancellationTerms } from "@/lib/cancellation-policy";
 export type BookingStatus =
   | "pending"
@@ -23,6 +24,8 @@ export interface StaffUser {
   id: string;
   fullName: string;
   role: StaffRole;
+  /** The language this person reads the staff app in (0106). */
+  locale: StaffLocale;
 }
 
 export type ActivityKind =

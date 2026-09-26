@@ -1,4 +1,6 @@
+import type { Month } from "date-fns";
 import { LOCALE } from "./money";
+import { DATE_LOCALES, type StaffLocale } from "@/lib/i18n/staff-locales";
 
 /**
  * Rendering a `timestamptz` on the property's own clock.
@@ -21,22 +23,12 @@ import { LOCALE } from "./money";
  * browser's, so leaving either to the platform would reintroduce exactly the
  * mismatch this function exists to remove. Only the numeric parts, which every
  * ICU agrees on, are taken from `Intl`.
+ *
+ * The month name is the STAFF MEMBER'S language (0106), from date-fns's locale
+ * data rather than ICU -- plain data in the bundle, identical on the server and
+ * in the browser -- so a translated stamp keeps the guarantee above. The
+ * locale is a required argument for the same reason the currency is.
  */
-const MONTHS = [
-  "Jan",
-  "Feb",
-  "Mar",
-  "Apr",
-  "May",
-  "Jun",
-  "Jul",
-  "Aug",
-  "Sep",
-  "Oct",
-  "Nov",
-  "Dec",
-];
-
 function partsInProperty(iso: string, timezone: string) {
   const parts = new Intl.DateTimeFormat(LOCALE, {
     timeZone: timezone,
@@ -61,9 +53,9 @@ function partsInProperty(iso: string, timezone: string) {
 }
 
 /** "20 Sep, 14:32" — when something was posted, on the property's clock. */
-export function formatStampInProperty(iso: string, timezone: string): string {
+export function formatStampInProperty(iso: string, timezone: string, locale: StaffLocale): string {
   const p = partsInProperty(iso, timezone);
-  const month = MONTHS[Number(p.month) - 1] ?? p.month;
+  const month = DATE_LOCALES[locale].localize.month((Number(p.month) - 1) as Month, { width: "abbreviated" }) ?? p.month;
 
   return `${Number(p.day)} ${month}, ${p.hour}:${p.minute}`;
 }

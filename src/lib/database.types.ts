@@ -3926,6 +3926,7 @@ export type Database = {
           full_name: string
           id: string
           is_active: boolean
+          locale: string
           property_id: string
           role: Database["public"]["Enums"]["staff_role"]
         }
@@ -3935,6 +3936,7 @@ export type Database = {
           full_name: string
           id: string
           is_active?: boolean
+          locale?: string
           property_id: string
           role: Database["public"]["Enums"]["staff_role"]
         }
@@ -3944,6 +3946,7 @@ export type Database = {
           full_name?: string
           id?: string
           is_active?: boolean
+          locale?: string
           property_id?: string
           role?: Database["public"]["Enums"]["staff_role"]
         }
@@ -6474,6 +6477,7 @@ export type Database = {
         Args: { p_date: string; p_enabled: boolean }
         Returns: undefined
       }
+      save_own_locale: { Args: { p_locale: string }; Returns: undefined }
       save_own_profile: { Args: { p_full_name: string }; Returns: string }
       save_payment_gateway: {
         Args: {

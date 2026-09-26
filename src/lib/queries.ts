@@ -30,6 +30,7 @@ import type { BookingWidget } from "@/lib/booking-widgets";
 import type { ApiPermission } from "@/lib/api-keys";
 import type { SystemCategory, SystemConnection } from "@/lib/system-connections";
 import { parseConditions, type Reaction } from "@/lib/reactions";
+import { DEFAULT_STAFF_LOCALE, isStaffLocale } from "@/lib/i18n/staff-locales";
 import {
   DEFAULT_INVENTORY_SETTINGS,
   type InventorySettings,
@@ -218,7 +219,7 @@ export const getCurrentStaffUser = cache(async (): Promise<StaffUser | null> => 
 
   const { data, error } = await supabase
     .from("staff_users")
-    .select("id, full_name, role")
+    .select("id, full_name, role, locale")
     .eq("id", user.id)
     .maybeSingle();
 
@@ -231,6 +232,9 @@ export const getCurrentStaffUser = cache(async (): Promise<StaffUser | null> => 
     id: data.id,
     fullName: data.full_name,
     role: data.role as StaffRole,
+    // The column's check constraint lists the same twelve; anything else
+    // would be a row written round it, and reads as English.
+    locale: isStaffLocale(data.locale) ? data.locale : DEFAULT_STAFF_LOCALE,
   };
 });
 

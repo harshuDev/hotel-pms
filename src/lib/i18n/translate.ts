@@ -1,0 +1,126 @@
+import { format, parseISO } from "date-fns";
+import { formatStampInProperty } from "@/lib/dates";
+import { DATE_LOCALES, type StaffLocale } from "@/lib/i18n/staff-locales";
+
+/*
+ * THE STAFF APPLICATION'S TRANSLATOR (0106). Pure, so the server and the
+ * browser build the same one from the same dictionary and cannot disagree.
+ *
+ *   - THE KEY IS THE ENGLISH TEXT. `t("Close shift")` reads as English in the
+ *     code, prints English in English, and a string nobody translated falls
+ *     back to its English rather than to a blank or a key name. Changing the
+ *     English wording is changing the key, and `pnpm i18n:check` says which
+ *     dictionaries then lack it.
+ *   - `{name}` is a placeholder: `t("{n} rooms", { n })`.
+ *   - Plurals follow the LANGUAGE's rules, not English's two: a dictionary
+ *     entry may be `{ one, two, few, other }` and `Intl.PluralRules` picks.
+ *     Slovenian has a dual; Thai and Indonesian do not inflect at all.
+ *   - `message()` is for text that arrives already written -- the database's
+ *     refusals. Exact first; failing that, a key with numbered placeholders
+ *     ("{0} is already added") is matched as a pattern and the captured
+ *     values are put back into the translation.
+ *
+ * Never a module-level setting: the server renders for many staff at once,
+ * each in their own language -- the same reason the currency is an argument.
+ * Server Components get theirs from `getT()`, client components from `useT()`.
+ */
+
+export type PluralForms = Partial<Record<Intl.LDMLPluralRule, string>> & { other: string };
+export type Dictionary = Record<string, string | PluralForms>;
+export type Vars = Record<string, string | number>;
+
+export interface Translator {
+  (key: string, vars?: Vars): string;
+  readonly locale: StaffLocale;
+  /** `t.plural(n, "{n} night", "{n} nights")`; `n` is passed to the text. */
+  plural(count: number, one: string, other: string, vars?: Vars): string;
+  /** Text written elsewhere -- a database refusal -- translated if it is known. */
+  message(text: string): string;
+  /** A date, with this language's month and weekday names (date-fns patterns). */
+  date(value: Date | string, pattern: string): string;
+  /** A timestamptz on the property's clock, "20 Sep, 14:32". */
+  stamp(iso: string, timezone: string): string;
+}
+
+function interpolate(text: string, vars?: Vars): string {
+  if (!vars) return text;
+  return text.replace(/\{(\w+)\}/g, (whole, name: string) =>
+    Object.prototype.hasOwnProperty.call(vars, name) ? String(vars[name]) : whole,
+  );
+}
+
+function asText(entry: string | PluralForms | undefined): string | undefined {
+  return entry === undefined ? undefined : typeof entry === "string" ? entry : entry.other;
+}
+
+type Pattern = { re: RegExp; key: string; order: number[] };
+const patternCache = new WeakMap<Dictionary, Pattern[]>();
+
+function patternsOf(dict: Dictionary): Pattern[] {
+  const cached = patternCache.get(dict);
+  if (cached) return cached;
+  const list: Pattern[] = [];
+  for (const key of Object.keys(dict)) {
+    if (!/\{\d+\}/.test(key)) continue;
+    const order: number[] = [];
+    const source = key
+      .split(/(\{\d+\})/)
+      .map((part) => {
+        const m = /^\{(\d+)\}$/.exec(part);
+        if (m) {
+          order.push(Number(m[1]));
+          return "(.+?)";
+        }
+        return part.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      })
+      .join("");
+    list.push({ re: new RegExp(`^${source}$`, "s"), key, order });
+  }
+  patternCache.set(dict, list);
+  return list;
+}
+
+export function makeTranslator(locale: StaffLocale, dict: Dictionary): Translator {
+  const pluralRules = new Intl.PluralRules(locale === "sl-SI" ? "sl" : locale);
+  const dateLocale = DATE_LOCALES[locale];
+
+  const t = ((key: string, vars?: Vars) => interpolate(asText(dict[key]) ?? key, vars)) as Translator;
+
+  Object.defineProperty(t, "locale", { value: locale });
+
+  t.plural = (count, one, other, vars) => {
+    const all = { n: count, ...vars };
+    const entry = dict[other];
+    if (entry === undefined) return interpolate(count === 1 ? one : other, all);
+    if (typeof entry === "string") return interpolate(entry, all);
+    return interpolate(entry[pluralRules.select(count)] ?? entry.other, all);
+  };
+
+  t.message = (text) => {
+    const exact = asText(dict[text]);
+    if (exact !== undefined) return exact;
+    for (const p of patternsOf(dict)) {
+      const m = p.re.exec(text);
+      if (!m) continue;
+      const values: Record<number, string> = {};
+      p.order.forEach((index, i) => {
+        values[index] = m[i + 1];
+      });
+      const translated = asText(dict[p.key]) ?? p.key;
+      return translated.replace(/\{(\d+)\}/g, (whole, i: string) => values[Number(i)] ?? whole);
+    }
+    return text;
+  };
+
+  t.date = (value, pattern) =>
+    format(typeof value === "string" ? parseISO(value) : value, pattern, { locale: dateLocale });
+
+  t.stamp = (iso, timezone) => formatStampInProperty(iso, timezone, locale);
+
+  return t;
+}
+
+/** Marks a string for translation where it is written, and returns it unchanged. */
+export function msg<T extends string>(text: T): T {
+  return text;
+}
