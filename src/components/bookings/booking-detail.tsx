@@ -1204,12 +1204,23 @@ export function BookingDetailView({
             <h2 className="font-display text-[15px] font-semibold tracking-tightest text-ink">
               Guests
             </h2>
-            <Link
-              href={`/customers?q=${encodeURIComponent(detail.customerName)}`}
-              className="text-[13px] text-ink-muted underline-offset-2 hover:text-ink hover:underline"
-            >
-              Open in Customers
-            </Link>
+            <span className="flex gap-4">
+              {/* The printable card Guest Configuration feeds (0073). A new
+                  tab, so the calendar's panel is still there afterwards. */}
+              <Link
+                href={`/bookings/${detail.bookingId}/registration`}
+                target="_blank"
+                className="text-[13px] text-ink-muted underline-offset-2 hover:text-ink hover:underline"
+              >
+                Registration card
+              </Link>
+              <Link
+                href={`/customers?q=${encodeURIComponent(detail.customerName)}`}
+                className="text-[13px] text-ink-muted underline-offset-2 hover:text-ink hover:underline"
+              >
+                Open in Customers
+              </Link>
+            </span>
           </div>
 
           {guest === null ? (

@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0072` are
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0073` are
 applied to the hosted database.
 
 Working on real data: dashboard (house board, movements, pace, activity feed),
@@ -1583,9 +1583,43 @@ anywhere else. Collapsed height must stay constant regardless of room count.
     so both screens silently opened on the property form — including from the
     two links on Inventory → Rates. Add a tab there and nowhere else.
   - **Only sections with something behind them are drawn.** The reference also
-    carries Guest Configuration, Communications & Notifications and Other;
-    there is nothing of ours to put in them, and an empty section is a dead
-    control. They go in when their contents are built.
+    carries Communications & Notifications and Other; there is nothing of ours
+    to put in them, and an empty section is a dead control. They go in when
+    their contents are built. Guest Configuration went in with 0073.
+  - **GUEST CONFIGURATION IS THREE SCREENS, AND EACH IS READ BY SOMETHING**
+    (0073) -- Guest Registration Form, Identification Types, Guest Details
+    Settings, as the reference's.
+    - **Identification types** are the pick-list in the Identity band of a
+      guest's Customers form (`customers.identification_type_id`). With one
+      chosen, the number beside it is the DOCUMENT number, so those two
+      labels on the form read "Document number" and "Document expiry" now;
+      the columns are still `passport_number` and `passport_expiry`, which the
+      Immigration report reads. A type still on a guest record is refused by
+      name rather than deleted.
+    - **Additional guest fields** (`guest_fields`: a label and a kind -- text,
+      number, date or yes/no) appear in an "Additional details" band on the
+      same form. Values live in `customers.custom_fields` as jsonb keyed by
+      field id, written by `set_customer_details()`, which drops any key that
+      is not a current field. The list saves as a whole, like the reference's
+      single SAVE; `GuestDetailsPanel` is keyed on the saved list so rows added
+      before a save pick up their ids -- without that, saving twice added them
+      twice.
+      - **`merge_customers()` does not yet carry these two across.** A
+        duplicate's identification type and additional field values are lost
+        when it is merged away. Worth adding the next time that function is
+        touched.
+    - **The registration form** (`registration_form_settings`: two custom
+      questions and the terms) prints on a booking's **Guest Registration
+      Card**, `/bookings/[id]/registration`, linked from the Guests tab. The
+      card fills in the stay and the guest's record -- identity, document,
+      additional fields -- leaves blank lines where the record is blank so
+      the guest can write, and ends with a signature line. The top bars are
+      `print:hidden`, so Print gives the card alone.
+    - **The terms are plain text, not the reference's rich-text editor.** HTML
+      typed in a browser and printed back out is a script-injection path with
+      no sanitiser in this codebase; line breaks are kept, which is what a
+      card someone signs needs. The LOCALE picker and translate buttons are
+      not copied either, as elsewhere.
   - **Hotel Details is `save_property_details()`; the times are
     `save_property_times()`.** Two functions because they are two forms with
     two Save buttons, and each saves only what it shows. `save_property()`

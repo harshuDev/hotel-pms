@@ -14,6 +14,7 @@ import {
   setExcludeFromEmail,
 } from "@/lib/actions/customers";
 import { COUNTRIES } from "@/lib/countries";
+import type { GuestField, IdentificationType } from "@/lib/guest-config";
 import type { Customer, CustomerKind } from "@/lib/types";
 import { useCurrency } from "@/components/currency";
 
@@ -57,6 +58,9 @@ interface FormState {
   passportNumber: string;
   passportExpiry: string;
   dateOfBirth: string;
+  /** Guest Configuration (0073). "" is "not recorded". */
+  identificationTypeId: string;
+  customFields: Record<string, string>;
 }
 
 const EMPTY: FormState = {
@@ -74,6 +78,8 @@ const EMPTY: FormState = {
   passportNumber: "",
   passportExpiry: "",
   dateOfBirth: "",
+  identificationTypeId: "",
+  customFields: {},
 };
 
 export function CustomersScreen({
@@ -85,6 +91,8 @@ export function CustomersScreen({
   kind,
   canMerge,
   canEdit,
+  identificationTypes,
+  guestFields,
 }: {
   rows: Customer[];
   total: number;
@@ -95,6 +103,9 @@ export function CustomersScreen({
   /** Merging rewrites booking history, so it is manager and above. */
   canMerge: boolean;
   canEdit: boolean;
+  /** Settings -> Guest Configuration (0073): the pick-list and the extra fields. */
+  identificationTypes: IdentificationType[];
+  guestFields: GuestField[];
 }) {
   const currency = useCurrency();
   const router = useRouter();
@@ -453,8 +464,28 @@ export function CustomersScreen({
                   ))}
                 </select>
               </div>
+              {identificationTypes.length > 0 && (
+                <div className="sm:col-span-2">
+                  <label className={label} htmlFor="c-id-type">Identification type</label>
+                  <select
+                    id="c-id-type"
+                    value={form.identificationTypeId}
+                    onChange={(e) =>
+                      setForm({ ...form, identificationTypeId: e.target.value })
+                    }
+                    className={field}
+                  >
+                    <option value="">Not recorded</option>
+                    {identificationTypes.map((t) => (
+                      <option key={t.id} value={t.id}>
+                        {t.title}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
               <div>
-                <label className={label} htmlFor="c-passport">Passport number</label>
+                <label className={label} htmlFor="c-passport">Document number</label>
                 <input
                   id="c-passport"
                   value={form.passportNumber}
@@ -465,7 +496,7 @@ export function CustomersScreen({
                 />
               </div>
               <div>
-                <label className={label} htmlFor="c-passport-exp">Passport expiry</label>
+                <label className={label} htmlFor="c-passport-exp">Document expiry</label>
                 <input
                   id="c-passport-exp"
                   type="date"
@@ -490,6 +521,44 @@ export function CustomersScreen({
               </div>
             </div>
           </fieldset>
+
+          {/* The property's own additional guest fields (0073). */}
+          {guestFields.length > 0 && (
+            <fieldset className="mt-4 rounded-md border border-line bg-shell/50 p-3">
+              <legend className="px-1 text-xxs font-semibold uppercase tracking-[0.1em] text-ink-faint">
+                Additional details
+              </legend>
+              <div className="grid gap-3 sm:grid-cols-2">
+                {guestFields.map((f) => {
+                  const value = form.customFields[f.id] ?? "";
+                  const set = (next: string) =>
+                    setForm({ ...form, customFields: { ...form.customFields, [f.id]: next } });
+                  const id = `c-field-${f.id}`;
+                  return (
+                    <div key={f.id}>
+                      <label className={label} htmlFor={id}>{f.label}</label>
+                      {f.kind === "yes_no" ? (
+                        <select id={id} value={value} onChange={(e) => set(e.target.value)} className={field}>
+                          <option value="">Not recorded</option>
+                          <option value="yes">Yes</option>
+                          <option value="no">No</option>
+                        </select>
+                      ) : (
+                        <input
+                          id={id}
+                          type={f.kind === "date" ? "date" : "text"}
+                          inputMode={f.kind === "number" ? "decimal" : undefined}
+                          value={value}
+                          onChange={(e) => set(e.target.value)}
+                          className={field}
+                        />
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </fieldset>
+          )}
 
           <label className="mt-3 flex items-center gap-2 text-[13px] text-ink">
             <input

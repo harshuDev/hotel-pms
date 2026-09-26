@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { nullableArg } from "@/lib/supabase/database";
 import { getCustomers } from "@/lib/queries";
 import type { CustomerKind } from "@/lib/types";
 
@@ -36,6 +37,13 @@ export interface SaveCustomerInput {
   passportNumber: string;
   passportExpiry: string;
   dateOfBirth: string;
+  /*
+    Guest Configuration (0073): which document the number above belongs to,
+    and the values of the property's additional guest fields, keyed by field
+    id. Saved by set_customer_details() after the customer itself.
+  */
+  identificationTypeId: string;
+  customFields: Record<string, string>;
 }
 
 type Result<T = undefined> =
@@ -72,6 +80,15 @@ export async function saveCustomer(
   });
 
   if (error) return failure(error.message);
+
+  // The customer first, so a new one has an id to hang these on.
+  const { error: detailsError } = await supabase.rpc("set_customer_details", {
+    p_customer_id: data as string,
+    // Null is "no identification type recorded".
+    p_identification_type_id: nullableArg(input.identificationTypeId || null),
+    p_custom_fields: input.customFields,
+  });
+  if (detailsError) return failure(detailsError.message);
 
   revalidatePath("/customers");
   return { ok: true, data: { id: data as string } };
@@ -153,6 +170,8 @@ export async function getCustomerForEdit(id: string): Promise<
     passportNumber: string;
     passportExpiry: string;
     dateOfBirth: string;
+    identificationTypeId: string;
+    customFields: Record<string, string>;
   }>
 > {
   const supabase = await createClient();
@@ -181,6 +200,21 @@ export async function getCustomerForEdit(id: string): Promise<
 
   if (!row) return failure("That customer could not be found.");
 
+  // The two Guest Configuration columns (0073), read straight from the table
+  // under RLS rather than widening customer_for_edit()'s return shape.
+  const { data: extra } = await supabase
+    .from("customers")
+    .select("identification_type_id, custom_fields")
+    .eq("id", id)
+    .maybeSingle();
+  const customFields: Record<string, string> = {};
+  const raw = extra?.custom_fields;
+  if (raw && typeof raw === "object" && !Array.isArray(raw)) {
+    for (const [key, value] of Object.entries(raw)) {
+      if (typeof value === "string") customFields[key] = value;
+    }
+  }
+
   return {
     ok: true,
     data: {
@@ -200,6 +234,8 @@ export async function getCustomerForEdit(id: string): Promise<
       passportNumber: row.passport_number ?? "",
       passportExpiry: row.passport_expiry ?? "",
       dateOfBirth: row.date_of_birth ?? "",
+      identificationTypeId: extra?.identification_type_id ?? "",
+      customFields,
     },
   };
 }

@@ -9,6 +9,7 @@ import type { ActionResult } from "@/lib/actions/cashier";
 import type { HotelPolicies } from "@/lib/hotel-policies";
 import type { ExtraItemType } from "@/lib/extras";
 import type { FacilityIcon } from "@/lib/facilities";
+import type { GuestFieldKind } from "@/lib/guest-config";
 import type {
   CancellationPolicyKind,
   HousekeepingChoice,
@@ -368,6 +369,71 @@ export async function setRoomTypeFacilities(input: {
   });
   if (error) return { ok: false, error: error.message };
   revalidateSettings();
+  return { ok: true, data: null };
+}
+
+/* -- Settings -> Guest Configuration (0073) ------------------------------- */
+
+function revalidateGuestConfig() {
+  revalidateSettings();
+  // The Customers form draws the identification types and the extra fields,
+  // and a booking's registration card prints the form settings.
+  revalidatePath("/customers");
+  revalidatePath("/bookings", "layout");
+}
+
+export async function saveIdentificationType(input: {
+  id: string | null;
+  title: string;
+}): Promise<ActionResult<{ id: string }>> {
+  if (input.title.trim() === "") {
+    return { ok: false, error: "An identification type needs a title." };
+  }
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("save_identification_type", {
+    // Null is a new type; an id is the one being renamed.
+    p_id: nullableArg(input.id),
+    p_title: input.title,
+  });
+  if (error) return { ok: false, error: error.message };
+  revalidateGuestConfig();
+  return { ok: true, data: { id: data } };
+}
+
+export async function deleteIdentificationType(id: string): Promise<ActionResult<null>> {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("delete_identification_type", { p_id: id });
+  if (error) return { ok: false, error: error.message };
+  revalidateGuestConfig();
+  return { ok: true, data: null };
+}
+
+/** The whole list at once, as the reference's single Save does. */
+export async function saveGuestFields(
+  fields: { id: string | null; label: string; kind: GuestFieldKind }[],
+): Promise<ActionResult<null>> {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("save_guest_fields", {
+    p_fields: fields.map((f) => ({ id: f.id ?? "", label: f.label, kind: f.kind })),
+  });
+  if (error) return { ok: false, error: error.message };
+  revalidateGuestConfig();
+  return { ok: true, data: null };
+}
+
+export async function saveRegistrationForm(input: {
+  question1: string;
+  question2: string;
+  terms: string;
+}): Promise<ActionResult<null>> {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("save_registration_form", {
+    p_question_1: input.question1,
+    p_question_2: input.question2,
+    p_terms: input.terms,
+  });
+  if (error) return { ok: false, error: error.message };
+  revalidateGuestConfig();
   return { ok: true, data: null };
 }
 
