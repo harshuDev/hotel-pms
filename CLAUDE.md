@@ -1538,10 +1538,24 @@ anywhere else. Collapsed height must stay constant regardless of room count.
     carries Guest Configuration, Communications & Notifications and Other;
     there is nothing of ours to put in them, and an empty section is a dead
     control. They go in when their contents are built.
-  - **Hotel Details is `save_property_details()`, Hotel Properties is
-    `save_property_times()`.** Two functions because they are two panels with
+  - **Hotel Details is `save_property_details()`; the times are
+    `save_property_times()`.** Two functions because they are two forms with
     two Save buttons, and each saves only what it shows. `save_property()`
     still exists and is called by nothing.
+  - **Hotel Properties is the reference's Properties list: one row, a pencil,
+    and NO "Add New Property" and NO delete.** A staff login belongs to exactly
+    one property — `staff_users.property_id` is a single column and
+    `current_property_id()`, the root of every RLS policy, reads it. A property
+    added from here would be one nobody could open, and every table points at a
+    property under `on delete restrict`, so the trash can could only ever be
+    refused. Both are the dead control this application does not ship. Adding
+    them means staff belonging to several properties and a property switcher —
+    a change to every policy, to be asked for rather than slipped in.
+    - The pencil opens check-in, check-out and night audit times, which the
+      reference's Hotel Details does not carry. The address column is written
+      the reference's way round: postcode, city, region, then the street.
+    - Their "LOCALE" picker is not copied. It chooses which language the
+      hotel's content is edited in, and nothing here is stored per language.
   - **Country is ISO alpha-2 under a check constraint**, the same list and the
     same reasoning as `customers.country`. Latitude and longitude are set
     together or not at all, and range-checked.
