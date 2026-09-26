@@ -4,7 +4,11 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { nullableArg } from "@/lib/supabase/database";
 import { ROOM_PHOTO_BUCKET } from "@/lib/queries";
+import { parseMoney } from "@/lib/money";
 import type { ActionResult } from "@/lib/actions/cashier";
+import type { HotelPolicies } from "@/lib/hotel-policies";
+import type { ExtraItemType } from "@/lib/extras";
+import type { FacilityIcon } from "@/lib/facilities";
 import type {
   CancellationPolicyKind,
   HousekeepingChoice,
@@ -157,6 +161,158 @@ export async function saveHotelTimes(input: {
 
   if (error) return { ok: false, error: error.message };
 
+  revalidateSettings();
+  return { ok: true, data: null };
+}
+
+export async function saveHotelPolicies(
+  input: HotelPolicies,
+): Promise<ActionResult<null>> {
+  const supabase = await createClient();
+  // The optional texts go as null rather than omitted: the function drops a
+  // custom text whose section is not "custom", and a blank means "nothing".
+  const { error } = await supabase.rpc("save_property_policies", {
+    p_children: input.children,
+    p_children_custom: nullableArg(input.childrenCustom),
+    p_pets: input.pets,
+    p_pets_custom: nullableArg(input.petsCustom),
+    p_smoking: input.smoking,
+    p_smoking_custom: nullableArg(input.smokingCustom),
+    p_internet: input.internet,
+    p_internet_custom: nullableArg(input.internetCustom),
+    p_parking: input.parking,
+    p_parking_custom: nullableArg(input.parkingCustom),
+    p_other_policies: nullableArg(input.otherPolicies),
+  });
+
+  if (error) return { ok: false, error: error.message };
+
+  revalidateSettings();
+  return { ok: true, data: null };
+}
+
+/* -- Hotel Content -> Extras (0069) --------------------------------------- */
+
+function revalidateExtras() {
+  revalidateSettings();
+  // The booking screen's Extras tab charges from this catalog.
+  revalidatePath("/bookings", "layout");
+  revalidatePath("/calendar");
+}
+
+export async function saveExtraCategory(input: {
+  id: string | null;
+  title: string;
+  taxRateId: string | null;
+}): Promise<ActionResult<{ id: string }>> {
+  if (input.title.trim() === "") {
+    return { ok: false, error: "An extra category needs a title." };
+  }
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("save_extra_category", {
+    // Null is a new category; an id is the one being renamed.
+    p_id: nullableArg(input.id),
+    p_title: input.title,
+    // Null is "no tax of its own".
+    p_tax_rate_id: nullableArg(input.taxRateId),
+  });
+  if (error) return { ok: false, error: error.message };
+  revalidateExtras();
+  return { ok: true, data: { id: data } };
+}
+
+export async function deleteExtraCategory(id: string): Promise<ActionResult<null>> {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("delete_extra_category", { p_id: id });
+  if (error) return { ok: false, error: error.message };
+  revalidateExtras();
+  return { ok: true, data: null };
+}
+
+export async function saveExtra(input: {
+  id: string | null;
+  categoryId: string;
+  title: string;
+  /** As typed, e.g. "24" or "24.50". Parsed to pence here, never as a float. */
+  price: string;
+  taxRateId: string | null;
+  itemType: ExtraItemType;
+}): Promise<ActionResult<{ id: string }>> {
+  if (input.title.trim() === "") return { ok: false, error: "An extra needs a title." };
+  if (input.categoryId === "") return { ok: false, error: "Pick a category for the extra." };
+
+  let priceCents: number;
+  try {
+    priceCents = parseMoney(input.price);
+  } catch {
+    return { ok: false, error: "The price is a number, like 24 or 24.50." };
+  }
+  if (!Number.isInteger(priceCents) || priceCents < 0) {
+    return { ok: false, error: "The price is a number, like 24 or 24.50." };
+  }
+
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("save_extra", {
+    p_id: nullableArg(input.id),
+    p_category_id: input.categoryId,
+    p_title: input.title,
+    p_price_cents: priceCents,
+    // Null is "use the category's rate".
+    p_tax_rate_id: nullableArg(input.taxRateId),
+    p_item_type: input.itemType,
+  });
+  if (error) return { ok: false, error: error.message };
+  revalidateExtras();
+  return { ok: true, data: { id: data } };
+}
+
+export async function deleteExtra(id: string): Promise<ActionResult<null>> {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("delete_extra", { p_id: id });
+  if (error) return { ok: false, error: error.message };
+  revalidateExtras();
+  return { ok: true, data: null };
+}
+
+/* -- Hotel Content -> Room Type Facilities (0070) ------------------------- */
+
+export async function saveFacility(input: {
+  id: string | null;
+  title: string;
+  icon: FacilityIcon;
+}): Promise<ActionResult<{ id: string }>> {
+  if (input.title.trim() === "") return { ok: false, error: "A facility needs a title." };
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("save_facility", {
+    // Null is a new facility; an id is the one being corrected.
+    p_id: nullableArg(input.id),
+    p_title: input.title,
+    p_icon: input.icon,
+  });
+  if (error) return { ok: false, error: error.message };
+  revalidateSettings();
+  return { ok: true, data: { id: data } };
+}
+
+export async function deleteFacility(id: string): Promise<ActionResult<null>> {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("delete_facility", { p_id: id });
+  if (error) return { ok: false, error: error.message };
+  revalidateSettings();
+  return { ok: true, data: null };
+}
+
+/** The whole set for one room type, as `set_rate_plan_meals()` takes its set. */
+export async function setRoomTypeFacilities(input: {
+  roomTypeId: string;
+  facilityIds: string[];
+}): Promise<ActionResult<null>> {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("set_room_type_facilities", {
+    p_room_type_id: input.roomTypeId,
+    p_facility_ids: input.facilityIds,
+  });
+  if (error) return { ok: false, error: error.message };
   revalidateSettings();
   return { ok: true, data: null };
 }

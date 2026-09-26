@@ -13,6 +13,9 @@
  */
 
 import { cache } from "react";
+import { EMPTY_HOTEL_POLICIES, type HotelPolicies } from "@/lib/hotel-policies";
+import type { ExtraItemType, ExtrasCatalog } from "@/lib/extras";
+import type { Facility, FacilityIcon } from "@/lib/facilities";
 
 import { createClient } from "@/lib/supabase/server";
 import { nullableArg } from "@/lib/supabase/database";
@@ -2453,6 +2456,104 @@ export async function getMeetingRoomBooking(
 /* Property settings                                                          */
 /* -------------------------------------------------------------------------- */
 
+/**
+ * Hotel Content -> Hotel Policy (0068). One row per property, and none until
+ * somebody first saves the page -- which reads as every section omitted, the
+ * same as the row's own defaults.
+ */
+export async function getHotelPolicies(): Promise<HotelPolicies> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("property_policies")
+    .select(
+      "children, children_custom, pets, pets_custom, smoking, smoking_custom, " +
+        "internet, internet_custom, parking, parking_custom, other_policies",
+    )
+    .maybeSingle();
+
+  if (error) throw new Error(`Failed to load the hotel policy: ${error.message}`);
+  if (!data) return EMPTY_HOTEL_POLICIES;
+
+  const row = data as unknown as {
+    children: string;
+    children_custom: string | null;
+    pets: string;
+    pets_custom: string | null;
+    smoking: string;
+    smoking_custom: string | null;
+    internet: string;
+    internet_custom: string | null;
+    parking: string;
+    parking_custom: string | null;
+    other_policies: string | null;
+  };
+  return {
+    children: row.children,
+    childrenCustom: row.children_custom,
+    pets: row.pets,
+    petsCustom: row.pets_custom,
+    smoking: row.smoking,
+    smokingCustom: row.smoking_custom,
+    internet: row.internet,
+    internetCustom: row.internet_custom,
+    parking: row.parking,
+    parkingCustom: row.parking_custom,
+    otherPolicies: row.other_policies,
+  };
+}
+
+/**
+ * Hotel Content -> Extras (0069): the catalog the front desk charges from.
+ * Two plain table reads under RLS -- a property's extras run to dozens, not
+ * thousands, so the Settings screen searches and pages them itself.
+ */
+export async function getExtrasCatalog(): Promise<ExtrasCatalog> {
+  const supabase = await createClient();
+  const [categories, extras] = await Promise.all([
+    supabase
+      .from("extra_categories")
+      .select("id, title, tax_rate_id")
+      .order("title"),
+    supabase
+      .from("extras")
+      .select("id, category_id, title, price_cents, tax_rate_id, item_type")
+      .order("title"),
+  ]);
+
+  if (categories.error) {
+    throw new Error(`Failed to load the extra categories: ${categories.error.message}`);
+  }
+  if (extras.error) throw new Error(`Failed to load the extras: ${extras.error.message}`);
+
+  return {
+    categories: categories.data.map((c) => ({
+      id: c.id,
+      title: c.title,
+      taxRateId: c.tax_rate_id,
+    })),
+    extras: extras.data.map((e) => ({
+      id: e.id,
+      categoryId: e.category_id,
+      title: e.title,
+      priceCents: Number(e.price_cents),
+      taxRateId: e.tax_rate_id,
+      itemType: e.item_type as ExtraItemType,
+    })),
+  };
+}
+
+/** Hotel Content -> Room Type Facilities (0070), in the order they were added. */
+export async function getFacilities(): Promise<Facility[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("facilities")
+    .select("id, title, icon")
+    .order("created_at");
+
+  if (error) throw new Error(`Failed to load the facilities: ${error.message}`);
+  return data.map((f) => ({ id: f.id, title: f.title, icon: f.icon as FacilityIcon }));
+}
+
 export async function getPropertySettings(): Promise<PropertySettings> {
   const supabase = await createClient();
   const { data, error } = await supabase
@@ -2525,7 +2626,9 @@ export async function getRoomTypeSettings(): Promise<RoomTypeSetting[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("room_types")
-    .select("id, code, name, base_occupancy, max_occupancy, sort_order, rooms(count)")
+    .select(
+      "id, code, name, base_occupancy, max_occupancy, sort_order, rooms(count), room_type_facilities(facility_id)",
+    )
     .order("sort_order")
     .order("name");
 
@@ -2540,6 +2643,7 @@ export async function getRoomTypeSettings(): Promise<RoomTypeSetting[]> {
       max_occupancy: number;
       sort_order: number;
       rooms: { count: number }[];
+      room_type_facilities: { facility_id: string }[] | null;
     }[]
   ).map((row) => ({
     id: row.id,
@@ -2549,6 +2653,7 @@ export async function getRoomTypeSettings(): Promise<RoomTypeSetting[]> {
     maxOccupancy: row.max_occupancy,
     sortOrder: row.sort_order,
     roomCount: row.rooms?.[0]?.count ?? 0,
+    facilityIds: (row.room_type_facilities ?? []).map((f) => f.facility_id),
   }));
 }
 

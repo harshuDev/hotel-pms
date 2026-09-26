@@ -7,6 +7,8 @@ import { format, parseISO } from "date-fns";
 import { formatStampInProperty } from "@/lib/dates";
 import { AttachmentsTab } from "@/components/bookings/attachments-tab";
 import { EmailTab } from "@/components/bookings/email-tab";
+import { ChargeExtra } from "@/components/bookings/charge-extra";
+import type { ExtrasCatalog } from "@/lib/extras";
 import { StatusBadge, cn } from "@/components/ui";
 import { CheckInAction, CheckOutAction } from "@/components/dashboard/movement-actions";
 import { formatMoney, parseMoney } from "@/lib/money";
@@ -128,6 +130,8 @@ export function BookingDetailView({
   emails,
   channels,
   canEdit,
+  canCharge,
+  extrasCatalog,
   guest,
   cancellationTerms,
   timezone,
@@ -146,6 +150,19 @@ export function BookingDetailView({
   emails: BookingEmail[];
   channels: Channel[];
   canEdit: boolean;
+  /**
+   * May post a charge: everyone `require_financial_staff()` lets through,
+   * which is every role but housekeeping. Wider than `canEdit`, because a
+   * cashier charges extras without being able to change the stay.
+   */
+  canCharge: boolean;
+  /**
+   * The property's extras catalog (0069), which the Extras tab charges from.
+   * Required rather than optional: both frames that draw this screen must
+   * pass it, and an optional prop is how the calendar's room rows once
+   * silently lost `bookingHref`.
+   */
+  extrasCatalog: ExtrasCatalog;
   /** Null when the guest record could not be read; the tab then says so. */
   guest: BookingGuest | null;
   /**
@@ -1106,9 +1123,14 @@ export function BookingDetailView({
           <h2 className="mb-4 font-display text-[15px] font-semibold tracking-tightest text-ink">
             Extras
           </h2>
+          {canCharge && (
+            <div className="mb-5 border-b border-line pb-5">
+              <ChargeExtra bookingId={detail.bookingId} catalog={extrasCatalog} />
+            </div>
+          )}
           {extras.length === 0 ? (
             <p className="py-6 text-center text-[13px] text-ink-muted">
-              Nothing charged beyond the room. Post an extra from the cashier.
+              Nothing charged beyond the room.
             </p>
           ) : (
             <table className="w-full text-[13px]">

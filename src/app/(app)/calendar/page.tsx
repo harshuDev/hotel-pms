@@ -23,6 +23,7 @@ import {
   getBookingDetail,
   getBookingRoomLines,
   getBookingCancellationTerms,
+  getExtrasCatalog,
   getBookingNights,
   getBookingFolioLines,
   getBookingActivity,
@@ -246,6 +247,7 @@ export default async function CalendarPage({
           channels,
           terms,
           guest,
+          extrasCatalog,
         ] =
           await Promise.all([
             getBookingRoomLines(peekId),
@@ -258,6 +260,7 @@ export default async function CalendarPage({
             getChannels(),
             getBookingCancellationTerms(peekId),
             getCustomerForEdit(d.customerId),
+            getExtrasCatalog(),
           ]);
         return {
           detail: d,
@@ -270,6 +273,7 @@ export default async function CalendarPage({
           channels,
           terms,
           guest,
+          extrasCatalog,
         };
       })()
     : null;
@@ -484,6 +488,11 @@ export default async function CalendarPage({
               peekStaff !== null &&
               ["admin", "manager", "front_desk"].includes(peekStaff.role)
             }
+            canCharge={
+              peekStaff !== null &&
+              ["admin", "manager", "front_desk", "cashier"].includes(peekStaff.role)
+            }
+            extrasCatalog={peek.extrasCatalog}
           />
         </BookingDialog>
       )}

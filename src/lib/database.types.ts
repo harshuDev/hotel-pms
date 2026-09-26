@@ -1041,6 +1041,132 @@ export type Database = {
           },
         ]
       }
+      extra_categories: {
+        Row: {
+          created_at: string
+          id: string
+          property_id: string
+          tax_rate_id: string | null
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          property_id: string
+          tax_rate_id?: string | null
+          title: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          property_id?: string
+          tax_rate_id?: string | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "extra_categories_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "extra_categories_tax_rate_id_fkey"
+            columns: ["tax_rate_id"]
+            isOneToOne: false
+            referencedRelation: "tax_rates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      extras: {
+        Row: {
+          category_id: string
+          created_at: string
+          id: string
+          item_type: Database["public"]["Enums"]["folio_item_type"]
+          price_cents: number
+          property_id: string
+          tax_rate_id: string | null
+          title: string
+        }
+        Insert: {
+          category_id: string
+          created_at?: string
+          id?: string
+          item_type?: Database["public"]["Enums"]["folio_item_type"]
+          price_cents: number
+          property_id: string
+          tax_rate_id?: string | null
+          title: string
+        }
+        Update: {
+          category_id?: string
+          created_at?: string
+          id?: string
+          item_type?: Database["public"]["Enums"]["folio_item_type"]
+          price_cents?: number
+          property_id?: string
+          tax_rate_id?: string | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "extras_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "extra_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "extras_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "extras_tax_rate_id_fkey"
+            columns: ["tax_rate_id"]
+            isOneToOne: false
+            referencedRelation: "tax_rates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      facilities: {
+        Row: {
+          created_at: string
+          icon: string
+          id: string
+          property_id: string
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          icon?: string
+          id?: string
+          property_id: string
+          title: string
+        }
+        Update: {
+          created_at?: string
+          icon?: string
+          id?: string
+          property_id?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "facilities_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       folio_items: {
         Row: {
           amount_cents: number
@@ -1845,6 +1971,72 @@ export type Database = {
         }
         Relationships: []
       }
+      property_policies: {
+        Row: {
+          children: string
+          children_custom: string | null
+          internet: string
+          internet_custom: string | null
+          other_policies: string | null
+          parking: string
+          parking_custom: string | null
+          pets: string
+          pets_custom: string | null
+          property_id: string
+          smoking: string
+          smoking_custom: string | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          children?: string
+          children_custom?: string | null
+          internet?: string
+          internet_custom?: string | null
+          other_policies?: string | null
+          parking?: string
+          parking_custom?: string | null
+          pets?: string
+          pets_custom?: string | null
+          property_id: string
+          smoking?: string
+          smoking_custom?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          children?: string
+          children_custom?: string | null
+          internet?: string
+          internet_custom?: string | null
+          other_policies?: string | null
+          parking?: string
+          parking_custom?: string | null
+          pets?: string
+          pets_custom?: string | null
+          property_id?: string
+          smoking?: string
+          smoking_custom?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_policies_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: true
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_policies_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "staff_users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       rate_plan_days: {
         Row: {
           closed_to_arrival: boolean
@@ -2135,6 +2327,46 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "staff_users"
             referencedColumns: ["id", "property_id"]
+          },
+        ]
+      }
+      room_type_facilities: {
+        Row: {
+          facility_id: string
+          property_id: string
+          room_type_id: string
+        }
+        Insert: {
+          facility_id: string
+          property_id: string
+          room_type_id: string
+        }
+        Update: {
+          facility_id?: string
+          property_id?: string
+          room_type_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "room_type_facilities_facility_id_fkey"
+            columns: ["facility_id"]
+            isOneToOne: false
+            referencedRelation: "facilities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "room_type_facilities_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "room_type_facilities_room_type_id_fkey"
+            columns: ["room_type_id"]
+            isOneToOne: false
+            referencedRelation: "room_types"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -3133,6 +3365,10 @@ export type Database = {
           room_revenue_cents: number
         }[]
       }
+      charge_extra: {
+        Args: { p_booking_id: string; p_extra_id: string; p_quantity?: number }
+        Returns: string
+      }
       charge_meeting_room_booking: {
         Args: {
           p_amount_cents: number
@@ -3427,6 +3663,9 @@ export type Database = {
         Returns: string
       }
       delete_calendar_note: { Args: { p_id: string }; Returns: undefined }
+      delete_extra: { Args: { p_id: string }; Returns: undefined }
+      delete_extra_category: { Args: { p_id: string }; Returns: undefined }
+      delete_facility: { Args: { p_id: string }; Returns: undefined }
       delete_room: { Args: { p_room_id: string }; Returns: undefined }
       delete_season: { Args: { p_id: string }; Returns: undefined }
       deposit_report: {
@@ -4153,6 +4392,25 @@ export type Database = {
         }
         Returns: string
       }
+      save_extra: {
+        Args: {
+          p_category_id: string
+          p_id: string
+          p_item_type: Database["public"]["Enums"]["folio_item_type"]
+          p_price_cents: number
+          p_tax_rate_id: string
+          p_title: string
+        }
+        Returns: string
+      }
+      save_extra_category: {
+        Args: { p_id: string; p_tax_rate_id: string; p_title: string }
+        Returns: string
+      }
+      save_facility: {
+        Args: { p_icon: string; p_id: string; p_title: string }
+        Returns: string
+      }
       save_meeting_room: {
         Args: {
           p_capacity?: number
@@ -4232,6 +4490,22 @@ export type Database = {
           p_region?: string
           p_timezone: string
           p_website?: string
+        }
+        Returns: undefined
+      }
+      save_property_policies: {
+        Args: {
+          p_children: string
+          p_children_custom: string
+          p_internet: string
+          p_internet_custom: string
+          p_other_policies: string
+          p_parking: string
+          p_parking_custom: string
+          p_pets: string
+          p_pets_custom: string
+          p_smoking: string
+          p_smoking_custom: string
         }
         Returns: undefined
       }
@@ -4445,6 +4719,10 @@ export type Database = {
           p_room_id: string
           p_status: Database["public"]["Enums"]["room_status"]
         }
+        Returns: undefined
+      }
+      set_room_type_facilities: {
+        Args: { p_facility_ids: string[]; p_room_type_id: string }
         Returns: undefined
       }
       set_stop_sell: {

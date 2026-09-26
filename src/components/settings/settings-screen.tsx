@@ -6,9 +6,22 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { cn } from "@/components/ui";
 import { RoomPhoto } from "@/components/settings/room-photo";
+import { ExtrasPanel } from "@/components/settings/extras-panel";
+import { FacilitiesPanel } from "@/components/settings/facilities-panel";
+import { FacilityIcon } from "@/components/settings/facility-icon";
+import type { Facility } from "@/lib/facilities";
+import type { ExtrasCatalog } from "@/lib/extras";
 import { SETTINGS_NAV, type SettingsTab } from "@/lib/settings-tabs";
 import { COUNTRIES } from "@/lib/countries";
 import { CURRENCIES, currencyOptionLabel } from "@/lib/currencies";
+import {
+  CUSTOM_POLICY,
+  HOTEL_POLICY_SECTIONS,
+  OMIT_POLICY,
+  hotelPolicySummary,
+  type HotelPolicies,
+  type HotelPolicyKey,
+} from "@/lib/hotel-policies";
 
 /*
  * Browser-only: Leaflet reaches for `window` the moment it is imported, so the
@@ -26,9 +39,11 @@ import {
   saveChannel,
   savePaymentMethod,
   saveHotelDetails,
+  saveHotelPolicies,
   saveHotelTimes,
   saveRoom,
   saveRoomType,
+  setRoomTypeFacilities,
   saveSeason,
   deleteSeason,
   saveStaffUser,
@@ -187,11 +202,20 @@ export function SettingsScreen({
   canEdit,
   isAdmin,
   timezones,
+  hotelPolicies,
+  extrasCatalog,
+  facilities,
 }: {
   tab: SettingsTab;
   property: PropertySettings;
   /** IANA zones, listed on the server so both renders offer the same ones. */
   timezones: string[];
+  /** Hotel Content -> Hotel Policy (0068). */
+  hotelPolicies: HotelPolicies;
+  /** Hotel Content -> Extras (0069). */
+  extrasCatalog: ExtrasCatalog;
+  /** Hotel Content -> Room Type Facilities (0070). */
+  facilities: Facility[];
   roomTypes: RoomTypeSetting[];
   rooms: RoomSettingsPage;
   roomQuery: string;
@@ -268,6 +292,15 @@ export function SettingsScreen({
   }, []);
 
   /* -- Hotel Properties: the three times ------------------------------- */
+  /* -- Hotel Policy (0068) ------------------------------------------- */
+  const [policies, setPolicies] = useState<HotelPolicies>(hotelPolicies);
+  const customField = (key: HotelPolicyKey) => `${key}Custom` as const;
+  const policySummary = hotelPolicySummary({
+    choice: (key) => policies[key],
+    custom: (key) => policies[customField(key)],
+    other: policies.otherPolicies,
+  });
+
   const [editingTimes, setEditingTimes] = useState(false);
   const [times, setTimes] = useState({
     checkInTime: property.checkInTime?.slice(0, 5) ?? "15:00",
@@ -282,6 +315,8 @@ export function SettingsScreen({
     name: string;
     baseOccupancy: string;
     maxOccupancy: string;
+    /** Ticked facilities (0070), saved with the room type as one set. */
+    facilityIds: string[];
   } | null>(() => {
     // The calendar's rail links here to rename a type, so arriving with that
     // id opens its form rather than a list somebody then has to search. An id
@@ -294,6 +329,7 @@ export function SettingsScreen({
       name: t.name,
       baseOccupancy: String(t.baseOccupancy),
       maxOccupancy: String(t.maxOccupancy),
+      facilityIds: t.facilityIds,
     };
   });
 
@@ -821,6 +857,129 @@ export function SettingsScreen({
         </div>
       )}
 
+      {tab === "hotel-policy" && (
+        /*
+          The reference's Hotel Policy, section for section. Each is a choice
+          from its own short list, "Custom policy" with the hotel's words, or
+          "Omit this policy"; the line above Save is those choices as a guest
+          would read them, following the form as it is edited.
+        */
+        <div className="max-w-5xl space-y-5">
+          <h2 className="font-display text-[26px] font-semibold tracking-tightest text-ink">
+            Hotel Policy
+          </h2>
+
+          <div className={cn(card, "px-6 py-7 sm:px-10")}>
+            <div className="space-y-8">
+              {HOTEL_POLICY_SECTIONS.map((section) => {
+                const choice = policies[section.key];
+                const custom = customField(section.key);
+                const name = `policy-${section.key}`;
+                return (
+                  <fieldset key={section.key}>
+                    <legend className="w-full border-b border-line pb-2 text-[20px] text-ink">
+                      {section.title}
+                    </legend>
+                    {section.prompt && (
+                      <p className="mt-4 text-[14px] text-ink-muted">{section.prompt}</p>
+                    )}
+                    <div className={cn("space-y-2", section.prompt ? "mt-2" : "mt-4")}>
+                      {[
+                        ...section.options,
+                        { id: CUSTOM_POLICY, label: "Custom policy" },
+                        { id: OMIT_POLICY, label: "Omit this policy" },
+                      ].map((option) => (
+                        <label
+                          key={option.id}
+                          className="flex w-fit items-center gap-2 text-[14px] text-ink-muted"
+                        >
+                          <input
+                            type="radio"
+                            name={name}
+                            value={option.id}
+                            checked={choice === option.id}
+                            disabled={!canEdit}
+                            onChange={() =>
+                              setPolicies({ ...policies, [section.key]: option.id })
+                            }
+                            className="h-3.5 w-3.5 accent-brass"
+                          />
+                          {option.label}
+                        </label>
+                      ))}
+                    </div>
+                    {choice === CUSTOM_POLICY && (
+                      <textarea
+                        aria-label={`${section.title} policy`}
+                        value={policies[custom] ?? ""}
+                        disabled={!canEdit}
+                        onChange={(e) =>
+                          setPolicies({ ...policies, [custom]: e.target.value })
+                        }
+                        rows={2}
+                        className={cn(field, "mt-3")}
+                      />
+                    )}
+                  </fieldset>
+                );
+              })}
+
+              <div>
+                <h3 className="w-full border-b border-line pb-2 text-[20px] text-ink">
+                  <label htmlFor="policy-other">Other Policies</label>
+                </h3>
+                <textarea
+                  id="policy-other"
+                  value={policies.otherPolicies ?? ""}
+                  disabled={!canEdit}
+                  onChange={(e) =>
+                    setPolicies({ ...policies, otherPolicies: e.target.value })
+                  }
+                  rows={3}
+                  className={cn(field, "mt-5")}
+                />
+              </div>
+            </div>
+
+            {policySummary && (
+              <p className="mt-6 text-[14px] leading-relaxed text-ink">{policySummary}</p>
+            )}
+
+            {canEdit && (
+              <div className="mt-5 flex justify-center">
+                <button
+                  type="button"
+                  onClick={() => run(() => saveHotelPolicies(policies), "Hotel policy saved.")}
+                  disabled={pending}
+                  className={primary}
+                >
+                  Save
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {tab === "extras" && (
+        <ExtrasPanel
+          catalog={extrasCatalog}
+          taxRates={taxRates}
+          canEdit={canEdit}
+          pending={pending}
+          run={run}
+        />
+      )}
+
+      {tab === "facilities" && (
+        <FacilitiesPanel
+          facilities={facilities}
+          canEdit={canEdit}
+          pending={pending}
+          run={run}
+        />
+      )}
+
       {/* Room types ---------------------------------------------------- */}
       {tab === "room-types" && (
         <>
@@ -832,7 +991,14 @@ export function SettingsScreen({
               {canEdit && (
                 <button
                   onClick={() =>
-                    setRt({ id: null, code: "", name: "", baseOccupancy: "2", maxOccupancy: "2" })
+                    setRt({
+                      id: null,
+                      code: "",
+                      name: "",
+                      baseOccupancy: "2",
+                      maxOccupancy: "2",
+                      facilityIds: [],
+                    })
                   }
                   className={secondary}
                 >
@@ -886,6 +1052,7 @@ export function SettingsScreen({
                                 name: t.name,
                                 baseOccupancy: String(t.baseOccupancy),
                                 maxOccupancy: String(t.maxOccupancy),
+                                facilityIds: t.facilityIds,
                               })
                             }
                             className="text-ink-muted underline-offset-2 hover:text-ink hover:underline"
@@ -950,21 +1117,55 @@ export function SettingsScreen({
                   </div>
                 </div>
               </div>
+              {facilities.length > 0 && (
+                <fieldset className="mt-5">
+                  <legend className={label}>Facilities</legend>
+                  <div className="mt-1 grid gap-x-4 gap-y-2 sm:grid-cols-2 lg:grid-cols-3">
+                    {facilities.map((f) => (
+                      <label
+                        key={f.id}
+                        className="flex items-center gap-2 text-[13px] text-ink"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={rt.facilityIds.includes(f.id)}
+                          onChange={(e) =>
+                            setRt({
+                              ...rt,
+                              facilityIds: e.target.checked
+                                ? [...rt.facilityIds, f.id]
+                                : rt.facilityIds.filter((id) => id !== f.id),
+                            })
+                          }
+                          className="h-3.5 w-3.5 accent-brass"
+                        />
+                        <FacilityIcon name={f.icon} className="h-[15px] w-[15px] text-ink-muted" />
+                        {f.title}
+                      </label>
+                    ))}
+                  </div>
+                </fieldset>
+              )}
               <div className="mt-4 flex justify-end gap-2">
                 <button onClick={() => setRt(null)} className={secondary}>Cancel</button>
                 <button
                   onClick={() =>
-                    run(
-                      () =>
-                        saveRoomType({
-                          id: rt.id,
-                          code: rt.code,
-                          name: rt.name,
-                          baseOccupancy: Number(rt.baseOccupancy) || 1,
-                          maxOccupancy: Number(rt.maxOccupancy) || 1,
-                        }),
-                      `${rt.name || "Room type"} saved.`,
-                    )
+                    run(async () => {
+                      const saved = await saveRoomType({
+                        id: rt.id,
+                        code: rt.code,
+                        name: rt.name,
+                        baseOccupancy: Number(rt.baseOccupancy) || 1,
+                        maxOccupancy: Number(rt.maxOccupancy) || 1,
+                      });
+                      if (!saved.ok || facilities.length === 0) return saved;
+                      // The room type first, so a new one has an id to tick
+                      // facilities against.
+                      return setRoomTypeFacilities({
+                        roomTypeId: saved.data.id,
+                        facilityIds: rt.facilityIds,
+                      });
+                    }, `${rt.name || "Room type"} saved.`)
                   }
                   disabled={pending}
                   className={primary}
