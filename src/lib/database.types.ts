@@ -1713,6 +1713,93 @@ export type Database = {
           },
         ]
       }
+      invoice_settings: {
+        Row: {
+          address: string | null
+          city: string | null
+          company_name: string | null
+          country: string | null
+          custom_invoice_numbers: boolean
+          logo_path: string | null
+          logo_text: string | null
+          notes: string | null
+          postcode: string | null
+          property_id: string
+          region: string | null
+          round_logic: string
+          round_to: string
+          show_nights_breakdown: boolean
+          show_room_number_for_extras: boolean
+          statement_reminder_text: string | null
+          statement_terms_text: string | null
+          updated_at: string
+          updated_by: string | null
+          use_text_instead_of_logo: boolean
+          vat_registered: boolean
+        }
+        Insert: {
+          address?: string | null
+          city?: string | null
+          company_name?: string | null
+          country?: string | null
+          custom_invoice_numbers?: boolean
+          logo_path?: string | null
+          logo_text?: string | null
+          notes?: string | null
+          postcode?: string | null
+          property_id: string
+          region?: string | null
+          round_logic?: string
+          round_to?: string
+          show_nights_breakdown?: boolean
+          show_room_number_for_extras?: boolean
+          statement_reminder_text?: string | null
+          statement_terms_text?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          use_text_instead_of_logo?: boolean
+          vat_registered?: boolean
+        }
+        Update: {
+          address?: string | null
+          city?: string | null
+          company_name?: string | null
+          country?: string | null
+          custom_invoice_numbers?: boolean
+          logo_path?: string | null
+          logo_text?: string | null
+          notes?: string | null
+          postcode?: string | null
+          property_id?: string
+          region?: string | null
+          round_logic?: string
+          round_to?: string
+          show_nights_breakdown?: boolean
+          show_room_number_for_extras?: boolean
+          statement_reminder_text?: string | null
+          statement_terms_text?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          use_text_instead_of_logo?: boolean
+          vat_registered?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoice_settings_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: true
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoice_settings_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "staff_users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       language_settings: {
         Row: {
           default_locale: string
@@ -3445,6 +3532,23 @@ export type Database = {
           posted_at: string
         }[]
       }
+      booking_invoice_lines: {
+        Args: { p_booking_id: string }
+        Returns: {
+          booking_room_id: string
+          business_date: string
+          description: string
+          gross_cents: number
+          is_discount: boolean
+          is_reversal: boolean
+          item_type: Database["public"]["Enums"]["folio_item_type"]
+          line_id: string
+          net_cents: number
+          room_number: string
+          stay_date: string
+          tax_cents: number
+        }[]
+      }
       booking_nights: {
         Args: { p_booking_id: string }
         Returns: {
@@ -4372,6 +4476,7 @@ export type Database = {
         Args: { p_days_of_week: number[]; p_from: string; p_to: string }
         Returns: string[]
       }
+      invoice_settings_row: { Args: never; Returns: string }
       is_front_office_staff: { Args: never; Returns: boolean }
       is_revenue_staff: { Args: never; Returns: boolean }
       known_locales: { Args: never; Returns: string[] }
@@ -4951,6 +5056,32 @@ export type Database = {
         Args: { p_id: string; p_title: string }
         Returns: string
       }
+      save_invoice_general: {
+        Args: {
+          p_address: string
+          p_city: string
+          p_company_name: string
+          p_country: string
+          p_postcode: string
+          p_region: string
+          p_show_nights_breakdown: boolean
+          p_show_room_number_for_extras: boolean
+          p_vat_registered: boolean
+        }
+        Returns: undefined
+      }
+      save_invoice_logo_and_notes: {
+        Args: {
+          p_logo_text: string
+          p_notes: string
+          p_use_text_instead_of_logo: boolean
+        }
+        Returns: undefined
+      }
+      save_invoice_number_settings: {
+        Args: { p_custom_invoice_numbers: boolean }
+        Returns: undefined
+      }
       save_meeting_room: {
         Args: {
           p_capacity?: number
@@ -5105,6 +5236,10 @@ export type Database = {
         }
         Returns: string
       }
+      save_rounding_options: {
+        Args: { p_round_logic: string; p_round_to: string }
+        Returns: undefined
+      }
       save_season: {
         Args: {
           p_ends_on: string
@@ -5122,6 +5257,10 @@ export type Database = {
           p_role: Database["public"]["Enums"]["staff_role"]
         }
         Returns: string
+      }
+      save_statement_settings: {
+        Args: { p_reminder_text: string; p_terms_text: string }
+        Returns: undefined
       }
       save_supported_languages: {
         Args: { p_locales: string[] }
@@ -5201,6 +5340,7 @@ export type Database = {
         Args: { p_id: string; p_value: boolean }
         Returns: undefined
       }
+      set_invoice_logo: { Args: { p_logo_path: string }; Returns: string }
       set_max_stay: {
         Args: {
           p_days_of_week?: number[]

@@ -33,6 +33,7 @@ export const SETTINGS_TABS = [
   "rooms",
   "staff",
   "tax",
+  "invoice-settings",
   "payment-methods",
   "rate-plans",
   "cancellation",
@@ -60,7 +61,7 @@ export function isSettingsTab(value: string | undefined): value is SettingsTab {
  *
  * FINANCES AND INVENTORY carry the reference's labels in its order (0079),
  * and Room Type and Room Setup moved under Inventory, where the reference
- * keeps them. Their items not listed -- Invoice Settings, Pos Profiles,
+ * keeps them. Their items not listed -- Pos Profiles,
  * Currencies, Accounting Categories, Payment Gateway, Accounting Systems,
  * Inventory's own Settings and Discounts -- go in as each is built, for the
  * same reason Other is left out: an item that opens onto nothing is a dead
@@ -120,6 +121,7 @@ export const SETTINGS_NAV: {
     items: [
       { id: "payment-methods", label: "Custom Payment Types" },
       { id: "tax", label: "Tax Information" },
+      { id: "invoice-settings", label: "Invoice Settings" },
     ],
   },
   {

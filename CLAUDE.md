@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0079` are
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0082` are
 applied to the hosted database.
 
 Working on real data: dashboard (house board, movements, pace, activity feed),
@@ -1589,13 +1589,56 @@ anywhere else. Collapsed height must stay constant regardless of room count.
     Configuration went in with 0073, Communications & Notifications with
     0074-0075, System Settings grew its three with 0076-0078.
   - **FINANCES AND INVENTORY are the reference's labels in its order**
-    (0079): Custom Payment Types, Tax Information; Room Type, Room Setup,
+    (0079): Custom Payment Types, Tax Information, Invoice Settings (0080);
+    Room Type, Room Setup,
     Cancellation Policy, Rate Plans, Seasons and Events. Room Type and Room
     Setup moved there from Hotel Content, where the reference does not have
-    them. Their other items — Invoice Settings, Pos Profiles, Currencies,
+    them. Their other items — Pos Profiles, Currencies,
     Accounting Categories, Payment Gateway, Accounting Systems, and
     Inventory's Settings and Discounts — go in as each is built. Tab ids did
     not change, so every existing link still lands.
+  - **INVOICE SETTINGS (0080-0082) HAS A READER: THE PRINTABLE INVOICE.**
+    Nothing printed an invoice before, so `/bookings/[id]/invoice` (linked
+    as "Print invoice" on the Folio tab, new tab like the registration card)
+    landed with the screen. Five cards, one row (`invoice_settings`), each
+    saving only its own columns through its own function via
+    `invoice_settings_row()`.
+    - **General Invoice Settings — all live.** Company information overrides
+      the hotel's name and address as issuer; blanks fall back to the hotel.
+      *Show nights breakdown*: one line per night charged, or one per room
+      (nights charged less any reversed). *Show room number for extras*: an
+      extra carries the booking's room **only when the booking has exactly
+      one** — an extra is posted to the booking, not a room, so on a group
+      none is guessed. *Are you VAT Registered*: Net / VAT / Total columns
+      and a VAT total, or amounts only. The row rules are the pure
+      `invoiceRows()` in `src/lib/invoice.ts`.
+    - **The invoice never recomputes money.** Lines come from
+      `booking_invoice_lines()` over `folio_item_lines` (net and tax split,
+      the room a night was charged for, a reversal naming the room of the
+      night it reverses); Total, payments and Balance due are the booking's
+      own figures, so the printout cannot disagree with the Folio tab.
+    - **Logo and Default Notes — live.** The logo is in the PUBLIC
+      `hotel-assets` bucket at `<property_id>/invoice-logo/<uuid>.<ext>`,
+      checked by the storage policy and again by `set_invoice_logo()`, which
+      hands back the replaced path so the old file is removed only after
+      Postgres agreed — the room-photo pattern. **Raster only (0081)**: 0080
+      allowed SVG, and an SVG in a public bucket runs script when its URL is
+      opened directly. Default Notes print at the foot, 255 characters.
+    - **Invoice number: the simple increment is live, the custom scheme is
+      not.** The invoice prints the booking's primary folio number
+      (`folio_number_seq`, the lowest on the booking, made on the first
+      charge) — the reference's "simple increment number". The sequence is
+      shared across properties, so one hotel's numbers can skip. The fields
+      behind "Enable Custom Invoice Number Settings" have not been seen, so
+      the switch is stored only.
+    - **Rounding Options and Statement Settings are STORED, NOT YET LIVE.**
+      Rounding "across whole system" would be a change to every money
+      function, not a setting — all money is integer cents in Postgres, and
+      None / 2 points is what the system does today. Only "None" and "2
+      Points after dot" were seen; the other choices are the ordinary ones.
+      There is no account statement yet for the reminder and terms to print
+      on.
+    - The LOCALE button and translate icons are not copied, as elsewhere.
   - **COMMUNICATIONS & NOTIFICATIONS IS STORED, NOT YET SENT** (0074, 0075) --
     Hotel Emails Preferences and Email Setup, cloned from the reference, all
     in one row per property, `hotel_email_settings`.

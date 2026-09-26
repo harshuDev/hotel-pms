@@ -17,6 +17,12 @@ import { EMPTY_HOTEL_POLICIES, type HotelPolicies } from "@/lib/hotel-policies";
 import { resolveHotelFeatures, type HotelFeatures } from "@/lib/hotel-features";
 import { DEFAULT_CALENDAR_SETTINGS, type CalendarSettings } from "@/lib/calendar-settings";
 import { resolveLanguageSettings, type LanguageSettings } from "@/lib/language-settings";
+import {
+  HOTEL_ASSETS_BUCKET,
+  ROUND_LOGIC,
+  ROUND_TO,
+  type InvoiceSettings,
+} from "@/lib/invoice-settings";
 import type { ExtraItemType, ExtrasCatalog } from "@/lib/extras";
 import type { Facility, FacilityIcon } from "@/lib/facilities";
 import type {
@@ -2704,6 +2710,81 @@ export async function getLanguageSettings(): Promise<LanguageSettings> {
     .maybeSingle();
   if (error) throw new Error(`Failed to load the language settings: ${error.message}`);
   return resolveLanguageSettings(data);
+}
+
+/**
+ * Invoice Settings (0080). No row reads as everything off and no override.
+ * The logo's public URL is resolved here, against the one known bucket, so a
+ * path that somehow got into the column cannot point the browser elsewhere.
+ */
+export const getInvoiceSettings = cache(async (): Promise<InvoiceSettings> => {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("invoice_settings")
+    .select(
+      "show_room_number_for_extras, show_nights_breakdown, vat_registered, company_name, country, region, city, address, postcode, logo_path, use_text_instead_of_logo, logo_text, notes, round_logic, round_to, custom_invoice_numbers, statement_reminder_text, statement_terms_text",
+    )
+    .maybeSingle();
+  if (error) throw new Error(`Failed to load the invoice settings: ${error.message}`);
+  return {
+    showRoomNumberForExtras: data?.show_room_number_for_extras ?? false,
+    showNightsBreakdown: data?.show_nights_breakdown ?? false,
+    vatRegistered: data?.vat_registered ?? false,
+    companyName: data?.company_name ?? null,
+    country: data?.country?.trim() ?? null,
+    region: data?.region ?? null,
+    city: data?.city ?? null,
+    address: data?.address ?? null,
+    postcode: data?.postcode ?? null,
+    logoPath: data?.logo_path ?? null,
+    logoUrl: data?.logo_path
+      ? supabase.storage.from(HOTEL_ASSETS_BUCKET).getPublicUrl(data.logo_path).data.publicUrl
+      : null,
+    useTextInsteadOfLogo: data?.use_text_instead_of_logo ?? false,
+    logoText: data?.logo_text ?? null,
+    notes: data?.notes ?? null,
+    roundLogic: ROUND_LOGIC.find((o) => o.id === data?.round_logic)?.id ?? "none",
+    roundTo: ROUND_TO.find((o) => o.id === data?.round_to)?.id ?? "two_decimals",
+    customInvoiceNumbers: data?.custom_invoice_numbers ?? false,
+    statementReminderText: data?.statement_reminder_text ?? null,
+    statementTermsText: data?.statement_terms_text ?? null,
+  };
+});
+
+/** One charge on a booking's folios, split for the invoice (0080). */
+export interface InvoiceLine {
+  lineId: string;
+  businessDate: string;
+  description: string;
+  itemType: string;
+  isReversal: boolean;
+  isDiscount: boolean;
+  netCents: number;
+  taxCents: number;
+  grossCents: number;
+  bookingRoomId: string | null;
+  roomNumber: string | null;
+  stayDate: string | null;
+}
+
+export async function getBookingInvoiceLines(bookingId: string): Promise<InvoiceLine[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("booking_invoice_lines", { p_booking_id: bookingId });
+  if (error) throw new Error(`Failed to load the invoice: ${error.message}`);
+  return (data ?? []).map((r) => ({
+    lineId: r.line_id,
+    businessDate: r.business_date,
+    description: r.description,
+    itemType: r.item_type,
+    isReversal: r.is_reversal,
+    isDiscount: r.is_discount,
+    netCents: Number(r.net_cents ?? 0),
+    taxCents: Number(r.tax_cents ?? 0),
+    grossCents: Number(r.gross_cents ?? 0),
+    bookingRoomId: r.booking_room_id,
+    roomNumber: r.room_number,
+    stayDate: r.stay_date,
+  }));
 }
 
 /**
