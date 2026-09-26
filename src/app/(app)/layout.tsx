@@ -7,8 +7,10 @@ import { signOut } from "@/lib/actions/auth";
 import {
   getBusinessDate,
   getCurrentStaffUser,
+  getHotelFeatures,
   getProperty,
 } from "@/lib/queries";
+import { hiddenNavHrefs } from "@/lib/hotel-features";
 
 /**
  * The browser tab carries the property's real name, not a hard-coded one.
@@ -74,9 +76,10 @@ export default async function AppLayout({
     );
   }
 
-  const [property, today] = await Promise.all([
+  const [property, today, features] = await Promise.all([
     getProperty(),
     getBusinessDate(),
+    getHotelFeatures(),
   ]);
 
   const businessDate = format(parseISO(today), "EEE d MMM yyyy");
@@ -88,6 +91,7 @@ export default async function AppLayout({
         propertyName={property.name}
         staffName={staff.fullName}
         staffRole={staff.role}
+        hiddenHrefs={hiddenNavHrefs(features)}
       />
 
       <TopBar

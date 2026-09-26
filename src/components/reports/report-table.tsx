@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { EmptyState, cn } from "@/components/ui";
 
 /**
@@ -116,6 +117,28 @@ export function ReportNoAccess() {
       <p className="mx-auto mt-2 max-w-md text-[13px] leading-relaxed text-ink-muted">
         Revenue and payment reports are open to front desk, cashier, manager and
         admin accounts. Ask a manager if you need access.
+      </p>
+    </div>
+  );
+}
+
+/**
+ * A report whose Hotel Feature is switched off (0076). A refusal, so it says
+ * why and where the switch is -- a manager who turned it off by mistake has a
+ * way back, and a deep link does not open onto an empty page.
+ */
+export function ReportFeatureOff({ feature }: { feature: string }) {
+  return (
+    <div className="rounded-lg border border-line bg-white p-8 text-center shadow-card">
+      <p className="font-display text-lg font-semibold tracking-tightest text-ink">
+        This report is switched off for this hotel
+      </p>
+      <p className="mx-auto mt-2 max-w-md text-[13px] leading-relaxed text-ink-muted">
+        A manager can turn it back on with &ldquo;{feature}&rdquo; in{" "}
+        <Link href="/settings?tab=hotel-features" className="text-brass underline-offset-2 hover:underline">
+          Settings &rarr; Hotel Features
+        </Link>
+        .
       </p>
     </div>
   );

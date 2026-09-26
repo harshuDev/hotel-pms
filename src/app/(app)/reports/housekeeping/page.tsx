@@ -5,11 +5,12 @@ import {
   ReportFigures,
   ReportShell,
 } from "@/components/reports/report-shell";
-import { ReportTable } from "@/components/reports/report-table";
+import { ReportFeatureOff, ReportTable } from "@/components/reports/report-table";
 import { RoomStatusAction } from "@/components/settings/room-status-action";
 import {
   HOUSEKEEPING_PAGE_SIZE,
   getBusinessDate,
+  getHotelFeatures,
   getHousekeepingRooms,
   getHousekeepingSummary,
 } from "@/lib/queries";
@@ -54,6 +55,18 @@ export default async function HousekeepingReportPage({
 }: {
   searchParams: Promise<{ floor?: string; state?: string; page?: string }>;
 }) {
+  // Hotel Features (0076): "Enable Housekeeping Feature" is this report, and
+  // "... Status Modification ..." is its Mark it column.
+  const features = await getHotelFeatures();
+  if (!features.housekeeping) {
+    return (
+      <ReportShell title="Housekeeping">
+        <ReportFeatureOff feature="Enable Housekeeping Feature" />
+      </ReportShell>
+    );
+  }
+  const canMark = features.housekeeping_status_modification;
+
   const sp = await searchParams;
   const floor = sp.floor !== undefined && /^-?\d+$/.test(sp.floor)
     ? Number(sp.floor)
@@ -293,12 +306,16 @@ export default async function HousekeepingReportPage({
               </span>
             ),
           },
-          {
-            header: "Mark it",
-            cell: (r) => (
-              <RoomStatusAction roomId={r.roomId} status={r.housekeepingStatus} />
-            ),
-          },
+          ...(canMark
+            ? [
+                {
+                  header: "Mark it",
+                  cell: (r: HousekeepingRoom) => (
+                    <RoomStatusAction roomId={r.roomId} status={r.housekeepingStatus} />
+                  ),
+                },
+              ]
+            : []),
         ]}
       />
 

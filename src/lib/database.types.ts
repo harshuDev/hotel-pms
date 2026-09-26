@@ -681,6 +681,87 @@ export type Database = {
           },
         ]
       }
+      calendar_settings: {
+        Row: {
+          booking_marker_intersect_checkout: boolean
+          bookings_intersect_checkout: boolean
+          company_booking_color: string
+          fixed_width_zoom: boolean
+          group_booking_color: string
+          hide_cancellation_area: boolean
+          last_name_first: boolean
+          paid_booking_color: string
+          partially_paid_booking_color: string
+          property_id: string
+          room_blocker_color: string
+          rounded_corners: boolean
+          show_channel_abbreviation: boolean
+          show_seasons: boolean
+          show_waitlist: boolean
+          unpaid_booking_color: string
+          updated_at: string
+          updated_by: string | null
+          weekend_border_color: string
+        }
+        Insert: {
+          booking_marker_intersect_checkout?: boolean
+          bookings_intersect_checkout?: boolean
+          company_booking_color?: string
+          fixed_width_zoom?: boolean
+          group_booking_color?: string
+          hide_cancellation_area?: boolean
+          last_name_first?: boolean
+          paid_booking_color?: string
+          partially_paid_booking_color?: string
+          property_id: string
+          room_blocker_color?: string
+          rounded_corners?: boolean
+          show_channel_abbreviation?: boolean
+          show_seasons?: boolean
+          show_waitlist?: boolean
+          unpaid_booking_color?: string
+          updated_at?: string
+          updated_by?: string | null
+          weekend_border_color?: string
+        }
+        Update: {
+          booking_marker_intersect_checkout?: boolean
+          bookings_intersect_checkout?: boolean
+          company_booking_color?: string
+          fixed_width_zoom?: boolean
+          group_booking_color?: string
+          hide_cancellation_area?: boolean
+          last_name_first?: boolean
+          paid_booking_color?: string
+          partially_paid_booking_color?: string
+          property_id?: string
+          room_blocker_color?: string
+          rounded_corners?: boolean
+          show_channel_abbreviation?: boolean
+          show_seasons?: boolean
+          show_waitlist?: boolean
+          unpaid_booking_color?: string
+          updated_at?: string
+          updated_by?: string | null
+          weekend_border_color?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "calendar_settings_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: true
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "calendar_settings_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "staff_users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cancellation_policies: {
         Row: {
           created_at: string
@@ -1567,6 +1648,42 @@ export type Database = {
           },
         ]
       }
+      hotel_features: {
+        Row: {
+          features: Json
+          property_id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          features?: Json
+          property_id: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          features?: Json
+          property_id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hotel_features_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: true
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hotel_features_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "staff_users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       identification_types: {
         Row: {
           created_at: string
@@ -1592,6 +1709,45 @@ export type Database = {
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      language_settings: {
+        Row: {
+          default_locale: string
+          property_id: string
+          supported_locales: string[]
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          default_locale?: string
+          property_id: string
+          supported_locales?: string[]
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          default_locale?: string
+          property_id?: string
+          supported_locales?: string[]
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "language_settings_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: true
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "language_settings_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "staff_users"
             referencedColumns: ["id"]
           },
         ]
@@ -3451,6 +3607,17 @@ export type Database = {
           value_cents: number
         }[]
       }
+      calendar_color: {
+        Args: { p_label: string; p_value: string }
+        Returns: string
+      }
+      calendar_guest_name: {
+        Args: {
+          p_customer: Database["public"]["Tables"]["customers"]["Row"]
+          p_last_first: boolean
+        }
+        Returns: string
+      }
       calendar_notes_for: {
         Args: { p_days?: number; p_from: string }
         Returns: {
@@ -3467,14 +3634,18 @@ export type Database = {
         Returns: {
           booking_id: string
           booking_room_id: string
+          channel_code: string
           check_in: string
           check_out: string
           guest_name: string
           guests: number
           has_notes: boolean
           is_assigned: boolean
+          is_company: boolean
+          payment_state: string
           rate_plan_name: string
           reference: string
+          room_count: number
           room_id: string
           room_type_id: string
           status: Database["public"]["Enums"]["booking_status"]
@@ -4196,6 +4367,7 @@ export type Database = {
       }
       is_front_office_staff: { Args: never; Returns: boolean }
       is_revenue_staff: { Args: never; Returns: boolean }
+      known_locales: { Args: never; Returns: string[] }
       log_booking_email: {
         Args: {
           p_body: string
@@ -4448,6 +4620,13 @@ export type Database = {
           smoking_custom: string
         }[]
       }
+      public_language_settings: {
+        Args: { p_property_id: string }
+        Returns: {
+          default_locale: string
+          supported_locales: string[]
+        }[]
+      }
       public_property: {
         Args: { p_property_id: string }
         Returns: {
@@ -4654,6 +4833,27 @@ export type Database = {
         Args: { p_body: string; p_id?: string; p_note_date: string }
         Returns: string
       }
+      save_calendar_settings: {
+        Args: {
+          p_booking_marker_intersect_checkout: boolean
+          p_bookings_intersect_checkout: boolean
+          p_company_booking_color: string
+          p_fixed_width_zoom: boolean
+          p_group_booking_color: string
+          p_hide_cancellation_area: boolean
+          p_last_name_first: boolean
+          p_paid_booking_color: string
+          p_partially_paid_booking_color: string
+          p_room_blocker_color: string
+          p_rounded_corners: boolean
+          p_show_channel_abbreviation: boolean
+          p_show_seasons: boolean
+          p_show_waitlist: boolean
+          p_unpaid_booking_color: string
+          p_weekend_border_color: string
+        }
+        Returns: undefined
+      }
       save_cancellation_policy: {
         Args: {
           p_description?: string
@@ -4696,6 +4896,7 @@ export type Database = {
         }
         Returns: string
       }
+      save_default_language: { Args: { p_locale: string }; Returns: undefined }
       save_email_footer: { Args: { p_footer: string }; Returns: undefined }
       save_email_general: {
         Args: {
@@ -4738,6 +4939,7 @@ export type Database = {
         Args: { p_emails: string[]; p_preferences: Json }
         Returns: undefined
       }
+      save_hotel_features: { Args: { p_features: Json }; Returns: undefined }
       save_identification_type: {
         Args: { p_id: string; p_title: string }
         Returns: string
@@ -4912,6 +5114,10 @@ export type Database = {
           p_role: Database["public"]["Enums"]["staff_role"]
         }
         Returns: string
+      }
+      save_supported_languages: {
+        Args: { p_locales: string[] }
+        Returns: undefined
       }
       save_tax_rate: {
         Args: {

@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import type { ActionResult } from "@/lib/actions/cashier";
 import type { HotelPolicies } from "@/lib/hotel-policies";
 import type { FacilityIcon } from "@/lib/facilities";
+import { resolveLanguageSettings, type LanguageSettings } from "@/lib/language-settings";
 
 /**
  * The guest booking page.
@@ -82,6 +83,21 @@ export async function getPublicProperty(
     checkInTime: row.check_in_time,
     checkOutTime: row.check_out_time,
   };
+}
+
+/**
+ * Which languages the hotel offers its guests, and which one they land on
+ * (0078). A failed read falls back to every language and English, which is
+ * what the page did before the setting existed -- a guest should never lose
+ * the booking page over a preference.
+ */
+export async function getPublicLanguageSettings(propertyId: string): Promise<LanguageSettings> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("public_language_settings", {
+    p_property_id: propertyId,
+  });
+  if (error) return resolveLanguageSettings(null);
+  return resolveLanguageSettings(data?.[0]);
 }
 
 /**

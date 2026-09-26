@@ -39,7 +39,8 @@ import {
   getRatePlans,
   getTaxRates,
 } from "@/lib/queries";
-import { getPropertyCurrency } from "@/lib/queries";
+import { getCalendarSettings, getHotelFeatures, getPropertyCurrency } from "@/lib/queries";
+import { housekeepingMode } from "@/lib/hotel-features";
 
 export const metadata = { title: "Calendar" };
 
@@ -106,13 +107,19 @@ export default async function CalendarPage({
   // bars answer "who is in, and when"; neither is the other. Cancelled rooms
   // come back separately because they belong in their own row, not among the
   // live ones where they would read as sold.
-  const [cells, rooms, roomBars, canceledBars, seasons, notes, property] =
+  // Calendar Settings (0077) first and alone, because one of them decides
+  // whether the Cancelled band's read is made at all.
+  const look = await getCalendarSettings();
+
+  const [cells, rooms, roomBars, canceledBars, seasons, notes, property, features] =
     await Promise.all([
     getCalendarAvailability(from, days),
     // The rail. Every room, grouped by type in Postgres.
     getCalendarRooms(),
     getCalendarRoomBars(from, days),
-    getCalendarBookings(from, days, CALENDAR_MAX_BARS_PER_TYPE, true),
+    look.hideCancellationArea
+      ? Promise.resolve([])
+      : getCalendarBookings(from, days, CALENDAR_MAX_BARS_PER_TYPE, true),
     getCalendarSeasons(from, days),
     // NO per-type housekeeping read any more. `getRoomStatusByType()` fed a
     // summary dot on the room-type header, and the client asked twice for the
@@ -123,6 +130,8 @@ export default async function CalendarPage({
     // Free: cache()d, and the app layout has already called it in this same
     // request. It carries the timezone a note's posting time is rendered on.
     getProperty(),
+    // Free as well: cache()d, and the layout read it for the nav.
+    getHotelFeatures(),
   ]);
 
   const dates = Array.from({ length: days }, (_, i) =>
@@ -162,7 +171,10 @@ export default async function CalendarPage({
    */
   const barsByRoom = new Map<string, typeof roomBars>();
   const unassignedByType = new Map<string, typeof roomBars>();
-  for (const bar of roomBars) {
+  // "Show channel abbreviation for bookings" off: the bars simply carry no
+  // code, so nothing in the board has to know the setting exists.
+  for (const raw of roomBars) {
+    const bar = look.showChannelAbbreviation ? raw : { ...raw, channelCode: null };
     if (bar.roomId) {
       const list = barsByRoom.get(bar.roomId);
       if (list) list.push(bar);
@@ -352,6 +364,8 @@ export default async function CalendarPage({
             }
             days={days}
             railW={railW}
+            housekeeping={housekeepingMode(features)}
+            look={look}
           />
 
         </>

@@ -1,10 +1,10 @@
 import { ReportFigure, ReportFigures, ReportShell } from "@/components/reports/report-shell";
-import { ReportNoAccess, ReportTable } from "@/components/reports/report-table";
+import { ReportFeatureOff, ReportNoAccess, ReportTable } from "@/components/reports/report-table";
 import { formatMoney, formatMoneyShort } from "@/lib/money";
 import { reportRange } from "@/lib/reports";
 import { ReportAccessError, getAccountingReport, getBusinessDate } from "@/lib/queries";
 import type { AccountingRow } from "@/lib/types";
-import { getPropertyCurrency } from "@/lib/queries";
+import { getHotelFeatures, getPropertyCurrency } from "@/lib/queries";
 
 export const metadata = { title: "Accounting report" };
 
@@ -26,6 +26,15 @@ export default async function AccountingReportPage({
 }: {
   searchParams: Promise<{ from?: string; to?: string }>;
 }) {
+  // Hotel Features -> "Enable Accounting Report" (0076). The menu entry goes
+  // with the switch; this answers a bookmark or a typed address.
+  if (!(await getHotelFeatures()).accounting_report) {
+    return (
+      <ReportShell title="Accounting">
+        <ReportFeatureOff feature="Enable Accounting Report" />
+      </ReportShell>
+    );
+  }
   const currency = await getPropertyCurrency();
   const sp = await searchParams;
   const businessDate = await getBusinessDate();

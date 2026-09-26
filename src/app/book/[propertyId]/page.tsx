@@ -3,13 +3,14 @@ import Link from "next/link";
 import { BookingWidget } from "@/components/book/booking-widget";
 import {
   getPublicHotelPolicies,
+  getPublicLanguageSettings,
   getPublicProperty,
   getPublicRatePlans,
   getPublicRoomTypeContent,
   getPublicRoomTypeFacilities,
 } from "@/lib/actions/public-booking";
 import { getCurrentStaffUser } from "@/lib/queries";
-import { LOCALES, DEFAULT_LOCALE, bcp47, isLocale, type Locale } from "@/lib/i18n/locales";
+import { LOCALES, bcp47, isLocale, type Locale } from "@/lib/i18n/locales";
 import { dictionaryFor } from "@/lib/i18n/dictionary";
 
 export const metadata = { title: "Book a room" };
@@ -39,10 +40,20 @@ export default async function BookPage({
 }) {
   const { propertyId } = await params;
   const { lang } = await searchParams;
-  const locale = isLocale(lang) ? lang : DEFAULT_LOCALE;
 
   const property = await getPublicProperty(propertyId);
   if (!property) notFound();
+
+  /*
+   * Language Settings (0078). A `?lang=` the hotel does not offer falls back
+   * to its default rather than being honoured -- otherwise a shared link would
+   * put a guest in a language the hotel chose not to support.
+   */
+  const languages = await getPublicLanguageSettings(propertyId);
+  const locale: Locale =
+    isLocale(lang) && languages.supportedLocales.includes(lang)
+      ? lang
+      : languages.defaultLocale;
 
   const ratePlans = await getPublicRatePlans(propertyId);
 
@@ -60,24 +71,26 @@ export default async function BookPage({
             <h1 className="font-display text-[20px] font-semibold tracking-tightest text-ink">
               {property.name}
             </h1>
-            <form>
-              <label htmlFor="lang" className="sr-only">{t.language}</label>
-              <select
-                id="lang"
-                name="lang"
-                defaultValue={locale}
-                className="rounded-md border border-line bg-white px-2.5 py-1.5 text-[13px] text-ink-muted outline-none focus:border-brass focus:ring-2 focus:ring-brass/20"
-              >
-                {LOCALES.map((l) => (
-                  <option key={l.code} value={l.code}>{l.label}</option>
-                ))}
-              </select>
-              <noscript>
-                <button type="submit" className="ml-2 text-[13px] underline">
-                  OK
-                </button>
-              </noscript>
-            </form>
+            {languages.supportedLocales.length > 1 && (
+              <form>
+                <label htmlFor="lang" className="sr-only">{t.language}</label>
+                <select
+                  id="lang"
+                  name="lang"
+                  defaultValue={locale}
+                  className="rounded-md border border-line bg-white px-2.5 py-1.5 text-[13px] text-ink-muted outline-none focus:border-brass focus:ring-2 focus:ring-brass/20"
+                >
+                  {LOCALES.filter((l) => languages.supportedLocales.includes(l.code)).map((l) => (
+                    <option key={l.code} value={l.code}>{l.label}</option>
+                  ))}
+                </select>
+                <noscript>
+                  <button type="submit" className="ml-2 text-[13px] underline">
+                    OK
+                  </button>
+                </noscript>
+              </form>
+            )}
           </div>
 
           <div className="rounded-lg border border-line bg-white p-6 shadow-card">
@@ -128,6 +141,7 @@ export default async function BookPage({
       property={property}
       ratePlans={ratePlans}
       locale={locale}
+      languages={languages.supportedLocales}
       policies={policies}
       facilities={facilities}
       content={content}

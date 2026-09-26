@@ -14,6 +14,9 @@
 
 import { cache } from "react";
 import { EMPTY_HOTEL_POLICIES, type HotelPolicies } from "@/lib/hotel-policies";
+import { resolveHotelFeatures, type HotelFeatures } from "@/lib/hotel-features";
+import { DEFAULT_CALENDAR_SETTINGS, type CalendarSettings } from "@/lib/calendar-settings";
+import { resolveLanguageSettings, type LanguageSettings } from "@/lib/language-settings";
 import type { ExtraItemType, ExtrasCatalog } from "@/lib/extras";
 import type { Facility, FacilityIcon } from "@/lib/facilities";
 import type {
@@ -97,6 +100,7 @@ import type {
   CalendarRoom,
   CalendarNote,
   CalendarRoomBar,
+  BookingPaymentState,
   CountryRow,
   DepositRow,
   EndOfDayRow,
@@ -2641,6 +2645,64 @@ export async function getHotelEmailSettings(): Promise<HotelEmailSettings> {
 }
 
 /**
+ * Hotel Features (0076). No row, or a switch never saved, reads as the
+ * switch's default. cache()d: the app layout reads it for the nav and the
+ * page under it may read it again in the same request.
+ */
+export const getHotelFeatures = cache(async (): Promise<HotelFeatures> => {
+  const supabase = await createClient();
+  const { data, error } = await supabase.from("hotel_features").select("features").maybeSingle();
+  if (error) throw new Error(`Failed to load the hotel features: ${error.message}`);
+  return resolveHotelFeatures(data?.features);
+});
+
+/**
+ * Calendar Settings (0077). No row reads as the reference's values, which are
+ * also the column defaults. cache()d: the calendar page and Settings both read
+ * it, and the board's own reads take the name order from the same row.
+ */
+export const getCalendarSettings = cache(async (): Promise<CalendarSettings> => {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("calendar_settings")
+    .select(
+      "room_blocker_color, unpaid_booking_color, paid_booking_color, partially_paid_booking_color, company_booking_color, group_booking_color, weekend_border_color, rounded_corners, bookings_intersect_checkout, booking_marker_intersect_checkout, fixed_width_zoom, show_seasons, show_channel_abbreviation, last_name_first, hide_cancellation_area, show_waitlist",
+    )
+    .maybeSingle();
+  if (error) throw new Error(`Failed to load the calendar settings: ${error.message}`);
+  if (!data) return DEFAULT_CALENDAR_SETTINGS;
+  return {
+    roomBlockerColor: data.room_blocker_color,
+    unpaidBookingColor: data.unpaid_booking_color,
+    paidBookingColor: data.paid_booking_color,
+    partiallyPaidBookingColor: data.partially_paid_booking_color,
+    companyBookingColor: data.company_booking_color,
+    groupBookingColor: data.group_booking_color,
+    weekendBorderColor: data.weekend_border_color,
+    roundedCorners: data.rounded_corners,
+    bookingsIntersectCheckout: data.bookings_intersect_checkout,
+    bookingMarkerIntersectCheckout: data.booking_marker_intersect_checkout,
+    fixedWidthZoom: data.fixed_width_zoom,
+    showSeasons: data.show_seasons,
+    showChannelAbbreviation: data.show_channel_abbreviation,
+    lastNameFirst: data.last_name_first,
+    hideCancellationArea: data.hide_cancellation_area,
+    showWaitlist: data.show_waitlist,
+  };
+});
+
+/** Language Settings (0078), as Settings edits them. */
+export async function getLanguageSettings(): Promise<LanguageSettings> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("language_settings")
+    .select("default_locale, supported_locales")
+    .maybeSingle();
+  if (error) throw new Error(`Failed to load the language settings: ${error.message}`);
+  return resolveLanguageSettings(data);
+}
+
+/**
  * Email Setup (0075): the same row as Hotel Emails Preferences, its other
  * columns. No row reads as the reference's defaults.
  */
@@ -3385,7 +3447,15 @@ export async function getCalendarRoomBars(
     isAssigned: row.is_assigned,
     unassignedTotal: Number(row.unassigned_total ?? 0),
     ratePlanName: row.rate_plan_name,
+    channelCode: row.channel_code,
+    paymentState: toPaymentState(row.payment_state),
+    isCompany: row.is_company,
+    roomCount: Number(row.room_count ?? 1),
   }));
+}
+
+function toPaymentState(value: string): BookingPaymentState {
+  return value === "paid" || value === "partial" ? value : "unpaid";
 }
 
 /**

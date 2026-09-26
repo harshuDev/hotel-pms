@@ -11,6 +11,9 @@ import {
   getFacilities,
   getGuestFields,
   getHotelEmailSettings,
+  getHotelFeatures,
+  getCalendarSettings,
+  getLanguageSettings,
   getEmailSetup,
   getEmailTemplates,
   getIdentificationTypes,
@@ -61,6 +64,9 @@ export default async function SettingsPage({
     emailSettings,
     emailSetup,
     emailTemplates,
+    hotelFeatures,
+    calendarSettings,
+    languageSettings,
   ] = await Promise.all([
     getPropertySettings(),
     getRoomTypeSettings(),
@@ -82,6 +88,9 @@ export default async function SettingsPage({
     getHotelEmailSettings(),
     getEmailSetup(),
     getEmailTemplates(),
+    getHotelFeatures(),
+    getCalendarSettings(),
+    getLanguageSettings(),
   ]);
 
   /*
@@ -123,6 +132,9 @@ export default async function SettingsPage({
         emailSettings={emailSettings}
         emailSetup={emailSetup}
         emailTemplates={emailTemplates}
+        hotelFeatures={hotelFeatures}
+        calendarSettings={calendarSettings}
+        languageSettings={languageSettings}
       />
     </div>
   );
