@@ -2458,13 +2458,16 @@ export async function getPropertySettings(): Promise<PropertySettings> {
   const { data, error } = await supabase
     .from("properties")
     .select(
-      "id, name, timezone, currency, check_in_time, check_out_time, audit_close_time",
+      "id, name, timezone, currency, check_in_time, check_out_time, audit_close_time, " +
+        "slug, property_type, company_name, company_registration_id, country, " +
+        "address_line1, address_line2, city, region, postcode, latitude, longitude, " +
+        "phone, fax, email, website",
     )
     .single();
 
   if (error) throw new Error(`Failed to load the property: ${error.message}`);
 
-  const row = data as {
+  const row = data as unknown as {
     id: string;
     name: string;
     timezone: string;
@@ -2472,16 +2475,48 @@ export async function getPropertySettings(): Promise<PropertySettings> {
     check_in_time: string | null;
     check_out_time: string | null;
     audit_close_time: string;
+    slug: string | null;
+    property_type: string;
+    company_name: string | null;
+    company_registration_id: string | null;
+    country: string | null;
+    address_line1: string | null;
+    address_line2: string | null;
+    city: string | null;
+    region: string | null;
+    postcode: string | null;
+    latitude: number | null;
+    longitude: number | null;
+    phone: string | null;
+    fax: string | null;
+    email: string | null;
+    website: string | null;
   };
 
   return {
     id: row.id,
     name: row.name,
     timezone: row.timezone,
-    currency: row.currency,
+    currency: row.currency.trim(),
     checkInTime: row.check_in_time,
     checkOutTime: row.check_out_time,
     auditCloseTime: row.audit_close_time,
+    slug: row.slug,
+    propertyType: row.property_type,
+    companyName: row.company_name,
+    companyRegistrationId: row.company_registration_id,
+    country: row.country,
+    addressLine1: row.address_line1,
+    addressLine2: row.address_line2,
+    city: row.city,
+    region: row.region,
+    postcode: row.postcode,
+    latitude: row.latitude,
+    longitude: row.longitude,
+    phone: row.phone,
+    fax: row.fax,
+    email: row.email,
+    website: row.website,
   };
 }
 

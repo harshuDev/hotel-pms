@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { nullableArg } from "@/lib/supabase/database";
 import { ROOM_PHOTO_BUCKET } from "@/lib/queries";
 import type { ActionResult } from "@/lib/actions/cashier";
 import type {
@@ -56,6 +57,102 @@ export async function saveProperty(input: {
     // for the two times above. A cleared field that silently kept the old
     // value would read as a save that did not save.
     p_audit_close_time: input.auditCloseTime || null,
+  });
+
+  if (error) return { ok: false, error: error.message };
+
+  revalidateSettings();
+  return { ok: true, data: null };
+}
+
+/**
+ * Settings > Hotel Profile > Hotel Details (0067).
+ *
+ * Every field the client's reference keeps about a hotel. The refusals live in
+ * `save_property_details()`, where they hold however the row is written; this
+ * only turns the form's strings into what the function takes. An empty field
+ * is null, which clears it.
+ */
+export async function saveHotelDetails(input: {
+  name: string;
+  timezone: string;
+  currency: string;
+  propertyType: string;
+  companyName: string;
+  companyRegistrationId: string;
+  country: string;
+  addressLine1: string;
+  addressLine2: string;
+  city: string;
+  region: string;
+  postcode: string;
+  latitude: string;
+  longitude: string;
+  phone: string;
+  fax: string;
+  email: string;
+  website: string;
+}): Promise<ActionResult<null>> {
+  if (input.name.trim() === "") {
+    return { ok: false, error: "The hotel needs a name." };
+  }
+
+  // Coordinates arrive as text from two inputs and a map. Blank is "no
+  // location"; anything else must be a number, said here rather than handed
+  // to Postgres as NaN.
+  const coord = (v: string): number | null | "bad" => {
+    const t = v.trim();
+    if (t === "") return null;
+    const n = Number(t);
+    return Number.isFinite(n) ? n : "bad";
+  };
+  const latitude = coord(input.latitude);
+  const longitude = coord(input.longitude);
+  if (latitude === "bad" || longitude === "bad") {
+    return { ok: false, error: "Latitude and longitude are numbers, like 51.5014 and -0.1419." };
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("save_property_details", {
+    p_name: input.name,
+    p_timezone: input.timezone,
+    p_currency: input.currency,
+    p_property_type: input.propertyType,
+    p_company_name: input.companyName,
+    p_company_registration_id: input.companyRegistrationId,
+    p_country: input.country,
+    p_address_line1: input.addressLine1,
+    p_address_line2: input.addressLine2,
+    p_city: input.city,
+    p_region: input.region,
+    p_postcode: input.postcode,
+    p_latitude: latitude,
+    p_longitude: longitude,
+    p_phone: input.phone,
+    p_fax: input.fax,
+    p_email: input.email,
+    p_website: input.website,
+  });
+
+  if (error) return { ok: false, error: error.message };
+
+  revalidateSettings();
+  // The name and the timezone reach the top bar and the browser tab.
+  revalidatePath("/", "layout");
+  return { ok: true, data: null };
+}
+
+/** Settings > Hotel Profile > Hotel Properties: the three times (0067). */
+export async function saveHotelTimes(input: {
+  checkInTime: string;
+  checkOutTime: string;
+  auditCloseTime: string;
+}): Promise<ActionResult<null>> {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("save_property_times", {
+    p_check_in_time: input.checkInTime || nullableArg<string>(null),
+    p_check_out_time: input.checkOutTime || nullableArg<string>(null),
+    p_audit_close_time: input.auditCloseTime || nullableArg<string>(null),
   });
 
   if (error) return { ok: false, error: error.message };

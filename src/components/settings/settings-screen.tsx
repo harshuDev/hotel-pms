@@ -1,15 +1,32 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { cn } from "@/components/ui";
 import { RoomPhoto } from "@/components/settings/room-photo";
+import { SETTINGS_NAV, type SettingsTab } from "@/lib/settings-tabs";
+import { COUNTRIES } from "@/lib/countries";
+import { CURRENCIES, currencyOptionLabel } from "@/lib/currencies";
+
+/*
+ * Browser-only: Leaflet reaches for `window` the moment it is imported, so the
+ * server renders the empty frame and the map arrives with the page's
+ * JavaScript. The frame is the map's own height, so nothing jumps.
+ */
+const LocationMap = dynamic(() => import("@/components/settings/location-map"), {
+  ssr: false,
+  loading: () => (
+    <div className="h-[400px] rounded-md border border-line bg-board" aria-hidden="true" />
+  ),
+});
 import {
   createRooms,
   saveChannel,
   savePaymentMethod,
-  saveProperty,
+  saveHotelDetails,
+  saveHotelTimes,
   saveRoom,
   saveRoomType,
   saveSeason,
@@ -39,17 +56,7 @@ import type {
   TaxRateSetting,
 } from "@/lib/types";
 
-export type SettingsTab =
-  | "property"
-  | "room-types"
-  | "rooms"
-  | "channels"
-  | "tax"
-  | "seasons"
-  | "rate-plans"
-  | "cancellation"
-  | "payment-methods"
-  | "staff";
+export type { SettingsTab } from "@/lib/settings-tabs";
 
 /** What a plan includes, in a guest's words. The set of meals IS the board type. */
 const MEAL_LABEL: Record<MealType, string> = {
@@ -57,19 +64,6 @@ const MEAL_LABEL: Record<MealType, string> = {
   lunch: "Lunch",
   dinner: "Dinner",
 };
-
-const TABS: { id: SettingsTab; label: string }[] = [
-  { id: "property", label: "Property" },
-  { id: "room-types", label: "Room types" },
-  { id: "rooms", label: "Rooms" },
-  { id: "channels", label: "Booking sources" },
-  { id: "tax", label: "Tax rates" },
-  { id: "seasons", label: "Seasons" },
-  { id: "rate-plans", label: "Rate plans" },
-  { id: "cancellation", label: "Cancellation" },
-  { id: "payment-methods", label: "Payment methods" },
-  { id: "staff", label: "Staff" },
-];
 
 const CHANNEL_KINDS: { value: ChannelKind; label: string }[] = [
   { value: "direct", label: "Direct" },
@@ -119,6 +113,55 @@ const primary =
   "rounded-md bg-chrome-800 px-5 py-2 text-[13px] font-medium text-white hover:bg-chrome-900 disabled:opacity-50";
 const secondary =
   "rounded-md border border-line px-4 py-2 text-[13px] text-ink-muted hover:bg-shell hover:text-ink";
+/* Property ID and slug: shown, greyed, never typed in -- as the reference's. */
+const readOnlyField =
+  "w-full cursor-default rounded-md border border-line bg-shell px-3 py-2 text-[13px] text-ink-faint focus:outline-none";
+
+/**
+ * One row of Hotel Details: the label on the left with its colon, the input
+ * on the right, as the client's reference lays the form out. Stacks on a
+ * phone, where two columns of that width do not fit.
+ */
+function DetailRow({
+  label,
+  htmlFor,
+  children,
+}: {
+  label: string;
+  htmlFor: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="grid gap-1.5 sm:grid-cols-[13.5rem_1fr] sm:items-start sm:gap-4">
+      <label htmlFor={htmlFor} className="text-[13.5px] text-ink sm:pt-2">
+        {label}:
+      </label>
+      <div>{children}</div>
+    </div>
+  );
+}
+
+/** A coordinate field's text as a number, or null while it is blank or half-typed. */
+function parseCoordinate(text: string): number | null {
+  const t = text.trim();
+  if (t === "" || t === "-" || t.endsWith(".")) return null;
+  const n = Number(t);
+  return Number.isFinite(n) ? n : null;
+}
+
+/**
+ * The timezone options: the server's list, plus the saved value and the
+ * browser's own zone if either is missing from it. Browsers still report
+ * old names like "Asia/Calcutta" that newer lists spell "Asia/Kolkata";
+ * Postgres accepts both, and a select cannot show a value it has no option
+ * for.
+ */
+function zoneOptions(list: string[], saved: string, browser: string | null): string[] {
+  const extra = [saved, browser].filter(
+    (z): z is string => z !== null && z !== "" && !list.includes(z),
+  );
+  return extra.length ? [...new Set([...extra, ...list])].sort() : list;
+}
 
 function Note({ children }: { children: React.ReactNode }) {
   return (
@@ -143,9 +186,12 @@ export function SettingsScreen({
   meId,
   canEdit,
   isAdmin,
+  timezones,
 }: {
   tab: SettingsTab;
   property: PropertySettings;
+  /** IANA zones, listed on the server so both renders offer the same ones. */
+  timezones: string[];
   roomTypes: RoomTypeSetting[];
   rooms: RoomSettingsPage;
   roomQuery: string;
@@ -180,10 +226,49 @@ export function SettingsScreen({
   }
 
   /* -- Property ------------------------------------------------------- */
-  const [prop, setProp] = useState({
+  /* -- Hotel Details (0067) ------------------------------------------ */
+  // Every value a string, as the inputs hold them: a coordinate half-typed as
+  // "51." is not a number yet, and a number state would snap it under the
+  // cursor. The action turns them back into numbers and refuses what is not.
+  const [details, setDetails] = useState({
     name: property.name,
     timezone: property.timezone,
     currency: property.currency,
+    propertyType: property.propertyType,
+    companyName: property.companyName ?? "",
+    companyRegistrationId: property.companyRegistrationId ?? "",
+    country: property.country ?? "",
+    addressLine1: property.addressLine1 ?? "",
+    addressLine2: property.addressLine2 ?? "",
+    city: property.city ?? "",
+    region: property.region ?? "",
+    postcode: property.postcode ?? "",
+    latitude: property.latitude === null ? "" : String(property.latitude),
+    longitude: property.longitude === null ? "" : String(property.longitude),
+    phone: property.phone ?? "",
+    fax: property.fax ?? "",
+    email: property.email ?? "",
+    website: property.website ?? "",
+  });
+
+  /*
+   * The browser's own timezone, for "Your current timezone is: ... Set as
+   * hotel timezone", as the reference offers. Read after mount and never
+   * during render: the server has no idea which zone the reader is in, so
+   * rendering it would put one value on the server and another in the
+   * browser -- the hydration mismatch this project has already met on dates.
+   */
+  const [browserZone, setBrowserZone] = useState<string | null>(null);
+  useEffect(() => {
+    try {
+      setBrowserZone(Intl.DateTimeFormat().resolvedOptions().timeZone || null);
+    } catch {
+      setBrowserZone(null);
+    }
+  }, []);
+
+  /* -- Hotel Properties: the three times ------------------------------- */
+  const [times, setTimes] = useState({
     checkInTime: property.checkInTime?.slice(0, 5) ?? "15:00",
     checkOutTime: property.checkOutTime?.slice(0, 5) ?? "11:00",
     auditCloseTime: property.auditCloseTime.slice(0, 5),
@@ -293,24 +378,19 @@ export function SettingsScreen({
   } | null>(null);
 
   return (
-    <div className="space-y-3">
-      <div className="flex flex-wrap gap-1.5 rounded-lg border border-line bg-white p-2 shadow-card">
-        {TABS.map((t) => (
-          <Link
-            key={t.id}
-            href={`/settings?tab=${t.id}`}
-            className={cn(
-              "rounded-md px-3.5 py-2 text-[13px]",
-              t.id === tab
-                ? "bg-chrome-800 font-medium text-white"
-                : "text-ink-muted hover:bg-shell hover:text-ink",
-            )}
-          >
-            {t.label}
-          </Link>
-        ))}
-      </div>
+    /*
+      THE REFERENCE'S LAYOUT: a dark sidebar down the left, the panel on the
+      right. Pulled out to the edges of `main` with negative margins so the
+      sidebar runs flush and full height, the way theirs does. 5.75rem is the
+      nav bar (h-14) plus the top bar (h-9) above it.
 
+      This is a sidebar INSIDE Settings, not an application sidebar. The app's
+      own navigation stays horizontal across the top, as CLAUDE.md requires --
+      the reference is built the same way.
+    */
+    <div className="-m-3 flex min-h-[calc(100vh-5.75rem)] flex-col sm:-m-5 lg:flex-row">
+      <SettingsSidebar tab={tab} />
+      <div className="min-w-0 flex-1 space-y-3 p-3 sm:p-5">
       {message && (
         <p
           className={cn(
@@ -329,89 +409,327 @@ export function SettingsScreen({
         </p>
       )}
 
-      {/* Property ------------------------------------------------------ */}
+      {/* Hotel Details --------------------------------------------------- */}
       {tab === "property" && (
-        <div className={card}>
-          <h2 className="mb-4 font-display text-[15px] font-semibold tracking-tightest text-ink">
-            The property
+        /*
+          Settings > Hotel Profile > Hotel Details, cloned from the client's
+          reference field for field and label for label, colons included:
+          a label column on the left, the input on the right, one card.
+        */
+        <div className={cn(card, "max-w-3xl p-6 sm:p-7")}>
+          <h2 className="mb-6 font-display text-[26px] font-semibold tracking-tightest text-ink">
+            Hotel Details
           </h2>
-          <div className="grid gap-4 sm:grid-cols-3">
-            <div className="sm:col-span-2">
-              <label htmlFor="p-name" className={label}>Name</label>
+
+          <div className="space-y-4">
+            <DetailRow label="Property ID" htmlFor="d-id">
+              <input id="d-id" value={property.id} readOnly className={readOnlyField} />
+            </DetailRow>
+            <DetailRow label="Property slug" htmlFor="d-slug">
+              <input id="d-slug" value={property.slug ?? ""} readOnly className={readOnlyField} />
+            </DetailRow>
+            <DetailRow label="Company Name" htmlFor="d-company">
               <input
-                id="p-name"
-                value={prop.name}
+                id="d-company"
+                value={details.companyName}
+                placeholder="Company Name"
                 disabled={!canEdit}
-                onChange={(e) => setProp({ ...prop, name: e.target.value })}
+                onChange={(e) => setDetails({ ...details, companyName: e.target.value })}
                 className={field}
               />
-            </div>
-            <div>
-              <label htmlFor="p-cur" className={label}>Currency</label>
+            </DetailRow>
+            <DetailRow label="Company registration id" htmlFor="d-reg">
               <input
-                id="p-cur"
-                value={prop.currency}
-                maxLength={3}
+                id="d-reg"
+                value={details.companyRegistrationId}
+                placeholder="Company registration id"
                 disabled={!canEdit}
-                onChange={(e) => setProp({ ...prop, currency: e.target.value.toUpperCase() })}
-                className={cn(field, "uppercase")}
-              />
-            </div>
-            <div>
-              <label htmlFor="p-tz" className={label}>Timezone</label>
-              <input
-                id="p-tz"
-                value={prop.timezone}
-                disabled={!canEdit}
-                onChange={(e) => setProp({ ...prop, timezone: e.target.value })}
+                onChange={(e) => setDetails({ ...details, companyRegistrationId: e.target.value })}
                 className={field}
               />
-            </div>
-            <div>
-              <label htmlFor="p-in" className={label}>Check-in from</label>
+            </DetailRow>
+            <DetailRow label="Property type" htmlFor="d-type">
               <input
-                id="p-in"
-                type="time"
-                value={prop.checkInTime}
+                id="d-type"
+                value={details.propertyType}
+                placeholder="Property type"
                 disabled={!canEdit}
-                onChange={(e) => setProp({ ...prop, checkInTime: e.target.value })}
+                onChange={(e) => setDetails({ ...details, propertyType: e.target.value })}
+                className={field}
+              />
+            </DetailRow>
+            <DetailRow label="Country" htmlFor="d-country">
+              <select
+                id="d-country"
+                value={details.country}
+                disabled={!canEdit}
+                onChange={(e) => setDetails({ ...details, country: e.target.value })}
+                className={field}
+              >
+                <option value="">Country</option>
+                {COUNTRIES.map((c) => (
+                  <option key={c.code} value={c.code}>
+                    {c.name}
+                  </option>
+                ))}
+              </select>
+            </DetailRow>
+            <DetailRow label="Name of your hotel" htmlFor="d-name">
+              <input
+                id="d-name"
+                value={details.name}
+                placeholder="Name of your hotel"
+                disabled={!canEdit}
+                onChange={(e) => setDetails({ ...details, name: e.target.value })}
+                className={field}
+              />
+            </DetailRow>
+            <DetailRow label="Address" htmlFor="d-addr1">
+              <input
+                id="d-addr1"
+                value={details.addressLine1}
+                placeholder="Address"
+                disabled={!canEdit}
+                onChange={(e) => setDetails({ ...details, addressLine1: e.target.value })}
+                className={field}
+              />
+            </DetailRow>
+            <DetailRow label="Address line 2" htmlFor="d-addr2">
+              <input
+                id="d-addr2"
+                value={details.addressLine2}
+                placeholder="Address line 2"
+                disabled={!canEdit}
+                onChange={(e) => setDetails({ ...details, addressLine2: e.target.value })}
+                className={field}
+              />
+            </DetailRow>
+            <DetailRow label="City / Town / Village" htmlFor="d-city">
+              <input
+                id="d-city"
+                value={details.city}
+                placeholder="City / Town / Village"
+                disabled={!canEdit}
+                onChange={(e) => setDetails({ ...details, city: e.target.value })}
+                className={field}
+              />
+            </DetailRow>
+            <DetailRow label="County / State / Province" htmlFor="d-region">
+              <input
+                id="d-region"
+                value={details.region}
+                placeholder="County / State / Province"
+                disabled={!canEdit}
+                onChange={(e) => setDetails({ ...details, region: e.target.value })}
+                className={field}
+              />
+            </DetailRow>
+            <DetailRow label="Postcode" htmlFor="d-post">
+              <input
+                id="d-post"
+                value={details.postcode}
+                placeholder="Postcode"
+                disabled={!canEdit}
+                onChange={(e) => setDetails({ ...details, postcode: e.target.value })}
+                className={field}
+              />
+            </DetailRow>
+
+            <h3 className="pt-3 text-[18px] text-ink">Location</h3>
+            <DetailRow label="Latitude" htmlFor="d-lat">
+              <input
+                id="d-lat"
+                inputMode="decimal"
+                value={details.latitude}
+                placeholder="Latitude"
+                disabled={!canEdit}
+                onChange={(e) => setDetails({ ...details, latitude: e.target.value })}
                 className={cn(field, "tnum")}
               />
-            </div>
-            <div>
-              <label htmlFor="p-out" className={label}>Check-out by</label>
+            </DetailRow>
+            <DetailRow label="Longitude" htmlFor="d-lng">
               <input
-                id="p-out"
-                type="time"
-                value={prop.checkOutTime}
+                id="d-lng"
+                inputMode="decimal"
+                value={details.longitude}
+                placeholder="Longitude"
                 disabled={!canEdit}
-                onChange={(e) => setProp({ ...prop, checkOutTime: e.target.value })}
+                onChange={(e) => setDetails({ ...details, longitude: e.target.value })}
                 className={cn(field, "tnum")}
               />
-            </div>
+            </DetailRow>
             {/*
-              The hour this property's day closes, on its own clock. The client:
-              "a hotel in London cannot run on the same time as a hotel in
-              Mexico" -- so it sits beside the timezone that gives it meaning,
-              and beside the two times it is a sibling of, rather than in a
-              settings tab of its own.
+              The map reads the two fields above and writes back to them: drag
+              the pin or click the map and they change; type in them and the pin
+              moves. A half-typed value that is not yet a number simply leaves
+              the pin where it was.
             */}
-            <div>
-              <label htmlFor="p-audit" className={label}>Night audit at</label>
+            <LocationMap
+              latitude={parseCoordinate(details.latitude)}
+              longitude={parseCoordinate(details.longitude)}
+              disabled={!canEdit}
+              onChange={(lat, lng) =>
+                setDetails((d) => ({ ...d, latitude: String(lat), longitude: String(lng) }))
+              }
+            />
+
+            <DetailRow label="Telephone Number" htmlFor="d-phone">
               <input
-                id="p-audit"
-                type="time"
-                value={prop.auditCloseTime}
+                id="d-phone"
+                type="tel"
+                value={details.phone}
+                placeholder="Telephone Number"
                 disabled={!canEdit}
-                onChange={(e) => setProp({ ...prop, auditCloseTime: e.target.value })}
+                onChange={(e) => setDetails({ ...details, phone: e.target.value })}
+                className={field}
+              />
+            </DetailRow>
+            <DetailRow label="Fax Number" htmlFor="d-fax">
+              <input
+                id="d-fax"
+                type="tel"
+                value={details.fax}
+                placeholder="Fax Number"
+                disabled={!canEdit}
+                onChange={(e) => setDetails({ ...details, fax: e.target.value })}
+                className={field}
+              />
+            </DetailRow>
+            <DetailRow label="Email address" htmlFor="d-email">
+              <input
+                id="d-email"
+                type="email"
+                value={details.email}
+                placeholder="Email address"
+                disabled={!canEdit}
+                onChange={(e) => setDetails({ ...details, email: e.target.value })}
+                className={field}
+              />
+            </DetailRow>
+            <DetailRow label="Website" htmlFor="d-web">
+              <input
+                id="d-web"
+                type="url"
+                value={details.website}
+                placeholder="Website"
+                disabled={!canEdit}
+                onChange={(e) => setDetails({ ...details, website: e.target.value })}
+                className={field}
+              />
+            </DetailRow>
+            <DetailRow label="Currency" htmlFor="d-cur">
+              <select
+                id="d-cur"
+                value={details.currency}
+                disabled={!canEdit}
+                onChange={(e) => setDetails({ ...details, currency: e.target.value })}
+                className={field}
+              >
+                {/* The saved value stays offered even if it is not in the list. */}
+                {!CURRENCIES.some((c) => c.code === details.currency) && (
+                  <option value={details.currency}>{details.currency}</option>
+                )}
+                {CURRENCIES.map((c) => (
+                  <option key={c.code} value={c.code}>
+                    {currencyOptionLabel(c.code)}
+                  </option>
+                ))}
+              </select>
+            </DetailRow>
+            <DetailRow label="What is your timezone" htmlFor="d-tz">
+              <select
+                id="d-tz"
+                value={details.timezone}
+                disabled={!canEdit}
+                onChange={(e) => setDetails({ ...details, timezone: e.target.value })}
+                className={field}
+              >
+                {zoneOptions(timezones, details.timezone, browserZone).map((z) => (
+                  <option key={z} value={z}>
+                    {z}
+                  </option>
+                ))}
+              </select>
+              {browserZone && (
+                <p className="mt-1.5 text-[13px] text-ink-muted">
+                  Your current timezone is: {browserZone}.{" "}
+                  {canEdit && browserZone !== details.timezone && (
+                    <button
+                      type="button"
+                      onClick={() => setDetails({ ...details, timezone: browserZone })}
+                      className="text-brass hover:underline focus-visible:underline focus-visible:outline-none"
+                    >
+                      Set as hotel timezone
+                    </button>
+                  )}
+                </p>
+              )}
+            </DetailRow>
+          </div>
+
+          {canEdit && (
+            <div className="mt-6 flex justify-end">
+              <button
+                onClick={() => run(() => saveHotelDetails(details), "Hotel details saved.")}
+                disabled={pending}
+                className={primary}
+              >
+                Save
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Hotel Properties ------------------------------------------------ */}
+      {tab === "hotel-properties" && (
+        /*
+          The three times that used to sit on the Property form. The
+          reference's Hotel Details carries none of them, so they moved here,
+          beside it under Hotel Profile. Same refusals as before: each is
+          required, because every arrival, departure and night audit is timed
+          against it.
+        */
+        <div className={cn(card, "max-w-3xl p-6 sm:p-7")}>
+          <h2 className="mb-6 font-display text-[26px] font-semibold tracking-tightest text-ink">
+            Hotel Properties
+          </h2>
+          <div className="space-y-4">
+            <DetailRow label="Check-in from" htmlFor="h-in">
+              <input
+                id="h-in"
+                type="time"
+                value={times.checkInTime}
+                disabled={!canEdit}
+                onChange={(e) => setTimes({ ...times, checkInTime: e.target.value })}
                 className={cn(field, "tnum")}
               />
-            </div>
+            </DetailRow>
+            <DetailRow label="Check-out by" htmlFor="h-out">
+              <input
+                id="h-out"
+                type="time"
+                value={times.checkOutTime}
+                disabled={!canEdit}
+                onChange={(e) => setTimes({ ...times, checkOutTime: e.target.value })}
+                className={cn(field, "tnum")}
+              />
+            </DetailRow>
+            <DetailRow label="Night audit at" htmlFor="h-audit">
+              <input
+                id="h-audit"
+                type="time"
+                value={times.auditCloseTime}
+                disabled={!canEdit}
+                onChange={(e) => setTimes({ ...times, auditCloseTime: e.target.value })}
+                className={cn(field, "tnum")}
+              />
+            </DetailRow>
           </div>
           {canEdit && (
-            <div className="mt-4 flex justify-end">
+            <div className="mt-6 flex justify-end">
               <button
-                onClick={() => run(() => saveProperty(prop), "Property saved.")}
+                onClick={() => run(() => saveHotelTimes(times), "Hotel properties saved.")}
                 disabled={pending}
                 className={primary}
               >
@@ -1599,21 +1917,6 @@ export function SettingsScreen({
                 </table>
               </div>
             )}
-
-            <p className="mt-4 text-xs leading-relaxed text-ink-faint">
-              A rate plan is what the hotel sells — the price itself is set per
-              room type and per night on{" "}
-              <Link
-                href="/inventory/rates-all"
-                className="underline underline-offset-2"
-              >
-                Inventory → Rates
-              </Link>
-              , where every plan shows under each room type. What a plan
-              includes is set there too. There is no delete: bookings and prices
-              point at a plan, so one no longer sold is retired and keeps saying
-              what it was sold as.
-            </p>
           </div>
 
           {rp && canEdit && (
@@ -2163,6 +2466,7 @@ export function SettingsScreen({
           </Note>
         </div>
       )}
+      </div>
     </div>
   );
 }
@@ -2271,5 +2575,92 @@ function StaffRow({
         </button>
       </td>
     </tr>
+  );
+}
+
+/**
+ * The Settings sidebar, cloned from the client's reference: section headings
+ * with a disclosure arrow, their items indented beneath, the current one lit.
+ *
+ * The section holding the open panel starts expanded and the rest collapsed,
+ * as theirs does. Each heading toggles on its own, so somebody can open two to
+ * compare without losing their place.
+ *
+ * Links, not buttons: the panel is URL state (`?tab=`), so the back button,
+ * a reload and a bookmark all land where somebody was.
+ */
+function SettingsSidebar({ tab }: { tab: SettingsTab }) {
+  const [open, setOpen] = useState<Set<string>>(
+    () =>
+      new Set(
+        SETTINGS_NAV.filter((s) => s.items.some((i) => i.id === tab)).map(
+          (s) => s.title,
+        ),
+      ),
+  );
+
+  function toggle(title: string) {
+    setOpen((current) => {
+      const next = new Set(current);
+      if (next.has(title)) next.delete(title);
+      else next.add(title);
+      return next;
+    });
+  }
+
+  return (
+    <aside className="shrink-0 bg-chrome-900 py-2 lg:w-60">
+      <nav aria-label="Settings">
+        {SETTINGS_NAV.map((section) => {
+          const expanded = open.has(section.title);
+          return (
+            <div key={section.title}>
+              <button
+                type="button"
+                onClick={() => toggle(section.title)}
+                aria-expanded={expanded}
+                className="flex w-full items-center gap-1.5 px-3 py-2.5 text-left text-[13.5px] text-white/85 outline-none transition-colors hover:text-white focus-visible:bg-white/[0.06]"
+              >
+                <svg
+                  viewBox="0 0 8 8"
+                  aria-hidden="true"
+                  className={cn(
+                    "h-2 w-2 shrink-0 fill-current transition-transform",
+                    expanded && "rotate-90",
+                  )}
+                >
+                  <path d="M2 1l4 3-4 3z" />
+                </svg>
+                {section.title}
+              </button>
+              {expanded && (
+                <ul>
+                  {section.items.map((item) => {
+                    const current = item.id === tab;
+                    return (
+                      <li key={item.id}>
+                        <Link
+                          href={`/settings?tab=${item.id}`}
+                          aria-current={current ? "page" : undefined}
+                          className={cn(
+                            "block py-2.5 pl-8 pr-3 text-[13.5px] outline-none transition-colors",
+                            "focus-visible:bg-white/[0.08]",
+                            current
+                              ? "bg-white/[0.1] font-medium text-white"
+                              : "text-white/70 hover:bg-white/[0.05] hover:text-white",
+                          )}
+                        >
+                          {item.label}
+                        </Link>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+            </div>
+          );
+        })}
+      </nav>
+    </aside>
   );
 }

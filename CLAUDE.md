@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0066` are
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0067` are
 applied to the hosted database.
 
 Working on real data: dashboard (house board, movements, pace, activity feed),
@@ -250,7 +250,7 @@ Each read is a Postgres view or RPC, never aggregation in the client:
 | `getPromotions()`                   | `promotions_list()`               |
 | `getMeetingRoomCalendar(from, n)`   | `meeting_room_calendar(from, n)`  |
 | `getMeetingRoomBooking(id)`         | `meeting_room_booking_detail(id)` |
-| `getPropertySettings()`             | `properties` row                  |
+| `getPropertySettings()`             | `properties` row incl. 0067 details |
 | `getRoomTypeSettings()`             | `room_types` with room counts     |
 | `getChannelSettings()`              | `channels`                        |
 | `getTaxRateSettings()`              | `tax_rates`                       |
@@ -1523,6 +1523,45 @@ anywhere else. Collapsed height must stay constant regardless of room count.
   RPCs in `src/lib/actions/settings.ts`. Settings lives in the user menu, not
   the nav bar: the client fixed the nine top-level sections and this is not one
   of them.
+- **SETTINGS HAS ITS OWN LEFT SIDEBAR, cloned from the reference** (0067).
+  The client sent their old system's Settings and asked for it exactly:
+  collapsible sections down a dark column, the form on the right with a label
+  column ending in colons. **This is a sidebar INSIDE the Settings page, not an
+  app sidebar** — the rule that the application's navigation is horizontal is
+  untouched. Do not "tidy" it into tabs again.
+  - **`src/lib/settings-tabs.ts` is the ONE list of tabs and sections.** The
+    page used to keep its own allowed-tab list beside the component's, and the
+    two drifted: `rate-plans` and `cancellation` were missing from the page's,
+    so both screens silently opened on the property form — including from the
+    two links on Inventory → Rates. Add a tab there and nowhere else.
+  - **Only sections with something behind them are drawn.** The reference also
+    carries Guest Configuration, Communications & Notifications and Other;
+    there is nothing of ours to put in them, and an empty section is a dead
+    control. They go in when their contents are built.
+  - **Hotel Details is `save_property_details()`, Hotel Properties is
+    `save_property_times()`.** Two functions because they are two panels with
+    two Save buttons, and each saves only what it shows. `save_property()`
+    still exists and is called by nothing.
+  - **Country is ISO alpha-2 under a check constraint**, the same list and the
+    same reasoning as `customers.country`. Latitude and longitude are set
+    together or not at all, and range-checked.
+  - **`properties.slug` is read-only**, generated from the name once and unique.
+    Nothing routes by it yet — the guest page is still `/book/[propertyId]`.
+  - **The map is Leaflet, not Google Maps.** Google needs an API key and a
+    billing account this project does not have. Leaflet with OpenStreetMap tiles
+    (Map) and Esri imagery (Satellite) needs neither. Click or drag the pin to
+    set the coordinates; typing them moves the pin. `location-map.tsx` is loaded
+    with `ssr: false` because Leaflet touches `window` on import, and its
+    wrapper is `relative z-0` because Leaflet's panes sit at z-index 400–1000 —
+    the same stacking-context trap as the top nav and the calendar's room menu.
+  - **The timezone list is computed on the server and handed down**, and the
+    browser's own zone ("Your current timezone is") is read after mount. Either
+    one done during render would differ between Node and the browser and cause
+    a hydration mismatch.
+  - **THE CURRENCY FIELD CHANGES NO FORMATTING YET.** `src/lib/money.ts` fixes
+    the staff application to GBP. Setting MXN on a property stores MXN and every
+    staff screen still prints £. Making `money.ts` read the property's currency
+    is the next piece of work before a non-UK hotel goes live on this.
 - **Rooms are created in runs**, because a property may hold ~1,800 of them and
   entering those one at a time is not a thing anyone would do. A run is capped
   at 500 and refuses by name if it would collide with rooms that already exist,
