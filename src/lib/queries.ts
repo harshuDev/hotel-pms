@@ -25,6 +25,7 @@ import {
 } from "@/lib/invoice-settings";
 import type { CancellationTerms } from "@/lib/cancellation-policy";
 import type { ChannelManager, ChannelManagerProvider } from "@/lib/channel-managers";
+import type { BookingEngineProfile, BookingEngineTexts } from "@/lib/booking-engine";
 import {
   DEFAULT_INVENTORY_SETTINGS,
   type InventorySettings,
@@ -2941,6 +2942,33 @@ export async function getChannelManagers(): Promise<ChannelManager[]> {
     isSynced: r.is_synced,
     syncedAt: r.synced_at,
   }));
+}
+
+/** Booking Engine Settings (0098): the profiles, and the privacy policy and terms. */
+export async function getBookingEngineSettings(): Promise<{
+  texts: BookingEngineTexts;
+  profiles: BookingEngineProfile[];
+}> {
+  const supabase = await createClient();
+  const [texts, profiles, links] = await Promise.all([
+    supabase.from("booking_engine_settings").select("privacy_policy, terms").maybeSingle(),
+    supabase.from("booking_engine_profiles").select("id, title, slug").order("created_at"),
+    supabase.from("booking_engine_profile_room_types").select("profile_id, room_type_id"),
+  ]);
+  const error = texts.error ?? profiles.error ?? links.error;
+  if (error) throw new Error(`Failed to load the booking engine settings: ${error.message}`);
+  return {
+    texts: {
+      privacyPolicy: texts.data?.privacy_policy ?? null,
+      terms: texts.data?.terms ?? null,
+    },
+    profiles: (profiles.data ?? []).map((p) => ({
+      id: p.id,
+      title: p.title,
+      slug: p.slug,
+      roomTypeIds: (links.data ?? []).filter((l) => l.profile_id === p.id).map((l) => l.room_type_id),
+    })),
+  };
 }
 
 /** Accounting Systems (0087), in the order they were added. Stored, not live. */

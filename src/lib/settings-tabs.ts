@@ -46,6 +46,7 @@ export const SETTINGS_TABS = [
   "seasons",
   "discounts",
   "channel-manager",
+  "booking-engine",
   "channels",
 ] as const;
 
@@ -150,6 +151,7 @@ export const SETTINGS_NAV: {
     title: "Connectivity Settings",
     items: [
       { id: "channel-manager", label: "Channel Manager" },
+      { id: "booking-engine", label: "Booking Engine Settings" },
       { id: "channels", label: "Booking Sources" },
     ],
   },

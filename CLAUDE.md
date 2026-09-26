@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0097` are
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0098` are
 applied to the hosted database.
 
 Working on real data: dashboard (house board, movements, pace, activity feed),
@@ -271,6 +271,7 @@ Each read is a Postgres view or RPC, never aggregation in the client:
 | `getInventorySettings()`            | `inventory_settings` (0088)       |
 | `getDiscounts()`                    | `discounts` (0090)                |
 | `getChannelManagers()`              | `channel_managers` (0097)         |
+| `getBookingEngineSettings()`        | `booking_engine_settings` + `booking_engine_profiles` (0098) |
 | `getMealReport(from, to)`           | `meal_report(from, to)`           |
 
 **Two signatures carry the room-count rule.** The client operates properties
@@ -399,11 +400,11 @@ the component.
   and the check is
   `select proname from pg_proc p join pg_namespace n on n.oid = p.pronamespace
   where n.nspname='public' and has_function_privilege('anon', p.oid, 'execute')`
-  — it should return only the public booking surface (seven functions since
-  0072: the four below plus `public_hotel_policies`,
-  `public_room_type_facilities` and `public_room_type_content`) and the two
-  policy
-  helpers. Four older functions held it through PUBLIC instead and needed
+  — it should return only the public booking surface (nine functions since
+  0098: the four below plus `public_hotel_policies`,
+  `public_room_type_facilities`, `public_room_type_content`,
+  `public_language_settings` (0078) and `public_booking_engine` (0098)) and
+  the two policy helpers. Four older functions held it through PUBLIC instead and needed
   `from public`; both revokes exist for a reason.
 - **A null role is not a refusal unless you write it as one.**
   `current_role()` returns null for anyone with no active `staff_users` row —
@@ -1903,6 +1904,37 @@ anywhere else. Collapsed height must stay constant regardless of room count.
       parses them. **PROVISIONAL:** the Region list (EMEA, APAC, Americas) and
       the Days to sync choices beside 400 -- neither dropdown was seen open.
       Both are in `src/lib/channel-managers.ts` and the 0097 checks.
+  - **CONNECTIVITY -> BOOKING ENGINE SETTINGS (0098) IS LIVE on the guest
+    booking page.** `booking-engine-panel.tsx`: Booking Engine Profiles
+    (Title, Slug, Link, ADD NEW PROFILE), then the Privacy Policy and the
+    Terms & Conditions under one Save.
+    - **A profile narrows the guest page to its room types**:
+      `/book/<property>?profile=<slug>`. It is a presentation filter, NOT a
+      security boundary -- `create_public_booking()` is unchanged. A profile
+      with no room types ticked, an unknown slug or none shows every room.
+      The edit form (Title, Slug, Room types) is PROVISIONAL: the
+      reference's was not seen.
+    - **Default and one profile per room type are not rows.** Default is the
+      page as it is; each room type answers to `__room_type_<first 8 hex of
+      its id>` (`room_type_profile_slug()` and `roomTypeProfileSlug()` agree),
+      drawn italic and not editable, as the reference lists them. A hotel
+      slug cannot start with `_`, so the two can never collide.
+    - **The privacy policy and terms are linked beside the agreement tickbox**
+      and open `/book/<property>/privacy` and `/terms` (the latter 404s when
+      there are none). The hotel's words are not translated; the two link
+      labels are, in all nineteen languages.
+    - **PLAIN TEXT, NOT THE REFERENCE'S RICH-TEXT EDITOR** -- serving
+      browser-typed HTML to anonymous guests with no sanitiser is the
+      injection path the registration card already refused. "## " is a
+      heading and "- " a bullet; `parseDocument()` makes blocks and
+      `PlainDocument` draws text nodes only.
+    - **No stored privacy text is the DEFAULT policy**, `DEFAULT_PRIVACY_POLICY`
+      in `src/lib/booking-engine.ts`, and saving it unchanged stores nothing,
+      so it stays the default. DROP IN'S inserts `{{hotel_*}}` placeholders
+      at the cursor; the guest page fills them from the property's Hotel
+      Details (the country by name), and an empty detail leaves no stray
+      comma. **The default wording is ours, not a lawyer's** -- worth the
+      hotel reading before relying on it.
   - **PAYMENT GATEWAY (0086) AND ACCOUNTING SYSTEMS (0087) ARE STORED, NOT
     YET LIVE, BY DECISION.** The client: gateways are connected per client, as
     each asks for one. A row says which gateway or ledger the hotel uses; no
@@ -2373,11 +2405,12 @@ anywhere else. Collapsed height must stay constant regardless of room count.
 - **The guest booking page is `/book/[propertyId]`, and it is the only thing
   in this codebase that runs without a staff session.** A guest has no
   `staff_users` row, so `current_property_id()` is null and the ordinary reads
-  see nothing. The property is therefore named in the URL and passed to seven
+  see nothing. The property is therefore named in the URL and passed to nine
   `security definer` RPCs granted to `anon`: `public_property`,
   `public_rate_plans`, `public_room_types`, `create_public_booking`, and the
-  read-only `public_hotel_policies`, `public_room_type_facilities` (0071) and
-  `public_room_type_content` (0072). That is the entire public surface — no
+  read-only `public_hotel_policies`, `public_room_type_facilities` (0071),
+  `public_room_type_content` (0072), `public_language_settings` (0078) and
+  `public_booking_engine` (0098). That is the entire public surface — no
   table, no view, none of the staff functions.
   - **THE PAGE IS A FOUR-STEP FLOW CLONED FROM THE CLIENT'S CURRENT BOOKING
     ENGINE** (0072). They sent five screenshots of a live hotel's page and

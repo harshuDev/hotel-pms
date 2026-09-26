@@ -328,6 +328,100 @@ export type Database = {
           },
         ]
       }
+      booking_engine_profile_room_types: {
+        Row: {
+          profile_id: string
+          property_id: string
+          room_type_id: string
+        }
+        Insert: {
+          profile_id: string
+          property_id: string
+          room_type_id: string
+        }
+        Update: {
+          profile_id?: string
+          property_id?: string
+          room_type_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "booking_engine_profile_room_types_profile_id_property_id_fkey"
+            columns: ["profile_id", "property_id"]
+            isOneToOne: false
+            referencedRelation: "booking_engine_profiles"
+            referencedColumns: ["id", "property_id"]
+          },
+          {
+            foreignKeyName: "booking_engine_profile_room_types_room_type_id_property_id_fkey"
+            columns: ["room_type_id", "property_id"]
+            isOneToOne: false
+            referencedRelation: "room_types"
+            referencedColumns: ["id", "property_id"]
+          },
+        ]
+      }
+      booking_engine_profiles: {
+        Row: {
+          created_at: string
+          id: string
+          property_id: string
+          slug: string
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          property_id: string
+          slug: string
+          title: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          property_id?: string
+          slug?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "booking_engine_profiles_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      booking_engine_settings: {
+        Row: {
+          privacy_policy: string | null
+          property_id: string
+          terms: string | null
+          updated_at: string
+        }
+        Insert: {
+          privacy_policy?: string | null
+          property_id: string
+          terms?: string | null
+          updated_at?: string
+        }
+        Update: {
+          privacy_policy?: string | null
+          property_id?: string
+          terms?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "booking_engine_settings_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: true
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       booking_room_nights: {
         Row: {
           booking_room_id: string
@@ -4874,6 +4968,10 @@ export type Database = {
         Args: { p_attachment_id: string }
         Returns: string
       }
+      delete_booking_engine_profile: {
+        Args: { p_id: string }
+        Returns: undefined
+      }
       delete_calendar_note: { Args: { p_id: string }; Returns: undefined }
       delete_cancellation_policy: { Args: { p_id: string }; Returns: undefined }
       delete_channel_manager: { Args: { p_id: string }; Returns: undefined }
@@ -5417,6 +5515,21 @@ export type Database = {
         Args: { p_from: string; p_property_id: string; p_to: string }
         Returns: string
       }
+      public_booking_engine: {
+        Args: { p_profile: string; p_property_id: string }
+        Returns: {
+          address: string
+          city: string
+          country: string
+          email: string
+          phone: string
+          postcode: string
+          privacy_policy: string
+          region: string
+          room_type_ids: string[]
+          terms: string
+        }[]
+      }
       public_hotel_policies: {
         Args: { p_property_id: string }
         Returns: {
@@ -5597,6 +5710,10 @@ export type Database = {
           vacant_dirty: number
         }[]
       }
+      room_type_profile_slug: {
+        Args: { p_room_type_id: string }
+        Returns: string
+      }
       rooms_for_settings: {
         Args: { p_limit?: number; p_offset?: number; p_q?: string }
         Returns: {
@@ -5669,6 +5786,19 @@ export type Database = {
           p_show_hotel_logo: boolean
           p_single_property_address: string
         }
+        Returns: undefined
+      }
+      save_booking_engine_profile: {
+        Args: {
+          p_id: string
+          p_room_type_ids: string[]
+          p_slug: string
+          p_title: string
+        }
+        Returns: string
+      }
+      save_booking_engine_texts: {
+        Args: { p_privacy_policy: string; p_terms: string }
         Returns: undefined
       }
       save_calendar_note: {

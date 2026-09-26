@@ -125,6 +125,8 @@ export function BookingWidget({
   today,
   monthNames,
   weekdayNames,
+  roomTypeIds,
+  hasTerms,
 }: {
   property: PublicProperty;
   ratePlans: PublicRatePlan[];
@@ -145,6 +147,14 @@ export function BookingWidget({
   /** Twelve month names and seven weekday names (Sunday first), from the server. */
   monthNames: string[];
   weekdayNames: string[];
+  /**
+   * The room types a booking engine profile shows (`?profile=`, 0098), or
+   * null for every one. It narrows what is SHOWN; it is not a security
+   * boundary.
+   */
+  roomTypeIds: string[] | null;
+  /** Whether the hotel has written terms (0098); the privacy policy always exists. */
+  hasTerms: boolean;
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -227,7 +237,7 @@ export function BookingWidget({
         setError(result.error ?? t.somethingWentWrong);
         return;
       }
-      setRooms(result.data);
+      setRooms(roomTypeIds ? result.data.filter((r) => roomTypeIds.includes(r.roomTypeId)) : result.data);
       setRoomId(null);
       setRatePlanId(null);
       setStep(2);
@@ -725,6 +735,18 @@ export function BookingWidget({
                       className="mt-0.5 h-4 w-4 accent-brass" />
                     {t.agreePolicies}
                   </label>
+                  <p className="-mt-2 flex flex-wrap gap-x-4 pl-6 text-[12.5px]">
+                    <a href={`/book/${property.propertyId}/privacy?lang=${locale}`} target="_blank" rel="noopener"
+                      className="text-brass underline-offset-2 hover:underline">
+                      {t.privacyPolicy}
+                    </a>
+                    {hasTerms && (
+                      <a href={`/book/${property.propertyId}/terms?lang=${locale}`} target="_blank" rel="noopener"
+                        className="text-brass underline-offset-2 hover:underline">
+                        {t.termsAndConditions}
+                      </a>
+                    )}
+                  </p>
                   <button type="submit" disabled={sending}
                     className="w-full rounded-md bg-emerald-500 px-5 py-3 text-sm font-medium text-white transition hover:bg-emerald-600 disabled:opacity-50">
                     {sending ? t.sending : t.agreeAndBook}

@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { BookingWidget } from "@/components/book/booking-widget";
 import {
+  getPublicBookingEngine,
   getPublicHotelPolicies,
   getPublicLanguageSettings,
   getPublicProperty,
@@ -36,10 +37,10 @@ export default async function BookPage({
   searchParams,
 }: {
   params: Promise<{ propertyId: string }>;
-  searchParams: Promise<{ lang?: string }>;
+  searchParams: Promise<{ lang?: string; profile?: string }>;
 }) {
   const { propertyId } = await params;
-  const { lang } = await searchParams;
+  const { lang, profile } = await searchParams;
 
   const property = await getPublicProperty(propertyId);
   if (!property) notFound();
@@ -130,10 +131,12 @@ export default async function BookPage({
 
   // What the guest is told about the hotel and its rooms (0071, 0072). The
   // hotel set these, so it knows them; the guest is who needs telling.
-  const [policies, facilities, content] = await Promise.all([
+  const [policies, facilities, content, engine] = await Promise.all([
     getPublicHotelPolicies(propertyId),
     getPublicRoomTypeFacilities(propertyId),
     getPublicRoomTypeContent(propertyId),
+    // Booking Engine Settings (0098): the profile's room types and the terms.
+    getPublicBookingEngine(propertyId, profile ?? null),
   ]);
 
   return (
@@ -148,6 +151,8 @@ export default async function BookPage({
       today={hotelToday(property.timezone)}
       monthNames={monthNames(locale)}
       weekdayNames={weekdayNames(locale)}
+      roomTypeIds={engine.roomTypeIds}
+      hasTerms={engine.terms !== null}
     />
   );
 }

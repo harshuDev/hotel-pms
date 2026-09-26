@@ -43,6 +43,8 @@ import { CancellationPolicyPanel } from "@/components/settings/cancellation-poli
 import { RatePlansPanel } from "@/components/settings/rate-plans-panel";
 import { RateCombinations } from "@/components/settings/rate-combinations";
 import { ChannelManagerPanel } from "@/components/settings/channel-manager-panel";
+import { BookingEnginePanel } from "@/components/settings/booking-engine-panel";
+import type { BookingEngineProfile, BookingEngineTexts } from "@/lib/booking-engine";
 import type { ChannelManager } from "@/lib/channel-managers";
 import { SeasonsPanel } from "@/components/settings/seasons-panel";
 import { DiscountsPanel } from "@/components/settings/discounts-panel";
@@ -223,6 +225,7 @@ export function SettingsScreen({
   virtualRoomTypes,
   weekRates,
   channelManagers,
+  bookingEngine,
 }: {
   tab: SettingsTab;
   property: PropertySettings;
@@ -270,6 +273,8 @@ export function SettingsScreen({
   weekRates: WeekRate[];
   /** Channel manager connections (0097); loaded only on their tab. */
   channelManagers: ChannelManager[];
+  /** Booking Engine Settings (0098); loaded only on their tab. */
+  bookingEngine: { texts: BookingEngineTexts; profiles: BookingEngineProfile[] } | null;
   roomTypes: RoomTypeSetting[];
   rooms: RoomSettingsPage;
   roomQuery: string;
@@ -1106,6 +1111,18 @@ export function SettingsScreen({
         <ChannelManagerPanel
           channelManagers={channelManagers}
           timezone={property.timezone}
+          canEdit={canEdit}
+          pending={pending}
+          run={run}
+        />
+      )}
+
+      {tab === "booking-engine" && bookingEngine && (
+        <BookingEnginePanel
+          propertyId={property.id}
+          profiles={bookingEngine.profiles}
+          texts={bookingEngine.texts}
+          roomTypes={roomTypes}
           canEdit={canEdit}
           pending={pending}
           run={run}
