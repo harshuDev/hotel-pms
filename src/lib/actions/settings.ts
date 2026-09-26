@@ -1,5 +1,6 @@
 "use server";
 
+import type { InventoryVisibility } from "@/lib/inventory-settings";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { nullableArg } from "@/lib/supabase/database";
@@ -633,6 +634,61 @@ export async function deletePosProfile(id: string): Promise<ActionResult<null>> 
   const { error } = await supabase.rpc("delete_pos_profile", { p_id: id });
   if (error) return { ok: false, error: error.message };
   revalidateSettings();
+  return { ok: true, data: null };
+}
+
+/* -- Inventory -> Settings (0088) ----------------------------------------- */
+
+function revalidateInventorySettings() {
+  revalidateSettings();
+  // The visibility ticks change the menu, which the layout draws on every page.
+  revalidatePath("/", "layout");
+}
+
+export async function saveOnlineBookingCutoff(input: {
+  enabled: boolean;
+  date: string | null;
+}): Promise<ActionResult<null>> {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("save_online_booking_cutoff", {
+    p_enabled: input.enabled,
+    // Null with the box unticked; Postgres refuses it with the box ticked.
+    p_date: nullableArg(input.enabled && input.date ? input.date : null),
+  });
+  if (error) return { ok: false, error: error.message };
+  revalidateInventorySettings();
+  return { ok: true, data: null };
+}
+
+export async function saveSameDayBookingCutoff(input: {
+  enabled: boolean;
+  time: string | null;
+}): Promise<ActionResult<null>> {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("save_same_day_booking_cutoff", {
+    p_enabled: input.enabled,
+    // Null with the box unticked; Postgres refuses it with the box ticked.
+    p_time: nullableArg(input.enabled && input.time ? input.time : null),
+  });
+  if (error) return { ok: false, error: error.message };
+  revalidateInventorySettings();
+  return { ok: true, data: null };
+}
+
+export async function saveInventoryVisibility(
+  visibility: InventoryVisibility,
+): Promise<ActionResult<null>> {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("save_inventory_visibility", {
+    p_min_stay_through: visibility.min_stay_through,
+    p_min_stay_arrival: visibility.min_stay_arrival,
+    p_closed_to_arrival: visibility.closed_to_arrival,
+    p_closed_to_departure: visibility.closed_to_departure,
+    p_max_stay: visibility.max_stay,
+    p_stop_sell: visibility.stop_sell,
+  });
+  if (error) return { ok: false, error: error.message };
+  revalidateInventorySettings();
   return { ok: true, data: null };
 }
 

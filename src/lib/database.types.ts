@@ -1878,6 +1878,59 @@ export type Database = {
           },
         ]
       }
+      inventory_settings: {
+        Row: {
+          online_cutoff_date: string | null
+          online_cutoff_enabled: boolean
+          property_id: string
+          same_day_cutoff_enabled: boolean
+          same_day_cutoff_time: string | null
+          show_closed_to_arrival: boolean
+          show_closed_to_departure: boolean
+          show_max_stay: boolean
+          show_min_stay_arrival: boolean
+          show_min_stay_through: boolean
+          show_stop_sell: boolean
+          updated_at: string
+        }
+        Insert: {
+          online_cutoff_date?: string | null
+          online_cutoff_enabled?: boolean
+          property_id: string
+          same_day_cutoff_enabled?: boolean
+          same_day_cutoff_time?: string | null
+          show_closed_to_arrival?: boolean
+          show_closed_to_departure?: boolean
+          show_max_stay?: boolean
+          show_min_stay_arrival?: boolean
+          show_min_stay_through?: boolean
+          show_stop_sell?: boolean
+          updated_at?: string
+        }
+        Update: {
+          online_cutoff_date?: string | null
+          online_cutoff_enabled?: boolean
+          property_id?: string
+          same_day_cutoff_enabled?: boolean
+          same_day_cutoff_time?: string | null
+          show_closed_to_arrival?: boolean
+          show_closed_to_departure?: boolean
+          show_max_stay?: boolean
+          show_min_stay_arrival?: boolean
+          show_min_stay_through?: boolean
+          show_stop_sell?: boolean
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inventory_settings_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: true
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       invoice_settings: {
         Row: {
           address: string | null
@@ -4709,6 +4762,7 @@ export type Database = {
           room_type_sort: number
         }[]
       }
+      inventory_settings_row: { Args: never; Returns: string }
       inventory_target_dates: {
         Args: { p_days_of_week: number[]; p_from: string; p_to: string }
         Returns: string[]
@@ -4955,6 +5009,10 @@ export type Database = {
           stay_from: string
           stay_to: string
         }[]
+      }
+      public_booking_cutoff_reason: {
+        Args: { p_from: string; p_property_id: string; p_to: string }
+        Returns: string
       }
       public_hotel_policies: {
         Args: { p_property_id: string }
@@ -5327,6 +5385,17 @@ export type Database = {
         Args: { p_id: string; p_title: string }
         Returns: string
       }
+      save_inventory_visibility: {
+        Args: {
+          p_closed_to_arrival: boolean
+          p_closed_to_departure: boolean
+          p_max_stay: boolean
+          p_min_stay_arrival: boolean
+          p_min_stay_through: boolean
+          p_stop_sell: boolean
+        }
+        Returns: undefined
+      }
       save_invoice_general: {
         Args: {
           p_address: string
@@ -5363,6 +5432,10 @@ export type Database = {
           p_sort_order?: number
         }
         Returns: string
+      }
+      save_online_booking_cutoff: {
+        Args: { p_date: string; p_enabled: boolean }
+        Returns: undefined
       }
       save_own_profile: { Args: { p_full_name: string }; Returns: string }
       save_payment_gateway: {
@@ -5522,6 +5595,10 @@ export type Database = {
       }
       save_rounding_options: {
         Args: { p_round_logic: string; p_round_to: string }
+        Returns: undefined
+      }
+      save_same_day_booking_cutoff: {
+        Args: { p_enabled: boolean; p_time: string }
         Returns: undefined
       }
       save_season: {

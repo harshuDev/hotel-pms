@@ -37,6 +37,8 @@ import {
   PaymentGatewaysPanel,
 } from "@/components/settings/finance-connection-panels";
 import { AccountingCategoriesPanel } from "@/components/settings/accounting-categories-panel";
+import { InventorySettingsPanel } from "@/components/settings/inventory-settings-panel";
+import type { InventorySettings } from "@/lib/inventory-settings";
 import type { EmailSetup, EmailTemplate, HotelEmailSettings } from "@/lib/email-preferences";
 import { EmailSetupPanel } from "@/components/settings/email-setup-panel";
 import { FacilityIcon } from "@/components/settings/facility-icon";
@@ -233,6 +235,8 @@ export function SettingsScreen({
   accountingSettings,
   paymentGateways,
   accountingSystems,
+  inventorySettings,
+  businessDate,
 }: {
   tab: SettingsTab;
   property: PropertySettings;
@@ -269,6 +273,9 @@ export function SettingsScreen({
   /** Finances -> Payment Gateway (0086) and Accounting Systems (0087). */
   paymentGateways: PaymentGateway[];
   accountingSystems: AccountingSystem[];
+  /** Inventory -> Settings (0088), and the earliest cut-off date it accepts. */
+  inventorySettings: InventorySettings;
+  businessDate: string;
   roomTypes: RoomTypeSetting[];
   rooms: RoomSettingsPage;
   roomQuery: string;
@@ -1093,6 +1100,16 @@ export function SettingsScreen({
       {tab === "accounting-categories" && (
         <AccountingCategoriesPanel
           settings={accountingSettings}
+          canEdit={canEdit}
+          pending={pending}
+          run={run}
+        />
+      )}
+
+      {tab === "inventory-settings" && (
+        <InventorySettingsPanel
+          settings={inventorySettings}
+          businessDate={businessDate}
           canEdit={canEdit}
           pending={pending}
           run={run}
