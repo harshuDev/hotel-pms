@@ -1037,6 +1037,126 @@ export async function saveRoomType(input: {
   return { ok: true, data: { id: data as string } };
 }
 
+/* -- Inventory -> Room Type (0091) --------------------------------------- */
+
+/** The guest-facing name; blank clears it back to the staff name. */
+export async function setRoomTypeDisplayName(input: {
+  roomTypeId: string;
+  displayName: string;
+}): Promise<ActionResult<null>> {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("set_room_type_display_name", {
+    p_room_type_id: input.roomTypeId,
+    p_display_name: input.displayName,
+  });
+  if (error) return { ok: false, error: error.message };
+  revalidateSettings();
+  revalidatePath("/calendar");
+  return { ok: true, data: null };
+}
+
+/** The whole list, top first: the calendar and the guest page sort by it. */
+export async function setRoomTypeOrder(ids: string[]): Promise<ActionResult<null>> {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("set_room_type_order", { p_ids: ids });
+  if (error) return { ok: false, error: error.message };
+  revalidateSettings();
+  revalidatePath("/calendar");
+  return { ok: true, data: null };
+}
+
+/** Refused by name while any room, booking, waitlist entry or virtual type uses it. */
+export async function deleteRoomType(id: string): Promise<ActionResult<null>> {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("delete_room_type", { p_room_type_id: id });
+  if (error) return { ok: false, error: error.message };
+  revalidateSettings();
+  revalidatePath("/calendar");
+  return { ok: true, data: null };
+}
+
+export async function saveVirtualRoomType(input: {
+  id: string | null;
+  displayName: string;
+  parentRoomTypeId: string;
+}): Promise<ActionResult<null>> {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("save_virtual_room_type", {
+    // Null adds a new virtual room type.
+    p_id: nullableArg(input.id),
+    p_display_name: input.displayName,
+    p_parent_room_type_id: input.parentRoomTypeId,
+  });
+  if (error) return { ok: false, error: error.message };
+  revalidateSettings();
+  return { ok: true, data: null };
+}
+
+export async function deleteVirtualRoomType(id: string): Promise<ActionResult<null>> {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("delete_virtual_room_type", { p_id: id });
+  if (error) return { ok: false, error: error.message };
+  revalidateSettings();
+  return { ok: true, data: null };
+}
+
+/* -- Inventory -> Room Setup (0091) -------------------------------------- */
+
+export async function setRoomSetup(input: {
+  roomId: string;
+  priority: number;
+  availableOnline: boolean;
+  keyCode: string;
+  doorName: string;
+  color: string | null;
+  hasDivider: boolean;
+}): Promise<ActionResult<null>> {
+  if (!Number.isSafeInteger(input.priority) || input.priority < 0 || input.priority > 999) {
+    return { ok: false, error: "Priority is a whole number from 0 to 999." };
+  }
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("set_room_setup", {
+    p_room_id: input.roomId,
+    p_priority: input.priority,
+    p_available_online: input.availableOnline,
+    p_key_code: input.keyCode,
+    p_door_name: input.doorName,
+    // Null clears the colour.
+    p_color: nullableArg(input.color),
+    p_has_divider: input.hasDivider,
+  });
+  if (error) return { ok: false, error: error.message };
+  revalidateSettings();
+  revalidatePath("/calendar");
+  return { ok: true, data: null };
+}
+
+/** Disabling locks the room out of order; enabling brings it back dirty. */
+export async function setRoomEnabled(input: {
+  roomId: string;
+  enabled: boolean;
+}): Promise<ActionResult<null>> {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("set_room_enabled", {
+    p_room_id: input.roomId,
+    p_enabled: input.enabled,
+  });
+  if (error) return { ok: false, error: error.message };
+  revalidateSettings();
+  revalidatePath("/calendar");
+  revalidatePath("/dashboard");
+  return { ok: true, data: null };
+}
+
+/** "Use Booking Room id as Key Code". Stored. */
+export async function saveKeyCodeSetting(on: boolean): Promise<ActionResult<null>> {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("save_key_code_setting", { p_on: on });
+  if (error) return { ok: false, error: error.message };
+  revalidateSettings();
+  return { ok: true, data: null };
+}
+
 /**
  * Rooms are made in runs. The client operates properties with up to ~1,800
  * rooms, and entering those one at a time is not a thing anyone would do.

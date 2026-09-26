@@ -15,6 +15,8 @@ export interface InventorySettings {
   /** "HH:MM" in the hotel's own clock. */
   sameDayCutoffTime: string | null;
   visibility: InventoryVisibility;
+  /** Room Setup's "Use Booking Room id as Key Code" (0091). Stored. */
+  keyCodeFromBookingRoom: boolean;
 }
 
 /**
@@ -38,6 +40,7 @@ export const DEFAULT_INVENTORY_SETTINGS: InventorySettings = {
   onlineCutoffDate: null,
   sameDayCutoffEnabled: false,
   sameDayCutoffTime: null,
+  keyCodeFromBookingRoom: false,
   visibility: {
     min_stay_through: true,
     min_stay_arrival: true,

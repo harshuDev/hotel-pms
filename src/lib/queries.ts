@@ -112,6 +112,7 @@ import type {
   CancellationPolicyKind,
   BookingCancellationTerms,
   RoomTypeSetting,
+  VirtualRoomType,
   StaffSetting,
   AccountingRow,
   RatesGridCell,
@@ -2868,7 +2869,7 @@ export const getInventorySettings = cache(async (): Promise<InventorySettings> =
   const { data, error } = await supabase
     .from("inventory_settings")
     .select(
-      "online_cutoff_enabled, online_cutoff_date, same_day_cutoff_enabled, same_day_cutoff_time, show_min_stay_through, show_min_stay_arrival, show_closed_to_arrival, show_closed_to_departure, show_max_stay, show_stop_sell",
+      "online_cutoff_enabled, online_cutoff_date, same_day_cutoff_enabled, same_day_cutoff_time, show_min_stay_through, show_min_stay_arrival, show_closed_to_arrival, show_closed_to_departure, show_max_stay, show_stop_sell, key_code_from_booking_room",
     )
     .maybeSingle();
   if (error) throw new Error(`Failed to load the inventory settings: ${error.message}`);
@@ -2879,6 +2880,7 @@ export const getInventorySettings = cache(async (): Promise<InventorySettings> =
     sameDayCutoffEnabled: data.same_day_cutoff_enabled,
     // Postgres gives "HH:MM:SS"; the time field wants "HH:MM".
     sameDayCutoffTime: data.same_day_cutoff_time?.slice(0, 5) ?? null,
+    keyCodeFromBookingRoom: data.key_code_from_booking_room,
     visibility: {
       min_stay_through: data.show_min_stay_through,
       min_stay_arrival: data.show_min_stay_arrival,
@@ -3076,7 +3078,7 @@ export async function getRoomTypeSettings(): Promise<RoomTypeSetting[]> {
   const { data, error } = await supabase
     .from("room_types")
     .select(
-      "id, code, name, base_occupancy, max_occupancy, sort_order, description, rooms(count), room_type_facilities(facility_id)",
+      "id, code, name, display_name, base_occupancy, max_occupancy, sort_order, description, rooms(count), room_type_facilities(facility_id)",
     )
     .order("sort_order")
     .order("name");
@@ -3088,6 +3090,7 @@ export async function getRoomTypeSettings(): Promise<RoomTypeSetting[]> {
       id: string;
       code: string;
       name: string;
+      display_name: string | null;
       base_occupancy: number;
       max_occupancy: number;
       sort_order: number;
@@ -3105,6 +3108,22 @@ export async function getRoomTypeSettings(): Promise<RoomTypeSetting[]> {
     roomCount: row.rooms?.[0]?.count ?? 0,
     facilityIds: (row.room_type_facilities ?? []).map((f) => f.facility_id),
     description: row.description,
+    displayName: row.display_name,
+  }));
+}
+
+/** Virtual Room Types (0091), in the order they were added. Stored, not sold. */
+export async function getVirtualRoomTypes(): Promise<VirtualRoomType[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("virtual_room_types")
+    .select("id, display_name, parent_room_type_id")
+    .order("created_at");
+  if (error) throw new Error(`Failed to load the virtual room types: ${error.message}`);
+  return (data ?? []).map((r) => ({
+    id: r.id,
+    displayName: r.display_name,
+    parentRoomTypeId: r.parent_room_type_id,
   }));
 }
 
@@ -3256,6 +3275,14 @@ export async function getRoomsForSettings(filters: {
     // every room nobody has photographed.
     photo_path: string | null;
     has_bookings: boolean;
+    priority: number;
+    available_online: boolean;
+    is_enabled: boolean;
+    // Nullable in Postgres, like photo_path.
+    key_code: string | null;
+    door_name: string | null;
+    color: string | null;
+    has_divider: boolean;
     total_count: number;
   }[];
 
@@ -3270,6 +3297,13 @@ export async function getRoomsForSettings(filters: {
       photoPath: row.photo_path,
       photoUrl: roomPhotoUrl(supabase, row.photo_path),
       hasBookings: row.has_bookings,
+      priority: row.priority,
+      availableOnline: row.available_online,
+      isEnabled: row.is_enabled,
+      keyCode: row.key_code,
+      doorName: row.door_name,
+      color: row.color,
+      hasDivider: row.has_divider,
     })),
     total: rows[0]?.total_count ?? 0,
     page,
@@ -3637,6 +3671,9 @@ export async function getCalendarRooms(): Promise<CalendarRoom[]> {
     isInspected: row.is_inspected,
     doNotDisturb: row.do_not_disturb,
     sortOrder: row.sort_order,
+    // Nullable in Postgres; the generator types a RETURNS TABLE column non-null.
+    color: (row.color as string | null) ?? null,
+    hasDivider: row.has_divider,
   }));
 }
 

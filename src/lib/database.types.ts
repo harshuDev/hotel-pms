@@ -1918,6 +1918,7 @@ export type Database = {
       }
       inventory_settings: {
         Row: {
+          key_code_from_booking_room: boolean
           online_cutoff_date: string | null
           online_cutoff_enabled: boolean
           property_id: string
@@ -1932,6 +1933,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          key_code_from_booking_room?: boolean
           online_cutoff_date?: string | null
           online_cutoff_enabled?: boolean
           property_id: string
@@ -1946,6 +1948,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          key_code_from_booking_room?: boolean
           online_cutoff_date?: string | null
           online_cutoff_enabled?: boolean
           property_id?: string
@@ -3189,6 +3192,7 @@ export type Database = {
           code: string
           created_at: string
           description: string | null
+          display_name: string | null
           id: string
           max_occupancy: number
           name: string
@@ -3200,6 +3204,7 @@ export type Database = {
           code: string
           created_at?: string
           description?: string | null
+          display_name?: string | null
           id?: string
           max_occupancy: number
           name: string
@@ -3211,6 +3216,7 @@ export type Database = {
           code?: string
           created_at?: string
           description?: string | null
+          display_name?: string | null
           id?: string
           max_occupancy?: number
           name?: string
@@ -3229,37 +3235,58 @@ export type Database = {
       }
       rooms: {
         Row: {
+          available_online: boolean
+          color: string | null
           created_at: string
           do_not_disturb: boolean
+          door_name: string | null
           floor: number | null
+          has_divider: boolean
           id: string
+          is_enabled: boolean
           is_inspected: boolean
+          key_code: string | null
           number: string
           photo_path: string | null
+          priority: number
           property_id: string
           room_type_id: string
           status: Database["public"]["Enums"]["room_status"]
         }
         Insert: {
+          available_online?: boolean
+          color?: string | null
           created_at?: string
           do_not_disturb?: boolean
+          door_name?: string | null
           floor?: number | null
+          has_divider?: boolean
           id?: string
+          is_enabled?: boolean
           is_inspected?: boolean
+          key_code?: string | null
           number: string
           photo_path?: string | null
+          priority?: number
           property_id: string
           room_type_id: string
           status?: Database["public"]["Enums"]["room_status"]
         }
         Update: {
+          available_online?: boolean
+          color?: string | null
           created_at?: string
           do_not_disturb?: boolean
+          door_name?: string | null
           floor?: number | null
+          has_divider?: boolean
           id?: string
+          is_enabled?: boolean
           is_inspected?: boolean
+          key_code?: string | null
           number?: string
           photo_path?: string | null
+          priority?: number
           property_id?: string
           room_type_id?: string
           status?: Database["public"]["Enums"]["room_status"]
@@ -3388,6 +3415,45 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "tax_rates_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      virtual_room_types: {
+        Row: {
+          created_at: string
+          display_name: string
+          id: string
+          parent_room_type_id: string
+          property_id: string
+        }
+        Insert: {
+          created_at?: string
+          display_name: string
+          id?: string
+          parent_room_type_id: string
+          property_id: string
+        }
+        Update: {
+          created_at?: string
+          display_name?: string
+          id?: string
+          parent_room_type_id?: string
+          property_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "virtual_room_types_parent_room_type_id_property_id_fkey"
+            columns: ["parent_room_type_id", "property_id"]
+            isOneToOne: false
+            referencedRelation: "room_types"
+            referencedColumns: ["id", "property_id"]
+          },
+          {
+            foreignKeyName: "virtual_room_types_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "properties"
@@ -4089,8 +4155,10 @@ export type Database = {
       calendar_rooms: {
         Args: never
         Returns: {
+          color: string
           do_not_disturb: boolean
           floor: string
+          has_divider: boolean
           is_inspected: boolean
           room_id: string
           room_number: string
@@ -4527,8 +4595,10 @@ export type Database = {
       delete_payment_gateway: { Args: { p_id: string }; Returns: undefined }
       delete_pos_profile: { Args: { p_id: string }; Returns: undefined }
       delete_room: { Args: { p_room_id: string }; Returns: undefined }
+      delete_room_type: { Args: { p_room_type_id: string }; Returns: undefined }
       delete_season: { Args: { p_id: string }; Returns: undefined }
       delete_tax_rate: { Args: { p_id: string }; Returns: undefined }
+      delete_virtual_room_type: { Args: { p_id: string }; Returns: undefined }
       deposit_report: {
         Args: never
         Returns: {
@@ -5236,10 +5306,17 @@ export type Database = {
       rooms_for_settings: {
         Args: { p_limit?: number; p_offset?: number; p_q?: string }
         Returns: {
+          available_online: boolean
+          color: string
+          door_name: string
           floor: number
           has_bookings: boolean
+          has_divider: boolean
+          is_enabled: boolean
+          key_code: string
           number: string
           photo_path: string
+          priority: number
           room_id: string
           room_type_id: string
           room_type_name: string
@@ -5471,6 +5548,7 @@ export type Database = {
         Args: { p_custom_invoice_numbers: boolean }
         Returns: undefined
       }
+      save_key_code_setting: { Args: { p_on: boolean }; Returns: undefined }
       save_meeting_room: {
         Args: {
           p_capacity?: number
@@ -5686,6 +5764,14 @@ export type Database = {
         }
         Returns: string
       }
+      save_virtual_room_type: {
+        Args: {
+          p_display_name: string
+          p_id: string
+          p_parent_room_type_id: string
+        }
+        Returns: string
+      }
       seed_accounting_categories: {
         Args: { p_property: string }
         Returns: undefined
@@ -5826,6 +5912,10 @@ export type Database = {
         Args: { p_on: boolean; p_room_id: string }
         Returns: undefined
       }
+      set_room_enabled: {
+        Args: { p_enabled: boolean; p_room_id: string }
+        Returns: undefined
+      }
       set_room_housekeeping: {
         Args: {
           p_choice: Database["public"]["Enums"]["housekeeping_choice"]
@@ -5835,6 +5925,18 @@ export type Database = {
       }
       set_room_photo: {
         Args: { p_photo_path?: string; p_room_id: string }
+        Returns: undefined
+      }
+      set_room_setup: {
+        Args: {
+          p_available_online: boolean
+          p_color: string
+          p_door_name: string
+          p_has_divider: boolean
+          p_key_code: string
+          p_priority: number
+          p_room_id: string
+        }
         Returns: undefined
       }
       set_room_status: {
@@ -5848,10 +5950,15 @@ export type Database = {
         Args: { p_description: string; p_room_type_id: string }
         Returns: undefined
       }
+      set_room_type_display_name: {
+        Args: { p_display_name: string; p_room_type_id: string }
+        Returns: undefined
+      }
       set_room_type_facilities: {
         Args: { p_facility_ids: string[]; p_room_type_id: string }
         Returns: undefined
       }
+      set_room_type_order: { Args: { p_ids: string[] }; Returns: undefined }
       set_stop_sell: {
         Args: {
           p_days_of_week?: number[]
