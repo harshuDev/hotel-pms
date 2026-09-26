@@ -25,7 +25,8 @@ import type { LanguageSettings } from "@/lib/language-settings";
 import { InvoiceSettingsPanel } from "@/components/settings/invoice-settings-panel";
 import type { InvoiceSettings } from "@/lib/invoice-settings";
 import { CurrenciesPanel, PosProfilesPanel } from "@/components/settings/finance-profile-panels";
-import type { CurrencyProfile, PosProfile } from "@/lib/finance-profiles";
+import type { AccountingSettings, CurrencyProfile, PosProfile } from "@/lib/finance-profiles";
+import { AccountingCategoriesPanel } from "@/components/settings/accounting-categories-panel";
 import type { EmailSetup, EmailTemplate, HotelEmailSettings } from "@/lib/email-preferences";
 import { EmailSetupPanel } from "@/components/settings/email-setup-panel";
 import { FacilityIcon } from "@/components/settings/facility-icon";
@@ -219,6 +220,7 @@ export function SettingsScreen({
   invoiceSettings,
   posProfiles,
   currencyProfiles,
+  accountingSettings,
 }: {
   tab: SettingsTab;
   property: PropertySettings;
@@ -250,6 +252,8 @@ export function SettingsScreen({
   /** Finances -> Pos Profiles (0084) and Currencies (0083). */
   posProfiles: PosProfile[];
   currencyProfiles: CurrencyProfile[];
+  /** Finances -> Accounting Categories (0085). */
+  accountingSettings: AccountingSettings;
   roomTypes: RoomTypeSetting[];
   rooms: RoomSettingsPage;
   roomQuery: string;
@@ -1065,6 +1069,15 @@ export function SettingsScreen({
         <CurrenciesPanel
           defaultCurrency={property.currency.trim()}
           profiles={currencyProfiles}
+          canEdit={canEdit}
+          pending={pending}
+          run={run}
+        />
+      )}
+
+      {tab === "accounting-categories" && (
+        <AccountingCategoriesPanel
+          settings={accountingSettings}
           canEdit={canEdit}
           pending={pending}
           run={run}

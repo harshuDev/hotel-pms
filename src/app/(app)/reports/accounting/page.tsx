@@ -4,7 +4,8 @@ import { formatMoney, formatMoneyShort } from "@/lib/money";
 import { reportRange } from "@/lib/reports";
 import { ReportAccessError, getAccountingReport, getBusinessDate } from "@/lib/queries";
 import type { AccountingRow } from "@/lib/types";
-import { getHotelFeatures, getPropertyCurrency } from "@/lib/queries";
+import { getAccountingSettings, getHotelFeatures, getPropertyCurrency } from "@/lib/queries";
+import type { AccountingCategory } from "@/lib/finance-profiles";
 
 export const metadata = { title: "Accounting report" };
 
@@ -54,6 +55,31 @@ export default async function AccountingReportPage({
     throw error;
   }
 
+  /*
+   * THE ACCOUNT each line posts to, from Settings -> Finances -> Accounting
+   * Categories (0085): room revenue to the accommodation default, every other
+   * revenue line to the extras default, the tax to the taxes default and every
+   * payment method to the payments default. A lookup, not a sum -- the figures
+   * are still all Postgres's.
+   */
+  const accounting = await getAccountingSettings();
+  const byId = new Map(accounting.categories.map((c) => [c.id, c]));
+  const d = accounting.defaults;
+  const account = (id: string | undefined) => (id ? byId.get(id) ?? null : null);
+  const revenueAccount = (r: AccountingRow) =>
+    account(r.code === "room_charge" ? d?.accommodationId : d?.extrasId);
+  const taxAccount = account(d?.taxesId);
+  const paymentsAccount = account(d?.paymentsId);
+  const accountCell = (a: AccountingCategory | null) =>
+    a ? (
+      <span className="text-ink">
+        {a.name}
+        {codes(a) && <span className="tnum ml-1.5 text-ink-faint">{codes(a)}</span>}
+      </span>
+    ) : (
+      <span className="text-ink-faint">—</span>
+    );
+
   const revenue = rows.filter((r) => r.section === "revenue");
   const receipts = rows.filter((r) => r.section === "payments");
 
@@ -75,7 +101,11 @@ export default async function AccountingReportPage({
           detail="Net of tax"
           emphasis
         />
-        <ReportFigure label="Tax" value={formatMoneyShort(tax, currency)} />
+        <ReportFigure
+          label="Tax"
+          value={formatMoneyShort(tax, currency)}
+          detail={taxAccount ? [taxAccount.name, codes(taxAccount)].filter(Boolean).join(" · ") : undefined}
+        />
         <ReportFigure label="Gross" value={formatMoneyShort(gross, currency)} />
         <ReportFigure
           label="Collected"
@@ -91,7 +121,7 @@ export default async function AccountingReportPage({
         <ReportTable<AccountingRow>
           rows={revenue}
           rowKey={(r) => `revenue-${r.code}`}
-          minWidth="680px"
+          minWidth="780px"
           emptyTitle="Nothing was earned in this range"
           emptyHint="Revenue posts on the night audit, so a range with no closed days shows nothing."
           footLabel={`${revenue.length} categor${revenue.length === 1 ? "y" : "ies"}`}
@@ -103,6 +133,10 @@ export default async function AccountingReportPage({
             {
               header: "Code",
               cell: (r) => <span className="text-ink-faint">{r.code}</span>,
+            },
+            {
+              header: "Account",
+              cell: (r) => accountCell(revenueAccount(r)),
             },
             {
               header: "Net",
@@ -135,7 +169,7 @@ export default async function AccountingReportPage({
         <ReportTable<AccountingRow>
           rows={receipts}
           rowKey={(r) => `payments-${r.code}-${r.label}`}
-          minWidth="680px"
+          minWidth="780px"
           emptyTitle="Nothing was collected in this range"
           emptyHint="Payments are dated to the business date they were taken on."
           footLabel={`${receipts.length} method${receipts.length === 1 ? "" : "s"}`}
@@ -147,6 +181,10 @@ export default async function AccountingReportPage({
             {
               header: "Kind",
               cell: (r) => <span className="text-ink-faint">{r.code}</span>,
+            },
+            {
+              header: "Account",
+              cell: () => accountCell(paymentsAccount),
             },
             {
               header: "Received",
@@ -161,4 +199,9 @@ export default async function AccountingReportPage({
       </div>
     </ReportShell>
   );
+}
+
+/** "4000 / ACC-4000": the internal code, then the external, whichever are set. */
+function codes(a: AccountingCategory): string {
+  return [a.internalCode, a.externalCode].filter(Boolean).join(" / ");
 }

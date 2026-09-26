@@ -636,6 +636,60 @@ export async function deletePosProfile(id: string): Promise<ActionResult<null>> 
   return { ok: true, data: null };
 }
 
+/* -- Finances -> Accounting Categories (0085) ----------------------------- */
+
+function revalidateAccounting() {
+  revalidateSettings();
+  // The Accounting report names the default accounts.
+  revalidatePath("/reports/accounting");
+}
+
+export async function saveAccountingCategory(input: {
+  id: string | null;
+  name: string;
+  internalCode: string;
+  externalCode: string;
+}): Promise<ActionResult<null>> {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("save_accounting_category", {
+    // Null adds a new category.
+    p_id: nullableArg(input.id),
+    p_name: input.name,
+    // Blank codes are stored as none.
+    p_internal_code: input.internalCode,
+    p_external_code: input.externalCode,
+  });
+  if (error) return { ok: false, error: error.message };
+  revalidateAccounting();
+  return { ok: true, data: null };
+}
+
+export async function deleteAccountingCategory(id: string): Promise<ActionResult<null>> {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("delete_accounting_category", { p_id: id });
+  if (error) return { ok: false, error: error.message };
+  revalidateAccounting();
+  return { ok: true, data: null };
+}
+
+export async function saveAccountingDefaults(input: {
+  accommodationId: string;
+  extrasId: string;
+  taxesId: string;
+  paymentsId: string;
+}): Promise<ActionResult<null>> {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("save_accounting_defaults", {
+    p_accommodation_id: input.accommodationId,
+    p_extras_id: input.extrasId,
+    p_taxes_id: input.taxesId,
+    p_payments_id: input.paymentsId,
+  });
+  if (error) return { ok: false, error: error.message };
+  revalidateAccounting();
+  return { ok: true, data: null };
+}
+
 export async function saveCurrencyProfile(input: {
   id: string | null;
   currency: string;
