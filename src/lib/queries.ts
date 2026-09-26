@@ -28,6 +28,7 @@ import type { ChannelManager, ChannelManagerProvider } from "@/lib/channel-manag
 import type { BookingEngineProfile, BookingEngineTexts } from "@/lib/booking-engine";
 import type { BookingWidget } from "@/lib/booking-widgets";
 import type { ApiPermission } from "@/lib/api-keys";
+import type { SystemCategory, SystemConnection } from "@/lib/system-connections";
 import {
   DEFAULT_INVENTORY_SETTINGS,
   type InventorySettings,
@@ -3032,6 +3033,28 @@ export async function getApiKeys(): Promise<{
         isActive: r.is_active,
       })),
   };
+}
+
+/**
+ * One category of connected systems -- key lock (0102) or housekeeping
+ * (0103) -- in the order they were added. Stored, not yet connected.
+ */
+export async function getSystemConnections(category: SystemCategory): Promise<SystemConnection[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("system_connections")
+    .select("id, provider, name, is_active, account_id, secret_id")
+    .eq("category", category)
+    .order("created_at");
+  if (error) throw new Error(`Failed to load the connected systems: ${error.message}`);
+  return (data ?? []).map((r) => ({
+    id: r.id,
+    provider: r.provider,
+    name: r.name,
+    isActive: r.is_active,
+    accountId: r.account_id,
+    hasSecret: r.secret_id !== null,
+  }));
 }
 
 /** Accounting Systems (0087), in the order they were added. Stored, not live. */

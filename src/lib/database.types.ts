@@ -3875,6 +3875,50 @@ export type Database = {
           },
         ]
       }
+      system_connections: {
+        Row: {
+          account_id: string | null
+          category: string
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          property_id: string
+          provider: string
+          secret_id: string | null
+        }
+        Insert: {
+          account_id?: string | null
+          category: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          property_id: string
+          provider: string
+          secret_id?: string | null
+        }
+        Update: {
+          account_id?: string | null
+          category?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          property_id?: string
+          provider?: string
+          secret_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "key_lock_systems_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tax_rates: {
         Row: {
           created_at: string
@@ -5224,6 +5268,7 @@ export type Database = {
       delete_room_type: { Args: { p_room_type_id: string }; Returns: undefined }
       delete_season: { Args: { p_id: string }; Returns: undefined }
       delete_season_type: { Args: { p_id: string }; Returns: undefined }
+      delete_system_connection: { Args: { p_id: string }; Returns: undefined }
       delete_tax_rate: { Args: { p_id: string }; Returns: undefined }
       delete_virtual_room_type: { Args: { p_id: string }; Returns: undefined }
       deposit_report: {
@@ -6517,6 +6562,17 @@ export type Database = {
       save_supported_languages: {
         Args: { p_locales: string[] }
         Returns: undefined
+      }
+      save_system_connection: {
+        Args: {
+          p_account_id: string
+          p_id: string
+          p_is_active: boolean
+          p_name: string
+          p_provider: string
+          p_secret: string
+        }
+        Returns: string
       }
       save_tax_rate: {
         Args: {

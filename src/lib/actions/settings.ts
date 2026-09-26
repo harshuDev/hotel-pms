@@ -977,6 +977,41 @@ export async function deleteDeveloperKey(id: string): Promise<ActionResult<null>
   return { ok: true, data: null };
 }
 
+/* -- Connectivity -> Key Lock and Housekeeping Systems (0102-0103) -------- */
+
+export async function saveSystemConnection(input: {
+  id: string | null;
+  provider: string;
+  name: string;
+  isActive: boolean;
+  accountId: string;
+  /** Blank keeps the saved secret. It is written to the vault, never to a row. */
+  secret: string;
+}): Promise<ActionResult<null>> {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("save_system_connection", {
+    // Null adds a new connection.
+    p_id: nullableArg(input.id),
+    p_provider: input.provider,
+    p_name: input.name,
+    p_is_active: input.isActive,
+    p_account_id: input.accountId,
+    // Null keeps the saved secret.
+    p_secret: nullableArg(input.secret === "" ? null : input.secret),
+  });
+  if (error) return { ok: false, error: error.message };
+  revalidateSettings();
+  return { ok: true, data: null };
+}
+
+export async function deleteSystemConnection(id: string): Promise<ActionResult<null>> {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("delete_system_connection", { p_id: id });
+  if (error) return { ok: false, error: error.message };
+  revalidateSettings();
+  return { ok: true, data: null };
+}
+
 /* -- Finances -> Accounting Systems (0087) -------------------------------- */
 
 export async function saveAccountingSystem(input: {
