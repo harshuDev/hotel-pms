@@ -51,6 +51,7 @@ export const SETTINGS_TABS = [
   "api-key",
   "developer-keys",
   "key-lock-systems",
+  "housekeeping-systems",
   "channels",
 ] as const;
 
@@ -161,6 +162,7 @@ export const SETTINGS_NAV: {
       { id: "api-key", label: "API Key" },
       { id: "developer-keys", label: "Developers Keys" },
       { id: "key-lock-systems", label: "Key Lock Systems" },
+      { id: "housekeeping-systems", label: "Housekeeping Systems" },
     ],
   },
 ];

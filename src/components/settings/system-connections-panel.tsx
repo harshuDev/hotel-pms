@@ -5,17 +5,19 @@ import { cn } from "@/components/ui";
 import { Menu, MenuItem } from "@/components/menu";
 import { EditIcon } from "@/components/settings/finance-panels";
 import {
-  KEY_LOCK_PROVIDERS,
-  keyLockProvider,
-  type KeyLockProvider,
-  type KeyLockSystem,
-} from "@/lib/key-lock-systems";
-import { deleteKeyLockSystem, saveKeyLockSystem } from "@/lib/actions/settings";
+  SYSTEM_CATEGORIES,
+  systemProvider,
+  type SystemCategory,
+  type SystemConnection,
+  type SystemProvider,
+} from "@/lib/system-connections";
+import { deleteSystemConnection, saveSystemConnection } from "@/lib/actions/settings";
 
 /*
- * Settings -> Connectivity Settings -> Key Lock Systems (0102), cloned from
- * the client's reference: the list, "No Data" when empty, and Add offering
- * Flexipass or Remotelock. STORED, NOT YET CONNECTED. The secret is
+ * Settings -> Connectivity Settings -> Key Lock Systems (0102) and
+ * Housekeeping Systems (0103), cloned from the client's reference: the list,
+ * "No Data" when empty, and Add offering the category's systems. One panel
+ * for both, over one table. STORED, NOT YET CONNECTED. The secret is
  * write-only (Supabase Vault), exactly like a channel manager's password.
  */
 
@@ -23,7 +25,7 @@ type Run = (fn: () => Promise<{ ok: boolean; error?: string }>, done: string) =>
 
 type Draft = {
   id: string | null;
-  provider: KeyLockProvider;
+  provider: string;
   name: string;
   isActive: boolean;
   accountId: string;
@@ -48,13 +50,15 @@ function Row({ label, htmlFor, children }: { label: string; htmlFor: string; chi
   );
 }
 
-export function KeyLockSystemsPanel({
+export function SystemConnectionsPanel({
+  category,
   systems,
   canEdit,
   pending,
   run,
 }: {
-  systems: KeyLockSystem[];
+  category: SystemCategory;
+  systems: SystemConnection[];
   canEdit: boolean;
   pending: boolean;
   run: Run;
@@ -62,12 +66,13 @@ export function KeyLockSystemsPanel({
   const [draft, setDraft] = useState<Draft | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const taken = new Set(systems.map((s) => s.provider));
-  const free = KEY_LOCK_PROVIDERS.filter((p) => !taken.has(p.id));
-  const labels = draft ? keyLockProvider(draft.provider) : null;
+  const providers: readonly SystemProvider[] = SYSTEM_CATEGORIES[category].providers;
+  const free = providers.filter((p) => !taken.has(p.id));
+  const labels = draft ? systemProvider(category, draft.provider) : null;
 
   function save(d: Draft) {
     run(async () => {
-      const result = await saveKeyLockSystem({
+      const result = await saveSystemConnection({
         id: d.id,
         provider: d.provider,
         name: d.name,
@@ -77,12 +82,12 @@ export function KeyLockSystemsPanel({
       });
       if (result.ok) setDraft(null);
       return result;
-    }, `${d.name.trim() || keyLockProvider(d.provider).label} saved.`);
+    }, `${d.name.trim() || systemProvider(category, d.provider).label} saved.`);
   }
 
   return (
     <div className="max-w-6xl space-y-2">
-      <h2 className="border-b border-line pb-1 text-[24px] text-ink">Key Lock Systems</h2>
+      <h2 className="border-b border-line pb-1 text-[24px] text-ink">{SYSTEM_CATEGORIES[category].title}</h2>
       <section className={cn(card, "px-4 py-5 sm:px-6")}>
         {systems.length === 0 ? (
           <div className="flex flex-col items-center py-8 text-ink-faint">
@@ -106,7 +111,7 @@ export function KeyLockSystemsPanel({
               {systems.map((s) => (
                 <tr key={s.id} className={cn("border-b border-line", draft?.id === s.id && "bg-shell/70")}>
                   <td className="px-2 py-1.5 text-ink">{s.name}</td>
-                  <td className="px-2 py-1.5 text-ink-muted">{keyLockProvider(s.provider).label}</td>
+                  <td className="px-2 py-1.5 text-ink-muted">{systemProvider(category, s.provider).label}</td>
                   <td className="px-2 py-1.5 text-ink">{s.isActive ? "Yes" : "No"}</td>
                   <td className="py-0.5">
                     {canEdit && (
@@ -128,7 +133,7 @@ export function KeyLockSystemsPanel({
                           onClick={() => {
                             if (!confirm(`Delete ${s.name}? Its saved secret goes with it.`)) return;
                             run(async () => {
-                              const result = await deleteKeyLockSystem(s.id);
+                              const result = await deleteSystemConnection(s.id);
                               if (result.ok && draft?.id === s.id) setDraft(null);
                               return result;
                             }, `${s.name} deleted.`);

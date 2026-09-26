@@ -977,9 +977,9 @@ export async function deleteDeveloperKey(id: string): Promise<ActionResult<null>
   return { ok: true, data: null };
 }
 
-/* -- Connectivity -> Key Lock Systems (0102) ------------------------------- */
+/* -- Connectivity -> Key Lock and Housekeeping Systems (0102-0103) -------- */
 
-export async function saveKeyLockSystem(input: {
+export async function saveSystemConnection(input: {
   id: string | null;
   provider: string;
   name: string;
@@ -989,7 +989,7 @@ export async function saveKeyLockSystem(input: {
   secret: string;
 }): Promise<ActionResult<null>> {
   const supabase = await createClient();
-  const { error } = await supabase.rpc("save_key_lock_system", {
+  const { error } = await supabase.rpc("save_system_connection", {
     // Null adds a new connection.
     p_id: nullableArg(input.id),
     p_provider: input.provider,
@@ -1004,9 +1004,9 @@ export async function saveKeyLockSystem(input: {
   return { ok: true, data: null };
 }
 
-export async function deleteKeyLockSystem(id: string): Promise<ActionResult<null>> {
+export async function deleteSystemConnection(id: string): Promise<ActionResult<null>> {
   const supabase = await createClient();
-  const { error } = await supabase.rpc("delete_key_lock_system", { p_id: id });
+  const { error } = await supabase.rpc("delete_system_connection", { p_id: id });
   if (error) return { ok: false, error: error.message };
   revalidateSettings();
   return { ok: true, data: null };

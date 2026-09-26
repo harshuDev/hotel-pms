@@ -28,7 +28,7 @@ import type { ChannelManager, ChannelManagerProvider } from "@/lib/channel-manag
 import type { BookingEngineProfile, BookingEngineTexts } from "@/lib/booking-engine";
 import type { BookingWidget } from "@/lib/booking-widgets";
 import type { ApiPermission } from "@/lib/api-keys";
-import type { KeyLockProvider, KeyLockSystem } from "@/lib/key-lock-systems";
+import type { SystemCategory, SystemConnection } from "@/lib/system-connections";
 import {
   DEFAULT_INVENTORY_SETTINGS,
   type InventorySettings,
@@ -3035,17 +3035,21 @@ export async function getApiKeys(): Promise<{
   };
 }
 
-/** Key lock systems (0102), in the order they were added. Stored, not yet connected. */
-export async function getKeyLockSystems(): Promise<KeyLockSystem[]> {
+/**
+ * One category of connected systems -- key lock (0102) or housekeeping
+ * (0103) -- in the order they were added. Stored, not yet connected.
+ */
+export async function getSystemConnections(category: SystemCategory): Promise<SystemConnection[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
-    .from("key_lock_systems")
+    .from("system_connections")
     .select("id, provider, name, is_active, account_id, secret_id")
+    .eq("category", category)
     .order("created_at");
-  if (error) throw new Error(`Failed to load the key lock systems: ${error.message}`);
+  if (error) throw new Error(`Failed to load the connected systems: ${error.message}`);
   return (data ?? []).map((r) => ({
     id: r.id,
-    provider: r.provider as KeyLockProvider,
+    provider: r.provider,
     name: r.name,
     isActive: r.is_active,
     accountId: r.account_id,

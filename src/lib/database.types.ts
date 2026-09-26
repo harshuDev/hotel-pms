@@ -2422,47 +2422,6 @@ export type Database = {
           },
         ]
       }
-      key_lock_systems: {
-        Row: {
-          account_id: string | null
-          created_at: string
-          id: string
-          is_active: boolean
-          name: string
-          property_id: string
-          provider: string
-          secret_id: string | null
-        }
-        Insert: {
-          account_id?: string | null
-          created_at?: string
-          id?: string
-          is_active?: boolean
-          name: string
-          property_id: string
-          provider: string
-          secret_id?: string | null
-        }
-        Update: {
-          account_id?: string | null
-          created_at?: string
-          id?: string
-          is_active?: boolean
-          name?: string
-          property_id?: string
-          provider?: string
-          secret_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "key_lock_systems_property_id_fkey"
-            columns: ["property_id"]
-            isOneToOne: false
-            referencedRelation: "properties"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       language_settings: {
         Row: {
           default_locale: string
@@ -3916,6 +3875,50 @@ export type Database = {
           },
         ]
       }
+      system_connections: {
+        Row: {
+          account_id: string | null
+          category: string
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          property_id: string
+          provider: string
+          secret_id: string | null
+        }
+        Insert: {
+          account_id?: string | null
+          category: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          property_id: string
+          provider: string
+          secret_id?: string | null
+        }
+        Update: {
+          account_id?: string | null
+          category?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          property_id?: string
+          provider?: string
+          secret_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "key_lock_systems_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tax_rates: {
         Row: {
           created_at: string
@@ -5258,7 +5261,6 @@ export type Database = {
       delete_extra_category: { Args: { p_id: string }; Returns: undefined }
       delete_facility: { Args: { p_id: string }; Returns: undefined }
       delete_identification_type: { Args: { p_id: string }; Returns: undefined }
-      delete_key_lock_system: { Args: { p_id: string }; Returns: undefined }
       delete_payment_gateway: { Args: { p_id: string }; Returns: undefined }
       delete_pos_profile: { Args: { p_id: string }; Returns: undefined }
       delete_rate_plan: { Args: { p_rate_plan_id: string }; Returns: undefined }
@@ -5266,6 +5268,7 @@ export type Database = {
       delete_room_type: { Args: { p_room_type_id: string }; Returns: undefined }
       delete_season: { Args: { p_id: string }; Returns: undefined }
       delete_season_type: { Args: { p_id: string }; Returns: undefined }
+      delete_system_connection: { Args: { p_id: string }; Returns: undefined }
       delete_tax_rate: { Args: { p_id: string }; Returns: undefined }
       delete_virtual_room_type: { Args: { p_id: string }; Returns: undefined }
       deposit_report: {
@@ -6360,17 +6363,6 @@ export type Database = {
         Returns: undefined
       }
       save_key_code_setting: { Args: { p_on: boolean }; Returns: undefined }
-      save_key_lock_system: {
-        Args: {
-          p_account_id: string
-          p_id: string
-          p_is_active: boolean
-          p_name: string
-          p_provider: string
-          p_secret: string
-        }
-        Returns: string
-      }
       save_meeting_room: {
         Args: {
           p_capacity?: number
@@ -6570,6 +6562,17 @@ export type Database = {
       save_supported_languages: {
         Args: { p_locales: string[] }
         Returns: undefined
+      }
+      save_system_connection: {
+        Args: {
+          p_account_id: string
+          p_id: string
+          p_is_active: boolean
+          p_name: string
+          p_provider: string
+          p_secret: string
+        }
+        Returns: string
       }
       save_tax_rate: {
         Args: {
