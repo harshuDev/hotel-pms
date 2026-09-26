@@ -152,7 +152,7 @@ export const SETTINGS_NAV: {
     items: [
       { id: "channel-manager", label: "Channel Manager" },
       { id: "booking-engine", label: "Booking Engine Settings" },
-      { id: "channels", label: "Booking Sources" },
+      { id: "channels", label: "Sales Channels" },
     ],
   },
 ];

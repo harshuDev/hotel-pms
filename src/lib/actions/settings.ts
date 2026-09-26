@@ -1577,28 +1577,67 @@ export async function saveChannel(input: {
   kind: ChannelKind;
   commissionBps: number;
   isActive: boolean;
+  /** The Associated Customer (0099), or null for none. */
+  customerId: string | null;
 }): Promise<ActionResult<{ id: string }>> {
-  if (input.code.trim() === "" || input.name.trim() === "") {
-    return { ok: false, error: "A booking source needs a code and a name." };
-  }
   if (input.commissionBps < 0 || input.commissionBps > 10000) {
     return { ok: false, error: "Commission must be between 0 and 100 percent." };
   }
 
   const supabase = await createClient();
   const { data, error } = await supabase.rpc("save_channel", {
-    p_id: input.id,
+    // Null adds a new sales channel.
+    p_id: nullableArg(input.id),
     p_code: input.code,
     p_name: input.name,
     p_kind: input.kind,
     p_commission_bps: input.commissionBps,
     p_is_active: input.isActive,
+    // Null is no associated customer.
+    p_customer_id: nullableArg(input.customerId),
   });
 
   if (error) return { ok: false, error: error.message };
 
   revalidateSettings();
   return { ok: true, data: { id: data as string } };
+}
+
+/** Folds the other channels into the one kept (0099); returns bookings moved. */
+export async function mergeChannels(
+  keepId: string,
+  mergeIds: string[],
+): Promise<ActionResult<{ moved: number }>> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("merge_channels", {
+    p_keep_id: keepId,
+    p_merge_ids: mergeIds,
+  });
+  if (error) return { ok: false, error: error.message };
+  revalidateSettings();
+  return { ok: true, data: { moved: data ?? 0 } };
+}
+
+/** Customers matching a search, for the Associated Customer picker. */
+export async function searchCustomersForPicker(
+  q: string,
+): Promise<ActionResult<{ id: string; name: string; kind: string }[]>> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("customers_page", {
+    p_q: q.trim() || null,
+    p_kind: null,
+    p_limit: 10,
+    p_offset: 0,
+  });
+  if (error) return { ok: false, error: error.message };
+  return {
+    ok: true,
+    data: (data ?? []).map((r) => ({
+      id: r.customer_id,
+      name: r.name ?? `#${r.customer_number}`,
+      kind: r.kind,
+    })),
+  };
 }
 
 export async function saveTaxRate(input: {

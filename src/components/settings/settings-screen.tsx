@@ -44,6 +44,7 @@ import { RatePlansPanel } from "@/components/settings/rate-plans-panel";
 import { RateCombinations } from "@/components/settings/rate-combinations";
 import { ChannelManagerPanel } from "@/components/settings/channel-manager-panel";
 import { BookingEnginePanel } from "@/components/settings/booking-engine-panel";
+import { SalesChannelsPanel } from "@/components/settings/sales-channels-panel";
 import type { BookingEngineProfile, BookingEngineTexts } from "@/lib/booking-engine";
 import type { ChannelManager } from "@/lib/channel-managers";
 import { SeasonsPanel } from "@/components/settings/seasons-panel";
@@ -77,7 +78,6 @@ const LocationMap = dynamic(() => import("@/components/settings/location-map"), 
   ),
 });
 import {
-  saveChannel,
   saveHotelDetails,
   saveHotelPolicies,
   saveHotelTimes,
@@ -88,7 +88,6 @@ import type {
   WeekRate,
   RatePlan,
   CancellationPolicy,
-  ChannelKind,
   ChannelSetting,
   PaymentMethodSetting,
   PropertySettings,
@@ -102,13 +101,6 @@ import type {
 
 export type { SettingsTab } from "@/lib/settings-tabs";
 
-const CHANNEL_KINDS: { value: ChannelKind; label: string }[] = [
-  { value: "direct", label: "Direct" },
-  { value: "ota", label: "OTA" },
-  { value: "wholesaler", label: "Wholesaler" },
-  { value: "gds", label: "GDS" },
-  { value: "offline", label: "Offline" },
-];
 
 const ROLES: { value: StaffRole; label: string; note: string }[] = [
   { value: "admin", label: "Administrator", note: "Everything, including staff" },
@@ -367,15 +359,6 @@ export function SettingsScreen({
     auditCloseTime: property.auditCloseTime.slice(0, 5),
   });
 
-  /* -- Channels ------------------------------------------------------- */
-  const [ch, setCh] = useState<{
-    id: string | null;
-    code: string;
-    name: string;
-    kind: ChannelKind;
-    commission: string;
-    isActive: boolean;
-  } | null>(null);
 
 
 
@@ -408,7 +391,7 @@ export function SettingsScreen({
       {!canEdit && (
         <p className={cn(card, "text-[13px] leading-relaxed text-ink-muted")}>
           You can read the settings but not change them. Rooms, rates and
-          booking sources are set by managers and administrators.
+          sales channels are set by managers and administrators.
         </p>
       )}
 
@@ -1130,175 +1113,7 @@ export function SettingsScreen({
       )}
 
       {tab === "channels" && (
-        <>
-          <div className={card}>
-            <div className="mb-4 flex items-center justify-between">
-              <h2 className="font-display text-[15px] font-semibold tracking-tightest text-ink">
-                Booking sources
-              </h2>
-              {canEdit && (
-                <button
-                  onClick={() =>
-                    setCh({
-                      id: null,
-                      code: "",
-                      name: "",
-                      kind: "direct",
-                      commission: "0",
-                      isActive: true,
-                    })
-                  }
-                  className={secondary}
-                >
-                  New source
-                </button>
-              )}
-            </div>
-
-            {channels.length === 0 ? (
-              <p className="rounded-md bg-warn-wash px-3 py-3 text-center text-[13px] leading-relaxed text-warn-deep">
-                None yet. Add at least &ldquo;Direct&rdquo; — a booking cannot
-                be taken without a source.
-              </p>
-            ) : (
-              <table className="w-full text-[13px]">
-                <thead>
-                  <tr className="border-b border-line text-left text-ink-faint">
-                    {["Code", "Name", "Kind", "Commission", "", ""].map((c, i) => (
-                      <th
-                        key={c || i}
-                        className="whitespace-nowrap px-3 pb-2.5 text-xxs font-semibold uppercase tracking-[0.1em]"
-                      >
-                        {c}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-line">
-                  {channels.map((c) => (
-                    <tr key={c.id} className={cn(!c.isActive && "opacity-55")}>
-                      <td className="px-3 py-2.5 font-medium text-ink">{c.code}</td>
-                      <td className="px-3 py-2.5 text-ink">{c.name}</td>
-                      <td className="px-3 py-2.5 text-ink-muted">{c.kind}</td>
-                      <td className="tnum px-3 py-2.5 text-ink-muted">
-                        {c.commissionBps === 0 ? "—" : `${(c.commissionBps / 100).toFixed(2)}%`}
-                      </td>
-                      <td className="px-3 py-2.5 text-xxs text-ink-faint">
-                        {c.isActive ? "" : "retired"}
-                      </td>
-                      <td className="px-3 py-2.5 text-right">
-                        {canEdit && (
-                          <button
-                            onClick={() =>
-                              setCh({
-                                id: c.id,
-                                code: c.code,
-                                name: c.name,
-                                kind: c.kind,
-                                commission: String(c.commissionBps / 100),
-                                isActive: c.isActive,
-                              })
-                            }
-                            className="text-ink-muted underline-offset-2 hover:text-ink hover:underline"
-                          >
-                            Edit
-                          </button>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-          </div>
-
-          {ch && (
-            <div className={card}>
-              <h3 className="mb-4 font-display text-[15px] font-semibold tracking-tightest text-ink">
-                {ch.id ? "Edit booking source" : "New booking source"}
-              </h3>
-              <div className="grid gap-4 sm:grid-cols-4">
-                <div>
-                  <label htmlFor="c-code" className={label}>Code</label>
-                  <input
-                    id="c-code"
-                    value={ch.code}
-                    placeholder="DIR"
-                    onChange={(e) => setCh({ ...ch, code: e.target.value.toUpperCase() })}
-                    className={cn(field, "uppercase")}
-                  />
-                </div>
-                <div>
-                  <label htmlFor="c-name" className={label}>Name</label>
-                  <input
-                    id="c-name"
-                    value={ch.name}
-                    placeholder="Direct"
-                    onChange={(e) => setCh({ ...ch, name: e.target.value })}
-                    className={field}
-                  />
-                </div>
-                <div>
-                  <label htmlFor="c-kind" className={label}>Kind</label>
-                  <select
-                    id="c-kind"
-                    value={ch.kind}
-                    onChange={(e) => setCh({ ...ch, kind: e.target.value as ChannelKind })}
-                    className={field}
-                  >
-                    {CHANNEL_KINDS.map((k) => (
-                      <option key={k.value} value={k.value}>{k.label}</option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label htmlFor="c-comm" className={label}>Commission %</label>
-                  <input
-                    id="c-comm"
-                    inputMode="decimal"
-                    value={ch.commission}
-                    onChange={(e) => setCh({ ...ch, commission: e.target.value })}
-                    className={cn(field, "tnum")}
-                  />
-                </div>
-              </div>
-              {ch.id && (
-                <label className="mt-4 flex items-center gap-2 text-[13px] text-ink-muted">
-                  <input
-                    type="checkbox"
-                    checked={ch.isActive}
-                    onChange={(e) => setCh({ ...ch, isActive: e.target.checked })}
-                  />
-                  Still selling
-                </label>
-              )}
-              <div className="mt-4 flex justify-end gap-2">
-                <button onClick={() => setCh(null)} className={secondary}>Cancel</button>
-                <button
-                  onClick={() =>
-                    run(
-                      () =>
-                        saveChannel({
-                          id: ch.id,
-                          code: ch.code,
-                          name: ch.name,
-                          kind: ch.kind,
-                          // Basis points, like every other rate here.
-                          commissionBps: Math.round((Number(ch.commission) || 0) * 100),
-                          isActive: ch.isActive,
-                        }),
-                      `${ch.name || "Source"} saved.`,
-                    )
-                  }
-                  disabled={pending}
-                  className={primary}
-                >
-                  Save
-                </button>
-              </div>
-            </div>
-          )}
-        </>
+        <SalesChannelsPanel channels={channels} canEdit={canEdit} pending={pending} run={run} />
       )}
 
       {/* Tax ----------------------------------------------------------- */}
