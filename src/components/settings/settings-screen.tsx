@@ -42,6 +42,8 @@ import { RoomSetupPanel, RoomTypesPanel } from "@/components/settings/room-panel
 import { CancellationPolicyPanel } from "@/components/settings/cancellation-policy-panel";
 import { RatePlansPanel } from "@/components/settings/rate-plans-panel";
 import { RateCombinations } from "@/components/settings/rate-combinations";
+import { ChannelManagerPanel } from "@/components/settings/channel-manager-panel";
+import type { ChannelManager } from "@/lib/channel-managers";
 import { SeasonsPanel } from "@/components/settings/seasons-panel";
 import { DiscountsPanel } from "@/components/settings/discounts-panel";
 import type { InventorySettings } from "@/lib/inventory-settings";
@@ -220,6 +222,7 @@ export function SettingsScreen({
   discounts,
   virtualRoomTypes,
   weekRates,
+  channelManagers,
 }: {
   tab: SettingsTab;
   property: PropertySettings;
@@ -265,6 +268,8 @@ export function SettingsScreen({
   virtualRoomTypes: VirtualRoomType[];
   /** The weekly rate templates (0096); loaded only on the Rate Plans tab. */
   weekRates: WeekRate[];
+  /** Channel manager connections (0097); loaded only on their tab. */
+  channelManagers: ChannelManager[];
   roomTypes: RoomTypeSetting[];
   rooms: RoomSettingsPage;
   roomQuery: string;
@@ -1097,6 +1102,16 @@ export function SettingsScreen({
       )}
 
       {/* Channels ------------------------------------------------------ */}
+      {tab === "channel-manager" && (
+        <ChannelManagerPanel
+          channelManagers={channelManagers}
+          timezone={property.timezone}
+          canEdit={canEdit}
+          pending={pending}
+          run={run}
+        />
+      )}
+
       {tab === "channels" && (
         <>
           <div className={card}>

@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0096` are
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0097` are
 applied to the hosted database.
 
 Working on real data: dashboard (house board, movements, pace, activity feed),
@@ -270,6 +270,7 @@ Each read is a Postgres view or RPC, never aggregation in the client:
 | `getAccountingSystems()`            | `accounting_systems` (0087)       |
 | `getInventorySettings()`            | `inventory_settings` (0088)       |
 | `getDiscounts()`                    | `discounts` (0090)                |
+| `getChannelManagers()`              | `channel_managers` (0097)         |
 | `getMealReport(from, to)`           | `meal_report(from, to)`           |
 
 **Two signatures carry the room-count rule.** The client operates properties
@@ -1872,6 +1873,36 @@ anywhere else. Collapsed height must stay constant regardless of room count.
       discount the nights instead, when this is wired -- and ask first.
       Offers (promotions) are still what reduces a stay automatically.
     - Genuinely deleted: nothing points at a discount.
+  - **CONNECTIVITY -> CHANNEL MANAGER (0097) IS STORED, NOT YET CONNECTED.**
+    The reference's list (Title, Is Active, Is Synced, Synced At) and ADD
+    CHANNEL offering Site Minder or Vertical Booking, each with its own form
+    inside the card (`channel-manager-panel.tsx`). One connection per
+    provider per property; the menu offers only the ones not yet added.
+    Booking Sources (`channels`) sits after it in the same section.
+    - **Nothing syncs.** There is no SiteMinder or Vertical Booking code and
+      OTA bookings are still entered by hand (open decision 2). Is Synced
+      reads No and Synced At is blank, which is true. When a sync lands it
+      needs the idempotency keys and `channel_sync_log` that decision names.
+    - **THE PASSWORD IS IN SUPABASE VAULT AND IS WRITE-ONLY.** A third party's
+      login cannot sit in a row every member of staff can select -- the rule
+      the payment gateway table keeps. `save_channel_manager()` writes it with
+      `vault.create_secret()` and the row holds only `password_secret_id`;
+      `authenticated` and `anon` have no access to the vault schema (tested),
+      so no browser and no staff session can read it back. The form shows
+      "Saved" and a blank field keeps it. A sync job reads it on the server.
+      That is why the two writes are `security definer`: they check
+      `is_revenue_staff()` and the property themselves, and the table grants
+      staff SELECT only. `delete_channel_manager()` removes the secret too.
+    - Site Minder: username, password, Hotel Code, Region, Days to sync, one
+      "Room & Rate configuration" CSV. Vertical Booking: username, password,
+      Requestor ID, Hotel ID, Days to sync (400 by default, as theirs), Room
+      and Rate CSVs, "Sync as multi occupancy rates". Fields of the other
+      provider are cleared on save. Hotel Code and Hotel ID are one column.
+    - **The CSVs are stored as text on the row** (256 KB each, with the file
+      name), downloadable again; their format has not been seen, so nothing
+      parses them. **PROVISIONAL:** the Region list (EMEA, APAC, Americas) and
+      the Days to sync choices beside 400 -- neither dropdown was seen open.
+      Both are in `src/lib/channel-managers.ts` and the 0097 checks.
   - **PAYMENT GATEWAY (0086) AND ACCOUNTING SYSTEMS (0087) ARE STORED, NOT
     YET LIVE, BY DECISION.** The client: gateways are connected per client, as
     each asks for one. A row says which gateway or ledger the hotel uses; no

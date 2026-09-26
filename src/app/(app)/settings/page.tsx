@@ -36,6 +36,7 @@ import {
   getCancellationPolicies,
   getSeasonSettings,
   getWeekRates,
+  getChannelManagers,
   getStaffSettings,
   getTaxRateSettings,
 } from "@/lib/queries";
@@ -89,6 +90,7 @@ export default async function SettingsPage({
     discounts,
     virtualRoomTypes,
     weekRates,
+    channelManagers,
   ] = await Promise.all([
     getPropertySettings(),
     getRoomTypeSettings(),
@@ -124,6 +126,7 @@ export default async function SettingsPage({
     getDiscounts(),
     getVirtualRoomTypes(),
     tab === "rate-plans" ? getWeekRates() : Promise.resolve([]),
+    tab === "channel-manager" ? getChannelManagers() : Promise.resolve([]),
   ]);
 
   /*
@@ -179,6 +182,7 @@ export default async function SettingsPage({
         discounts={discounts}
         virtualRoomTypes={virtualRoomTypes}
         weekRates={weekRates}
+        channelManagers={channelManagers}
       />
     </div>
   );
