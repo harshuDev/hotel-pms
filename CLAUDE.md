@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0082` are
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0084` are
 applied to the hosted database.
 
 Working on real data: dashboard (house board, movements, pace, activity feed),
@@ -1589,11 +1589,12 @@ anywhere else. Collapsed height must stay constant regardless of room count.
     Configuration went in with 0073, Communications & Notifications with
     0074-0075, System Settings grew its three with 0076-0078.
   - **FINANCES AND INVENTORY are the reference's labels in its order**
-    (0079): Custom Payment Types, Tax Information, Invoice Settings (0080);
+    (0079): Custom Payment Types, Tax Information, Invoice Settings (0080),
+    Pos Profiles (0084), Currencies (0083);
     Room Type, Room Setup,
     Cancellation Policy, Rate Plans, Seasons and Events. Room Type and Room
     Setup moved there from Hotel Content, where the reference does not have
-    them. Their other items — Pos Profiles, Currencies,
+    them. Their other items —
     Accounting Categories, Payment Gateway, Accounting Systems, and
     Inventory's Settings and Discounts — go in as each is built. Tab ids did
     not change, so every existing link still lands.
@@ -1639,6 +1640,29 @@ anywhere else. Collapsed height must stay constant regardless of room count.
       There is no account statement yet for the reminder and terms to print
       on.
     - The LOCALE button and translate icons are not copied, as elsewhere.
+  - **POS PROFILES (0084) AND CURRENCIES (0083) ARE STORED, NOT YET LIVE.**
+    - **Pos Profiles**: "up to one profile per each pos type" is
+      `unique (property_id, pos_type)`; the form opens inside the list card,
+      as the reference's Create Pos Profile does, and offers only the types
+      not yet taken. **THE TYPE LIST IS PROVISIONAL** — the reference's
+      dropdown has not been seen open — so `known_pos_types()` holds ordinary
+      outlets (Restaurant, Bar, Room Service, Spa, Shop). It and `POS_TYPES`
+      in `src/lib/finance-profiles.ts` change together. No POS is connected;
+      outlet charges are still posted from the booking's Extras tab.
+    - **Currencies: THE DEFAULT IS NOT A ROW.** It is `properties.currency`,
+      set in Hotel Details, shown first with a tick and no icons — the
+      reference's default row carries none — so one place decides the
+      hotel's currency. `currency_profiles` holds the additional ones, each
+      with a rate that is "Live Exchange" or a fixed "1 EUR = 20.5 MXN",
+      stored as integer millionths (`fixed_rate_micros`) and parsed from the
+      typed string without a float. The default cannot be added as a
+      profile, and a profile that later becomes the default in Hotel Details
+      is not listed twice.
+    - **Nothing converts money yet**: no currency switcher on the guest page,
+      no foreign-currency invoice (itself a stored Hotel Feature), and "Live
+      Exchange" would need a rate feed this project has neither the network
+      access nor a key for. The natural first reader is a display-only
+      switcher on the guest booking page.
   - **COMMUNICATIONS & NOTIFICATIONS IS STORED, NOT YET SENT** (0074, 0075) --
     Hotel Emails Preferences and Email Setup, cloned from the reference, all
     in one row per property, `hotel_email_settings`.

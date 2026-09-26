@@ -33,7 +33,7 @@ const iconButton =
   "grid h-8 w-8 place-items-center rounded text-brass hover:bg-shell focus-visible:outline focus-visible:outline-2 focus-visible:outline-brass";
 const th = "px-2 py-2.5 text-left text-[12.5px] font-semibold text-ink";
 
-function EditIcon() {
+export function EditIcon() {
   // The reference's pencil-in-a-box.
   return (
     <svg viewBox="0 0 24 24" className="h-[20px] w-[20px]" fill="none" stroke="currentColor"
@@ -44,7 +44,7 @@ function EditIcon() {
   );
 }
 
-function TrashIcon() {
+export function TrashIcon() {
   return (
     <svg viewBox="0 0 24 24" className="h-[19px] w-[19px]" fill="currentColor" aria-hidden="true">
       <path d="M9 3h6l1 2h4v2H4V5h4zM6 9h12l-1 12H7z" />

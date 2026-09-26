@@ -24,6 +24,8 @@ import { LanguageSettingsPanel } from "@/components/settings/language-settings-p
 import type { LanguageSettings } from "@/lib/language-settings";
 import { InvoiceSettingsPanel } from "@/components/settings/invoice-settings-panel";
 import type { InvoiceSettings } from "@/lib/invoice-settings";
+import { CurrenciesPanel, PosProfilesPanel } from "@/components/settings/finance-profile-panels";
+import type { CurrencyProfile, PosProfile } from "@/lib/finance-profiles";
 import type { EmailSetup, EmailTemplate, HotelEmailSettings } from "@/lib/email-preferences";
 import { EmailSetupPanel } from "@/components/settings/email-setup-panel";
 import { FacilityIcon } from "@/components/settings/facility-icon";
@@ -215,6 +217,8 @@ export function SettingsScreen({
   calendarSettings,
   languageSettings,
   invoiceSettings,
+  posProfiles,
+  currencyProfiles,
 }: {
   tab: SettingsTab;
   property: PropertySettings;
@@ -243,6 +247,9 @@ export function SettingsScreen({
   languageSettings: LanguageSettings;
   /** Finances -> Invoice Settings (0080). */
   invoiceSettings: InvoiceSettings;
+  /** Finances -> Pos Profiles (0084) and Currencies (0083). */
+  posProfiles: PosProfile[];
+  currencyProfiles: CurrencyProfile[];
   roomTypes: RoomTypeSetting[];
   rooms: RoomSettingsPage;
   roomQuery: string;
@@ -1044,6 +1051,20 @@ export function SettingsScreen({
           // from the settings directly and needs no re-seeding.
           settings={invoiceSettings}
           propertyId={property.id}
+          canEdit={canEdit}
+          pending={pending}
+          run={run}
+        />
+      )}
+
+      {tab === "pos-profiles" && (
+        <PosProfilesPanel profiles={posProfiles} canEdit={canEdit} pending={pending} run={run} />
+      )}
+
+      {tab === "currencies" && (
+        <CurrenciesPanel
+          defaultCurrency={property.currency.trim()}
+          profiles={currencyProfiles}
           canEdit={canEdit}
           pending={pending}
           run={run}
