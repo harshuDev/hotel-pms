@@ -91,6 +91,8 @@ export interface Dict {
   agreePolicies: string;
   agreeAndBook: string;
   mustAgree: string;
+  privacyPolicy: string;
+  termsAndConditions: string;
   prevMonth: string;
   nextMonth: string;
 }
@@ -166,6 +168,8 @@ const en: Dict = {
   agreePolicies: "I have read and agree to the booking policy and the hotel policy",
   agreeAndBook: "Agree and book",
   mustAgree: "Please confirm that you have read the policies.",
+  privacyPolicy: "Privacy Policy",
+  termsAndConditions: "Terms & Conditions",
   prevMonth: "Previous month",
   nextMonth: "Next month",
 };
@@ -224,6 +228,8 @@ const de: Dict = {
   agreePolicies: "Ich habe die Buchungsbedingungen und die Hausregeln gelesen und stimme ihnen zu",
   agreeAndBook: "Zustimmen und buchen",
   mustAgree: "Bitte bestätigen Sie, dass Sie die Bedingungen gelesen haben.",
+  privacyPolicy: "Datenschutzerklärung",
+  termsAndConditions: "Allgemeine Geschäftsbedingungen",
   prevMonth: "Vorheriger Monat",
   nextMonth: "Nächster Monat",
 };
@@ -282,6 +288,8 @@ const fr: Dict = {
   agreePolicies: "J'ai lu et j'accepte les conditions de réservation et le règlement de l'hôtel",
   agreeAndBook: "Accepter et réserver",
   mustAgree: "Veuillez confirmer avoir lu les conditions.",
+  privacyPolicy: "Politique de confidentialité",
+  termsAndConditions: "Conditions générales",
   prevMonth: "Mois précédent",
   nextMonth: "Mois suivant",
 };
@@ -340,6 +348,8 @@ const es: Dict = {
   agreePolicies: "He leído y acepto la política de reserva y la política del hotel",
   agreeAndBook: "De acuerdo y reservar",
   mustAgree: "Confirme que ha leído las políticas.",
+  privacyPolicy: "Política de privacidad",
+  termsAndConditions: "Términos y condiciones",
   prevMonth: "Mes anterior",
   nextMonth: "Mes siguiente",
 };
@@ -398,6 +408,8 @@ const it: Dict = {
   agreePolicies: "Ho letto e accetto le condizioni di prenotazione e il regolamento dell'hotel",
   agreeAndBook: "Accetta e prenota",
   mustAgree: "Conferma di aver letto le condizioni.",
+  privacyPolicy: "Informativa sulla privacy",
+  termsAndConditions: "Termini e condizioni",
   prevMonth: "Mese precedente",
   nextMonth: "Mese successivo",
 };
@@ -456,6 +468,8 @@ const pt: Dict = {
   agreePolicies: "Li e aceito a política de reserva e as políticas do hotel",
   agreeAndBook: "Aceitar e reservar",
   mustAgree: "Confirme que leu as políticas.",
+  privacyPolicy: "Política de privacidade",
+  termsAndConditions: "Termos e condições",
   prevMonth: "Mês anterior",
   nextMonth: "Mês seguinte",
 };
@@ -514,6 +528,8 @@ const nl: Dict = {
   agreePolicies: "Ik heb de boekingsvoorwaarden en de huisregels gelezen en ga ermee akkoord",
   agreeAndBook: "Akkoord en boeken",
   mustAgree: "Bevestig dat u de voorwaarden hebt gelezen.",
+  privacyPolicy: "Privacybeleid",
+  termsAndConditions: "Algemene voorwaarden",
   prevMonth: "Vorige maand",
   nextMonth: "Volgende maand",
 };
@@ -572,6 +588,8 @@ const pl: Dict = {
   agreePolicies: "Przeczytałem(-am) i akceptuję zasady rezerwacji oraz zasady hotelu",
   agreeAndBook: "Akceptuję i rezerwuję",
   mustAgree: "Potwierdź, że zapoznałeś(-aś) się z zasadami.",
+  privacyPolicy: "Polityka prywatności",
+  termsAndConditions: "Regulamin",
   prevMonth: "Poprzedni miesiąc",
   nextMonth: "Następny miesiąc",
 };
@@ -630,6 +648,8 @@ const sv: Dict = {
   agreePolicies: "Jag har läst och godkänner bokningsvillkoren och hotellets regler",
   agreeAndBook: "Godkänn och boka",
   mustAgree: "Bekräfta att du har läst villkoren.",
+  privacyPolicy: "Integritetspolicy",
+  termsAndConditions: "Villkor",
   prevMonth: "Föregående månad",
   nextMonth: "Nästa månad",
 };
@@ -688,6 +708,8 @@ const da: Dict = {
   agreePolicies: "Jeg har læst og accepterer bookingbetingelserne og hotellets regler",
   agreeAndBook: "Accepter og book",
   mustAgree: "Bekræft venligst, at du har læst betingelserne.",
+  privacyPolicy: "Privatlivspolitik",
+  termsAndConditions: "Vilkår og betingelser",
   prevMonth: "Forrige måned",
   nextMonth: "Næste måned",
 };
@@ -746,6 +768,8 @@ const no: Dict = {
   agreePolicies: "Jeg har lest og godtar bestillingsvilkårene og hotellets regler",
   agreeAndBook: "Godta og bestill",
   mustAgree: "Bekreft at du har lest vilkårene.",
+  privacyPolicy: "Personvernerklæring",
+  termsAndConditions: "Vilkår og betingelser",
   prevMonth: "Forrige måned",
   nextMonth: "Neste måned",
 };
@@ -804,6 +828,8 @@ const fi: Dict = {
   agreePolicies: "Olen lukenut varausehdot ja hotellin säännöt ja hyväksyn ne",
   agreeAndBook: "Hyväksy ja varaa",
   mustAgree: "Vahvista, että olet lukenut ehdot.",
+  privacyPolicy: "Tietosuojakäytäntö",
+  termsAndConditions: "Käyttöehdot",
   prevMonth: "Edellinen kuukausi",
   nextMonth: "Seuraava kuukausi",
 };
@@ -862,6 +888,8 @@ const cs: Dict = {
   agreePolicies: "Přečetl(a) jsem si rezervační podmínky a pravidla hotelu a souhlasím s nimi",
   agreeAndBook: "Souhlasit a rezervovat",
   mustAgree: "Potvrďte prosím, že jste si podmínky přečetli.",
+  privacyPolicy: "Zásady ochrany osobních údajů",
+  termsAndConditions: "Obchodní podmínky",
   prevMonth: "Předchozí měsíc",
   nextMonth: "Další měsíc",
 };
@@ -920,6 +948,8 @@ const el: Dict = {
   agreePolicies: "Έχω διαβάσει και αποδέχομαι την πολιτική κράτησης και την πολιτική του ξενοδοχείου",
   agreeAndBook: "Αποδοχή και κράτηση",
   mustAgree: "Επιβεβαιώστε ότι διαβάσατε τις πολιτικές.",
+  privacyPolicy: "Πολιτική απορρήτου",
+  termsAndConditions: "Όροι και προϋποθέσεις",
   prevMonth: "Προηγούμενος μήνας",
   nextMonth: "Επόμενος μήνας",
 };
@@ -978,6 +1008,8 @@ const ro: Dict = {
   agreePolicies: "Am citit și accept politica de rezervare și regulile hotelului",
   agreeAndBook: "Accept și rezerv",
   mustAgree: "Confirmați că ați citit politicile.",
+  privacyPolicy: "Politica de confidențialitate",
+  termsAndConditions: "Termeni și condiții",
   prevMonth: "Luna anterioară",
   nextMonth: "Luna următoare",
 };
@@ -1036,6 +1068,8 @@ const hu: Dict = {
   agreePolicies: "Elolvastam és elfogadom a foglalási feltételeket és a házirendet",
   agreeAndBook: "Elfogadom és foglalok",
   mustAgree: "Kérjük, erősítse meg, hogy elolvasta a feltételeket.",
+  privacyPolicy: "Adatvédelmi szabályzat",
+  termsAndConditions: "Általános szerződési feltételek",
   prevMonth: "Előző hónap",
   nextMonth: "Következő hónap",
 };
@@ -1094,6 +1128,8 @@ const uk: Dict = {
   agreePolicies: "Я прочитав(ла) і приймаю умови бронювання та правила готелю",
   agreeAndBook: "Погодитися і забронювати",
   mustAgree: "Підтвердьте, що ви прочитали правила.",
+  privacyPolicy: "Політика конфіденційності",
+  termsAndConditions: "Умови та положення",
   prevMonth: "Попередній місяць",
   nextMonth: "Наступний місяць",
 };
@@ -1152,6 +1188,8 @@ const ru: Dict = {
   agreePolicies: "Я прочитал(а) и принимаю условия бронирования и правила отеля",
   agreeAndBook: "Согласиться и забронировать",
   mustAgree: "Подтвердите, что вы ознакомились с правилами.",
+  privacyPolicy: "Политика конфиденциальности",
+  termsAndConditions: "Условия и положения",
   prevMonth: "Предыдущий месяц",
   nextMonth: "Следующий месяц",
 };
@@ -1210,6 +1248,8 @@ const tr: Dict = {
   agreePolicies: "Rezervasyon koşullarını ve otel kurallarını okudum, kabul ediyorum",
   agreeAndBook: "Kabul et ve rezervasyon yap",
   mustAgree: "Lütfen koşulları okuduğunuzu onaylayın.",
+  privacyPolicy: "Gizlilik Politikası",
+  termsAndConditions: "Şartlar ve Koşullar",
   prevMonth: "Önceki ay",
   nextMonth: "Sonraki ay",
 };

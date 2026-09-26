@@ -838,6 +838,52 @@ export async function getChannelManagerConfig(
   return { ok: true, data: { name, csv } };
 }
 
+/* -- Connectivity -> Booking Engine Settings (0098) ----------------------- */
+
+export async function saveBookingEngineTexts(input: {
+  /** Blank goes back to the default policy. */
+  privacyPolicy: string;
+  /** Blank is none. */
+  terms: string;
+}): Promise<ActionResult<null>> {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("save_booking_engine_texts", {
+    p_privacy_policy: input.privacyPolicy,
+    p_terms: input.terms,
+  });
+  if (error) return { ok: false, error: error.message };
+  revalidateSettings();
+  return { ok: true, data: null };
+}
+
+export async function saveBookingEngineProfile(input: {
+  id: string | null;
+  title: string;
+  slug: string;
+  /** Empty is every room type. */
+  roomTypeIds: string[];
+}): Promise<ActionResult<null>> {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("save_booking_engine_profile", {
+    // Null adds a new profile.
+    p_id: nullableArg(input.id),
+    p_title: input.title,
+    p_slug: input.slug,
+    p_room_type_ids: input.roomTypeIds,
+  });
+  if (error) return { ok: false, error: error.message };
+  revalidateSettings();
+  return { ok: true, data: null };
+}
+
+export async function deleteBookingEngineProfile(id: string): Promise<ActionResult<null>> {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("delete_booking_engine_profile", { p_id: id });
+  if (error) return { ok: false, error: error.message };
+  revalidateSettings();
+  return { ok: true, data: null };
+}
+
 /* -- Finances -> Accounting Systems (0087) -------------------------------- */
 
 export async function saveAccountingSystem(input: {

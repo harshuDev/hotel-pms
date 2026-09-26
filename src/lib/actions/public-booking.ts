@@ -101,6 +101,50 @@ export async function getPublicLanguageSettings(propertyId: string): Promise<Lan
 }
 
 /**
+ * Booking Engine Settings for the guest page (0098): the privacy policy and
+ * terms, the hotel's address the policy's placeholders are filled from, and
+ * the room types a `?profile=` shows. `roomTypeIds` null is every room type,
+ * which is also what an unknown profile gets. A failed read is the defaults,
+ * so a setting can never take the booking page down.
+ */
+export interface PublicBookingEngine {
+  privacyPolicy: string | null;
+  terms: string | null;
+  country: string | null;
+  postcode: string | null;
+  city: string | null;
+  region: string | null;
+  address: string | null;
+  email: string | null;
+  phone: string | null;
+  roomTypeIds: string[] | null;
+}
+
+export async function getPublicBookingEngine(
+  propertyId: string,
+  profile: string | null,
+): Promise<PublicBookingEngine> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("public_booking_engine", {
+    p_property_id: propertyId,
+    p_profile: profile ?? "",
+  });
+  const r = !error && data && data.length > 0 ? data[0] : null;
+  return {
+    privacyPolicy: r?.privacy_policy ?? null,
+    terms: r?.terms ?? null,
+    country: r?.country ?? null,
+    postcode: r?.postcode ?? null,
+    city: r?.city ?? null,
+    region: r?.region ?? null,
+    address: r?.address ?? null,
+    email: r?.email ?? null,
+    phone: r?.phone ?? null,
+    roomTypeIds: r?.room_type_ids ?? null,
+  };
+}
+
+/**
  * The hotel's policies, for the guest (0071). Null when the hotel has never
  * saved them -- which the page draws as nothing at all, rather than as a
  * policy the hotel did not state.
