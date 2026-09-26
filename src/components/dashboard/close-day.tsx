@@ -9,6 +9,7 @@ import {
   closeBusinessDate,
   type CloseDayResult,
 } from "@/lib/actions/business-date";
+import { useCurrency } from "@/components/currency";
 
 /**
  * The night audit control. Only shown to staff who can actually run it; the
@@ -16,6 +17,7 @@ import {
  * gate.
  */
 export function CloseDay({ businessDate }: { businessDate: string }) {
+  const currency = useCurrency();
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [open, setOpen] = useState(false);
@@ -76,7 +78,7 @@ export function CloseDay({ businessDate }: { businessDate: string }) {
                     <div className="flex justify-between border-b border-line pb-2">
                       <dt className="text-ink-muted">Charged</dt>
                       <dd className="tnum font-medium">
-                        {formatMoney(done.roomChargesCents)}
+                        {formatMoney(done.roomChargesCents, currency)}
                       </dd>
                     </div>
                     <div className="flex justify-between pt-1">

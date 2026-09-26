@@ -10,11 +10,10 @@
  *
  * INR is deliberately absent, per a standing instruction on this project.
  *
- * WHAT CHANGING THIS DOES TODAY: it is the currency the guest booking page
- * prices in. The staff screens still format every amount as GBP --
- * `CURRENCY` in `src/lib/money.ts` is a constant -- so a property moved to
- * MXN here is not yet shown in pesos at the front desk. That is recorded in
- * CLAUDE.md as the next thing to fix before a non-UK hotel goes live.
+ * WHAT CHANGING THIS DOES: it is the currency every amount on the property is
+ * written in -- the guest booking page and, since the staff formatters took
+ * the currency as a required argument, every staff screen too. The figures
+ * themselves do not move: integer minor units, two decimal places.
  */
 export const CURRENCIES: { code: string; symbol: string }[] = [
   { code: "AED", symbol: "د.إ" },

@@ -54,6 +54,29 @@ export interface Dict {
   /** Cancellation terms, which a guest must be shown BEFORE they agree. */
   cancellation: string;
   nonRefundable: string;
+  /**
+   * The hotel's policies (0071). The section titles and the listed options
+   * are ours and are translated; a hotel's "Custom policy" text and its Other
+   * Policies are its own words and are not -- the same line as the
+   * cancellation policy's wording. Children reuses `children`.
+   */
+  policies: string;
+  policyPets: string;
+  policySmoking: string;
+  policyInternet: string;
+  policyParking: string;
+  policyOther: string;
+  pAllAges: string;
+  pNoChildren: string;
+  pNoInfants: string;
+  pNoPets: string;
+  pPetsSurcharge: string;
+  pNoSmoking: string;
+  pSmokingAreas: string;
+  pWifiAll: string;
+  pWifiMost: string;
+  pParkingFree: string;
+  pParkingLimited: string;
 }
 
 const en: Dict = {
@@ -97,6 +120,23 @@ const en: Dict = {
   notBookable: "Online booking is not open yet",
   notBookableHint: "This hotel is not taking bookings on this page at the moment. Please contact us directly and we will be glad to help.",
   cancellation: "Cancellation", nonRefundable: "Non-refundable",
+  policies: "Hotel policies",
+  policyPets: "Pets",
+  policySmoking: "Smoking",
+  policyInternet: "Internet",
+  policyParking: "Parking",
+  policyOther: "Other",
+  pAllAges: "All ages welcome",
+  pNoChildren: "Sorry, no children and infants",
+  pNoInfants: "Sorry, no infants",
+  pNoPets: "Sorry, no pets",
+  pPetsSurcharge: "Pets welcome, but may incur surcharge",
+  pNoSmoking: "Strictly no smoking",
+  pSmokingAreas: "Smoking in permitted areas only",
+  pWifiAll: "Free Wifi in all areas",
+  pWifiMost: "Free WiFi in most areas depending on signal",
+  pParkingFree: "Free On-Site Parking",
+  pParkingLimited: "Limited On-Site Parking Available",
 };
 
 const de: Dict = {
@@ -123,6 +163,23 @@ const de: Dict = {
   notBookable: "Online-Buchung ist noch nicht möglich",
   notBookableHint: "Dieses Hotel nimmt auf dieser Seite derzeit keine Buchungen entgegen. Bitte kontaktieren Sie uns direkt — wir helfen Ihnen gern.",
   cancellation: "Stornierung", nonRefundable: "Nicht erstattbar",
+  policies: "Hausregeln",
+  policyPets: "Haustiere",
+  policySmoking: "Rauchen",
+  policyInternet: "Internet",
+  policyParking: "Parken",
+  policyOther: "Sonstiges",
+  pAllAges: "Alle Altersgruppen willkommen",
+  pNoChildren: "Leider keine Kinder und Kleinkinder",
+  pNoInfants: "Leider keine Kleinkinder",
+  pNoPets: "Leider keine Haustiere",
+  pPetsSurcharge: "Haustiere willkommen, ggf. gegen Aufpreis",
+  pNoSmoking: "Rauchen strengstens verboten",
+  pSmokingAreas: "Rauchen nur in ausgewiesenen Bereichen",
+  pWifiAll: "Kostenloses WLAN in allen Bereichen",
+  pWifiMost: "Kostenloses WLAN in den meisten Bereichen, je nach Empfang",
+  pParkingFree: "Kostenlose Parkplätze vor Ort",
+  pParkingLimited: "Begrenzte Parkplätze vor Ort",
 };
 
 const fr: Dict = {
@@ -149,6 +206,23 @@ const fr: Dict = {
   notBookable: "La réservation en ligne n'est pas encore ouverte",
   notBookableHint: "Cet hôtel ne prend pas de réservations sur cette page pour le moment. Contactez-nous directement, nous serons ravis de vous aider.",
   cancellation: "Annulation", nonRefundable: "Non remboursable",
+  policies: "Règlement de l'hôtel",
+  policyPets: "Animaux",
+  policySmoking: "Tabac",
+  policyInternet: "Internet",
+  policyParking: "Parking",
+  policyOther: "Autres",
+  pAllAges: "Tous les âges sont les bienvenus",
+  pNoChildren: "Désolé, ni enfants ni bébés",
+  pNoInfants: "Désolé, pas de bébés",
+  pNoPets: "Désolé, pas d'animaux",
+  pPetsSurcharge: "Animaux bienvenus, un supplément peut s'appliquer",
+  pNoSmoking: "Strictement non-fumeur",
+  pSmokingAreas: "Fumer uniquement dans les zones autorisées",
+  pWifiAll: "Wi-Fi gratuit dans tout l'établissement",
+  pWifiMost: "Wi-Fi gratuit dans la plupart des zones selon le signal",
+  pParkingFree: "Parking gratuit sur place",
+  pParkingLimited: "Places de parking limitées sur place",
 };
 
 const es: Dict = {
@@ -175,6 +249,23 @@ const es: Dict = {
   notBookable: "La reserva en línea aún no está disponible",
   notBookableHint: "Este hotel no acepta reservas en esta página por ahora. Póngase en contacto con nosotros directamente y le ayudaremos con mucho gusto.",
   cancellation: "Cancelación", nonRefundable: "No reembolsable",
+  policies: "Políticas del hotel",
+  policyPets: "Mascotas",
+  policySmoking: "Fumar",
+  policyInternet: "Internet",
+  policyParking: "Aparcamiento",
+  policyOther: "Otras",
+  pAllAges: "Bienvenidas todas las edades",
+  pNoChildren: "Lo sentimos, no se admiten niños ni bebés",
+  pNoInfants: "Lo sentimos, no se admiten bebés",
+  pNoPets: "Lo sentimos, mascotas no",
+  pPetsSurcharge: "Se admiten mascotas, con posible suplemento",
+  pNoSmoking: "Prohibido fumar",
+  pSmokingAreas: "Fumar en áreas permitidas solamente",
+  pWifiAll: "Wifi gratis en todas las áreas",
+  pWifiMost: "Wifi gratis en la mayoría de las áreas, según la señal",
+  pParkingFree: "Aparcamiento gratuito en el alojamiento",
+  pParkingLimited: "Aparcamiento limitado en el alojamiento",
 };
 
 const it: Dict = {
@@ -201,6 +292,23 @@ const it: Dict = {
   notBookable: "La prenotazione online non è ancora attiva",
   notBookableHint: "Al momento questo hotel non accetta prenotazioni da questa pagina. Contattaci direttamente, saremo lieti di aiutarti.",
   cancellation: "Cancellazione", nonRefundable: "Non rimborsabile",
+  policies: "Regolamento dell'hotel",
+  policyPets: "Animali",
+  policySmoking: "Fumo",
+  policyInternet: "Internet",
+  policyParking: "Parcheggio",
+  policyOther: "Altro",
+  pAllAges: "Tutte le età sono benvenute",
+  pNoChildren: "Spiacenti, niente bambini e neonati",
+  pNoInfants: "Spiacenti, niente neonati",
+  pNoPets: "Spiacenti, niente animali",
+  pPetsSurcharge: "Animali ammessi, con possibile supplemento",
+  pNoSmoking: "Vietato fumare",
+  pSmokingAreas: "Fumo consentito solo nelle aree dedicate",
+  pWifiAll: "Wi-Fi gratuito in tutte le aree",
+  pWifiMost: "Wi-Fi gratuito nella maggior parte delle aree, a seconda del segnale",
+  pParkingFree: "Parcheggio gratuito in loco",
+  pParkingLimited: "Parcheggio limitato in loco",
 };
 
 const pt: Dict = {
@@ -227,6 +335,23 @@ const pt: Dict = {
   notBookable: "A reserva online ainda não está disponível",
   notBookableHint: "Este hotel não aceita reservas nesta página de momento. Contacte-nos diretamente e teremos todo o gosto em ajudar.",
   cancellation: "Cancelamento", nonRefundable: "Não reembolsável",
+  policies: "Políticas do hotel",
+  policyPets: "Animais",
+  policySmoking: "Fumar",
+  policyInternet: "Internet",
+  policyParking: "Estacionamento",
+  policyOther: "Outras",
+  pAllAges: "Todas as idades são bem-vindas",
+  pNoChildren: "Lamentamos, não são aceites crianças nem bebés",
+  pNoInfants: "Lamentamos, não são aceites bebés",
+  pNoPets: "Lamentamos, não são aceites animais",
+  pPetsSurcharge: "Animais bem-vindos, podendo ter custo adicional",
+  pNoSmoking: "Proibido fumar",
+  pSmokingAreas: "Fumar apenas nas áreas permitidas",
+  pWifiAll: "Wi-Fi gratuito em todas as áreas",
+  pWifiMost: "Wi-Fi gratuito na maioria das áreas, conforme o sinal",
+  pParkingFree: "Estacionamento gratuito no local",
+  pParkingLimited: "Estacionamento limitado no local",
 };
 
 const nl: Dict = {
@@ -253,6 +378,23 @@ const nl: Dict = {
   notBookable: "Online boeken is nog niet mogelijk",
   notBookableHint: "Dit hotel neemt op deze pagina momenteel geen boekingen aan. Neem rechtstreeks contact met ons op, wij helpen u graag.",
   cancellation: "Annulering", nonRefundable: "Niet-restitueerbaar",
+  policies: "Huisregels",
+  policyPets: "Huisdieren",
+  policySmoking: "Roken",
+  policyInternet: "Internet",
+  policyParking: "Parkeren",
+  policyOther: "Overig",
+  pAllAges: "Alle leeftijden welkom",
+  pNoChildren: "Helaas geen kinderen en baby's",
+  pNoInfants: "Helaas geen baby's",
+  pNoPets: "Helaas geen huisdieren",
+  pPetsSurcharge: "Huisdieren welkom, mogelijk tegen toeslag",
+  pNoSmoking: "Roken is ten strengste verboden",
+  pSmokingAreas: "Roken alleen in de daarvoor bestemde ruimtes",
+  pWifiAll: "Gratis wifi in alle ruimtes",
+  pWifiMost: "Gratis wifi in de meeste ruimtes, afhankelijk van het signaal",
+  pParkingFree: "Gratis parkeren op het terrein",
+  pParkingLimited: "Beperkte parkeergelegenheid op het terrein",
 };
 
 const pl: Dict = {
@@ -279,6 +421,23 @@ const pl: Dict = {
   notBookable: "Rezerwacja online nie jest jeszcze dostępna",
   notBookableHint: "Ten hotel nie przyjmuje obecnie rezerwacji na tej stronie. Prosimy o bezpośredni kontakt — chętnie pomożemy.",
   cancellation: "Anulowanie", nonRefundable: "Bezzwrotna",
+  policies: "Zasady hotelu",
+  policyPets: "Zwierzęta",
+  policySmoking: "Palenie",
+  policyInternet: "Internet",
+  policyParking: "Parking",
+  policyOther: "Inne",
+  pAllAges: "Goście w każdym wieku mile widziani",
+  pNoChildren: "Niestety nie przyjmujemy dzieci ani niemowląt",
+  pNoInfants: "Niestety nie przyjmujemy niemowląt",
+  pNoPets: "Niestety nie przyjmujemy zwierząt",
+  pPetsSurcharge: "Zwierzęta mile widziane, możliwa dodatkowa opłata",
+  pNoSmoking: "Całkowity zakaz palenia",
+  pSmokingAreas: "Palenie tylko w wyznaczonych miejscach",
+  pWifiAll: "Bezpłatne Wi-Fi na całym terenie",
+  pWifiMost: "Bezpłatne Wi-Fi w większości miejsc, zależnie od zasięgu",
+  pParkingFree: "Bezpłatny parking na miejscu",
+  pParkingLimited: "Ograniczona liczba miejsc parkingowych na miejscu",
 };
 
 const sv: Dict = {
@@ -305,6 +464,23 @@ const sv: Dict = {
   notBookable: "Onlinebokning är inte öppen än",
   notBookableHint: "Hotellet tar för närvarande inte emot bokningar på den här sidan. Kontakta oss direkt, så hjälper vi dig gärna.",
   cancellation: "Avbokning", nonRefundable: "Återbetalas ej",
+  policies: "Hotellets regler",
+  policyPets: "Husdjur",
+  policySmoking: "Rökning",
+  policyInternet: "Internet",
+  policyParking: "Parkering",
+  policyOther: "Övrigt",
+  pAllAges: "Alla åldrar välkomna",
+  pNoChildren: "Tyvärr inga barn eller spädbarn",
+  pNoInfants: "Tyvärr inga spädbarn",
+  pNoPets: "Tyvärr inga husdjur",
+  pPetsSurcharge: "Husdjur välkomna, men tillägg kan tillkomma",
+  pNoSmoking: "Rökning strängt förbjuden",
+  pSmokingAreas: "Rökning endast på anvisade platser",
+  pWifiAll: "Gratis wifi i alla utrymmen",
+  pWifiMost: "Gratis wifi i de flesta utrymmen beroende på signal",
+  pParkingFree: "Gratis parkering på plats",
+  pParkingLimited: "Begränsad parkering på plats",
 };
 
 const da: Dict = {
@@ -331,6 +507,23 @@ const da: Dict = {
   notBookable: "Onlinebooking er ikke åben endnu",
   notBookableHint: "Dette hotel tager i øjeblikket ikke imod bookinger på denne side. Kontakt os direkte, så hjælper vi gerne.",
   cancellation: "Afbestilling", nonRefundable: "Ikke-refunderbar",
+  policies: "Hotellets regler",
+  policyPets: "Kæledyr",
+  policySmoking: "Rygning",
+  policyInternet: "Internet",
+  policyParking: "Parkering",
+  policyOther: "Andet",
+  pAllAges: "Alle aldre er velkomne",
+  pNoChildren: "Beklager, ingen børn eller spædbørn",
+  pNoInfants: "Beklager, ingen spædbørn",
+  pNoPets: "Beklager, ingen kæledyr",
+  pPetsSurcharge: "Kæledyr er velkomne, men der kan komme et tillæg",
+  pNoSmoking: "Rygning strengt forbudt",
+  pSmokingAreas: "Rygning kun på anviste områder",
+  pWifiAll: "Gratis wi-fi i alle områder",
+  pWifiMost: "Gratis wi-fi i de fleste områder afhængigt af signalet",
+  pParkingFree: "Gratis parkering på stedet",
+  pParkingLimited: "Begrænset parkering på stedet",
 };
 
 const no: Dict = {
@@ -357,6 +550,23 @@ const no: Dict = {
   notBookable: "Nettbestilling er ikke åpen ennå",
   notBookableHint: "Dette hotellet tar foreløpig ikke imot bestillinger på denne siden. Ta kontakt med oss direkte, så hjelper vi deg gjerne.",
   cancellation: "Avbestilling", nonRefundable: "Ikke refunderbar",
+  policies: "Hotellets regler",
+  policyPets: "Kjæledyr",
+  policySmoking: "Røyking",
+  policyInternet: "Internett",
+  policyParking: "Parkering",
+  policyOther: "Annet",
+  pAllAges: "Alle aldre er velkommen",
+  pNoChildren: "Beklager, ingen barn eller spedbarn",
+  pNoInfants: "Beklager, ingen spedbarn",
+  pNoPets: "Beklager, ingen kjæledyr",
+  pPetsSurcharge: "Kjæledyr er velkommen, men tillegg kan påløpe",
+  pNoSmoking: "Røyking strengt forbudt",
+  pSmokingAreas: "Røyking kun i anviste områder",
+  pWifiAll: "Gratis wifi i alle områder",
+  pWifiMost: "Gratis wifi i de fleste områder, avhengig av signal",
+  pParkingFree: "Gratis parkering på stedet",
+  pParkingLimited: "Begrenset parkering på stedet",
 };
 
 const fi: Dict = {
@@ -383,6 +593,23 @@ const fi: Dict = {
   notBookable: "Verkkovaraus ei ole vielä avoinna",
   notBookableHint: "Tämä hotelli ei toistaiseksi ota vastaan varauksia tältä sivulta. Ota meihin suoraan yhteyttä, autamme mielellämme.",
   cancellation: "Peruutus", nonRefundable: "Ei hyvitettävä",
+  policies: "Hotellin säännöt",
+  policyPets: "Lemmikit",
+  policySmoking: "Tupakointi",
+  policyInternet: "Internet",
+  policyParking: "Pysäköinti",
+  policyOther: "Muut",
+  pAllAges: "Kaikenikäiset ovat tervetulleita",
+  pNoChildren: "Valitettavasti ei lapsia eikä vauvoja",
+  pNoInfants: "Valitettavasti ei vauvoja",
+  pNoPets: "Valitettavasti ei lemmikkejä",
+  pPetsSurcharge: "Lemmikit tervetulleita, lisämaksu mahdollinen",
+  pNoSmoking: "Tupakointi ehdottomasti kielletty",
+  pSmokingAreas: "Tupakointi vain sallituilla alueilla",
+  pWifiAll: "Ilmainen wifi kaikissa tiloissa",
+  pWifiMost: "Ilmainen wifi useimmissa tiloissa signaalista riippuen",
+  pParkingFree: "Ilmainen pysäköinti paikan päällä",
+  pParkingLimited: "Rajoitetusti pysäköintipaikkoja paikan päällä",
 };
 
 const cs: Dict = {
@@ -409,6 +636,23 @@ const cs: Dict = {
   notBookable: "Online rezervace zatím není spuštěna",
   notBookableHint: "Tento hotel na této stránce momentálně nepřijímá rezervace. Kontaktujte nás prosím přímo, rádi vám pomůžeme.",
   cancellation: "Zrušení", nonRefundable: "Nevratná",
+  policies: "Pravidla hotelu",
+  policyPets: "Domácí zvířata",
+  policySmoking: "Kouření",
+  policyInternet: "Internet",
+  policyParking: "Parkování",
+  policyOther: "Ostatní",
+  pAllAges: "Vítáni hosté všech věkových kategorií",
+  pNoChildren: "Bohužel nepřijímáme děti ani kojence",
+  pNoInfants: "Bohužel nepřijímáme kojence",
+  pNoPets: "Bohužel nepřijímáme domácí zvířata",
+  pPetsSurcharge: "Domácí zvířata vítána, může být účtován příplatek",
+  pNoSmoking: "Přísný zákaz kouření",
+  pSmokingAreas: "Kouření pouze ve vyhrazených prostorách",
+  pWifiAll: "Wi-Fi zdarma ve všech prostorách",
+  pWifiMost: "Wi-Fi zdarma ve většině prostor podle signálu",
+  pParkingFree: "Parkování zdarma na místě",
+  pParkingLimited: "Omezené parkování na místě",
 };
 
 const el: Dict = {
@@ -435,6 +679,23 @@ const el: Dict = {
   notBookable: "Η online κράτηση δεν είναι ακόμη διαθέσιμη",
   notBookableHint: "Αυτό το ξενοδοχείο δεν δέχεται προς το παρόν κρατήσεις από αυτή τη σελίδα. Επικοινωνήστε μαζί μας απευθείας και θα χαρούμε να σας βοηθήσουμε.",
   cancellation: "Ακύρωση", nonRefundable: "Μη επιστρέψιμη",
+  policies: "Πολιτική ξενοδοχείου",
+  policyPets: "Κατοικίδια",
+  policySmoking: "Κάπνισμα",
+  policyInternet: "Διαδίκτυο",
+  policyParking: "Στάθμευση",
+  policyOther: "Άλλα",
+  pAllAges: "Ευπρόσδεκτες όλες οι ηλικίες",
+  pNoChildren: "Λυπούμαστε, δεν δεχόμαστε παιδιά και βρέφη",
+  pNoInfants: "Λυπούμαστε, δεν δεχόμαστε βρέφη",
+  pNoPets: "Λυπούμαστε, δεν δεχόμαστε κατοικίδια",
+  pPetsSurcharge: "Τα κατοικίδια είναι ευπρόσδεκτα, ενδέχεται να υπάρχει επιβάρυνση",
+  pNoSmoking: "Απαγορεύεται αυστηρά το κάπνισμα",
+  pSmokingAreas: "Κάπνισμα μόνο σε επιτρεπόμενους χώρους",
+  pWifiAll: "Δωρεάν Wi-Fi σε όλους τους χώρους",
+  pWifiMost: "Δωρεάν Wi-Fi στους περισσότερους χώρους, ανάλογα με το σήμα",
+  pParkingFree: "Δωρεάν χώρος στάθμευσης στο κατάλυμα",
+  pParkingLimited: "Περιορισμένες θέσεις στάθμευσης στο κατάλυμα",
 };
 
 const ro: Dict = {
@@ -461,6 +722,23 @@ const ro: Dict = {
   notBookable: "Rezervarea online nu este încă disponibilă",
   notBookableHint: "Acest hotel nu acceptă momentan rezervări pe această pagină. Contactați-ne direct și vă vom ajuta cu plăcere.",
   cancellation: "Anulare", nonRefundable: "Nerambursabil",
+  policies: "Regulile hotelului",
+  policyPets: "Animale de companie",
+  policySmoking: "Fumat",
+  policyInternet: "Internet",
+  policyParking: "Parcare",
+  policyOther: "Altele",
+  pAllAges: "Toate vârstele sunt binevenite",
+  pNoChildren: "Ne pare rău, nu acceptăm copii și bebeluși",
+  pNoInfants: "Ne pare rău, nu acceptăm bebeluși",
+  pNoPets: "Ne pare rău, nu acceptăm animale de companie",
+  pPetsSurcharge: "Animalele de companie sunt binevenite, cu posibilă taxă suplimentară",
+  pNoSmoking: "Fumatul strict interzis",
+  pSmokingAreas: "Fumatul permis doar în zonele special amenajate",
+  pWifiAll: "Wi-Fi gratuit în toate zonele",
+  pWifiMost: "Wi-Fi gratuit în majoritatea zonelor, în funcție de semnal",
+  pParkingFree: "Parcare gratuită la proprietate",
+  pParkingLimited: "Locuri de parcare limitate la proprietate",
 };
 
 const hu: Dict = {
@@ -487,6 +765,23 @@ const hu: Dict = {
   notBookable: "Az online foglalás még nem elérhető",
   notBookableHint: "Ez a szálloda jelenleg nem fogad foglalást ezen az oldalon. Kérjük, vegye fel velünk közvetlenül a kapcsolatot, szívesen segítünk.",
   cancellation: "Lemondás", nonRefundable: "Nem visszatéríthető",
+  policies: "Házirend",
+  policyPets: "Háziállatok",
+  policySmoking: "Dohányzás",
+  policyInternet: "Internet",
+  policyParking: "Parkolás",
+  policyOther: "Egyéb",
+  pAllAges: "Minden korosztály szívesen látott",
+  pNoChildren: "Sajnos gyermekeket és csecsemőket nem fogadunk",
+  pNoInfants: "Sajnos csecsemőket nem fogadunk",
+  pNoPets: "Sajnos háziállatot nem fogadunk",
+  pPetsSurcharge: "Háziállatok szívesen látottak, felár felszámítása lehetséges",
+  pNoSmoking: "Szigorúan tilos a dohányzás",
+  pSmokingAreas: "Dohányozni csak a kijelölt helyeken lehet",
+  pWifiAll: "Ingyenes wifi minden területen",
+  pWifiMost: "Ingyenes wifi a legtöbb területen, a jelerősségtől függően",
+  pParkingFree: "Ingyenes parkolás a helyszínen",
+  pParkingLimited: "Korlátozott parkolás a helyszínen",
 };
 
 const uk: Dict = {
@@ -513,6 +808,23 @@ const uk: Dict = {
   notBookable: "Онлайн-бронювання ще не відкрите",
   notBookableHint: "Цей готель наразі не приймає бронювання на цій сторінці. Зв’яжіться з нами напряму — ми радо допоможемо.",
   cancellation: "Скасування", nonRefundable: "Без повернення коштів",
+  policies: "Правила готелю",
+  policyPets: "Домашні тварини",
+  policySmoking: "Паління",
+  policyInternet: "Інтернет",
+  policyParking: "Паркування",
+  policyOther: "Інше",
+  pAllAges: "Раді гостям будь-якого віку",
+  pNoChildren: "На жаль, діти та немовлята не допускаються",
+  pNoInfants: "На жаль, немовлята не допускаються",
+  pNoPets: "На жаль, з домашніми тваринами не можна",
+  pPetsSurcharge: "З домашніми тваринами можна, можлива доплата",
+  pNoSmoking: "Паління суворо заборонено",
+  pSmokingAreas: "Паління лише у відведених місцях",
+  pWifiAll: "Безкоштовний Wi-Fi на всій території",
+  pWifiMost: "Безкоштовний Wi-Fi на більшій частині території, залежно від сигналу",
+  pParkingFree: "Безкоштовне паркування на території",
+  pParkingLimited: "Обмежена кількість місць для паркування на території",
 };
 
 const ru: Dict = {
@@ -539,6 +851,23 @@ const ru: Dict = {
   notBookable: "Онлайн-бронирование пока недоступно",
   notBookableHint: "Этот отель сейчас не принимает бронирования на этой странице. Свяжитесь с нами напрямую — мы будем рады помочь.",
   cancellation: "Отмена", nonRefundable: "Без возврата",
+  policies: "Правила отеля",
+  policyPets: "Домашние животные",
+  policySmoking: "Курение",
+  policyInternet: "Интернет",
+  policyParking: "Парковка",
+  policyOther: "Прочее",
+  pAllAges: "Рады гостям любого возраста",
+  pNoChildren: "К сожалению, дети и младенцы не допускаются",
+  pNoInfants: "К сожалению, младенцы не допускаются",
+  pNoPets: "К сожалению, с домашними животными нельзя",
+  pPetsSurcharge: "Можно с домашними животными, возможна доплата",
+  pNoSmoking: "Курение строго запрещено",
+  pSmokingAreas: "Курение только в отведённых местах",
+  pWifiAll: "Бесплатный Wi-Fi на всей территории",
+  pWifiMost: "Бесплатный Wi-Fi на большей части территории, в зависимости от сигнала",
+  pParkingFree: "Бесплатная парковка на территории",
+  pParkingLimited: "Ограниченное количество парковочных мест на территории",
 };
 
 const tr: Dict = {
@@ -565,6 +894,23 @@ const tr: Dict = {
   notBookable: "Çevrimiçi rezervasyon henüz açık değil",
   notBookableHint: "Bu otel şu anda bu sayfadan rezervasyon almıyor. Lütfen bizimle doğrudan iletişime geçin, memnuniyetle yardımcı oluruz.",
   cancellation: "İptal", nonRefundable: "İade edilmez",
+  policies: "Otel kuralları",
+  policyPets: "Evcil hayvanlar",
+  policySmoking: "Sigara",
+  policyInternet: "İnternet",
+  policyParking: "Otopark",
+  policyOther: "Diğer",
+  pAllAges: "Her yaştan misafir kabul edilir",
+  pNoChildren: "Maalesef çocuk ve bebek kabul edilmez",
+  pNoInfants: "Maalesef bebek kabul edilmez",
+  pNoPets: "Maalesef evcil hayvan kabul edilmez",
+  pPetsSurcharge: "Evcil hayvanlar kabul edilir, ek ücret alınabilir",
+  pNoSmoking: "Kesinlikle sigara içilmez",
+  pSmokingAreas: "Sigara yalnızca izin verilen alanlarda içilebilir",
+  pWifiAll: "Tüm alanlarda ücretsiz Wi-Fi",
+  pWifiMost: "Sinyale bağlı olarak çoğu alanda ücretsiz Wi-Fi",
+  pParkingFree: "Tesiste ücretsiz otopark",
+  pParkingLimited: "Tesiste sınırlı otopark",
 };
 
 const DICTS: Record<Locale, Dict> = {

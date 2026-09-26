@@ -4,6 +4,7 @@ import { format, parseISO } from "date-fns";
 import { cn } from "@/components/ui";
 import { formatMoney } from "@/lib/money";
 import type { InventoryCell } from "@/lib/types";
+import { getPropertyCurrency } from "@/lib/queries";
 
 /**
  * Every inventory field at once, for one rate plan.
@@ -27,7 +28,7 @@ interface FieldRow {
   label: string;
   href: string;
   /** What the cell shows. Null renders as the "no rule" dash. */
-  read: (c: InventoryCell) => string | null;
+  read: (c: InventoryCell, currency: string) => string | null;
   /** A rule that is actively stopping a sale, so it can be marked. */
   blocking?: (c: InventoryCell) => boolean;
 }
@@ -38,7 +39,7 @@ const ROWS: FieldRow[] = [
     label: "Rate",
     href: "/inventory/rates-all",
     // A null rate is not free: nothing can be sold on this plan that night.
-    read: (c) => (c.rateCents === null ? null : formatMoney(c.rateCents)),
+    read: (c, currency) => (c.rateCents === null ? null : formatMoney(c.rateCents, currency)),
     blocking: (c) => c.rateCents === null,
   },
   {
@@ -103,7 +104,8 @@ const ROWS: FieldRow[] = [
   },
 ];
 
-export function InventoryAll({ cells }: { cells: InventoryCell[] }) {
+export async function InventoryAll({ cells }: { cells: InventoryCell[] }) {
+  const currency = await getPropertyCurrency();
   const dates = [...new Set(cells.map((c) => c.date))].sort();
   const types = [...new Map(cells.map((c) => [c.roomTypeId, c])).values()];
   const at = new Map(cells.map((c) => [`${c.roomTypeId}|${c.date}`, c]));
@@ -178,7 +180,7 @@ export function InventoryAll({ cells }: { cells: InventoryCell[] }) {
                     </td>
                     {dates.map((d) => {
                       const cell = at.get(`${t.roomTypeId}|${d}`);
-                      const value = cell ? row.read(cell) : null;
+                      const value = cell ? row.read(cell, currency) : null;
                       const blocking = cell ? (row.blocking?.(cell) ?? false) : false;
                       return (
                         <td

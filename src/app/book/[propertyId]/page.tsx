@@ -2,8 +2,10 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { BookingWidget } from "@/components/book/booking-widget";
 import {
+  getPublicHotelPolicies,
   getPublicProperty,
   getPublicRatePlans,
+  getPublicRoomTypeFacilities,
 } from "@/lib/actions/public-booking";
 import { getCurrentStaffUser } from "@/lib/queries";
 import { LOCALES, DEFAULT_LOCALE, isLocale } from "@/lib/i18n/locales";
@@ -112,11 +114,20 @@ export default async function BookPage({
     );
   }
 
+  // What the guest is told about the hotel and its rooms (0071). The hotel
+  // set these, so it knows them; the guest is who needs telling.
+  const [policies, facilities] = await Promise.all([
+    getPublicHotelPolicies(propertyId),
+    getPublicRoomTypeFacilities(propertyId),
+  ]);
+
   return (
     <BookingWidget
       property={property}
       ratePlans={ratePlans}
       locale={locale}
+      policies={policies}
+      facilities={facilities}
     />
   );
 }

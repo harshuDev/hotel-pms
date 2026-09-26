@@ -266,6 +266,26 @@ export async function saveExtra(input: {
   return { ok: true, data: { id: data } };
 }
 
+/**
+ * Folds one extra into another (0071): the target stays, the source leaves
+ * the catalog, and the activity log records which went where. Nothing posted
+ * moves -- a charged extra is a folio item carrying its own copy.
+ */
+export async function mergeExtra(input: {
+  sourceId: string;
+  targetId: string;
+}): Promise<ActionResult<null>> {
+  if (!input.targetId) return { ok: false, error: "Choose the extra to merge into." };
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("merge_extra", {
+    p_source_id: input.sourceId,
+    p_target_id: input.targetId,
+  });
+  if (error) return { ok: false, error: error.message };
+  revalidateExtras();
+  return { ok: true, data: null };
+}
+
 export async function deleteExtra(id: string): Promise<ActionResult<null>> {
   const supabase = await createClient();
   const { error } = await supabase.rpc("delete_extra", { p_id: id });

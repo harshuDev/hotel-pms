@@ -2,6 +2,8 @@
 
 import { createClient } from "@/lib/supabase/server";
 import type { ActionResult } from "@/lib/actions/cashier";
+import type { HotelPolicies } from "@/lib/hotel-policies";
+import type { FacilityIcon } from "@/lib/facilities";
 
 /**
  * The guest booking page.
@@ -77,6 +79,62 @@ export async function getPublicProperty(
     checkInTime: row.check_in_time,
     checkOutTime: row.check_out_time,
   };
+}
+
+/**
+ * The hotel's policies, for the guest (0071). Null when the hotel has never
+ * saved them -- which the page draws as nothing at all, rather than as a
+ * policy the hotel did not state.
+ */
+export async function getPublicHotelPolicies(
+  propertyId: string,
+): Promise<HotelPolicies | null> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("public_hotel_policies", {
+    p_property_id: propertyId,
+  });
+  if (error || !data || data.length === 0) return null;
+  const r = data[0];
+  return {
+    children: r.children,
+    childrenCustom: r.children_custom,
+    pets: r.pets,
+    petsCustom: r.pets_custom,
+    smoking: r.smoking,
+    smokingCustom: r.smoking_custom,
+    internet: r.internet,
+    internetCustom: r.internet_custom,
+    parking: r.parking,
+    parkingCustom: r.parking_custom,
+    otherPolicies: r.other_policies,
+  };
+}
+
+export interface PublicFacility {
+  title: string;
+  icon: FacilityIcon;
+}
+
+/**
+ * Each room type's facilities (0071), keyed by room type. Titles are the
+ * hotel's own words and are not translated, like its cancellation wording.
+ */
+export async function getPublicRoomTypeFacilities(
+  propertyId: string,
+): Promise<Record<string, PublicFacility[]>> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("public_room_type_facilities", {
+    p_property_id: propertyId,
+  });
+  if (error || !data) return {};
+  const byType: Record<string, PublicFacility[]> = {};
+  for (const row of data) {
+    (byType[row.room_type_id] ??= []).push({
+      title: row.title,
+      icon: row.icon as FacilityIcon,
+    });
+  }
+  return byType;
 }
 
 export async function getPublicRatePlans(

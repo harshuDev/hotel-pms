@@ -7,6 +7,7 @@ import { cn } from "@/components/ui";
 import { formatMoney } from "@/lib/money";
 import { chargeExtra } from "@/lib/actions/booking-edit";
 import type { ExtrasCatalog } from "@/lib/extras";
+import { useCurrency } from "@/components/currency";
 
 /*
  * Charging an extra from the catalog (0069) on the booking's Extras tab.
@@ -27,6 +28,7 @@ export function ChargeExtra({
   bookingId: string;
   catalog: ExtrasCatalog;
 }) {
+  const currency = useCurrency();
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [extraId, setExtraId] = useState("");
@@ -89,7 +91,7 @@ export function ChargeExtra({
                 <optgroup key={c.id} label={c.title}>
                   {inCategory.map((e) => (
                     <option key={e.id} value={e.id}>
-                      {e.title} · {formatMoney(e.priceCents)}
+                      {e.title} · {formatMoney(e.priceCents, currency)}
                     </option>
                   ))}
                 </optgroup>

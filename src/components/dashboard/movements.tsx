@@ -8,6 +8,7 @@ import {
   CheckOutAction,
 } from "@/components/dashboard/movement-actions";
 import type { Booking } from "@/lib/types";
+import { useCurrency } from "@/components/currency";
 
 type Tab = "arrivals" | "departures";
 
@@ -20,6 +21,7 @@ export function Movements({
   departures: Booking[];
   canMoveGuests: boolean;
 }) {
+  const currency = useCurrency();
   const [tab, setTab] = useState<Tab>("arrivals");
   const rows = tab === "arrivals" ? arrivals : departures;
 
@@ -94,7 +96,7 @@ export function Movements({
                     b.balanceCents > 0 ? "text-rose-600" : "text-emerald-600",
                   )}
                 >
-                  {b.balanceCents > 0 ? formatMoney(b.balanceCents) : "Settled"}
+                  {b.balanceCents > 0 ? formatMoney(b.balanceCents, currency) : "Settled"}
                 </p>
                 <p className="text-xxs text-ink-faint">
                   {b.adults + b.children} pax

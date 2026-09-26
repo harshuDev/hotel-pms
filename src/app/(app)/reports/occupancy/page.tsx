@@ -12,6 +12,7 @@ import {
   getOccupancyReport,
   getOccupancySummary,
 } from "@/lib/queries";
+import { getPropertyCurrency } from "@/lib/queries";
 
 export const metadata = { title: "Occupancy report" };
 
@@ -20,6 +21,7 @@ export default async function OccupancyReportPage({
 }: {
   searchParams: Promise<{ from?: string; to?: string }>;
 }) {
+  const currency = await getPropertyCurrency();
   const sp = await searchParams;
   const businessDate = await getBusinessDate();
   const range = reportRange(businessDate, sp.from, sp.to);
@@ -43,18 +45,18 @@ export default async function OccupancyReportPage({
         />
         <ReportFigure
           label="Room revenue"
-          value={formatMoneyShort(summary.roomRevenueCents)}
+          value={formatMoneyShort(summary.roomRevenueCents, currency)}
           detail="Rate less discount, excluding tax"
         />
         <ReportFigure
           label="ADR"
-          value={formatMoney(summary.adrCents)}
+          value={formatMoney(summary.adrCents, currency)}
           detail="Revenue over rooms sold"
           emphasis
         />
         <ReportFigure
           label="RevPAR"
-          value={formatMoney(summary.revparCents)}
+          value={formatMoney(summary.revparCents, currency)}
           detail="Revenue over rooms available"
         />
       </ReportFigures>
@@ -107,13 +109,13 @@ export default async function OccupancyReportPage({
                       {r.occupancyPct}%
                     </td>
                     <td className="tnum whitespace-nowrap px-3 py-2.5 text-right text-ink">
-                      {formatMoney(r.roomRevenueCents)}
+                      {formatMoney(r.roomRevenueCents, currency)}
                     </td>
                     <td className="tnum whitespace-nowrap px-3 py-2.5 text-right text-ink-muted">
-                      {formatMoney(r.adrCents)}
+                      {formatMoney(r.adrCents, currency)}
                     </td>
                     <td className="tnum whitespace-nowrap px-3 py-2.5 text-right text-ink-muted">
-                      {formatMoney(r.revparCents)}
+                      {formatMoney(r.revparCents, currency)}
                     </td>
                   </tr>
                 ))}

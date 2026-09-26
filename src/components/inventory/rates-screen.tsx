@@ -8,6 +8,7 @@ import { cn } from "@/components/ui";
 import { formatMoney, parseMoney } from "@/lib/money";
 import { applyRates } from "@/lib/actions/inventory";
 import type { RatesGridCell } from "@/lib/types";
+import { useCurrency } from "@/components/currency";
 
 /**
  * Rates: every rate plan, under every room type, priced per night.
@@ -62,6 +63,7 @@ export function RatesScreen({
   from: string;
   canEdit: boolean;
 }) {
+  const currency = useCurrency();
   const router = useRouter();
   const [selected, setSelected] = useState<string[]>([]);
   const [editFrom, setEditFrom] = useState(from);
@@ -161,7 +163,7 @@ export function RatesScreen({
         text:
           cents === null
             ? `Cleared ${result.data.nightsWritten} night${result.data.nightsWritten === 1 ? "" : "s"}.`
-            : `Set ${formatMoney(cents)} on ${result.data.nightsWritten} night${result.data.nightsWritten === 1 ? "" : "s"}.`,
+            : `Set ${formatMoney(cents, currency)} on ${result.data.nightsWritten} night${result.data.nightsWritten === 1 ? "" : "s"}.`,
       });
       router.refresh();
     });
@@ -295,7 +297,7 @@ export function RatesScreen({
                                 {/* A dash, not a blank and never a zero: no rate
                                     loaded is not the same as free, and a booking
                                     against it is refused. */}
-                                {rate === null ? "—" : formatMoney(rate)}
+                                {rate === null ? "—" : formatMoney(rate, currency)}
                               </td>
                             );
                           })}

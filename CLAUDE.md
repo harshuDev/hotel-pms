@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0070` are
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0071` are
 applied to the hosted database.
 
 Working on real data: dashboard (house board, movements, pace, activity feed),
@@ -296,6 +296,29 @@ the component.
 - Tax rates are basis points, suffix `_bps` (1250 = 12.5%).
 - `src/lib/money.ts` is the ONLY place a number becomes a currency string.
   Never format inline.
+- **THE CURRENCY IS THE PROPERTY'S, AND IT IS A REQUIRED ARGUMENT** (0071
+  round). `formatMoney`, `formatMoneyShort` and `formatDue` take `currency`
+  with no default. They used to default to a constant "GBP", so a hotel set up
+  in pesos had every staff screen print pounds.
+  - **A Server Component** reads it with `await getPropertyCurrency()` --
+    free, because `getProperty()` is `cache()`d and the layout already called
+    it. A non-async server component that formats money was made async for
+    this (`Bars`, `BookingList`, `HouseStrip`, `InventoryAll`).
+  - **A client component** reads it with `useCurrency()`, from the
+    `CurrencyProvider` the `(app)` layout puts round every page. It has no
+    default and throws outside the provider, rather than quietly printing one
+    currency for every hotel.
+  - **It can never be a module-level setting.** money.ts renders on the server
+    for every hotel at once; two requests interleaving would print one hotel's
+    money in another's currency. Required-argument is what the compiler can
+    hold everyone to -- the same move as removing `PageHeader`'s subtitle.
+  - **`currencyDisplay: "narrowSymbol"`**, so a peso hotel reads "$1,284.00"
+    as its reference does, not en-GB's "MX$1,284.00". Checked identical in
+    Node and Chromium for the currencies a client is likely to use, which
+    matters because a client component renders in both.
+  - The figures stay en-GB ("1,284.00"): the staff app speaks English. The
+    guest page still writes numbers in the guest's language, via
+    `formatMoneyIn()`.
 
 **Sign convention**
 
@@ -365,7 +388,9 @@ the component.
   and the check is
   `select proname from pg_proc p join pg_namespace n on n.oid = p.pronamespace
   where n.nspname='public' and has_function_privilege('anon', p.oid, 'execute')`
-  — it should return only the public booking surface and the two policy
+  — it should return only the public booking surface (six functions since
+  0071: the four below plus `public_hotel_policies` and
+  `public_room_type_facilities`) and the two policy
   helpers. Four older functions held it through PUBLIC instead and needed
   `from public`; both revokes exist for a reason.
 - **A null role is not a refusal unless you write it as one.**
@@ -1594,9 +1619,15 @@ anywhere else. Collapsed height must stay constant regardless of room count.
       refusing; choosing Custom with nothing written is refused by name.
     - The sentence above Save is the choices as a guest would read them,
       assembled by `hotelPolicySummary()` from the form as it stands.
-    - **Nothing outside Settings reads it yet.** The guest booking page is the
-      obvious reader and has not been asked for. When it is, it reads the same
-      module rather than copying the sentences.
+    - **The guest booking page shows it** (0071), through
+      `public_hotel_policies()`. The client: "if it's for guest, we should let
+      them know" -- the hotel set it and knows it; the guest is who needs
+      telling. The section titles and the listed options are translated into
+      all nineteen guest languages; Custom text and Other Policies are the
+      hotel's own words and are shown as written, like its cancellation
+      wording. A hotel that never saved the page shows no policies card at
+      all. It stays on screen through the details step, so a guest reads it
+      before confirming.
     - The labels are the reference's exactly, "Free Wifi" beside "Free WiFi"
       included. Its prompt lines are kept, as the label of each group of
       options rather than explanation. "Let you guests know" was a typo and
@@ -1625,11 +1656,18 @@ anywhere else. Collapsed height must stay constant regardless of room count.
       in `charge_extra()`. The list shows an inherited rate faint and an own
       rate solid, so it is visible which one applies without a sentence
       saying so.
-    - **The reference's third, arrows icon on each row is NOT copied.** What it
-      does in their system has not been seen, and an icon that does nothing is
-      the dead control this application does not ship. Nor is the reference's
-      split between rows that can be deleted and rows that cannot -- there are
-      no system extras here, so every one the hotel added, it can remove.
+    - **The arrows icon is MERGE** (0071), which the client explained after it
+      was first left out: "Merge <extra> to:" with a searchable picker, as
+      theirs. `merge_extra()` keeps the target, removes the source from the
+      catalog, and writes "Extra X merged into Y" to the activity log.
+      - **Nothing in the ledger moves, and nothing has to.** A charged extra
+        copied its title and price onto the folio item and points at no
+        catalog row, and the Extras report groups by accounting category. So
+        a merge is "these two are one thing, keep this one" -- which is what
+        it is for -- and never a rewrite of posted money.
+      - The reference's split between rows that can be deleted and rows that
+        cannot is not copied: there are no system extras here, so every extra
+        a hotel added, it can remove.
     - Search and paging are in the browser. The catalog is dozens of rows,
       not thousands, so the ~1,800 rule does not reach it -- the same
       judgement as meeting rooms.
@@ -1652,10 +1690,10 @@ anywhere else. Collapsed height must stay constant regardless of room count.
       cheaper than adding one. Adding an icon is all three.
     - **A facility is genuinely deleted** and comes off every room type it was
       on -- it describes a room, it is not a record of anything that happened.
-    - **Nothing outside Settings shows them yet**, exactly like the hotel
-      policy. The guest booking page is the obvious reader; it would mean
-      adding them to `public_room_types()`, which is on the anonymous surface
-      and wants asking for.
+    - **The guest booking page shows them** under each room's name (0071),
+      through its own `public_room_type_facilities()` rather than a change to
+      `public_room_types()`, whose return shape the booking flow depends on.
+      Titles are the hotel's own words and are not translated.
   - **Country is ISO alpha-2 under a check constraint**, the same list and the
     same reasoning as `customers.country`. Latitude and longitude are set
     together or not at all, and range-checked.
@@ -1672,10 +1710,9 @@ anywhere else. Collapsed height must stay constant regardless of room count.
     browser's own zone ("Your current timezone is") is read after mount. Either
     one done during render would differ between Node and the browser and cause
     a hydration mismatch.
-  - **THE CURRENCY FIELD CHANGES NO FORMATTING YET.** `src/lib/money.ts` fixes
-    the staff application to GBP. Setting MXN on a property stores MXN and every
-    staff screen still prints £. Making `money.ts` read the property's currency
-    is the next piece of work before a non-UK hotel goes live on this.
+  - **The Currency field is live everywhere.** It was stored and ignored by
+    the staff screens until the formatters took the currency as a required
+    argument -- see the money rules.
 - **Rooms are created in runs**, because a property may hold ~1,800 of them and
   entering those one at a time is not a thing anyone would do. A run is capped
   at 500 and refuses by name if it would collide with rooms that already exist,
@@ -1806,10 +1843,12 @@ anywhere else. Collapsed height must stay constant regardless of room count.
 - **The guest booking page is `/book/[propertyId]`, and it is the only thing
   in this codebase that runs without a staff session.** A guest has no
   `staff_users` row, so `current_property_id()` is null and the ordinary reads
-  see nothing. The property is therefore named in the URL and passed to four
+  see nothing. The property is therefore named in the URL and passed to six
   `security definer` RPCs granted to `anon`: `public_property`,
-  `public_rate_plans`, `public_room_types` and `create_public_booking`. That is
-  the entire public surface — no table, no view, none of the staff functions.
+  `public_rate_plans`, `public_room_types`, `create_public_booking`, and since
+  0071 the two read-only `public_hotel_policies` and
+  `public_room_type_facilities`. That is the entire public surface — no table,
+  no view, none of the staff functions.
   - **`current_property_id()` was deliberately not taught about a public
     context.** It is the root of every RLS policy in the database, so anything
     able to set it would put cross-property access one bug away. That is why

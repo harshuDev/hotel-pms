@@ -5,6 +5,7 @@ import { ReportNoAccess, ReportTable } from "@/components/reports/report-table";
 import { formatMoney, formatMoneyShort } from "@/lib/money";
 import { ReportAccessError, getDepositReport } from "@/lib/queries";
 import type { DepositRow } from "@/lib/types";
+import { getPropertyCurrency } from "@/lib/queries";
 
 export const metadata = { title: "Deposit report" };
 
@@ -21,6 +22,7 @@ export const metadata = { title: "Deposit report" };
  * thing to set correctly and a new way for this and the drawer to disagree.
  */
 export default async function DepositReportPage() {
+  const currency = await getPropertyCurrency();
   let rows: DepositRow[];
   try {
     rows = await getDepositReport();
@@ -46,13 +48,13 @@ export default async function DepositReportPage() {
       <ReportFigures>
         <ReportFigure
           label="Held"
-          value={formatMoneyShort(held)}
+          value={formatMoneyShort(held, currency)}
           detail={`Across ${rows.length} booking${rows.length === 1 ? "" : "s"}`}
           emphasis
         />
         <ReportFigure
           label="Stay value"
-          value={formatMoneyShort(value)}
+          value={formatMoneyShort(value, currency)}
           detail="What those stays are worth"
         />
         <ReportFigure
@@ -132,16 +134,16 @@ export default async function DepositReportPage() {
           {
             header: "Stay value",
             align: "right",
-            cell: (r) => <span className="tnum text-ink-muted">{formatMoney(r.stayValueCents)}</span>,
-            foot: formatMoney(value),
+            cell: (r) => <span className="tnum text-ink-muted">{formatMoney(r.stayValueCents, currency)}</span>,
+            foot: formatMoney(value, currency),
           },
           {
             header: "Held",
             align: "right",
             cell: (r) => (
-              <span className="tnum font-medium text-ink">{formatMoney(r.depositCents)}</span>
+              <span className="tnum font-medium text-ink">{formatMoney(r.depositCents, currency)}</span>
             ),
-            foot: formatMoney(held),
+            foot: formatMoney(held, currency),
           },
         ]}
       />

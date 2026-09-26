@@ -5,12 +5,15 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { cn } from "@/components/ui";
 import { formatMoneyIn } from "@/lib/money";
 import { LOCALES, bcp47, type Locale } from "@/lib/i18n/locales";
-import { dictionaryFor } from "@/lib/i18n/dictionary";
+import { dictionaryFor, type Dict } from "@/lib/i18n/dictionary";
+import { FacilityIcon } from "@/components/settings/facility-icon";
+import type { HotelPolicies, HotelPolicyKey } from "@/lib/hotel-policies";
 import {
   requestPublicBooking,
   searchPublicRooms,
   type PublicProperty,
   type PublicRatePlan,
+  type PublicFacility,
   type PublicRoomType,
 } from "@/lib/actions/public-booking";
 
@@ -27,6 +30,48 @@ function isoDate(offsetDays: number): string {
   return d.toISOString().slice(0, 10);
 }
 
+/*
+ * The hotel's policies (0071), in the guest's language. The listed options
+ * are ours and translated; "Custom policy" text and Other Policies are the
+ * hotel's own words and shown as written. An omitted section is not shown.
+ */
+const POLICY_OPTION: Record<string, keyof Dict> = {
+  all_ages: "pAllAges",
+  no_children_or_infants: "pNoChildren",
+  no_infants: "pNoInfants",
+  no_pets: "pNoPets",
+  pets_surcharge: "pPetsSurcharge",
+  no_smoking: "pNoSmoking",
+  permitted_areas: "pSmokingAreas",
+  free_wifi_all: "pWifiAll",
+  free_wifi_most: "pWifiMost",
+  free_on_site: "pParkingFree",
+  limited_on_site: "pParkingLimited",
+};
+
+function policyRows(p: HotelPolicies | null, t: Dict): { label: string; text: string }[] {
+  if (!p) return [];
+  const sections: [HotelPolicyKey, string][] = [
+    ["children", t.children],
+    ["pets", t.policyPets],
+    ["smoking", t.policySmoking],
+    ["internet", t.policyInternet],
+    ["parking", t.policyParking],
+  ];
+  const rows: { label: string; text: string }[] = [];
+  for (const [key, label] of sections) {
+    const choice = p[key];
+    if (choice === "omit") continue;
+    // An option this page has no words for is left out, never guessed at.
+    const option = POLICY_OPTION[choice];
+    const text = choice === "custom" ? p[`${key}Custom`]?.trim() : option ? t[option] : null;
+    if (text) rows.push({ label, text });
+  }
+  const other = p.otherPolicies?.trim();
+  if (other) rows.push({ label: t.policyOther, text: other });
+  return rows;
+}
+
 type Stage =
   | { name: "search" }
   | { name: "details"; room: PublicRoomType }
@@ -36,15 +81,22 @@ export function BookingWidget({
   property,
   ratePlans,
   locale,
+  policies,
+  facilities,
 }: {
   property: PublicProperty;
   ratePlans: PublicRatePlan[];
   locale: Locale;
+  /** Null when the hotel has never saved its policies (0071). */
+  policies: HotelPolicies | null;
+  /** Each room type's facilities, keyed by room type (0071). */
+  facilities: Record<string, PublicFacility[]>;
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const t = dictionaryFor(locale);
   const money = useMemo(() => bcp47(locale), [locale]);
+  const policyList = policyRows(policies, t);
 
   const [ratePlanId, setRatePlanId] = useState(ratePlans[0].ratePlanId);
   /* Derived, not a second piece of state to keep in step with the first. */
@@ -291,6 +343,19 @@ export function BookingWidget({
                             <p className="mt-0.5 text-[13px] text-ink-muted">
                               {t.sleeps} {room.maxOccupancy}
                             </p>
+                            {(facilities[room.roomTypeId]?.length ?? 0) > 0 && (
+                              <ul className="mt-2 flex max-w-md flex-wrap gap-x-3 gap-y-1">
+                                {facilities[room.roomTypeId].map((f) => (
+                                  <li
+                                    key={f.title}
+                                    className="inline-flex items-center gap-1 text-xs text-ink-muted"
+                                  >
+                                    <FacilityIcon name={f.icon} className="h-3.5 w-3.5" />
+                                    {f.title}
+                                  </li>
+                                ))}
+                              </ul>
+                            )}
                             {bookable && room.available <= 3 && (
                               <p className="mt-1 text-xs font-medium text-warn-deep">
                                 {room.available} {t.roomsLeft}
@@ -398,6 +463,25 @@ export function BookingWidget({
               </form>
             )}
           </>
+        )}
+
+        {stage.name !== "done" && policyList.length > 0 && (
+          <section className={cn(card, "mt-6")} aria-labelledby="hotel-policies">
+            <h2
+              id="hotel-policies"
+              className="font-display text-[16px] font-semibold tracking-tightest text-ink"
+            >
+              {t.policies}
+            </h2>
+            <dl className="mt-3 divide-y divide-line text-[13px]">
+              {policyList.map((row) => (
+                <div key={row.label} className="grid gap-1 py-2 sm:grid-cols-[9rem_1fr]">
+                  <dt className="font-medium text-ink">{row.label}</dt>
+                  <dd className="whitespace-pre-line text-ink-muted">{row.text}</dd>
+                </div>
+              ))}
+            </dl>
+          </section>
         )}
       </div>
     </main>

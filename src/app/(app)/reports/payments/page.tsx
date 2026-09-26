@@ -15,6 +15,7 @@ import {
   getPaymentsReport,
 } from "@/lib/queries";
 import type { PaymentMethodTotal, PaymentRow } from "@/lib/types";
+import { getPropertyCurrency } from "@/lib/queries";
 
 export const metadata = { title: "Payments report" };
 
@@ -23,6 +24,7 @@ export default async function PaymentsReportPage({
 }: {
   searchParams: Promise<{ from?: string; to?: string }>;
 }) {
+  const currency = await getPropertyCurrency();
   const sp = await searchParams;
   const businessDate = await getBusinessDate();
   const range = reportRange(businessDate, sp.from, sp.to);
@@ -60,13 +62,13 @@ export default async function PaymentsReportPage({
       <ReportFigures>
         <ReportFigure
           label="Taken"
-          value={formatMoneyShort(net)}
+          value={formatMoneyShort(net, currency)}
           detail="Net of reversals"
           emphasis
         />
         <ReportFigure
           label="Through the drawer"
-          value={formatMoneyShort(drawer)}
+          value={formatMoneyShort(drawer, currency)}
           detail="Methods that move physical cash"
         />
         <ReportFigure
@@ -123,9 +125,9 @@ export default async function PaymentsReportPage({
               header: "Net taken",
               align: "right",
               cell: (t) => (
-                <span className="font-medium text-ink">{formatMoney(t.netCents)}</span>
+                <span className="font-medium text-ink">{formatMoney(t.netCents, currency)}</span>
               ),
-              foot: formatMoney(net),
+              foot: formatMoney(net, currency),
             },
           ]}
         />
@@ -184,10 +186,10 @@ export default async function PaymentsReportPage({
                   r.isReversal ? "text-warn-deep" : "text-ink",
                 )}
               >
-                {formatMoney(r.amountCents)}
+                {formatMoney(r.amountCents, currency)}
               </span>
             ),
-            foot: formatMoney(net),
+            foot: formatMoney(net, currency),
           },
         ]}
       />

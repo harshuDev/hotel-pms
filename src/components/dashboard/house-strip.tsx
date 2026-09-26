@@ -1,6 +1,7 @@
 import { cn } from "@/components/ui";
 import { formatMoney, formatMoneyShort } from "@/lib/money";
 import type { HouseSummary } from "@/lib/types";
+import { getPropertyCurrency } from "@/lib/queries";
 
 function Metric({
   label,
@@ -43,7 +44,8 @@ function Metric({
   );
 }
 
-export function HouseStrip({ s }: { s: HouseSummary }) {
+export async function HouseStrip({ s }: { s: HouseSummary }) {
+  const currency = await getPropertyCurrency();
   return (
     <div className="flex flex-wrap rounded-lg border border-line bg-white shadow-card">
       <Metric
@@ -60,12 +62,12 @@ export function HouseStrip({ s }: { s: HouseSummary }) {
       />
       <Metric
         label="ADR tonight"
-        value={formatMoneyShort(s.adrCents)}
+        value={formatMoneyShort(s.adrCents, currency)}
         detail="Average of in-house rates"
       />
       <Metric
         label="In the drawer"
-        value={s.drawerCents === null ? "—" : formatMoney(s.drawerCents)}
+        value={s.drawerCents === null ? "—" : formatMoney(s.drawerCents, currency)}
         detail={
           s.drawerCents === null
             ? "Counted blind at close"
@@ -74,7 +76,7 @@ export function HouseStrip({ s }: { s: HouseSummary }) {
       />
       <Metric
         label="Outstanding"
-        value={formatMoneyShort(s.outstandingCents)}
+        value={formatMoneyShort(s.outstandingCents, currency)}
         detail="Unsettled folios"
         tone={s.outstandingCents > 0 ? "warn" : "neutral"}
       />

@@ -10,6 +10,7 @@ import { formatMoney, formatMoneyShort } from "@/lib/money";
 import { reportRange } from "@/lib/reports";
 import { getBusinessDate, getCancellationReport } from "@/lib/queries";
 import type { CancellationRow } from "@/lib/types";
+import { getPropertyCurrency } from "@/lib/queries";
 
 export const metadata = { title: "Cancellation report" };
 
@@ -18,6 +19,7 @@ export default async function CancellationReportPage({
 }: {
   searchParams: Promise<{ from?: string; to?: string }>;
 }) {
+  const currency = await getPropertyCurrency();
   const sp = await searchParams;
   const businessDate = await getBusinessDate();
   const range = reportRange(businessDate, sp.from, sp.to);
@@ -47,7 +49,7 @@ export default async function CancellationReportPage({
         <ReportFigure label="Room nights lost" value={String(roomNights)} />
         <ReportFigure
           label="Value lost"
-          value={formatMoneyShort(lost)}
+          value={formatMoneyShort(lost, currency)}
           detail="Rate less discount, before tax"
           emphasis
         />
@@ -121,10 +123,10 @@ export default async function CancellationReportPage({
             align: "right",
             cell: (r) => (
               <span className="font-medium text-warn-deep">
-                {formatMoney(r.lostValueCents)}
+                {formatMoney(r.lostValueCents, currency)}
               </span>
             ),
-            foot: formatMoney(lost),
+            foot: formatMoney(lost, currency),
           },
         ]}
       />

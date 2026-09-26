@@ -5,6 +5,7 @@ import { ReportNoAccess } from "@/components/reports/report-table";
 import { formatMoney, formatMoneyShort } from "@/lib/money";
 import { ReportAccessError, getBusinessDate, getEndOfDayReport } from "@/lib/queries";
 import type { EndOfDayRow } from "@/lib/types";
+import { getPropertyCurrency } from "@/lib/queries";
 
 export const metadata = { title: "End of day report" };
 
@@ -23,6 +24,7 @@ export default async function EndOfDayReportPage({
 }: {
   searchParams: Promise<{ date?: string }>;
 }) {
+  const currency = await getPropertyCurrency();
   const sp = await searchParams;
   const businessDate = await getBusinessDate();
 
@@ -73,13 +75,13 @@ export default async function EndOfDayReportPage({
             />
             <ReportFigure
               label="Revenue"
-              value={formatMoneyShort(row.roomRevenueCents + row.otherRevenueCents)}
-              detail={`${formatMoneyShort(row.roomRevenueCents)} rooms`}
+              value={formatMoneyShort(row.roomRevenueCents + row.otherRevenueCents, currency)}
+              detail={`${formatMoneyShort(row.roomRevenueCents, currency)} rooms`}
             />
             <ReportFigure
               label="Collected"
-              value={formatMoneyShort(row.paymentsCents)}
-              detail={`${formatMoneyShort(row.drawerCents)} in cash`}
+              value={formatMoneyShort(row.paymentsCents, currency)}
+              detail={`${formatMoneyShort(row.drawerCents, currency)} in cash`}
             />
             <ReportFigure
               label="Day"
@@ -120,14 +122,14 @@ export default async function EndOfDayReportPage({
             </Panel>
 
             <Panel title="Revenue posted">
-              <Line label="Accommodation" value={formatMoney(row.roomRevenueCents)} />
-              <Line label="Everything else" value={formatMoney(row.otherRevenueCents)} />
-              <Line label="Tax" value={formatMoney(row.taxCents)} />
+              <Line label="Accommodation" value={formatMoney(row.roomRevenueCents, currency)} />
+              <Line label="Everything else" value={formatMoney(row.otherRevenueCents, currency)} />
+              <Line label="Tax" value={formatMoney(row.taxCents, currency)} />
             </Panel>
 
             <Panel title="Money taken">
-              <Line label="All methods" value={formatMoney(row.paymentsCents)} />
-              <Line label="Of which cash" value={formatMoney(row.drawerCents)} />
+              <Line label="All methods" value={formatMoney(row.paymentsCents, currency)} />
+              <Line label="Of which cash" value={formatMoney(row.drawerCents, currency)} />
               <Line
                 label="Shifts still open"
                 value={String(row.shiftsOpen)}

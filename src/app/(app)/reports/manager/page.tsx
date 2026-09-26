@@ -9,6 +9,7 @@ import { formatMoney, formatMoneyShort } from "@/lib/money";
 import { reportRange } from "@/lib/reports";
 import { ReportAccessError, getBusinessDate, getManagerReport } from "@/lib/queries";
 import type { ManagerRow } from "@/lib/types";
+import { getPropertyCurrency } from "@/lib/queries";
 
 export const metadata = { title: "Manager report" };
 
@@ -26,6 +27,7 @@ export default async function ManagerReportPage({
 }: {
   searchParams: Promise<{ from?: string; to?: string }>;
 }) {
+  const currency = await getPropertyCurrency();
   const sp = await searchParams;
   const businessDate = await getBusinessDate();
   const range = reportRange(businessDate, sp.from, sp.to);
@@ -77,16 +79,16 @@ export default async function ManagerReportPage({
           detail={`${roomsSold} of ${sellable * nights} room nights`}
           emphasis
         />
-        <ReportFigure label="ADR" value={formatMoneyShort(adr)} detail="Per room sold" />
+        <ReportFigure label="ADR" value={formatMoneyShort(adr, currency)} detail="Per room sold" />
         <ReportFigure
           label="RevPAR"
-          value={formatMoneyShort(revpar)}
+          value={formatMoneyShort(revpar, currency)}
           detail="Per room available"
         />
         <ReportFigure
           label="Revenue"
-          value={formatMoneyShort(totalRevenue)}
-          detail={`${formatMoneyShort(roomRevenue)} rooms, ${formatMoneyShort(otherRevenue)} other`}
+          value={formatMoneyShort(totalRevenue, currency)}
+          detail={`${formatMoneyShort(roomRevenue, currency)} rooms, ${formatMoneyShort(otherRevenue, currency)} other`}
         />
       </ReportFigures>
 
@@ -121,42 +123,42 @@ export default async function ManagerReportPage({
           {
             header: "ADR",
             align: "right",
-            cell: (r) => <span className="tnum text-ink-muted">{formatMoney(r.adrCents)}</span>,
-            foot: formatMoney(adr),
+            cell: (r) => <span className="tnum text-ink-muted">{formatMoney(r.adrCents, currency)}</span>,
+            foot: formatMoney(adr, currency),
           },
           {
             header: "RevPAR",
             align: "right",
-            cell: (r) => <span className="tnum text-ink-muted">{formatMoney(r.revparCents)}</span>,
-            foot: formatMoney(revpar),
+            cell: (r) => <span className="tnum text-ink-muted">{formatMoney(r.revparCents, currency)}</span>,
+            foot: formatMoney(revpar, currency),
           },
           {
             header: "Rooms",
             align: "right",
-            cell: (r) => <span className="tnum text-ink-muted">{formatMoney(r.roomRevenueCents)}</span>,
-            foot: formatMoney(roomRevenue),
+            cell: (r) => <span className="tnum text-ink-muted">{formatMoney(r.roomRevenueCents, currency)}</span>,
+            foot: formatMoney(roomRevenue, currency),
           },
           {
             header: "Other",
             align: "right",
-            cell: (r) => <span className="tnum text-ink-faint">{formatMoney(r.otherRevenueCents)}</span>,
-            foot: formatMoney(otherRevenue),
+            cell: (r) => <span className="tnum text-ink-faint">{formatMoney(r.otherRevenueCents, currency)}</span>,
+            foot: formatMoney(otherRevenue, currency),
           },
           {
             header: "Total",
             align: "right",
             cell: (r) => (
               <span className="tnum font-medium text-ink">
-                {formatMoney(r.totalRevenueCents)}
+                {formatMoney(r.totalRevenueCents, currency)}
               </span>
             ),
-            foot: formatMoney(totalRevenue),
+            foot: formatMoney(totalRevenue, currency),
           },
           {
             header: "Collected",
             align: "right",
-            cell: (r) => <span className="tnum text-ink-muted">{formatMoney(r.paymentsCents)}</span>,
-            foot: formatMoney(payments),
+            cell: (r) => <span className="tnum text-ink-muted">{formatMoney(r.paymentsCents, currency)}</span>,
+            foot: formatMoney(payments, currency),
           },
           {
             header: "In / out",

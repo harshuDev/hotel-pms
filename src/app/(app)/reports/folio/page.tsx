@@ -9,6 +9,7 @@ import { formatMoney, formatMoneyShort } from "@/lib/money";
 import { reportRange } from "@/lib/reports";
 import { ReportAccessError, getBusinessDate, getFolioReport } from "@/lib/queries";
 import type { FolioReportRow } from "@/lib/types";
+import { getPropertyCurrency } from "@/lib/queries";
 
 export const metadata = { title: "Folio report" };
 
@@ -25,6 +26,7 @@ export default async function FolioReportPage({
 }: {
   searchParams: Promise<{ from?: string; to?: string }>;
 }) {
+  const currency = await getPropertyCurrency();
   const sp = await searchParams;
   const businessDate = await getBusinessDate();
   const range = reportRange(businessDate, sp.from, sp.to);
@@ -57,12 +59,12 @@ export default async function FolioReportPage({
       <ReportFigures>
         <ReportFigure
           label="Outstanding"
-          value={formatMoneyShort(balance)}
+          value={formatMoneyShort(balance, currency)}
           detail={`Across ${owing} folio${owing === 1 ? "" : "s"}`}
           emphasis
         />
-        <ReportFigure label="Charged" value={formatMoneyShort(charges)} />
-        <ReportFigure label="Paid" value={formatMoneyShort(payments)} />
+        <ReportFigure label="Charged" value={formatMoneyShort(charges, currency)} />
+        <ReportFigure label="Paid" value={formatMoneyShort(payments, currency)} />
         <ReportFigure
           label="Folios"
           value={String(rows.length)}
@@ -120,14 +122,14 @@ export default async function FolioReportPage({
           {
             header: "Charged",
             align: "right",
-            cell: (r) => <span className="tnum text-ink-muted">{formatMoney(r.chargesCents)}</span>,
-            foot: formatMoney(charges),
+            cell: (r) => <span className="tnum text-ink-muted">{formatMoney(r.chargesCents, currency)}</span>,
+            foot: formatMoney(charges, currency),
           },
           {
             header: "Paid",
             align: "right",
-            cell: (r) => <span className="tnum text-ink-muted">{formatMoney(r.paymentsCents)}</span>,
-            foot: formatMoney(payments),
+            cell: (r) => <span className="tnum text-ink-muted">{formatMoney(r.paymentsCents, currency)}</span>,
+            foot: formatMoney(payments, currency),
           },
           {
             header: "Balance",
@@ -140,10 +142,10 @@ export default async function FolioReportPage({
                     : "tnum text-ink-faint"
                 }
               >
-                {formatMoney(r.balanceCents)}
+                {formatMoney(r.balanceCents, currency)}
               </span>
             ),
-            foot: formatMoney(balance),
+            foot: formatMoney(balance, currency),
           },
         ]}
       />

@@ -8,10 +8,12 @@ import type { InHouseRow } from "@/lib/types";
 import { ReportTable } from "@/components/reports/report-table";
 import { formatMoney, formatMoneyShort } from "@/lib/money";
 import { getBusinessDate, getInHouseReport } from "@/lib/queries";
+import { getPropertyCurrency } from "@/lib/queries";
 
 export const metadata = { title: "In house report" };
 
 export default async function InHouseReportPage() {
+  const currency = await getPropertyCurrency();
   // Not behind the money gate: knowing who is in which room is an operational
   // question every role needs answered, housekeeping included.
   const [businessDate, rows] = await Promise.all([
@@ -43,7 +45,7 @@ export default async function InHouseReportPage() {
         />
         <ReportFigure
           label="Owed by the house"
-          value={formatMoneyShort(owing)}
+          value={formatMoneyShort(owing, currency)}
           detail="Across every folio on these bookings"
           emphasis
         />
@@ -130,10 +132,10 @@ export default async function InHouseReportPage() {
                   r.balanceCents > 0 ? "font-medium text-rose-600" : "text-ink-faint"
                 }
               >
-                {r.balanceCents === 0 ? "Settled" : formatMoney(r.balanceCents)}
+                {r.balanceCents === 0 ? "Settled" : formatMoney(r.balanceCents, currency)}
               </span>
             ),
-            foot: formatMoney(owing),
+            foot: formatMoney(owing, currency),
           },
         ]}
       />

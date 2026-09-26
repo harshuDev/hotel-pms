@@ -14,6 +14,7 @@ import {
   getFinancialReport,
 } from "@/lib/queries";
 import type { FinancialRow } from "@/lib/types";
+import { getPropertyCurrency } from "@/lib/queries";
 
 export const metadata = { title: "Financial report" };
 
@@ -22,6 +23,7 @@ export default async function FinancialReportPage({
 }: {
   searchParams: Promise<{ from?: string; to?: string }>;
 }) {
+  const currency = await getPropertyCurrency();
   const sp = await searchParams;
   const businessDate = await getBusinessDate();
   const range = reportRange(businessDate, sp.from, sp.to);
@@ -62,20 +64,20 @@ export default async function FinancialReportPage({
       <ReportFigures>
         <ReportFigure
           label="Revenue"
-          value={formatMoneyShort(room + extras + discounts)}
+          value={formatMoneyShort(room + extras + discounts, currency)}
           detail="Room and extras, less discounts, before tax"
           emphasis
         />
-        <ReportFigure label="Tax" value={formatMoneyShort(tax)} detail="Posted with the charge" />
+        <ReportFigure label="Tax" value={formatMoneyShort(tax, currency)} detail="Posted with the charge" />
         <ReportFigure
           label="Charged"
-          value={formatMoneyShort(charges)}
+          value={formatMoneyShort(charges, currency)}
           detail="Everything posted to folios"
         />
         <ReportFigure
           label="Received"
-          value={formatMoneyShort(payments)}
-          detail={`${formatMoneyShort(drawer)} through the drawer`}
+          value={formatMoneyShort(payments, currency)}
+          detail={`${formatMoneyShort(drawer, currency)} through the drawer`}
         />
       </ReportFigures>
 
@@ -98,52 +100,52 @@ export default async function FinancialReportPage({
           {
             header: "Room",
             align: "right",
-            cell: (r) => <span className="text-ink-muted">{formatMoney(r.roomRevenueCents)}</span>,
-            foot: formatMoney(room),
+            cell: (r) => <span className="text-ink-muted">{formatMoney(r.roomRevenueCents, currency)}</span>,
+            foot: formatMoney(room, currency),
           },
           {
             header: "Extras",
             align: "right",
-            cell: (r) => <span className="text-ink-muted">{formatMoney(r.extrasRevenueCents)}</span>,
-            foot: formatMoney(extras),
+            cell: (r) => <span className="text-ink-muted">{formatMoney(r.extrasRevenueCents, currency)}</span>,
+            foot: formatMoney(extras, currency),
           },
           {
             header: "Discounts",
             align: "right",
             cell: (r) => (
               <span className={r.discountsCents < 0 ? "text-warn-deep" : "text-ink-faint"}>
-                {r.discountsCents === 0 ? "—" : formatMoney(r.discountsCents)}
+                {r.discountsCents === 0 ? "—" : formatMoney(r.discountsCents, currency)}
               </span>
             ),
-            foot: discounts === 0 ? "—" : formatMoney(discounts),
+            foot: discounts === 0 ? "—" : formatMoney(discounts, currency),
           },
           {
             header: "Tax",
             align: "right",
-            cell: (r) => <span className="text-ink-faint">{formatMoney(r.taxCents)}</span>,
-            foot: formatMoney(tax),
+            cell: (r) => <span className="text-ink-faint">{formatMoney(r.taxCents, currency)}</span>,
+            foot: formatMoney(tax, currency),
           },
           {
             header: "Charged",
             align: "right",
-            cell: (r) => <span className="font-medium text-ink">{formatMoney(r.chargesCents)}</span>,
-            foot: formatMoney(charges),
+            cell: (r) => <span className="font-medium text-ink">{formatMoney(r.chargesCents, currency)}</span>,
+            foot: formatMoney(charges, currency),
           },
           {
             header: "Received",
             align: "right",
             cell: (r) => (
               <span className={cn(r.paymentsCents > 0 ? "text-ink" : "text-ink-faint")}>
-                {formatMoney(r.paymentsCents)}
+                {formatMoney(r.paymentsCents, currency)}
               </span>
             ),
-            foot: formatMoney(payments),
+            foot: formatMoney(payments, currency),
           },
           {
             header: "Of which cash",
             align: "right",
-            cell: (r) => <span className="text-ink-faint">{formatMoney(r.drawerPaymentsCents)}</span>,
-            foot: formatMoney(drawer),
+            cell: (r) => <span className="text-ink-faint">{formatMoney(r.drawerPaymentsCents, currency)}</span>,
+            foot: formatMoney(drawer, currency),
           },
         ]}
       />

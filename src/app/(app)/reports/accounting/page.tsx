@@ -4,6 +4,7 @@ import { formatMoney, formatMoneyShort } from "@/lib/money";
 import { reportRange } from "@/lib/reports";
 import { ReportAccessError, getAccountingReport, getBusinessDate } from "@/lib/queries";
 import type { AccountingRow } from "@/lib/types";
+import { getPropertyCurrency } from "@/lib/queries";
 
 export const metadata = { title: "Accounting report" };
 
@@ -25,6 +26,7 @@ export default async function AccountingReportPage({
 }: {
   searchParams: Promise<{ from?: string; to?: string }>;
 }) {
+  const currency = await getPropertyCurrency();
   const sp = await searchParams;
   const businessDate = await getBusinessDate();
   const range = reportRange(businessDate, sp.from, sp.to);
@@ -60,15 +62,15 @@ export default async function AccountingReportPage({
       <ReportFigures>
         <ReportFigure
           label="Revenue"
-          value={formatMoneyShort(net)}
+          value={formatMoneyShort(net, currency)}
           detail="Net of tax"
           emphasis
         />
-        <ReportFigure label="Tax" value={formatMoneyShort(tax)} />
-        <ReportFigure label="Gross" value={formatMoneyShort(gross)} />
+        <ReportFigure label="Tax" value={formatMoneyShort(tax, currency)} />
+        <ReportFigure label="Gross" value={formatMoneyShort(gross, currency)} />
         <ReportFigure
           label="Collected"
-          value={formatMoneyShort(collected)}
+          value={formatMoneyShort(collected, currency)}
           detail="Money received in this range"
         />
       </ReportFigures>
@@ -96,22 +98,22 @@ export default async function AccountingReportPage({
             {
               header: "Net",
               align: "right",
-              cell: (r) => <span className="tnum text-ink-muted">{formatMoney(r.netCents)}</span>,
-              foot: formatMoney(net),
+              cell: (r) => <span className="tnum text-ink-muted">{formatMoney(r.netCents, currency)}</span>,
+              foot: formatMoney(net, currency),
             },
             {
               header: "Tax",
               align: "right",
-              cell: (r) => <span className="tnum text-ink-faint">{formatMoney(r.taxCents)}</span>,
-              foot: formatMoney(tax),
+              cell: (r) => <span className="tnum text-ink-faint">{formatMoney(r.taxCents, currency)}</span>,
+              foot: formatMoney(tax, currency),
             },
             {
               header: "Gross",
               align: "right",
               cell: (r) => (
-                <span className="tnum font-medium text-ink">{formatMoney(r.grossCents)}</span>
+                <span className="tnum font-medium text-ink">{formatMoney(r.grossCents, currency)}</span>
               ),
-              foot: formatMoney(gross),
+              foot: formatMoney(gross, currency),
             },
           ]}
         />
@@ -141,9 +143,9 @@ export default async function AccountingReportPage({
               header: "Received",
               align: "right",
               cell: (r) => (
-                <span className="tnum font-medium text-ink">{formatMoney(r.grossCents)}</span>
+                <span className="tnum font-medium text-ink">{formatMoney(r.grossCents, currency)}</span>
               ),
-              foot: formatMoney(collected),
+              foot: formatMoney(collected, currency),
             },
           ]}
         />

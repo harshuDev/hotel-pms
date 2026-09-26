@@ -4034,6 +4034,10 @@ export type Database = {
           meeting_rooms_moved: number
         }[]
       }
+      merge_extra: {
+        Args: { p_source_id: string; p_target_id: string }
+        Returns: undefined
+      }
       next_booking_reference: { Args: never; Returns: string }
       next_meeting_room_reference: { Args: never; Returns: string }
       occupancy_forecast: {
@@ -4173,6 +4177,22 @@ export type Database = {
           stay_to: string
         }[]
       }
+      public_hotel_policies: {
+        Args: { p_property_id: string }
+        Returns: {
+          children: string
+          children_custom: string
+          internet: string
+          internet_custom: string
+          other_policies: string
+          parking: string
+          parking_custom: string
+          pets: string
+          pets_custom: string
+          smoking: string
+          smoking_custom: string
+        }[]
+      }
       public_property: {
         Args: { p_property_id: string }
         Returns: {
@@ -4195,6 +4215,14 @@ export type Database = {
           description: string
           name: string
           rate_plan_id: string
+        }[]
+      }
+      public_room_type_facilities: {
+        Args: { p_property_id: string }
+        Returns: {
+          icon: string
+          room_type_id: string
+          title: string
         }[]
       }
       public_room_types: {

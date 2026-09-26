@@ -3,6 +3,7 @@ import { format, parseISO } from "date-fns";
 import { EmptyState, StatusBadge, cn } from "@/components/ui";
 import { formatDue, formatMoney } from "@/lib/money";
 import type { Booking } from "@/lib/types";
+import { getPropertyCurrency } from "@/lib/queries";
 
 const COLS = [
   "Booking",
@@ -24,7 +25,7 @@ const COLS = [
  * the desk, so the room and the guest count earn their place and the booking
  * date does not.
  */
-export function BookingList({
+export async function BookingList({
   rows,
   empty,
   hint,
@@ -33,6 +34,7 @@ export function BookingList({
   empty: string;
   hint: string;
 }) {
+  const currency = await getPropertyCurrency();
   if (rows.length === 0) {
     return (
       <div className="rounded-lg border border-line bg-white p-4 shadow-card">
@@ -114,7 +116,7 @@ export function BookingList({
                   <StatusBadge status={b.status} />
                 </td>
                 <td className="tnum whitespace-nowrap px-3 py-3 text-right text-ink">
-                  {formatMoney(b.totalCents)}
+                  {formatMoney(b.totalCents, currency)}
                 </td>
                 <td
                   className={cn(
@@ -122,7 +124,7 @@ export function BookingList({
                     b.balanceCents > 0 ? "text-rose-600" : "text-ink-muted",
                   )}
                 >
-                  {formatDue(b.balanceCents)}
+                  {formatDue(b.balanceCents, currency)}
                 </td>
               </tr>
             ))}

@@ -8,6 +8,7 @@ import { formatMoney, formatMoneyShort } from "@/lib/money";
 import { reportRange } from "@/lib/reports";
 import { getBusinessDate, getChannelReport } from "@/lib/queries";
 import type { ChannelRevenueRow } from "@/lib/types";
+import { getPropertyCurrency } from "@/lib/queries";
 
 export const metadata = { title: "Channel report" };
 
@@ -16,6 +17,7 @@ export default async function ChannelReportPage({
 }: {
   searchParams: Promise<{ from?: string; to?: string }>;
 }) {
+  const currency = await getPropertyCurrency();
   const sp = await searchParams;
   const businessDate = await getBusinessDate();
   const range = reportRange(businessDate, sp.from, sp.to);
@@ -39,17 +41,17 @@ export default async function ChannelReportPage({
       <ReportFigures>
         <ReportFigure
           label="Room revenue"
-          value={formatMoneyShort(revenue)}
+          value={formatMoneyShort(revenue, currency)}
           detail={`${roomNights} room night${roomNights === 1 ? "" : "s"}`}
         />
         <ReportFigure
           label="Commission"
-          value={formatMoneyShort(commission)}
+          value={formatMoneyShort(commission, currency)}
           detail="What the channels are owed"
         />
         <ReportFigure
           label="Net to the hotel"
-          value={formatMoneyShort(net)}
+          value={formatMoneyShort(net, currency)}
           emphasis
         />
         <ReportFigure
@@ -98,26 +100,26 @@ export default async function ChannelReportPage({
           {
             header: "Room revenue",
             align: "right",
-            cell: (r) => <span className="text-ink-muted">{formatMoney(r.roomRevenueCents)}</span>,
-            foot: formatMoney(revenue),
+            cell: (r) => <span className="text-ink-muted">{formatMoney(r.roomRevenueCents, currency)}</span>,
+            foot: formatMoney(revenue, currency),
           },
           {
             header: "Commission",
             align: "right",
             cell: (r) => (
               <span className={r.commissionCents > 0 ? "text-warn-deep" : "text-ink-faint"}>
-                {r.commissionCents === 0 ? "—" : formatMoney(r.commissionCents)}
+                {r.commissionCents === 0 ? "—" : formatMoney(r.commissionCents, currency)}
               </span>
             ),
-            foot: formatMoney(commission),
+            foot: formatMoney(commission, currency),
           },
           {
             header: "Net",
             align: "right",
             cell: (r) => (
-              <span className="font-medium text-ink">{formatMoney(r.netRevenueCents)}</span>
+              <span className="font-medium text-ink">{formatMoney(r.netRevenueCents, currency)}</span>
             ),
-            foot: formatMoney(net),
+            foot: formatMoney(net, currency),
           },
         ]}
       />

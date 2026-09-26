@@ -18,6 +18,7 @@ import type {
   TaxRate,
 } from "@/lib/types";
 import type { BookingBlock } from "@/lib/actions/bookings";
+import { useCurrency } from "@/components/currency";
 
 interface Line {
   /** Local key, so two lines of the same room type stay distinct while editing. */
@@ -67,6 +68,7 @@ export function NewBookingForm({
   /** The room type whose row was clicked. */
   initialRoomTypeId?: string;
 }) {
+  const currency = useCurrency();
   const router = useRouter();
   const [pending, startTransition] = useTransition();
 
@@ -397,7 +399,7 @@ export function NewBookingForm({
         {taken.promotionName && (
           <p className="mx-auto mt-3 max-w-md rounded-md bg-emerald-50 px-3 py-2.5 text-[13px] leading-relaxed text-emerald-800">
             <span className="font-medium">{taken.promotionName}</span> applied,
-            taking {formatMoney(taken.discountCents)} off the stay.
+            taking {formatMoney(taken.discountCents, currency)} off the stay.
           </p>
         )}
         <div className="mt-5 flex justify-center gap-2">

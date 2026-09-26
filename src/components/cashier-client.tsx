@@ -17,6 +17,7 @@ import type {
   PaymentMethod,
   Shift,
 } from "@/lib/types";
+import { useCurrency } from "@/components/currency";
 
 const CATEGORIES: { key: PaidOutCategory; label: string }[] = [
   { key: "taxi", label: "Taxi" },
@@ -74,6 +75,7 @@ export function CashierClient({
   suggestedFloatCents: number | null;
   canSeeExpected: boolean;
 }) {
+  const currency = useCurrency();
   const [modal, setModal] = useState<null | "payment" | "paidout" | "close">(
     null,
   );
@@ -159,23 +161,23 @@ export function CashierClient({
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <Stat
           label="Opening float"
-          value={formatMoney(shift.openingFloatCents)}
+          value={formatMoney(shift.openingFloatCents, currency)}
         />
         <Stat
           label="Payments taken"
-          value={formatMoney(totals.allIn)}
-          hint={`${formatMoney(totals.drawerIn)} of it in cash`}
+          value={formatMoney(totals.allIn, currency)}
+          hint={`${formatMoney(totals.drawerIn, currency)} of it in cash`}
           tone="positive"
         />
         <Stat
           label="Paid out"
-          value={formatMoney(totals.out)}
+          value={formatMoney(totals.out, currency)}
           hint={`${shift.paidOuts.length} transactions`}
           tone="negative"
         />
         <Stat
           label="Expected in drawer"
-          value={canSeeExpected ? formatMoney(totals.expected) : "—"}
+          value={canSeeExpected ? formatMoney(totals.expected, currency) : "—"}
           hint={
             canSeeExpected
               ? "Cash only — non-cash payments excluded"
@@ -212,7 +214,7 @@ export function CashierClient({
                       </span>
                     </td>
                     <td className="tnum px-4 py-2.5 text-right font-medium text-ink">
-                      {formatMoney(p.amountCents)}
+                      {formatMoney(p.amountCents, currency)}
                     </td>
                   </tr>
                 ))}
@@ -241,7 +243,7 @@ export function CashierClient({
                       </p>
                     </td>
                     <td className="tnum px-4 py-2.5 text-right font-medium text-rose-600">
-                      −{formatMoney(p.amountCents)}
+                      −{formatMoney(p.amountCents, currency)}
                     </td>
                   </tr>
                 ))}
@@ -290,6 +292,7 @@ function ClosedReceipt({
   closed: { counted: number; expected: number; variance: number };
   onOpenAnother: () => void;
 }) {
+  const currency = useCurrency();
   const large = Math.abs(closed.variance) > LARGE_VARIANCE_CENTS;
 
   return (
@@ -299,8 +302,8 @@ function ClosedReceipt({
       </h1>
       <dl className="mt-6 space-y-2 text-sm">
         {[
-          ["Expected in drawer", formatMoney(closed.expected)],
-          ["Counted", formatMoney(closed.counted)],
+          ["Expected in drawer", formatMoney(closed.expected, currency)],
+          ["Counted", formatMoney(closed.counted, currency)],
         ].map(([k, v]) => (
           <div key={k} className="flex justify-between border-b border-line pb-2">
             <dt className="text-ink-muted">{k}</dt>
@@ -317,14 +320,14 @@ function ClosedReceipt({
             )}
           >
             {closed.variance > 0 ? "+" : ""}
-            {formatMoney(closed.variance)}
+            {formatMoney(closed.variance, currency)}
           </dd>
         </div>
       </dl>
 
       {large && (
         <p className="mt-4 rounded-md border border-rose-200 bg-rose-50 px-3 py-2.5 text-xs text-rose-700">
-          That is over {formatMoney(LARGE_VARIANCE_CENTS)} out. A manager should
+          That is over {formatMoney(LARGE_VARIANCE_CENTS, currency)} out. A manager should
           look at this shift before the drawer is used again.
         </p>
       )}
@@ -349,6 +352,7 @@ function OpenShiftPanel({
   businessDate: string;
   suggestedFloatCents: number | null;
 }) {
+  const currency = useCurrency();
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [float, setFloat] = useState(
@@ -398,7 +402,7 @@ function OpenShiftPanel({
         <p className="mt-1.5 text-xxs text-ink-faint">
           {suggestedFloatCents === null
             ? "Count the float into the drawer and enter the total."
-            : `The last shift opened at ${formatMoney(suggestedFloatCents)}.`}
+            : `The last shift opened at ${formatMoney(suggestedFloatCents, currency)}.`}
         </p>
       </div>
 
@@ -460,6 +464,7 @@ function PaymentModal({
   businessDate: string;
   onClose: () => void;
 }) {
+  const currency = useCurrency();
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [bookingId, setBookingId] = useState(bookings[0]?.id ?? "");
@@ -518,7 +523,7 @@ function PaymentModal({
           )}
           {booking && (
             <p className="mt-1 text-xxs text-ink-faint">
-              Outstanding balance {formatMoney(booking.balanceCents)}
+              Outstanding balance {formatMoney(booking.balanceCents, currency)}
             </p>
           )}
         </div>

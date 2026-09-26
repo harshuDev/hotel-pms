@@ -36,6 +36,7 @@ import type {
   Settlement,
 } from "@/lib/types";
 import { COUNTRIES } from "@/lib/countries";
+import { useCurrency } from "@/components/currency";
 
 /**
  * The guest record behind the booking, as `customer_for_edit()` returns it.
@@ -188,6 +189,7 @@ export function BookingDetailView({
    */
   inDialog?: boolean;
 }) {
+  const currency = useCurrency();
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
@@ -505,7 +507,7 @@ export function BookingDetailView({
             )}
           </Fact>
           <Fact name="Reservation value">
-            <span className="tnum">{formatMoney(detail.reservationValueCents)}</span>
+            <span className="tnum">{formatMoney(detail.reservationValueCents, currency)}</span>
             <span className="block text-xxs text-ink-faint">Rate less discount, before tax</span>
           </Fact>
           <Fact name="Balance">
@@ -515,10 +517,10 @@ export function BookingDetailView({
                 detail.balanceCents > 0 ? "text-rose-600" : "text-ink",
               )}
             >
-              {settled ? "Settled" : formatMoney(detail.balanceCents)}
+              {settled ? "Settled" : formatMoney(detail.balanceCents, currency)}
             </span>
             <span className="block text-xxs text-ink-faint">
-              {formatMoney(detail.chargesCents)} charged, {formatMoney(detail.paymentsCents)} paid
+              {formatMoney(detail.chargesCents, currency)} charged, {formatMoney(detail.paymentsCents, currency)} paid
             </span>
           </Fact>
         </div>
@@ -705,7 +707,7 @@ export function BookingDetailView({
               <>
                 {" "}This booking still owes{" "}
                 <span className="tnum font-medium text-rose-600">
-                  {formatMoney(detail.balanceCents)}
+                  {formatMoney(detail.balanceCents, currency)}
                 </span>
                 . Cancelling does not write that off — a cancellation fee is a
                 real charge and somebody still has to chase it.
@@ -880,11 +882,11 @@ export function BookingDetailView({
                   </button>
                   <div className="flex items-center gap-3">
                     <span className="tnum text-[13px] text-ink">
-                      {formatMoney(room.valueCents)}
+                      {formatMoney(room.valueCents, currency)}
                     </span>
                     {room.discountCents > 0 && (
                       <span className="tnum rounded bg-emerald-50 px-2 py-0.5 text-xxs font-medium text-emerald-800">
-                        {formatMoney(room.discountCents)} off
+                        {formatMoney(room.discountCents, currency)} off
                       </span>
                     )}
                     {canEdit && editable && !roomCanceled && (
@@ -1082,16 +1084,16 @@ export function BookingDetailView({
                             n.roomRateCents === 0 ? "text-warn-deep" : "text-ink-muted",
                           )}
                         >
-                          {n.roomRateCents === 0 ? "Not priced" : formatMoney(n.roomRateCents)}
+                          {n.roomRateCents === 0 ? "Not priced" : formatMoney(n.roomRateCents, currency)}
                         </td>
                         <td className="tnum px-4 py-2 text-right text-emerald-700">
-                          {n.discountCents > 0 ? formatMoney(n.discountCents) : "—"}
+                          {n.discountCents > 0 ? formatMoney(n.discountCents, currency) : "—"}
                         </td>
                         <td className="tnum px-4 py-2 text-right text-ink-faint">
-                          {n.taxCents > 0 ? formatMoney(n.taxCents) : "—"}
+                          {n.taxCents > 0 ? formatMoney(n.taxCents, currency) : "—"}
                         </td>
                         <td className="tnum px-4 py-2 text-right font-medium text-ink">
-                          {formatMoney(n.roomRateCents - n.discountCents + n.taxCents)}
+                          {formatMoney(n.roomRateCents - n.discountCents + n.taxCents, currency)}
                         </td>
                         <td className="px-4 py-2 text-xxs text-ink-faint">
                           {n.charged ? "Charged" : ""}
@@ -1170,7 +1172,7 @@ export function BookingDetailView({
                         l.isReversal ? "text-warn-deep" : "text-ink",
                       )}
                     >
-                      {formatMoney(l.amountCents)}
+                      {formatMoney(l.amountCents, currency)}
                     </td>
                   </tr>
                 ))}
@@ -1186,7 +1188,7 @@ export function BookingDetailView({
                     Extras charged
                   </td>
                   <td className="tnum whitespace-nowrap px-3 pt-3 text-right font-semibold text-ink">
-                    {formatMoney(extrasCents)}
+                    {formatMoney(extrasCents, currency)}
                   </td>
                 </tr>
               </tfoot>
@@ -1343,7 +1345,7 @@ export function BookingDetailView({
                       l.isReversal && "text-warn-deep",
                     )}
                   >
-                    {formatMoney(l.amountCents)}
+                    {formatMoney(l.amountCents, currency)}
                   </td>
                 </tr>
               ))}

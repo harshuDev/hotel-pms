@@ -142,6 +142,16 @@ export const getProperty = cache(async () => {
   return data;
 });
 
+/**
+ * The property's currency, for a Server Component to hand to money.ts. Free:
+ * getProperty() is cache()d and the app layout has already called it in this
+ * request. The column is char(3), so it is trimmed rather than trusted.
+ */
+export async function getPropertyCurrency(): Promise<string> {
+  const property = await getProperty();
+  return property.currency.trim();
+}
+
 /* -------------------------------------------------------------------------- */
 /* Staff                                                                      */
 /* -------------------------------------------------------------------------- */
