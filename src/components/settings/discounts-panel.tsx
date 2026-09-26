@@ -23,8 +23,7 @@ import { deleteDiscount, saveDiscount } from "@/lib/actions/settings";
  * STORED, NOT YET APPLIED: nothing takes a discount off a stay yet. See the
  * migration and CLAUDE.md.
  *
- * A row opens the same dialog to edit, with Delete there -- the reference's
- * list carries no icons.
+ * Each row carries the reference's pencil and bin, each in a ring.
  */
 
 type Run = (fn: () => Promise<{ ok: boolean; error?: string }>, done: string) => void;
@@ -35,17 +34,35 @@ const primary =
   "rounded-md bg-chrome-800 px-4 py-2 text-[12.5px] font-semibold text-white hover:bg-chrome-900 disabled:opacity-50";
 const secondary =
   "rounded-md border border-line bg-white px-4 py-2 text-[12.5px] font-semibold text-ink hover:bg-shell disabled:opacity-50";
-const danger =
-  "mr-auto rounded-md border border-rose-200 bg-white px-4 py-2 text-[12.5px] font-semibold text-rose-700 hover:bg-rose-50";
 const input =
   "w-full rounded-md border border-line bg-white px-2.5 py-1.5 text-[13.5px] text-ink outline-none focus:border-brass";
 const th = "px-3 py-3 text-left text-[12px] font-semibold text-ink";
 
-function SortIcon({ desc }: { desc: boolean }) {
+/** Both arrows faint when this column is not the sort; one lit when it is. */
+function SortIcon({ active, desc }: { active: boolean; desc: boolean }) {
   return (
     <svg viewBox="0 0 10 12" className="h-3 w-2.5" aria-hidden="true">
-      <path d="M5 1l3.5 4h-7z" className={desc ? "fill-ink-faint" : "fill-brass"} />
-      <path d="M5 11l3.5-4h-7z" className={desc ? "fill-brass" : "fill-ink-faint"} />
+      <path d="M5 1l3.5 4h-7z" className={active && !desc ? "fill-brass" : "fill-ink-faint"} />
+      <path d="M5 11l3.5-4h-7z" className={active && desc ? "fill-brass" : "fill-ink-faint"} />
+    </svg>
+  );
+}
+
+// The reference's row controls: a pencil and a bin, each in a ring.
+function RingPencil() {
+  return (
+    <svg viewBox="0 0 16 16" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="1.6"
+      strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M10.5 2.5l3 3L6 13H3v-3z" />
+    </svg>
+  );
+}
+
+function RingBin() {
+  return (
+    <svg viewBox="0 0 16 16" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="1.5"
+      strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M3 4.5h10M6.5 4.5V3h3v1.5M4.5 4.5l.7 8.5h5.6l.7-8.5" />
     </svg>
   );
 }
@@ -72,6 +89,7 @@ export function DiscountsPanel({
   const currency = useCurrency();
   const symbol = CURRENCIES.find((c) => c.code === currency)?.symbol ?? currency;
   const [query, setQuery] = useState("");
+  const [sortBy, setSortBy] = useState<"title" | "amount">("title");
   const [desc, setDesc] = useState(false);
   const [kindFilter, setKindFilter] = useState<DiscountKind | null>(null);
   const [filterOpen, setFilterOpen] = useState(false);
@@ -83,9 +101,24 @@ export function DiscountsPanel({
     const list = discounts.filter(
       (d) => (!q || d.title.toLowerCase().includes(q)) && (!kindFilter || d.kind === kindFilter),
     );
-    list.sort((a, b) => a.title.localeCompare(b.title) * (desc ? -1 : 1));
+    // Amount sorts percent before fixed, each by its own figure: a
+    // percentage and a sum of money are not one scale.
+    const amount = (d: Discount) =>
+      d.kind === "percent" ? (d.percentBps ?? 0) : 1_000_000_000 + (d.amountCents ?? 0);
+    list.sort(
+      (a, b) =>
+        (sortBy === "title" ? a.title.localeCompare(b.title) : amount(a) - amount(b)) * (desc ? -1 : 1),
+    );
     return list;
-  }, [discounts, query, desc, kindFilter]);
+  }, [discounts, query, sortBy, desc, kindFilter]);
+
+  function sort(by: "title" | "amount") {
+    if (sortBy === by) setDesc(!desc);
+    else {
+      setSortBy(by);
+      setDesc(false);
+    }
+  }
 
   function amountLabel(d: Discount) {
     if (d.kind === "percent" && d.percentBps !== null) return `${formatPercentBps(d.percentBps)} %`;
@@ -163,12 +196,12 @@ export function DiscountsPanel({
               <th className={cn(th, "w-[38%]")}>
                 <button
                   type="button"
-                  onClick={() => setDesc(!desc)}
+                  onClick={() => sort("title")}
                   className="flex w-full items-center justify-between gap-2"
-                  aria-label={`Title, sorted ${desc ? "Z to A" : "A to Z"}`}
+                  aria-label="Sort by title"
                 >
                   Title
-                  <SortIcon desc={desc} />
+                  <SortIcon active={sortBy === "title"} desc={desc} />
                 </button>
               </th>
               <th className={cn(th, "relative w-[35%]")}>
@@ -205,39 +238,57 @@ export function DiscountsPanel({
                   </div>
                 )}
               </th>
-              <th className={th}>Amount</th>
+              <th className={cn(th, "w-[20%]")}>
+                <button
+                  type="button"
+                  onClick={() => sort("amount")}
+                  className="flex w-full items-center justify-between gap-2"
+                  aria-label="Sort by amount"
+                >
+                  Amount
+                  <SortIcon active={sortBy === "amount"} desc={desc} />
+                </button>
+              </th>
+              <th className="w-28" aria-label="Actions" />
             </tr>
           </thead>
           <tbody>
             {rows.map((d) => (
-              <tr
-                key={d.id}
-                className={cn("border-b border-line last:border-0", canEdit && "cursor-pointer hover:bg-shell/60")}
-                onClick={canEdit ? () => open(d) : undefined}
-              >
-                <td className="px-3 py-3.5 text-ink">
-                  {canEdit ? (
-                    <button
-                      type="button"
-                      className="text-left hover:underline"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        open(d);
-                      }}
-                    >
-                      {d.title}
-                    </button>
-                  ) : (
-                    d.title
-                  )}
-                </td>
+              <tr key={d.id} className="border-b border-line last:border-0">
+                <td className="px-3 py-3.5 text-ink">{d.title}</td>
                 <td className="bg-shell/40 px-3 py-3.5 text-ink">{d.kind === "percent" ? "Percent" : "Fixed"}</td>
                 <td className="tnum px-3 py-3.5 text-ink">{amountLabel(d)}</td>
+                <td className="px-3 py-2">
+                  {canEdit && (
+                    <span className="flex justify-end gap-3">
+                      <button
+                        type="button"
+                        aria-label={`Edit ${d.title}`}
+                        onClick={() => open(d)}
+                        className="grid h-7 w-7 place-items-center rounded-full border border-brass text-brass hover:bg-brass/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-brass"
+                      >
+                        <RingPencil />
+                      </button>
+                      <button
+                        type="button"
+                        aria-label={`Delete ${d.title}`}
+                        disabled={pending}
+                        onClick={() => {
+                          if (!confirm(`Delete ${d.title}?`)) return;
+                          run(() => deleteDiscount(d.id), `${d.title} deleted.`);
+                        }}
+                        className="grid h-7 w-7 place-items-center rounded-full border border-rose-500 text-rose-600 hover:bg-rose-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-rose-500"
+                      >
+                        <RingBin />
+                      </button>
+                    </span>
+                  )}
+                </td>
               </tr>
             ))}
             {rows.length === 0 && (
               <tr>
-                <td colSpan={3} className="px-3 py-5 text-[13px] text-ink-muted">
+                <td colSpan={4} className="px-3 py-5 text-[13px] text-ink-muted">
                   {discounts.length === 0 ? "None yet." : "No discount matches."}
                 </td>
               </tr>
@@ -262,24 +313,6 @@ export function DiscountsPanel({
           onClose={() => setDraft(null)}
           footer={
             <>
-              {draft.id && (
-                <button
-                  type="button"
-                  className={danger}
-                  disabled={pending}
-                  onClick={() => {
-                    if (!confirm(`Delete ${draft.title}?`)) return;
-                    const id = draft.id!;
-                    run(async () => {
-                      const result = await deleteDiscount(id);
-                      if (result.ok) setDraft(null);
-                      return result;
-                    }, `${draft.title} deleted.`);
-                  }}
-                >
-                  Delete
-                </button>
-              )}
               <button type="button" className={secondary} onClick={() => setDraft(null)}>
                 Cancel
               </button>

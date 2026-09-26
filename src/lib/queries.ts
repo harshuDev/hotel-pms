@@ -23,6 +23,7 @@ import {
   ROUND_TO,
   type InvoiceSettings,
 } from "@/lib/invoice-settings";
+import type { CancellationTerms } from "@/lib/cancellation-policy";
 import {
   DEFAULT_INVENTORY_SETTINGS,
   type InventorySettings,
@@ -1820,6 +1821,30 @@ export async function getCancellationPolicies(): Promise<CancellationPolicy[]> {
     isActive: row.is_active,
     sortOrder: row.sort_order,
     ratePlanCount: row.rate_plan_count,
+    isDefault: row.is_default,
+    // The generator types every RETURNS TABLE column non-null; each of these
+    // is nullable in Postgres and null wherever the question was not answered.
+    terms: {
+      depositRule: (row.deposit_rule as CancellationTerms["depositRule"]) ?? null,
+      depositNights: (row.deposit_nights as number | null) ?? null,
+      depositPercentBps: (row.deposit_percent_bps as number | null) ?? null,
+      depositAmountCents:
+        (row.deposit_amount_cents as number | null) === null ? null : Number(row.deposit_amount_cents),
+      refundRule: (row.refund_rule as CancellationTerms["refundRule"]) ?? null,
+      refundDays: (row.refund_days as number | null) ?? null,
+      refundCustom: (row.refund_custom as string | null) ?? null,
+      balanceDue: (row.balance_due as CancellationTerms["balanceDue"]) ?? null,
+      preauthoriseCard: row.preauthorise_card,
+      otherCustom: (row.other_custom as string | null) ?? null,
+      cancelRule: (row.cancel_rule as CancellationTerms["cancelRule"]) ?? null,
+      cancelValue: (row.cancel_value as number | null) ?? null,
+      cancelUnit: (row.cancel_unit as CancellationTerms["cancelUnit"]) ?? null,
+      cancelCustom: (row.cancel_custom as string | null) ?? null,
+      noShowRule: (row.no_show_rule as CancellationTerms["noShowRule"]) ?? null,
+      noShowCustom: (row.no_show_custom as string | null) ?? null,
+      breakfastOmit: row.breakfast_omit,
+      breakfastCustom: (row.breakfast_custom as string | null) ?? null,
+    },
   }));
 }
 

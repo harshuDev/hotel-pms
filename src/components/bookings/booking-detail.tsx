@@ -481,6 +481,15 @@ export function BookingDetailView({
                  because no policy is attached would be inventing a promise
                  the hotel never made. */
               <span className="text-ink-muted">Not set</span>
+            ) : cancellationTerms.kind === "custom" ? (
+              /* A custom policy is the hotel's own words (0092): no date can
+                 be worked out from it, so none is claimed. */
+              <>
+                <span className="font-medium text-ink">Custom terms</span>
+                <span className="block text-xxs text-ink-faint">
+                  {cancellationTerms.policyName}
+                </span>
+              </>
             ) : cancellationTerms.kind === "non_refundable" ? (
               <>
                 <span className="font-medium text-rose-600">Non-refundable</span>
@@ -749,13 +758,17 @@ export function BookingDetailView({
               <p
                 className={cn(
                   "mb-3 rounded-md px-3 py-2 text-[12.5px] leading-snug",
-                  cancellationTerms.kind === "non_refundable" ||
-                    cancellationTerms.isFreeNow === false
-                    ? "bg-rose-50 text-rose-700"
-                    : "bg-emerald-50 text-emerald-700",
+                  cancellationTerms.kind === "custom"
+                    ? "bg-shell text-ink"
+                    : cancellationTerms.kind === "non_refundable" ||
+                        cancellationTerms.isFreeNow === false
+                      ? "bg-rose-50 text-rose-700"
+                      : "bg-emerald-50 text-emerald-700",
                 )}
               >
-                {cancellationTerms.kind === "non_refundable"
+                {cancellationTerms.kind === "custom"
+                  ? `Sold under custom terms (${cancellationTerms.policyName}). Check them before cancelling.`
+                  : cancellationTerms.kind === "non_refundable"
                   ? `Sold as non-refundable (${cancellationTerms.policyName}). The charge stands and stays on the folio.`
                   : cancellationTerms.isFreeNow
                     ? `Free to cancel until ${cancellationTerms.freeUntil ? format(parseISO(cancellationTerms.freeUntil), "d MMM yyyy") : "the deadline"}.`

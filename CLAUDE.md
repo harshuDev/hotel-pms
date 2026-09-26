@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0091` are
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0093` are
 applied to the hosted database.
 
 Working on real data: dashboard (house board, movements, pace, activity feed),
@@ -1154,12 +1154,35 @@ anywhere else. Collapsed height must stay constant regardless of room count.
   The hotel choose how many day in Advance the guest can cancel for free. Non
   Refundable: Means that the guests cannot cancel or modify and the hotel can
   charge the guest card anytime."
-  - **Two kinds, because they behave differently rather than being one setting
-    at two values.** `flexible` carries `free_cancellation_days` and a check
-    constraint requires it; `non_refundable` carries none and the same
-    constraint forbids one. Switching kind in the form DROPS the stale days
-    rather than refusing — nobody should have to clear a field the new kind
-    does not have.
+  - **Three kinds, because they behave differently rather than being one
+    setting at three values.** `flexible` carries `free_cancellation_days` and
+    a check constraint requires it; `non_refundable` and `custom` (0092) carry
+    none and the same constraint forbids one. A custom policy is the hotel's
+    own words: no date can be worked out from it, so the booking screen says
+    "Custom terms" and claims no free window.
+  - **THE FORM IS THE REFERENCE'S (0093)** -- deposits, refunds of deposits,
+    other details, the cancellation choice, no-show, breakfast, "Use as
+    default policy" -- in `cancellation-policy-panel.tsx`, stored as
+    structured columns.
+    - **Kind and days are DERIVED from the cancellation choice by
+      `save_cancellation_policy_terms()`**, never sent: free at any time is
+      flexible/0, no cancellation is non-refundable, free up to N days is
+      flexible/N, free up to N HOURS is flexible/ceil(N/24) -- terms are dated
+      by business date, so hours round UP to a whole day, never promising less
+      time than the hotel gave -- and custom is custom.
+    - **The sentence the choices add up to** (`cancellationPolicySummary()` in
+      `src/lib/cancellation-policy.ts`, pure) is saved as `description`, which
+      the guest page already shows as the policy's wording. So deposits,
+      refunds, no-show and breakfast reach the guest in words, untranslated
+      like every hotel's own wording. Nothing COLLECTS a deposit or charges a
+      no-show from them -- see "Card capture is not built".
+    - **One default per property** (partial unique index). A new rate plan
+      with no policy takes it, by trigger on `rate_plans`. The default can be
+      neither unticked nor deleted; tick another instead.
+    - **Not built:** "Flexible Cancellation Fee based at cancellation period"
+      (its fee schedule has not been seen). "Remaining balance to be paid on"
+      offers arrival or departure -- PROVISIONAL, the reference's list was not
+      seen open. The reference's LOCALE and translate buttons are not copied.
   - **Per rate plan, not per property.** "Each hotel have different policy" is
     satisfied by the rows being per-property; what a policy governs is a rate,
     because Flexible and Non-refundable are two things one hotel sells side by
@@ -1196,11 +1219,12 @@ anywhere else. Collapsed height must stay constant regardless of room count.
     non-refundable booking means the charge stands and the folio still says
     what is owed; collecting it is the front desk's job until card capture
     exists. Do not let the interface imply otherwise.
-  - **There is no delete**, like a rate plan or a tax rate: `rate_plans` points
-    at a policy under `on delete restrict` and a booking keeps meaning what it
-    was sold under. One no longer offered is `is_active = false`, and the
-    Settings list shows how many plans use each so retiring a live one is
-    visible before it happens.
+  - **A policy CAN be deleted as of 0093, but only one no rate plan uses and
+    that is not the default** -- `delete_cancellation_policy()` refuses the
+    rest by name. `rate_plans` points at a policy under `on delete restrict`,
+    so a booking keeps meaning what it was sold under. There is no Active
+    switch any more (the reference has none); `is_active` stays true and the
+    column is kept for the guest page's join.
   - **"Rates (Main)" and "Rates (All)" are the same field.** Main pins the
     property's default plan and hides the switcher; All lets you pick. Two
     entries for one field is not duplication — changing the main rate is most
@@ -1773,8 +1797,10 @@ anywhere else. Collapsed height must stay constant regardless of room count.
   - **INVENTORY -> DISCOUNTS (0090) IS STORED, NOT YET APPLIED.** The
     reference's search box, list (Title sortable, Type filterable, Amount) and
     Add Discount dialog: Title, Amount with a % or currency prefix, Type as
-    Percent or Fixed. A row opens the same dialog to edit, with Delete there,
-    since the reference's list carries no icons.
+    Percent or Fixed. Each row carries a ringed pencil and a ringed bin, as
+    the reference's do (the first build had none, from a screenshot without
+    them); Title and Amount both sort, Amount putting percentages before
+    fixed sums since the two are not one scale.
     - **The amount is never a float.** Percent is `percent_bps` (1000 = 10.0 %)
       parsed from the typed string by `parsePercentBps()`; Fixed is
       `amount_cents` in the property's currency. A check constraint makes each
@@ -2794,9 +2820,9 @@ than proceeding.
     built. Until it is, a new person is invited in Supabase Auth and then
     appears in Settings to be named and given a role.
 
-16. **Cancellation policy — settled and built (0060): two kinds, per rate
-    plan.** Flexible with a free-cancellation window in days, and
-    non-refundable. See the cancellation notes above. **What is NOT settled is
+16. **Cancellation policy — settled and built (0060, 0092-0093): three
+    kinds, per rate plan.** Flexible with a free-cancellation window in days,
+    non-refundable, and custom (the hotel's own words). See the cancellation notes above. **What is NOT settled is
     charging the card**: the client's "the hotel can charge the guest card
     anytime" needs card capture, which is deferred, so the policy records the
     right and cannot exercise it.
