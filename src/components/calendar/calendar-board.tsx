@@ -1490,10 +1490,21 @@ export function CalendarBoard({
                   const bars = barsByRoom.get(room.roomId) ?? [];
                   const { placed, lanes } = packLanes(bars, dates);
                   return (
-                    <div key={room.roomId} className="flex items-stretch">
+                    <div
+                      key={room.roomId}
+                      // Room Setup's Divider (0091): a heavier rule under the
+                      // room, across the rail and the grid alike.
+                      className={cn("flex items-stretch", room.hasDivider && "border-b-2 border-chrome-900")}
+                    >
                       <div
                         className={cn(railCell, "flex items-center gap-2 px-3 py-1.5")}
-                        style={{ width: railW }}
+                        style={{
+                          width: railW,
+                          // Room Setup's Color (0091), as an inset stripe so the
+                          // rail keeps its width. A hotel's colour is data, so it
+                          // is a style and never a Tailwind class.
+                          boxShadow: room.color ? `inset 4px 0 0 ${room.color}` : undefined,
+                        }}
                       >
                         {/*
                           The dot is a control now, not just a light. The

@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0090` are
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0091` are
 applied to the hosted database.
 
 Working on real data: dashboard (house board, movements, pace, activity feed),
@@ -32,8 +32,9 @@ by hand.
 
 Those figures are a working configuration, not the client's own property. They
 were chosen with the client and are cheap to change in the application, with
-one exception that Postgres will not let anyone undo: there is no delete for a
-room type, because bookings point at it under `on delete restrict`. **A tax
+one exception that Postgres will not let anyone undo: a room type that has
+been BOOKED cannot be deleted, because bookings point at it under `on delete
+restrict` (as of 0091 one nothing was ever built on can be). **A tax
 rate CAN be deleted as of 0079, but only one nothing points at** — no charge
 posted at it, no extra or extras category set to it; one in use is retired.
 
@@ -256,6 +257,7 @@ Each read is a Postgres view or RPC, never aggregation in the client:
 | `getExtrasCatalog()`                | `extra_categories` + `extras` (0069) |
 | `getFacilities()`                   | `facilities` (0070)               |
 | `getRoomTypeSettings()`             | `room_types` with room counts and facility ids |
+| `getVirtualRoomTypes()`             | `virtual_room_types` (0091)       |
 | `getChannelSettings()`              | `channels`                        |
 | `getTaxRateSettings()`              | `tax_rates_list()` (order, in use) |
 | `getStaffSettings()`                | `staff_users`                     |
@@ -1721,6 +1723,53 @@ anywhere else. Collapsed height must stay constant regardless of room count.
       which staff cannot execute -- every save raised a permission error. They
       read `business_dates` under RLS now. Found by the rolled-back test
       before any code shipped.
+  - **INVENTORY -> ROOM TYPE AND ROOM SETUP (0091)**, cloned from the
+    reference. `src/components/settings/room-panels.tsx`.
+    - **Room Type**: Display Name (with the code), Room Type, Occupancy, a
+      drag handle, a pencil and a cross, "+ Add Room Type".
+      - **`display_name` is what a GUEST reads**; `name` stays the staff name
+        every screen, report and grid uses. `public_room_types()` returns
+        `coalesce(display_name, name)` in its existing `name` column -- same
+        shape, so the booking flow was not touched. Null reads as the name.
+      - **The drag order is `sort_order`**, which the calendar, the inventory
+        grids and the guest page already sort by (`set_room_type_order()`,
+        arrow keys on the handle as on Tax Information).
+      - **A ROOM TYPE CAN BE DELETED IF NOTHING WAS BUILT ON IT**: no room, no
+        booked room, no waitlist entry, no virtual type. Its prices,
+        restrictions, offer links and facility ticks go with it by cascade.
+        `delete_room_type()` refuses the rest by name, and the cross is drawn
+        only on a type with no rooms. A BOOKED type still stays for ever.
+      - Occupancy shows sleeps and, where the maximum is higher, "+ extra".
+        The reference's children figure has no column here and is not faked.
+    - **VIRTUAL ROOM TYPES ARE STORED, NOT YET SOLD** (`virtual_room_types`:
+      display name + parent). Selling one means a booking, a rate row and an
+      availability rule that resolve to the parent -- a change to how
+      inventory is counted, to be asked for.
+    - **Room Setup**: Name/Number, Room Type, Property, Priority, Available
+      Online, Enabled, Key Code, Common Door Name, Color, Divider, a pencil
+      and a cross, "+ Add Room" (one room, in a dialog) and "Use Booking Room
+      id as Key Code". Search and paging stay, in Postgres -- the ~1,800 rule.
+      "+ Add Rooms in a Run" stays beside Add Room; it is not the reference's
+      but a large property cannot be entered one room at a time.
+      - **AVAILABLE ONLINE IS LIVE**: `public_room_types()` counts only rooms
+        available online as sellable on the guest page. Staff sell them all.
+      - **ENABLED IS LIVE, AND A DISABLED ROOM IS LOCKED OUT OF ORDER.**
+        `set_room_enabled()` sets it `ooo` -- which every availability,
+        occupancy and house count already excludes, so no report was
+        rewritten -- and two triggers hold it there: `rooms_disabled_stays_ooo`
+        refuses any status change while disabled (check-in, the housekeeping
+        menu and report, `set_room_status()`), and
+        `booking_rooms_not_in_disabled_room` refuses putting a booking in one
+        (`assign_room()` and anything else). A check constraint says the same.
+        Disabling is refused while a guest is in the room or a live booking is
+        assigned from the business date on; enabling returns it dirty.
+      - **Color and Divider are live on the calendar rail**: the colour is an
+        inset stripe on the room number (a style, since it is data), the
+        divider a heavier rule under the row. `calendar_rooms()` returns both.
+      - **Stored**: Priority (nothing allocates rooms automatically), Key
+        Code, Common Door Name, and the key-code setting (no door-lock
+        system). `set_room_setup()` is its own function, not parameters on
+        `save_room()` -- the overload trap again.
   - **INVENTORY -> DISCOUNTS (0090) IS STORED, NOT YET APPLIED.** The
     reference's search box, list (Title sortable, Type filterable, Amount) and
     Add Discount dialog: Title, Amount with a % or currency prefix, Type as
@@ -2062,9 +2111,10 @@ anywhere else. Collapsed height must stay constant regardless of room count.
     `ooo`; the list says which is which with `has_bookings` rather than letting
     somebody find out by clicking. The room's `room_status_history` goes with
     it — that log is about the room, and once the room is gone there is nothing
-    for it to be evidence of. **There is still no delete for a room type or a
-    payment method**: bookings and payments point at those under
-    `on delete restrict`, so one no longer used is `is_active = false`.
+    for it to be evidence of. **There is still no delete for a payment
+    method**: payments point at one under `on delete restrict`, so one no
+    longer used is `is_active = false`. **A room type CAN be deleted as of
+    0091, but only one nothing was built on** -- see the Room Type notes.
   - **A room carries a photograph** (0055). `rooms.photo_path` holds an object
     path in the public `room-photos` bucket, never a URL: a url column renders
     whatever the browser sent. The path is `<property_id>/<room_id>/<file>`,

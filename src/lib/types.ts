@@ -952,6 +952,15 @@ export interface RoomTypeSetting {
   facilityIds: string[];
   /** What the guest booking page says about the room type (0072). */
   description: string | null;
+  /** The guest-facing name on the booking page (0091); null reads as `name`. */
+  displayName: string | null;
+}
+
+/** A second name a parent room type is sold under (0091). Stored, not sold. */
+export interface VirtualRoomType {
+  id: string;
+  displayName: string;
+  parentRoomTypeId: string;
 }
 
 export interface TaxRateSetting {
@@ -1015,6 +1024,18 @@ export interface RoomSetting {
    * before somebody clicks rather than after.
    */
   hasBookings: boolean;
+  /** Room Setup (0091). Stored: nothing allocates rooms automatically. */
+  priority: number;
+  /** Counted as sellable on the guest booking page. */
+  availableOnline: boolean;
+  /** Disabled rooms are held `ooo` by trigger and nobody can be put in one. */
+  isEnabled: boolean;
+  keyCode: string | null;
+  doorName: string | null;
+  /** "#rrggbb", marks the room on the calendar rail; null for none. */
+  color: string | null;
+  /** A heavier rule under this room on the calendar rail. */
+  hasDivider: boolean;
 }
 
 export interface RoomSettingsPage {
@@ -1250,6 +1271,10 @@ export interface CalendarRoom {
   /** The guest has asked not to be disturbed. Only ever true while occupied. */
   doNotDisturb: boolean;
   sortOrder: number;
+  /** Room Setup's colour (0091): marks the room number in the rail. */
+  color: string | null;
+  /** Room Setup's divider (0091): a heavier rule under the row. */
+  hasDivider: boolean;
 }
 
 /** The four points on the housekeeping scale the rail's dot menu offers. */
