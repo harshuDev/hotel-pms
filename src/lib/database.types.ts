@@ -14,6 +14,104 @@ export type Database = {
   }
   public: {
     Tables: {
+      accounting_categories: {
+        Row: {
+          created_at: string
+          external_code: string | null
+          id: string
+          internal_code: string | null
+          name: string
+          property_id: string
+        }
+        Insert: {
+          created_at?: string
+          external_code?: string | null
+          id?: string
+          internal_code?: string | null
+          name: string
+          property_id: string
+        }
+        Update: {
+          created_at?: string
+          external_code?: string | null
+          id?: string
+          internal_code?: string | null
+          name?: string
+          property_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "accounting_categories_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      accounting_defaults: {
+        Row: {
+          accommodation_id: string
+          extras_id: string
+          payments_id: string
+          property_id: string
+          taxes_id: string
+          updated_at: string
+        }
+        Insert: {
+          accommodation_id: string
+          extras_id: string
+          payments_id: string
+          property_id: string
+          taxes_id: string
+          updated_at?: string
+        }
+        Update: {
+          accommodation_id?: string
+          extras_id?: string
+          payments_id?: string
+          property_id?: string
+          taxes_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "accounting_defaults_accommodation_id_fkey"
+            columns: ["accommodation_id"]
+            isOneToOne: false
+            referencedRelation: "accounting_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "accounting_defaults_extras_id_fkey"
+            columns: ["extras_id"]
+            isOneToOne: false
+            referencedRelation: "accounting_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "accounting_defaults_payments_id_fkey"
+            columns: ["payments_id"]
+            isOneToOne: false
+            referencedRelation: "accounting_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "accounting_defaults_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: true
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "accounting_defaults_taxes_id_fkey"
+            columns: ["taxes_id"]
+            isOneToOne: false
+            referencedRelation: "accounting_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       activity_log: {
         Row: {
           action: string
@@ -4254,6 +4352,7 @@ export type Database = {
           status: Database["public"]["Enums"]["booking_status"]
         }[]
       }
+      delete_accounting_category: { Args: { p_id: string }; Returns: undefined }
       delete_booking_attachment: {
         Args: { p_attachment_id: string }
         Returns: string
@@ -4998,6 +5097,24 @@ export type Database = {
           total_count: number
         }[]
       }
+      save_accounting_category: {
+        Args: {
+          p_external_code: string
+          p_id: string
+          p_internal_code: string
+          p_name: string
+        }
+        Returns: string
+      }
+      save_accounting_defaults: {
+        Args: {
+          p_accommodation_id: string
+          p_extras_id: string
+          p_payments_id: string
+          p_taxes_id: string
+        }
+        Returns: undefined
+      }
       save_booking_confirmation_email: {
         Args: {
           p_checkin_notes: string
@@ -5358,6 +5475,10 @@ export type Database = {
           p_rate_bps: number
         }
         Returns: string
+      }
+      seed_accounting_categories: {
+        Args: { p_property: string }
+        Returns: undefined
       }
       set_allotment: {
         Args: {

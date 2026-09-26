@@ -57,3 +57,36 @@ export function formatRateMicros(micros: number): string {
   const frac = String(micros % 1_000_000).padStart(6, "0").replace(/0+$/, "");
   return frac ? `${whole}.${frac}` : String(whole);
 }
+
+/**
+ * Settings -> Finances -> Accounting Categories (0085): the ledger accounts a
+ * bookkeeper posts to. Not the Extras catalog's "Accounting Category", which
+ * is the report bucket (`folio_item_type`).
+ */
+export interface AccountingCategory {
+  id: string;
+  name: string;
+  internalCode: string | null;
+  externalCode: string | null;
+}
+
+/** The four defaults. Always set: the migration seeds them. */
+export interface AccountingDefaults {
+  accommodationId: string;
+  extrasId: string;
+  taxesId: string;
+  paymentsId: string;
+}
+
+export interface AccountingSettings {
+  categories: AccountingCategory[];
+  defaults: AccountingDefaults | null;
+}
+
+/** The four pickers, in the reference's order and wording. */
+export const ACCOUNTING_DEFAULT_KINDS = [
+  { key: "accommodationId", label: "Default for accommodation" },
+  { key: "extrasId", label: "Default for extras" },
+  { key: "taxesId", label: "Default for taxes" },
+  { key: "paymentsId", label: "Default for payments" },
+] as const satisfies readonly { key: keyof AccountingDefaults; label: string }[];

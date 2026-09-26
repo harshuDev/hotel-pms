@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0084` are
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0085` are
 applied to the hosted database.
 
 Working on real data: dashboard (house board, movements, pace, activity feed),
@@ -261,6 +261,7 @@ Each read is a Postgres view or RPC, never aggregation in the client:
 | `getStaffSettings()`                | `staff_users`                     |
 | `getRoomsForSettings({ q, page })`  | `rooms_for_settings(...)`         |
 | `getPaymentMethodSettings()`        | `payment_methods` incl. retired   |
+| `getAccountingSettings()`           | `accounting_categories` + `accounting_defaults` (0085) |
 | `getMealReport(from, to)`           | `meal_report(from, to)`           |
 
 **Two signatures carry the room-count rule.** The client operates properties
@@ -1590,12 +1591,12 @@ anywhere else. Collapsed height must stay constant regardless of room count.
     0074-0075, System Settings grew its three with 0076-0078.
   - **FINANCES AND INVENTORY are the reference's labels in its order**
     (0079): Custom Payment Types, Tax Information, Invoice Settings (0080),
-    Pos Profiles (0084), Currencies (0083);
+    Pos Profiles (0084), Currencies (0083), Accounting Categories (0085);
     Room Type, Room Setup,
     Cancellation Policy, Rate Plans, Seasons and Events. Room Type and Room
     Setup moved there from Hotel Content, where the reference does not have
     them. Their other items —
-    Accounting Categories, Payment Gateway, Accounting Systems, and
+    Payment Gateway, Accounting Systems, and
     Inventory's Settings and Discounts — go in as each is built. Tab ids did
     not change, so every existing link still lands.
   - **INVOICE SETTINGS (0080-0082) HAS A READER: THE PRINTABLE INVOICE.**
@@ -1663,6 +1664,32 @@ anywhere else. Collapsed height must stay constant regardless of room count.
       Exchange" would need a rate feed this project has neither the network
       access nor a key for. The natural first reader is a display-only
       switcher on the guest booking page.
+  - **ACCOUNTING CATEGORIES (0085) ARE LEDGER ACCOUNTS, AND THE ACCOUNTING
+    REPORT READS THEM.** The reference's list (Name, Internal Code, External
+    Code, a pencil and a cross, a Create form inside the card) and Default
+    Accounting Categories: four pickers for accommodation, extras, taxes and
+    payments, one Save.
+    - **NOT THE EXTRAS CATALOG'S "ACCOUNTING CATEGORY".** That one is
+      `folio_item_type`, the report bucket a charge lands in (0069). This is
+      the account a bookkeeper posts the bucket to. Two levels, one word --
+      the reference uses it for both. Pointing an extra at one of these
+      instead would be a change to `charge_extra()` and the Extras report,
+      and has not been done.
+    - **The four defaults are live**: the Accounting report names the account
+      and its codes beside every line -- `room_charge` revenue to the
+      accommodation default, every other revenue line to extras, every payment
+      method to payments, and the Tax figure to taxes. A lookup in the page,
+      not a sum; the figures are still Postgres's.
+    - **The reference ships four, and so does every property**: Accommodation,
+      Extras, Taxes and Income, seeded by the migration and, for a property
+      inserted later, by a trigger on `properties`. `accounting_defaults` is
+      one row per property whose four columns are `not null` and point at a
+      category `on delete restrict`, so a default can never be empty. A
+      category that is a default is refused on delete BY NAME ("Taxes is the
+      default for taxes"); any other is genuinely deleted, since nothing else
+      points at one.
+    - Names are unique per property, case-insensitively. Blank codes are
+      stored as null.
   - **COMMUNICATIONS & NOTIFICATIONS IS STORED, NOT YET SENT** (0074, 0075) --
     Hotel Emails Preferences and Email Setup, cloned from the reference, all
     in one row per property, `hotel_email_settings`.

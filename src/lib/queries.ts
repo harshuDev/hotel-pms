@@ -23,7 +23,7 @@ import {
   ROUND_TO,
   type InvoiceSettings,
 } from "@/lib/invoice-settings";
-import type { CurrencyProfile, PosProfile } from "@/lib/finance-profiles";
+import type { AccountingSettings, CurrencyProfile, PosProfile } from "@/lib/finance-profiles";
 import type { ExtraItemType, ExtrasCatalog } from "@/lib/extras";
 import type { Facility, FacilityIcon } from "@/lib/facilities";
 import type {
@@ -2778,6 +2778,48 @@ export async function getCurrencyProfiles(): Promise<CurrencyProfile[]> {
     fixedRateMicros: r.fixed_rate_micros === null ? null : Number(r.fixed_rate_micros),
   }));
 }
+
+/**
+ * Accounting Categories (0085): every category, in the order added, and the
+ * four defaults. Cached, because the Accounting report reads it too.
+ */
+export const getAccountingSettings = cache(async (): Promise<AccountingSettings> => {
+  const supabase = await createClient();
+  const [categories, defaults] = await Promise.all([
+    supabase
+      .from("accounting_categories")
+      .select("id, name, internal_code, external_code")
+      .order("created_at")
+      .order("name"),
+    supabase
+      .from("accounting_defaults")
+      .select("accommodation_id, extras_id, taxes_id, payments_id")
+      .maybeSingle(),
+  ]);
+  if (categories.error) {
+    throw new Error(`Failed to load the accounting categories: ${categories.error.message}`);
+  }
+  if (defaults.error) {
+    throw new Error(`Failed to load the accounting defaults: ${defaults.error.message}`);
+  }
+  const d = defaults.data;
+  return {
+    categories: (categories.data ?? []).map((r) => ({
+      id: r.id,
+      name: r.name,
+      internalCode: r.internal_code,
+      externalCode: r.external_code,
+    })),
+    defaults: d
+      ? {
+          accommodationId: d.accommodation_id,
+          extrasId: d.extras_id,
+          taxesId: d.taxes_id,
+          paymentsId: d.payments_id,
+        }
+      : null,
+  };
+});
 
 /** One charge on a booking's folios, split for the invoice (0080). */
 export interface InvoiceLine {
