@@ -1718,6 +1718,17 @@ export async function deleteCancellationPolicy(id: string): Promise<ActionResult
   return { ok: true, data: null };
 }
 
+/** The reference's red bin: refused for the main rate and for a plan anything was sold on. */
+export async function deleteRatePlan(id: string): Promise<ActionResult<null>> {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("delete_rate_plan", { p_rate_plan_id: id });
+  if (error) return { ok: false, error: error.message };
+  revalidatePath("/settings");
+  revalidatePath("/inventory", "layout");
+  revalidatePath("/book", "layout");
+  return { ok: true, data: null };
+}
+
 /**
  * Which policy a rate is sold on.
  *
