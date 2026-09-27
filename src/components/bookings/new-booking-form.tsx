@@ -624,7 +624,7 @@ export function NewBookingForm({
                               quantity: Math.max(Number(e.target.value) || 1, 1),
                             })
                           }
-                          className={cn(fieldDark, "tnum")}
+                          className={cn(field, "tnum")}
                         />
                       </div>
                       <div>
@@ -635,7 +635,7 @@ export function NewBookingForm({
                           placeholder={ratePlanId ? tr("From the plan") : "0.00"}
                           value={line.rate}
                           onChange={(e) => setLine(line.key, { rate: e.target.value })}
-                          className={cn(fieldDark, "tnum")}
+                          className={cn(field, "tnum")}
                         />
                       </div>
                       <div>
@@ -649,7 +649,7 @@ export function NewBookingForm({
                               adults: Math.max(Number(e.target.value) || 1, 1),
                             })
                           }
-                          className={cn(fieldDark, "tnum")}
+                          className={cn(field, "tnum")}
                         />
                       </div>
                       <div>
@@ -663,7 +663,7 @@ export function NewBookingForm({
                               children: Math.max(Number(e.target.value) || 0, 0),
                             })
                           }
-                          className={cn(fieldDark, "tnum")}
+                          className={cn(field, "tnum")}
                         />
                       </div>
                       <div className="flex items-end">

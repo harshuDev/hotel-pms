@@ -40,13 +40,13 @@ export function Movements({
               key={t}
               onClick={() => setTab(t)}
               className={cn(
-                "rounded px-2.5 py-1 text-xs capitalize transition-colors",
+                "rounded px-2.5 py-1 text-xs transition-colors",
                 tab === t
                   ? "bg-white font-medium text-ink shadow-card"
                   : "text-ink-muted hover:text-ink",
               )}
             >
-              {t}
+              {t === "arrivals" ? tr("Arrivals") : tr("Departures")}
               <span className="tnum ml-1.5 text-ink-faint">
                 {t === "arrivals" ? arrivals.length : departures.length}
               </span>
@@ -87,8 +87,16 @@ export function Movements({
                 <p className="truncate text-[13px] font-medium text-ink">
                   {b.customerName}
                 </p>
-                <p className="text-xxs text-ink-faint">
-                  {b.typeLine ?? `${b.roomTypeName} · ${tr("{n}n", { n: b.nights })} · ${tr.message(b.channelName)}`}
+                <p className="flex min-w-0 items-center gap-1.5 text-xxs text-ink-faint">
+                  <span className="truncate">
+                    {`${b.roomTypeName} · ${tr("{n}n", { n: b.nights })}`}
+                  </span>
+                  <span
+                    title={tr("Booking channel")}
+                    className="shrink-0 rounded border border-line bg-shell px-1.5 py-px font-medium text-ink-muted"
+                  >
+                    {tr.message(b.channelName)}
+                  </span>
                 </p>
               </div>
               <div className="text-right">

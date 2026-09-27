@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0107` are
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0108` are
 applied to the hosted database.
 
 Working on real data: dashboard (house board, movements, pace, activity feed),
@@ -34,7 +34,8 @@ Those figures are a working configuration, not the client's own property. They
 were chosen with the client and are cheap to change in the application, with
 one exception that Postgres will not let anyone undo: a room type that has
 been BOOKED cannot be deleted, because bookings point at it under `on delete
-restrict` (as of 0091 one nothing was ever built on can be). **A tax
+restrict` (as of 0091 one nothing was ever built on can be, and as of 0108
+together with its rooms, if none of them was ever booked). **A tax
 rate CAN be deleted as of 0079, but only one nothing points at** — no charge
 posted at it, no extra or extras category set to it; one in use is retired.
 
@@ -297,6 +298,7 @@ Each read is a Postgres view or RPC, never aggregation in the client:
 | `getReactions()`                    | `reactions` (0104)                |
 | `getDocumentTemplate("folio")`      | `document_templates` (0105)       |
 | `getMealReport(from, to)`           | `meal_report(from, to)`           |
+| `getAccountingRoomRevenue(from, to)` | `accounting_room_revenue(from, to)` (0108) |
 
 **Two signatures carry the room-count rule.** The client operates properties
 with up to ~1,800 rooms, so no query may return every room and no screen may
@@ -889,7 +891,28 @@ showed the Reservation Centric calendar and asked for it by name.
         are not stacking contexts and its `z-50` still wins.
     - **THE MENU OFFERS ONLY WHAT THE ROOM ALLOWS, and explains nothing about
       the rest.** A vacant room gets the four cleaning states; an occupied
-      room gets Do not disturb. Neither is told about the other.
+      room gets Inspected, Clean, Dirty and Do not disturb (0108). Broken is
+      the one it never gets: it is `ooo`, and a room with a guest in it
+      cannot go out of order until the guest is moved or checked out.
+      - **THE OCCUPIED OPTIONS ARE 0108, at the client's request** -- their
+        screenshot showed room 104's menu holding Do not disturb alone, where
+        the reference offers the cleaning states on an occupied room too.
+        That is the stay-over clean: a guest in 104 wants the room made up,
+        and housekeeping wants to say it has been.
+      - **`room_status` cannot carry it**, because `occupied` already means
+        "a guest is in it" and says nothing about cleanliness. So an occupied
+        room's Dirty is a FLAG, `rooms.service_due`, beside `is_inspected`
+        and `do_not_disturb`: Dirty sets it, Clean clears both, Inspected sets
+        `is_inspected`. The status stays `occupied` throughout, so nothing
+        about availability or the house count moves.
+      - **The trigger `rooms_housekeeping_flags_follow_status` clears the
+        flags on any status change** -- `service_due` always, `is_inspected`
+        unless the room becomes `vacant_clean`, `do_not_disturb` unless it is
+        `occupied`. Without it a room checked out while flagged would carry
+        "needs its stay-over clean" into the next guest's stay.
+      - The rail dot shows it: rose for occupied and waiting for its clean,
+        the inspected ring for occupied and signed off, amber for Do not
+        disturb, which wins over both.
       - It used to show all five always, greying out whatever the room's state
         forbade and printing a sentence underneath saying why — "Occupied —
         check the guest out before changing its state", "Do not disturb needs
@@ -910,7 +933,8 @@ showed the Reservation Centric calendar and asked for it by name.
         courtesy and never the only thing standing between a bad write and the
         database.
     - **Occupied is not offered in either direction**, as before: a guest being
-      in the room is what puts it there.
+      in the room is what puts it there. The occupied room's Clean and Dirty
+      are the flags above, never a move off `occupied`.
   - **A GUEST CAN BE UPGRADED INTO ANOTHER ROOM TYPE** (0062). The client:
     "when a room is in the holding area, whe can only move it to the same room
     type. But hotels do offer upgrades. Let's say someone booked a Double Room
@@ -1088,6 +1112,11 @@ showed the Reservation Centric calendar and asked for it by name.
     light rather than a black square on a dark field. **It is one component**,
     so the dark band appears wherever the form does — the calendar's dialog and
     `/bookings/new` alike. That is the point of there being one form.
+  - **The room lines are NOT on the dark band, and use `field`, not
+    `fieldDark`.** They sit on the white card under it, and in `fieldDark`
+    -- white text on a near-transparent fill -- they were white on white: the
+    client sent a screenshot of ROOMS / RATE A NIGHT / ADULTS / CHILDREN with
+    nothing visible beneath them. Only the Stay band takes the dark styles.
   - **Focus goes to the first field, not the first focusable element.**
     `querySelector` returns document order and the close button is first in the
     markup, so one selector put the cursor on "close" — where a habitual space
@@ -1112,6 +1141,19 @@ rendered one tile per room. That grid was the nicest thing on the page at 40
 rooms and unusable at 1,800, which is the scale the client actually operates
 at. **Do not reintroduce a grid of one tile per room**, on the dashboard or
 anywhere else. Collapsed height must stay constant regardless of room count.
+
+**The dashboard shows where the business comes from** (0108 round). The
+client: "Need to add Booking Channel in the Dashboard".
+- **Booking channels** (`src/components/dashboard/channel-mix.tsx`) is a card
+  in the right column: one row per channel over the next 28 nights from the
+  business date -- the same nights the pace chart forecasts -- with its
+  bookings, room nights, value and a bar for its share of room nights. It is
+  `channel_report()`, the Channel report's own read, so the card and the
+  report cannot disagree; the card links to the report over the same dates.
+  No new function and no new aggregation.
+- **Each arrival and departure carries its channel as a chip**, where it
+  used to be the last clause of the grey line under the name. The Arrivals
+  and Departures tabs are translated now; they printed the raw English keys.
 
 ## Naming
 
@@ -1222,6 +1264,18 @@ anywhere else. Collapsed height must stay constant regardless of room count.
         removes nothing. Nothing priced or restricted in Inventory is ever
         overwritten; Inventory stays the way to change a night that has a
         value. Save reports how many nights it priced.
+      - **EXCEPT THE RATE, WHEN ASKED (0108).** "Replace prices already on
+        these nights", a tickbox above the grid, makes a row's Save overwrite
+        `rate_cents` on the season's nights as well as fill the empty ones.
+        The client asked to "put rate in the season", and on the hosted
+        property every night was already priced to 2027-09-18, so fill-only
+        changed nothing and read as broken. **The restrictions stay
+        fill-only either way** -- the tickbox names prices and does only
+        that. Save then reports nights set or changed.
+      - **The grid is also on Settings -> Seasons and Events** (0108), under
+        the year calendar: "Rates for <season>" on each season and on the
+        Default Season opens it on that season. It is the same
+        `RateCombinations` keyed on the season chosen, not a second editor.
       - **Which nights:** from the open business date on. A season: its own
         ranges, up to two years out. The Default Season: the next 365 nights
         that no season covers. `inventory_guard()` does the role check.
@@ -1804,6 +1858,16 @@ anywhere else. Collapsed height must stay constant regardless of room count.
       accommodation default, every other revenue line to extras, every payment
       method to payments, and the Tax figure to taxes. A lookup in the page,
       not a sum; the figures are still Postgres's.
+    - **A ROOM TYPE CAN NAME ITS OWN ACCOUNT (0108)**,
+      `room_types.accounting_category_id`, null meaning the accommodation
+      default, set on the Room Type form. The Accounting report then splits
+      its room line per room type -- `accounting_room_revenue()`, room charges
+      from `folio_item_lines` attributed to the night's sold type, a reversal
+      to the night it reverses -- and posts each to its type's account. **The
+      split is drawn only when it adds up to the report's own room line to
+      the penny**; otherwise the single line stays, so the page can never
+      show two different room totals. A category a room type uses is refused
+      on delete by name, like a default.
     - **The reference ships four, and so does every property**: Accommodation,
       Extras, Taxes and Income, seeded by the migration and, for a property
       inserted later, by a trigger on `properties`. `accounting_defaults` is
@@ -1855,8 +1919,31 @@ anywhere else. Collapsed height must stay constant regardless of room count.
       - **A ROOM TYPE CAN BE DELETED IF NOTHING WAS BUILT ON IT**: no room, no
         booked room, no waitlist entry, no virtual type. Its prices,
         restrictions, offer links and facility ticks go with it by cascade.
-        `delete_room_type()` refuses the rest by name, and the cross is drawn
-        only on a type with no rooms. A BOOKED type still stays for ever.
+        `delete_room_type()` refuses the rest by name. A BOOKED type still
+        stays for ever.
+      - **THE CROSS IS ON EVERY ROW AS OF 0108**, at the client's request
+        ("Add Room Types option should have delete option"). It was drawn
+        only on a type with no rooms, which on a set-up property is none of
+        them. `delete_room_type(p_room_type_id, p_with_rooms)` now takes the
+        type's rooms with it when asked, **provided none of those rooms was
+        ever booked** -- a room typed in by mistake, a type set up and never
+        sold. The confirmation says how many rooms go. A type with booked
+        rooms is still refused by name, with the count: `booking_rooms`
+        points at it under `on delete restrict` and a reservation keeps
+        saying what it was sold as. **On the hosted property all four types
+        have been booked**, so all four refuse; tell the client that is the
+        rule working, not the button failing.
+      - **The list carries Pictures, Available Facilities and Accounting
+        Category** (0108), the client's "more information in Room Types":
+        the first picture and a count, up to five facility icons and "+n",
+        and the type's account or the accommodation default.
+      - **A ROOM TYPE HAS ITS OWN PICTURES (0108)**, `room_type_photos`, up to
+        twelve, uploaded on its form (`room-type-photos.tsx`) to the public
+        `room-photos` bucket at `<property>/room-types/<type>/<uuid>.<ext>`.
+        The browser uploads under its own session and `add_room_type_photo()`
+        records the row, checking the path names this property and this type;
+        a refused row takes its file back out, and deleting the type hands
+        back its paths so the files go too. The room-photo pattern exactly.
       - Occupancy shows sleeps and, where the maximum is higher, "+ extra".
         The reference's children figure has no column here and is not faked.
     - **VIRTUAL ROOM TYPES ARE STORED, NOT YET SOLD** (`virtual_room_types`:
@@ -2664,10 +2751,11 @@ anywhere else. Collapsed height must stay constant regardless of room count.
       "today" is the HOTEL's today in its own timezone, not the server's or
       the guest's. Formatting names in a client component is the hydration
       trap `formatStampInProperty()` exists for.
-    - **Photographs are the type's own rooms'.** There is no room TYPE
-      photograph; photos have been per room since 0055, so
-      `public_room_type_content()` returns up to eight of the type's room
-      photos. A type with none draws a plain dark tint, never a broken image.
+    - **Photographs are the type's own first, then its rooms'** (0108).
+      `public_room_type_content()` returns up to eight: the room type's own
+      pictures in their order, then photos of its rooms (per room since
+      0055). This used to say there was no room TYPE photograph; there is
+      now. A type with none draws a plain dark tint, never a broken image.
     - **A room type has a description** (0072, `room_types.description`),
       edited on the Room Types form and saved by its own
       `set_room_type_description()` -- the overload trap again, as with

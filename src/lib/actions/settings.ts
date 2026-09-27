@@ -1332,12 +1332,75 @@ export async function setRoomTypeOrder(ids: string[]): Promise<ActionResult<null
 }
 
 /** Refused by name while any room, booking, waitlist entry or virtual type uses it. */
-export async function deleteRoomType(id: string): Promise<ActionResult<null>> {
+/**
+ * Deleting a room type (0108). `withRooms` takes its rooms with it -- only
+ * ever when nothing was booked on the type or in those rooms, which Postgres
+ * decides. The photographs that went with it are removed from the bucket
+ * after the rows are gone, never before.
+ */
+export async function deleteRoomType(
+  id: string,
+  withRooms = false,
+): Promise<ActionResult<null>> {
   const supabase = await createClient();
-  const { error } = await supabase.rpc("delete_room_type", { p_room_type_id: id });
+  const { data, error } = await supabase.rpc("delete_room_type", {
+    p_room_type_id: id,
+    p_with_rooms: withRooms,
+  });
   if (error) return { ok: false, error: await localised(error.message) };
+  const paths = (data ?? []) as string[];
+  if (paths.length > 0) await supabase.storage.from(ROOM_PHOTO_BUCKET).remove(paths);
   revalidateSettings();
   revalidatePath("/calendar");
+  return { ok: true, data: null };
+}
+
+/**
+ * A photograph of a room type (0108). The browser uploads it straight to the
+ * public `room-photos` bucket under `<property>/room-types/<type>/`, as a
+ * room's photograph does; this records it, and Postgres checks the path.
+ */
+export async function addRoomTypePhoto(input: {
+  roomTypeId: string;
+  path: string;
+}): Promise<ActionResult<null>> {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("add_room_type_photo", {
+    p_room_type_id: input.roomTypeId,
+    p_path: input.path,
+  });
+  if (error) {
+    // The row was refused, so the file just uploaded points at nothing.
+    await supabase.storage.from(ROOM_PHOTO_BUCKET).remove([input.path]);
+    return { ok: false, error: await localised(error.message) };
+  }
+  revalidateSettings();
+  return { ok: true, data: null };
+}
+
+/** The row goes first and hands back the path, so the file is only removed once Postgres agreed. */
+export async function deleteRoomTypePhoto(photoId: string): Promise<ActionResult<null>> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("delete_room_type_photo", { p_photo_id: photoId });
+  if (error) return { ok: false, error: await localised(error.message) };
+  if (data) await supabase.storage.from(ROOM_PHOTO_BUCKET).remove([data as string]);
+  revalidateSettings();
+  return { ok: true, data: null };
+}
+
+/** The ledger account a room type's revenue posts to (0108); null is the accommodation default. */
+export async function setRoomTypeAccountingCategory(input: {
+  roomTypeId: string;
+  categoryId: string | null;
+}): Promise<ActionResult<null>> {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("set_room_type_accounting_category", {
+    p_room_type_id: input.roomTypeId,
+    // Null: the accommodation default, as every type was before 0108.
+    p_category_id: nullableArg(input.categoryId),
+  });
+  if (error) return { ok: false, error: await localised(error.message) };
+  revalidateSettings();
   return { ok: true, data: null };
 }
 
@@ -2049,9 +2112,12 @@ export async function saveWeekRates(input: {
     closedToDeparture: boolean;
     stopSell: boolean;
   }[];
+  /** Replace the rate already on these nights, not only fill empty ones (0108). */
+  replaceRates?: boolean;
 }): Promise<ActionResult<{ filled: number }>> {
   const supabase = await createClient();
   const { data, error } = await supabase.rpc("save_week_rates", {
+    p_replace_rates: input.replaceRates ?? false,
     p_rate_plan_id: input.ratePlanId,
     p_room_type_id: input.roomTypeId,
     // Null is the Default Season.

@@ -139,7 +139,7 @@ export default async function SettingsPage({
     getBusinessDate(),
     getDiscounts(),
     getVirtualRoomTypes(),
-    tab === "rate-plans" ? getWeekRates() : Promise.resolve([]),
+    tab === "rate-plans" || tab === "seasons" ? getWeekRates() : Promise.resolve([]),
     tab === "channel-manager" ? getChannelManagers() : Promise.resolve([]),
     tab === "booking-engine" ? getBookingEngineSettings() : Promise.resolve(null),
     tab === "booking-widget" ? getBookingWidgets() : Promise.resolve([]),

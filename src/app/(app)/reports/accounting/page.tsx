@@ -3,8 +3,13 @@ import { ReportFigure, ReportFigures, ReportShell } from "@/components/reports/r
 import { ReportFeatureOff, ReportNoAccess, ReportTable } from "@/components/reports/report-table";
 import { formatMoney, formatMoneyShort } from "@/lib/money";
 import { reportRange } from "@/lib/reports";
-import { ReportAccessError, getAccountingReport, getBusinessDate } from "@/lib/queries";
-import type { AccountingRow, FolioItemType } from "@/lib/types";
+import {
+  ReportAccessError,
+  getAccountingReport,
+  getAccountingRoomRevenue,
+  getBusinessDate,
+} from "@/lib/queries";
+import type { AccountingRoomRevenueRow, AccountingRow, FolioItemType } from "@/lib/types";
 import { FOLIO_ITEM_LABEL } from "@/lib/folio-items";
 import { getAccountingSettings, getHotelFeatures, getPropertyCurrency } from "@/lib/queries";
 import type { AccountingCategory } from "@/lib/finance-profiles";
@@ -47,8 +52,12 @@ export default async function AccountingReportPage({
   const range = reportRange(businessDate, sp.from, sp.to);
 
   let rows: AccountingRow[];
+  let byType: AccountingRoomRevenueRow[];
   try {
-    rows = await getAccountingReport(range.from, range.to);
+    [rows, byType] = await Promise.all([
+      getAccountingReport(range.from, range.to),
+      getAccountingRoomRevenue(range.from, range.to),
+    ]);
   } catch (error) {
     if (error instanceof ReportAccessError) {
       return (
@@ -72,7 +81,9 @@ export default async function AccountingReportPage({
   const d = accounting.defaults;
   const account = (id: string | undefined) => (id ? byId.get(id) ?? null : null);
   const revenueAccount = (r: AccountingRow) =>
-    account(r.code === "room_charge" ? d?.accommodationId : d?.extrasId);
+    r.code === "room_charge"
+      ? account(r.accountingCategoryId ?? d?.accommodationId)
+      : account(d?.extrasId);
   const taxAccount = account(d?.taxesId);
   const paymentsAccount = account(d?.paymentsId);
   const accountCell = (a: AccountingCategory | null) =>
@@ -85,7 +96,30 @@ export default async function AccountingReportPage({
       <span className="text-ink-faint">—</span>
     );
 
-  const revenue = rows.filter((r) => r.section === "revenue");
+  /*
+   * ROOM REVENUE, ONE LINE PER ROOM TYPE (0108), so a type with its own
+   * accounting category posts there rather than to the accommodation default.
+   * The split is Postgres's and always adds up to the room_charge line; if it
+   * ever did not, the single line is shown rather than figures that disagree.
+   */
+  const roomLine = rows.find((r) => r.section === "revenue" && r.code === "room_charge");
+  const splitGross = byType.reduce((s, r) => s + r.grossCents, 0);
+  const splitRoom =
+    roomLine && byType.length > 0 && splitGross === roomLine.grossCents
+      ? byType.map<AccountingRow>((r) => ({
+          section: "revenue",
+          code: "room_charge",
+          label: roomLine.label,
+          netCents: r.netCents,
+          taxCents: r.taxCents,
+          grossCents: r.grossCents,
+          roomTypeName: r.roomTypeName ?? tr("Not recorded"),
+          accountingCategoryId: r.accountingCategoryId,
+        }))
+      : null;
+  const revenue = rows
+    .filter((r) => r.section === "revenue")
+    .flatMap((r) => (r.code === "room_charge" && splitRoom ? splitRoom : [r]));
   const receipts = rows.filter((r) => r.section === "payments");
 
   const net = revenue.reduce((s, r) => s + r.netCents, 0);
@@ -125,7 +159,7 @@ export default async function AccountingReportPage({
         </h2>
         <ReportTable<AccountingRow>
           rows={revenue}
-          rowKey={(r) => `revenue-${r.code}`}
+          rowKey={(r) => `revenue-${r.code}-${r.roomTypeName ?? ""}`}
           minWidth="780px"
           emptyTitle={tr("Nothing was earned in this range")}
           emptyHint={tr("Revenue posts on the night audit, so a range with no closed days shows nothing.")}
@@ -137,6 +171,9 @@ export default async function AccountingReportPage({
               cell: (r) => (
                 <span className="font-medium text-ink">
                   {r.code in FOLIO_ITEM_LABEL ? tr(FOLIO_ITEM_LABEL[r.code as FolioItemType]) : r.label}
+                  {r.roomTypeName && (
+                    <span className="ml-1.5 font-normal text-ink-muted">· {tr.message(r.roomTypeName)}</span>
+                  )}
                 </span>
               ),
             },

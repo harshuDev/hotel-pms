@@ -3714,8 +3714,51 @@ export type Database = {
           },
         ]
       }
+      room_type_photos: {
+        Row: {
+          created_at: string
+          id: string
+          path: string
+          property_id: string
+          room_type_id: string
+          sort_order: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          path: string
+          property_id: string
+          room_type_id: string
+          sort_order?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          path?: string
+          property_id?: string
+          room_type_id?: string
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "room_type_photos_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "room_type_photos_room_type_id_fkey"
+            columns: ["room_type_id"]
+            isOneToOne: false
+            referencedRelation: "room_types"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       room_types: {
         Row: {
+          accounting_category_id: string | null
           base_occupancy: number
           code: string
           created_at: string
@@ -3728,6 +3771,7 @@ export type Database = {
           sort_order: number
         }
         Insert: {
+          accounting_category_id?: string | null
           base_occupancy: number
           code: string
           created_at?: string
@@ -3740,6 +3784,7 @@ export type Database = {
           sort_order?: number
         }
         Update: {
+          accounting_category_id?: string | null
           base_occupancy?: number
           code?: string
           created_at?: string
@@ -3752,6 +3797,13 @@ export type Database = {
           sort_order?: number
         }
         Relationships: [
+          {
+            foreignKeyName: "room_types_accounting_category_id_fkey"
+            columns: ["accounting_category_id"]
+            isOneToOne: false
+            referencedRelation: "accounting_categories"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "room_types_property_id_fkey"
             columns: ["property_id"]
@@ -3779,6 +3831,7 @@ export type Database = {
           priority: number
           property_id: string
           room_type_id: string
+          service_due: boolean
           status: Database["public"]["Enums"]["room_status"]
         }
         Insert: {
@@ -3798,6 +3851,7 @@ export type Database = {
           priority?: number
           property_id: string
           room_type_id: string
+          service_due?: boolean
           status?: Database["public"]["Enums"]["room_status"]
         }
         Update: {
@@ -3817,6 +3871,7 @@ export type Database = {
           priority?: number
           property_id?: string
           room_type_id?: string
+          service_due?: boolean
           status?: Database["public"]["Enums"]["room_status"]
         }
         Relationships: [
@@ -4343,6 +4398,17 @@ export type Database = {
           tax_cents: number
         }[]
       }
+      accounting_room_revenue: {
+        Args: { p_from: string; p_to: string }
+        Returns: {
+          accounting_category_id: string
+          gross_cents: number
+          net_cents: number
+          room_type_id: string
+          room_type_name: string
+          tax_cents: number
+        }[]
+      }
       activity_feed: {
         Args: { p_limit?: number; p_offset?: number }
         Returns: {
@@ -4362,6 +4428,10 @@ export type Database = {
           p_size_bytes: number
           p_storage_path: string
         }
+        Returns: string
+      }
+      add_room_type_photo: {
+        Args: { p_path: string; p_room_type_id: string }
         Returns: string
       }
       add_season_range: {
@@ -4887,6 +4957,7 @@ export type Database = {
           room_status: Database["public"]["Enums"]["room_status"]
           room_type_id: string
           room_type_name: string
+          service_due: boolean
           sort_order: number
         }[]
       }
@@ -5351,7 +5422,11 @@ export type Database = {
       delete_rate_plan: { Args: { p_rate_plan_id: string }; Returns: undefined }
       delete_reaction: { Args: { p_id: string }; Returns: undefined }
       delete_room: { Args: { p_room_id: string }; Returns: undefined }
-      delete_room_type: { Args: { p_room_type_id: string }; Returns: undefined }
+      delete_room_type: {
+        Args: { p_room_type_id: string; p_with_rooms?: boolean }
+        Returns: string[]
+      }
+      delete_room_type_photo: { Args: { p_photo_id: string }; Returns: string }
       delete_season: { Args: { p_id: string }; Returns: undefined }
       delete_season_type: { Args: { p_id: string }; Returns: undefined }
       delete_system_connection: { Args: { p_id: string }; Returns: undefined }
@@ -6712,6 +6787,7 @@ export type Database = {
         Args: {
           p_days: Json
           p_rate_plan_id: string
+          p_replace_rates?: boolean
           p_room_type_id: string
           p_season_type_id: string
         }
@@ -6889,6 +6965,10 @@ export type Database = {
           p_room_id: string
           p_status: Database["public"]["Enums"]["room_status"]
         }
+        Returns: undefined
+      }
+      set_room_type_accounting_category: {
+        Args: { p_category_id: string; p_room_type_id: string }
         Returns: undefined
       }
       set_room_type_description: {

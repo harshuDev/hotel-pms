@@ -127,6 +127,7 @@ import type {
   VirtualRoomType,
   StaffSetting,
   AccountingRow,
+  AccountingRoomRevenueRow,
   RatesGridCell,
   CalendarRoom,
   CalendarNote,
@@ -3343,7 +3344,7 @@ export async function getRoomTypeSettings(): Promise<RoomTypeSetting[]> {
   const { data, error } = await supabase
     .from("room_types")
     .select(
-      "id, code, name, display_name, base_occupancy, max_occupancy, sort_order, description, rooms(count), room_type_facilities(facility_id)",
+      "id, code, name, display_name, base_occupancy, max_occupancy, sort_order, description, accounting_category_id, rooms(count), booking_rooms(count), room_type_facilities(facility_id), room_type_photos(id, path, sort_order)",
     )
     .order("sort_order")
     .order("name");
@@ -3360,8 +3361,11 @@ export async function getRoomTypeSettings(): Promise<RoomTypeSetting[]> {
       max_occupancy: number;
       sort_order: number;
       description: string | null;
+      accounting_category_id: string | null;
       rooms: { count: number }[];
+      booking_rooms: { count: number }[];
       room_type_facilities: { facility_id: string }[] | null;
+      room_type_photos: { id: string; path: string; sort_order: number }[] | null;
     }[]
   ).map((row) => ({
     id: row.id,
@@ -3374,6 +3378,11 @@ export async function getRoomTypeSettings(): Promise<RoomTypeSetting[]> {
     facilityIds: (row.room_type_facilities ?? []).map((f) => f.facility_id),
     description: row.description,
     displayName: row.display_name,
+    bookedCount: row.booking_rooms?.[0]?.count ?? 0,
+    accountingCategoryId: row.accounting_category_id,
+    photos: [...(row.room_type_photos ?? [])]
+      .sort((a, b) => a.sort_order - b.sort_order)
+      .map((p) => ({ id: p.id, path: p.path, url: roomPhotoUrl(supabase, p.path) ?? "" })),
   }));
 }
 
@@ -3846,6 +3855,32 @@ export async function getAccountingReport(
   }));
 }
 
+/**
+ * Room revenue by the room type it was sold as (0108), so each type can post
+ * to its own ledger account. Always adds up to the report's room_charge line;
+ * Postgres keeps a charge with no night behind it as a null type.
+ */
+export async function getAccountingRoomRevenue(
+  from: string,
+  to: string,
+): Promise<AccountingRoomRevenueRow[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("accounting_room_revenue", {
+    p_from: from,
+    p_to: to,
+  });
+  if (error) rethrow(error, "accounting report");
+  return (data ?? []).map((row) => ({
+    // Nullable in Postgres (a charge with no night); the generator says otherwise.
+    roomTypeId: (row.room_type_id as string | null) ?? null,
+    roomTypeName: (row.room_type_name as string | null) ?? null,
+    accountingCategoryId: (row.accounting_category_id as string | null) ?? null,
+    netCents: Number(row.net_cents ?? 0),
+    taxCents: Number(row.tax_cents ?? 0),
+    grossCents: Number(row.gross_cents ?? 0),
+  }));
+}
+
 /** One date, as the night audit left it. One date and not a range, by design. */
 export async function getEndOfDayReport(
   date: string,
@@ -3944,6 +3979,7 @@ export async function getCalendarRooms(): Promise<CalendarRoom[]> {
     roomStatus: row.room_status,
     isInspected: row.is_inspected,
     doNotDisturb: row.do_not_disturb,
+    serviceDue: row.service_due,
     sortOrder: row.sort_order,
     // Nullable in Postgres; the generator types a RETURNS TABLE column non-null.
     color: (row.color as string | null) ?? null,

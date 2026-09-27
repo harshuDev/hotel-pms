@@ -7,7 +7,9 @@ import { cn } from "@/components/ui";
 import { Dialog, EditIcon, HandleIcon } from "@/components/settings/finance-panels";
 import { FacilityIcon } from "@/components/settings/facility-icon";
 import { RoomPhoto } from "@/components/settings/room-photo";
+import { RoomTypePhotos } from "@/components/settings/room-type-photos";
 import type { Facility } from "@/lib/facilities";
+import type { AccountingCategory } from "@/lib/finance-profiles";
 import type {
   RoomSetting,
   RoomSettingsPage,
@@ -25,6 +27,7 @@ import {
   saveVirtualRoomType,
   setRoomEnabled,
   setRoomSetup,
+  setRoomTypeAccountingCategory,
   setRoomTypeDescription,
   setRoomTypeDisplayName,
   setRoomTypeFacilities,
@@ -99,6 +102,8 @@ type TypeDraft = {
   maxOccupancy: string;
   facilityIds: string[];
   description: string;
+  /** "" is the accommodation default. */
+  accountingCategoryId: string;
 };
 
 function draftOf(t: RoomTypeSetting): TypeDraft {
@@ -111,21 +116,29 @@ function draftOf(t: RoomTypeSetting): TypeDraft {
     maxOccupancy: String(t.maxOccupancy),
     facilityIds: t.facilityIds,
     description: t.description ?? "",
+    accountingCategoryId: t.accountingCategoryId ?? "",
   };
 }
 
 export function RoomTypesPanel({
+  propertyId,
   roomTypes,
   virtualRoomTypes,
   facilities,
+  accountingCategories,
+  accommodationDefaultId,
   editRoomTypeId,
   canEdit,
   pending,
   run,
 }: {
+  propertyId: string;
   roomTypes: RoomTypeSetting[];
   virtualRoomTypes: VirtualRoomType[];
   facilities: Facility[];
+  /** Settings -> Finances -> Accounting Categories (0085), for the type's own account (0108). */
+  accountingCategories: AccountingCategory[];
+  accommodationDefaultId: string | null;
   /** The calendar rail's pencil links here with a type to open. */
   editRoomTypeId: string | null;
   canEdit: boolean;
@@ -145,6 +158,14 @@ export function RoomTypesPanel({
 
   const byId = new Map(roomTypes.map((t) => [t.id, t]));
   const rows = order.map((id) => byId.get(id)).filter((t): t is RoomTypeSetting => Boolean(t));
+
+  /* A type with no account of its own posts to the accommodation default (0085). */
+  const categoryName = (id: string | null) => {
+    const own = id ? accountingCategories.find((c) => c.id === id) : null;
+    if (own) return own.name;
+    const fallback = accountingCategories.find((c) => c.id === accommodationDefaultId);
+    return fallback ? fallback.name : tr("Accommodation");
+  };
 
   function move(id: string, to: number) {
     const from = order.indexOf(id);
@@ -175,6 +196,11 @@ export function RoomTypesPanel({
         const ticked = await setRoomTypeFacilities({ roomTypeId: saved.data.id, facilityIds: d.facilityIds });
         if (!ticked.ok) return ticked;
       }
+      const booked = await setRoomTypeAccountingCategory({
+        roomTypeId: saved.data.id,
+        categoryId: d.accountingCategoryId || null,
+      });
+      if (!booked.ok) return booked;
       setDraft(null);
       return { ok: true };
     }, tr("{name} saved.", { name: d.name.trim() || tr("Room type") }));
@@ -190,12 +216,15 @@ export function RoomTypesPanel({
           <p className="py-5 text-[13px] text-ink-muted">{tr("None yet. Add a room type before anything else.")}</p>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[36rem] text-[13px]">
+            <table className="w-full min-w-[56rem] text-[13px]">
               <thead>
                 <tr className="border-b border-line">
-                  <th className={cn(th, "w-[40%]")}>{tr("Display Name")}</th>
-                  <th className={cn(th, "w-[34%]")}>{tr("Room Type")}</th>
+                  <th className={cn(th, "w-[22%]")}>{tr("Display Name")}</th>
+                  <th className={cn(th, "w-[20%]")}>{tr("Room Type")}</th>
                   <th className={th}>{tr("Occupancy")}</th>
+                  <th className={th}>{tr("Pictures")}</th>
+                  <th className={th}>{tr("Available Facilities")}</th>
+                  <th className={th}>{tr("Accounting Category")}</th>
                   <th className="w-20" aria-label={tr("Actions")} />
                 </tr>
               </thead>
@@ -255,31 +284,66 @@ export function RoomTypesPanel({
                         {t.maxOccupancy > t.baseOccupancy && <span className="text-ink-muted">+ {t.maxOccupancy - t.baseOccupancy}</span>}
                       </span>
                     </td>
+                    <td className="px-2 py-1.5">
+                      {t.photos.length > 0 ? (
+                        <span className="flex items-center gap-1.5">
+                          {/* eslint-disable-next-line @next/next/no-img-element -- runtime bucket host, as room-photo.tsx */}
+                          <img src={t.photos[0].url} alt="" className="h-8 w-11 rounded object-cover" />
+                          <span className="tnum text-ink-muted">{t.photos.length}</span>
+                        </span>
+                      ) : (
+                        <span className="text-ink-faint">—</span>
+                      )}
+                    </td>
+                    <td className="px-2 py-1.5">
+                      {t.facilityIds.length > 0 ? (
+                        <span className="flex flex-wrap items-center gap-1" title={facilities.filter((f) => t.facilityIds.includes(f.id)).map((f) => f.title).join(", ")}>
+                          {facilities.filter((f) => t.facilityIds.includes(f.id)).slice(0, 5).map((f) => (
+                            <FacilityIcon key={f.id} name={f.icon} className="h-[15px] w-[15px] text-ink-muted" />
+                          ))}
+                          {t.facilityIds.length > 5 && <span className="tnum text-[11px] text-ink-muted">+{t.facilityIds.length - 5}</span>}
+                        </span>
+                      ) : (
+                        <span className="text-ink-faint">—</span>
+                      )}
+                    </td>
+                    <td className="px-2 py-1.5 text-ink">
+                      {categoryName(t.accountingCategoryId)}
+                    </td>
                     <td className="py-0.5">
                       {canEdit && (
                         <span className="flex justify-end">
                           <button type="button" aria-label={tr("Edit {name}", { name: t.name })} className={iconButton} onClick={() => setDraft(draftOf(t))}>
                             <EditIcon />
                           </button>
-                          {/* A type with rooms in it is not offered for deletion;
-                              Postgres refuses the other reasons by name. */}
-                          {t.roomCount === 0 && (
-                            <button
-                              type="button"
-                              aria-label={tr("Delete {name}", { name: t.name })}
-                              className={iconButton}
-                              onClick={() => {
-                                if (!confirm(tr("Delete {name}? Its prices and restrictions go with it.", { name: t.name }))) return;
-                                run(async () => {
-                                  const result = await deleteRoomType(t.id);
-                                  if (result.ok && draft?.id === t.id) setDraft(null);
-                                  return result;
-                                }, tr("{name} deleted.", { name: t.name }));
-                              }}
-                            >
-                              <CrossIcon />
-                            </button>
-                          )}
+                          {/*
+                            On every type (0108). It used to be drawn only on a
+                            type with no rooms -- never, on a set-up hotel -- so
+                            the client saw no delete at all. A booked type is
+                            refused by Postgres, by name; a never-booked one
+                            goes with its rooms once the confirmation says so.
+                          */}
+                          <button
+                            type="button"
+                            aria-label={tr("Delete {name}", { name: t.name })}
+                            className={iconButton}
+                            onClick={() => {
+                              if (t.bookedCount === 0) {
+                                const question =
+                                  t.roomCount > 0
+                                    ? tr.plural(t.roomCount, "Delete {name} and its {n} room? Its prices and restrictions go with it.", "Delete {name} and its {n} rooms? Their prices and restrictions go with them.", { name: t.name })
+                                    : tr("Delete {name}? Its prices and restrictions go with it.", { name: t.name });
+                                if (!confirm(question)) return;
+                              }
+                              run(async () => {
+                                const result = await deleteRoomType(t.id, t.roomCount > 0);
+                                if (result.ok && draft?.id === t.id) setDraft(null);
+                                return result;
+                              }, tr("{name} deleted.", { name: t.name }));
+                            }}
+                          >
+                            <CrossIcon />
+                          </button>
                         </span>
                       )}
                     </td>
@@ -358,9 +422,47 @@ export function RoomTypesPanel({
                 className={field}
               />
             </label>
+            <label className={cn(label, "mt-4 max-w-sm")}>
+              {tr("Accounting Category")}
+              <select
+                value={draft.accountingCategoryId}
+                onChange={(e) => setDraft({ ...draft, accountingCategoryId: e.target.value })}
+                className={field}
+              >
+                <option value="">
+                  {tr("Default ({name})", { name: categoryName(null) })}
+                </option>
+                {accountingCategories.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+            {draft.id && (
+              <div className="mt-4">
+                <span className={label}>{tr("Pictures")}</span>
+                <div className="mt-1">
+                  <RoomTypePhotos
+                    propertyId={propertyId}
+                    roomTypeId={draft.id}
+                    roomTypeName={draft.name}
+                    photos={byId.get(draft.id)?.photos ?? []}
+                  />
+                </div>
+              </div>
+            )}
+            {facilities.length === 0 && (
+              <p className="mt-4 text-[13px] text-ink-muted">
+                <span className={label}>{tr("Available Facilities")}</span>
+                <a href="/settings?tab=facilities" className="text-brass hover:underline">
+                  {tr("None yet. Add them under Room Type Facilities.")}
+                </a>
+              </p>
+            )}
             {facilities.length > 0 && (
               <fieldset className="mt-4">
-                <legend className={label}>{tr("Facilities")}</legend>
+                <legend className={label}>{tr("Available Facilities")}</legend>
                 <div className="mt-1 grid gap-x-4 gap-y-2 sm:grid-cols-2 lg:grid-cols-3">
                   {facilities.map((f) => (
                     <label key={f.id} className="flex items-center gap-2 text-[13px] text-ink">
@@ -409,6 +511,7 @@ export function RoomTypesPanel({
                 maxOccupancy: "2",
                 facilityIds: [],
                 description: "",
+                accountingCategoryId: "",
               })
             }
           >
