@@ -1,6 +1,7 @@
 "use client";
 
 import { useT } from "@/components/i18n";
+import { msg } from "@/lib/i18n/translate";
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { format, parseISO } from "date-fns";
@@ -21,11 +22,20 @@ import type { RoomTypeSetting, WaitlistRow, WaitlistStatus } from "@/lib/types";
  */
 
 const STATUS_LABEL: Record<WaitlistStatus, string> = {
-  waiting: "Waiting",
-  offered: "Offered",
-  converted: "Converted",
-  expired: "Expired",
-  canceled: "Cancelled",
+  waiting: msg("Waiting"),
+  offered: msg("Offered"),
+  converted: msg("Converted"),
+  expired: msg("Expired"),
+  canceled: msg("Cancelled"),
+};
+
+/** The confirmation, whole: lower-casing a translated status is not safe. */
+const MARKED: Record<WaitlistStatus, string> = {
+  waiting: msg("Marked waiting."),
+  offered: msg("Marked offered."),
+  converted: msg("Marked converted."),
+  expired: msg("Marked expired."),
+  canceled: msg("Marked cancelled."),
 };
 
 const STATUS_TONE: Record<WaitlistStatus, string> = {
@@ -89,7 +99,7 @@ export function WaitlistScreen({
     if (form.checkOut <= form.checkIn) {
       setMessage({
         ok: false,
-        text: "The departure date has to be after the arrival date.",
+        text: tr("The departure date has to be after the arrival date."),
       });
       return;
     }
@@ -116,7 +126,7 @@ export function WaitlistScreen({
         return;
       }
       setForm(null);
-      setMessage({ ok: true, text: "Added to the waitlist." });
+      setMessage({ ok: true, text: tr("Added to the waitlist.") });
       router.refresh();
     });
   }
@@ -128,7 +138,7 @@ export function WaitlistScreen({
         setMessage({ ok: false, text: result.error });
         return;
       }
-      setMessage({ ok: true, text: tr("Marked {lowerCase}.", { lowerCase: STATUS_LABEL[status].toLowerCase() }) });
+      setMessage({ ok: true, text: tr(MARKED[status]) });
       router.refresh();
     });
   }
@@ -302,13 +312,13 @@ export function WaitlistScreen({
             <table className="w-full min-w-[980px] text-[13px]">
               <thead>
                 <tr className="border-b border-line text-left text-ink-faint">
-                  {["Guest", "Contact", "Room type", "Dates", "Party", "Status", "Note", ""].map(
+                  {[msg("Guest"), msg("Contact"), msg("Room type"), msg("Dates"), msg("Party"), msg("Status"), msg("Note"), ""].map(
                     (c, i) => (
                       <th
                         key={c || `c${i}`}
                         className="whitespace-nowrap px-3 pb-2.5 text-xxs font-semibold uppercase tracking-[0.1em]"
                       >
-                        {c}
+                        {c && tr(c)}
                       </th>
                     ),
                   )}
@@ -317,15 +327,15 @@ export function WaitlistScreen({
               <tbody className="divide-y divide-line">
                 {rows.map((r) => (
                   <tr key={r.id}>
-                    <td className="px-3 py-2.5 font-medium text-ink">{r.guestName}</td>
+                    <td className="px-3 py-2.5 font-medium text-ink">{tr.message(r.guestName)}</td>
                     <td className="px-3 py-2.5 text-ink-muted">
                       {r.contactEmail ?? r.contactPhone ?? "—"}
                     </td>
-                    <td className="px-3 py-2.5 text-ink-muted">{r.roomTypeName}</td>
+                    <td className="px-3 py-2.5 text-ink-muted">{tr.message(r.roomTypeName)}</td>
                     <td className="tnum whitespace-nowrap px-3 py-2.5 text-ink-muted">
                       {tr.date(r.checkIn, "d MMM")} –{" "}
                       {tr.date(r.checkOut, "d MMM")}
-                      <span className="ml-1 text-ink-faint">({r.nights}n)</span>
+                      <span className="ml-1 text-ink-faint">({tr("{n}n", { n: r.nights })})</span>
                     </td>
                     <td className="tnum px-3 py-2.5 text-ink-faint">
                       {r.adults}
@@ -333,7 +343,7 @@ export function WaitlistScreen({
                     </td>
                     <td className="px-3 py-2.5">
                       <span className={cn("font-medium", STATUS_TONE[r.status])}>
-                        {STATUS_LABEL[r.status]}
+                        {tr(STATUS_LABEL[r.status])}
                       </span>
                       {r.convertedReference && (
                         <span className="ml-1 text-ink-faint">

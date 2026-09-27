@@ -1,5 +1,4 @@
 import { getT } from "@/lib/i18n/server";
-import { format, parseISO } from "date-fns";
 import { PageHeader } from "@/components/ui";
 import type { DateRange } from "@/lib/reports";
 
@@ -90,8 +89,10 @@ export async function ReportShell({
       />
       {range && (
         <p className="mb-3 text-xs text-ink-faint">
-          {tr.date(range.from, "d MMM yyyy")} {tr("to")}{" "}
-          {tr.date(range.to, "d MMM yyyy")}
+          {tr("{from} to {to}", {
+            from: tr.date(range.from, "d MMM yyyy"),
+            to: tr.date(range.to, "d MMM yyyy"),
+          })}
         </p>
       )}
       {date && !range && (

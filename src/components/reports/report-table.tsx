@@ -136,11 +136,9 @@ export async function ReportFeatureOff({ feature }: { feature: string }) {
         {tr("This report is switched off for this hotel")}
       </p>
       <p className="mx-auto mt-2 max-w-md text-[13px] leading-relaxed text-ink-muted">
-        {tr("A manager can turn it back on with “")}{feature}{tr("” in")}{" "}
         <Link href="/settings?tab=hotel-features" className="text-brass underline-offset-2 hover:underline">
-          {tr("Settings → Hotel Features")}
+          {tr("A manager can turn it back on with “{feature}” in Settings → Hotel Features.", { feature: tr(feature) })}
         </Link>
-        .
       </p>
     </div>
   );
