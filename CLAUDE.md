@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0108` are
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0109` are
 applied to the hosted database.
 
 Working on real data: dashboard (house board, movements, pace, activity feed),
@@ -1283,9 +1283,86 @@ client: "Need to add Booking Channel in the Dashboard".
         next Save of that row fills it back in.** That is what "fill" means
         for a rule whose absence is null; tell the client if they clear rules
         night by night and then re-save the week.
-      - Not copied: "Show Multi Occupancy Rates" and "Show derived and
-        calculated rates" (no per-occupancy or derived rates exist), and each
-        row's menu and arrow, whose actions have not been seen.
+      - **"Show derived and calculated rates" is built (0109)**: off, derived
+        plans are hidden; on, their rows show the rate worked out from the
+        parent's row (read-only -- Postgres recomputes it on every write) and
+        their restrictions stay editable. Each row also says how many nights
+        that combination has priced from the business date, or "Not priced"
+        (`rate_plan_coverage()`).
+      - Not copied: "Show Multi Occupancy Rates" (a plan prices per person by
+        its own two adjustments, not by a grid per occupancy), and each row's
+        menu and arrow, whose actions have not been seen.
+  - **THE RATE PLAN FORM CARRIES THE REFERENCE'S TERMS (0109)**, saved by
+    `set_rate_plan_terms()` -- one function taking the whole set, its own for
+    the overload reason -- plus meals through `set_rate_plan_meals()`. Every
+    term is applied or enforced; none is a stored wish. The client's video
+    brief also named the workflow; what already existed was reused, not
+    rebuilt (room types, cancellation policies, seasons, the weekly grid,
+    `rate_plan_days`, taxes, accounting categories, channels).
+    - **Booking conditions**: min/max days in advance (against the open
+      business date), min/max adults and children per room, and an active
+      range of NIGHTS (`valid_from`/`valid_to`, inclusive -- every night of
+      the stay must fall inside). `rate_plan_condition_violation()` decides
+      them in one place. `create_booking()` checks them with the stay rules,
+      as HP002, overridden by the same `p_ignore_restrictions`; the guest page
+      gets them in `unavailable_reason`.
+    - **Channels**: `rate_plan_channels`, no rows = every channel. A plan
+      restricted to other channels is refused for that channel (HP002) and is
+      not offered on the guest page at all, which books through the first
+      active direct channel (`public_direct_channel()`). `merge_channels()`
+      moves a merged channel's plan rows to the keeper, so a restricted plan
+      never silently opens to everyone.
+    - **DERIVED RATES ARE MATERIALISED, NOT COMPUTED ON READ.** A derived
+      plan names a parent and a percentage (bps) or an amount (pence), up or
+      down, never below zero. Two triggers on `rate_plan_days` keep it true:
+      before any write of a derived plan's night the price is recomputed from
+      the parent's night (whatever was sent is replaced), and after a
+      parent's price changes the same night on each child is touched. So
+      every reader of `rate_plan_days` -- `create_booking()`, the guest page,
+      the grids, the public API -- sees the derived price with no change to
+      any of them. `set_rates()` refuses a derived plan by name; the Rates
+      grid draws it with no tick box. One level only: a parent cannot itself
+      be derived, and a plan with children cannot become derived. Setting or
+      changing a derivation re-derives every night from the business date
+      (`rate_plan_rederive()`); removing it leaves the prices as the plan's
+      own. A parent cannot be deleted while a plan is derived from it.
+      Restrictions are never derived -- each plan keeps its own.
+    - **Occupancy pricing**: "One Price For All Occupancies", or per person:
+      the loaded price is for the room type's BASE occupancy in adults; each
+      adult above or below moves it by the adult amount, each child adds the
+      child amount, floored at zero (`rate_plan_occupancy_rate()`). Applied
+      wherever a night is priced from the plan -- `create_booking()` per room
+      line's party, `create_public_booking()`, and `public_room_types()`,
+      which takes the party now. A hand-typed room rate is never adjusted.
+      **Known gap**: a percent-off offer is computed on the loaded price, not
+      the per-person one (`promotion_night_discounts()` reads
+      `rate_plan_days`), so on a per-person plan it discounts the base part.
+    - **Attached tax**: `rate_plans.tax_rate_id`. The staff form seeds its tax
+      field with the plan's when the plan is picked (still editable). The
+      GUEST PAGE NOW CHARGES TAX: `create_public_booking()` splits each night
+      with the plan's tax through `tax_split_for()` (apply_tax_rate() without
+      `current_property_id()`), and the quote adds exclusive tax. **Until
+      0109 every guest-page booking carried zero tax** -- worth telling the
+      client, and a plan with no tax set still books tax-free online.
+    - **Accounting category**: `rate_plans.accounting_category_id`, ahead of
+      the room type's, ahead of the accommodation default, in the Accounting
+      report's room split (`accounting_room_revenue()` names the plan beside
+      the type only when the plan has its own account).
+    - A tax or an account a plan uses is refused on delete by name, and a tax
+      a plan uses counts as in use in Tax Information.
+    - **"Affected Room Types" is READ, NOT SET.** A plan is sold on a room
+      type exactly when that pair has prices loaded -- the rule this file
+      already gives for the Rates grid, and why there is still no
+      `rate_plan_room_types` table. The form lists each type with its priced
+      nights (`rate_plan_coverage()`); prices go on in Room Rate Combinations.
+    - **Not built: "Sell With Extras."** Nothing sells an extra with a rate,
+      and inventing what it should post would be a money rule nobody asked
+      for.
+    - **The guest page re-quotes on the details step**: the party is chosen
+      there, after the price was shown, so a change asks
+      `searchPublicStay()` again (newest reply wins) and the summary shows
+      what will be charged; a condition the party breaks shows as an error
+      above the button.
   - **A property always keeps one default plan.** `save_rate_plan()` promotes
     the first active plan if the last default is retired or stood down —
     otherwise a booking naming no plan has nowhere to fall back to.
@@ -3078,6 +3155,11 @@ half-translated app reads worse than an English one.
   - **A new `raise exception` needs no code change to be translated — but it
     needs a dictionary entry in all eleven**, or it shows in English. The
     extractor finds it in the migrations.
+  - **A message that OPENS on a value is extracted too, as of 0109** ("% is
+    the main rate...", `format('%s needs at least %s adults...')`). The
+    extractor's phrase test wanted a capital first, so fifty such refusals --
+    every one naming a plan, a type or a tax -- had reached every language in
+    English. They are translated now; `tr.message()` always matched them.
   - A message that would need English built in SQL (`global_search()`'s old
     subtitle) is better returned as raw fields and composed in TypeScript —
     that is what 0107 did.

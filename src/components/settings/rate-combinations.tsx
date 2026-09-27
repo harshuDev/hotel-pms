@@ -7,6 +7,7 @@ import { formatMoneyInput, parseMoney } from "@/lib/money";
 import type {
   CancellationPolicy,
   RatePlan,
+  RatePlanCoverage,
   RoomTypeSetting,
   SeasonType,
   WeekRate,
@@ -25,10 +26,38 @@ import { saveWeekRates } from "@/lib/actions/settings";
  * already has a value. Nights are from the business date on: a season's own
  * dates, or the next year of days no season covers.
  *
- * Not copied: "Show Multi Occupancy Rates" and "Show derived and calculated
- * rates" (there are no per-occupancy or derived rates here), and the row's
- * menu and arrow, whose actions have not been seen.
+ * "Show derived and calculated rates" (0109) brings in the plans derived from
+ * another: their rate is the parent's, adjusted, shown and never typed -- the
+ * database recomputes it on every write -- while their restrictions are their
+ * own and save as any other row's. Each row says whether that combination is
+ * priced from the business date on, which is what "sold on this room type"
+ * means here.
+ *
+ * Not copied: "Show Multi Occupancy Rates" (a plan prices per person by its
+ * own adjustment, not by a grid per occupancy), and the row's menu and arrow,
+ * whose actions have not been seen.
  */
+
+/** The parent's typed rate, adjusted as the database will adjust it. Display only. */
+function derivedRate(parentText: string, plan: RatePlan): string {
+  if (parentText.trim() === "") return "";
+  let parent: number;
+  try {
+    parent = parseMoney(parentText);
+  } catch {
+    return "";
+  }
+  if (plan.derivedKind === "amount" && plan.derivedAmountCents !== null) {
+    return formatMoneyInput(Math.max(0, parent + plan.derivedAmountCents));
+  }
+  if (plan.derivedKind === "percent" && plan.derivedPercentBps !== null) {
+    // Integer arithmetic, half away from zero, as round() in Postgres.
+    const scaled = parent * plan.derivedPercentBps;
+    const adj = Math.sign(scaled) * Math.floor((Math.abs(scaled) + 5000) / 10000);
+    return formatMoneyInput(Math.max(0, parent + adj));
+  }
+  return formatMoneyInput(parent);
+}
 
 type Run = (fn: () => Promise<{ ok: boolean; error?: string }>, done: string) => void;
 
@@ -79,6 +108,7 @@ export function RateCombinations({
   seasons,
   cancellationPolicies,
   weekRates,
+  coverage,
   initialSeasonId = null,
   canEdit,
   pending,
@@ -91,6 +121,8 @@ export function RateCombinations({
   seasons: SeasonType[];
   cancellationPolicies: CancellationPolicy[];
   weekRates: WeekRate[];
+  /** Which (plan, room type) pairs are priced from the business date (0109). */
+  coverage: RatePlanCoverage[];
   /** The season to open on -- the Seasons screen's price button (0108). Null is the Default Season. */
   initialSeasonId?: string | null;
   canEdit: boolean;
@@ -107,6 +139,7 @@ export function RateCombinations({
    * fill-only either way.
    */
   const [replaceRates, setReplaceRates] = useState(false);
+  const [showDerived, setShowDerived] = useState(false);
   const [typeIds, setTypeIds] = useState<string[]>(roomTypes.map((t) => t.id));
   const [planIds, setPlanIds] = useState<string[]>(ratePlans.map((p) => p.id));
   const [drafts, setDrafts] = useState<Record<string, DayDraft[]>>({});
@@ -129,7 +162,8 @@ export function RateCombinations({
     for (let i = 0; i < 7; i++) {
       const d = row[i];
       let rateCents: number | null = null;
-      if (d.rate.trim() !== "") {
+      // A derived plan's rate is never sent: Postgres works it out.
+      if (!plan.parentRatePlanId && d.rate.trim() !== "") {
         try {
           rateCents = parseMoney(d.rate);
         } catch {
@@ -171,7 +205,9 @@ export function RateCombinations({
   }
 
   const shownTypes = roomTypes.filter((t) => typeIds.includes(t.id));
-  const shownPlans = ratePlans.filter((p) => planIds.includes(p.id));
+  const shownPlans = ratePlans.filter(
+    (p) => planIds.includes(p.id) && (showDerived || !p.parentRatePlanId),
+  );
   const policyName = (id: string | null) => cancellationPolicies.find((c) => c.id === id)?.name ?? tr("No policy");
 
   function Chips({
@@ -245,6 +281,11 @@ export function RateCombinations({
           onChange={(e) => setReplaceRates(e.target.checked)} />
         {tr("Replace prices already on these nights")}
       </label>
+      <label className="mt-2 flex items-center gap-2 text-[12.5px] text-ink">
+        <input type="checkbox" className="h-4 w-4 accent-brass" checked={showDerived}
+          onChange={(e) => setShowDerived(e.target.checked)} />
+        {tr("Show derived and calculated rates")}
+      </label>
 
       <h3 className="mt-6 border-b border-line pb-1 text-[14px] text-ink">{tr("Room Rate Combinations")}</h3>
       {shownTypes.length === 0 || shownPlans.length === 0 ? (
@@ -287,13 +328,36 @@ export function RateCombinations({
                           <p className="text-[11px] text-ink-muted">
                             {policyName(p.cancellationPolicyId)}, {currency}
                           </p>
+                          {p.parentRatePlanId && (
+                            <p className="text-[11px] text-ink-muted">
+                              {tr("Derived from {name}", {
+                                name: ratePlans.find((x) => x.id === p.parentRatePlanId)?.name ?? "",
+                              })}
+                            </p>
+                          )}
+                          {(() => {
+                            const c = coverage.find((x) => x.ratePlanId === p.id && x.roomTypeId === t.id);
+                            return (
+                              <p className={c ? "text-[11px] text-emerald-700" : "text-[11px] text-ink-faint"}>
+                                {c
+                                  ? tr.plural(c.pricedNights, "{n} night priced", "{n} nights priced")
+                                  : tr("Not priced")}
+                              </p>
+                            );
+                          })()}
                         </td>
                         {row.map((d, i) => (
                           <td key={i} className="px-1 py-2 text-center">
-                            <input aria-label={tr("{name}, {name2}, {value} rate", { name: p.name, name2: t.name, value: tr.weekday(WEEKDAY_OF[i]) })} inputMode="decimal"
-                              value={d.rate} readOnly={!canEdit}
-                              onChange={(e) => setDay(p.id, t.id, i, { rate: e.target.value })}
-                              className="tnum w-[4.6rem] rounded border border-line bg-white px-1 py-0.5 text-center text-[12px] text-ink outline-none focus:border-brass" />
+                            {p.parentRatePlanId ? (
+                              <span className="tnum inline-block w-[4.6rem] py-0.5 text-center text-[12px] text-ink-muted">
+                                {derivedRate(rowDraft(p.parentRatePlanId, t.id)[i].rate, p) || "—"}
+                              </span>
+                            ) : (
+                              <input aria-label={tr("{name}, {name2}, {value} rate", { name: p.name, name2: t.name, value: tr.weekday(WEEKDAY_OF[i]) })} inputMode="decimal"
+                                value={d.rate} readOnly={!canEdit}
+                                onChange={(e) => setDay(p.id, t.id, i, { rate: e.target.value })}
+                                className="tnum w-[4.6rem] rounded border border-line bg-white px-1 py-0.5 text-center text-[12px] text-ink outline-none focus:border-brass" />
+                            )}
                             <span className="mt-1 flex justify-center gap-0.5">
                               <input aria-label={tr("{value} min stay through", { value: tr.weekday(WEEKDAY_OF[i]) })} inputMode="numeric" value={d.mst} readOnly={!canEdit}
                                 onChange={(e) => setDay(p.id, t.id, i, { mst: e.target.value })} className={small} />

@@ -2,6 +2,156 @@
  "(Holding area)": {
   "kind": "text"
  },
+ "{0} booked for {1}": {
+  "kind": "db"
+ },
+ "{0} can be booked at most {1} days before arrival.": {
+  "kind": "db"
+ },
+ "{0} cancelled: {1}": {
+  "kind": "db"
+ },
+ "{0} customer record(s) merged into {1}": {
+  "kind": "db"
+ },
+ "{0} does not look like an email address": {
+  "kind": "db"
+ },
+ "{0} has {1} booked room(s), so it stays on the record and cannot be deleted.": {
+  "kind": "db"
+ },
+ "{0} has {1} room(s). Delete them with it, or move them first.": {
+  "kind": "db"
+ },
+ "{0} has {1} room{2}. Move or delete them first.": {
+  "kind": "db"
+ },
+ "{0} has already been charged to the folio, so it cannot be dropped from the stay. Reverse the charge first.": {
+  "kind": "db"
+ },
+ "{0} has been booked, so it stays on the record and cannot be deleted.": {
+  "kind": "db"
+ },
+ "{0} has been sold, so it stays on the record. Untick Still selling instead.": {
+  "kind": "db"
+ },
+ "{0} is already added": {
+  "kind": "db"
+ },
+ "{0} is already booked for {1} from {2} to {3}.": {
+  "kind": "db"
+ },
+ "{0} is already one of the hotel's currencies": {
+  "kind": "db"
+ },
+ "{0} is already oversold over these dates. Tick overbook to extend anyway.": {
+  "kind": "db"
+ },
+ "{0} is already the hotel's default currency": {
+  "kind": "db"
+ },
+ "{0} is append-only": {
+  "kind": "db"
+ },
+ "{0} is closed out on {1}.": {
+  "kind": "db"
+ },
+ "{0} is closed to arrivals on {1}.": {
+  "kind": "db"
+ },
+ "{0} is closed to departures on {1}.": {
+  "kind": "db"
+ },
+ "{0} is derived from {1}, so {2} cannot be derived from another plan.": {
+  "kind": "db"
+ },
+ "{0} is derived from {1}, so its price follows that plan. Change the price on {2} instead.": {
+  "kind": "db"
+ },
+ "{0} is derived from {1}. Stop deriving it first.": {
+  "kind": "db"
+ },
+ "{0} is itself derived from another plan. Derive from a plan with its own prices.": {
+  "kind": "db"
+ },
+ "{0} is not a colour like #003580": {
+  "kind": "db"
+ },
+ "{0} is not sold through {1}.": {
+  "kind": "db"
+ },
+ "{0} is on {1} guest record{2}. Change them first": {
+  "kind": "db"
+ },
+ "{0} is on {1} rate plan{2}. Move them to another policy first.": {
+  "kind": "db"
+ },
+ "{0} is on the booking waitlist and cannot be deleted.": {
+  "kind": "db"
+ },
+ "{0} is set on an extra or an extras category. Change those first, or untick Active to retire it.": {
+  "kind": "db"
+ },
+ "{0} is sold only for stays from {1} to {2}.": {
+  "kind": "db"
+ },
+ "{0} is sold only for stays from {1}.": {
+  "kind": "db"
+ },
+ "{0} is sold only for stays up to {1}.": {
+  "kind": "db"
+ },
+ "{0} is still set on {1} night{2}. Clear it before hiding it.": {
+  "kind": "db"
+ },
+ "{0} is the accounting category of {1}. Choose another for that room type first.": {
+  "kind": "db"
+ },
+ "{0} is the accounting category of the rate plan {1}. Choose another for that plan first.": {
+  "kind": "db"
+ },
+ "{0} is the default for {1}. Choose another default first.": {
+  "kind": "db"
+ },
+ "{0} is the default policy. Make another policy the default first.": {
+  "kind": "db"
+ },
+ "{0} is the main rate. Make another plan the main rate first.": {
+  "kind": "db"
+ },
+ "{0} is the parent of a virtual room type. Delete that first.": {
+  "kind": "db"
+ },
+ "{0} is the tax of the rate plan {1}. Change that first, or untick Active to retire it.": {
+  "kind": "db"
+ },
+ "{0} must be a colour like #74c971": {
+  "kind": "db"
+ },
+ "{0} must be booked at least {1} days before arrival.": {
+  "kind": "db"
+ },
+ "{0} needs at least {1} adults in a room.": {
+  "kind": "db"
+ },
+ "{0} needs at least {1} children in a room.": {
+  "kind": "db"
+ },
+ "{0} records are append-only; create a reversing entry instead": {
+  "kind": "db"
+ },
+ "{0} seats {1}, and this is for {2}. Pick a bigger room or reduce the count.": {
+  "kind": "db"
+ },
+ "{0} still holds {1} extra{2}. Move or delete them first": {
+  "kind": "db"
+ },
+ "{0} takes at most {1} adults in a room.": {
+  "kind": "db"
+ },
+ "{0} takes at most {1} children in a room.": {
+  "kind": "db"
+ },
  "{abs}d ago": {
   "kind": "text"
  },
@@ -170,6 +320,9 @@
  "{n} nights priced": {
   "kind": "plural",
   "one": "{n} night priced"
+ },
+ "{n} nights priced, {from} to {to}": {
+  "kind": "text"
  },
  "{n} no shows": {
   "kind": "plural",
@@ -668,6 +821,9 @@
  "A promotion needs a name": {
   "kind": "db"
  },
+ "A rate plan cannot be derived from itself": {
+  "kind": "db"
+ },
  "A rate plan needs a code and a name": {
   "kind": "db"
  },
@@ -682,6 +838,9 @@
  },
  "A room needs a number.": {
   "kind": "text"
+ },
+ "A room needs at least one adult": {
+  "kind": "db"
  },
  "A room of {0} has a booking against it, so the rooms cannot be deleted. Move that room to another type first.": {
   "kind": "db"
@@ -791,7 +950,13 @@
  "Active": {
   "kind": "text"
  },
+ "Active from": {
+  "kind": "text"
+ },
  "Active offers": {
+  "kind": "text"
+ },
+ "Active to": {
   "kind": "text"
  },
  "Activity": {
@@ -998,6 +1163,9 @@
  "Adults and children": {
   "kind": "text"
  },
+ "Affected Room Types": {
+  "kind": "text"
+ },
  "Afghanistan": {
   "kind": "country",
   "code": "AF"
@@ -1042,6 +1210,9 @@
   "kind": "text"
  },
  "All bookings": {
+  "kind": "text"
+ },
+ "All channels": {
   "kind": "text"
  },
  "All Conditions Match": {
@@ -1279,6 +1450,9 @@
   "kind": "text"
  },
  "At this part you can manage hotel currencies": {
+  "kind": "text"
+ },
+ "Attached Taxes": {
   "kind": "text"
  },
  "Attachment": {
@@ -1543,6 +1717,9 @@
   "kind": "text"
  },
  "Booking channels": {
+  "kind": "text"
+ },
+ "Booking conditions": {
   "kind": "text"
  },
  "Booking confirmation": {
@@ -1942,6 +2119,9 @@
  "Channel Report": {
   "kind": "text"
  },
+ "Channels": {
+  "kind": "text"
+ },
  "ChannexPCI": {
   "kind": "text"
  },
@@ -2178,6 +2358,9 @@
  "Choose the no-show policy": {
   "kind": "db"
  },
+ "Choose the parent rate.": {
+  "kind": "text"
+ },
  "Choose the parent room type": {
   "kind": "db"
  },
@@ -2197,6 +2380,9 @@
   "kind": "db"
  },
  "Choose when the remaining balance is paid": {
+  "kind": "db"
+ },
+ "Choose whether the derived rate moves by a percentage or by an amount": {
   "kind": "db"
  },
  "Choose which customer to keep": {
@@ -2658,6 +2844,9 @@
  "Days": {
   "kind": "text"
  },
+ "Days in advance cannot be negative": {
+  "kind": "db"
+ },
  "Days or hours": {
   "kind": "text"
  },
@@ -2665,6 +2854,9 @@
   "kind": "text"
  },
  "Days to sync:": {
+  "kind": "text"
+ },
+ "Days, adults and children are whole numbers.": {
   "kind": "text"
  },
  "DBL": {
@@ -2677,6 +2869,12 @@
   "kind": "text"
  },
  "Debtors Report": {
+  "kind": "text"
+ },
+ "Decrease by %": {
+  "kind": "text"
+ },
+ "Decrease by amount": {
   "kind": "text"
  },
  "default": {
@@ -2831,6 +3029,12 @@
  "Deposits are refundable up to {n} days prior to arrival.": {
   "kind": "plural",
   "one": "Deposits are refundable up to {n} day prior to arrival."
+ },
+ "Derived from {name}": {
+  "kind": "text"
+ },
+ "Derived Rate": {
+  "kind": "text"
  },
  "Description": {
   "kind": "text"
@@ -3594,11 +3798,17 @@
  "Give the address it went to": {
   "kind": "db"
  },
+ "Give the amount the derived rate moves by": {
+  "kind": "db"
+ },
  "Give the event a name.": {
   "kind": "text"
  },
  "Give the meeting room a name.": {
   "kind": "text"
+ },
+ "Give the percentage the derived rate moves by, between -100 and 1000": {
+  "kind": "db"
  },
  "Give the post-departure email a subject, or turn it off": {
   "kind": "db"
@@ -3960,6 +4170,18 @@
   "kind": "text"
  },
  "Incomplete": {
+  "kind": "text"
+ },
+ "Increase by %": {
+  "kind": "text"
+ },
+ "Increase by amount": {
+  "kind": "text"
+ },
+ "Increase/Decrease per Adult": {
+  "kind": "text"
+ },
+ "Increase/Decrease per Child": {
   "kind": "text"
  },
  "India": {
@@ -4454,6 +4676,15 @@
  "Max Stay": {
   "kind": "text"
  },
+ "Maximum Adults": {
+  "kind": "text"
+ },
+ "Maximum Children": {
+  "kind": "text"
+ },
+ "Maximum Days Advance": {
+  "kind": "text"
+ },
  "Mayotte": {
   "kind": "country",
   "code": "YT"
@@ -4465,6 +4696,9 @@
   "kind": "text"
  },
  "Meal Report": {
+  "kind": "text"
+ },
+ "Meal Type": {
   "kind": "text"
  },
  "Meals": {
@@ -4557,6 +4791,15 @@
   "kind": "text"
  },
  "Minibar, laundry and food charges posted to a folio appear here.": {
+  "kind": "text"
+ },
+ "Minimum Adults": {
+  "kind": "text"
+ },
+ "Minimum Children": {
+  "kind": "text"
+ },
+ "Minimum Days Advance": {
   "kind": "text"
  },
  "Miscellaneous": {
@@ -5353,6 +5596,12 @@
  "One of those facilities no longer exists": {
   "kind": "db"
  },
+ "One of those sales channels is not on this property": {
+  "kind": "db"
+ },
+ "One Price For All Occupancies": {
+  "kind": "text"
+ },
  "Online Booking Cut Off Date": {
   "kind": "text"
  },
@@ -5776,6 +6025,9 @@
   "kind": "country",
   "code": "PY"
  },
+ "Parent Rate": {
+  "kind": "text"
+ },
  "Parent Room Type": {
   "kind": "text"
  },
@@ -6099,6 +6351,9 @@
  "Price": {
   "kind": "text"
  },
+ "Pricing": {
+  "kind": "text"
+ },
  "Primary color": {
   "kind": "text"
  },
@@ -6306,6 +6561,9 @@
   "kind": "text"
  },
  "Registration form saved.": {
+  "kind": "text"
+ },
+ "Relation": {
   "kind": "text"
  },
  "Reload data": {
@@ -7071,6 +7329,9 @@
  "Show Closed To Departure": {
   "kind": "text"
  },
+ "Show derived and calculated rates": {
+  "kind": "text"
+ },
  "Show Expired Rates": {
   "kind": "text"
  },
@@ -7437,6 +7698,9 @@
  "Taxes": {
   "kind": "text"
  },
+ "Taxes and accounting": {
+  "kind": "text"
+ },
  "Taxes And Fees": {
   "kind": "text"
  },
@@ -7768,6 +8032,9 @@
  "That season or event is not on this property": {
   "kind": "db"
  },
+ "That tax is not an active tax on this property": {
+  "kind": "db"
+ },
  "That tax is not on this property": {
   "kind": "db"
  },
@@ -7793,6 +8060,9 @@
   "kind": "db"
  },
  "That would remove your own access. Have another administrator do it.": {
+  "kind": "db"
+ },
+ "The active date range ends before it starts": {
   "kind": "db"
  },
  "The address may have been mistyped, or the link that brought you here may be out of date.": {
@@ -7957,8 +8227,20 @@
  "The meals on this rate are priced at {0} but the night is worth {1}. Correct the meal values in Inventory.": {
   "kind": "db"
  },
+ "The minimum days in advance is more than the maximum": {
+  "kind": "db"
+ },
+ "The minimum number of adults is more than the maximum": {
+  "kind": "db"
+ },
+ "The minimum number of children is more than the maximum": {
+  "kind": "db"
+ },
  "The next receptionist can now open a shift.": {
   "kind": "text"
+ },
+ "The number of children cannot be negative": {
+  "kind": "db"
  },
  "The opening float must be zero or more.": {
   "kind": "text"
@@ -7968,6 +8250,9 @@
  },
  "The paid-out was not recorded": {
   "kind": "text"
+ },
+ "The parent rate plan is not on this property": {
+  "kind": "db"
  },
  "The payment was not recorded": {
   "kind": "text"
@@ -8018,6 +8303,9 @@
   "kind": "text"
  },
  "The room list did not load. Check your connection, then try again.": {
+  "kind": "text"
+ },
+ "The room type's": {
   "kind": "text"
  },
  "The room was not assigned": {
@@ -8333,6 +8621,9 @@
  "Unknown language {0}": {
   "kind": "db"
  },
+ "Unknown occupancy pricing: {0}": {
+  "kind": "db"
+ },
  "Unnamed customer": {
   "kind": "text"
  },
@@ -8612,7 +8903,16 @@
  "Write the abbreviation": {
   "kind": "db"
  },
+ "Write the adjustment as a percentage, such as 10 or 12.5.": {
+  "kind": "text"
+ },
+ "Write the adjustment as an amount, such as 10 or 12.50.": {
+  "kind": "text"
+ },
  "Write the amount as a number above 0, with up to two decimals.": {
+  "kind": "text"
+ },
+ "Write the amounts per adult and per child as numbers, such as 15 or -10.": {
   "kind": "text"
  },
  "Write the children policy, or pick one of the listed options": {

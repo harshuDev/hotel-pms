@@ -3212,6 +3212,49 @@ export type Database = {
           },
         ]
       }
+      rate_plan_channels: {
+        Row: {
+          channel_id: string
+          created_at: string
+          property_id: string
+          rate_plan_id: string
+        }
+        Insert: {
+          channel_id: string
+          created_at?: string
+          property_id: string
+          rate_plan_id: string
+        }
+        Update: {
+          channel_id?: string
+          created_at?: string
+          property_id?: string
+          rate_plan_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rate_plan_channels_channel_id_fkey"
+            columns: ["channel_id"]
+            isOneToOne: false
+            referencedRelation: "channels"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rate_plan_channels_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rate_plan_channels_rate_plan_id_fkey"
+            columns: ["rate_plan_id"]
+            isOneToOne: false
+            referencedRelation: "rate_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       rate_plan_days: {
         Row: {
           closed_to_arrival: boolean
@@ -3416,48 +3459,106 @@ export type Database = {
       }
       rate_plans: {
         Row: {
+          accounting_category_id: string | null
+          adult_adjust_cents: number | null
           cancellation_policy_id: string | null
+          child_adjust_cents: number | null
           code: string
           created_at: string
+          derived_amount_cents: number | null
+          derived_kind: string | null
+          derived_percent_bps: number | null
           description: string | null
           id: string
           is_active: boolean
           is_default: boolean
           is_public: boolean
+          max_adults: number | null
+          max_children: number | null
+          max_days_advance: number | null
+          min_adults: number | null
+          min_children: number | null
+          min_days_advance: number | null
           name: string
+          occupancy_pricing: string
+          parent_rate_plan_id: string | null
           property_id: string
           sort_order: number
+          tax_rate_id: string | null
           updated_at: string
+          valid_from: string | null
+          valid_to: string | null
         }
         Insert: {
+          accounting_category_id?: string | null
+          adult_adjust_cents?: number | null
           cancellation_policy_id?: string | null
+          child_adjust_cents?: number | null
           code: string
           created_at?: string
+          derived_amount_cents?: number | null
+          derived_kind?: string | null
+          derived_percent_bps?: number | null
           description?: string | null
           id?: string
           is_active?: boolean
           is_default?: boolean
           is_public?: boolean
+          max_adults?: number | null
+          max_children?: number | null
+          max_days_advance?: number | null
+          min_adults?: number | null
+          min_children?: number | null
+          min_days_advance?: number | null
           name: string
+          occupancy_pricing?: string
+          parent_rate_plan_id?: string | null
           property_id: string
           sort_order?: number
+          tax_rate_id?: string | null
           updated_at?: string
+          valid_from?: string | null
+          valid_to?: string | null
         }
         Update: {
+          accounting_category_id?: string | null
+          adult_adjust_cents?: number | null
           cancellation_policy_id?: string | null
+          child_adjust_cents?: number | null
           code?: string
           created_at?: string
+          derived_amount_cents?: number | null
+          derived_kind?: string | null
+          derived_percent_bps?: number | null
           description?: string | null
           id?: string
           is_active?: boolean
           is_default?: boolean
           is_public?: boolean
+          max_adults?: number | null
+          max_children?: number | null
+          max_days_advance?: number | null
+          min_adults?: number | null
+          min_children?: number | null
+          min_days_advance?: number | null
           name?: string
+          occupancy_pricing?: string
+          parent_rate_plan_id?: string | null
           property_id?: string
           sort_order?: number
+          tax_rate_id?: string | null
           updated_at?: string
+          valid_from?: string | null
+          valid_to?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "rate_plans_accounting_category_id_fkey"
+            columns: ["accounting_category_id"]
+            isOneToOne: false
+            referencedRelation: "accounting_categories"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "rate_plans_cancellation_policy_id_fkey"
             columns: ["cancellation_policy_id"]
@@ -3466,10 +3567,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "rate_plans_parent_rate_plan_id_fkey"
+            columns: ["parent_rate_plan_id"]
+            isOneToOne: false
+            referencedRelation: "rate_plans"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "rate_plans_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rate_plans_tax_rate_id_fkey"
+            columns: ["tax_rate_id"]
+            isOneToOne: false
+            referencedRelation: "tax_rates"
             referencedColumns: ["id"]
           },
         ]
@@ -4404,6 +4519,7 @@ export type Database = {
           accounting_category_id: string
           gross_cents: number
           net_cents: number
+          rate_plan_name: string
           room_type_id: string
           room_type_name: string
           tax_cents: number
@@ -6028,6 +6144,10 @@ export type Database = {
           weekday_names: string
         }[]
       }
+      public_direct_channel: {
+        Args: { p_property_id: string }
+        Returns: string
+      }
       public_hotel_policies: {
         Args: { p_property_id: string }
         Returns: {
@@ -6093,6 +6213,8 @@ export type Database = {
       }
       public_room_types: {
         Args: {
+          p_adults?: number
+          p_children?: number
           p_from: string
           p_property_id: string
           p_rate_plan_id: string
@@ -6110,6 +6232,49 @@ export type Database = {
           unavailable_reason: string
         }[]
       }
+      rate_plan_condition_violation: {
+        Args: {
+          p_adults: number
+          p_channel_id: string
+          p_check_in: string
+          p_check_out: string
+          p_children: number
+          p_property_id: string
+          p_rate_plan_id: string
+          p_today: string
+        }
+        Returns: string
+      }
+      rate_plan_coverage: {
+        Args: never
+        Returns: {
+          first_night: string
+          last_night: string
+          priced_nights: number
+          rate_plan_id: string
+          room_type_id: string
+        }[]
+      }
+      rate_plan_derived_rate: {
+        Args: {
+          p_amount_cents: number
+          p_kind: string
+          p_parent_cents: number
+          p_percent_bps: number
+        }
+        Returns: number
+      }
+      rate_plan_occupancy_rate: {
+        Args: {
+          p_adults: number
+          p_children: number
+          p_rate_cents: number
+          p_rate_plan_id: string
+          p_room_type_id: string
+        }
+        Returns: number
+      }
+      rate_plan_rederive: { Args: { p_rate_plan_id: string }; Returns: number }
       rate_plan_report: {
         Args: { p_from: string; p_to: string }
         Returns: {
@@ -6918,6 +7083,30 @@ export type Database = {
         Args: { p_is_public: boolean; p_rate_plan_id: string }
         Returns: boolean
       }
+      set_rate_plan_terms: {
+        Args: {
+          p_accounting_category_id?: string
+          p_adult_adjust_cents?: number
+          p_channel_ids?: string[]
+          p_child_adjust_cents?: number
+          p_derived_amount_cents?: number
+          p_derived_kind?: string
+          p_derived_percent_bps?: number
+          p_max_adults?: number
+          p_max_children?: number
+          p_max_days_advance?: number
+          p_min_adults?: number
+          p_min_children?: number
+          p_min_days_advance?: number
+          p_occupancy_pricing?: string
+          p_parent_rate_plan_id?: string
+          p_rate_plan_id: string
+          p_tax_rate_id?: string
+          p_valid_from?: string
+          p_valid_to?: string
+        }
+        Returns: number
+      }
       set_rates: {
         Args: {
           p_days_of_week?: number[]
@@ -7034,6 +7223,18 @@ export type Database = {
           name: string
           rate_bps: number
           sort_order: number
+        }[]
+      }
+      tax_split_for: {
+        Args: {
+          p_amount_cents: number
+          p_property_id: string
+          p_tax_rate_id: string
+        }
+        Returns: {
+          gross_cents: number
+          net_cents: number
+          tax_cents: number
         }[]
       }
       unassign_room: { Args: { p_booking_room_id: string }; Returns: undefined }
