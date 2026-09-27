@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0105` are
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0107` are
 applied to the hosted database.
 
 Working on real data: dashboard (house board, movements, pace, activity feed),
@@ -166,14 +166,29 @@ current design, not as drift.
    - `src/components/menu.tsx` is the shared dropdown primitive — hover
      intent, click-outside, Escape, arrow keys. Inventory, Bookings, Reports
      and the user menu all use it. Do not hand-roll another one.
-   - **The user menu is Profile, Guest booking page, Settings, Reload data and
-     Log out. There is no Language item and no footnote.** Both were removed
-     after the client asked what the point of a control that changes nothing
-     was. A disabled row was tried twice — silent, then labelled "English" —
-     and read as broken the first time and pointless the second. **Do not add a
-     control to this menu that cannot do anything.** The nineteen languages
-     live on the guest booking page, where the reader might not speak English;
-     if the staff app is ever translated, the switcher goes back here. The logo
+   - **The user menu is Profile, Guest booking page, Settings, Reload data, the
+     LANGUAGE GRID, and Log out (0106). This reverses what this file said**,
+     which was that there is no Language item. It was taken out because the
+     staff app spoke only English, so the control changed nothing — a disabled
+     row was tried twice, silent and then labelled "English", and read as
+     broken and then pointless. The app is translated now (see "The staff
+     application speaks twelve languages"), so the switch changes every screen
+     and earns its place. **Do not add a control to this menu that cannot do
+     anything** still holds; this one does something.
+     - It is the reference's, copied at the client's request: twelve codes in
+       a grid of four (`LanguageChoices` in `language-switch.tsx`), the current
+       one marked, and a confirmation — "You're changing the language. The page
+       will reload…", Cancel and Confirm — before `save_own_locale()` and a
+       full reload, so every Server Component renders again in the new
+       language. The dialog is portalled to `<body>`: the top nav is a sticky
+       `z-50` stacking context, the calendar room menu's trap.
+     - **The Greek nav label for Meeting Rooms is "Αίθουσες"**, short on
+       purpose: the full "Αίθουσες συσκέψεων" pushed the bar past 1024px. The
+       page title keeps the full words (a different key, "Meeting rooms").
+     - **Nav labels never wrap, and between `lg` and `xl` the triggers are
+       `px-2` and the user's name is hidden behind its initial.** Translated
+       labels run long; measured at 1024px in all twelve languages, and at
+       390px, with no horizontal scroll. Re-measure if a label changes. The logo
      is `/public/logo-mark.png`, supplied by the client in the first commit,
      and it is now the favicon too — `src/app/icon.png`, `apple-icon.png` and
      `favicon.ico` are generated from that same mark, trimmed to its own bounds
@@ -192,6 +207,10 @@ current design, not as drift.
      - Two characters minimum, debounced, and each reply checks it is still the
        newest: without that a slow early request lands after a fast late one and
        shows results for a term already typed over.
+     - **`global_search()` returns raw fields as of 0107**, not sentences:
+       status, dates, booking count and floor rather than a subtitle written
+       in English in SQL. `search.ts` composes the meta line in the reader's
+       language. `SearchHit.term` carries what was searched for the href.
 5. **No per-room grid.** See the house board note in the design system section.
 
 ## Stack
@@ -333,7 +352,10 @@ the component.
     as its reference does, not en-GB's "MX$1,284.00". Checked identical in
     Node and Chromium for the currencies a client is likely to use, which
     matters because a client component renders in both.
-  - The figures stay en-GB ("1,284.00"): the staff app speaks English. The
+  - The figures stay en-GB ("1,284.00") in EVERY staff language, as of 0106.
+    The words around them are translated; the money is not reformatted,
+    because a cash screen where "1.284,00" and "1,284.00" both appear
+    depending on who is logged in is a counting error waiting to happen. The
     guest page still writes numbers in the guest's language, via
     `formatMoneyIn()`.
 
@@ -2266,7 +2288,8 @@ anywhere else. Collapsed height must stay constant regardless of room count.
         the table's check), because SQL cannot read `locales.ts`. Adding a
         language is a dictionary, a line there and both SQL lists.
       - The reference's "LOCALE: ES" button is not copied, as on Hotel Details.
-      - The staff application stays in English.
+      - These are the GUEST page's languages. The staff application's twelve
+        are a different list, chosen per person in the user menu (0106).
   - **GUEST CONFIGURATION IS THREE SCREENS, AND EACH IS READ BY SOMETHING**
     (0073) -- Guest Registration Form, Identification Types, Guest Details
     Settings, as the reference's.
@@ -2550,6 +2573,11 @@ anywhere else. Collapsed height must stay constant regardless of room count.
   browser client, like `/login`, because the session cookies have to be set
   where the token lands. That keeps "no API routes except external webhooks"
   intact — there is no `/auth/callback` route handler.
+  - **`/login`, `/forgot-password` and `/reset-password` live in the `(auth)`
+    route group** (URLs unchanged), whose layout wraps them in `StaffI18n`.
+    Nobody is signed in, so `getStaffLocale()` finds no `staff_users` row and
+    falls back to the `staff_locale` cookie — the last choice made on this
+    browser.
   - **The reset page handles all three link shapes** — `?code` (PKCE),
     `?token_hash&type` (the current email template) and `#access_token` (the
     older implicit flow, which the browser client picks up itself). Which one
@@ -2693,11 +2721,13 @@ anywhere else. Collapsed height must stay constant regardless of room count.
     the first time a rule changed.
   - **`properties.is_active` finally means something.** It had been honoured
     nowhere since 0001; the public reads are the first to check it.
-  - **The guest page speaks nineteen languages and the staff app speaks
-    English.** `src/lib/i18n/` holds the locale list and a flat dictionary.
-    Guest copy is ordinary — dates, a room, a price, a name. Staff copy is
-    hotel and accounting terminology where a wrong word in a cash screen is an
-    operational risk, and that wants a translator rather than a best guess.
+  - **The guest page speaks nineteen languages; the staff app speaks twelve
+    as of 0106** (see "The staff application speaks twelve languages"). Two
+    lists, two dictionaries: `src/lib/i18n/locales.ts` and `dictionary.ts` for
+    guests, `staff-locales.ts` and `staff/*.json` for staff. This note used to
+    say the staff app stayed English because its terminology wanted a
+    translator; the client asked for it anyway, and the staff translations are
+    machine-made and flagged to the client for review by native speakers.
     `formatMoneyIn()` in `money.ts` writes the figure the way the reader's
     language writes it; the currency and the integer pence do not move.
 - **What a rate includes is `rate_plan_meals`: one row per plan per meal.**
@@ -2917,7 +2947,75 @@ pnpm build
 pnpm typecheck
 pnpm supabase db reset        # once Supabase is added
 pnpm supabase migration new <name>
+pnpm i18n:extract              # regenerate the staff string catalog
+pnpm i18n:check                # catalog current + all eleven dictionaries complete
 ```
+
+## The staff application speaks twelve languages (0106)
+
+The client asked for their reference's language switch: twelve languages
+(en de el es fr id it pt ro sl-SI th is), chosen in the user menu, the whole
+staff app changing with it. Built in full rather than per screen — a
+half-translated app reads worse than an English one.
+
+- **The choice is per person**, `staff_users.locale`, written by
+  `save_own_locale()` (security definer, the `save_own_profile()` shape: one
+  column on the caller's own active row; the UPDATE policy stays admin-only).
+  Two receptionists on one desk may read different languages. The
+  `staff_locale` cookie remembers the last choice on the browser for `/login`.
+  The check constraint, `save_own_locale()` and `STAFF_LOCALES` in
+  `src/lib/i18n/staff-locales.ts` list the same twelve and change together.
+- **Every staff string goes through the translator.** Server Components use
+  `await getT()` (cached per request), client components `useT()` from the
+  `I18nProvider` the layouts put round every page, and the 404 `getCookieT()`
+  (it makes no query). `useT()` throws outside the provider, like
+  `useCurrency()`. Page titles are `generateMetadata = pageTitle(msg("…"))`.
+- **The English text IS the key.** `tr("Take a booking")`, with `{name}`
+  placeholders passed as values, and `tr.plural(n, one, other)` for counts —
+  keyed by the `other` form, with each language's own plural categories (sl
+  one/two/few/other, ro one/few/other, th and id other only). **Write whole
+  sentences with placeholders**, never English fragments glued together: word
+  order differs, and a fragment has nothing to translate against.
+- **Text the database writes is translated too**, with `tr.message()`:
+  refusals raised in plpgsql, activity-log summaries, fallback labels
+  (`queries.ts` translates "Unnamed guest", channel and room-type fallbacks,
+  and every field a report shows that SQL wrote). An exact match first, then
+  PATTERN keys — `"Room {0} is {1}, so it is not ready for a guest"` — with
+  each captured value looked up once, so enum words (`vacant_dirty`,
+  `waiting`, `confirmed`) arrive translated. A pattern needs four letters of
+  fixed text, so `"{0} — {1}"` never matches everything. A translation may
+  drop a placeholder (where SQL interpolates English, such as "a season")
+  but never invent one. Server Actions return errors through `localised()` /
+  `localisedAs()` in `src/lib/i18n/localised.ts`.
+  - **A new `raise exception` needs no code change to be translated — but it
+    needs a dictionary entry in all eleven**, or it shows in English. The
+    extractor finds it in the migrations.
+  - A message that would need English built in SQL (`global_search()`'s old
+    subtitle) is better returned as raw fields and composed in TypeScript —
+    that is what 0107 did.
+- **`src/lib/i18n/staff/catalog.json` is generated** by `pnpm i18n:extract`
+  (`scripts/i18n-extract.mjs`), which scans `src/` for `tr(`, `msg(`,
+  `tr.plural(` and the migrations for `raise exception` and activity text.
+  `pnpm i18n:check` fails on a missing key, a placeholder a translation
+  invents, a wrong plural shape or a stale key. **Run both after adding any
+  staff string**; `--check` on the extractor fails if the catalog is out of
+  date. Country names are filled from `Intl.DisplayNames`
+  (`scripts/i18n-countries.mjs`), not hand-translated.
+- **Dictionaries are `src/lib/i18n/staff/<locale>.json`**, one chunk each,
+  loaded only for the language in use. English has no file: the key is the
+  text.
+- **Dates and weekdays come from date-fns's own locale data** (`tr.date`,
+  `tr.weekday`, `tr.stamp`, `tr.since`), never hand-written month names.
+  `formatStampInProperty()` still does the time-zone work.
+- **Money is NOT localised** — see the money rules. Figures stay en-GB.
+- **The translations are machine-made.** The client has been told to have
+  native speakers review them, accounting and cash terms first. Terms were
+  kept consistent per language (e.g. German Buchung / Ratenplan /
+  Geschäftstag / Nachtabschluss / Kassenschicht; Spanish reserva / fecha
+  operativa / auditoría nocturna). Changing one term means changing every
+  key that uses it.
+- **The guest booking page is unaffected**: its nineteen languages, its own
+  dictionary and its `?lang=` are a separate system for a different reader.
 
 ## Copy and interface writing
 

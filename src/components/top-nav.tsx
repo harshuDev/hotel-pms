@@ -25,8 +25,10 @@ const ROLE_LABEL: Record<StaffRole, string> = {
 
 const USER_MENU = "__user";
 
+// Tighter between lg and xl, and never wrapped: the labels are translated
+// (0106), and Greek or Icelandic run long enough to push the bar past 1024px.
 const TRIGGER =
-  "relative flex h-14 items-center px-2.5 text-[13.5px] transition-colors";
+  "relative flex h-14 items-center whitespace-nowrap px-2 text-[13.5px] transition-colors xl:px-2.5";
 
 interface TopNavProps {
   propertyId: string;
@@ -195,7 +197,7 @@ export function TopNav({
               >
                 {tr(s.label)}
                 {active && (
-                  <span className="absolute inset-x-2.5 bottom-0 h-[2px] rounded-full bg-brass" />
+                  <span className="absolute inset-x-2 bottom-0 h-[2px] xl:inset-x-2.5 rounded-full bg-brass" />
                 )}
               </Link>
             );
@@ -235,7 +237,7 @@ export function TopNav({
                 <span className="grid h-7 w-7 place-items-center rounded-full bg-white/[0.14] text-[11px] font-medium text-white">
                   {staffName.slice(0, 1).toUpperCase()}
                 </span>
-                <span className="hidden text-[13px] sm:inline">{staffName}</span>
+                <span className="hidden max-w-[12rem] truncate text-[13px] xl:inline">{staffName}</span>
                 <Chevron open={openMenu === USER_MENU} />
               </>
             }

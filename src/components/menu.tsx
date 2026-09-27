@@ -181,7 +181,7 @@ export function Menu({
           </>
         )}
         {active && (
-          <span className="absolute inset-x-2.5 bottom-0 h-[2px] rounded-full bg-brass" />
+          <span className="absolute inset-x-2 bottom-0 h-[2px] xl:inset-x-2.5 rounded-full bg-brass" />
         )}
       </button>
 
