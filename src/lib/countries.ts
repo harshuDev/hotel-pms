@@ -1,3 +1,5 @@
+import { msg } from "@/lib/i18n/translate";
+
 /**
  * ISO 3166-1 alpha-2 countries, for the guest identity fields and the Country
  * report.
@@ -281,6 +283,29 @@ const BY_CODE = new Map(COUNTRIES.map((c) => [c.code, c.name]));
  * passed through as-is, because that is what the report calls a null.
  */
 export function countryName(code: string | null | undefined): string {
-  if (!code) return "Unknown";
+  if (!code) return msg("Unknown");
   return BY_CODE.get(code) ?? code;
+}
+
+/** Folds a name for sorting: no accents, no case. */
+function sortKey(name: string): string {
+  return name.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+}
+
+/**
+ * Every country in the reader's language (0106), in THAT language's order --
+ * "Deutschland" under D for a German reader, not under G.
+ *
+ * The English name is the dictionary key, so a staff dictionary carries every
+ * country, written from ICU's own names when the dictionaries were built.
+ * Sorted on a folded key with a plain comparison rather than `localeCompare`,
+ * whose collation is ICU's and differs between Node and a browser: a client
+ * component renders in both, and two orders is a hydration mismatch.
+ */
+export function countriesIn(tr: (english: string) => string): Country[] {
+  return COUNTRIES.map((c) => ({ code: c.code, name: tr(c.name) })).sort((a, b) => {
+    const x = sortKey(a.name);
+    const y = sortKey(b.name);
+    return x < y ? -1 : x > y ? 1 : 0;
+  });
 }

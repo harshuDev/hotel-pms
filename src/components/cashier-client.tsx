@@ -1,6 +1,7 @@
 "use client";
 
 import { useT } from "@/components/i18n";
+import { msg } from "@/lib/i18n/translate";
 import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { format, parseISO } from "date-fns";
@@ -21,12 +22,12 @@ import type {
 import { useCurrency } from "@/components/currency";
 
 const CATEGORIES: { key: PaidOutCategory; label: string }[] = [
-  { key: "taxi", label: "Taxi" },
-  { key: "guest_purchase", label: "Guest purchase" },
-  { key: "medical", label: "Medical" },
-  { key: "supplies", label: "Supplies" },
-  { key: "staff_advance", label: "Staff advance" },
-  { key: "other", label: "Other" },
+  { key: "taxi", label: msg("Taxi") },
+  { key: "guest_purchase", label: msg("Guest purchase") },
+  { key: "medical", label: msg("Medical") },
+  { key: "supplies", label: msg("Supplies") },
+  { key: "staff_advance", label: msg("Staff advance") },
+  { key: "other", label: msg("Other") },
 ];
 
 /** A variance past this gets called out on the closing receipt. */
@@ -133,9 +134,11 @@ export function CashierClient({
             {tr("Cashier")}
           </h1>
           <p className="mt-1 text-sm text-ink-muted">
-            {shift.userName} {tr("· opened")}{" "}
-            {tr.date(shift.openedAt, "h:mm a")} {tr("· business date")}{" "}
-            {tr.date(shift.businessDate, "d MMM yyyy")}
+            {tr("{name} · opened {time} · business date {date}", {
+              name: shift.userName,
+              time: tr.date(shift.openedAt, "h:mm a"),
+              date: tr.date(shift.businessDate, "d MMM yyyy"),
+            })}
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -305,8 +308,8 @@ function ClosedReceipt({
       </h1>
       <dl className="mt-6 space-y-2 text-sm">
         {[
-          ["Expected in drawer", formatMoney(closed.expected, currency)],
-          ["Counted", formatMoney(closed.counted, currency)],
+          [tr("Expected in drawer"), formatMoney(closed.expected, currency)],
+          [tr("Counted"), formatMoney(closed.counted, currency)],
         ].map(([k, v]) => (
           <div key={k} className="flex justify-between border-b border-line pb-2">
             <dt className="text-ink-muted">{k}</dt>
@@ -330,7 +333,9 @@ function ClosedReceipt({
 
       {large && (
         <p className="mt-4 rounded-md border border-rose-200 bg-rose-50 px-3 py-2.5 text-xs text-rose-700">
-          {tr("That is over")}{" "}{formatMoney(LARGE_VARIANCE_CENTS, currency)} {tr("out. A manager should look at this shift before the drawer is used again.")}
+          {tr("That is over {amount} out. A manager should look at this shift before the drawer is used again.", {
+            amount: formatMoney(LARGE_VARIANCE_CENTS, currency),
+          })}
         </p>
       )}
 
@@ -385,7 +390,9 @@ function OpenShiftPanel({
         {tr("Open a shift")}
       </h1>
       <p className="mt-1.5 text-sm text-ink-muted">
-        {tr("Business date")}{" "}{tr.date(businessDate, "d MMM yyyy")}{tr(". Nothing can be taken or paid out until a shift is open.")}
+        {tr("Business date {date}. Nothing can be taken or paid out until a shift is open.", {
+          date: tr.date(businessDate, "d MMM yyyy"),
+        })}
       </p>
 
       <div className="mt-6">
@@ -527,7 +534,7 @@ function PaymentModal({
           )}
           {booking && (
             <p className="mt-1 text-xxs text-ink-faint">
-              {tr("Outstanding balance")}{" "}{formatMoney(booking.balanceCents, currency)}
+              {tr("Outstanding balance {amount}", { amount: formatMoney(booking.balanceCents, currency) })}
             </p>
           )}
         </div>
@@ -675,7 +682,7 @@ function PaidOutModal({
             >
               {CATEGORIES.map((c) => (
                 <option key={c.key} value={c.key}>
-                  {c.label}
+                  {tr(c.label)}
                 </option>
               ))}
             </select>

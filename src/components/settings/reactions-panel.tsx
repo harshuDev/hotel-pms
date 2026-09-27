@@ -4,7 +4,7 @@ import { useT } from "@/components/i18n";
 import { useState } from "react";
 import { cn } from "@/components/ui";
 import { EditIcon } from "@/components/settings/finance-panels";
-import { COUNTRIES } from "@/lib/countries";
+import { countriesIn } from "@/lib/countries";
 import {
   BOOKING_STATUS_CHOICES,
   CONDITION_FIELDS,
@@ -157,7 +157,7 @@ function ConditionRow({
   const choices: Option[] | null =
     spec?.kind === "status" ? [...BOOKING_STATUS_CHOICES]
     : spec?.kind === "settlement" ? [...SETTLEMENT_CHOICES]
-    : spec?.kind === "country" ? COUNTRIES.map((k) => ({ id: k.code, label: k.name }))
+    : spec?.kind === "country" ? countriesIn(tr).map((k) => ({ id: k.code, label: k.name }))
     : spec?.kind === "channel" || spec?.kind === "room_type" || spec?.kind === "rate_plan" ? lists[spec.kind]
     : null;
 

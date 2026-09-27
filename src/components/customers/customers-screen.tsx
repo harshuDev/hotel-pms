@@ -1,6 +1,7 @@
 "use client";
 
 import { useT } from "@/components/i18n";
+import { msg } from "@/lib/i18n/translate";
 import { useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -14,7 +15,7 @@ import {
   saveCustomer,
   setExcludeFromEmail,
 } from "@/lib/actions/customers";
-import { COUNTRIES } from "@/lib/countries";
+import { countriesIn } from "@/lib/countries";
 import type { GuestField, IdentificationType } from "@/lib/guest-config";
 import type { Customer, CustomerKind } from "@/lib/types";
 import { useCurrency } from "@/components/currency";
@@ -32,9 +33,9 @@ import { useCurrency } from "@/components/currency";
  */
 
 const TABS = [
-  { key: "all", label: "All" },
-  { key: "personal", label: "Personal" },
-  { key: "company", label: "Company" },
+  { key: "all", label: msg("All") },
+  { key: "personal", label: msg("Personal") },
+  { key: "company", label: msg("Company") },
 ];
 
 const label =
@@ -161,7 +162,7 @@ export function CustomersScreen({
       setForm(null);
       setMessage({
         ok: true,
-        text: form.id ? "Customer saved." : "Customer created.",
+        text: form.id ? tr("Customer saved.") : tr("Customer created."),
       });
       router.refresh();
     });
@@ -184,7 +185,7 @@ export function CustomersScreen({
     if (selectedRows.length < 2) {
       setMessage({
         ok: false,
-        text: "Tick two or more customers to merge them into one.",
+        text: tr("Tick two or more customers to merge them into one."),
       });
       return;
     }
@@ -212,7 +213,11 @@ export function CustomersScreen({
       setSelected(new Set());
       setMessage({
         ok: true,
-        text: `${d.customersMerged} record${d.customersMerged === 1 ? "" : "s"} merged. ${d.bookingsMoved} booking${d.bookingsMoved === 1 ? "" : "s"} and ${d.foliosMoved} folio${d.foliosMoved === 1 ? "" : "s"} moved across.`,
+        text: tr("{records} merged. {bookings} and {folios} moved across.", {
+          records: tr.plural(d.customersMerged, "{n} record", "{n} records"),
+          bookings: tr.plural(d.bookingsMoved, "{n} booking", "{n} bookings"),
+          folios: tr.plural(d.foliosMoved, "{n} folio", "{n} folios"),
+        }),
       });
       router.refresh();
     });
@@ -249,8 +254,10 @@ export function CustomersScreen({
       setMessage({
         ok: true,
         text: result.data.capped
-          ? tr("{rows} customers exported — the export stops at {rows2}, so this is not the whole list. Narrow the search and export again.", { rows: result.data.rows, rows2: result.data.rows })
-          : `${result.data.rows} customer${result.data.rows === 1 ? "" : "s"} exported to ${result.data.filename}.`,
+          ? tr("{n} customers exported — the export stops at {n}, so this is not the whole list. Narrow the search and export again.", { n: result.data.rows })
+          : tr.plural(result.data.rows, "{n} customer exported to {file}.", "{n} customers exported to {file}.", {
+              file: result.data.filename,
+            }),
       });
     });
   }
@@ -443,7 +450,7 @@ export function CustomersScreen({
                   className={field}
                 >
                   <option value="">{tr("Not recorded")}</option>
-                  {COUNTRIES.map((c) => (
+                  {countriesIn(tr).map((c) => (
                     <option key={c.code} value={c.code}>
                       {c.name}
                     </option>
@@ -459,7 +466,7 @@ export function CustomersScreen({
                   className={field}
                 >
                   <option value="">{tr("Not recorded")}</option>
-                  {COUNTRIES.map((c) => (
+                  {countriesIn(tr).map((c) => (
                     <option key={c.code} value={c.code}>
                       {c.name}
                     </option>
@@ -595,7 +602,7 @@ export function CustomersScreen({
       {merging && (
         <div className="mb-4 rounded-lg border border-warn/40 bg-warn-wash p-4">
           <h2 className="font-display text-[15px] font-semibold tracking-tightest text-warn-deep">
-            {tr("Merge")}{" "}{selectedRows.length} {tr("customers into one")}
+            {tr("Merge {n} customers into one", { n: selectedRows.length })}
           </h2>
           <p className="mt-1 text-[13px] leading-relaxed text-warn-deep">
             {tr("Choose the record to keep. Everything on the others moves to it. This cannot be undone from here.")}
@@ -615,9 +622,9 @@ export function CustomersScreen({
                   className="accent-brass"
                 />
                 <span className="font-medium">{c.name}</span>
-                <span className="text-xxs text-ink-faint">{tr("Id:")}{" "}{c.ref}</span>
+                <span className="text-xxs text-ink-faint">{tr("Id: {ref}", { ref: c.ref })}</span>
                 <span className="tnum ml-auto text-xxs text-ink-muted">
-                  {c.bookingCount} {tr("booking")}{c.bookingCount === 1 ? "" : "s"}
+                  {tr.plural(c.bookingCount, "{n} booking", "{n} bookings")}
                   {c.email ? ` · ${c.email}` : ""}
                 </span>
               </label>
@@ -668,7 +675,7 @@ export function CustomersScreen({
                     : "text-nav hover:underline",
                 )}
               >
-                {t.label}
+                {tr(t.label)}
               </Link>
             </span>
           ))}
@@ -748,7 +755,7 @@ export function CustomersScreen({
                         <span className="font-medium text-ink">{c.name}</span>
                       )}
                       <span className="ml-1.5 text-xxs text-ink-faint">
-                        {tr("Id:")}{" "}{c.ref}
+                        {tr("Id: {ref}", { ref: c.ref })}
                       </span>
                       {c.kind === "company" && (
                         <span className="ml-1.5 rounded bg-slate-100 px-1.5 py-0.5 text-[10px] text-slate-600">
@@ -807,8 +814,11 @@ export function CustomersScreen({
 
           <div className="mt-3 flex items-center justify-between text-sm text-ink-muted">
             <p>
-              {(page - 1) * perPage + 1}–{Math.min(page * perPage, total)} {tr("of")}{" "}
-              {total}
+              {tr("{from}–{to} of {total}", {
+                from: (page - 1) * perPage + 1,
+                to: Math.min(page * perPage, total),
+                total,
+              })}
             </p>
             <div className="flex gap-1">
               {Array.from({ length: pages }, (_, i) => i + 1).map((p) => (

@@ -4,7 +4,7 @@ import { useT } from "@/components/i18n";
 import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { cn } from "@/components/ui";
-import { COUNTRIES } from "@/lib/countries";
+import { countriesIn } from "@/lib/countries";
 import { createClient } from "@/lib/supabase/client";
 import {
   HOTEL_ASSETS_BUCKET,
@@ -238,7 +238,7 @@ export function InvoiceSettingsPanel({
                 className={cn(line, "cursor-pointer", general.country === "" && "text-ink-muted")}
               >
                 <option value="">{tr("Country")}</option>
-                {COUNTRIES.map((c) => (
+                {countriesIn(tr).map((c) => (
                   <option key={c.code} value={c.code} className="text-ink">
                     {c.name}
                   </option>

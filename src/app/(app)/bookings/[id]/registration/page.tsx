@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { format, parseISO } from "date-fns";
 import { PrintButton } from "@/components/bookings/print-button";
 import { getCustomerForEdit } from "@/lib/actions/customers";
-import { COUNTRIES } from "@/lib/countries";
+import { countryName } from "@/lib/countries";
 import { guestFieldDisplay } from "@/lib/guest-config";
 import {
   getBookingDetail,
@@ -53,7 +53,7 @@ export default async function RegistrationCardPage({
   const g = guest.ok ? guest.data : null;
 
   const country = (code: string | undefined) =>
-    code ? COUNTRIES.find((c) => c.code === code)?.name ?? code : "";
+    code ? tr(countryName(code)) : "";
   const date = (d: string | undefined | null) => (d ? tr.date(d, "d MMM yyyy") : "");
   const address = [
     property.addressLine1,

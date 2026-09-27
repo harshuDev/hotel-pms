@@ -37,7 +37,7 @@ import type {
   FolioLine,
   Settlement,
 } from "@/lib/types";
-import { COUNTRIES } from "@/lib/countries";
+import { countryName } from "@/lib/countries";
 import { useCurrency } from "@/components/currency";
 
 /**
@@ -1260,14 +1260,10 @@ export function BookingDetailView({
               <Fact name={tr("Email")}>{guest.email || "—"}</Fact>
               <Fact name={tr("Phone")}>{guest.phone || "—"}</Fact>
               <Fact name={tr("Nationality")}>
-                {COUNTRIES.find((c) => c.code === guest.nationality)?.name ??
-                  guest.nationality ??
-                  "—"}
+                {guest.nationality ? tr(countryName(guest.nationality)) : "—"}
               </Fact>
               <Fact name={tr("Country")}>
-                {COUNTRIES.find((c) => c.code === guest.country)?.name ??
-                  guest.country ??
-                  "—"}
+                {guest.country ? tr(countryName(guest.country)) : "—"}
               </Fact>
               <Fact name={tr("Passport")}>{guest.passportNumber || "—"}</Fact>
               <Fact name={tr("Passport expiry")}>

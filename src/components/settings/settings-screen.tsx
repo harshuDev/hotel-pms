@@ -64,7 +64,7 @@ import { EmailSetupPanel } from "@/components/settings/email-setup-panel";
 import type { Facility } from "@/lib/facilities";
 import type { ExtrasCatalog } from "@/lib/extras";
 import { SETTINGS_NAV, type SettingsTab } from "@/lib/settings-tabs";
-import { COUNTRIES } from "@/lib/countries";
+import { countriesIn } from "@/lib/countries";
 import { CURRENCIES, currencyOptionLabel } from "@/lib/currencies";
 import {
   CUSTOM_POLICY,
@@ -477,7 +477,7 @@ export function SettingsScreen({
                 className={field}
               >
                 <option value="">{tr("Country")}</option>
-                {COUNTRIES.map((c) => (
+                {countriesIn(tr).map((c) => (
                   <option key={c.code} value={c.code}>
                     {c.name}
                   </option>

@@ -73,7 +73,7 @@ export default async function CountryReportPage({
         {top && (
           <ReportFigure
             label={tr("Biggest market")}
-            value={countryName(top.country)}
+            value={tr(countryName(top.country))}
             detail={`${top.roomNights} night${top.roomNights === 1 ? "" : "s"}`}
           />
         )}
@@ -103,7 +103,7 @@ export default async function CountryReportPage({
                     : "font-medium text-ink"
                 }
               >
-                {countryName(r.country)}
+                {tr(countryName(r.country))}
               </span>
             ),
           },

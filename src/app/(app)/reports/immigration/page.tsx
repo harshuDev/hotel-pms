@@ -135,7 +135,7 @@ export default async function ImmigrationReportPage({
             header: tr("Nationality"),
             cell: (r) =>
               r.nationality ? (
-                <span className="text-ink-muted">{countryName(r.nationality)}</span>
+                <span className="text-ink-muted">{tr(countryName(r.nationality))}</span>
               ) : (
                 <span className="text-warn-deep">{tr("Not recorded")}</span>
               ),
