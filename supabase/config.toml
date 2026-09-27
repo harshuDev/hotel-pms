@@ -31,3 +31,15 @@ additional_redirect_urls = [
 ]
 jwt_expiry = 3600
 enable_signup = false
+
+# THE RESET LINK CARRIES A TOKEN HASH, NOT A PKCE CODE. The default template
+# links to {{ .ConfirmationURL }}, which comes back as ?code= and can only be
+# exchanged in the browser that asked -- the verifier lives in that browser's
+# cookies. A receptionist who asks at the desk and opens the email on a phone
+# would get a dead link. /reset-password verifies ?token_hash= with
+# verifyOtp(), which works anywhere. The hosted project needs the same
+# template pasted under Auth -> Email Templates -> Reset Password, and its Site
+# URL set to the deployed origin, which is what {{ .SiteURL }} fills in.
+[auth.email.template.recovery]
+subject = "Reset your password"
+content_path = "./supabase/templates/recovery.html"

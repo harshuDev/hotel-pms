@@ -1469,6 +1469,9 @@
   "kind": "country",
   "code": "AT"
  },
+ "Auth session missing!": {
+  "kind": "text"
+ },
  "Automatic": {
   "kind": "text"
  },
@@ -3249,6 +3252,12 @@
  "Email address": {
   "kind": "text"
  },
+ "Email link is invalid or has expired": {
+  "kind": "text"
+ },
+ "Email not confirmed": {
+  "kind": "text"
+ },
  "Email preference {0} must be on or off": {
   "kind": "db"
  },
@@ -3256,6 +3265,12 @@
   "kind": "text"
  },
  "Email preferences saved.": {
+  "kind": "text"
+ },
+ "email rate limit exceeded": {
+  "kind": "text"
+ },
+ "Email rate limit exceeded": {
   "kind": "text"
  },
  "Email Setup": {
@@ -3634,6 +3649,9 @@
   "kind": "text"
  },
  "Footer Template": {
+  "kind": "text"
+ },
+ "For security purposes, you can only request this after {0} seconds.": {
   "kind": "text"
  },
  "forecast": {
@@ -4202,6 +4220,9 @@
   "kind": "text"
  },
  "Internet Access": {
+  "kind": "text"
+ },
+ "Invalid login credentials": {
   "kind": "text"
  },
  "Invalid manual charge values": {
@@ -4978,6 +4999,9 @@
   "kind": "text"
  },
  "New password": {
+  "kind": "text"
+ },
+ "New password should be different from the old password.": {
   "kind": "text"
  },
  "New payment type": {
@@ -6053,6 +6077,9 @@
   "kind": "text"
  },
  "Password changed.": {
+  "kind": "text"
+ },
+ "Password should be at least 6 characters.": {
   "kind": "text"
  },
  "Past the free window": {
@@ -8419,6 +8446,9 @@
  "This is the default policy. Make another policy the default instead.": {
   "kind": "db"
  },
+ "This link has to be opened in the browser that asked for it. Open it there, or ask for a new link here.": {
+  "kind": "text"
+ },
  "This page needs the link from the reset email. Ask for a new one below.": {
   "kind": "text"
  },
@@ -8512,6 +8542,9 @@
   "kind": "country",
   "code": "TK"
  },
+ "Token has expired or is invalid": {
+  "kind": "text"
+ },
  "Tonga": {
   "kind": "country",
   "code": "TO"
@@ -8586,6 +8619,9 @@
  "Ukraine": {
   "kind": "country",
   "code": "UA"
+ },
+ "Unable to validate email address: invalid format": {
+  "kind": "text"
  },
  "Unassigned": {
   "kind": "text"

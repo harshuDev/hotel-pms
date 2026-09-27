@@ -1,0 +1,9 @@
+<h2>Reset your password</h2>
+
+<p>Somebody asked to reset the password for the staff account {{ .Email }}.</p>
+
+<p><a href="{{ .SiteURL }}/reset-password?token_hash={{ .TokenHash }}&type=recovery">Set a new password</a></p>
+
+<p>The link works once and expires in an hour. It opens in any browser, on any device.</p>
+
+<p>If you did not ask for this, ignore this email: your password has not changed.</p>

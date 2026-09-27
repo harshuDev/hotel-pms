@@ -5,6 +5,7 @@ import { FormEvent, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { authErrorText } from "@/lib/auth-messages";
 
 export default function LoginPage() {
   const tr = useT();
@@ -31,7 +32,7 @@ export default function LoginPage() {
     });
 
     if (error) {
-      setError(error.message);
+      setError(authErrorText(tr, error));
       setLoading(false);
       return;
     }

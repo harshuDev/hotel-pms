@@ -5,6 +5,7 @@ import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { authErrorText } from "@/lib/auth-messages";
 
 /**
  * Stricter than GoTrue's own default of six, deliberately: these accounts reach
@@ -59,7 +60,7 @@ export default function ResetPasswordPage() {
         new URLSearchParams(url.hash.slice(1)).get("error_description");
 
       if (linkError) {
-        if (!cancelled) setStage({ name: "invalid", reason: linkError });
+        if (!cancelled) setStage({ name: "invalid", reason: tr.message(linkError) });
         return;
       }
 
@@ -67,13 +68,15 @@ export default function ResetPasswordPage() {
 
       if (code) {
         const { error } = await supabase.auth.exchangeCodeForSession(code);
-        failure = error?.message ?? null;
+        // Opened in another browser than the one that asked: the verifier is
+        // not here. The token-hash email template avoids this entirely.
+        failure = error ? authErrorText(tr, error) : null;
       } else if (tokenHash) {
         const { error } = await supabase.auth.verifyOtp({
           type: "recovery",
           token_hash: tokenHash,
         });
-        failure = error?.message ?? null;
+        failure = error ? authErrorText(tr, error) : null;
       }
 
       if (cancelled) return;
@@ -127,7 +130,7 @@ export default function ResetPasswordPage() {
     const { error } = await supabase.auth.updateUser({ password });
 
     if (error) {
-      setError(error.message);
+      setError(authErrorText(tr, error));
       setSaving(false);
       return;
     }

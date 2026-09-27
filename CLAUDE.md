@@ -2766,6 +2766,31 @@ client: "Need to add Booking Channel in the Dashboard".
     back to `site_url`, dropping the token and making the link look broken.
     `supabase/config.toml` covers local development. The hosted project has its
     own list under Auth → URL Configuration.
+  - **THE RESET EMAIL LINKS WITH A TOKEN HASH, NOT A PKCE CODE.** The browser
+    client runs the PKCE flow, and Supabase's default template links to
+    `{{ .ConfirmationURL }}`, which comes back as `?code=` -- exchangeable only
+    in the browser that asked, because the verifier is in that browser's
+    cookies. Ask at the desk, open the email on a phone, and the link is dead.
+    `supabase/templates/recovery.html` links to
+    `{{ .SiteURL }}/reset-password?token_hash={{ .TokenHash }}&type=recovery`,
+    which the page verifies with `verifyOtp()` on any device.
+    `config.toml` uses it locally; **the hosted project needs it pasted under
+    Auth → Email Templates → Reset Password, and its Site URL set to the
+    deployed origin**, which is what `{{ .SiteURL }}` fills in. If a `?code=`
+    link is still opened elsewhere, the page says so in the reader's language
+    rather than showing Auth's "code verifier" text.
+  - **Supabase's built-in email sender is not enough for staff.** It delivers
+    only to members of the Supabase project's team, a few an hour. A
+    receptionist who is not on the team gets no reset email at all, and the
+    confirmation screen cannot say so (it never says whether an address has
+    an account). Production needs custom SMTP under Auth → SMTP Settings.
+    Checked when this was written: no reset had ever been requested on the
+    hosted project.
+  - **Auth's own messages are translated** (`src/lib/auth-messages.ts`):
+    `authErrorText()` runs them through `tr.message()` on the sign-in, forgot
+    and reset screens, with the common ones listed as keys ("Invalid login
+    credentials", the "after {0} seconds" rate limit). One not listed shows as
+    Auth wrote it.
   - **Neither screen says whether an email belongs to an account.** The
     confirmation is the same either way. This is the one place the "errors say
     what happened" rule gives way, deliberately.
