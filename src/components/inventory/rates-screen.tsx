@@ -34,15 +34,8 @@ import { useCurrency } from "@/components/currency";
  * expressed as the absence of a price rather than a second table to maintain.
  */
 
-const DOW = [
-  { value: 1, label: "M" },
-  { value: 2, label: "T" },
-  { value: 3, label: "W" },
-  { value: 4, label: "T" },
-  { value: 5, label: "F" },
-  { value: 6, label: "S" },
-  { value: 0, label: "S" },
-];
+/** Monday first; the letters come from `tr.weekday(day, "narrow")`. */
+const DOW = [1, 2, 3, 4, 5, 6, 0].map((value) => ({ value }));
 
 const label =
   "mb-1 block text-xxs font-semibold uppercase tracking-[0.1em] text-ink-faint";
@@ -142,7 +135,7 @@ export function RatesScreen({
     if (trimmed !== "") {
       const parsed = parseMoney(trimmed);
       if (parsed === null) {
-        setMessage({ ok: false, text: "That is not an amount. Try 120 or 120.50." });
+        setMessage({ ok: false, text: tr("That is not an amount. Try 120 or 120.50.") });
         return;
       }
       cents = parsed;
@@ -164,8 +157,10 @@ export function RatesScreen({
         ok: true,
         text:
           cents === null
-            ? `Cleared ${result.data.nightsWritten} night${result.data.nightsWritten === 1 ? "" : "s"}.`
-            : `Set ${formatMoney(cents, currency)} on ${result.data.nightsWritten} night${result.data.nightsWritten === 1 ? "" : "s"}.`,
+            ? tr.plural(result.data.nightsWritten, "Cleared {n} night.", "Cleared {n} nights.")
+            : tr.plural(result.data.nightsWritten, "Set {amount} on {n} night.", "Set {amount} on {n} nights.", {
+                amount: formatMoney(cents, currency),
+              }),
       });
       router.refresh();
     });
@@ -174,11 +169,11 @@ export function RatesScreen({
   if (groups.length === 0) {
     return (
       <div className="rounded-lg border border-line bg-white p-4 text-[13px] text-ink-muted shadow-card">
-        {tr("There are no rate plans yet, so there is nothing to price. Create one under")}{" "}
+        {tr("There are no rate plans yet, so there is nothing to price.")}{" "}
         <Link href="/settings?tab=rate-plans" className="underline underline-offset-2">
-          {tr("Settings → Rate plans")}
+          {tr("Create one under Settings → Rate plans.")}
         </Link>{" "}
-        {tr("— a hotel usually has several, like Room Only, Bed and Breakfast and Non-refundable.")}
+        {tr("A hotel usually has several, like Room Only, Bed and Breakfast and Non-refundable.")}
       </div>
     );
   }
@@ -249,8 +244,7 @@ export function RatesScreen({
                           />
                           <span className="font-medium text-ink">{t.roomTypeName}</span>
                           <span className="text-xxs text-ink-faint">
-                            {t.roomTypeCode} · {plans.length} {tr("rate")}
-                            {plans.length === 1 ? "" : "s"}
+                            {t.roomTypeCode} · {tr.plural(plans.length, "{n} rate", "{n} rates")}
                           </span>
                         </label>
                       </td>
@@ -284,7 +278,11 @@ export function RatesScreen({
                                 key={d}
                                 title={
                                   rate === null
-                                    ? `${p.ratePlanName} is not loaded on ${t.roomTypeName} for ${tr.date(d, "d MMM")}, so it cannot be sold`
+                                    ? tr("{plan} is not loaded on {type} for {date}, so it cannot be sold", {
+                                        plan: p.ratePlanName,
+                                        type: t.roomTypeName,
+                                        date: tr.date(d, "d MMM"),
+                                      })
                                     : undefined
                                 }
                                 className={cn(
@@ -312,11 +310,10 @@ export function RatesScreen({
         </div>
 
         <p className="mt-4 text-xs leading-relaxed text-ink-faint">
-          {tr("A dash means no rate is loaded for that rate on that room type, which is not the same as free — a booking against it is refused. That is also how a room type is taken off a rate: clear the price rather than looking for a switch. Rates are created and renamed under")}{" "}
+          {tr("A dash means no rate is loaded for that rate on that room type, which is not the same as free — a booking against it is refused. That is also how a room type is taken off a rate: clear the price rather than looking for a switch.")}{" "}
           <Link href="/settings?tab=rate-plans" className="underline underline-offset-2">
-            {tr("Settings → Rate plans")}
+            {tr("Rates are created and renamed under Settings → Rate plans.")}
           </Link>
-          .
         </p>
       </div>
 
@@ -379,7 +376,7 @@ export function RatesScreen({
                         : "border-line text-ink-muted hover:bg-shell",
                     )}
                   >
-                    {d.label}
+                    {tr.weekday(d.value, "narrow")}
                   </button>
                 ))}
               </div>
@@ -397,7 +394,11 @@ export function RatesScreen({
             <p className="text-xs text-ink-faint">
               {selected.length === 0
                 ? tr("Tick the rates on the left to apply this to.")
-                : `${selected.length} rate${selected.length === 1 ? "" : "s"} selected. Leave the box empty to clear the price and take them off sale.`}
+                : tr.plural(
+                    selected.length,
+                    "{n} rate selected. Leave the box empty to clear the price and take it off sale.",
+                    "{n} rates selected. Leave the box empty to clear the price and take them off sale.",
+                  )}
             </p>
           </div>
         </div>

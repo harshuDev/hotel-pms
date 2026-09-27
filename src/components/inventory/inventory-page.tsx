@@ -47,16 +47,15 @@ export async function InventoryPage({
     const label = INVENTORY_VISIBILITY.find((v) => v.field === fieldName)?.label;
     return (
       <div>
-        <PageHeader title={title ?? spec.title} />
+        <PageHeader title={title ?? tr(spec.title)} />
         <div className="rounded-lg border border-line bg-white p-5 text-[13px] text-ink shadow-card">
           {tr("This screen is switched off.")}{" "}
           <Link
             href="/settings?tab=inventory-settings"
             className="text-brass underline-offset-2 hover:underline"
           >
-            {label} {tr("in Inventory Settings")}
-          </Link>{" "}
-          {tr("turns it back on.")}
+            {tr("{setting} in Inventory Settings turns it back on.", { setting: label ? tr(label) : "" })}
+          </Link>
         </div>
       </div>
     );
@@ -94,7 +93,7 @@ export async function InventoryPage({
   return (
     <div>
       <PageHeader
-        title={title ?? spec.title}
+        title={title ?? tr(spec.title)}
       />
       <InventoryScreen
         fieldName={fieldName}

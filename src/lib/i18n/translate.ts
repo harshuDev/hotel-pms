@@ -1,4 +1,4 @@
-import { format, formatDistanceToNowStrict, parseISO } from "date-fns";
+import { format, formatDistanceToNowStrict, parseISO, type Day } from "date-fns";
 import { formatStampInProperty } from "@/lib/dates";
 import { DATE_LOCALES, type StaffLocale } from "@/lib/i18n/staff-locales";
 
@@ -44,6 +44,8 @@ export interface Translator {
   stamp(iso: string, timezone: string): string;
   /** How long ago, "5 minutes ago" -- the whole phrase, since word order varies. */
   since(iso: string): string;
+  /** A weekday's name, 0 = Sunday, short or a single letter, from the same locale data as dates. */
+  weekday(day: number, width?: "abbreviated" | "narrow"): string;
 }
 
 function interpolate(text: string, vars?: Vars): string {
@@ -124,6 +126,9 @@ export function makeTranslator(locale: StaffLocale, dict: Dictionary): Translato
     format(typeof value === "string" ? parseISO(value) : value, pattern, { locale: dateLocale });
 
   t.stamp = (iso, timezone) => formatStampInProperty(iso, timezone, locale);
+
+  t.weekday = (day, width = "abbreviated") =>
+    dateLocale.localize.day((((day % 7) + 7) % 7) as Day, { width });
 
   t.since = (iso) => formatDistanceToNowStrict(new Date(iso), { addSuffix: true, locale: dateLocale });
 

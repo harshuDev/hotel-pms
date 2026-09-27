@@ -1,6 +1,7 @@
 "use client";
 
 import { useT } from "@/components/i18n";
+import { msg } from "@/lib/i18n/translate";
 import { useMemo, useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -23,15 +24,15 @@ import type {
 } from "@/lib/types";
 import { useCurrency } from "@/components/currency";
 
-const DOW = [
-  { value: 1, label: "Mon" },
-  { value: 2, label: "Tue" },
-  { value: 3, label: "Wed" },
-  { value: 4, label: "Thu" },
-  { value: 5, label: "Fri" },
-  { value: 6, label: "Sat" },
-  { value: 0, label: "Sun" },
-];
+/** Monday first, as the grid reads; the names come from `tr.weekday()`. */
+const DOW = [1, 2, 3, 4, 5, 6, 0].map((value) => ({ value }));
+
+/** A meal as it sits inside a sentence, "includes breakfast, dinner". */
+const MEAL_IN_SENTENCE: Record<MealType, string> = {
+  breakfast: msg("breakfast"),
+  lunch: msg("lunch"),
+  dinner: msg("dinner"),
+};
 
 const label =
   "mb-1 block text-xxs font-semibold uppercase tracking-[0.1em] text-ink-faint";
@@ -106,8 +107,8 @@ export function InventoryScreen({
   function show(cell: InventoryCell | undefined) {
     if (!cell) return "—";
     const raw = spec.read(cell);
-    if (spec.kind === "flag") return raw ? "Yes" : "";
-    if (raw === null) return spec.kind === "count" ? "All" : "—";
+    if (spec.kind === "flag") return raw ? tr("Yes") : "";
+    if (raw === null) return spec.kind === "count" ? tr("All") : "—";
     if (spec.kind === "money") return formatMoney(raw as number, currency);
     return String(raw);
   }
@@ -139,13 +140,13 @@ export function InventoryScreen({
       try {
         parsed = parseMoney(value);
       } catch {
-        setMessage({ ok: false, text: "That is not an amount. Try 120 or 120.50." });
+        setMessage({ ok: false, text: tr("That is not an amount. Try 120 or 120.50.") });
         return;
       }
     } else {
       const n = Number(value);
       if (!Number.isSafeInteger(n)) {
-        setMessage({ ok: false, text: "Enter a whole number, or leave it blank to clear." });
+        setMessage({ ok: false, text: tr("Enter a whole number, or leave it blank to clear.") });
         return;
       }
       parsed = n;
@@ -170,7 +171,9 @@ export function InventoryScreen({
       const n = result.data.nightsWritten;
       setMessage({
         ok: true,
-        text: `${spec.title} set on ${n} room-night${n === 1 ? "" : "s"}.`,
+        text: tr.plural(n, "{field} set on {n} room-night.", "{field} set on {n} room-nights.", {
+          field: tr(spec.title),
+        }),
       });
       router.refresh();
     });
@@ -198,7 +201,7 @@ export function InventoryScreen({
       } catch {
         setMessage({
           ok: false,
-          text: "That is not an amount. Try 15 or 15.00, or clear it to make the meal worth nothing.",
+          text: tr("That is not an amount. Try 15 or 15.00, or clear it to make the meal worth nothing."),
         });
         return;
       }
@@ -245,9 +248,10 @@ export function InventoryScreen({
         text:
           next.length === 0
             ? tr("{name} includes no meals.", { name: plan.name })
-            : `${plan.name} includes ${next
-                .map((m) => MEALS.find((x) => x.value === m)?.label.toLowerCase())
-                .join(", ")}.`,
+            : tr("{name} includes {meals}.", {
+                name: plan.name,
+                meals: next.map((m) => tr(MEAL_IN_SENTENCE[m])).join(", "),
+              }),
       });
       router.refresh();
     });
@@ -567,7 +571,7 @@ export function InventoryScreen({
               </table>
             </div>
             <p className="mt-3 text-xs leading-relaxed text-ink-faint">
-              {spec.note} {tr("Rows are room types, not rooms — a property can run well over a thousand rooms and this grid is the same height whatever the count.")}
+              {tr(spec.note)} {tr("Rows are room types, not rooms — a property can run well over a thousand rooms and this grid is the same height whatever the count.")}
             </p>
           </>
         )}
@@ -577,7 +581,7 @@ export function InventoryScreen({
       {canEdit && types.length > 0 && (!spec.needsPlan || planId) && (
         <div className="rounded-lg border border-line bg-white p-5 shadow-card">
           <h2 className="mb-4 font-display text-[15px] font-semibold tracking-tightest text-ink">
-            {tr("Set")}{" "}{spec.title.toLowerCase()}
+            {tr(spec.setHeading)}
           </h2>
 
           <div className="grid gap-4 sm:grid-cols-4">
@@ -620,7 +624,7 @@ export function InventoryScreen({
                         : "border-line text-ink-muted hover:bg-shell hover:text-ink",
                     )}
                   >
-                    {d.label}
+                    {tr.weekday(d.value)}
                   </button>
                 ))}
                 {dow.length > 0 && (
@@ -636,7 +640,7 @@ export function InventoryScreen({
             </div>
             <div>
               <label htmlFor="edit-value" className={label}>
-                {spec.valueLabel}
+                {tr(spec.valueLabel)}
               </label>
               {spec.kind === "flag" ? (
                 <select
@@ -664,7 +668,7 @@ export function InventoryScreen({
               <p className="text-xs leading-relaxed text-ink-faint">
                 {selected.length === 0
                   ? tr("Tick the room types on the left to apply this to.")
-                  : `${selected.length} room type${selected.length === 1 ? "" : "s"} selected.`}
+                  : tr.plural(selected.length, "{n} room type selected.", "{n} room types selected.")}
               </p>
             </div>
           </div>
