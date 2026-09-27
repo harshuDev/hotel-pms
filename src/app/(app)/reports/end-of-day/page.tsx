@@ -51,7 +51,7 @@ export default async function EndOfDayReportPage({
     throw error;
   }
 
-  const pretty = format(parseISO(date), "EEEE d MMMM yyyy");
+  const pretty = tr.date(date, "EEEE d MMMM yyyy");
 
   return (
     <ReportShell

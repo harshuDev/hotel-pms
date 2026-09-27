@@ -1,3 +1,4 @@
+import { msg } from "@/lib/i18n/translate";
 /**
  * Settings -> System Settings -> Calendar Settings (0077), in the client's
  * reference's order and wording.
@@ -11,50 +12,50 @@
  */
 
 export const CALENDAR_COLORS = [
-  { id: "roomBlockerColor", label: "Room Blocker Color", default: "#b4d0f5", wired: false },
-  { id: "unpaidBookingColor", label: "Unpaid Booking Color", default: "#ed5b4f", wired: true },
-  { id: "paidBookingColor", label: "Paid Booking Color", default: "#74c971", wired: true },
+  { id: "roomBlockerColor", label: msg("Room Blocker Color"), default: "#b4d0f5", wired: false },
+  { id: "unpaidBookingColor", label: msg("Unpaid Booking Color"), default: "#ed5b4f", wired: true },
+  { id: "paidBookingColor", label: msg("Paid Booking Color"), default: "#74c971", wired: true },
   {
     id: "partiallyPaidBookingColor",
-    label: "Partially Paid Booking Color",
+    label: msg("Partially Paid Booking Color"),
     default: "#fdb650",
     wired: true,
   },
-  { id: "companyBookingColor", label: "Company Booking Color", default: "#71b4e9", wired: true },
-  { id: "groupBookingColor", label: "Group Booking Color", default: "#74c971", wired: true },
-  { id: "weekendBorderColor", label: "Weekend Border Color", default: "#dce7f5", wired: true },
+  { id: "companyBookingColor", label: msg("Company Booking Color"), default: "#71b4e9", wired: true },
+  { id: "groupBookingColor", label: msg("Group Booking Color"), default: "#74c971", wired: true },
+  { id: "weekendBorderColor", label: msg("Weekend Border Color"), default: "#dce7f5", wired: true },
 ] as const;
 
 export const CALENDAR_SWITCHES = [
-  { id: "roundedCorners", label: "Use Rounded Corners", default: true, wired: true },
+  { id: "roundedCorners", label: msg("Use Rounded Corners"), default: true, wired: true },
   {
     id: "bookingsIntersectCheckout",
-    label: "Bookings to intersect checkout date",
+    label: msg("Bookings to intersect checkout date"),
     default: false,
     wired: false,
   },
   {
     id: "bookingMarkerIntersectCheckout",
-    label: "Create Booking marker to intersect checkout date",
+    label: msg("Create Booking marker to intersect checkout date"),
     default: false,
     wired: false,
   },
-  { id: "fixedWidthZoom", label: "Use fixed width for zoom", default: true, wired: false },
-  { id: "showSeasons", label: "Show seasons in calendar", default: true, wired: true },
+  { id: "fixedWidthZoom", label: msg("Use fixed width for zoom"), default: true, wired: false },
+  { id: "showSeasons", label: msg("Show seasons in calendar"), default: true, wired: true },
   {
     id: "showChannelAbbreviation",
-    label: "Show channel abbreviation for bookings",
+    label: msg("Show channel abbreviation for bookings"),
     default: true,
     wired: true,
   },
-  { id: "lastNameFirst", label: "Show last name first for bookings", default: true, wired: true },
+  { id: "lastNameFirst", label: msg("Show last name first for bookings"), default: true, wired: true },
   {
     id: "hideCancellationArea",
-    label: "Hide cancellation area from calendar",
+    label: msg("Hide cancellation area from calendar"),
     default: false,
     wired: true,
   },
-  { id: "showWaitlist", label: "Show waitlist", default: false, wired: false },
+  { id: "showWaitlist", label: msg("Show waitlist"), default: false, wired: false },
 ] as const;
 
 export type CalendarColorId = (typeof CALENDAR_COLORS)[number]["id"];

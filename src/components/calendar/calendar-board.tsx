@@ -358,7 +358,7 @@ async function Bars({
             title={[
               bar.reference,
               bar.guestName,
-              `${format(parseISO(bar.checkIn), "d MMM")} to ${format(
+              `${tr.date(bar.checkIn, "d MMM")} to ${format(
                 parseISO(bar.checkOut),
                 "d MMM",
               )}`,
@@ -662,7 +662,7 @@ function DayCells({
           <Link
             key={d}
             href={bookHref(d)}
-            title={`Take a booking arriving ${format(parseISO(d), "d MMM")}`}
+            title={`Take a booking arriving ${tr.date(d, "d MMM")}`}
             className={tone}
             style={width}
           >
@@ -1261,12 +1261,12 @@ export async function CalendarBoard({
                         {format(day, "d")}
                       </span>
                       <span className="text-[12.5px] text-ink">
-                        {format(day, "EEEE")}
+                        {tr.date(day, "EEEE")}
                       </span>
                     </div>
                     <div className="flex items-center justify-center gap-1 text-xxs text-ink-faint">
                       {/* CAPITALS, as the client asked. */}
-                      <span className="uppercase">{format(day, "MMMM")}</span>
+                      <span className="uppercase">{tr.date(day, "MMMM")}</span>
                       {/*
                         The day's notes: a marker and a count, never the words.
                         A column is 118px wide and an operational note is a
@@ -1277,13 +1277,13 @@ export async function CalendarBoard({
                         href={noteHref(d)}
                         title={
                           dayNotes.length === 0
-                            ? `Add a note for ${format(day, "d MMM")}`
+                            ? `Add a note for ${tr.date(day, "d MMM")}`
                             : dayNotes.map((n) => n.body).join("\n")
                         }
                         aria-label={
                           dayNotes.length === 0
-                            ? `Add a note for ${format(day, "d MMM")}`
-                            : `${dayNotes.length} note${dayNotes.length === 1 ? "" : "s"} on ${format(day, "d MMM")}`
+                            ? `Add a note for ${tr.date(day, "d MMM")}`
+                            : `${dayNotes.length} note${dayNotes.length === 1 ? "" : "s"} on ${tr.date(day, "d MMM")}`
                         }
                         className={cn(
                           "inline-flex items-center gap-0.5 rounded border px-1 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brass",

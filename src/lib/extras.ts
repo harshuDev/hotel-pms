@@ -1,3 +1,4 @@
+import { msg } from "@/lib/i18n/translate";
 /**
  * Hotel Content -> Extras (0069).
  *
@@ -12,11 +13,11 @@
  */
 
 export const EXTRA_ACCOUNTING_CATEGORIES = [
-  { id: "food_beverage", label: "Food & beverage" },
-  { id: "laundry", label: "Laundry" },
-  { id: "minibar", label: "Minibar" },
-  { id: "transport", label: "Transport" },
-  { id: "miscellaneous", label: "Miscellaneous" },
+  { id: "food_beverage", label: msg("Food & beverage") },
+  { id: "laundry", label: msg("Laundry") },
+  { id: "minibar", label: msg("Minibar") },
+  { id: "transport", label: msg("Transport") },
+  { id: "miscellaneous", label: msg("Miscellaneous") },
 ] as const;
 
 export type ExtraItemType = (typeof EXTRA_ACCOUNTING_CATEGORIES)[number]["id"];

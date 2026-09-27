@@ -105,7 +105,7 @@ export default async function DepositReportPage() {
             header: tr("Arrives"),
             cell: (r) => (
               <span className="tnum whitespace-nowrap text-ink-muted">
-                {format(parseISO(r.checkIn), "EEE d MMM")}
+                {tr.date(r.checkIn, "EEE d MMM")}
               </span>
             ),
           },

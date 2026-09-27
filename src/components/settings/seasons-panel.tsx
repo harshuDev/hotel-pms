@@ -47,7 +47,7 @@ function iso(y: number, m: number, d: number): string {
 }
 
 function day(d: string): string {
-  return format(parseISO(d), "dd MMM yyyy");
+  return tr.date(d, "dd MMM yyyy");
 }
 
 function PlusIcon() {
@@ -225,7 +225,7 @@ export function SeasonsPanel({
               const days = getDaysInMonth(new Date(year, m, 1));
               return (
                 <div key={m}>
-                  <p className="mb-1 text-center text-[12.5px] text-ink">{format(new Date(year, m, 1), "MMMM")}</p>
+                  <p className="mb-1 text-center text-[12.5px] text-ink">{tr.date(new Date(year, m, 1), "MMMM")}</p>
                   <div className="grid grid-cols-7 text-center">
                     {Array.from({ length: lead }, (_, i) => <span key={`b${i}`} />)}
                     {Array.from({ length: days }, (_, i) => {

@@ -100,7 +100,7 @@ export default async function MealReportPage({
                       <tr key={`${date}-${meal}`}>
                         <td className="whitespace-nowrap px-3 py-2.5 text-ink">
                           {index === 0
-                            ? format(parseISO(date), "EEE d MMM")
+                            ? tr.date(date, "EEE d MMM")
                             : ""}
                         </td>
                         <td className="px-3 py-2.5 text-ink-muted">

@@ -53,7 +53,7 @@ export function ChargeExtra({
 
   function submit() {
     if (!chosen) {
-      setMessage({ ok: false, text: "Pick the extra to charge." });
+      setMessage({ ok: false, text: tr("Pick the extra to charge.") });
       return;
     }
     const qty = Number(quantity);
@@ -65,7 +65,10 @@ export function ChargeExtra({
         setMessage({ ok: false, text: result.error });
         return;
       }
-      setMessage({ ok: true, text: `${qty > 1 ? `${qty} × ` : ""}${what} charged.` });
+      setMessage({
+        ok: true,
+        text: qty > 1 ? tr("{qty} × {what} charged.", { qty, what }) : tr("{what} charged.", { what }),
+      });
       setExtraId("");
       setQuantity("1");
       router.refresh();

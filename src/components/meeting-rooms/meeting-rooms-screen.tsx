@@ -262,9 +262,9 @@ export function MeetingRoomsScreen({
                           weekend ? "text-ink-muted" : "text-ink-faint",
                         )}
                       >
-                        <span className="block">{format(day, "EEE")}</span>
+                        <span className="block">{tr.date(day, "EEE")}</span>
                         <span className="tnum block text-[11px] font-normal">
-                          {format(day, "d MMM")}
+                          {tr.date(day, "d MMM")}
                         </span>
                       </th>
                     );
@@ -508,8 +508,8 @@ export function MeetingRoomsScreen({
             <div>
               <p className={label}>{tr("When")}</p>
               <p className="text-[13px] text-ink">
-                {format(parseISO(booking.startsOn), "EEE d MMM")} {tr("to")}{" "}
-                {format(parseISO(booking.endsOn), "EEE d MMM")}
+                {tr.date(booking.startsOn, "EEE d MMM")} {tr("to")}{" "}
+                {tr.date(booking.endsOn, "EEE d MMM")}
                 <span className="ml-1.5 text-xxs text-ink-faint">
                   {booking.days} {tr("day")}{booking.days === 1 ? "" : "s"}
                 </span>
@@ -640,7 +640,7 @@ export function MeetingRoomsScreen({
 
           <p className="text-xs text-ink-faint">
             {tr("Booked by")}{" "}{booking.bookedBy ?? tr("someone")} {tr("on")}{" "}
-            {format(parseISO(booking.createdAt), "d MMM yyyy")}.
+            {tr.date(booking.createdAt, "d MMM yyyy")}.
           </p>
         </Sheet>
       )}

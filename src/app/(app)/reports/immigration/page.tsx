@@ -156,7 +156,7 @@ export default async function ImmigrationReportPage({
             cell: (r) => (
               <span className="tnum whitespace-nowrap text-ink-faint">
                 {r.passportExpiry
-                  ? format(parseISO(r.passportExpiry), "d MMM yyyy")
+                  ? tr.date(r.passportExpiry, "d MMM yyyy")
                   : "—"}
               </span>
             ),
@@ -166,7 +166,7 @@ export default async function ImmigrationReportPage({
             cell: (r) =>
               r.dateOfBirth ? (
                 <span className="tnum whitespace-nowrap text-ink-muted">
-                  {format(parseISO(r.dateOfBirth), "d MMM yyyy")}
+                  {tr.date(r.dateOfBirth, "d MMM yyyy")}
                 </span>
               ) : (
                 <span className="text-warn-deep">{tr("Not recorded")}</span>
@@ -177,8 +177,8 @@ export default async function ImmigrationReportPage({
             align: "right",
             cell: (r) => (
               <span className="tnum whitespace-nowrap text-ink-muted">
-                {format(parseISO(r.checkIn), "d MMM")} –{" "}
-                {format(parseISO(r.checkOut), "d MMM")}
+                {tr.date(r.checkIn, "d MMM")} –{" "}
+                {tr.date(r.checkOut, "d MMM")}
               </span>
             ),
           },

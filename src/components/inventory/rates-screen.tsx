@@ -217,7 +217,7 @@ export function RatesScreen({
                         weekend ? "text-ink-muted" : "text-ink-faint",
                       )}
                     >
-                      <span className="block">{format(day, "EEEEE")}</span>
+                      <span className="block">{tr.date(day, "EEEEE")}</span>
                       <span className="tnum block text-[11px] font-normal">
                         {format(day, "d")}
                       </span>
@@ -284,7 +284,7 @@ export function RatesScreen({
                                 key={d}
                                 title={
                                   rate === null
-                                    ? `${p.ratePlanName} is not loaded on ${t.roomTypeName} for ${format(parseISO(d), "d MMM")}, so it cannot be sold`
+                                    ? `${p.ratePlanName} is not loaded on ${t.roomTypeName} for ${tr.date(d, "d MMM")}, so it cannot be sold`
                                     : undefined
                                 }
                                 className={cn(

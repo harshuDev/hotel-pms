@@ -53,13 +53,13 @@ export async function HouseStrip({ s }: { s: HouseSummary }) {
       <Metric
         label={tr("Occupancy")}
         value={`${s.occupancyPct}%`}
-        detail={`${s.occupied} of ${s.sellable} sellable`}
+        detail={tr("{occupied} of {sellable} sellable", { occupied: s.occupied, sellable: s.sellable })}
         bar={s.occupancyPct}
       />
       <Metric
         label={tr("Arriving")}
         value={String(s.arrivals)}
-        detail={`${s.departures} due out`}
+        detail={tr("{n} due out", { n: s.departures })}
         tone="brass"
       />
       <Metric
@@ -85,7 +85,7 @@ export async function HouseStrip({ s }: { s: HouseSummary }) {
       <Metric
         label={tr("Housekeeping")}
         value={String(s.vacantDirty)}
-        detail={s.ooo > 0 ? `${s.ooo} out of order` : tr("Nothing out of order")}
+        detail={s.ooo > 0 ? tr("{n} out of order", { n: s.ooo }) : tr("Nothing out of order")}
       />
     </div>
   );

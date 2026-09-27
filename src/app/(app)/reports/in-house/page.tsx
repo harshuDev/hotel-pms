@@ -89,7 +89,7 @@ export default async function InHouseReportPage() {
             header: tr("Arrived"),
             cell: (r) => (
               <span className="whitespace-nowrap text-ink-muted">
-                {format(parseISO(r.checkIn), "d MMM")}
+                {tr.date(r.checkIn, "d MMM")}
               </span>
             ),
           },
@@ -97,7 +97,7 @@ export default async function InHouseReportPage() {
             header: tr("Departs"),
             cell: (r) => (
               <span className="whitespace-nowrap text-ink-muted">
-                {format(parseISO(r.checkOut), "d MMM")}
+                {tr.date(r.checkOut, "d MMM")}
               </span>
             ),
           },

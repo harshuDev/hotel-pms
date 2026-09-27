@@ -1,3 +1,4 @@
+import { msg } from "@/lib/i18n/translate";
 /**
  * Hotel Content -> Hotel Policy (0068), cloned from the client's reference.
  *
@@ -18,49 +19,49 @@
 export const HOTEL_POLICY_SECTIONS = [
   {
     key: "children",
-    title: "Children",
-    prompt: "Let your guests know if children are allowed in your accommodation",
+    title: msg("Children"),
+    prompt: msg("Let your guests know if children are allowed in your accommodation"),
     options: [
-      { id: "all_ages", label: "All ages welcome" },
-      { id: "no_children_or_infants", label: "Sorry, no children and infants" },
-      { id: "no_infants", label: "Sorry, no infants" },
+      { id: "all_ages", label: msg("All ages welcome") },
+      { id: "no_children_or_infants", label: msg("Sorry, no children and infants") },
+      { id: "no_infants", label: msg("Sorry, no infants") },
     ],
   },
   {
     key: "pets",
-    title: "Pets",
-    prompt: "Let your guests know if pets are allowed in your accommodation",
+    title: msg("Pets"),
+    prompt: msg("Let your guests know if pets are allowed in your accommodation"),
     options: [
-      { id: "no_pets", label: "Sorry, no pets" },
-      { id: "pets_surcharge", label: "Pets welcome, but may incur surcharge" },
+      { id: "no_pets", label: msg("Sorry, no pets") },
+      { id: "pets_surcharge", label: msg("Pets welcome, but may incur surcharge") },
     ],
   },
   {
     key: "smoking",
-    title: "Smoking",
-    prompt: "Let your guests know if smoking is allowed",
+    title: msg("Smoking"),
+    prompt: msg("Let your guests know if smoking is allowed"),
     options: [
-      { id: "no_smoking", label: "Strictly no smoking" },
-      { id: "permitted_areas", label: "Smoking in permitted areas only" },
+      { id: "no_smoking", label: msg("Strictly no smoking") },
+      { id: "permitted_areas", label: msg("Smoking in permitted areas only") },
     ],
   },
   {
     key: "internet",
-    title: "Internet Access",
-    prompt: "Let your guests know about the Internet access",
+    title: msg("Internet Access"),
+    prompt: msg("Let your guests know about the Internet access"),
     options: [
-      { id: "free_wifi_all", label: "Free Wifi in all areas" },
-      { id: "free_wifi_most", label: "Free WiFi in most areas depending on signal" },
+      { id: "free_wifi_all", label: msg("Free Wifi in all areas") },
+      { id: "free_wifi_most", label: msg("Free WiFi in most areas depending on signal") },
     ],
   },
   {
     key: "parking",
-    title: "Parking",
+    title: msg("Parking"),
     // The reference's Parking section carries no prompt line.
     prompt: null,
     options: [
-      { id: "free_on_site", label: "Free On-Site Parking" },
-      { id: "limited_on_site", label: "Limited On-Site Parking Available" },
+      { id: "free_on_site", label: msg("Free On-Site Parking") },
+      { id: "limited_on_site", label: msg("Limited On-Site Parking Available") },
     ],
   },
 ] as const;

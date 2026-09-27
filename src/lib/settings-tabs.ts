@@ -1,3 +1,4 @@
+import { msg } from "@/lib/i18n/translate";
 /**
  * THE ONE LIST OF SETTINGS PANELS, read by the page and by the screen alike.
  *
@@ -91,80 +92,80 @@ export const SETTINGS_NAV: {
   items: { id: SettingsTab; label: string }[];
 }[] = [
   {
-    title: "Hotel Profile",
+    title: msg("Hotel Profile"),
     items: [
-      { id: "property", label: "Hotel Details" },
-      { id: "hotel-properties", label: "Hotel Properties" },
+      { id: "property", label: msg("Hotel Details") },
+      { id: "hotel-properties", label: msg("Hotel Properties") },
     ],
   },
   {
-    title: "Hotel Content",
+    title: msg("Hotel Content"),
     items: [
-      { id: "hotel-policy", label: "Hotel Policy" },
-      { id: "extras", label: "Extras" },
-      { id: "facilities", label: "Room Type Facilities" },
+      { id: "hotel-policy", label: msg("Hotel Policy") },
+      { id: "extras", label: msg("Extras") },
+      { id: "facilities", label: msg("Room Type Facilities") },
     ],
   },
   {
-    title: "Guest Configuration",
+    title: msg("Guest Configuration"),
     items: [
-      { id: "guest-registration", label: "Guest Registration Form" },
-      { id: "identification-types", label: "Identification Types" },
-      { id: "guest-details", label: "Guest Details Settings" },
+      { id: "guest-registration", label: msg("Guest Registration Form") },
+      { id: "identification-types", label: msg("Identification Types") },
+      { id: "guest-details", label: msg("Guest Details Settings") },
     ],
   },
   {
-    title: "Communications & Notifications",
+    title: msg("Communications & Notifications"),
     items: [
-      { id: "email-preferences", label: "Hotel Emails Preferences" },
-      { id: "email-setup", label: "Email Setup" },
+      { id: "email-preferences", label: msg("Hotel Emails Preferences") },
+      { id: "email-setup", label: msg("Email Setup") },
     ],
   },
   {
-    title: "System Settings",
+    title: msg("System Settings"),
     items: [
-      { id: "hotel-features", label: "Hotel Features" },
-      { id: "calendar-settings", label: "Calendar Settings" },
-      { id: "language-settings", label: "Language Settings" },
-      { id: "staff", label: "Staff" },
+      { id: "hotel-features", label: msg("Hotel Features") },
+      { id: "calendar-settings", label: msg("Calendar Settings") },
+      { id: "language-settings", label: msg("Language Settings") },
+      { id: "staff", label: msg("Staff") },
     ],
   },
   {
-    title: "Finances",
+    title: msg("Finances"),
     items: [
-      { id: "payment-methods", label: "Custom Payment Types" },
-      { id: "tax", label: "Tax Information" },
-      { id: "invoice-settings", label: "Invoice Settings" },
-      { id: "pos-profiles", label: "Pos Profiles" },
-      { id: "currencies", label: "Currencies" },
-      { id: "accounting-categories", label: "Accounting Categories" },
-      { id: "payment-gateways", label: "Payment Gateway" },
-      { id: "accounting-systems", label: "Accounting Systems" },
+      { id: "payment-methods", label: msg("Custom Payment Types") },
+      { id: "tax", label: msg("Tax Information") },
+      { id: "invoice-settings", label: msg("Invoice Settings") },
+      { id: "pos-profiles", label: msg("Pos Profiles") },
+      { id: "currencies", label: msg("Currencies") },
+      { id: "accounting-categories", label: msg("Accounting Categories") },
+      { id: "payment-gateways", label: msg("Payment Gateway") },
+      { id: "accounting-systems", label: msg("Accounting Systems") },
     ],
   },
   {
-    title: "Inventory",
+    title: msg("Inventory"),
     items: [
-      { id: "inventory-settings", label: "Settings" },
-      { id: "room-types", label: "Room Type" },
-      { id: "rooms", label: "Room Setup" },
-      { id: "cancellation", label: "Cancellation Policy" },
-      { id: "rate-plans", label: "Rate Plans" },
-      { id: "seasons", label: "Seasons and Events" },
-      { id: "discounts", label: "Discounts" },
+      { id: "inventory-settings", label: msg("Settings") },
+      { id: "room-types", label: msg("Room Type") },
+      { id: "rooms", label: msg("Room Setup") },
+      { id: "cancellation", label: msg("Cancellation Policy") },
+      { id: "rate-plans", label: msg("Rate Plans") },
+      { id: "seasons", label: msg("Seasons and Events") },
+      { id: "discounts", label: msg("Discounts") },
     ],
   },
   {
-    title: "Connectivity Settings",
+    title: msg("Connectivity Settings"),
     items: [
-      { id: "channel-manager", label: "Channel Manager" },
-      { id: "booking-engine", label: "Booking Engine Settings" },
-      { id: "channels", label: "Sales Channels" },
-      { id: "booking-widget", label: "Booking Widget" },
-      { id: "api-key", label: "API Key" },
-      { id: "developer-keys", label: "Developers Keys" },
-      { id: "key-lock-systems", label: "Key Lock Systems" },
-      { id: "housekeeping-systems", label: "Housekeeping Systems" },
+      { id: "channel-manager", label: msg("Channel Manager") },
+      { id: "booking-engine", label: msg("Booking Engine Settings") },
+      { id: "channels", label: msg("Sales Channels") },
+      { id: "booking-widget", label: msg("Booking Widget") },
+      { id: "api-key", label: msg("API Key") },
+      { id: "developer-keys", label: msg("Developers Keys") },
+      { id: "key-lock-systems", label: msg("Key Lock Systems") },
+      { id: "housekeeping-systems", label: msg("Housekeeping Systems") },
     ],
   },
   {
@@ -172,10 +173,10 @@ export const SETTINGS_NAV: {
     // empty page ("settings that are specific for your country, if
     // present"), and a sidebar item with nothing behind it is a dead
     // control, so it goes in when a country needs something.
-    title: "Other",
+    title: msg("Other"),
     items: [
-      { id: "reactions", label: "Reactions" },
-      { id: "templates", label: "Templates" },
+      { id: "reactions", label: msg("Reactions") },
+      { id: "templates", label: msg("Templates") },
     ],
   },
 ];

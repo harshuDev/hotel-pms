@@ -134,8 +134,8 @@ export function CashierClient({
           </h1>
           <p className="mt-1 text-sm text-ink-muted">
             {shift.userName} {tr("· opened")}{" "}
-            {format(parseISO(shift.openedAt), "h:mm a")} {tr("· business date")}{" "}
-            {format(parseISO(shift.businessDate), "d MMM yyyy")}
+            {tr.date(shift.openedAt, "h:mm a")} {tr("· business date")}{" "}
+            {tr.date(shift.businessDate, "d MMM yyyy")}
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -385,7 +385,7 @@ function OpenShiftPanel({
         {tr("Open a shift")}
       </h1>
       <p className="mt-1.5 text-sm text-ink-muted">
-        {tr("Business date")}{" "}{format(parseISO(businessDate), "d MMM yyyy")}{tr(". Nothing can be taken or paid out until a shift is open.")}
+        {tr("Business date")}{" "}{tr.date(businessDate, "d MMM yyyy")}{tr(". Nothing can be taken or paid out until a shift is open.")}
       </p>
 
       <div className="mt-6">

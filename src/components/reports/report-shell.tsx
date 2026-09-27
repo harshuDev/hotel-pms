@@ -90,13 +90,13 @@ export async function ReportShell({
       />
       {range && (
         <p className="mb-3 text-xs text-ink-faint">
-          {format(parseISO(range.from), "d MMM yyyy")} {tr("to")}{" "}
-          {format(parseISO(range.to), "d MMM yyyy")}
+          {tr.date(range.from, "d MMM yyyy")} {tr("to")}{" "}
+          {tr.date(range.to, "d MMM yyyy")}
         </p>
       )}
       {date && !range && (
         <p className="mb-3 text-xs text-ink-faint">
-          {format(parseISO(date), "EEEE d MMMM yyyy")}
+          {tr.date(date, "EEEE d MMMM yyyy")}
         </p>
       )}
       {children}

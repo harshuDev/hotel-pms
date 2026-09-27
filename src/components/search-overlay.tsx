@@ -1,6 +1,7 @@
 "use client";
 
 import { useT } from "@/components/i18n";
+import { msg } from "@/lib/i18n/translate";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { cn } from "@/components/ui";
@@ -21,9 +22,9 @@ import { globalSearch, type SearchHit } from "@/lib/actions/search";
  */
 
 const KIND_LABEL: Record<SearchHit["kind"], string> = {
-  booking: "Bookings",
-  customer: "Customers",
-  room: "Rooms",
+  booking: msg("Bookings"),
+  customer: msg("Customers"),
+  room: msg("Rooms"),
 };
 
 /** Where a hit goes. Rooms have no page of their own; the list is filtered. */
@@ -167,7 +168,7 @@ export function SearchOverlay({ onClose }: { onClose: () => void }) {
             {groups.map((group) => (
               <li key={group.kind}>
                 <p className="px-4 pb-1 pt-2 text-xxs font-semibold uppercase tracking-[0.1em] text-ink-faint">
-                  {KIND_LABEL[group.kind]}
+                  {tr(KIND_LABEL[group.kind])}
                 </p>
                 <ul>
                   {group.hits.map((hit) => {
@@ -210,7 +211,7 @@ export function SearchOverlay({ onClose }: { onClose: () => void }) {
 
         {showEmpty && (
           <p className="px-4 py-6 text-center text-[13px] text-ink-muted">
-            {tr("Nothing matches “")}{term.trim()}{tr("”. Search covers booking references, guest names and room numbers.")}
+            {tr("Nothing matches “{term}”. Search covers booking references, guest names and room numbers.", { term: term.trim() })}
           </p>
         )}
 

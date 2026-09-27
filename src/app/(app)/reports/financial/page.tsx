@@ -95,7 +95,7 @@ export default async function FinancialReportPage({
             header: tr("Business date"),
             cell: (r) => (
               <span className="whitespace-nowrap text-ink">
-                {format(parseISO(r.businessDate), "EEE d MMM")}
+                {tr.date(r.businessDate, "EEE d MMM")}
               </span>
             ),
           },

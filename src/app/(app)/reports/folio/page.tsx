@@ -103,7 +103,7 @@ export default async function FolioReportPage({
             header: tr("Opened"),
             cell: (r) => (
               <span className="whitespace-nowrap text-ink-faint">
-                {format(parseISO(r.openedAt), "d MMM yyyy")}
+                {tr.date(r.openedAt, "d MMM yyyy")}
               </span>
             ),
           },

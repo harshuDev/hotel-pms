@@ -5,7 +5,6 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { EmptyState } from "@/components/ui";
 import { logBookingEmail } from "@/lib/actions/booking-files";
-import { formatStampInProperty } from "@/lib/dates";
 import type { BookingEmail } from "@/lib/types";
 import type { EmailTemplate } from "@/lib/email-preferences";
 
@@ -216,7 +215,7 @@ export function EmailTab({
                   {e.subject}
                 </span>
                 <span className="tnum shrink-0 text-xxs text-ink-faint">
-                  {formatStampInProperty(e.sentAt, timezone)}
+                  {tr.stamp(e.sentAt, timezone)}
                 </span>
               </div>
               <div className="mt-0.5 truncate text-xxs text-ink-muted">

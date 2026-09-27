@@ -69,7 +69,7 @@ export default async function CancellationReportPage({
             header: tr("Arrival"),
             cell: (r) => (
               <span className="whitespace-nowrap text-ink">
-                {format(parseISO(r.checkIn), "d MMM yyyy")}
+                {tr.date(r.checkIn, "d MMM yyyy")}
               </span>
             ),
           },
@@ -96,7 +96,7 @@ export default async function CancellationReportPage({
             header: tr("Booked"),
             cell: (r) => (
               <span className="whitespace-nowrap text-ink-muted">
-                {format(parseISO(r.bookedOn), "d MMM")}
+                {tr.date(r.bookedOn, "d MMM")}
               </span>
             ),
           },
@@ -105,7 +105,7 @@ export default async function CancellationReportPage({
             cell: (r) => (
               <span className="whitespace-nowrap text-ink-muted">
                 {r.cancelledOn
-                  ? format(parseISO(r.cancelledOn), "d MMM")
+                  ? tr.date(r.cancelledOn, "d MMM")
                   : tr("Not recorded")}
               </span>
             ),

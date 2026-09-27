@@ -115,8 +115,8 @@ export function DateJump({
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
         aria-haspopup="dialog"
-        title={`The board starts on ${format(first, "d MMM yyyy")}. Go to another date.`}
-        aria-label={`The board starts on ${format(first, "d MMM yyyy")}. Go to another date.`}
+        title={`The board starts on ${tr.date(first, "d MMM yyyy")}. Go to another date.`}
+        aria-label={`The board starts on ${tr.date(first, "d MMM yyyy")}. Go to another date.`}
         className="flex w-full items-center gap-1.5 rounded-sm bg-white/15 px-1.5 py-[3px] text-left text-xxs font-medium text-white transition hover:bg-white/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
       >
         <svg viewBox="0 0 16 16" aria-hidden className="h-3 w-3 shrink-0 fill-current">
@@ -130,7 +130,7 @@ export function DateJump({
           business date a week later. One word, and the field now says which
           of the two it is.
         */}
-        <span className="truncate">{tr("From")}{" "}{format(first, "d MMM yyyy")}</span>
+        <span className="truncate">{tr("From")}{" "}{tr.date(first, "d MMM yyyy")}</span>
       </button>
 
       {open && (
@@ -153,7 +153,7 @@ export function DateJump({
               ‹
             </button>
             <span className="font-display text-[13px] font-semibold tracking-tightest text-ink">
-              {format(month, "MMMM yyyy")}
+              {tr.date(month, "MMMM yyyy")}
             </span>
             <button
               type="button"

@@ -26,7 +26,7 @@ export function CloseDay({ businessDate }: { businessDate: string }) {
   const [done, setDone] = useState<CloseDayResult | null>(null);
   const [error, setError] = useState("");
 
-  const day = format(parseISO(businessDate), "EEE d MMM yyyy");
+  const day = tr.date(businessDate, "EEE d MMM yyyy");
 
   const run = () => {
     setError("");
@@ -86,7 +86,7 @@ export function CloseDay({ businessDate }: { businessDate: string }) {
                     <div className="flex justify-between pt-1">
                       <dt className="font-medium">{tr("Business date")}</dt>
                       <dd className="tnum font-semibold text-brass">
-                        {format(parseISO(done.nextDate), "EEE d MMM yyyy")}
+                        {tr.date(done.nextDate, "EEE d MMM yyyy")}
                       </dd>
                     </div>
                   </dl>

@@ -1,4 +1,4 @@
-import { format, parseISO } from "date-fns";
+import { format, formatDistanceToNowStrict, parseISO } from "date-fns";
 import { formatStampInProperty } from "@/lib/dates";
 import { DATE_LOCALES, type StaffLocale } from "@/lib/i18n/staff-locales";
 
@@ -16,9 +16,11 @@ import { DATE_LOCALES, type StaffLocale } from "@/lib/i18n/staff-locales";
  *     entry may be `{ one, two, few, other }` and `Intl.PluralRules` picks.
  *     Slovenian has a dual; Thai and Indonesian do not inflect at all.
  *   - `message()` is for text that arrives already written -- the database's
- *     refusals. Exact first; failing that, a key with numbered placeholders
- *     ("{0} is already added") is matched as a pattern and the captured
- *     values are put back into the translation.
+ *     refusals, the activity log's sentences, a report's "No name recorded".
+ *     Exact first; failing that, a key with numbered placeholders ("{0} is
+ *     already added") is matched as a pattern and the captured values are put
+ *     back into the translation. Anything unknown is returned as it came,
+ *     which is also what makes it safe to pass a guest's name through it.
  *
  * Never a module-level setting: the server renders for many staff at once,
  * each in their own language -- the same reason the currency is an argument.
@@ -40,6 +42,8 @@ export interface Translator {
   date(value: Date | string, pattern: string): string;
   /** A timestamptz on the property's clock, "20 Sep, 14:32". */
   stamp(iso: string, timezone: string): string;
+  /** How long ago, "5 minutes ago" -- the whole phrase, since word order varies. */
+  since(iso: string): string;
 }
 
 function interpolate(text: string, vars?: Vars): string {
@@ -102,9 +106,13 @@ export function makeTranslator(locale: StaffLocale, dict: Dictionary): Translato
     for (const p of patternsOf(dict)) {
       const m = p.re.exec(text);
       if (!m) continue;
+      // A captured value is itself looked up, exactly and once: the room
+      // status in "Room 101 status changed from vacant_clean to occupied"
+      // translates, while a reference or a guest's name matches no key and
+      // is put back as it was.
       const values: Record<number, string> = {};
       p.order.forEach((index, i) => {
-        values[index] = m[i + 1];
+        values[index] = asText(dict[m[i + 1]]) ?? m[i + 1];
       });
       const translated = asText(dict[p.key]) ?? p.key;
       return translated.replace(/\{(\d+)\}/g, (whole, i: string) => values[Number(i)] ?? whole);
@@ -116,6 +124,8 @@ export function makeTranslator(locale: StaffLocale, dict: Dictionary): Translato
     format(typeof value === "string" ? parseISO(value) : value, pattern, { locale: dateLocale });
 
   t.stamp = (iso, timezone) => formatStampInProperty(iso, timezone, locale);
+
+  t.since = (iso) => formatDistanceToNowStrict(new Date(iso), { addSuffix: true, locale: dateLocale });
 
   return t;
 }

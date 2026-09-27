@@ -77,7 +77,7 @@ export default async function DebtorsReportPage() {
                         <StatusBadge status={r.status} />
                       </td>
                       <td className="whitespace-nowrap px-3 py-3 text-ink-muted">
-                        {format(parseISO(r.checkOut), "d MMM yyyy")}
+                        {tr.date(r.checkOut, "d MMM yyyy")}
                       </td>
                       <td
                         className={cn(

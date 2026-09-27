@@ -1,3 +1,4 @@
+import { msg } from "@/lib/i18n/translate";
 import type { InventoryField } from "@/lib/types";
 
 /**
@@ -24,12 +25,12 @@ export interface InventorySettings {
  * grid's own name for the column; `href` is its screen.
  */
 export const INVENTORY_VISIBILITY = [
-  { field: "min_stay_through", label: "Show Min Stay Through", href: "/inventory/min-stay-through" },
-  { field: "min_stay_arrival", label: "Show Min Stay Arrival", href: "/inventory/min-stay-arrival" },
-  { field: "closed_to_arrival", label: "Show Closed To Arrival", href: "/inventory/cta" },
-  { field: "closed_to_departure", label: "Show Closed To Departure", href: "/inventory/ctd" },
-  { field: "max_stay", label: "Show Max Stay", href: "/inventory/max-stay" },
-  { field: "stop_sell", label: "Show Stop Sell", href: "/inventory/stop-sell" },
+  { field: "min_stay_through", label: msg("Show Min Stay Through"), href: "/inventory/min-stay-through" },
+  { field: "min_stay_arrival", label: msg("Show Min Stay Arrival"), href: "/inventory/min-stay-arrival" },
+  { field: "closed_to_arrival", label: msg("Show Closed To Arrival"), href: "/inventory/cta" },
+  { field: "closed_to_departure", label: msg("Show Closed To Departure"), href: "/inventory/ctd" },
+  { field: "max_stay", label: msg("Show Max Stay"), href: "/inventory/max-stay" },
+  { field: "stop_sell", label: msg("Show Stop Sell"), href: "/inventory/stop-sell" },
 ] as const satisfies readonly { field: InventoryField; label: string; href: string }[];
 
 export type VisibilityField = (typeof INVENTORY_VISIBILITY)[number]["field"];

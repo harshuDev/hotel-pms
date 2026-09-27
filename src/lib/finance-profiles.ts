@@ -1,3 +1,4 @@
+import { msg } from "@/lib/i18n/translate";
 /**
  * Settings -> Finances -> Pos Profiles (0084) and Currencies (0083).
  * Both STORED, NOT YET LIVE -- see the migrations and CLAUDE.md.
@@ -8,11 +9,11 @@
  * are what `known_pos_types()` in 0084 accepts; the two lists change together.
  */
 export const POS_TYPES = [
-  { id: "restaurant", label: "Restaurant" },
-  { id: "bar", label: "Bar" },
-  { id: "room_service", label: "Room Service" },
-  { id: "spa", label: "Spa" },
-  { id: "shop", label: "Shop" },
+  { id: "restaurant", label: msg("Restaurant") },
+  { id: "bar", label: msg("Bar") },
+  { id: "room_service", label: msg("Room Service") },
+  { id: "spa", label: msg("Spa") },
+  { id: "shop", label: msg("Shop") },
 ] as const;
 
 export type PosType = (typeof POS_TYPES)[number]["id"];
@@ -85,10 +86,10 @@ export interface AccountingSettings {
 
 /** The four pickers, in the reference's order and wording. */
 export const ACCOUNTING_DEFAULT_KINDS = [
-  { key: "accommodationId", label: "Default for accommodation" },
-  { key: "extrasId", label: "Default for extras" },
-  { key: "taxesId", label: "Default for taxes" },
-  { key: "paymentsId", label: "Default for payments" },
+  { key: "accommodationId", label: msg("Default for accommodation") },
+  { key: "extrasId", label: msg("Default for extras") },
+  { key: "taxesId", label: msg("Default for taxes") },
+  { key: "paymentsId", label: msg("Default for payments") },
 ] as const satisfies readonly { key: keyof AccountingDefaults; label: string }[];
 
 /**
@@ -97,8 +98,8 @@ export const ACCOUNTING_DEFAULT_KINDS = [
  * `known_payment_gateways()` accepts; the two lists change together.
  */
 export const PAYMENT_GATEWAYS = [
-  { id: "stripe_sca", label: "Stripe SCA" },
-  { id: "channex_pci", label: "ChannexPCI" },
+  { id: "stripe_sca", label: msg("Stripe SCA") },
+  { id: "channex_pci", label: msg("ChannexPCI") },
 ] as const;
 
 export function paymentGatewayLabel(id: string): string {
@@ -119,9 +120,9 @@ export interface PaymentGateway {
  * lists change together.
  */
 export const ACCOUNTING_SYSTEMS = [
-  { id: "quickbooks_online", label: "QuickBooks Online" },
-  { id: "xero", label: "Xero" },
-  { id: "sage", label: "Sage" },
+  { id: "quickbooks_online", label: msg("QuickBooks Online") },
+  { id: "xero", label: msg("Xero") },
+  { id: "sage", label: msg("Sage") },
 ] as const;
 
 export function accountingSystemLabel(id: string): string {

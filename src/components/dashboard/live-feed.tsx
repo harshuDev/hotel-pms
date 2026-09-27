@@ -3,7 +3,6 @@
 import { useT } from "@/components/i18n";
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { formatDistanceToNowStrict } from "date-fns";
 import { Card, FeedDot, cn } from "@/components/ui";
 import { markActivitySeen } from "@/lib/actions/activity";
 import type { ActivityItem } from "@/lib/types";
@@ -93,10 +92,12 @@ export function LiveFeed({ items }: { items: ActivityItem[] }) {
               )}
             >
               <p className="text-[12.5px] leading-snug text-ink-muted">
-                <Emphasised text={item.summary} terms={item.emphasis} />
+                {/* The log's own sentence, translated by pattern (0106); the
+                    references and names it emphasises pass through unchanged. */}
+                <Emphasised text={tr.message(item.summary)} terms={item.emphasis} />
               </p>
               <p className="mt-0.5 text-xxs text-ink-faint">
-                {formatDistanceToNowStrict(new Date(item.createdAt))} {tr("ago")}
+                {tr.since(item.createdAt)}
               </p>
             </div>
           </li>

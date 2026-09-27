@@ -77,15 +77,15 @@ function conditions(p: Promotion): string[] {
   }
   if (p.stayFrom || p.stayTo) {
     out.push(
-      `nights ${p.stayFrom ? format(parseISO(p.stayFrom), "d MMM") : "any"} to ${
-        p.stayTo ? format(parseISO(p.stayTo), "d MMM") : "any"
+      `nights ${p.stayFrom ? tr.date(p.stayFrom, "d MMM") : "any"} to ${
+        p.stayTo ? tr.date(p.stayTo, "d MMM") : "any"
       }`,
     );
   }
   if (p.sellFrom || p.sellTo) {
     out.push(
-      `sold ${p.sellFrom ? format(parseISO(p.sellFrom), "d MMM") : "any"} to ${
-        p.sellTo ? format(parseISO(p.sellTo), "d MMM") : "any"
+      `sold ${p.sellFrom ? tr.date(p.sellFrom, "d MMM") : "any"} to ${
+        p.sellTo ? tr.date(p.sellTo, "d MMM") : "any"
       }`,
     );
   }
@@ -192,8 +192,8 @@ function dateRange(p: Promotion) {
   const from = p.stayFrom ?? p.sellFrom;
   const to = p.stayTo ?? p.sellTo;
   if (!from && !to) return "Any dates";
-  return `${from ? format(parseISO(from), "dd MMM") : "Any"} - ${
-    to ? format(parseISO(to), "dd MMM") : "Any"
+  return `${from ? tr.date(from, "dd MMM") : "Any"} - ${
+    to ? tr.date(to, "dd MMM") : "Any"
   }`;
 }
 

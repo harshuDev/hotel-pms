@@ -88,7 +88,7 @@ export function Movements({
                   {b.customerName}
                 </p>
                 <p className="text-xxs text-ink-faint">
-                  {b.typeLine ?? `${b.roomTypeName} · ${b.nights}n · ${b.channelName}`}
+                  {b.typeLine ?? `${b.roomTypeName} · ${tr("{n}n", { n: b.nights })} · ${b.channelName}`}
                 </p>
               </div>
               <div className="text-right">
@@ -101,7 +101,7 @@ export function Movements({
                   {b.balanceCents > 0 ? formatMoney(b.balanceCents, currency) : tr("Settled")}
                 </p>
                 <p className="text-xxs text-ink-faint">
-                  {b.adults + b.children} {tr("pax")}
+                  {tr("{n} pax", { n: b.adults + b.children })}
                 </p>
               </div>
               {/* A guest can only move one way, and only from the right state:

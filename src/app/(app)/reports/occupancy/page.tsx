@@ -99,7 +99,7 @@ export default async function OccupancyReportPage({
                 {rows.map((r) => (
                   <tr key={r.date} className="hover:bg-shell">
                     <td className="whitespace-nowrap px-3 py-2.5 text-ink">
-                      {format(parseISO(r.date), "EEE d MMM")}
+                      {tr.date(r.date, "EEE d MMM")}
                     </td>
                     <td className="tnum px-3 py-2.5 text-right text-ink-muted">
                       {r.roomsSold}

@@ -162,7 +162,7 @@ export async function InventoryAll({ cells }: { cells: InventoryCell[] }) {
                       weekend ? "text-ink-muted" : "text-ink-faint",
                     )}
                   >
-                    <span className="block">{format(day, "EEEEE")}</span>
+                    <span className="block">{tr.date(day, "EEEEE")}</span>
                     <span className="tnum block text-[11px] font-normal">
                       {format(day, "d")}
                     </span>

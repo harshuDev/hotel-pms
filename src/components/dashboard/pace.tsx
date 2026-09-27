@@ -49,11 +49,11 @@ function Tip({
   return (
     <div className="rounded-md border border-line bg-white px-3 py-2 shadow-lift">
       <p className="text-xxs uppercase tracking-wide text-ink-faint">
-        {format(parseISO(r.date), "EEE d MMM")}
-        {r.future && tr(" · forecast")}
+        {tr.date(r.date, "EEE d MMM")}
+        {r.future && ` · ${tr("forecast")}`}
       </p>
       <p className="tnum mt-1 text-[13px] font-semibold text-ink">
-        {r.occupancy.toFixed(1)}{tr("% occupied")}
+        {tr("{pct}% occupied", { pct: r.occupancy.toFixed(1) })}
       </p>
       <p className="tnum text-xs text-ink-muted">{formatMoney(r.revenue, currency)}</p>
     </div>
@@ -134,7 +134,7 @@ export function Pace({
               tickLine={false}
               axisLine={false}
               tick={{ fontSize: 10, fill: AXIS_TEXT }}
-              tickFormatter={(d: string) => format(parseISO(d), "d MMM")}
+              tickFormatter={(d: string) => tr.date(d, "d MMM")}
               interval={6}
             />
             <YAxis

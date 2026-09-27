@@ -323,8 +323,8 @@ export function WaitlistScreen({
                     </td>
                     <td className="px-3 py-2.5 text-ink-muted">{r.roomTypeName}</td>
                     <td className="tnum whitespace-nowrap px-3 py-2.5 text-ink-muted">
-                      {format(parseISO(r.checkIn), "d MMM")} –{" "}
-                      {format(parseISO(r.checkOut), "d MMM")}
+                      {tr.date(r.checkIn, "d MMM")} –{" "}
+                      {tr.date(r.checkOut, "d MMM")}
                       <span className="ml-1 text-ink-faint">({r.nights}n)</span>
                     </td>
                     <td className="tnum px-3 py-2.5 text-ink-faint">

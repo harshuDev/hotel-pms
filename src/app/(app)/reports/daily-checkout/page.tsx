@@ -113,7 +113,7 @@ export default async function DailyCheckoutPage({
             header: tr("Arrived"),
             cell: (r) => (
               <span className="whitespace-nowrap text-ink-muted">
-                {format(parseISO(r.checkIn), "d MMM")}
+                {tr.date(r.checkIn, "d MMM")}
               </span>
             ),
           },

@@ -376,7 +376,7 @@ export default async function CalendarPage({
       {openBooking && bookDate && (
         <BookingDialog
           title={tr("Take a booking")}
-          subtitle={`Arriving ${format(parseISO(bookDate), "EEEE d MMMM yyyy")}`}
+          subtitle={`Arriving ${tr.date(bookDate, "EEEE d MMMM yyyy")}`}
           closeHref={href(from, railW)}
         >
           {/*
@@ -424,7 +424,7 @@ export default async function CalendarPage({
       {noteDate && (
         <BookingDialog
           title={tr("Add note")}
-          subtitle={format(parseISO(noteDate), "EEEE d MMMM yyyy")}
+          subtitle={tr.date(noteDate, "EEEE d MMMM yyyy")}
           closeHref={href(from, railW)}
         >
           <NoteForm
@@ -527,7 +527,7 @@ export default async function CalendarPage({
       {bookDate && !mayBook && (
         <BookingDialog
           title={tr("Take a booking")}
-          subtitle={format(parseISO(bookDate), "EEEE d MMMM yyyy")}
+          subtitle={tr.date(bookDate, "EEEE d MMMM yyyy")}
           closeHref={href(from, railW)}
         >
           <div className="rounded-lg border border-line bg-white p-8 text-center shadow-card">

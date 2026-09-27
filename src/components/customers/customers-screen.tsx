@@ -788,7 +788,7 @@ export function CustomersScreen({
                     </td>
                     <td className="whitespace-nowrap px-3 py-3 text-ink-muted">
                       {c.lastBookingDate
-                        ? format(parseISO(c.lastBookingDate), "MMM d, yyyy")
+                        ? tr.date(c.lastBookingDate, "MMM d, yyyy")
                         : "—"}
                     </td>
                     <td

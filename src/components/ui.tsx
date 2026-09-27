@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import type { ActivityKind, BookingStatus } from "@/lib/types";
+import type { ActivityKind } from "@/lib/types";
 
 export function cn(...parts: (string | false | null | undefined)[]) {
   return parts.filter(Boolean).join(" ");
@@ -49,30 +49,9 @@ export function Card({
   );
 }
 
-const STATUS_STYLE: Record<BookingStatus, string> = {
-  // `warn`, not `brass` — pending sat on the accent token and read as pale
-  // blue next to `confirmed`. `warn-deep` for text: `warn` DEFAULT on the
-  // wash is only ~3:1, too low for the 10.5px badge.
-  pending: "bg-warn-wash text-warn-deep ring-warn-light",
-  confirmed: "bg-sky-50 text-sky-700 ring-sky-200",
-  checked_in: "bg-emerald-50 text-emerald-700 ring-emerald-200",
-  checked_out: "bg-slate-100 text-slate-500 ring-slate-200",
-  canceled: "bg-rose-50 text-rose-700 ring-rose-200",
-  no_show: "bg-violet-50 text-violet-700 ring-violet-200",
-};
-
-export function StatusBadge({ status }: { status: BookingStatus }) {
-  return (
-    <span
-      className={cn(
-        "inline-flex rounded px-1.5 py-0.5 text-xxs font-medium capitalize ring-1 ring-inset",
-        STATUS_STYLE[status],
-      )}
-    >
-      {status.replace("_", " ")}
-    </span>
-  );
-}
+// A client component in its own file, so it can read the staff language
+// (0106) wherever it is drawn, server screens included.
+export { StatusBadge } from "@/components/status-badge";
 
 const FEED_DOT: Record<ActivityKind, string> = {
   BOOKING: "bg-emerald-500",

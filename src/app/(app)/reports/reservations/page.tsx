@@ -72,7 +72,7 @@ export default async function ReservationsReportPage({
           value={formatMoneyShort(value, currency)}
           detail={
             busiest && busiest.roomCount > 0
-              ? `Busiest ${format(parseISO(busiest.arrivalDate), "EEE d MMM")}`
+              ? `Busiest ${tr.date(busiest.arrivalDate, "EEE d MMM")}`
               : undefined
           }
           emphasis
@@ -96,7 +96,7 @@ export default async function ReservationsReportPage({
                   r.bookingCount > 0 ? "text-ink" : "text-ink-faint",
                 )}
               >
-                {format(parseISO(r.arrivalDate), "EEE d MMM")}
+                {tr.date(r.arrivalDate, "EEE d MMM")}
               </span>
             ),
           },

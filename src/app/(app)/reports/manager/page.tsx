@@ -106,7 +106,7 @@ export default async function ManagerReportPage({
             header: tr("Date"),
             cell: (r) => (
               <span className="whitespace-nowrap font-medium text-ink">
-                {format(parseISO(r.businessDate), "EEE d MMM")}
+                {tr.date(r.businessDate, "EEE d MMM")}
               </span>
             ),
           },

@@ -54,7 +54,7 @@ export default async function RegistrationCardPage({
 
   const country = (code: string | undefined) =>
     code ? COUNTRIES.find((c) => c.code === code)?.name ?? code : "";
-  const date = (d: string | undefined | null) => (d ? format(parseISO(d), "d MMM yyyy") : "");
+  const date = (d: string | undefined | null) => (d ? tr.date(d, "d MMM yyyy") : "");
   const address = [
     property.addressLine1,
     property.addressLine2,

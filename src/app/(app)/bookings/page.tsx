@@ -144,10 +144,10 @@ export default async function BookingsPage({
                       </span>
                     </td>
                     <td className="whitespace-nowrap px-3 py-3 text-ink-muted">
-                      {format(parseISO(b.arrivalDate), "MMM d, yyyy")}
+                      {tr.date(b.arrivalDate, "MMM d, yyyy")}
                     </td>
                     <td className="whitespace-nowrap px-3 py-3 text-ink-muted">
-                      {format(parseISO(b.bookedAt), "MMM d, yyyy")}
+                      {tr.date(b.bookedAt, "MMM d, yyyy")}
                     </td>
                     <td className="tnum px-3 py-3 text-center text-ink-muted">
                       {b.nights}

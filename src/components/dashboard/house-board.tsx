@@ -1,6 +1,7 @@
 "use client";
 
 import { useT } from "@/components/i18n";
+import { msg } from "@/lib/i18n/translate";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Card, cn } from "@/components/ui";
 import { loadRooms } from "@/lib/actions/rooms";
@@ -15,42 +16,42 @@ const STATES: {
 }[] = [
   {
     key: "occupied",
-    label: "Occupied",
+    label: msg("Occupied"),
     bar: "bg-chrome-700",
     swatch: "bg-chrome-700",
     pill: "bg-chrome-700 text-white border-chrome-700",
   },
   {
     key: "due_out",
-    label: "Due out",
+    label: msg("Due out"),
     bar: "bg-warn",
     swatch: "bg-warn",
     pill: "bg-warn text-white border-warn",
   },
   {
     key: "arriving",
-    label: "Arriving",
+    label: msg("Arriving"),
     bar: "bg-brass",
     swatch: "border-2 border-dashed border-brass bg-white",
     pill: "bg-white text-ink border-brass border-dashed",
   },
   {
     key: "vacant_clean",
-    label: "Ready",
+    label: msg("Ready"),
     bar: "bg-emerald-500",
     swatch: "bg-emerald-500",
     pill: "bg-white text-ink-muted border-line",
   },
   {
     key: "vacant_dirty",
-    label: "Needs service",
+    label: msg("Needs service"),
     bar: "bg-line-strong",
     swatch: "bg-shell border border-line-strong",
     pill: "bg-shell text-ink-muted border-line-strong",
   },
   {
     key: "ooo",
-    label: "Out of order",
+    label: msg("Out of order"),
     bar: "bg-ink-faint",
     swatch: "hatch bg-white border border-line",
     pill: "hatch bg-white text-ink-faint border-line line-through",
@@ -152,7 +153,7 @@ export function HouseBoard({
           onClick={() => setOpen((o) => !o)}
           className="rounded-md border border-line px-3 py-1.5 text-xs text-ink-muted transition-colors hover:bg-shell hover:text-ink"
         >
-          {open ? tr("Hide rooms") : `View rooms (${total})`}
+          {open ? tr("Hide rooms") : tr("View rooms ({n})", { n: total })}
         </button>
       }
     >
@@ -163,7 +164,7 @@ export function HouseBoard({
             <button
               key={s.key}
               onClick={() => pick(s.key)}
-              title={`${s.label} · ${s.n}`}
+              title={`${tr(s.label)} · ${s.n}`}
               style={{ width: `${(s.n / denominator) * 100}%` }}
               className={cn(
                 "h-full transition-opacity",
@@ -185,7 +186,7 @@ export function HouseBoard({
             )}
           >
             <span className={cn("h-2.5 w-2.5 rounded-sm", s.swatch)} />
-            <span className="text-ink-muted">{s.label}</span>
+            <span className="text-ink-muted">{tr(s.label)}</span>
             <span className="tnum font-semibold text-ink">{s.n}</span>
           </button>
         ))}
@@ -210,7 +211,7 @@ export function HouseBoard({
               </button>
             )}
             <p className="tnum text-xs text-ink-faint">
-              {matches} {tr("of")}{" "}{total}
+              {tr("{matches} of {total}", { matches, total })}
             </p>
           </div>
 
@@ -256,7 +257,7 @@ export function HouseBoard({
                 >
                   {loading
                     ? tr("Loading…")
-                    : `Show ${Math.min(PAGE, remaining)} more`}
+                    : tr("Show {n} more", { n: Math.min(PAGE, remaining) })}
                 </button>
               )}
             </>

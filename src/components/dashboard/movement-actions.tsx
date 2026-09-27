@@ -121,8 +121,8 @@ export function CheckInAction({ booking }: { booking: Booking }) {
               {booking.customerName}
             </p>
             <p className="text-xxs text-ink-faint">
-              {booking.reference} · {booking.nights}n · {booking.roomCount} {tr("room")}
-              {booking.roomCount === 1 ? "" : "s"}
+              {booking.reference} · {tr("{n}n", { n: booking.nights })} ·{" "}
+              {tr.plural(booking.roomCount, "{n} room", "{n} rooms")}
             </p>
           </div>
 
@@ -136,7 +136,7 @@ export function CheckInAction({ booking }: { booking: Booking }) {
               return (
                 <div key={slot.bookingRoomId}>
                   <label className="mb-1 block text-xs font-medium text-ink-muted">
-                    {tr("Room for")}{" "}{slot.roomTypeName}
+                    {tr("Room for {type}", { type: slot.roomTypeName })}
                   </label>
                   {rooms === undefined ? (
                     <p className="text-[13px] text-ink-faint">
@@ -144,7 +144,7 @@ export function CheckInAction({ booking }: { booking: Booking }) {
                     </p>
                   ) : rooms.length === 0 ? (
                     <p className="rounded-md border border-warn-light bg-warn-wash px-3 py-2 text-xs text-warn-deep">
-                      {tr("No clean")}{" "}{slot.roomTypeName} {tr("is free for these dates. Housekeeping needs to release one first.")}
+                      {tr("No clean {type} is free for these dates. Housekeeping needs to release one first.", { type: slot.roomTypeName })}
                     </p>
                   ) : (
                     <select
@@ -160,8 +160,8 @@ export function CheckInAction({ booking }: { booking: Booking }) {
                       <option value="">{tr("Choose a room")}</option>
                       {rooms.map((r) => (
                         <option key={r.roomId} value={r.roomId}>
-                          {tr("Room")}{" "}{r.number}
-                          {r.floor === null ? "" : ` · floor ${r.floor}`}
+                          {tr("Room {n}", { n: r.number })}
+                          {r.floor === null ? "" : ` · ${tr("floor {n}", { n: r.floor })}`}
                         </option>
                       ))}
                     </select>
@@ -229,7 +229,7 @@ export function CheckOutAction({ booking }: { booking: Booking }) {
             </p>
             <p className="text-xxs text-ink-faint">
               {booking.reference}
-              {booking.roomNumber ? ` · room ${booking.roomNumber}` : ""}
+              {booking.roomNumber ? ` · ${tr("room {n}", { n: booking.roomNumber })}` : ""}
             </p>
           </div>
 
@@ -240,7 +240,7 @@ export function CheckOutAction({ booking }: { booking: Booking }) {
                 "border-warn-light bg-warn-wash text-warn-deep",
               )}
             >
-              {tr("This folio still owes")}{" "}{formatMoney(booking.balanceCents, currency)}{tr(". Checking out does not settle it — take the payment first unless the balance is going to an account.")}
+              {tr("This folio still owes {amount}. Checking out does not settle it — take the payment first unless the balance is going to an account.", { amount: formatMoney(booking.balanceCents, currency) })}
             </div>
           ) : (
             <p className="text-[13px] text-ink-muted">{tr("The folio is settled.")}</p>

@@ -1,3 +1,4 @@
+import { msg } from "@/lib/i18n/translate";
 /**
  * Settings -> Guest Configuration (0073): identification types, additional
  * guest fields, and the guest registration form.
@@ -14,10 +15,10 @@ export interface IdentificationType {
  * constraint change in a migration.
  */
 export const GUEST_FIELD_KINDS = [
-  { id: "text", label: "Text" },
-  { id: "number", label: "Number" },
-  { id: "date", label: "Date" },
-  { id: "yes_no", label: "Yes / No" },
+  { id: "text", label: msg("Text") },
+  { id: "number", label: msg("Number") },
+  { id: "date", label: msg("Date") },
+  { id: "yes_no", label: msg("Yes / No") },
 ] as const;
 
 export type GuestFieldKind = (typeof GUEST_FIELD_KINDS)[number]["id"];

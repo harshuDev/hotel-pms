@@ -1,3 +1,4 @@
+import { msg } from "@/lib/i18n/translate";
 /**
  * Settings -> Finances -> Invoice Settings (0080), as the settings screen and
  * the printable invoice both read it. No row reads as everything off and no
@@ -38,15 +39,15 @@ export interface InvoiceSettings {
  * whole system" is a change to every money function, not a setting.
  */
 export const ROUND_LOGIC = [
-  { id: "none", label: "None" },
-  { id: "nearest", label: "Round to nearest" },
-  { id: "up", label: "Round up" },
-  { id: "down", label: "Round down" },
+  { id: "none", label: msg("None") },
+  { id: "nearest", label: msg("Round to nearest") },
+  { id: "up", label: msg("Round up") },
+  { id: "down", label: msg("Round down") },
 ] as const;
 export const ROUND_TO = [
-  { id: "two_decimals", label: "2 Points after dot" },
-  { id: "one_decimal", label: "1 Point after dot" },
-  { id: "whole", label: "Whole number" },
+  { id: "two_decimals", label: msg("2 Points after dot") },
+  { id: "one_decimal", label: msg("1 Point after dot") },
+  { id: "whole", label: msg("Whole number") },
 ] as const;
 export type RoundLogic = (typeof ROUND_LOGIC)[number]["id"];
 export type RoundTo = (typeof ROUND_TO)[number]["id"];

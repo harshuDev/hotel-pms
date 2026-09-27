@@ -394,7 +394,7 @@ export function NewBookingForm({
         </p>
         <p className="mx-auto mt-2 max-w-md text-[13px] leading-relaxed text-ink-muted">
           {nights} {tr("night")}{nights === 1 ? "" : "s"} {tr("from")}{" "}
-          {format(parseISO(checkIn), "d MMM")}, {lines.reduce((s, l) => s + l.quantity, 0)}{" "}
+          {tr.date(checkIn, "d MMM")}, {lines.reduce((s, l) => s + l.quantity, 0)}{" "}
           {tr("room")}{lines.reduce((s, l) => s + l.quantity, 0) === 1 ? "" : "s"}{tr(". No room has been assigned yet — that happens at check-in.")}
         </p>
         {taken.promotionName && (
@@ -513,7 +513,7 @@ export function NewBookingForm({
         </div>
         <p className="mt-3 text-xs text-white/60">
           {nights > 0
-            ? `${nights} night${nights === 1 ? "" : "s"}, ${format(parseISO(checkIn), "EEE d MMM")} to ${format(parseISO(checkOut), "EEE d MMM")}`
+            ? `${nights} night${nights === 1 ? "" : "s"}, ${tr.date(checkIn, "EEE d MMM")} to ${tr.date(checkOut, "EEE d MMM")}`
             : tr("Pick a departure date after the arrival date.")}
         </p>
       </section>

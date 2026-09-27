@@ -11,7 +11,6 @@ import {
   deleteBookingAttachment,
   recordBookingAttachment,
 } from "@/lib/actions/booking-files";
-import { formatStampInProperty } from "@/lib/dates";
 import type { BookingAttachment } from "@/lib/types";
 
 /**
@@ -178,7 +177,7 @@ export function AttachmentsTab({
                 </button>
                 <div className="tnum mt-0.5 text-xxs text-ink-faint">
                   {formatSize(a.sizeBytes)} ·{" "}
-                  {formatStampInProperty(a.createdAt, timezone)}
+                  {tr.stamp(a.createdAt, timezone)}
                   {a.uploadedByName ? ` · ${a.uploadedByName}` : ""}
                 </div>
               </div>

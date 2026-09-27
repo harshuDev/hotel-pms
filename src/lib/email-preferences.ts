@@ -1,3 +1,4 @@
+import { msg } from "@/lib/i18n/translate";
 /**
  * Settings -> Communications & Notifications -> Hotel Emails Preferences
  * (0074), in the client's reference's order and wording.
@@ -13,47 +14,47 @@ export const EMAIL_PREFERENCES = [
   {
     id: "channel_booking_confirmation",
     name: "Channel - Booking Confirmation",
-    description: "Send email when system receives booking via channel",
+    description: msg("Send email when system receives booking via channel"),
   },
   {
     id: "channel_booking_modification",
     name: "Channel - Booking Modification",
-    description: "Send email when system receives booking modification via channel",
+    description: msg("Send email when system receives booking modification via channel"),
   },
   {
     id: "pre_arrival",
     name: "Pre-Arrival Email",
     description:
-      "Send email each day; include pdf with guest registration forms and folios for arriving guests",
+      msg("Send email each day; include pdf with guest registration forms and folios for arriving guests"),
   },
   {
     id: "channel_booking_cancellation",
     name: "Channel - Booking Cancellation",
-    description: "Send email when system receives a booking cancellation via channel",
+    description: msg("Send email when system receives a booking cancellation via channel"),
   },
   {
     id: "channel_missing_booking_cancellation",
     name: "Channel - Missing Booking Cancellation",
     description:
-      "Send email when system receives a booking cancellation via channel, but corresponding booking doesn't exist in system",
+      msg("Send email when system receives a booking cancellation via channel, but corresponding booking doesn't exist in system"),
   },
   {
     id: "channel_missing_booking_modification",
     name: "Channel - Missing Booking Modification",
     description:
-      "Send email when system receives booking modification via channel, but corresponding booking doesn't exist in system",
+      msg("Send email when system receives booking modification via channel, but corresponding booking doesn't exist in system"),
   },
   {
     id: "channel_overbooking",
     name: "Channel - Overbooking Notification",
     description:
-      "Send email when system receives booking that cannot be allocated. Possible reasons: 1. Overbooking. 2. There is space in calendar, but it split over several rooms of that type, needs manual intervention.",
+      msg("Send email when system receives booking that cannot be allocated. Possible reasons: 1. Overbooking. 2. There is space in calendar, but it split over several rooms of that type, needs manual intervention."),
   },
   {
     id: "channel_rate_mapping_error",
     name: "Channel - Rate Mapping Error",
     description:
-      "Send email when system receives booking with room rate / room type combination that is not configured for sync or improperly configured",
+      msg("Send email when system receives booking with room rate / room type combination that is not configured for sync or improperly configured"),
   },
 ] as const;
 
@@ -69,13 +70,13 @@ export interface HotelEmailSettings {
 
 /** The seven confirmation-email colours, in the reference's order and wording. */
 export const CONFIRMATION_COLORS = [
-  { id: "header_info_text", label: "Confirmation Header Info Text Color", fallback: "#003580" },
-  { id: "title_text", label: "Title Text Color", fallback: "#2d90d1" },
-  { id: "reservation_details_background", label: "Reservation Details Background Color", fallback: "#71bb6e" },
-  { id: "reservation_details_text", label: "Reservation Details Text Color", fallback: "#ffffff" },
-  { id: "room_details_background", label: "Room Details Background Color", fallback: "#eafbe9" },
-  { id: "room_details_text", label: "Room Details Text Color", fallback: "#000000" },
-  { id: "room_price_nights_text", label: "Room Price And Nights Text Color", fallback: "#57a571" },
+  { id: "header_info_text", label: msg("Confirmation Header Info Text Color"), fallback: "#003580" },
+  { id: "title_text", label: msg("Title Text Color"), fallback: "#2d90d1" },
+  { id: "reservation_details_background", label: msg("Reservation Details Background Color"), fallback: "#71bb6e" },
+  { id: "reservation_details_text", label: msg("Reservation Details Text Color"), fallback: "#ffffff" },
+  { id: "room_details_background", label: msg("Room Details Background Color"), fallback: "#eafbe9" },
+  { id: "room_details_text", label: msg("Room Details Text Color"), fallback: "#000000" },
+  { id: "room_price_nights_text", label: msg("Room Price And Nights Text Color"), fallback: "#57a571" },
 ] as const;
 
 export type ConfirmationColorId = (typeof CONFIRMATION_COLORS)[number]["id"];
