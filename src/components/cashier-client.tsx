@@ -168,13 +168,13 @@ export function CashierClient({
         <Stat
           label={tr("Payments taken")}
           value={formatMoney(totals.allIn, currency)}
-          hint={`${formatMoney(totals.drawerIn, currency)} of it in cash`}
+          hint={tr("{amount} of it in cash", { amount: formatMoney(totals.drawerIn, currency) })}
           tone="positive"
         />
         <Stat
           label={tr("Paid out")}
           value={formatMoney(totals.out, currency)}
-          hint={`${shift.paidOuts.length} transactions`}
+          hint={tr("{length} transactions", { length: shift.paidOuts.length })}
           tone="negative"
         />
         <Stat
@@ -240,7 +240,7 @@ export function CashierClient({
                       <p className="text-xxs text-ink-faint">
                         {p.payee} ·{" "}
                         {p.rechargeBookingRef
-                          ? `recharged to ${p.rechargeBookingRef}`
+                          ? tr("recharged to {rechargeBookingRef}", { rechargeBookingRef: p.rechargeBookingRef })
                           : tr("house expense")}
                       </p>
                     </td>
@@ -404,7 +404,7 @@ function OpenShiftPanel({
         <p className="mt-1.5 text-xxs text-ink-faint">
           {suggestedFloatCents === null
             ? tr("Count the float into the drawer and enter the total.")
-            : `The last shift opened at ${formatMoney(suggestedFloatCents, currency)}.`}
+            : tr("The last shift opened at {amount}.", { amount: formatMoney(suggestedFloatCents, currency) })}
         </p>
       </div>
 

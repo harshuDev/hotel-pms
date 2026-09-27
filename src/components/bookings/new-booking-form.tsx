@@ -293,14 +293,14 @@ export function NewBookingForm({
       return;
     }
     for (const line of lines) {
-      const name = typeById.get(line.roomTypeId)?.name ?? "this room";
+      const name = typeById.get(line.roomTypeId)?.name ?? tr("this room");
       if (rateIsNonsense(line)) {
-        setError(`The rate for ${name} is not an amount. Try 120 or 120.50.`);
+        setError(tr("The rate for {name} is not an amount. Try 120 or 120.50.", { name: name }));
         return;
       }
       if (rateCents(line) === null && !ratePlanId) {
         setError(
-          `Enter a nightly rate for ${name}, or pick a rate plan that has one loaded.`,
+          tr("Enter a nightly rate for {name}, or pick a rate plan that has one loaded.", { name: name }),
         );
         return;
       }
@@ -313,8 +313,8 @@ export function NewBookingForm({
       if (named === "") {
         setError(
           newGuest.kind === "company"
-            ? "Enter the company name."
-            : "Enter the guest's name.",
+            ? tr("Enter the company name.")
+            : tr("Enter the guest's name."),
         );
         return;
       }
@@ -390,16 +390,21 @@ export function NewBookingForm({
     return (
       <div className="rounded-lg border border-line bg-white p-8 text-center shadow-card">
         <p className="font-display text-2xl font-semibold tracking-tightest text-ink">
-          {tr("Booking")}{" "}{taken.reference} {tr("taken")}
+          {tr("Booking {reference} taken", { reference: taken.reference })}
         </p>
         <p className="mx-auto mt-2 max-w-md text-[13px] leading-relaxed text-ink-muted">
-          {nights} {tr("night")}{nights === 1 ? "" : "s"} {tr("from")}{" "}
-          {tr.date(checkIn, "d MMM")}, {lines.reduce((s, l) => s + l.quantity, 0)}{" "}
-          {tr("room")}{lines.reduce((s, l) => s + l.quantity, 0) === 1 ? "" : "s"}{tr(". No room has been assigned yet — that happens at check-in.")}
+          {tr("{nights} from {date}, {rooms}. No room has been assigned yet — that happens at check-in.", {
+            nights: tr.plural(nights, "{n} night", "{n} nights"),
+            date: tr.date(checkIn, "d MMM"),
+            rooms: tr.plural(lines.reduce((s, l) => s + l.quantity, 0), "{n} room", "{n} rooms"),
+          })}
         </p>
         {taken.promotionName && (
           <p className="mx-auto mt-3 max-w-md rounded-md bg-emerald-50 px-3 py-2.5 text-[13px] leading-relaxed text-emerald-800">
-            <span className="font-medium">{taken.promotionName}</span> {tr("applied, taking")}{" "}{formatMoney(taken.discountCents, currency)} {tr("off the stay.")}
+            {tr("{offer} applied, taking {amount} off the stay.", {
+              offer: taken.promotionName,
+              amount: formatMoney(taken.discountCents, currency),
+            })}
           </p>
         )}
         <div className="mt-5 flex justify-center gap-2">
@@ -513,7 +518,11 @@ export function NewBookingForm({
         </div>
         <p className="mt-3 text-xs text-white/60">
           {nights > 0
-            ? `${nights} night${nights === 1 ? "" : "s"}, ${tr.date(checkIn, "EEE d MMM")} to ${tr.date(checkOut, "EEE d MMM")}`
+            ? tr("{nights}, {from} to {to}", {
+                nights: tr.plural(nights, "{n} night", "{n} nights"),
+                from: tr.date(checkIn, "EEE d MMM"),
+                to: tr.date(checkOut, "EEE d MMM"),
+              })
             : tr("Pick a departure date after the arrival date.")}
         </p>
       </section>
@@ -565,7 +574,7 @@ export function NewBookingForm({
                           : "bg-shell text-ink-muted",
                     )}
                   >
-                    {t.name}: {left} {tr("free of")}{" "}{t.totalRooms}
+                    {t.name}: {tr("{left} free of {total}", { left, total: t.totalRooms })}
                   </span>
                 );
               })}
@@ -670,7 +679,7 @@ export function NewBookingForm({
                       </div>
                       {over && (
                         <p className="text-xs text-rose-700 sm:col-span-6">
-                          {tr("Only")}{" "}{Math.max(left, 0)} {tr("free for these dates. Reduce the count, change the dates, or tick overbook below.")}
+                          {tr("Only {n} free for these dates. Reduce the count, change the dates, or tick overbook below.", { n: Math.max(left, 0) })}
                         </p>
                       )}
                     </div>

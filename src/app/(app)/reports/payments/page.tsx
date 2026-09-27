@@ -78,7 +78,7 @@ export default async function PaymentsReportPage({
           value={String(rows.length - reversals)}
           detail={
             reversals > 0
-              ? `${reversals} reversed`
+              ? tr("{reversals} reversed", { reversals: reversals })
               : tr("None reversed in this range")
           }
         />

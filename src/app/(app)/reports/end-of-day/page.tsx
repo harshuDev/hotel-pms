@@ -72,18 +72,18 @@ export default async function EndOfDayReportPage({
             <ReportFigure
               label={tr("Occupancy")}
               value={`${row.occupancyPct}%`}
-              detail={`${row.roomsSold} of ${row.sellableRooms} rooms`}
+              detail={tr("{roomsSold} of {sellableRooms} rooms", { roomsSold: row.roomsSold, sellableRooms: row.sellableRooms })}
               emphasis
             />
             <ReportFigure
               label={tr("Revenue")}
               value={formatMoneyShort(row.roomRevenueCents + row.otherRevenueCents, currency)}
-              detail={`${formatMoneyShort(row.roomRevenueCents, currency)} rooms`}
+              detail={tr("{amount} rooms", { amount: formatMoneyShort(row.roomRevenueCents, currency) })}
             />
             <ReportFigure
               label={tr("Collected")}
               value={formatMoneyShort(row.paymentsCents, currency)}
-              detail={`${formatMoneyShort(row.drawerCents, currency)} in cash`}
+              detail={tr("{amount} in cash", { amount: formatMoneyShort(row.drawerCents, currency) })}
             />
             <ReportFigure
               label={tr("Day")}

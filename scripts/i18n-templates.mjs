@@ -21,6 +21,9 @@ function nameFor(expr, used) {
     if (m) base = m[1];
   }
   base = base.replace(/^(get|format|to)(?=[A-Z])/, "").replace(/^./, (c) => c.toLowerCase());
+  // One word for "the thing's name", so "Delete {name}?" is one sentence to
+  // translate whether the value was a title, a display name or a name.
+  if (["title", "displayName", "connectionName", "label", "fullName", "customerName", "guestName"].includes(base)) base = "name";
   let name = base;
   let i = 2;
   while (used.has(name)) name = `${base}${i++}`;

@@ -278,7 +278,7 @@ export function ExtrasPanel({
                           <button
                             type="button"
                             title={tr("Edit")}
-                            aria-label={`Edit ${c.title}`}
+                            aria-label={tr("Edit {name}", { name: c.title })}
                             onClick={() =>
                               setCat({ id: c.id, title: c.title, taxRateId: c.taxRateId ?? "" })
                             }
@@ -289,7 +289,7 @@ export function ExtrasPanel({
                           <button
                             type="button"
                             title={tr("Merge")}
-                            aria-label={`Merge ${c.title}`}
+                            aria-label={tr("Merge {name}", { name: c.title })}
                             onClick={() => setMergingCat({ id: c.id, title: c.title })}
                             className={cn(iconButton, "text-brass")}
                           >
@@ -298,11 +298,11 @@ export function ExtrasPanel({
                           <button
                             type="button"
                             title={tr("Delete")}
-                            aria-label={`Delete ${c.title}`}
+                            aria-label={tr("Delete {name}", { name: c.title })}
                             disabled={pending}
                             onClick={() => {
-                              if (!confirm(`Delete the category ${c.title}?`)) return;
-                              run(() => deleteExtraCategory(c.id), `${c.title} deleted.`);
+                              if (!confirm(tr("Delete the category {name}?", { name: c.title }))) return;
+                              run(() => deleteExtraCategory(c.id), tr("{name} deleted.", { name: c.title }));
                             }}
                             className={cn(iconButton, "text-lg font-semibold leading-none text-brass")}
                           >
@@ -398,7 +398,7 @@ export function ExtrasPanel({
                           <button
                             type="button"
                             title={tr("Edit")}
-                            aria-label={`Edit ${e.title}`}
+                            aria-label={tr("Edit {name}", { name: e.title })}
                             onClick={() =>
                               setEx({
                                 id: e.id,
@@ -416,7 +416,7 @@ export function ExtrasPanel({
                           <button
                             type="button"
                             title={tr("Merge")}
-                            aria-label={`Merge ${e.title}`}
+                            aria-label={tr("Merge {name}", { name: e.title })}
                             onClick={() => setMerging({ id: e.id, title: e.title })}
                             className={cn(iconButton, "border border-line text-ink")}
                           >
@@ -425,11 +425,11 @@ export function ExtrasPanel({
                           <button
                             type="button"
                             title={tr("Delete")}
-                            aria-label={`Delete ${e.title}`}
+                            aria-label={tr("Delete {name}", { name: e.title })}
                             disabled={pending}
                             onClick={() => {
-                              if (!confirm(`Delete the extra ${e.title}?`)) return;
-                              run(() => deleteExtra(e.id), `${e.title} deleted.`);
+                              if (!confirm(tr("Delete the extra {name}?", { name: e.title }))) return;
+                              run(() => deleteExtra(e.id), tr("{name} deleted.", { name: e.title }));
                             }}
                             className={cn(iconButton, "border border-line text-ink")}
                           >
@@ -568,7 +568,7 @@ export function ExtrasPanel({
               >
                 <option value="">
                   {taxName(categoryById.get(ex.categoryId)?.taxRateId ?? null)
-                    ? `As category (${taxName(categoryById.get(ex.categoryId)?.taxRateId ?? null)})`
+                    ? tr("As category ({taxRateId})", { taxRateId: taxName(categoryById.get(ex.categoryId)?.taxRateId ?? null) })
                     : tr("No tax")}
                 </option>
                 {taxOptions(ex.taxRateId).map((t) => (

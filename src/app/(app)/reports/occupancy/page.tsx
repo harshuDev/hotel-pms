@@ -43,7 +43,7 @@ export default async function OccupancyReportPage({
         <ReportFigure
           label={tr("Occupancy")}
           value={`${summary.occupancyPct}%`}
-          detail={`${summary.roomsSold} of ${summary.roomNightsAvailable} room nights`}
+          detail={tr("{roomsSold} of {roomNightsAvailable} room nights", { roomsSold: summary.roomsSold, roomNightsAvailable: summary.roomNightsAvailable })}
         />
         <ReportFigure
           label={tr("Room revenue")}

@@ -155,22 +155,22 @@ export function BookingWidgetPanel({
                 <td className="py-0.5">
                   {canEdit && (
                     <span className="flex justify-end">
-                      <button type="button" aria-label={`Edit widget ${w.hash}`}
+                      <button type="button" aria-label={tr("Edit widget {hash}", { hash: w.hash })}
                         className="grid h-7 w-7 place-items-center rounded text-brass hover:bg-white"
                         onClick={() => { setCopied(false); setDraft({ ...w }); }}>
                         <EditIcon />
                       </button>
                       <button
                         type="button"
-                        aria-label={`Delete widget ${w.hash}`}
+                        aria-label={tr("Delete widget {hash}", { hash: w.hash })}
                         className="grid h-7 w-7 place-items-center rounded text-brass hover:bg-white"
                         onClick={() => {
-                          if (!confirm(`Delete widget ${w.hash}? Its embed code stops showing a widget.`)) return;
+                          if (!confirm(tr("Delete widget {hash}? Its embed code stops showing a widget.", { hash: w.hash }))) return;
                           run(async () => {
                             const result = await deleteBookingWidget(w.id);
                             if (result.ok && draft?.id === w.id) setDraft(null);
                             return result;
-                          }, `Widget ${w.hash} deleted.`);
+                          }, tr("Widget {hash} deleted.", { hash: w.hash }));
                         }}
                       >
                         <CrossIcon />
@@ -199,7 +199,7 @@ export function BookingWidgetPanel({
           }}
         >
           <h3 className="border-b border-line pb-2 text-[15px] text-ink">
-            {draft.hash ? `Booking Widget ${draft.hash}` : tr("New Booking Widget")}
+            {draft.hash ? tr("Booking Widget {hash}", { hash: draft.hash }) : tr("New Booking Widget")}
           </h3>
           <div className="mt-3 space-y-3">
             <TextField label={tr("Title Text")} value={draft.titleText} onChange={(titleText) => set({ titleText })} />

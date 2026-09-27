@@ -742,7 +742,7 @@ export function SettingsScreen({
                         <button
                           type="button"
                           onClick={() => setEditingTimes(true)}
-                          aria-label={`Edit ${property.name}`}
+                          aria-label={tr("Edit {name}", { name: property.name })}
                           title={tr("Edit")}
                           className="rounded p-1 text-ink hover:bg-shell"
                         >
@@ -883,7 +883,7 @@ export function SettingsScreen({
                     </div>
                     {choice === CUSTOM_POLICY && (
                       <textarea
-                        aria-label={`${section.title} policy`}
+                        aria-label={tr("{name} policy", { name: section.title })}
                         value={policies[custom] ?? ""}
                         disabled={!canEdit}
                         onChange={(e) =>
@@ -1278,7 +1278,7 @@ export function SettingsScreen({
                   canEdit={isAdmin}
                   pending={pending}
                   onSave={(next) =>
-                    run(() => saveStaffUser(next), `${next.fullName} saved.`)
+                    run(() => saveStaffUser(next), tr("{name} saved.", { name: next.fullName }))
                   }
                 />
               ))}

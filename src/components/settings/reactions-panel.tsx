@@ -90,7 +90,7 @@ function fromReaction(r: Reaction, copy = false): Draft {
   return {
     id: copy ? null : r.id,
     task: r.task,
-    title: copy ? `${r.title} (copy)` : r.title,
+    title: copy ? tr("{name} (copy)", { name: r.title }) : r.title,
     description: r.description ?? "",
     conditions,
     events: r.events.map((event) => ({ key: key(), event })),
@@ -458,22 +458,22 @@ export function ReactionsPanel({
                     <td className="px-2 py-1">
                       {canEdit && (
                         <span className="flex justify-end">
-                          <button type="button" aria-label={`Copy ${r.title}`} className={iconBtn}
+                          <button type="button" aria-label={tr("Copy {name}", { name: r.title })} className={iconBtn}
                             onClick={() => setDraft(fromReaction(r, true))}>
                             <CopyIcon />
                           </button>
-                          <button type="button" aria-label={`Edit ${r.title}`} className={iconBtn}
+                          <button type="button" aria-label={tr("Edit {name}", { name: r.title })} className={iconBtn}
                             onClick={() => setDraft(fromReaction(r))}>
                             <EditIcon />
                           </button>
-                          <button type="button" aria-label={`Delete ${r.title}`} className={iconBtn}
+                          <button type="button" aria-label={tr("Delete {name}", { name: r.title })} className={iconBtn}
                             onClick={() => {
-                              if (!confirm(`Delete ${r.title}?`)) return;
+                              if (!confirm(tr("Delete {name}?", { name: r.title }))) return;
                               run(async () => {
                                 const result = await deleteReaction(r.id);
                                 if (result.ok && draft?.id === r.id) setDraft(null);
                                 return result;
-                              }, `${r.title} deleted.`);
+                              }, tr("{name} deleted.", { name: r.title }));
                             }}>
                             <CrossIcon />
                           </button>

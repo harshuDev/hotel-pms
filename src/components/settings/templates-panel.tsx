@@ -80,7 +80,7 @@ function CodeEditor({
         />
         <button
           type="button"
-          aria-label={full ? `Leave full screen, ${label}` : `Full screen, ${label}`}
+          aria-label={full ? tr("Leave full screen, {name}", { name: label }) : tr("Full screen, {name}", { name: label })}
           onClick={() => setFull(!full)}
           className="absolute bottom-2 right-3 grid h-7 w-7 place-items-center rounded text-white hover:bg-white/10"
         >

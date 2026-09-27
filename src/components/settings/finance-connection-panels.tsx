@@ -157,7 +157,7 @@ export function PaymentGatewaysPanel({
                         <span className="flex justify-end">
                           <button
                             type="button"
-                            aria-label={`Edit ${g.title}`}
+                            aria-label={tr("Edit {name}", { name: g.title })}
                             className={iconButton}
                             onClick={() =>
                               setDraft({
@@ -172,15 +172,15 @@ export function PaymentGatewaysPanel({
                           </button>
                           <button
                             type="button"
-                            aria-label={`Delete ${g.title}`}
+                            aria-label={tr("Delete {name}", { name: g.title })}
                             className={iconButton}
                             onClick={() => {
-                              if (!confirm(`Delete ${g.title}?`)) return;
+                              if (!confirm(tr("Delete {name}?", { name: g.title }))) return;
                               run(async () => {
                                 const result = await deletePaymentGateway(g.id);
                                 if (result.ok && draft?.id === g.id) setDraft(null);
                                 return result;
-                              }, `${g.title} deleted.`);
+                              }, tr("{name} deleted.", { name: g.title }));
                             }}
                           >
                             <CrossIcon />
@@ -325,7 +325,7 @@ export function AccountingSystemsPanel({
                           <span className="flex justify-end">
                             <button
                               type="button"
-                              aria-label={`Edit ${label}`}
+                              aria-label={tr("Edit {name}", { name: label })}
                               className={iconButton}
                               onClick={() =>
                                 setDraft({ id: s.id, provider: s.provider, isEnabled: s.isEnabled })
@@ -335,15 +335,15 @@ export function AccountingSystemsPanel({
                             </button>
                             <button
                               type="button"
-                              aria-label={`Delete ${label}`}
+                              aria-label={tr("Delete {name}", { name: label })}
                               className={iconButton}
                               onClick={() => {
-                                if (!confirm(`Delete ${label}?`)) return;
+                                if (!confirm(tr("Delete {name}?", { name: label }))) return;
                                 run(async () => {
                                   const result = await deleteAccountingSystem(s.id);
                                   if (result.ok && draft?.id === s.id) setDraft(null);
                                   return result;
-                                }, `${label} deleted.`);
+                                }, tr("{name} deleted.", { name: label }));
                               }}
                             >
                               <CrossIcon />

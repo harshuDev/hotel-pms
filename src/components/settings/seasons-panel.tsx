@@ -166,18 +166,18 @@ export function SeasonsPanel({
               <span className="min-w-0 flex-1 truncate text-[12px] font-bold uppercase text-ink">{t.name}</span>
               {canEdit && (
                 <span className="flex shrink-0">
-                  <button type="button" aria-label={`Add dates to ${t.name}`} className={icon}
+                  <button type="button" aria-label={tr("Add dates to {name}", { name: t.name })} className={icon}
                     onClick={() => setRange({ typeId: t.id, name: t.name, from: "", to: "" })}>
                     <PlusIcon />
                   </button>
-                  <button type="button" aria-label={`Edit ${t.name}`} className={icon}
+                  <button type="button" aria-label={tr("Edit {name}", { name: t.name })} className={icon}
                     onClick={() => setEdit({ id: t.id, kind: t.kind, name: t.name, color: t.color })}>
                     <PencilIcon />
                   </button>
-                  <button type="button" aria-label={`Delete ${t.name}`} className={icon}
+                  <button type="button" aria-label={tr("Delete {name}", { name: t.name })} className={icon}
                     onClick={() => {
-                      if (!confirm(`Delete ${t.name} and all its dates?`)) return;
-                      run(() => deleteSeasonType(t.id), `${t.name} deleted.`);
+                      if (!confirm(tr("Delete {name} and all its dates?", { name: t.name }))) return;
+                      run(() => deleteSeasonType(t.id), tr("{name} deleted.", { name: t.name }));
                     }}>
                     <BinIcon />
                   </button>
@@ -190,10 +190,10 @@ export function SeasonsPanel({
                   {day(r.startsOn)} - {day(r.endsOn)}
                 </span>
                 {canEdit && (
-                  <button type="button" aria-label={`Delete ${t.name} ${day(r.startsOn)} to ${day(r.endsOn)}`}
+                  <button type="button" aria-label={tr("Delete {name} {date} to {date2}", { name: t.name, date: day(r.startsOn), date2: day(r.endsOn) })}
                     className={icon}
                     onClick={() => {
-                      if (!confirm(`Delete ${t.name}, ${day(r.startsOn)} - ${day(r.endsOn)}?`)) return;
+                      if (!confirm(tr("Delete {name}, {date} - {date2}?", { name: t.name, date: day(r.startsOn), date2: day(r.endsOn) }))) return;
                       run(() => deleteSeason(r.id), tr("Dates deleted."));
                     }}>
                     <BinIcon />
@@ -329,7 +329,7 @@ export function SeasonsPanel({
 
       {range && (
         <Dialog
-          title={`Add dates to ${range.name}`}
+          title={tr("Add dates to {name}", { name: range.name })}
           onClose={() => setRange(null)}
           footer={
             <>
@@ -340,7 +340,7 @@ export function SeasonsPanel({
                     const result = await addSeasonRange({ seasonTypeId: range.typeId, startsOn: range.from, endsOn: range.to });
                     if (result.ok) setRange(null);
                     return result;
-                  }, `${range.name} dates added.`)
+                  }, tr("{name} dates added.", { name: range.name }))
                 }>
                 {tr("Save")}
               </button>

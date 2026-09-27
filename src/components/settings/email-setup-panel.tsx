@@ -121,7 +121,7 @@ function EmailChips({
             {canEdit && (
               <button
                 type="button"
-                aria-label={`Remove ${e}`}
+                aria-label={tr("Remove {e}", { e: e })}
                 onClick={() => onChange(emails.filter((x) => x !== e))}
                 className="grid h-5 w-5 place-items-center rounded-full text-ink-muted hover:bg-white hover:text-ink"
               >
@@ -134,7 +134,7 @@ function EmailChips({
           <span className="flex min-w-[12rem] flex-1 items-center gap-2">
             <input
               type="email"
-              aria-label={`Add to ${label}`}
+              aria-label={tr("Add to {name}", { name: label })}
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
               onBlur={add}
@@ -148,7 +148,7 @@ function EmailChips({
             />
             <button
               type="button"
-              aria-label={`Add to ${label}`}
+              aria-label={tr("Add to {name}", { name: label })}
               onClick={add}
               className="grid h-8 w-8 place-items-center rounded text-[20px] leading-none text-ink-faint hover:bg-shell hover:text-ink"
             >
@@ -472,7 +472,7 @@ export function EmailSetupPanel({
                   </div>
                   <input
                     type="color"
-                    aria-label={`${c.label} picker`}
+                    aria-label={tr("{name} picker", { name: c.label })}
                     value={isHex(colors[c.id]) ? colors[c.id] : c.fallback}
                     disabled={disabled}
                     onChange={(e) => setColors({ ...colors, [c.id]: e.target.value })}
@@ -533,7 +533,7 @@ export function EmailSetupPanel({
           <div>
             <label htmlFor="post-subject" className={tiny}>{tr("Email subject")}</label>
             <input id="post-subject" value={postSubject} disabled={disabled}
-              placeholder={`Your Recent Stay at ${propertyName}`}
+              placeholder={tr("Your Recent Stay at {propertyName}", { propertyName: propertyName })}
               onChange={(e) => setPostSubject(e.target.value)} className={underline} />
             <Counter value={postSubject} />
           </div>
@@ -591,7 +591,7 @@ export function EmailSetupPanel({
                         <button
                           type="button"
                           title={tr("Edit")}
-                          aria-label={`Edit ${t.title}`}
+                          aria-label={tr("Edit {name}", { name: t.title })}
                           onClick={() => setTpl({ id: t.id, title: t.title, subject: t.subject ?? "", body: t.body ?? "" })}
                           className="grid h-7 w-7 place-items-center rounded text-brass hover:bg-shell"
                         >
@@ -604,11 +604,11 @@ export function EmailSetupPanel({
                         <button
                           type="button"
                           title={tr("Delete")}
-                          aria-label={`Delete ${t.title}`}
+                          aria-label={tr("Delete {name}", { name: t.title })}
                           disabled={pending}
                           onClick={() => {
-                            if (!confirm(`Delete the template ${t.title}?`)) return;
-                            run(() => deleteEmailTemplate(t.id), `${t.title} deleted.`);
+                            if (!confirm(tr("Delete the template {name}?", { name: t.title }))) return;
+                            run(() => deleteEmailTemplate(t.id), tr("{name} deleted.", { name: t.title }));
                           }}
                           className="grid h-7 w-7 place-items-center rounded text-[15px] font-bold leading-none text-brass hover:bg-shell"
                         >

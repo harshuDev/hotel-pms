@@ -59,7 +59,7 @@ export default async function ReservationsReportPage({
         <ReportFigure
           label={tr("Arrivals expected")}
           value={String(bookings)}
-          detail={pending > 0 ? `${pending} still pending` : tr("All confirmed")}
+          detail={pending > 0 ? tr("{pending} still pending", { pending: pending }) : tr("All confirmed")}
         />
         <ReportFigure
           label={tr("Rooms")}

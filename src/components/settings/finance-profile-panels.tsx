@@ -116,7 +116,7 @@ export function PosProfilesPanel({
                     <span className="flex justify-end">
                       <button
                         type="button"
-                        aria-label={`Edit ${posTypeLabel(p.posType)}`}
+                        aria-label={tr("Edit {posTypeLabel}", { posTypeLabel: posTypeLabel(p.posType) })}
                         className={iconButton}
                         onClick={() => setDraft({ id: p.id, posType: p.posType, isEnabled: p.isEnabled })}
                       >
@@ -124,11 +124,11 @@ export function PosProfilesPanel({
                       </button>
                       <button
                         type="button"
-                        aria-label={`Delete ${posTypeLabel(p.posType)}`}
+                        aria-label={tr("Delete {posTypeLabel}", { posTypeLabel: posTypeLabel(p.posType) })}
                         className={iconButton}
                         onClick={() => {
-                          if (!confirm(`Delete the ${posTypeLabel(p.posType)} profile?`)) return;
-                          run(() => deletePosProfile(p.id), `${posTypeLabel(p.posType)} profile deleted.`);
+                          if (!confirm(tr("Delete the {posTypeLabel} profile?", { posTypeLabel: posTypeLabel(p.posType) }))) return;
+                          run(() => deletePosProfile(p.id), tr("{posTypeLabel} profile deleted.", { posTypeLabel: posTypeLabel(p.posType) }));
                         }}
                       >
                         <TrashIcon />
@@ -254,7 +254,7 @@ export function CurrenciesPanel({
       });
       if (result.ok) setDraft(null);
       return result;
-    }, `${d.currency} saved.`);
+    }, tr("{currency} saved.", { currency: d.currency }));
   }
 
   return (
@@ -292,7 +292,7 @@ export function CurrenciesPanel({
                       <span className="flex justify-end">
                         <button
                           type="button"
-                          aria-label={`Edit ${p.currency}`}
+                          aria-label={tr("Edit {currency}", { currency: p.currency })}
                           className={iconButton}
                           onClick={() => {
                             setError(null);
@@ -308,11 +308,11 @@ export function CurrenciesPanel({
                         </button>
                         <button
                           type="button"
-                          aria-label={`Delete ${p.currency}`}
+                          aria-label={tr("Delete {currency}", { currency: p.currency })}
                           className={iconButton}
                           onClick={() => {
-                            if (!confirm(`Delete ${p.currency}?`)) return;
-                            run(() => deleteCurrencyProfile(p.id), `${p.currency} deleted.`);
+                            if (!confirm(tr("Delete {currency}?", { currency: p.currency }))) return;
+                            run(() => deleteCurrencyProfile(p.id), tr("{currency} deleted.", { currency: p.currency }));
                           }}
                         >
                           <TrashIcon />

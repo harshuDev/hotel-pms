@@ -189,7 +189,7 @@ export function PaymentTypesPanel({
                     {canEdit && (
                       <button
                         type="button"
-                        aria-label={`Edit ${m.name}`}
+                        aria-label={tr("Edit {name}", { name: m.name })}
                         className={cn(iconButton, "ml-auto")}
                         onClick={() =>
                           setDraft({
@@ -432,7 +432,7 @@ export function TaxesPanel({
                           */
                           <button
                             type="button"
-                            aria-label={`Move ${t.name}. Use the arrow keys.`}
+                            aria-label={tr("Move {name}. Use the arrow keys.", { name: t.name })}
                             className="cursor-grab rounded p-0.5 text-ink hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-brass"
                             onKeyDown={(e) => {
                               if (e.key === "ArrowUp") {
@@ -460,7 +460,7 @@ export function TaxesPanel({
                         <span className="flex justify-end">
                           <button
                             type="button"
-                            aria-label={`Edit ${t.name}`}
+                            aria-label={tr("Edit {name}", { name: t.name })}
                             className={iconButton}
                             onClick={() =>
                               setDraft({
@@ -480,11 +480,11 @@ export function TaxesPanel({
                           {!t.inUse && (
                             <button
                               type="button"
-                              aria-label={`Delete ${t.name}`}
+                              aria-label={tr("Delete {name}", { name: t.name })}
                               className={iconButton}
                               onClick={() => {
-                                if (!confirm(`Delete ${t.name}?`)) return;
-                                run(() => deleteTaxRate(t.id), `${t.name} deleted.`);
+                                if (!confirm(tr("Delete {name}?", { name: t.name }))) return;
+                                run(() => deleteTaxRate(t.id), tr("{name} deleted.", { name: t.name }));
                               }}
                             >
                               <TrashIcon />

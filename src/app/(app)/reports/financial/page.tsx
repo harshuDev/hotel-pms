@@ -79,7 +79,7 @@ export default async function FinancialReportPage({
         <ReportFigure
           label={tr("Received")}
           value={formatMoneyShort(payments, currency)}
-          detail={`${formatMoneyShort(drawer, currency)} through the drawer`}
+          detail={tr("{amount} through the drawer", { amount: formatMoneyShort(drawer, currency) })}
         />
       </ReportFigures>
 

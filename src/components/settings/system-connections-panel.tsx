@@ -84,7 +84,7 @@ export function SystemConnectionsPanel({
       });
       if (result.ok) setDraft(null);
       return result;
-    }, `${d.name.trim() || systemProvider(category, d.provider).label} saved.`);
+    }, tr("{name} saved.", { name: d.name.trim() || systemProvider(category, d.provider).label }));
   }
 
   return (
@@ -118,7 +118,7 @@ export function SystemConnectionsPanel({
                   <td className="py-0.5">
                     {canEdit && (
                       <span className="flex justify-end">
-                        <button type="button" aria-label={`Edit ${s.name}`}
+                        <button type="button" aria-label={tr("Edit {name}", { name: s.name })}
                           className="grid h-8 w-8 place-items-center rounded text-brass hover:bg-shell"
                           onClick={() =>
                             setDraft({
@@ -130,15 +130,15 @@ export function SystemConnectionsPanel({
                         </button>
                         <button
                           type="button"
-                          aria-label={`Delete ${s.name}`}
+                          aria-label={tr("Delete {name}", { name: s.name })}
                           className="grid h-8 w-8 place-items-center rounded text-brass hover:bg-shell"
                           onClick={() => {
-                            if (!confirm(`Delete ${s.name}? Its saved secret goes with it.`)) return;
+                            if (!confirm(tr("Delete {name}? Its saved secret goes with it.", { name: s.name }))) return;
                             run(async () => {
                               const result = await deleteSystemConnection(s.id);
                               if (result.ok && draft?.id === s.id) setDraft(null);
                               return result;
-                            }, `${s.name} deleted.`);
+                            }, tr("{name} deleted.", { name: s.name }));
                           }}
                         >
                           <svg viewBox="0 0 24 24" className="h-[18px] w-[18px]" fill="none" stroke="currentColor"

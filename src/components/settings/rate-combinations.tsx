@@ -156,7 +156,7 @@ export function RateCombinations({
         setNotes({ ...notes, [k]: `${n} night${n === 1 ? "" : "s"} priced` });
       }
       return result;
-    }, `${plan.name} on ${type.name} saved.`);
+    }, tr("{name} on {name2} saved.", { name: plan.name, name2: type.name }));
   }
 
   const shownTypes = roomTypes.filter((t) => typeIds.includes(t.id));
@@ -182,14 +182,14 @@ export function RateCombinations({
           .map((a) => (
             <span key={a.id} className="flex items-center gap-1 rounded border border-line bg-shell px-1.5 py-0.5 text-[11.5px] text-ink">
               {a.name}
-              <button type="button" aria-label={`Remove ${a.name}`} className="text-ink-faint hover:text-ink"
+              <button type="button" aria-label={tr("Remove {name}", { name: a.name })} className="text-ink-faint hover:text-ink"
                 onClick={() => set(chosen.filter((c) => c !== a.id))}>
                 ×
               </button>
             </span>
           ))}
         {rest.length > 0 && (
-          <select aria-label={`Add ${l}`} value="" onChange={(e) => e.target.value && set([...chosen, e.target.value])}
+          <select aria-label={tr("Add {l}", { l: l })} value="" onChange={(e) => e.target.value && set([...chosen, e.target.value])}
             className="min-w-[4rem] flex-1 border-0 bg-transparent text-[11.5px] text-ink-muted outline-none">
             <option value="">{tr("Add…")}</option>
             {rest.map((a) => (
@@ -272,24 +272,24 @@ export function RateCombinations({
                         </td>
                         {row.map((d, i) => (
                           <td key={i} className="px-1 py-2 text-center">
-                            <input aria-label={`${p.name}, ${t.name}, ${DAYS[i]} rate`} inputMode="decimal"
+                            <input aria-label={tr("{name}, {name2}, {value} rate", { name: p.name, name2: t.name, value: DAYS[i] })} inputMode="decimal"
                               value={d.rate} readOnly={!canEdit}
                               onChange={(e) => setDay(p.id, t.id, i, { rate: e.target.value })}
                               className="tnum w-[4.6rem] rounded border border-line bg-white px-1 py-0.5 text-center text-[12px] text-ink outline-none focus:border-brass" />
                             <span className="mt-1 flex justify-center gap-0.5">
-                              <input aria-label={`${DAYS[i]} min stay through`} inputMode="numeric" value={d.mst} readOnly={!canEdit}
+                              <input aria-label={tr("{value} min stay through", { value: DAYS[i] })} inputMode="numeric" value={d.mst} readOnly={!canEdit}
                                 onChange={(e) => setDay(p.id, t.id, i, { mst: e.target.value })} className={small} />
-                              <input aria-label={`${DAYS[i]} min stay arrival`} inputMode="numeric" value={d.msa} readOnly={!canEdit}
+                              <input aria-label={tr("{value} min stay arrival", { value: DAYS[i] })} inputMode="numeric" value={d.msa} readOnly={!canEdit}
                                 onChange={(e) => setDay(p.id, t.id, i, { msa: e.target.value })} className={small} />
-                              <input aria-label={`${DAYS[i]} max stay`} inputMode="numeric" value={d.mxs} readOnly={!canEdit}
+                              <input aria-label={tr("{value} max stay", { value: DAYS[i] })} inputMode="numeric" value={d.mxs} readOnly={!canEdit}
                                 onChange={(e) => setDay(p.id, t.id, i, { mxs: e.target.value })} className={small} />
                             </span>
                             <span className="mt-1 flex justify-center gap-2.5">
-                              <input type="checkbox" aria-label={`${DAYS[i]} closed to arrival`} checked={d.cta} readOnly={!canEdit}
+                              <input type="checkbox" aria-label={tr("{value} closed to arrival", { value: DAYS[i] })} checked={d.cta} readOnly={!canEdit}
                                 onChange={(e) => canEdit && setDay(p.id, t.id, i, { cta: e.target.checked })} className="h-3 w-3 accent-brass" />
-                              <input type="checkbox" aria-label={`${DAYS[i]} closed to departure`} checked={d.ctd} readOnly={!canEdit}
+                              <input type="checkbox" aria-label={tr("{value} closed to departure", { value: DAYS[i] })} checked={d.ctd} readOnly={!canEdit}
                                 onChange={(e) => canEdit && setDay(p.id, t.id, i, { ctd: e.target.checked })} className="h-3 w-3 accent-brass" />
-                              <input type="checkbox" aria-label={`${DAYS[i]} stop sell`} checked={d.ss} readOnly={!canEdit}
+                              <input type="checkbox" aria-label={tr("{value} stop sell", { value: DAYS[i] })} checked={d.ss} readOnly={!canEdit}
                                 onChange={(e) => canEdit && setDay(p.id, t.id, i, { ss: e.target.checked })} className="h-3 w-3 accent-brass" />
                             </span>
                           </td>

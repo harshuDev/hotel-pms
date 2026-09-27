@@ -188,7 +188,7 @@ export async function InventoryAll({ cells }: { cells: InventoryCell[] }) {
                     {t.roomTypeName}
                     <span className="ml-2 text-xxs font-normal text-ink-faint">
                       {t.physicalRooms} {tr("room")}{t.physicalRooms === 1 ? "" : "s"}
-                      {t.outOfOrder > 0 ? `, ${t.outOfOrder} out of order` : ""}
+                      {t.outOfOrder > 0 ? tr(", {outOfOrder} out of order", { outOfOrder: t.outOfOrder }) : ""}
                     </span>
                   </td>
                 </tr>

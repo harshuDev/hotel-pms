@@ -104,7 +104,7 @@ export default async function HousekeepingReportPage({
         <ReportFigure
           label={tr("To clean")}
           value={String(toClean + dueOut)}
-          detail={`${toClean} vacant dirty, ${dueOut} due out`}
+          detail={tr("{clean} vacant dirty, {dueOut} due out", { clean: toClean, dueOut: dueOut })}
           emphasis
         />
         <ReportFigure
@@ -139,7 +139,7 @@ export default async function HousekeepingReportPage({
                   href={href({ floor: f.floor, state })}
                   className="font-medium text-ink underline-offset-2 hover:underline"
                 >
-                  {f.floor === null ? tr("Unnumbered") : `Floor ${f.floor}`}
+                  {f.floor === null ? tr("Unnumbered") : tr("Floor {floor}", { floor: f.floor })}
                 </Link>
               ),
             },

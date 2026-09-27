@@ -197,7 +197,7 @@ export function IdentificationTypesPanel({
                       <button
                         type="button"
                         title={tr("Edit")}
-                        aria-label={`Edit ${t.title}`}
+                        aria-label={tr("Edit {name}", { name: t.title })}
                         onClick={() => setDraft({ id: t.id, title: t.title })}
                         className={iconButton}
                       >
@@ -206,11 +206,11 @@ export function IdentificationTypesPanel({
                       <button
                         type="button"
                         title={tr("Delete")}
-                        aria-label={`Delete ${t.title}`}
+                        aria-label={tr("Delete {name}", { name: t.title })}
                         disabled={pending}
                         onClick={() => {
-                          if (!confirm(`Delete ${t.title}?`)) return;
-                          run(() => deleteIdentificationType(t.id), `${t.title} deleted.`);
+                          if (!confirm(tr("Delete {name}?", { name: t.title }))) return;
+                          run(() => deleteIdentificationType(t.id), tr("{name} deleted.", { name: t.title }));
                         }}
                         className={cn(iconButton, "text-[16px] font-bold leading-none")}
                       >
@@ -302,7 +302,7 @@ export function GuestDetailsPanel({
             <li key={r.key} className="flex items-center gap-3 px-5 py-3">
               <span className="tnum w-5 text-[13px] text-ink-faint">{i + 1}</span>
               <input
-                aria-label={`Field ${i + 1} name`}
+                aria-label={tr("Field {value} name", { value: i + 1 })}
                 placeholder={tr("Field name")}
                 value={r.label}
                 disabled={!canEdit}
@@ -310,7 +310,7 @@ export function GuestDetailsPanel({
                 className={cn(fieldInline, "min-w-0 flex-1")}
               />
               <select
-                aria-label={`Field ${i + 1} type`}
+                aria-label={tr("Field {value} type", { value: i + 1 })}
                 value={r.kind}
                 disabled={!canEdit}
                 onChange={(e) => update(r.key, { kind: e.target.value as GuestFieldKind })}

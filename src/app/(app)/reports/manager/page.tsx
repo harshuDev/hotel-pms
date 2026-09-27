@@ -78,7 +78,7 @@ export default async function ManagerReportPage({
         <ReportFigure
           label={tr("Occupancy")}
           value={`${occupancy}%`}
-          detail={`${roomsSold} of ${sellable * nights} room nights`}
+          detail={tr("{roomsSold} of {nights} room nights", { roomsSold: roomsSold, nights: sellable * nights })}
           emphasis
         />
         <ReportFigure label={tr("ADR")} value={formatMoneyShort(adr, currency)} detail={tr("Per room sold")} />
@@ -90,7 +90,7 @@ export default async function ManagerReportPage({
         <ReportFigure
           label={tr("Revenue")}
           value={formatMoneyShort(totalRevenue, currency)}
-          detail={`${formatMoneyShort(roomRevenue, currency)} rooms, ${formatMoneyShort(otherRevenue, currency)} other`}
+          detail={tr("{amount} rooms, {amount2} other", { amount: formatMoneyShort(roomRevenue, currency), amount2: formatMoneyShort(otherRevenue, currency) })}
         />
       </ReportFigures>
 

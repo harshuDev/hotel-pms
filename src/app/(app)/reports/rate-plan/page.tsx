@@ -74,7 +74,7 @@ export default async function RatePlanReportPage({
         <ReportFigure
           label={tr("Discount given")}
           value={formatMoneyShort(discount, currency)}
-          detail={gross > 0 ? `${Math.round((discount / gross) * 100)}% of rack` : "—"}
+          detail={gross > 0 ? tr("{value}% of rack", { value: Math.round((discount / gross) * 100) }) : "—"}
         />
       </ReportFigures>
 

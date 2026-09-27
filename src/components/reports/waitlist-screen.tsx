@@ -128,7 +128,7 @@ export function WaitlistScreen({
         setMessage({ ok: false, text: result.error });
         return;
       }
-      setMessage({ ok: true, text: `Marked ${STATUS_LABEL[status].toLowerCase()}.` });
+      setMessage({ ok: true, text: tr("Marked {lowerCase}.", { lowerCase: STATUS_LABEL[status].toLowerCase() }) });
       router.refresh();
     });
   }

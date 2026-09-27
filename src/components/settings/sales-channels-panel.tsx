@@ -241,7 +241,7 @@ export function SalesChannelsPanel({
                       {canEdit && (
                         <input
                           type="checkbox"
-                          aria-label={`Select ${c.name}`}
+                          aria-label={tr("Select {name}", { name: c.name })}
                           className="h-4 w-4 accent-brass"
                           checked={selected.includes(c.id)}
                           onChange={(e) =>
@@ -260,7 +260,7 @@ export function SalesChannelsPanel({
                       {canEdit && (
                         <button
                           type="button"
-                          aria-label={`Edit ${c.name}`}
+                          aria-label={tr("Edit {name}", { name: c.name })}
                           className="grid h-8 w-8 place-items-center rounded text-brass hover:bg-shell"
                           onClick={() =>
                             setDraft({

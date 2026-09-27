@@ -123,7 +123,7 @@ export default async function DepositReportPage() {
                 }
               >
                 {r.daysToArrival < 0
-                  ? `${Math.abs(r.daysToArrival)}d ago`
+                  ? tr("{abs}d ago", { abs: Math.abs(r.daysToArrival) })
                   : `${r.daysToArrival}d`}
               </span>
             ),

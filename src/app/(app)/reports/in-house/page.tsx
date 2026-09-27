@@ -37,7 +37,7 @@ export default async function InHouseReportPage() {
         <ReportFigure
           label={tr("Rooms occupied")}
           value={String(rows.length)}
-          detail={unassigned > 0 ? `${unassigned} with no room assigned` : undefined}
+          detail={unassigned > 0 ? tr("{unassigned} with no room assigned", { unassigned: unassigned }) : undefined}
         />
         <ReportFigure label={tr("Guests")} value={String(guests)} detail={tr("Adults and children")} />
         <ReportFigure

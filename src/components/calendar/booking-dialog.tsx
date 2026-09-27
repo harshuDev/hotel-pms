@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { useT } from "@/components/i18n";
 
 /**
  * The panel that opens over the board when a date is clicked.
@@ -25,7 +26,7 @@ export function BookingDialog({
   title,
   subtitle,
   closeHref,
-  closeLabel = "Close without taking a booking",
+  closeLabel,
   side = false,
   meta,
   children,
@@ -59,8 +60,10 @@ export function BookingDialog({
   meta?: { label: string; value: string; tone?: "paid" | "due" }[];
   children: React.ReactNode;
 }) {
+  const tr = useT();
   const router = useRouter();
   const panelRef = useRef<HTMLDivElement>(null);
+  const close = closeLabel ?? tr("Close without taking a booking");
 
   // Escape closes, which is what every dialog on every system does, and a front
   // desk reaches for it without thinking.
@@ -143,7 +146,7 @@ export function BookingDialog({
             <button
               type="button"
               onClick={() => router.push(closeHref)}
-              aria-label={closeLabel}
+              aria-label={close}
               className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-white/15 text-white transition hover:bg-white/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
             >
               <svg viewBox="0 0 16 16" aria-hidden className="h-3.5 w-3.5 fill-current">
@@ -200,7 +203,7 @@ export function BookingDialog({
             <button
               type="button"
               onClick={() => router.push(closeHref)}
-              aria-label={closeLabel}
+              aria-label={close}
               className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-white/15 text-white transition hover:bg-white/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
             >
               <svg viewBox="0 0 16 16" aria-hidden className="h-3.5 w-3.5 fill-current">

@@ -228,7 +228,7 @@ export function RoomTypesPanel({
                         {canEdit && (
                           <button
                             type="button"
-                            aria-label={`Move ${t.name}. Use the arrow keys.`}
+                            aria-label={tr("Move {name}. Use the arrow keys.", { name: t.name })}
                             className="cursor-grab rounded p-0.5 text-ink hover:bg-shell focus-visible:outline focus-visible:outline-2 focus-visible:outline-brass"
                             onKeyDown={(e) => {
                               if (e.key === "ArrowUp") {
@@ -249,7 +249,7 @@ export function RoomTypesPanel({
                     </td>
                     <td className="px-2 py-1.5 text-ink">{t.name}</td>
                     <td className="tnum px-2 py-1.5 text-ink">
-                      <span className="inline-flex items-center gap-1" title={`Sleeps ${t.baseOccupancy}, at most ${t.maxOccupancy}`}>
+                      <span className="inline-flex items-center gap-1" title={tr("Sleeps {baseOccupancy}, at most {maxOccupancy}", { baseOccupancy: t.baseOccupancy, maxOccupancy: t.maxOccupancy })}>
                         <PersonIcon />
                         {t.baseOccupancy}
                         {t.maxOccupancy > t.baseOccupancy && <span className="text-ink-muted">+ {t.maxOccupancy - t.baseOccupancy}</span>}
@@ -258,7 +258,7 @@ export function RoomTypesPanel({
                     <td className="py-0.5">
                       {canEdit && (
                         <span className="flex justify-end">
-                          <button type="button" aria-label={`Edit ${t.name}`} className={iconButton} onClick={() => setDraft(draftOf(t))}>
+                          <button type="button" aria-label={tr("Edit {name}", { name: t.name })} className={iconButton} onClick={() => setDraft(draftOf(t))}>
                             <EditIcon />
                           </button>
                           {/* A type with rooms in it is not offered for deletion;
@@ -266,15 +266,15 @@ export function RoomTypesPanel({
                           {t.roomCount === 0 && (
                             <button
                               type="button"
-                              aria-label={`Delete ${t.name}`}
+                              aria-label={tr("Delete {name}", { name: t.name })}
                               className={iconButton}
                               onClick={() => {
-                                if (!confirm(`Delete ${t.name}? Its prices and restrictions go with it.`)) return;
+                                if (!confirm(tr("Delete {name}? Its prices and restrictions go with it.", { name: t.name }))) return;
                                 run(async () => {
                                   const result = await deleteRoomType(t.id);
                                   if (result.ok && draft?.id === t.id) setDraft(null);
                                   return result;
-                                }, `${t.name} deleted.`);
+                                }, tr("{name} deleted.", { name: t.name }));
                               }}
                             >
                               <CrossIcon />
@@ -439,7 +439,7 @@ export function RoomTypesPanel({
                       <span className="flex justify-end">
                         <button
                           type="button"
-                          aria-label={`Edit ${v.displayName}`}
+                          aria-label={tr("Edit {name}", { name: v.displayName })}
                           className={iconButton}
                           onClick={() => setVirtual({ id: v.id, displayName: v.displayName, parent: v.parentRoomTypeId })}
                         >
@@ -447,11 +447,11 @@ export function RoomTypesPanel({
                         </button>
                         <button
                           type="button"
-                          aria-label={`Delete ${v.displayName}`}
+                          aria-label={tr("Delete {name}", { name: v.displayName })}
                           className={iconButton}
                           onClick={() => {
-                            if (!confirm(`Delete ${v.displayName}?`)) return;
-                            run(() => deleteVirtualRoomType(v.id), `${v.displayName} deleted.`);
+                            if (!confirm(tr("Delete {name}?", { name: v.displayName }))) return;
+                            run(() => deleteVirtualRoomType(v.id), tr("{name} deleted.", { name: v.displayName }));
                           }}
                         >
                           <CrossIcon />
@@ -712,7 +712,7 @@ export function RoomSetupPanel({
                   <td className="py-1">
                     {canEdit && (
                       <span className="flex justify-end">
-                        <button type="button" aria-label={`Edit room ${r.number}`} className={iconButton} onClick={() => setDraft(roomDraftOf(r))}>
+                        <button type="button" aria-label={tr("Edit room {number}", { number: r.number })} className={iconButton} onClick={() => setDraft(roomDraftOf(r))}>
                           <EditIcon />
                         </button>
                         {/* Only a room nobody has been booked into can go;
@@ -720,11 +720,11 @@ export function RoomSetupPanel({
                         {!r.hasBookings && (
                           <button
                             type="button"
-                            aria-label={`Delete room ${r.number}`}
+                            aria-label={tr("Delete room {number}", { number: r.number })}
                             className={iconButton}
                             onClick={() => {
-                              if (!confirm(`Delete room ${r.number}? This cannot be undone.`)) return;
-                              run(() => deleteRoom(r.id), `Room ${r.number} deleted.`);
+                              if (!confirm(tr("Delete room {number}? This cannot be undone.", { number: r.number }))) return;
+                              run(() => deleteRoom(r.id), tr("Room {number} deleted.", { number: r.number }));
                             }}
                           >
                             <CrossIcon />
@@ -739,7 +739,7 @@ export function RoomSetupPanel({
                 <tr>
                   <td colSpan={11} className="px-2 py-5 text-[13px] text-ink-muted">
                     {roomQuery !== ""
-                      ? `No room matches “${roomQuery}”.`
+                      ? tr("No room matches “{roomQuery}”.", { roomQuery: roomQuery })
                       : roomTypes.length === 0
                         ? tr("Add a room type first. Every room belongs to one.")
                         : tr("None yet.")}
@@ -894,7 +894,7 @@ export function RoomSetupPanel({
 
       {draft && (
         <Dialog
-          title={draft.id ? `Room ${current?.number ?? draft.number}` : tr("Add Room")}
+          title={draft.id ? tr("Room {number}", { number: current?.number ?? draft.number }) : tr("Add Room")}
           onClose={() => setDraft(null)}
           footer={
             <>

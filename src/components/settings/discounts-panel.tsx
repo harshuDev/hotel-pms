@@ -265,7 +265,7 @@ export function DiscountsPanel({
                     <span className="flex justify-end gap-3">
                       <button
                         type="button"
-                        aria-label={`Edit ${d.title}`}
+                        aria-label={tr("Edit {name}", { name: d.title })}
                         onClick={() => open(d)}
                         className="grid h-7 w-7 place-items-center rounded-full border border-brass text-brass hover:bg-brass/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-brass"
                       >
@@ -273,11 +273,11 @@ export function DiscountsPanel({
                       </button>
                       <button
                         type="button"
-                        aria-label={`Delete ${d.title}`}
+                        aria-label={tr("Delete {name}", { name: d.title })}
                         disabled={pending}
                         onClick={() => {
-                          if (!confirm(`Delete ${d.title}?`)) return;
-                          run(() => deleteDiscount(d.id), `${d.title} deleted.`);
+                          if (!confirm(tr("Delete {name}?", { name: d.title }))) return;
+                          run(() => deleteDiscount(d.id), tr("{name} deleted.", { name: d.title }));
                         }}
                         className="grid h-7 w-7 place-items-center rounded-full border border-rose-500 text-rose-600 hover:bg-rose-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-rose-500"
                       >

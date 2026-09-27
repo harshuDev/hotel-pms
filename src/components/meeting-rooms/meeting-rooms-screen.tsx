@@ -173,7 +173,7 @@ export function MeetingRoomsScreen({
         return;
       }
       setNewBooking(null);
-      setMessage({ ok: true, text: `${result.data.reference} booked.` });
+      setMessage({ ok: true, text: tr("{reference} booked.", { reference: result.data.reference }) });
       router.refresh();
     });
   }
@@ -347,7 +347,7 @@ export function MeetingRoomsScreen({
 
       {/* Booking a slot ------------------------------------------------ */}
       {newBooking && (
-        <Sheet title={`Book ${newBooking.roomName}`} onClose={() => setNewBooking(null)}>
+        <Sheet title={tr("Book {roomName}", { roomName: newBooking.roomName })} onClose={() => setNewBooking(null)}>
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
               <label htmlFor="mr-from" className={label}>{tr("First day")}</label>
@@ -545,7 +545,7 @@ export function MeetingRoomsScreen({
                       )}
                     >
                       {booking.balanceCents > 0
-                        ? `${formatMoney(booking.balanceCents, currency)} owing`
+                        ? tr("{amount} owing", { amount: formatMoney(booking.balanceCents, currency) })
                         : tr("settled")}
                     </span>
                   </>
@@ -692,7 +692,7 @@ export function MeetingRoomsScreen({
                           : Number(newRoom.capacity),
                       description: "",
                     }),
-                  `${name} added.`,
+                  tr("{name} added.", { name: name }),
                 );
                 setNewRoom(null);
               }}

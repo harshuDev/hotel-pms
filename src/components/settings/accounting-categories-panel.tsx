@@ -78,12 +78,12 @@ export function AccountingCategoriesPanel({
   }
 
   function remove(c: AccountingCategory) {
-    if (!confirm(`Delete ${c.name}?`)) return;
+    if (!confirm(tr("Delete {name}?", { name: c.name }))) return;
     run(async () => {
       const result = await deleteAccountingCategory(c.id);
       if (result.ok && draft?.id === c.id) setDraft(null);
       return result;
-    }, `${c.name} deleted.`);
+    }, tr("{name} deleted.", { name: c.name }));
   }
 
   return (
@@ -114,7 +114,7 @@ export function AccountingCategoriesPanel({
                       <span className="flex justify-end">
                         <button
                           type="button"
-                          aria-label={`Edit ${c.name}`}
+                          aria-label={tr("Edit {name}", { name: c.name })}
                           className={iconButton}
                           onClick={() =>
                             setDraft({
@@ -129,7 +129,7 @@ export function AccountingCategoriesPanel({
                         </button>
                         <button
                           type="button"
-                          aria-label={`Delete ${c.name}`}
+                          aria-label={tr("Delete {name}", { name: c.name })}
                           className={iconButton}
                           onClick={() => remove(c)}
                         >

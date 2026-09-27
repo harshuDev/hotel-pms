@@ -242,21 +242,21 @@ export function BookingEnginePanel({
                     <td className="py-0.5">
                       {canEdit && (
                         <span className="flex justify-end">
-                          <button type="button" aria-label={`Edit ${p.title}`} className={iconButton}
+                          <button type="button" aria-label={tr("Edit {name}", { name: p.title })} className={iconButton}
                             onClick={() => setDraft({ id: p.id, title: p.title, slug: p.slug, slugTouched: true, roomTypeIds: p.roomTypeIds })}>
                             <EditIcon />
                           </button>
                           <button
                             type="button"
-                            aria-label={`Delete ${p.title}`}
+                            aria-label={tr("Delete {name}", { name: p.title })}
                             className={iconButton}
                             onClick={() => {
-                              if (!confirm(`Delete ${p.title}? Its link stops narrowing the rooms.`)) return;
+                              if (!confirm(tr("Delete {name}? Its link stops narrowing the rooms.", { name: p.title }))) return;
                               run(async () => {
                                 const result = await deleteBookingEngineProfile(p.id);
                                 if (result.ok && draft?.id === p.id) setDraft(null);
                                 return result;
-                              }, `${p.title} deleted.`);
+                              }, tr("{name} deleted.", { name: p.title }));
                             }}
                           >
                             <CrossIcon />

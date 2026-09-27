@@ -149,7 +149,7 @@ export function DeveloperKeysPanel({
     const next = { ...k, ...patch };
     run(
       () => updateDeveloperKey({ id: next.id, name: next.name, permissions: next.permissions, isActive: next.isActive }),
-      `${k.name} saved.`,
+      tr("{name} saved.", { name: k.name }),
     );
   }
 
@@ -159,7 +159,7 @@ export function DeveloperKeysPanel({
       <section className={cn(card, "px-4 py-5 sm:px-6")}>
         <p className="text-center text-[13px] text-ink">
           {tr("Endpoint:")}{" "}
-          <span className="break-all font-semibold">{origin ? `${origin}/api/public/v1/${propertyId}/` : ""}</span>
+          <span className="break-all font-semibold">{origin ? tr("{origin}/api/public/v1/{propertyId}/", { origin: origin, propertyId: propertyId }) : ""}</span>
         </p>
         <div className="mt-3 overflow-x-auto">
           <table className="w-full min-w-[40rem] text-[12.5px]">
@@ -210,7 +210,7 @@ export function DeveloperKeysPanel({
                     <td className="px-2 py-2 text-center">
                       <input
                         type="checkbox"
-                        aria-label={`${k.name} is active`}
+                        aria-label={tr("{name} is active", { name: k.name })}
                         className="h-4 w-4 accent-brass"
                         checked={k.isActive}
                         onChange={(e) => canEdit && update(k, { isActive: e.target.checked })}
@@ -220,11 +220,11 @@ export function DeveloperKeysPanel({
                       {canEdit && (
                         <button
                           type="button"
-                          aria-label={`Delete ${k.name}`}
+                          aria-label={tr("Delete {name}", { name: k.name })}
                           className="grid h-7 w-7 place-items-center rounded text-brass hover:bg-shell"
                           onClick={() => {
-                            if (!confirm(`Delete ${k.name}? Anything using it stops working at once.`)) return;
-                            run(() => deleteDeveloperKey(k.id), `${k.name} deleted.`);
+                            if (!confirm(tr("Delete {name}? Anything using it stops working at once.", { name: k.name }))) return;
+                            run(() => deleteDeveloperKey(k.id), tr("{name} deleted.", { name: k.name }));
                           }}
                         >
                           <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor"

@@ -85,7 +85,7 @@ export function EmailPreferencesPanel({
               {canEdit && (
                 <button
                   type="button"
-                  aria-label={`Remove ${e}`}
+                  aria-label={tr("Remove {e}", { e: e })}
                   onClick={() => setEmails(emails.filter((x) => x !== e))}
                   className="grid h-5 w-5 place-items-center rounded-full text-ink-muted hover:bg-white hover:text-ink"
                 >
@@ -144,7 +144,7 @@ export function EmailPreferencesPanel({
                   <td className="py-3 text-center">
                     <input
                       type="checkbox"
-                      aria-label={`${p.name} active`}
+                      aria-label={tr("{name} active", { name: p.name })}
                       checked={prefs[p.id]}
                       disabled={!canEdit}
                       onChange={(e) => setPrefs({ ...prefs, [p.id]: e.target.checked })}

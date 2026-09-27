@@ -288,7 +288,7 @@ export function RatePlansPanel({
                           <span className="flex items-center justify-end gap-3">
                             <button
                               type="button"
-                              aria-label={`Edit ${p.name}`}
+                              aria-label={tr("Edit {name}", { name: p.name })}
                               onClick={() => open(p)}
                               className="rounded p-1 text-ink hover:bg-shell focus-visible:outline focus-visible:outline-2 focus-visible:outline-brass"
                             >
@@ -298,15 +298,15 @@ export function RatePlansPanel({
                             {!p.isDefault && (
                               <button
                                 type="button"
-                                aria-label={`Delete ${p.name}`}
+                                aria-label={tr("Delete {name}", { name: p.name })}
                                 disabled={pending}
                                 onClick={() => {
-                                  if (!confirm(`Delete ${p.name}? Its prices go with it.`)) return;
+                                  if (!confirm(tr("Delete {name}? Its prices go with it.", { name: p.name }))) return;
                                   run(async () => {
                                     const result = await deleteRatePlan(p.id);
                                     if (result.ok && draft?.id === p.id) setDraft(null);
                                     return result;
-                                  }, `${p.name} deleted.`);
+                                  }, tr("{name} deleted.", { name: p.name }));
                                 }}
                                 className="grid h-7 w-7 place-items-center rounded-full border border-rose-500 text-rose-600 hover:bg-rose-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-rose-500"
                               >

@@ -52,7 +52,7 @@ export default async function BookingReportPage({
         <ReportFigure
           label={tr("Bookings taken")}
           value={String(rows.length)}
-          detail={lost > 0 ? `${lost} since cancelled` : tr("None cancelled")}
+          detail={lost > 0 ? tr("{lost} since cancelled", { lost: lost }) : tr("None cancelled")}
         />
         <ReportFigure label={tr("Room nights")} value={String(roomNights)} />
         <ReportFigure

@@ -95,7 +95,7 @@ export function CalendarSettingsPanel({
                     */}
                     <input
                       type="color"
-                      aria-label={`Pick the ${c.label.toLowerCase()}`}
+                      aria-label={tr("Pick the {lowerCase}", { lowerCase: c.label.toLowerCase() })}
                       value={valid ? value.trim().toLowerCase() : c.default}
                       disabled={!canEdit}
                       onChange={(e) => setValues({ ...values, [c.id]: e.target.value })}

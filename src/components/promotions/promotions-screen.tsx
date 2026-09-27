@@ -477,7 +477,7 @@ export function PromotionsScreen({
         return;
       }
       setForm(null);
-      setMessage({ ok: true, text: `${form.name} saved.` });
+      setMessage({ ok: true, text: tr("{name} saved.", { name: form.name }) });
       router.refresh();
     });
   }

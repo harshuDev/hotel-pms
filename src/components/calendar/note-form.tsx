@@ -5,7 +5,6 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { cn } from "@/components/ui";
-import { formatStampInProperty } from "@/lib/dates";
 import { deleteCalendarNote, saveCalendarNote } from "@/lib/actions/calendar-notes";
 import type { CalendarNote } from "@/lib/types";
 
@@ -46,7 +45,7 @@ export function NoteForm({
     startTransition(async () => {
       const result = await fn();
       if (!result.ok) {
-        setError(result.error ?? "That did not work.");
+        setError(result.error ?? tr("That did not work."));
         return;
       }
       after();
@@ -103,7 +102,7 @@ export function NoteForm({
                   <div className="mt-1.5 flex items-center justify-between gap-3">
                     <span className="text-xxs text-ink-faint">
                       {n.author ?? tr("Unknown")} ·{" "}
-                      {formatStampInProperty(n.createdAt, timezone)}
+                      {tr.stamp(n.createdAt, timezone)}
                     </span>
                     {canEdit && (
                       <span className="flex gap-3 text-xxs">

@@ -135,7 +135,7 @@ export function FacilitiesPanel({
                           <button
                             type="button"
                             title={tr("Edit")}
-                            aria-label={`Edit ${f.title}`}
+                            aria-label={tr("Edit {name}", { name: f.title })}
                             onClick={() => setDraft({ id: f.id, title: f.title, icon: f.icon })}
                             className={iconButton}
                           >
@@ -148,13 +148,13 @@ export function FacilitiesPanel({
                           <button
                             type="button"
                             title={tr("Delete")}
-                            aria-label={`Delete ${f.title}`}
+                            aria-label={tr("Delete {name}", { name: f.title })}
                             disabled={pending}
                             onClick={() => {
-                              if (!confirm(`Delete ${f.title}? It comes off every room type it is on.`)) {
+                              if (!confirm(tr("Delete {name}? It comes off every room type it is on.", { name: f.title }))) {
                                 return;
                               }
-                              run(() => deleteFacility(f.id), `${f.title} deleted.`);
+                              run(() => deleteFacility(f.id), tr("{name} deleted.", { name: f.title }));
                             }}
                             className={cn(iconButton, "text-[15px] font-bold leading-none")}
                           >

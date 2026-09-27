@@ -175,7 +175,7 @@ function ConfigFileField({
           if (!file) return;
           const csv = await file.text();
           if (csv.length > MAX_CONFIG_CHARS) {
-            onError(`${file.name} is larger than 256 KB.`);
+            onError(tr("{name} is larger than 256 KB.", { name: file.name }));
             return;
           }
           onChange({ name: file.name, csv });
@@ -252,7 +252,7 @@ export function ChannelManagerPanel({
       });
       if (result.ok) setDraft(null);
       return result;
-    }, `${d.connectionName.trim() || channelManagerLabel(d.provider)} saved.`);
+    }, tr("{channelManagerLabel} saved.", { channelManagerLabel: d.connectionName.trim() || channelManagerLabel(d.provider) }));
   }
 
   const vb = draft?.provider === "vertical_booking";
@@ -290,21 +290,21 @@ export function ChannelManagerPanel({
                     <td className="py-0.5">
                       {canEdit && (
                         <span className="flex justify-end">
-                          <button type="button" aria-label={`Edit ${c.connectionName}`} className={iconButton}
+                          <button type="button" aria-label={tr("Edit {name}", { name: c.connectionName })} className={iconButton}
                             onClick={() => { setFileError(null); setDraft(draftOf(c)); }}>
                             <EditIcon />
                           </button>
                           <button
                             type="button"
-                            aria-label={`Delete ${c.connectionName}`}
+                            aria-label={tr("Delete {name}", { name: c.connectionName })}
                             className={iconButton}
                             onClick={() => {
-                              if (!confirm(`Delete ${c.connectionName}? Its saved password goes with it.`)) return;
+                              if (!confirm(tr("Delete {name}? Its saved password goes with it.", { name: c.connectionName }))) return;
                               run(async () => {
                                 const result = await deleteChannelManager(c.id);
                                 if (result.ok && draft?.id === c.id) setDraft(null);
                                 return result;
-                              }, `${c.connectionName} deleted.`);
+                              }, tr("{name} deleted.", { name: c.connectionName }));
                             }}
                           >
                             <CrossIcon />
@@ -342,11 +342,11 @@ export function ChannelManagerPanel({
                   {tr("Is Active")}
                 </label>
               </div>
-              <Row label={vb ? `${who} Username` : `${who} Username:`} htmlFor="cm-user">
+              <Row label={vb ? tr("{who} Username", { who: who }) : tr("{who} Username:", { who: who })} htmlFor="cm-user">
                 <input id="cm-user" value={draft.username} maxLength={120} autoComplete="off"
                   onChange={(e) => set({ username: e.target.value })} className={field} />
               </Row>
-              <Row label={vb ? `${who} password` : `${who} password:`} htmlFor="cm-pass">
+              <Row label={vb ? tr("{who} password", { who: who }) : tr("{who} password:", { who: who })} htmlFor="cm-pass">
                 <input id="cm-pass" type="password" value={draft.password} maxLength={200}
                   autoComplete="new-password"
                   placeholder={draft.hasPassword ? tr("Saved") : ""}

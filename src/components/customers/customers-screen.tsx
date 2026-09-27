@@ -249,7 +249,7 @@ export function CustomersScreen({
       setMessage({
         ok: true,
         text: result.data.capped
-          ? `${result.data.rows} customers exported — the export stops at ${result.data.rows}, so this is not the whole list. Narrow the search and export again.`
+          ? tr("{rows} customers exported — the export stops at {rows2}, so this is not the whole list. Narrow the search and export again.", { rows: result.data.rows, rows2: result.data.rows })
           : `${result.data.rows} customer${result.data.rows === 1 ? "" : "s"} exported to ${result.data.filename}.`,
       });
     });
@@ -732,7 +732,7 @@ export function CustomersScreen({
                         checked={selected.has(c.id)}
                         onChange={() => toggle(c.id)}
                         className="h-3.5 w-3.5 accent-brass"
-                        aria-label={`Select ${c.name}`}
+                        aria-label={tr("Select {name}", { name: c.name })}
                       />
                     </td>
                     <td className="px-3 py-3">
@@ -772,7 +772,7 @@ export function CustomersScreen({
                         onChange={() => toggleExclude(c)}
                         disabled={!canEdit || pending}
                         className="h-3.5 w-3.5 accent-brass disabled:cursor-not-allowed"
-                        aria-label={`Exclude ${c.name} from email`}
+                        aria-label={tr("Exclude {name} from email", { name: c.name })}
                         title={
                           canEdit
                             ? tr("Keep this customer off mailings")

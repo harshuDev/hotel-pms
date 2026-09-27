@@ -1,6 +1,7 @@
 "use client";
 
 import { useT } from "@/components/i18n";
+import { msg } from "@/lib/i18n/translate";
 import { useEffect, useRef, useState, useTransition } from "react";
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
@@ -79,10 +80,10 @@ const CHOICES: {
   label: string;
   dot: string;
 }[] = [
-  { choice: "inspected", label: "Inspected", dot: "bg-emerald-500" },
-  { choice: "clean", label: "Clean", dot: "bg-emerald-400" },
-  { choice: "dirty", label: "Dirty", dot: "bg-rose-400" },
-  { choice: "broken", label: "Broken", dot: "bg-slate-500" },
+  { choice: "inspected", label: msg("Inspected"), dot: "bg-emerald-500" },
+  { choice: "clean", label: msg("Clean"), dot: "bg-emerald-400" },
+  { choice: "dirty", label: msg("Dirty"), dot: "bg-rose-400" },
+  { choice: "broken", label: msg("Broken"), dot: "bg-slate-500" },
 ];
 
 export function RoomStatusMenu({
@@ -162,7 +163,7 @@ export function RoomStatusMenu({
     startTransition(async () => {
       const result = await fn();
       if (!result.ok) {
-        setError(result.error ?? "That did not work.");
+        setError(result.error ?? tr("That did not work."));
         return;
       }
       setOpen(false);
@@ -191,8 +192,8 @@ export function RoomStatusMenu({
           if (!open) place();
           setOpen((o) => !o);
         }}
-        title={`${label} — change`}
-        aria-label={`Housekeeping for room ${roomNumber}: ${label}. Change it.`}
+        title={tr("{name} — change", { name: label })}
+        aria-label={tr("Housekeeping for room {roomNumber}: {name}. Change it.", { roomNumber: roomNumber, name: label })}
         aria-expanded={open}
         className={cn(
           "block h-2.5 w-2.5 rounded-full ring-offset-1 ring-offset-chrome-800 transition",
@@ -286,7 +287,7 @@ export function RoomStatusMenu({
                     <span
                       className={cn("h-2 w-2 shrink-0 rounded-full", c.dot)}
                     />
-                    <span className="min-w-0 flex-1 truncate">{c.label}</span>
+                    <span className="min-w-0 flex-1 truncate">{tr(c.label)}</span>
                     {c.choice === current && (
                       <span className="shrink-0 text-xxs text-ink-faint">
                         {tr("now")}

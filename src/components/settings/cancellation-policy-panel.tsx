@@ -236,7 +236,7 @@ export function CancellationPolicyPanel({
                       <span className="flex justify-end">
                         <button
                           type="button"
-                          aria-label={`Edit ${p.name}`}
+                          aria-label={tr("Edit {name}", { name: p.name })}
                           className={iconButton}
                           onClick={() => setDraft(draftOf(p, policies.length))}
                         >
@@ -247,15 +247,15 @@ export function CancellationPolicyPanel({
                         {!p.isDefault && (
                           <button
                             type="button"
-                            aria-label={`Delete ${p.name}`}
+                            aria-label={tr("Delete {name}", { name: p.name })}
                             className={iconButton}
                             onClick={() => {
-                              if (!confirm(`Delete ${p.name}?`)) return;
+                              if (!confirm(tr("Delete {name}?", { name: p.name }))) return;
                               run(async () => {
                                 const result = await deleteCancellationPolicy(p.id);
                                 if (result.ok && draft?.id === p.id) setDraft(null);
                                 return result;
-                              }, `${p.name} deleted.`);
+                              }, tr("{name} deleted.", { name: p.name }));
                             }}
                           >
                             <CrossIcon />

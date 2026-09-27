@@ -126,7 +126,7 @@ export function RoomPhoto({
           // and a rebuild every time a property is added.
           <img
             src={photoUrl}
-            alt={`Room ${roomNumber}`}
+            alt={tr("Room {roomNumber}", { roomNumber: roomNumber })}
             className="h-full w-full object-cover"
           />
         ) : (

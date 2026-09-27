@@ -218,8 +218,8 @@ export function InventoryScreen({
         ok: true,
         text:
           valueCents === null
-            ? `${label} on ${plan.name} is worth nothing again, so nothing is posted for it.`
-            : `${label} on ${plan.name} is worth ${formatMoney(valueCents, currency)}. Nights charged from the next night audit split it out as food.`,
+            ? tr("{name} on {name2} is worth nothing again, so nothing is posted for it.", { name: label, name2: plan.name })
+            : tr("{name} on {name2} is worth {amount}. Nights charged from the next night audit split it out as food.", { name: label, name2: plan.name, amount: formatMoney(valueCents, currency) }),
       });
       router.refresh();
     });
@@ -244,7 +244,7 @@ export function InventoryScreen({
         ok: true,
         text:
           next.length === 0
-            ? `${plan.name} includes no meals.`
+            ? tr("{name} includes no meals.", { name: plan.name })
             : `${plan.name} includes ${next
                 .map((m) => MEALS.find((x) => x.value === m)?.label.toLowerCase())
                 .join(", ")}.`,
@@ -264,8 +264,8 @@ export function InventoryScreen({
       setMessage({
         ok: true,
         text: isPublic
-          ? `${plan.name} is now on the guest booking page.`
-          : `${plan.name} is off the guest booking page.`,
+          ? tr("{name} is now on the guest booking page.", { name: plan.name })
+          : tr("{name} is off the guest booking page.", { name: plan.name }),
       });
       router.refresh();
     });
@@ -285,7 +285,7 @@ export function InventoryScreen({
         return;
       }
       setNewPlan(null);
-      setMessage({ ok: true, text: `Rate plan ${newPlan.name} created.` });
+      setMessage({ ok: true, text: tr("Rate plan {name} created.", { name: newPlan.name }) });
       router.refresh();
     });
   }
@@ -387,7 +387,7 @@ export function InventoryScreen({
                               }
                               placeholder={tr("Worth nothing")}
                               disabled={pending}
-                              aria-label={`What ${m.label.toLowerCase()} on this rate is worth`}
+                              aria-label={tr("What {lowerCase} on this rate is worth", { lowerCase: m.label.toLowerCase() })}
                               onBlur={(e) =>
                                 priceMeal(selectedPlan, m.value, e.target.value)
                               }
@@ -549,7 +549,7 @@ export function InventoryScreen({
                             key={d}
                             title={
                               cell
-                                ? `${cell.sold} sold of ${cell.sellable} sellable`
+                                ? tr("{sold} sold of {sellable} sellable", { sold: cell.sold, sellable: cell.sellable })
                                 : undefined
                             }
                             className={cn(
