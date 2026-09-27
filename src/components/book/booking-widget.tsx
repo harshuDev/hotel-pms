@@ -239,7 +239,7 @@ export function BookingWidget({
     const from = checkIn;
     const to = checkOut;
     startSearch(async () => {
-      const result = await searchPublicStay({ propertyId: property.propertyId, from, to });
+      const result = await searchPublicStay({ propertyId: property.propertyId, from, to, adults, children });
       if (!result.ok) {
         setError(result.error ?? t.somethingWentWrong);
         return;
@@ -250,6 +250,27 @@ export function BookingWidget({
       setStep(2);
     });
   }
+
+  /*
+   * The party is chosen on the details step, after the price was shown. A
+   * plan may price per person or limit the party (0109), so a change there
+   * asks again and the summary shows what will be charged. Only the newest
+   * reply is kept.
+   */
+  const quoteSeq = useRef(0);
+  useEffect(() => {
+    if (step !== 4 || !checkIn || !checkOut) return;
+    const seq = ++quoteSeq.current;
+    const from = checkIn;
+    const to = checkOut;
+    const timer = setTimeout(async () => {
+      const result = await searchPublicStay({ propertyId: property.propertyId, from, to, adults, children });
+      if (seq !== quoteSeq.current || !result.ok) return;
+      setRooms(roomTypeIds ? result.data.filter((r) => roomTypeIds.includes(r.roomTypeId)) : result.data);
+    }, 300);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [adults, children]);
 
   // Arriving from a Booking Widget: search the stay it sent, once.
   const searchedOnArrival = useRef(false);
@@ -763,6 +784,9 @@ export function BookingWidget({
                       </a>
                     )}
                   </p>
+                  {offer.unavailableReason && (
+                    <p role="alert" className="text-[13px] text-rose-700">{offer.unavailableReason}</p>
+                  )}
                   <button type="submit" disabled={sending}
                     className="w-full rounded-md bg-emerald-500 px-5 py-3 text-sm font-medium text-white transition hover:bg-emerald-600 disabled:opacity-50">
                     {sending ? t.sending : t.agreeAndBook}

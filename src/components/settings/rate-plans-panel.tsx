@@ -4,12 +4,25 @@ import { useT } from "@/components/i18n";
 import { useMemo, useState } from "react";
 import { cn } from "@/components/ui";
 import { useCurrency } from "@/components/currency";
-import type { CancellationPolicy, RatePlan } from "@/lib/types";
+import type {
+  CancellationPolicy,
+  ChannelSetting,
+  MealType,
+  RatePlan,
+  RatePlanCoverage,
+  RoomTypeSetting,
+  TaxRateSetting,
+} from "@/lib/types";
+import type { AccountingCategory } from "@/lib/finance-profiles";
+import { formatPercentBps, parsePercentBps } from "@/lib/finance-profiles";
+import { formatMoneyInput, parseMoney } from "@/lib/money";
 import {
   deleteRatePlan,
   saveRatePlan,
   setRatePlanCancellationPolicy,
+  setRatePlanTerms,
 } from "@/lib/actions/settings";
+import { setRatePlanMeals } from "@/lib/actions/inventory";
 
 /*
  * Settings -> Inventory -> Rate Plans, cloned from the client's reference's
@@ -22,9 +35,19 @@ import {
  *
  * "Show Special Offer Rates" is not copied: offers here reduce a stay
  * (promotions), they do not create rate plans, so there are none to show.
+ *
+ * THE FORM CARRIES THE REFERENCE'S RATE PLAN TERMS (0109): meals, booking
+ * conditions, a derived rate, occupancy pricing, the tax and ledger account,
+ * and the channels. Every one is enforced or applied in Postgres
+ * (`set_rate_plan_terms()`); none is a stored wish. "Affected room types" is
+ * read, not set: a plan is sold on a room type exactly when that pair has
+ * prices loaded, which is done in Room Rate Combinations below.
+ * "Sell with extras" is not copied -- nothing sells an extra with a rate.
  */
 
 type Run = (fn: () => Promise<{ ok: boolean; error?: string }>, done: string) => void;
+
+type Relation = "up_percent" | "down_percent" | "up_amount" | "down_amount";
 
 type Draft = {
   id: string | null;
@@ -36,7 +59,82 @@ type Draft = {
   cancellationPolicyId: string;
   /** What the policy was when the form opened, so only a change is sent. */
   wasPolicyId: string;
+  meals: MealType[];
+  wasMeals: MealType[];
+  minDaysAdvance: string;
+  maxDaysAdvance: string;
+  minAdults: string;
+  maxAdults: string;
+  minChildren: string;
+  maxChildren: string;
+  validFrom: string;
+  validTo: string;
+  derived: boolean;
+  parentRatePlanId: string;
+  relation: Relation;
+  adjustment: string;
+  singlePrice: boolean;
+  perAdult: string;
+  perChild: string;
+  taxRateId: string;
+  accountingCategoryId: string;
+  allChannels: boolean;
+  channelIds: string[];
 };
+
+const MEALS: MealType[] = ["breakfast", "lunch", "dinner"];
+
+/** A whole number from a field, null when blank, "bad" when not a number. */
+function count(s: string): number | null | "bad" {
+  if (s.trim() === "") return null;
+  return /^\s*\d{1,4}\s*$/.test(s) ? Number(s) : "bad";
+}
+
+function draftOf(p: RatePlan | null, defaultPolicyId: string): Draft {
+  const policy = p ? (p.cancellationPolicyId ?? "") : defaultPolicyId;
+  const n = (v: number | null) => (v === null ? "" : String(v));
+  const pct = p?.derivedPercentBps ?? null;
+  const amt = p?.derivedAmountCents ?? null;
+  return {
+    id: p?.id ?? null,
+    code: p?.code ?? "",
+    name: p?.name ?? "",
+    description: p?.description ?? "",
+    isDefault: p?.isDefault ?? false,
+    isActive: p?.isActive ?? true,
+    cancellationPolicyId: policy,
+    wasPolicyId: p ? policy : "",
+    meals: p?.meals ?? [],
+    wasMeals: p?.meals ?? [],
+    minDaysAdvance: n(p?.minDaysAdvance ?? null),
+    maxDaysAdvance: n(p?.maxDaysAdvance ?? null),
+    minAdults: n(p?.minAdults ?? null),
+    maxAdults: n(p?.maxAdults ?? null),
+    minChildren: n(p?.minChildren ?? null),
+    maxChildren: n(p?.maxChildren ?? null),
+    validFrom: p?.validFrom ?? "",
+    validTo: p?.validTo ?? "",
+    derived: !!p?.parentRatePlanId,
+    parentRatePlanId: p?.parentRatePlanId ?? "",
+    relation:
+      p?.derivedKind === "amount"
+        ? (amt ?? 0) < 0 ? "down_amount" : "up_amount"
+        : (pct ?? -1) < 0 ? "down_percent" : "up_percent",
+    adjustment:
+      p?.derivedKind === "amount" && amt !== null
+        ? formatMoneyInput(Math.abs(amt))
+        : p?.derivedKind === "percent" && pct !== null
+          ? formatPercentBps(Math.abs(pct))
+          : "",
+    singlePrice: (p?.occupancyPricing ?? "single") === "single",
+    perAdult: p?.adultAdjustCents != null ? formatMoneyInput(p.adultAdjustCents) : "",
+    perChild: p?.childAdjustCents != null ? formatMoneyInput(p.childAdjustCents) : "",
+    taxRateId: p?.taxRateId ?? "",
+    accountingCategoryId: p?.accountingCategoryId ?? "",
+    allChannels: (p?.channelIds.length ?? 0) === 0,
+    channelIds: p?.channelIds ?? [],
+  };
+}
 
 const th = "px-3 py-3 text-left text-[12px] font-semibold text-ink";
 const label = "block text-[12px] text-ink-muted";
@@ -44,6 +142,7 @@ const field =
   "mt-1 w-full rounded-md border border-line px-3 py-2 text-[14px] text-ink focus:border-brass focus:outline-none focus:ring-1 focus:ring-brass";
 const primary =
   "rounded-md bg-chrome-800 px-4 py-2 text-[12.5px] font-semibold text-white hover:bg-chrome-900 disabled:opacity-50";
+const section = "mt-5 border-b border-line pb-1 text-[13px] font-semibold text-ink";
 const secondary =
   "rounded-md border border-line bg-white px-4 py-2 text-[12.5px] font-semibold text-ink hover:bg-shell";
 
@@ -103,6 +202,11 @@ function TickCircle() {
 export function RatePlansPanel({
   ratePlans,
   cancellationPolicies,
+  roomTypes,
+  taxRates,
+  accountingCategories,
+  channels,
+  coverage,
   canEdit,
   pending,
   run,
@@ -110,6 +214,11 @@ export function RatePlansPanel({
   /** Every plan, retired ones included. */
   ratePlans: RatePlan[];
   cancellationPolicies: CancellationPolicy[];
+  roomTypes: RoomTypeSetting[];
+  taxRates: TaxRateSetting[];
+  accountingCategories: AccountingCategory[];
+  channels: ChannelSetting[];
+  coverage: RatePlanCoverage[];
   canEdit: boolean;
   pending: boolean;
   run: Run;
@@ -154,20 +263,88 @@ export function RatePlansPanel({
   }
 
   function open(p: RatePlan | null) {
-    const policy = p ? (p.cancellationPolicyId ?? "") : defaultPolicyId;
-    setDraft({
-      id: p?.id ?? null,
-      code: p?.code ?? "",
-      name: p?.name ?? "",
-      description: p?.description ?? "",
-      isDefault: p?.isDefault ?? false,
-      isActive: p?.isActive ?? true,
-      cancellationPolicyId: policy,
-      wasPolicyId: p ? policy : "",
-    });
+    setDraft(draftOf(p, defaultPolicyId));
   }
 
+  const planName = (id: string | null) => ratePlans.find((p) => p.id === id)?.name ?? "";
+
+  /** The form's text as the terms Postgres takes, or the first problem found. */
+  function termsOf(d: Draft): Omit<Parameters<typeof setRatePlanTerms>[0], "ratePlanId"> | string {
+    const nums = {
+      minDaysAdvance: count(d.minDaysAdvance),
+      maxDaysAdvance: count(d.maxDaysAdvance),
+      minAdults: count(d.minAdults),
+      maxAdults: count(d.maxAdults),
+      minChildren: count(d.minChildren),
+      maxChildren: count(d.maxChildren),
+    };
+    if (Object.values(nums).some((v) => v === "bad")) {
+      return tr("Days, adults and children are whole numbers.");
+    }
+    let derivedKind: "percent" | "amount" | null = null;
+    let derivedPercentBps: number | null = null;
+    let derivedAmountCents: number | null = null;
+    if (d.derived) {
+      if (!d.parentRatePlanId) return tr("Choose the parent rate.");
+      const down = d.relation.startsWith("down");
+      if (d.relation.endsWith("percent")) {
+        const bps = parsePercentBps(d.adjustment);
+        if (bps === null) return tr("Write the adjustment as a percentage, such as 10 or 12.5.");
+        derivedKind = "percent";
+        derivedPercentBps = down ? -bps : bps;
+      } else {
+        let cents: number;
+        try {
+          cents = parseMoney(d.adjustment);
+        } catch {
+          return tr("Write the adjustment as an amount, such as 10 or 12.50.");
+        }
+        if (cents <= 0) return tr("Write the adjustment as an amount, such as 10 or 12.50.");
+        derivedKind = "amount";
+        derivedAmountCents = down ? -cents : cents;
+      }
+    }
+    let adultAdjustCents: number | null = null;
+    let childAdjustCents: number | null = null;
+    if (!d.singlePrice) {
+      try {
+        adultAdjustCents = d.perAdult.trim() === "" ? 0 : parseMoney(d.perAdult);
+        childAdjustCents = d.perChild.trim() === "" ? 0 : parseMoney(d.perChild);
+      } catch {
+        return tr("Write the amounts per adult and per child as numbers, such as 15 or -10.");
+      }
+    }
+    return {
+      minDaysAdvance: nums.minDaysAdvance as number | null,
+      maxDaysAdvance: nums.maxDaysAdvance as number | null,
+      minAdults: nums.minAdults as number | null,
+      maxAdults: nums.maxAdults as number | null,
+      minChildren: nums.minChildren as number | null,
+      maxChildren: nums.maxChildren as number | null,
+      validFrom: d.validFrom || null,
+      validTo: d.validTo || null,
+      parentRatePlanId: d.derived ? d.parentRatePlanId : null,
+      derivedKind,
+      derivedPercentBps,
+      derivedAmountCents,
+      occupancyPricing: d.singlePrice ? "single" : "per_person",
+      adultAdjustCents,
+      childAdjustCents,
+      taxRateId: d.taxRateId || null,
+      accountingCategoryId: d.accountingCategoryId || null,
+      channelIds: d.allChannels ? [] : d.channelIds,
+    };
+  }
+
+  const [formError, setFormError] = useState<string | null>(null);
+
   function save(d: Draft) {
+    const terms = termsOf(d);
+    if (typeof terms === "string") {
+      setFormError(terms);
+      return;
+    }
+    setFormError(null);
     run(async () => {
       const saved = await saveRatePlan({
         id: d.id,
@@ -184,6 +361,12 @@ export function RatePlansPanel({
       if (d.cancellationPolicyId !== (d.id ? d.wasPolicyId : defaultPolicyId)) {
         const set = await setRatePlanCancellationPolicy(saved.data.id, d.cancellationPolicyId || null);
         if (!set.ok) return set;
+      }
+      const setTerms = await setRatePlanTerms({ ratePlanId: saved.data.id, ...terms });
+      if (!setTerms.ok) return setTerms;
+      if ([...d.meals].sort().join() !== [...d.wasMeals].sort().join()) {
+        const meals = await setRatePlanMeals({ ratePlanId: saved.data.id, meals: d.meals });
+        if (!meals.ok) return meals;
       }
       setDraft(null);
       return { ok: true };
@@ -279,6 +462,11 @@ export function RatePlansPanel({
                     <tr key={p.id} className={cn("border-b border-line", draft?.id === p.id && "bg-shell/70")}>
                       <td className={cn("px-3 py-3.5", p.isActive ? "text-ink" : "text-ink-faint")}>
                         {p.name}
+                        {p.parentRatePlanId && (
+                          <span className="block text-[11px] text-ink-faint">
+                            {tr("Derived from {name}", { name: planName(p.parentRatePlanId) })}
+                          </span>
+                        )}
                       </td>
                       <td className="px-3 py-3.5 text-ink">{currency}</td>
                       <td className="bg-shell/40 px-3 py-3.5 text-ink">{policyName(p.cancellationPolicyId)}</td>
@@ -360,7 +548,7 @@ export function RatePlansPanel({
                     <input value={draft.description} placeholder={tr("What a guest gets on this rate")} className={field}
                       onChange={(e) => setDraft({ ...draft, description: e.target.value })} />
                   </label>
-                  <label className={cn(label, "sm:col-span-2")}>
+                  <label className={label}>
                     {tr("Cancellation Policy")}
                     <select value={draft.cancellationPolicyId} className={field}
                       onChange={(e) => setDraft({ ...draft, cancellationPolicyId: e.target.value })}>
@@ -370,7 +558,192 @@ export function RatePlansPanel({
                       ))}
                     </select>
                   </label>
+                  <div className={label}>
+                    {tr("Currency")}
+                    <p className="mt-1 py-2 text-[14px] text-ink">{currency}</p>
+                  </div>
                 </div>
+
+                <fieldset className="mt-4">
+                  <legend className={label}>{tr("Meal Type")}</legend>
+                  <div className="mt-1 flex flex-wrap gap-x-6 gap-y-2 text-[13.5px] text-ink">
+                    {MEALS.map((m) => (
+                      <label key={m} className="flex items-center gap-2">
+                        <input type="checkbox" className="h-4 w-4 accent-brass" checked={draft.meals.includes(m)}
+                          onChange={(e) =>
+                            setDraft({
+                              ...draft,
+                              meals: e.target.checked ? [...draft.meals, m] : draft.meals.filter((x) => x !== m),
+                            })
+                          } />
+                        {m === "breakfast" ? tr("Breakfast") : m === "lunch" ? tr("Lunch") : tr("Dinner")}
+                      </label>
+                    ))}
+                  </div>
+                </fieldset>
+
+                <h5 className={section}>{tr("Booking conditions")}</h5>
+                <div className="mt-2 grid gap-4 sm:grid-cols-4">
+                  {([
+                    ["minDaysAdvance", tr("Minimum Days Advance")],
+                    ["maxDaysAdvance", tr("Maximum Days Advance")],
+                    ["minAdults", tr("Minimum Adults")],
+                    ["maxAdults", tr("Maximum Adults")],
+                    ["minChildren", tr("Minimum Children")],
+                    ["maxChildren", tr("Maximum Children")],
+                  ] as const).map(([k, l]) => (
+                    <label key={k} className={label}>
+                      {l}
+                      <input inputMode="numeric" value={draft[k]} className={cn(field, "tnum")}
+                        onChange={(e) => setDraft({ ...draft, [k]: e.target.value })} />
+                    </label>
+                  ))}
+                  <label className={label}>
+                    {tr("Active from")}
+                    <input type="date" value={draft.validFrom} className={field}
+                      onChange={(e) => setDraft({ ...draft, validFrom: e.target.value })} />
+                  </label>
+                  <label className={label}>
+                    {tr("Active to")}
+                    <input type="date" value={draft.validTo} className={field}
+                      onChange={(e) => setDraft({ ...draft, validTo: e.target.value })} />
+                  </label>
+                </div>
+
+                <h5 className={section}>{tr("Pricing")}</h5>
+                <label className="mt-2 flex items-center gap-2 text-[13.5px] text-ink">
+                  <input type="checkbox" className="h-4 w-4 accent-brass" checked={draft.derived}
+                    onChange={(e) => setDraft({ ...draft, derived: e.target.checked })} />
+                  {tr("Derived Rate")}
+                </label>
+                {draft.derived && (
+                  <div className="mt-2 grid gap-4 sm:grid-cols-4">
+                    <label className={cn(label, "sm:col-span-2")}>
+                      {tr("Parent Rate")}
+                      <select value={draft.parentRatePlanId} className={field}
+                        onChange={(e) => setDraft({ ...draft, parentRatePlanId: e.target.value })}>
+                        <option value="">{tr("Choose…")}</option>
+                        {ratePlans
+                          .filter((p) => p.id !== draft.id && !p.parentRatePlanId)
+                          .map((p) => (
+                            <option key={p.id} value={p.id}>{p.name}</option>
+                          ))}
+                      </select>
+                    </label>
+                    <label className={label}>
+                      {tr("Relation")}
+                      <select value={draft.relation} className={field}
+                        onChange={(e) => setDraft({ ...draft, relation: e.target.value as Relation })}>
+                        <option value="down_percent">{tr("Decrease by %")}</option>
+                        <option value="up_percent">{tr("Increase by %")}</option>
+                        <option value="down_amount">{tr("Decrease by amount")}</option>
+                        <option value="up_amount">{tr("Increase by amount")}</option>
+                      </select>
+                    </label>
+                    <label className={label}>
+                      {tr("Adjustment")}
+                      <input inputMode="decimal" value={draft.adjustment} className={cn(field, "tnum")}
+                        placeholder={draft.relation.endsWith("percent") ? "10" : "10.00"}
+                        onChange={(e) => setDraft({ ...draft, adjustment: e.target.value })} />
+                    </label>
+                  </div>
+                )}
+                <label className="mt-3 flex items-center gap-2 text-[13.5px] text-ink">
+                  <input type="checkbox" className="h-4 w-4 accent-brass" checked={draft.singlePrice}
+                    onChange={(e) => setDraft({ ...draft, singlePrice: e.target.checked })} />
+                  {tr("One Price For All Occupancies")}
+                </label>
+                {!draft.singlePrice && (
+                  <div className="mt-2 grid gap-4 sm:grid-cols-4">
+                    <label className={label}>
+                      {tr("Increase/Decrease per Adult")}
+                      <input inputMode="decimal" value={draft.perAdult} placeholder="0.00" className={cn(field, "tnum")}
+                        onChange={(e) => setDraft({ ...draft, perAdult: e.target.value })} />
+                    </label>
+                    <label className={label}>
+                      {tr("Increase/Decrease per Child")}
+                      <input inputMode="decimal" value={draft.perChild} placeholder="0.00" className={cn(field, "tnum")}
+                        onChange={(e) => setDraft({ ...draft, perChild: e.target.value })} />
+                    </label>
+                  </div>
+                )}
+
+                <h5 className={section}>{tr("Taxes and accounting")}</h5>
+                <div className="mt-2 grid gap-4 sm:grid-cols-4">
+                  <label className={cn(label, "sm:col-span-2")}>
+                    {tr("Attached Taxes")}
+                    <select value={draft.taxRateId} className={field}
+                      onChange={(e) => setDraft({ ...draft, taxRateId: e.target.value })}>
+                      <option value="">{tr("No tax")}</option>
+                      {taxRates
+                        .filter((t) => t.isActive || t.id === draft.taxRateId)
+                        .map((t) => (
+                          <option key={t.id} value={t.id}>{t.name}</option>
+                        ))}
+                    </select>
+                  </label>
+                  <label className={cn(label, "sm:col-span-2")}>
+                    {tr("Accounting Category")}
+                    <select value={draft.accountingCategoryId} className={field}
+                      onChange={(e) => setDraft({ ...draft, accountingCategoryId: e.target.value })}>
+                      <option value="">{tr("The room type's")}</option>
+                      {accountingCategories.map((c) => (
+                        <option key={c.id} value={c.id}>{c.name}</option>
+                      ))}
+                    </select>
+                  </label>
+                </div>
+
+                <h5 className={section}>{tr("Channels")}</h5>
+                <label className="mt-2 flex items-center gap-2 text-[13.5px] text-ink">
+                  <input type="checkbox" className="h-4 w-4 accent-brass" checked={draft.allChannels}
+                    onChange={(e) => setDraft({ ...draft, allChannels: e.target.checked })} />
+                  {tr("All channels")}
+                </label>
+                {!draft.allChannels && (
+                  <div className="mt-2 flex flex-wrap gap-x-6 gap-y-2 text-[13.5px] text-ink">
+                    {channels.map((c) => (
+                      <label key={c.id} className="flex items-center gap-2">
+                        <input type="checkbox" className="h-4 w-4 accent-brass" checked={draft.channelIds.includes(c.id)}
+                          onChange={(e) =>
+                            setDraft({
+                              ...draft,
+                              channelIds: e.target.checked
+                                ? [...draft.channelIds, c.id]
+                                : draft.channelIds.filter((x) => x !== c.id),
+                            })
+                          } />
+                        {c.name}
+                      </label>
+                    ))}
+                  </div>
+                )}
+
+                {draft.id && (
+                  <>
+                    <h5 className={section}>{tr("Affected Room Types")}</h5>
+                    <ul className="mt-2 grid gap-x-10 gap-y-1 text-[13px] sm:grid-cols-2">
+                      {roomTypes.map((t) => {
+                        const c = coverage.find((x) => x.ratePlanId === draft.id && x.roomTypeId === t.id);
+                        return (
+                          <li key={t.id} className="flex justify-between gap-3 border-b border-line py-1">
+                            <span className="text-ink">{t.displayName ?? t.name}</span>
+                            <span className={cn("tnum", c ? "text-ink-muted" : "text-ink-faint")}>
+                              {c
+                                ? tr("{n} nights priced, {from} to {to}", {
+                                    n: c.pricedNights,
+                                    from: tr.date(c.firstNight, "d MMM yyyy"),
+                                    to: tr.date(c.lastNight, "d MMM yyyy"),
+                                  })
+                                : tr("Not priced")}
+                            </span>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </>
+                )}
+
                 <div className="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-[13.5px] text-ink">
                   <label className="flex items-center gap-2">
                     <input type="checkbox" checked={draft.isDefault} className="h-4 w-4 accent-brass"
@@ -383,6 +756,7 @@ export function RatePlansPanel({
                     {tr("Still selling")}
                   </label>
                 </div>
+                {formError && <p role="alert" className="mt-3 text-[12.5px] text-rose-700">{formError}</p>}
                 <div className="mt-5 flex justify-end gap-3">
                   <button type="button" className={secondary} onClick={() => setDraft(null)}>
                     {tr("Cancel")}

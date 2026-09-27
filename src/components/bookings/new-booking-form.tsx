@@ -134,7 +134,15 @@ export function NewBookingForm({
    * booking is a real thing -- it is now something you choose rather than
    * something you get by not noticing.
    */
-  const [taxRateId, setTaxRateId] = useState(taxRates[0]?.id ?? "");
+  /*
+   * A plan sold with a tax of its own (0109) seeds that tax instead, here and
+   * whenever the plan is changed. Still a choice: the field stays editable.
+   */
+  const planTax = (planId: string) => {
+    const id = ratePlans.find((p) => p.id === planId)?.taxRateId ?? null;
+    return id && taxRates.some((t) => t.id === id) ? id : null;
+  };
+  const [taxRateId, setTaxRateId] = useState(planTax(ratePlanId) ?? taxRates[0]?.id ?? "");
   const [adults, setAdults] = useState(2);
   const [children, setChildren] = useState(0);
   const [guestNotes, setGuestNotes] = useState("");
@@ -862,7 +870,11 @@ export function NewBookingForm({
             <select
               id="rate-plan"
               value={ratePlanId}
-              onChange={(e) => setRatePlanId(e.target.value)}
+              onChange={(e) => {
+                setRatePlanId(e.target.value);
+                const tax = planTax(e.target.value);
+                if (tax) setTaxRateId(tax);
+              }}
               className={field}
             >
               <option value="">{tr("No plan — type the rate")}</option>

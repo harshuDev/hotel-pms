@@ -36,6 +36,7 @@ import {
   getCancellationPolicies,
   getSeasonSettings,
   getWeekRates,
+  getRatePlanCoverage,
   getChannelManagers,
   getBookingEngineSettings,
   getBookingWidgets,
@@ -98,6 +99,7 @@ export default async function SettingsPage({
     discounts,
     virtualRoomTypes,
     weekRates,
+    rateCoverage,
     channelManagers,
     bookingEngine,
     bookingWidgets,
@@ -140,6 +142,7 @@ export default async function SettingsPage({
     getDiscounts(),
     getVirtualRoomTypes(),
     tab === "rate-plans" || tab === "seasons" ? getWeekRates() : Promise.resolve([]),
+    tab === "rate-plans" || tab === "seasons" ? getRatePlanCoverage() : Promise.resolve([]),
     tab === "channel-manager" ? getChannelManagers() : Promise.resolve([]),
     tab === "booking-engine" ? getBookingEngineSettings() : Promise.resolve(null),
     tab === "booking-widget" ? getBookingWidgets() : Promise.resolve([]),
@@ -206,6 +209,7 @@ export default async function SettingsPage({
         discounts={discounts}
         virtualRoomTypes={virtualRoomTypes}
         weekRates={weekRates}
+        rateCoverage={rateCoverage}
         channelManagers={channelManagers}
         bookingEngine={bookingEngine}
         bookingWidgets={bookingWidgets}

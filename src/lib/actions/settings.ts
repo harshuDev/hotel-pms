@@ -2036,6 +2036,61 @@ export async function saveRatePlan(input: {
 }
 
 /**
+ * Everything on the rate plan form beyond its name, its tick boxes and its
+ * cancellation policy (0109): booking conditions, derivation, occupancy
+ * pricing, tax, account and channels, as one set in one transaction. Money
+ * arrives in pence and the percentage in basis points; nothing here parses.
+ */
+export async function setRatePlanTerms(input: {
+  ratePlanId: string;
+  minDaysAdvance: number | null;
+  maxDaysAdvance: number | null;
+  minAdults: number | null;
+  maxAdults: number | null;
+  minChildren: number | null;
+  maxChildren: number | null;
+  validFrom: string | null;
+  validTo: string | null;
+  parentRatePlanId: string | null;
+  derivedKind: "percent" | "amount" | null;
+  derivedPercentBps: number | null;
+  derivedAmountCents: number | null;
+  occupancyPricing: "single" | "per_person";
+  adultAdjustCents: number | null;
+  childAdjustCents: number | null;
+  taxRateId: string | null;
+  accountingCategoryId: string | null;
+  channelIds: string[];
+}): Promise<ActionResult<{ rederived: number }>> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("set_rate_plan_terms", {
+    p_rate_plan_id: input.ratePlanId,
+    p_min_days_advance: input.minDaysAdvance,
+    p_max_days_advance: input.maxDaysAdvance,
+    p_min_adults: input.minAdults,
+    p_max_adults: input.maxAdults,
+    p_min_children: input.minChildren,
+    p_max_children: input.maxChildren,
+    p_valid_from: input.validFrom,
+    p_valid_to: input.validTo,
+    p_parent_rate_plan_id: input.parentRatePlanId,
+    p_derived_kind: input.derivedKind,
+    p_derived_percent_bps: input.derivedPercentBps,
+    p_derived_amount_cents: input.derivedAmountCents,
+    p_occupancy_pricing: input.occupancyPricing,
+    p_adult_adjust_cents: input.adultAdjustCents,
+    p_child_adjust_cents: input.childAdjustCents,
+    p_tax_rate_id: input.taxRateId,
+    p_accounting_category_id: input.accountingCategoryId,
+    p_channel_ids: input.channelIds,
+  });
+  if (error) return { ok: false, error: await localised(error.message) };
+  revalidateSettings();
+  revalidatePath("/calendar");
+  return { ok: true, data: { rederived: Number(data ?? 0) } };
+}
+
+/**
  * A cancellation policy (0093): the reference's form as structured choices,
  * and the sentence they add up to, which is stored as the policy's wording.
  * Postgres derives the kind and the free days the booking screen enforces

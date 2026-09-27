@@ -120,6 +120,7 @@ import type {
   PromotionKind,
   PropertySettings,
   RatePlan,
+  RatePlanCoverage,
   CancellationPolicy,
   CancellationPolicyKind,
   BookingCancellationTerms,
@@ -1796,7 +1797,7 @@ async function loadRatePlans(includeRetired: boolean): Promise<RatePlan[]> {
   let query = supabase
     .from("rate_plans")
     .select(
-      "id, code, name, description, is_default, is_active, is_public, cancellation_policy_id, rate_plan_meals(meal, value_cents)",
+      "id, code, name, description, is_default, is_active, is_public, cancellation_policy_id, rate_plan_meals(meal, value_cents), min_days_advance, max_days_advance, min_adults, max_adults, min_children, max_children, valid_from, valid_to, parent_rate_plan_id, derived_kind, derived_percent_bps, derived_amount_cents, occupancy_pricing, adult_adjust_cents, child_adjust_cents, tax_rate_id, accounting_category_id, rate_plan_channels(channel_id)",
     );
   if (!includeRetired) query = query.eq("is_active", true);
   const { data, error } = await query
@@ -1819,6 +1820,24 @@ async function loadRatePlans(includeRetired: boolean): Promise<RatePlan[]> {
       is_public: boolean;
       cancellation_policy_id: string | null;
       rate_plan_meals: { meal: MealType; value_cents: number | null }[];
+      min_days_advance: number | null;
+      max_days_advance: number | null;
+      min_adults: number | null;
+      max_adults: number | null;
+      min_children: number | null;
+      max_children: number | null;
+      valid_from: string | null;
+      valid_to: string | null;
+      parent_rate_plan_id: string | null;
+      derived_kind: string | null;
+      derived_percent_bps: number | null;
+      derived_amount_cents: number | null;
+      occupancy_pricing: string;
+      adult_adjust_cents: number | null;
+      child_adjust_cents: number | null;
+      tax_rate_id: string | null;
+      accounting_category_id: string | null;
+      rate_plan_channels: { channel_id: string }[];
     }[]
   ).map((row) => ({
     id: row.id,
@@ -1837,6 +1856,42 @@ async function loadRatePlans(includeRetired: boolean): Promise<RatePlan[]> {
         .map((m) => [m.meal, m.value_cents as number]),
     ) as Partial<Record<MealType, number>>,
     cancellationPolicyId: row.cancellation_policy_id,
+    minDaysAdvance: row.min_days_advance,
+    maxDaysAdvance: row.max_days_advance,
+    minAdults: row.min_adults,
+    maxAdults: row.max_adults,
+    minChildren: row.min_children,
+    maxChildren: row.max_children,
+    validFrom: row.valid_from,
+    validTo: row.valid_to,
+    parentRatePlanId: row.parent_rate_plan_id,
+    derivedKind: row.derived_kind === "percent" || row.derived_kind === "amount" ? row.derived_kind : null,
+    derivedPercentBps: row.derived_percent_bps,
+    derivedAmountCents: row.derived_amount_cents === null ? null : Number(row.derived_amount_cents),
+    occupancyPricing: row.occupancy_pricing === "per_person" ? "per_person" : "single",
+    adultAdjustCents: row.adult_adjust_cents === null ? null : Number(row.adult_adjust_cents),
+    childAdjustCents: row.child_adjust_cents === null ? null : Number(row.child_adjust_cents),
+    taxRateId: row.tax_rate_id,
+    accountingCategoryId: row.accounting_category_id,
+    channelIds: (row.rate_plan_channels ?? []).map((c) => c.channel_id),
+  }));
+}
+
+/**
+ * Which room types each plan is sold on (0109): the pairs with a price loaded
+ * from the business date on. A blank price is how a hotel says "not sold on
+ * this room", so this is the plan-to-room-type link, read rather than stored.
+ */
+export async function getRatePlanCoverage(): Promise<RatePlanCoverage[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("rate_plan_coverage");
+  if (error) throw new Error(`Failed to load the rate plan coverage: ${error.message}`);
+  return (data ?? []).map((row) => ({
+    ratePlanId: row.rate_plan_id,
+    roomTypeId: row.room_type_id,
+    pricedNights: Number(row.priced_nights),
+    firstNight: row.first_night,
+    lastNight: row.last_night,
   }));
 }
 
@@ -3874,6 +3929,7 @@ export async function getAccountingRoomRevenue(
     // Nullable in Postgres (a charge with no night); the generator says otherwise.
     roomTypeId: (row.room_type_id as string | null) ?? null,
     roomTypeName: (row.room_type_name as string | null) ?? null,
+    ratePlanName: (row.rate_plan_name as string | null) ?? null,
     accountingCategoryId: (row.accounting_category_id as string | null) ?? null,
     netCents: Number(row.net_cents ?? 0),
     taxCents: Number(row.tax_cents ?? 0),

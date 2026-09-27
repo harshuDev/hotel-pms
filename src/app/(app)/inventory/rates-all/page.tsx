@@ -7,6 +7,7 @@ import {
   INVENTORY_NIGHTS,
   getBusinessDate,
   getCurrentStaffUser,
+  getRatePlans,
   getRatesGrid,
 } from "@/lib/queries";
 import { pageTitle } from "@/lib/i18n/server";
@@ -43,7 +44,12 @@ export default async function Page({
       ? sp.from
       : businessDate;
 
-  const cells = await getRatesGrid(from, INVENTORY_NIGHTS);
+  const [cells, plans] = await Promise.all([getRatesGrid(from, INVENTORY_NIGHTS), getRatePlans()]);
+  const derivedFrom = Object.fromEntries(
+    plans
+      .filter((p) => p.parentRatePlanId)
+      .map((p) => [p.id, plans.find((x) => x.id === p.parentRatePlanId)?.name ?? ""]),
+  );
   const dates = Array.from({ length: INVENTORY_NIGHTS }, (_, i) =>
     format(addDays(parseISO(from), i), "yyyy-MM-dd"),
   );
@@ -57,6 +63,7 @@ export default async function Page({
         cells={cells}
         dates={dates}
         from={from}
+        derivedFrom={derivedFrom}
         canEdit={staff !== null && ["admin", "manager"].includes(staff.role)}
       />
     </div>

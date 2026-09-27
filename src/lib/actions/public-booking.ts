@@ -350,6 +350,9 @@ export async function searchPublicStay(input: {
   propertyId: string;
   from: string;
   to: string;
+  /** The party, so a plan that prices per person quotes what it charges (0109). */
+  adults?: number;
+  children?: number;
 }): Promise<ActionResult<PublicStayRoom[]>> {
   if (input.to <= input.from) {
     return { ok: false, error: "Departure must be after arrival." };
@@ -365,6 +368,8 @@ export async function searchPublicStay(input: {
         p_rate_plan_id: plan.ratePlanId,
         p_from: input.from,
         p_to: input.to,
+        p_adults: input.adults ?? null,
+        p_children: input.children ?? null,
       }),
     ),
   );

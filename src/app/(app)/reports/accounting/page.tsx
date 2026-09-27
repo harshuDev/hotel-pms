@@ -113,7 +113,10 @@ export default async function AccountingReportPage({
           netCents: r.netCents,
           taxCents: r.taxCents,
           grossCents: r.grossCents,
-          roomTypeName: r.roomTypeName ?? tr("Not recorded"),
+          // A plan with its own account (0109) is named beside the type.
+          roomTypeName: r.ratePlanName
+            ? `${tr.message(r.roomTypeName ?? tr("Not recorded"))} · ${r.ratePlanName}`
+            : (r.roomTypeName ?? tr("Not recorded")),
           accountingCategoryId: r.accountingCategoryId,
         }))
       : null;

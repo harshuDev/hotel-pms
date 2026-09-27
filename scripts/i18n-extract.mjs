@@ -151,8 +151,11 @@ function toPattern(text, style) {
 const CODE = /^[A-Z][A-Z0-9_]+(:.*)?$/;
 // Single words from Postgres that are labels rather than data.
 const SINGLE_WORDS = new Set(["Attachment", "Guest", "Unknown"]);
-// A literal that reads as a phrase: a capital, then lower case words.
-const PHRASE = /^[A-Z][^\n]*[a-z]{2}/;
+// A literal that reads as a phrase: a capital, then lower case words -- or a
+// message that opens on a value ("% is the main rate. ..."), which is how most
+// refusals naming a plan, a room type or a tax begin. Those were skipped until
+// 0109 and so reached every language in English.
+const PHRASE = /^(?:[A-Z]|%s? \S)[^\n]*[a-z]{2}/;
 
 for (const { name, body } of bodies.values()) {
   if (name.startsWith("public_") || name.startsWith("api_")) continue; // guest page and API: not staff text

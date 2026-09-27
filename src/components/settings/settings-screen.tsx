@@ -96,6 +96,7 @@ import {
 import type {
   SeasonType,
   WeekRate,
+  RatePlanCoverage,
   RatePlan,
   CancellationPolicy,
   ChannelSetting,
@@ -226,6 +227,7 @@ export function SettingsScreen({
   discounts,
   virtualRoomTypes,
   weekRates,
+  rateCoverage,
   channelManagers,
   bookingEngine,
   bookingWidgets,
@@ -278,6 +280,7 @@ export function SettingsScreen({
   virtualRoomTypes: VirtualRoomType[];
   /** The weekly rate templates (0096); loaded only on the Rate Plans tab. */
   weekRates: WeekRate[];
+  rateCoverage: RatePlanCoverage[];
   /** Channel manager connections (0097); loaded only on their tab. */
   channelManagers: ChannelManager[];
   /** Booking Engine Settings (0098); loaded only on their tab. */
@@ -1240,6 +1243,7 @@ export function SettingsScreen({
               seasons={seasons.filter((x) => x.kind === "season")}
               cancellationPolicies={cancellationPolicies}
               weekRates={weekRates}
+              coverage={rateCoverage}
               canEdit={canEdit}
               pending={pending}
               run={run}
@@ -1253,6 +1257,11 @@ export function SettingsScreen({
           <RatePlansPanel
             ratePlans={ratePlans}
             cancellationPolicies={cancellationPolicies}
+            roomTypes={roomTypes}
+            taxRates={taxRates}
+            accountingCategories={accountingSettings.categories}
+            channels={channels}
+            coverage={rateCoverage}
             canEdit={canEdit}
             pending={pending}
             run={run}
@@ -1263,6 +1272,7 @@ export function SettingsScreen({
             seasons={seasons.filter((s) => s.kind === "season")}
             cancellationPolicies={cancellationPolicies}
             weekRates={weekRates}
+            coverage={rateCoverage}
             canEdit={canEdit}
             pending={pending}
             run={run}

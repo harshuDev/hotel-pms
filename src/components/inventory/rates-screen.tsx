@@ -50,11 +50,17 @@ export function RatesScreen({
   cells,
   dates,
   from,
+  derivedFrom,
   canEdit,
 }: {
   cells: RatesGridCell[];
   dates: string[];
   from: string;
+  /**
+   * A derived plan's id to its parent's name (0109). Its price follows the
+   * parent and set_rates() refuses it, so it is shown and never selected.
+   */
+  derivedFrom: Record<string, string>;
   canEdit: boolean;
 }) {
   const tr = useT();
@@ -224,7 +230,8 @@ export function RatesScreen({
             <tbody>
               {groups.map((t) => {
                 const plans = [...t.plans.values()];
-                const keys = plans.map((p) => pairKey(t.roomTypeId, p.ratePlanId));
+                const editable = plans.filter((p) => !derivedFrom[p.ratePlanId]);
+                const keys = editable.map((p) => pairKey(t.roomTypeId, p.ratePlanId));
                 const allOn = keys.every((k) => selected.includes(k));
                 return (
                   <Fragment key={t.roomTypeId}>
@@ -238,7 +245,7 @@ export function RatesScreen({
                           <input
                             type="checkbox"
                             checked={allOn}
-                            onChange={() => toggleType(t.roomTypeId, plans.map((p) => p.ratePlanId))}
+                            onChange={() => toggleType(t.roomTypeId, editable.map((p) => p.ratePlanId))}
                             disabled={!canEdit}
                             className="h-3.5 w-3.5 accent-brass"
                           />
@@ -257,14 +264,23 @@ export function RatesScreen({
                         <tr key={key}>
                           <td className="sticky left-0 z-10 whitespace-nowrap border-t border-line bg-white px-3 py-1.5">
                             <label className="flex cursor-pointer items-center gap-2 pl-4">
-                              <input
-                                type="checkbox"
-                                checked={selected.includes(key)}
-                                onChange={() => toggle(key)}
-                                disabled={!canEdit}
-                                className="h-3.5 w-3.5 accent-brass"
-                              />
+                              {derivedFrom[p.ratePlanId] ? (
+                                <span className="inline-block h-3.5 w-3.5" aria-hidden="true" />
+                              ) : (
+                                <input
+                                  type="checkbox"
+                                  checked={selected.includes(key)}
+                                  onChange={() => toggle(key)}
+                                  disabled={!canEdit}
+                                  className="h-3.5 w-3.5 accent-brass"
+                                />
+                              )}
                               <span className="text-ink">{p.ratePlanName}</span>
+                              {derivedFrom[p.ratePlanId] && (
+                                <span className="text-xxs text-ink-faint">
+                                  {tr("Derived from {name}", { name: derivedFrom[p.ratePlanId] })}
+                                </span>
+                              )}
                               {p.isDefault && (
                                 <span className="text-xxs text-ink-faint">{tr("main")}</span>
                               )}

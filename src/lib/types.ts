@@ -668,6 +668,39 @@ export interface RatePlan {
    * say so rather than guessing on a hotel's behalf about refunds.
    */
   cancellationPolicyId: string | null;
+  /** Booking conditions (0109). Null is no rule. */
+  minDaysAdvance: number | null;
+  maxDaysAdvance: number | null;
+  minAdults: number | null;
+  maxAdults: number | null;
+  minChildren: number | null;
+  maxChildren: number | null;
+  /** The nights the plan may be sold for, inclusive. Null is open-ended. */
+  validFrom: string | null;
+  validTo: string | null;
+  /** A derived plan's price is the parent's, adjusted (0109). */
+  parentRatePlanId: string | null;
+  derivedKind: "percent" | "amount" | null;
+  derivedPercentBps: number | null;
+  derivedAmountCents: number | null;
+  /** One price for every occupancy, or adjusted per adult and child. */
+  occupancyPricing: "single" | "per_person";
+  adultAdjustCents: number | null;
+  childAdjustCents: number | null;
+  /** The tax the plan is sold with, and its own ledger account. */
+  taxRateId: string | null;
+  accountingCategoryId: string | null;
+  /** The channels it may be sold through; empty is every channel. */
+  channelIds: string[];
+}
+
+/** Which room types a plan has prices loaded on, from the business date (0109). */
+export interface RatePlanCoverage {
+  ratePlanId: string;
+  roomTypeId: string;
+  pricedNights: number;
+  firstNight: string;
+  lastNight: string;
 }
 
 /**
@@ -1258,6 +1291,8 @@ export interface AccountingRow {
 
 /** Room revenue by room type (0108), the room_charge line of the Accounting report split. */
 export interface AccountingRoomRevenueRow {
+  /** Named only when the plan has an account of its own (0109). */
+  ratePlanName: string | null;
   roomTypeId: string | null;
   roomTypeName: string | null;
   accountingCategoryId: string | null;
