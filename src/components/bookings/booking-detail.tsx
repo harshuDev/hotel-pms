@@ -1433,7 +1433,7 @@ export function BookingDetailView({
           <ul className="space-y-2.5">
             {activity.map((a) => (
               <li key={a.activityId} className="flex items-baseline justify-between gap-4">
-                <span className="text-[13px] text-ink">{a.summary}</span>
+                <span className="text-[13px] text-ink">{tr.message(a.summary)}</span>
                 <span className="shrink-0 text-xxs text-ink-faint">
                   {tr.stamp(a.createdAt, timezone)}
                   {a.actor && ` · ${a.actor}`}

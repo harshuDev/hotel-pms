@@ -75,7 +75,7 @@ function patternsOf(dict: Dictionary): Pattern[] {
         const m = /^\{(\d+)\}$/.exec(part);
         if (m) {
           order.push(Number(m[1]));
-          return "(.+?)";
+          return "(.*?)";
         }
         return part.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
       })

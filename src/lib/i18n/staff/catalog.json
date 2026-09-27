@@ -1,0 +1,8725 @@
+{
+ ", and opens the next day. It cannot be undone.": {
+  "kind": "text"
+ },
+ "(Holding area)": {
+  "kind": "text"
+ },
+ "{abs}d ago": {
+  "kind": "text"
+ },
+ "{amount} Discount": {
+  "kind": "text"
+ },
+ "{amount} in cash": {
+  "kind": "text"
+ },
+ "{amount} is required per booking.": {
+  "kind": "text"
+ },
+ "{amount} is required per room booked.": {
+  "kind": "text"
+ },
+ "{amount} of it in cash": {
+  "kind": "text"
+ },
+ "{amount} off": {
+  "kind": "text"
+ },
+ "{amount} owing": {
+  "kind": "text"
+ },
+ "{amount} rooms": {
+  "kind": "text"
+ },
+ "{amount} rooms, {amount2} other": {
+  "kind": "text"
+ },
+ "{amount} through the drawer": {
+  "kind": "text"
+ },
+ "{channel} booking {reference}": {
+  "kind": "text"
+ },
+ "{channelManagerLabel} saved.": {
+  "kind": "text"
+ },
+ "{charged} charged, {paid} paid": {
+  "kind": "text"
+ },
+ "{clean} vacant dirty, {dueOut} due out": {
+  "kind": "text"
+ },
+ "{currency} deleted.": {
+  "kind": "text"
+ },
+ "{currency} saved.": {
+  "kind": "text"
+ },
+ "{day}: a rate cannot be negative.": {
+  "kind": "text"
+ },
+ "{day}: a stay rule is a number of nights, 1 to 365.": {
+  "kind": "text"
+ },
+ "{day}: write the rate as a number.": {
+  "kind": "text"
+ },
+ "{field} set on {n} room-nights.": {
+  "kind": "plural",
+  "one": "{field} set on {n} room-night."
+ },
+ "{from} to {to}": {
+  "kind": "text"
+ },
+ "{from}–{to} of {total}": {
+  "kind": "text"
+ },
+ "{label} picker": {
+  "kind": "text"
+ },
+ "{left} free of {total}": {
+  "kind": "text"
+ },
+ "{length} transactions": {
+  "kind": "text"
+ },
+ "{lost} since cancelled": {
+  "kind": "text"
+ },
+ "{matches} of {total}": {
+  "kind": "text"
+ },
+ "{n} / page": {
+  "kind": "text"
+ },
+ "{n} adults": {
+  "kind": "plural",
+  "one": "{n} adult"
+ },
+ "{n} bookings": {
+  "kind": "plural",
+  "one": "{n} booking"
+ },
+ "{n} bookings owing": {
+  "kind": "plural",
+  "one": "{n} booking owing"
+ },
+ "{n} bookings still owing": {
+  "kind": "plural",
+  "one": "{n} booking still owing"
+ },
+ "{n} cashier shifts are still open on this date. The night audit refuses to close a day while one is, so the figures below can still move.": {
+  "kind": "plural",
+  "one": "{n} cashier shift is still open on this date. The night audit refuses to close a day while one is, so the figures below can still move."
+ },
+ "{n} categories": {
+  "kind": "plural",
+  "one": "{n} category"
+ },
+ "{n} channels": {
+  "kind": "plural",
+  "one": "{n} channel"
+ },
+ "{n} children": {
+  "kind": "plural",
+  "one": "{n} child"
+ },
+ "{n} customers exported — the export stops at {n}, so this is not the whole list. Narrow the search and export again.": {
+  "kind": "text"
+ },
+ "{n} customers exported to {file}.": {
+  "kind": "plural",
+  "one": "{n} customer exported to {file}."
+ },
+ "{n} days": {
+  "kind": "plural",
+  "one": "{n} day"
+ },
+ "{n} departures": {
+  "kind": "plural",
+  "one": "{n} departure"
+ },
+ "{n} due out": {
+  "kind": "text"
+ },
+ "{n} floors": {
+  "kind": "plural",
+  "one": "{n} floor"
+ },
+ "{n} folios": {
+  "kind": "plural",
+  "one": "{n} folio"
+ },
+ "{n} free": {
+  "kind": "text"
+ },
+ "{n} guests": {
+  "kind": "plural",
+  "one": "{n} guest"
+ },
+ "{n} methods": {
+  "kind": "plural",
+  "one": "{n} method"
+ },
+ "{n} nights": {
+  "kind": "plural",
+  "one": "{n} night"
+ },
+ "{n} nights have no rate. Nights added by an extension come in at zero because no rate plan was named — set a rate before the night audit runs, or the stay will be charged as free.": {
+  "kind": "plural",
+  "one": "{n} night has no rate. Nights added by an extension come in at zero because no rate plan was named — set a rate before the night audit runs, or the stay will be charged as free."
+ },
+ "{n} nights priced": {
+  "kind": "plural",
+  "one": "{n} night priced"
+ },
+ "{n} no shows": {
+  "kind": "plural",
+  "one": "{n} no show"
+ },
+ "{n} notes on {date}": {
+  "kind": "plural",
+  "one": "{n} note on {date}"
+ },
+ "{n} out of order": {
+  "kind": "text"
+ },
+ "{n} pax": {
+  "kind": "text"
+ },
+ "{n} people": {
+  "kind": "plural",
+  "one": "{n} person"
+ },
+ "{n} plans": {
+  "kind": "plural",
+  "one": "{n} plan"
+ },
+ "{n} rates": {
+  "kind": "plural",
+  "one": "{n} rate"
+ },
+ "{n} rates selected. Leave the box empty to clear the price and take them off sale.": {
+  "kind": "plural",
+  "one": "{n} rate selected. Leave the box empty to clear the price and take it off sale."
+ },
+ "{n} records": {
+  "kind": "plural",
+  "one": "{n} record"
+ },
+ "{n} room nights": {
+  "kind": "plural",
+  "one": "{n} room night"
+ },
+ "{n} room types selected.": {
+  "kind": "plural",
+  "one": "{n} room type selected."
+ },
+ "{n} rooms": {
+  "kind": "plural",
+  "one": "{n} room"
+ },
+ "{n} rows": {
+  "kind": "plural",
+  "one": "{n} row"
+ },
+ "{n} stays": {
+  "kind": "plural",
+  "one": "{n} stay"
+ },
+ "{n} types": {
+  "kind": "plural",
+  "one": "{n} type"
+ },
+ "{n} unassigned": {
+  "kind": "text"
+ },
+ "{n}d": {
+  "kind": "text"
+ },
+ "{n}n": {
+  "kind": "text"
+ },
+ "{name} — change": {
+  "kind": "text"
+ },
+ "{name} · opened {time} · business date {date}": {
+  "kind": "text"
+ },
+ "{name} (copy)": {
+  "kind": "text"
+ },
+ "{name} (reversed)": {
+  "kind": "text"
+ },
+ "{name} active": {
+  "kind": "text"
+ },
+ "{name} added.": {
+  "kind": "text"
+ },
+ "{name} dashboard": {
+  "kind": "text"
+ },
+ "{name} dates added.": {
+  "kind": "text"
+ },
+ "{name} deleted.": {
+  "kind": "text"
+ },
+ "{name} includes {meals}.": {
+  "kind": "text"
+ },
+ "{name} includes no meals.": {
+  "kind": "text"
+ },
+ "{name} is active": {
+  "kind": "text"
+ },
+ "{name} is larger than 256 KB.": {
+  "kind": "text"
+ },
+ "{name} is now on the guest booking page.": {
+  "kind": "text"
+ },
+ "{name} is off the guest booking page.": {
+  "kind": "text"
+ },
+ "{name} merged into {target}.": {
+  "kind": "text"
+ },
+ "{name} merged.": {
+  "kind": "text"
+ },
+ "{name} must be a colour like #003580.": {
+  "kind": "text"
+ },
+ "{name} on {name2} is worth {amount}. Nights charged from the next night audit split it out as food.": {
+  "kind": "text"
+ },
+ "{name} on {name2} is worth nothing again, so nothing is posted for it.": {
+  "kind": "text"
+ },
+ "{name} on {name2} saved.": {
+  "kind": "text"
+ },
+ "{name} policy": {
+  "kind": "text"
+ },
+ "{name} profile deleted.": {
+  "kind": "text"
+ },
+ "{name} profile saved.": {
+  "kind": "text"
+ },
+ "{name} saved.": {
+  "kind": "text"
+ },
+ "{name}, {name2}, {value} rate": {
+  "kind": "text"
+ },
+ "{nights} from {date}, {rooms}. No room has been assigned yet — that happens at check-in.": {
+  "kind": "text"
+ },
+ "{nights}, {from} to {to}": {
+  "kind": "text"
+ },
+ "{occupied} of {sellable} sellable": {
+  "kind": "text"
+ },
+ "{offer} applied, taking {amount} off the stay.": {
+  "kind": "text"
+ },
+ "{pct}% Discount": {
+  "kind": "text"
+ },
+ "{pct}% occupied": {
+  "kind": "text"
+ },
+ "{pending} still pending": {
+  "kind": "text"
+ },
+ "{plan} is not loaded on {type} for {date}, so it cannot be sold": {
+  "kind": "text"
+ },
+ "{qty} × {what} charged.": {
+  "kind": "text"
+ },
+ "{records} merged. {bookings} and {folios} moved across.": {
+  "kind": "text"
+ },
+ "{reference} booked.": {
+  "kind": "text"
+ },
+ "{reversals} reversed": {
+  "kind": "text"
+ },
+ "{roomsSold} of {nights} room nights": {
+  "kind": "text"
+ },
+ "{roomsSold} of {roomNightsAvailable} room nights": {
+  "kind": "text"
+ },
+ "{roomsSold} of {sellableRooms} rooms": {
+  "kind": "text"
+ },
+ "{setting} in Inventory Settings turns it back on.": {
+  "kind": "text"
+ },
+ "{shown} of {total} rooms": {
+  "kind": "text"
+ },
+ "{sold} sold of {sellable} sellable": {
+  "kind": "text"
+ },
+ "{unassigned} with no room assigned": {
+  "kind": "text"
+ },
+ "{value} closed to arrival": {
+  "kind": "text"
+ },
+ "{value} closed to departure": {
+  "kind": "text"
+ },
+ "{value} max stay": {
+  "kind": "text"
+ },
+ "{value} min stay arrival": {
+  "kind": "text"
+ },
+ "{value} min stay through": {
+  "kind": "text"
+ },
+ "{value} stop sell": {
+  "kind": "text"
+ },
+ "{value}% of rack": {
+  "kind": "text"
+ },
+ "{what} charged.": {
+  "kind": "text"
+ },
+ "{who} password": {
+  "kind": "text"
+ },
+ "{who} password:": {
+  "kind": "text"
+ },
+ "{who} Username": {
+  "kind": "text"
+ },
+ "{who} Username:": {
+  "kind": "text"
+ },
+ "% deposit is required at the time of booking": {
+  "kind": "text"
+ },
+ "↑↓ to move": {
+  "kind": "text"
+ },
+ "↵ to open": {
+  "kind": "text"
+ },
+ "+ Add Cancellation Policy": {
+  "kind": "text"
+ },
+ "+ Add email template": {
+  "kind": "text"
+ },
+ "+ Add Extra Category": {
+  "kind": "text"
+ },
+ "+ Add Facility": {
+  "kind": "text"
+ },
+ "+ Add Room": {
+  "kind": "text"
+ },
+ "+ Add Room Type": {
+  "kind": "text"
+ },
+ "+ Add Rooms in a Run": {
+  "kind": "text"
+ },
+ "+ Add Virtual Room Type": {
+  "kind": "text"
+ },
+ "1 Example Street, Example City": {
+  "kind": "text"
+ },
+ "1 Point after dot": {
+  "kind": "text"
+ },
+ "120.00, or blank to clear": {
+  "kind": "text"
+ },
+ "2 Points after dot": {
+  "kind": "text"
+ },
+ "A {0} booking cannot be given a room": {
+  "kind": "db"
+ },
+ "A {n} night deposit is required at the time of booking.": {
+  "kind": "plural",
+  "one": "A {n} night deposit is required at the time of booking."
+ },
+ "A {percent}% deposit is required at the time of booking.": {
+  "kind": "text"
+ },
+ "A booking appears here once a guest checks in, and leaves when they check out.": {
+  "kind": "text"
+ },
+ "A booking appears here once a payment is taken against it and before the guest checks in.": {
+  "kind": "text"
+ },
+ "A booking needs a first and last name": {
+  "kind": "db"
+ },
+ "A booking needs a guest: pick an existing customer or enter a new one": {
+  "kind": "db"
+ },
+ "A booking needs at least one adult": {
+  "kind": "db"
+ },
+ "A booking needs at least one room": {
+  "kind": "db"
+ },
+ "A booking source needs a code and a name": {
+  "kind": "db"
+ },
+ "A cancellation policy needs a name": {
+  "kind": "db"
+ },
+ "A capacity has to be a whole number of seats.": {
+  "kind": "text"
+ },
+ "A category cannot be merged into itself": {
+  "kind": "db"
+ },
+ "A ceiling, never a promise: rooms out of order still come off the top, so the sellable figure can be lower than the allotment but never higher. Leave the box empty to go back to selling every room that exists.": {
+  "kind": "text"
+ },
+ "A charge must be more than nothing": {
+  "kind": "db"
+ },
+ "A charge must be more than nothing.": {
+  "kind": "text"
+ },
+ "A chosen room type is not on this property": {
+  "kind": "db"
+ },
+ "A company": {
+  "kind": "text"
+ },
+ "A company needs a company name": {
+  "kind": "db"
+ },
+ "A condition names something that is not on this property": {
+  "kind": "db"
+ },
+ "A configuration file can be at most 256 KB": {
+  "kind": "db"
+ },
+ "A connection cannot change channel manager": {
+  "kind": "db"
+ },
+ "A connection cannot change provider": {
+  "kind": "db"
+ },
+ "A connection cannot change system": {
+  "kind": "db"
+ },
+ "A currency is three letters, like GBP.": {
+  "kind": "text"
+ },
+ "A customer is needed before any money can be charged.": {
+  "kind": "text"
+ },
+ "A dash means no rate is loaded for that rate on that room type, which is not the same as free — a booking against it is refused. That is also how a room type is taken off a rate: clear the price rather than looking for a switch.": {
+  "kind": "text"
+ },
+ "A deposit equal to the total cost is required at the time of booking": {
+  "kind": "text"
+ },
+ "A deposit equal to the total cost is required at the time of booking.": {
+  "kind": "text"
+ },
+ "A disabled room is out of order and cannot be sold.": {
+  "kind": "text"
+ },
+ "A facility needs a title": {
+  "kind": "db"
+ },
+ "A facility needs a title.": {
+  "kind": "text"
+ },
+ "A fixed discount is more than 0": {
+  "kind": "db"
+ },
+ "A fixed sum off each night, never more than the night costs.": {
+  "kind": "text"
+ },
+ "A floor is a whole number, or leave it blank.": {
+  "kind": "text"
+ },
+ "A folio is created on its first charge, so a booking that has taken no money yet has none.": {
+  "kind": "text"
+ },
+ "A folio number is digits only": {
+  "kind": "text"
+ },
+ "A guest already staying can stay through a closed date; only arrivals are refused.": {
+  "kind": "text"
+ },
+ "A hotel usually has several, like Room Only, Bed and Breakfast and Non-refundable.": {
+  "kind": "text"
+ },
+ "A location needs both a latitude and a longitude": {
+  "kind": "db"
+ },
+ "A manager can turn it back on with “{feature}” in Settings → Hotel Features.": {
+  "kind": "text"
+ },
+ "A manager or administrator can create one.": {
+  "kind": "text"
+ },
+ "A manager or administrator sets these up.": {
+  "kind": "text"
+ },
+ "A meal cannot be worth less than nothing": {
+  "kind": "db"
+ },
+ "A meal cannot be worth less than nothing.": {
+  "kind": "text"
+ },
+ "A meeting room booking needs a guest count": {
+  "kind": "db"
+ },
+ "A meeting room booking needs an event name": {
+  "kind": "db"
+ },
+ "A meeting room needs a name": {
+  "kind": "db"
+ },
+ "A member of staff needs a name": {
+  "kind": "db"
+ },
+ "A member of staff needs a name.": {
+  "kind": "text"
+ },
+ "A new booking can only be taken as pending or confirmed": {
+  "kind": "db"
+ },
+ "A new member of staff is invited in Supabase Auth, and then appears in this list.": {
+  "kind": "text"
+ },
+ "A night with no rate loaded is not free — it cannot be sold on this plan at all, and taking a booking against it will say so. Leave the box empty and apply to clear a rate back to nothing.": {
+  "kind": "text"
+ },
+ "A nightly rate cannot be negative": {
+  "kind": "db"
+ },
+ "A nightly rate cannot be negative.": {
+  "kind": "text"
+ },
+ "A note needs a date": {
+  "kind": "db"
+ },
+ "A note needs something written in it": {
+  "kind": "db"
+ },
+ "A paid-out may only be recorded against your own open shift": {
+  "kind": "db"
+ },
+ "A paid-out must be more than zero": {
+  "kind": "db"
+ },
+ "A paid-out needs a reason": {
+  "kind": "db"
+ },
+ "A password needs at least {mIN_LENGTH} characters.": {
+  "kind": "text"
+ },
+ "A payment method needs a kind": {
+  "kind": "db"
+ },
+ "A payment method needs a name": {
+  "kind": "db"
+ },
+ "A payment type needs a title": {
+  "kind": "db"
+ },
+ "A payment type needs a title.": {
+  "kind": "text"
+ },
+ "A percent discount is more than 0 and at most 100": {
+  "kind": "db"
+ },
+ "A person": {
+  "kind": "text"
+ },
+ "A person needs a first name": {
+  "kind": "db"
+ },
+ "A promotion needs a name": {
+  "kind": "db"
+ },
+ "A rate plan needs a code and a name": {
+  "kind": "db"
+ },
+ "A rate plan needs a code and a name.": {
+  "kind": "text"
+ },
+ "A room line must be for between one and fifty rooms": {
+  "kind": "db"
+ },
+ "A room needs a number": {
+  "kind": "db"
+ },
+ "A room needs a number.": {
+  "kind": "text"
+ },
+ "A room type needs a code and a name": {
+  "kind": "db"
+ },
+ "A room type needs a code and a name.": {
+  "kind": "text"
+ },
+ "A season cannot end before it starts": {
+  "kind": "db"
+ },
+ "A stay over {0} may run at most {1} nights, and this one is {2}.": {
+  "kind": "db"
+ },
+ "A stay over {0} must run at least {1} nights, and this one is {2}.": {
+  "kind": "db"
+ },
+ "A stay rule of zero nights means nothing. Leave it blank to clear it.": {
+  "kind": "text"
+ },
+ "A tax rate must be between 0 and 100 percent": {
+  "kind": "db"
+ },
+ "A tax rate must be between 0 and 100 percent.": {
+  "kind": "text"
+ },
+ "A tax rate needs a name": {
+  "kind": "db"
+ },
+ "A tax rate needs a name.": {
+  "kind": "text"
+ },
+ "A waitlist entry needs an arrival and a departure date": {
+  "kind": "db"
+ },
+ "A waitlist entry needs either a customer or a contact name": {
+  "kind": "db"
+ },
+ "Abbreviation": {
+  "kind": "text"
+ },
+ "Accommodation": {
+  "kind": "text"
+ },
+ "Accommodation, {n} nights": {
+  "kind": "plural",
+  "one": "Accommodation, {n} night"
+ },
+ "Account": {
+  "kind": "text"
+ },
+ "Accounting": {
+  "kind": "text"
+ },
+ "Accounting Categories": {
+  "kind": "text"
+ },
+ "Accounting category": {
+  "kind": "text"
+ },
+ "Accounting Category": {
+  "kind": "text"
+ },
+ "Accounting report": {
+  "kind": "text"
+ },
+ "Accounting Report": {
+  "kind": "text"
+ },
+ "Accounting system": {
+  "kind": "text"
+ },
+ "Accounting Systems": {
+  "kind": "text"
+ },
+ "Across {n} bookings": {
+  "kind": "plural",
+  "one": "Across {n} booking"
+ },
+ "Across {n} floors": {
+  "kind": "plural",
+  "one": "Across {n} floor"
+ },
+ "Across {n} folios": {
+  "kind": "plural",
+  "one": "Across {n} folio"
+ },
+ "Across {n} plans": {
+  "kind": "plural",
+  "one": "Across {n} plan"
+ },
+ "Across {n} types": {
+  "kind": "plural",
+  "one": "Across {n} type"
+ },
+ "Across every folio on these bookings": {
+  "kind": "text"
+ },
+ "Actions": {
+  "kind": "text"
+ },
+ "Active": {
+  "kind": "text"
+ },
+ "Active offers": {
+  "kind": "text"
+ },
+ "Activity": {
+  "kind": "text"
+ },
+ "Add": {
+  "kind": "text"
+ },
+ "Add {l}": {
+  "kind": "text"
+ },
+ "Add a customer without taking a booking": {
+  "kind": "text"
+ },
+ "Add a meeting room": {
+  "kind": "text"
+ },
+ "Add a note for {date}": {
+  "kind": "text"
+ },
+ "Add a passport scan, a registration card or a purchase order.": {
+  "kind": "text"
+ },
+ "Add a room": {
+  "kind": "text"
+ },
+ "Add a room type first. Every room belongs to one.": {
+  "kind": "text"
+ },
+ "Add a staff note": {
+  "kind": "text"
+ },
+ "Add accounting system": {
+  "kind": "text"
+ },
+ "Add Accounting System": {
+  "kind": "text"
+ },
+ "Add an email address": {
+  "kind": "text"
+ },
+ "Add at least one room to the booking.": {
+  "kind": "text"
+ },
+ "Add at most 500 rooms at a time": {
+  "kind": "db"
+ },
+ "Add channel": {
+  "kind": "text"
+ },
+ "Add Condition": {
+  "kind": "text"
+ },
+ "Add currency profile": {
+  "kind": "text"
+ },
+ "Add dates to {name}": {
+  "kind": "text"
+ },
+ "Add Discount": {
+  "kind": "text"
+ },
+ "Add email address": {
+  "kind": "text"
+ },
+ "Add Extra": {
+  "kind": "text"
+ },
+ "Add file": {
+  "kind": "text"
+ },
+ "Add gateway": {
+  "kind": "text"
+ },
+ "Add Gateway": {
+  "kind": "text"
+ },
+ "Add Group": {
+  "kind": "text"
+ },
+ "Add Group Booking": {
+  "kind": "text"
+ },
+ "Add it": {
+  "kind": "text"
+ },
+ "Add new accounting category": {
+  "kind": "text"
+ },
+ "Add new payment type": {
+  "kind": "text"
+ },
+ "Add new pos profile": {
+  "kind": "text"
+ },
+ "Add new profile": {
+  "kind": "text"
+ },
+ "Add New Profile": {
+  "kind": "text"
+ },
+ "Add New Rate Plan": {
+  "kind": "text"
+ },
+ "Add new sales channel": {
+  "kind": "text"
+ },
+ "Add note": {
+  "kind": "text"
+ },
+ "Add offer": {
+  "kind": "text"
+ },
+ "Add one to take a percentage or an amount off, or to give a night free on a longer stay.": {
+  "kind": "text"
+ },
+ "Add Reaction": {
+  "kind": "text"
+ },
+ "Add Room": {
+  "kind": "text"
+ },
+ "Add Room Type": {
+  "kind": "text"
+ },
+ "Add room types and rooms in Settings before the calendar can show anything.": {
+  "kind": "text"
+ },
+ "Add rooms before housekeeping has anything to work from.": {
+  "kind": "text"
+ },
+ "Add Rooms in a Run": {
+  "kind": "text"
+ },
+ "Add season or event": {
+  "kind": "text"
+ },
+ "Add Simple Booking": {
+  "kind": "text"
+ },
+ "Add tax": {
+  "kind": "text"
+ },
+ "Add the rooms this property lets out — Meeting Room A, the boardroom — and they will appear here with their calendars.": {
+  "kind": "text"
+ },
+ "Add the run": {
+  "kind": "text"
+ },
+ "Add them in Settings": {
+  "kind": "text"
+ },
+ "Add to {name}": {
+  "kind": "text"
+ },
+ "Add to waitlist": {
+  "kind": "text"
+ },
+ "Add Virtual Room Type": {
+  "kind": "text"
+ },
+ "Add…": {
+  "kind": "text"
+ },
+ "Added {0} to the waitlist for {1} to {2}": {
+  "kind": "db"
+ },
+ "Added to the waitlist.": {
+  "kind": "text"
+ },
+ "Adding a new login is not here.": {
+  "kind": "text"
+ },
+ "Adding…": {
+  "kind": "text"
+ },
+ "Additional details": {
+  "kind": "text"
+ },
+ "Address": {
+  "kind": "text"
+ },
+ "Address line 2": {
+  "kind": "text"
+ },
+ "Adjustment": {
+  "kind": "text"
+ },
+ "Administrator": {
+  "kind": "text"
+ },
+ "ADR": {
+  "kind": "text"
+ },
+ "ADR tonight": {
+  "kind": "text"
+ },
+ "Adults": {
+  "kind": "text"
+ },
+ "Adults and children": {
+  "kind": "text"
+ },
+ "Afghanistan": {
+  "kind": "country",
+  "code": "AF"
+ },
+ "After booking cancellation": {
+  "kind": "text"
+ },
+ "After booking creation": {
+  "kind": "text"
+ },
+ "After booking modification": {
+  "kind": "text"
+ },
+ "After check in": {
+  "kind": "text"
+ },
+ "After check out": {
+  "kind": "text"
+ },
+ "Again": {
+  "kind": "text"
+ },
+ "Airport transfer for arriving guest": {
+  "kind": "text"
+ },
+ "Åland Islands": {
+  "kind": "country",
+  "code": "AX"
+ },
+ "Albania": {
+  "kind": "country",
+  "code": "AL"
+ },
+ "Algeria": {
+  "kind": "country",
+  "code": "DZ"
+ },
+ "All": {
+  "kind": "text"
+ },
+ "All ages welcome": {
+  "kind": "text"
+ },
+ "All bookings": {
+  "kind": "text"
+ },
+ "All Conditions Match": {
+  "kind": "text"
+ },
+ "All confirmed": {
+  "kind": "text"
+ },
+ "All deposits are non-refundable": {
+  "kind": "text"
+ },
+ "All deposits are non-refundable.": {
+  "kind": "text"
+ },
+ "All methods": {
+  "kind": "text"
+ },
+ "all plans": {
+  "kind": "text"
+ },
+ "All read": {
+  "kind": "text"
+ },
+ "All Rooms": {
+  "kind": "text"
+ },
+ "All states": {
+  "kind": "text"
+ },
+ "Allow 'Edit' action for payments": {
+  "kind": "text"
+ },
+ "Allow changes to invoice date": {
+  "kind": "text"
+ },
+ "Allow changes to invoice number": {
+  "kind": "text"
+ },
+ "American Samoa": {
+  "kind": "country",
+  "code": "AS"
+ },
+ "Americas": {
+  "kind": "text"
+ },
+ "Amount": {
+  "kind": "text"
+ },
+ "Amount and reason are required": {
+  "kind": "db"
+ },
+ "Amount must be more than zero.": {
+  "kind": "text"
+ },
+ "Amount Of Rooms": {
+  "kind": "text"
+ },
+ "Amount off a night": {
+  "kind": "text"
+ },
+ "Amount per booking": {
+  "kind": "text"
+ },
+ "Amount per room": {
+  "kind": "text"
+ },
+ "Amount:": {
+  "kind": "text"
+ },
+ "An email template needs a title": {
+  "kind": "db"
+ },
+ "An email template needs a title.": {
+  "kind": "text"
+ },
+ "An extra cannot be merged into itself": {
+  "kind": "db"
+ },
+ "An extra category needs a title": {
+  "kind": "db"
+ },
+ "An extra category needs a title.": {
+  "kind": "text"
+ },
+ "An extra needs a price of zero or more": {
+  "kind": "db"
+ },
+ "An extra needs a title": {
+  "kind": "db"
+ },
+ "An extra needs a title.": {
+  "kind": "text"
+ },
+ "An identification type needs a title": {
+  "kind": "db"
+ },
+ "An identification type needs a title.": {
+  "kind": "text"
+ },
+ "and fill in the Identity fields — nationality, a document number and a date of birth.": {
+  "kind": "text"
+ },
+ "Andorra": {
+  "kind": "country",
+  "code": "AD"
+ },
+ "Angola": {
+  "kind": "country",
+  "code": "AO"
+ },
+ "Anguilla": {
+  "kind": "country",
+  "code": "AI"
+ },
+ "Another profile already uses the slug {0}": {
+  "kind": "db"
+ },
+ "Another sales channel already uses the abbreviation {0}": {
+  "kind": "db"
+ },
+ "Antarctica": {
+  "kind": "country",
+  "code": "AQ"
+ },
+ "Antigua and Barbuda": {
+  "kind": "country",
+  "code": "AG"
+ },
+ "Any": {
+  "kind": "text"
+ },
+ "Any Conditions Matches": {
+  "kind": "text"
+ },
+ "Any dates": {
+  "kind": "text"
+ },
+ "Any room type": {
+  "kind": "text"
+ },
+ "Anything the next shift or a manager should know.": {
+  "kind": "text"
+ },
+ "API Key": {
+  "kind": "text"
+ },
+ "API key generated.": {
+  "kind": "text"
+ },
+ "Appended to the existing notes; the guest never sees these": {
+  "kind": "text"
+ },
+ "Applicable": {
+  "kind": "text"
+ },
+ "Applies only to stays arriving that day, so a guest already in house is unaffected. Leave the box empty to clear the rule.": {
+  "kind": "text"
+ },
+ "Applies to any stay covering the night, whenever it arrived. Use this to stop one-night bookings eating into a busy weekend. Leave the box empty to clear the rule.": {
+  "kind": "text"
+ },
+ "Apply": {
+  "kind": "text"
+ },
+ "Applying…": {
+  "kind": "text"
+ },
+ "Are you VAT Registered": {
+  "kind": "text"
+ },
+ "Argentina": {
+  "kind": "country",
+  "code": "AR"
+ },
+ "Armenia": {
+  "kind": "country",
+  "code": "AM"
+ },
+ "arrival": {
+  "kind": "text"
+ },
+ "Arrival": {
+  "kind": "text"
+ },
+ "Arrival Date": {
+  "kind": "text"
+ },
+ "Arrivals": {
+  "kind": "text"
+ },
+ "Arrivals any day": {
+  "kind": "text"
+ },
+ "Arrivals expected": {
+  "kind": "text"
+ },
+ "Arrivals on {days}": {
+  "kind": "text"
+ },
+ "Arrived": {
+  "kind": "text"
+ },
+ "Arrives": {
+  "kind": "text"
+ },
+ "Arriving": {
+  "kind": "text"
+ },
+ "Arriving {date}": {
+  "kind": "text"
+ },
+ "Arriving on {0} needs at least {1} nights, and this stay is {2}.": {
+  "kind": "db"
+ },
+ "Arriving within a week": {
+  "kind": "text"
+ },
+ "Aruba": {
+  "kind": "country",
+  "code": "AW"
+ },
+ "As category ({taxRateId})": {
+  "kind": "text"
+ },
+ "As the room type": {
+  "kind": "text"
+ },
+ "Asia Pacific": {
+  "kind": "text"
+ },
+ "Associated Customer": {
+  "kind": "text"
+ },
+ "At least {mIN_LENGTH} characters": {
+  "kind": "text"
+ },
+ "At property": {
+  "kind": "text"
+ },
+ "At this part you can manage hotel currencies": {
+  "kind": "text"
+ },
+ "Attachment": {
+  "kind": "db"
+ },
+ "Attachments": {
+  "kind": "text"
+ },
+ "Australia": {
+  "kind": "country",
+  "code": "AU"
+ },
+ "Austria": {
+  "kind": "country",
+  "code": "AT"
+ },
+ "Automatic": {
+  "kind": "text"
+ },
+ "Availability": {
+  "kind": "text"
+ },
+ "Availability did not load": {
+  "kind": "text"
+ },
+ "Available online": {
+  "kind": "text"
+ },
+ "Available Online": {
+  "kind": "text"
+ },
+ "Available rooms did not load": {
+  "kind": "text"
+ },
+ "Average booking": {
+  "kind": "text"
+ },
+ "Average of in-house rates": {
+  "kind": "text"
+ },
+ "Azerbaijan": {
+  "kind": "country",
+  "code": "AZ"
+ },
+ "Back": {
+  "kind": "text"
+ },
+ "Back to sign in": {
+  "kind": "text"
+ },
+ "Back to the calendar": {
+  "kind": "text"
+ },
+ "Back to the current dates": {
+  "kind": "text"
+ },
+ "Back to the dashboard": {
+  "kind": "text"
+ },
+ "Background color": {
+  "kind": "text"
+ },
+ "Bahamas": {
+  "kind": "country",
+  "code": "BS"
+ },
+ "Bahrain": {
+  "kind": "country",
+  "code": "BH"
+ },
+ "Balance": {
+  "kind": "text"
+ },
+ "Balance due": {
+  "kind": "text"
+ },
+ "Bangladesh": {
+  "kind": "country",
+  "code": "BD"
+ },
+ "Bank transfer": {
+  "kind": "text"
+ },
+ "Bar": {
+  "kind": "text"
+ },
+ "BAR": {
+  "kind": "text"
+ },
+ "Barbados": {
+  "kind": "country",
+  "code": "BB"
+ },
+ "BB": {
+  "kind": "text"
+ },
+ "Bed and Breakfast": {
+  "kind": "text"
+ },
+ "before arrival": {
+  "kind": "text"
+ },
+ "Before tax": {
+  "kind": "text"
+ },
+ "Belarus": {
+  "kind": "country",
+  "code": "BY"
+ },
+ "Belgium": {
+  "kind": "country",
+  "code": "BE"
+ },
+ "Belize": {
+  "kind": "country",
+  "code": "BZ"
+ },
+ "belongs to a staff account, a link to set a new password is on its way. It expires in an hour, and it only works once.": {
+  "kind": "text"
+ },
+ "Benin": {
+  "kind": "country",
+  "code": "BJ"
+ },
+ "Bermuda": {
+  "kind": "country",
+  "code": "BM"
+ },
+ "Best available rate": {
+  "kind": "text"
+ },
+ "Best seller": {
+  "kind": "text"
+ },
+ "Bhutan": {
+  "kind": "country",
+  "code": "BT"
+ },
+ "Biggest earner": {
+  "kind": "text"
+ },
+ "Biggest market": {
+  "kind": "text"
+ },
+ "Bill to": {
+  "kind": "text"
+ },
+ "Blank clears": {
+  "kind": "text"
+ },
+ "Bolivia": {
+  "kind": "country",
+  "code": "BO"
+ },
+ "Bonaire, Sint Eustatius and Saba": {
+  "kind": "country",
+  "code": "BQ"
+ },
+ "Book": {
+  "kind": "text"
+ },
+ "Book {roomName}": {
+  "kind": "text"
+ },
+ "Book it": {
+  "kind": "text"
+ },
+ "Book this day": {
+  "kind": "text"
+ },
+ "Booked": {
+  "kind": "text"
+ },
+ "Booked at least (days ahead)": {
+  "kind": "text"
+ },
+ "Booked by {name} on {date}.": {
+  "kind": "text"
+ },
+ "Booked within (days)": {
+  "kind": "text"
+ },
+ "Booking": {
+  "kind": "text"
+ },
+ "Booking {0} arrives on {1}, which is after the business date": {
+  "kind": "db"
+ },
+ "Booking {0} canceled": {
+  "kind": "db"
+ },
+ "Booking {0} changed": {
+  "kind": "db"
+ },
+ "Booking {0} confirmed": {
+  "kind": "db"
+ },
+ "Booking {0} created": {
+  "kind": "db"
+ },
+ "Booking {0} has already checked in, so the arrival date cannot move": {
+  "kind": "db"
+ },
+ "Booking {0} has already departed": {
+  "kind": "db"
+ },
+ "Booking {0} has no customer, and a folio has to belong to somebody. Add the customer first.": {
+  "kind": "db"
+ },
+ "Booking {0} has no open folio, so its no-show fee for {1} cannot be posted": {
+  "kind": "db"
+ },
+ "Booking {0} has no open folio, so its room charge for {1} cannot be posted": {
+  "kind": "db"
+ },
+ "Booking {0} is {1}, not pending": {
+  "kind": "db"
+ },
+ "Booking {0} is {1}, so it can no longer be changed": {
+  "kind": "db"
+ },
+ "Booking {0} is {1}, so it cannot be checked in": {
+  "kind": "db"
+ },
+ "Booking {0} is {1}, so it cannot be checked out": {
+  "kind": "db"
+ },
+ "Booking {0} is already cancelled": {
+  "kind": "db"
+ },
+ "Booking {0} is cancelled": {
+  "kind": "db"
+ },
+ "Booking {0} is cancelled. Restore the booking rather than this one room": {
+  "kind": "db"
+ },
+ "Booking {0} is in house. Check the guest out rather than cancelling": {
+  "kind": "db"
+ },
+ "Booking {0} is not cancelled, so there is nothing to restore": {
+  "kind": "db"
+ },
+ "Booking {0} marked no show": {
+  "kind": "db"
+ },
+ "Booking {0} still needs {1} room(s) assigned": {
+  "kind": "db"
+ },
+ "Booking {reference} taken": {
+  "kind": "text"
+ },
+ "Booking cancelled — the room is free again.": {
+  "kind": "text"
+ },
+ "Booking cancelled.": {
+  "kind": "text"
+ },
+ "Booking changed.": {
+  "kind": "text"
+ },
+ "Booking confirmation": {
+  "kind": "text"
+ },
+ "Booking confirmation email saved.": {
+  "kind": "text"
+ },
+ "Booking Confirmation Email settings": {
+  "kind": "text"
+ },
+ "Booking confirmed.": {
+  "kind": "text"
+ },
+ "Booking Date": {
+  "kind": "text"
+ },
+ "Booking Engine - Privacy Policy": {
+  "kind": "text"
+ },
+ "Booking Engine - Terms & Conditions": {
+  "kind": "text"
+ },
+ "Booking Engine Profiles": {
+  "kind": "text"
+ },
+ "Booking engine saved.": {
+  "kind": "text"
+ },
+ "Booking Engine Settings": {
+  "kind": "text"
+ },
+ "Booking for": {
+  "kind": "text"
+ },
+ "Booking must belong to the same property as booking room": {
+  "kind": "db"
+ },
+ "Booking not found for current property": {
+  "kind": "db"
+ },
+ "Booking Notification Email Address": {
+  "kind": "text"
+ },
+ "Booking Reference": {
+  "kind": "text"
+ },
+ "Booking reference, guest name or room number": {
+  "kind": "text"
+ },
+ "Booking report": {
+  "kind": "text"
+ },
+ "Booking Report": {
+  "kind": "text"
+ },
+ "Booking restored.": {
+  "kind": "text"
+ },
+ "Booking room dates must fall within the booking dates": {
+  "kind": "db"
+ },
+ "Booking room id is the key code.": {
+  "kind": "text"
+ },
+ "Booking Source": {
+  "kind": "text"
+ },
+ "Booking status": {
+  "kind": "text"
+ },
+ "Booking waitlist": {
+  "kind": "text"
+ },
+ "Booking waitlist report": {
+  "kind": "text"
+ },
+ "Booking Waitlist Report": {
+  "kind": "text"
+ },
+ "Booking Widget": {
+  "kind": "text"
+ },
+ "Booking Widget {hash}": {
+  "kind": "text"
+ },
+ "Booking Widget Generation": {
+  "kind": "text"
+ },
+ "Booking…": {
+  "kind": "text"
+ },
+ "Bookings": {
+  "kind": "text"
+ },
+ "Bookings due to check in on the business date appear here. Cancellations and no-shows do not.": {
+  "kind": "text"
+ },
+ "Bookings due to check out on the business date appear here until they do.": {
+  "kind": "text"
+ },
+ "Bookings taken": {
+  "kind": "text"
+ },
+ "Bookings to intersect checkout date": {
+  "kind": "text"
+ },
+ "Bookings, check-in and out, payments": {
+  "kind": "text"
+ },
+ "Border color": {
+  "kind": "text"
+ },
+ "Born": {
+  "kind": "text"
+ },
+ "Bosnia and Herzegovina": {
+  "kind": "country",
+  "code": "BA"
+ },
+ "Botswana": {
+  "kind": "country",
+  "code": "BW"
+ },
+ "Bouvet Island": {
+  "kind": "country",
+  "code": "BV"
+ },
+ "Brazil": {
+  "kind": "country",
+  "code": "BR"
+ },
+ "breakfast": {
+  "kind": "text"
+ },
+ "Breakfast": {
+  "kind": "text"
+ },
+ "Breakfast policy": {
+  "kind": "text"
+ },
+ "Breaks a tie only.": {
+  "kind": "text"
+ },
+ "British Indian Ocean Territory": {
+  "kind": "country",
+  "code": "IO"
+ },
+ "Broken": {
+  "kind": "text"
+ },
+ "Brunei Darussalam": {
+  "kind": "country",
+  "code": "BN"
+ },
+ "Bulgaria": {
+  "kind": "country",
+  "code": "BG"
+ },
+ "Burkina Faso": {
+  "kind": "country",
+  "code": "BF"
+ },
+ "Burundi": {
+  "kind": "country",
+  "code": "BI"
+ },
+ "Busiest {date}": {
+  "kind": "text"
+ },
+ "Business date": {
+  "kind": "text"
+ },
+ "Business date {0} closed, {1} room charge(s) posted": {
+  "kind": "db"
+ },
+ "Business date {0} closed, {1} room charge(s) posted, {2} no-show(s)": {
+  "kind": "db"
+ },
+ "Business date {date}. Nothing can be taken or paid out until a shift is open.": {
+  "kind": "text"
+ },
+ "business day open": {
+  "kind": "text"
+ },
+ "Button Text": {
+  "kind": "text"
+ },
+ "By default": {
+  "kind": "text"
+ },
+ "By default we use Hotel Name and Hotel Address, but you can override that values here.": {
+  "kind": "text"
+ },
+ "By default we use simple increment number for your invoices.": {
+  "kind": "text"
+ },
+ "Cabo Verde": {
+  "kind": "country",
+  "code": "CV"
+ },
+ "Calendar": {
+  "kind": "text"
+ },
+ "Calendar Settings": {
+  "kind": "text"
+ },
+ "Calendar settings saved.": {
+  "kind": "text"
+ },
+ "Cambodia": {
+  "kind": "country",
+  "code": "KH"
+ },
+ "Came from": {
+  "kind": "text"
+ },
+ "Cameroon": {
+  "kind": "country",
+  "code": "CM"
+ },
+ "Canada": {
+  "kind": "country",
+  "code": "CA"
+ },
+ "Cancel": {
+  "kind": "text"
+ },
+ "Cancel {reference}": {
+  "kind": "text"
+ },
+ "Cancel booking": {
+  "kind": "text"
+ },
+ "Cancel it": {
+  "kind": "text"
+ },
+ "Cancel the room": {
+  "kind": "text"
+ },
+ "Cancel this booking": {
+  "kind": "text"
+ },
+ "Cancel this room": {
+  "kind": "text"
+ },
+ "canceled": {
+  "kind": "db"
+ },
+ "Canceled": {
+  "kind": "text"
+ },
+ "Cancellation": {
+  "kind": "text"
+ },
+ "Cancellation policy": {
+  "kind": "text"
+ },
+ "Cancellation Policy": {
+  "kind": "text"
+ },
+ "Cancellation report": {
+  "kind": "text"
+ },
+ "Cancellation Report": {
+  "kind": "text"
+ },
+ "Cancellations and no-shows appear here against the date they were due to arrive.": {
+  "kind": "text"
+ },
+ "Cancelled": {
+  "kind": "text"
+ },
+ "Cancelled {0} on booking {1}": {
+  "kind": "db"
+ },
+ "Cannot be filed as they stand": {
+  "kind": "text"
+ },
+ "Cannot post to another cashier drawer": {
+  "kind": "db"
+ },
+ "Card": {
+  "kind": "text"
+ },
+ "Cash": {
+  "kind": "text"
+ },
+ "Cash — this will change the drawer total.": {
+  "kind": "text"
+ },
+ "Cash counted": {
+  "kind": "text"
+ },
+ "Cash only — non-cash payments excluded": {
+  "kind": "text"
+ },
+ "Cash only, this shift": {
+  "kind": "text"
+ },
+ "Cash payment must use an open shift on its business date": {
+  "kind": "db"
+ },
+ "Cash payments require a cashier shift": {
+  "kind": "db"
+ },
+ "Cashier": {
+  "kind": "text"
+ },
+ "Cashier shift closed": {
+  "kind": "db"
+ },
+ "Cashier shift opened": {
+  "kind": "db"
+ },
+ "Cashier shift opening facts are immutable": {
+  "kind": "db"
+ },
+ "Cashier variance recorded": {
+  "kind": "db"
+ },
+ "Category": {
+  "kind": "text"
+ },
+ "Category taxes": {
+  "kind": "text"
+ },
+ "Category title": {
+  "kind": "text"
+ },
+ "Cayman Islands": {
+  "kind": "country",
+  "code": "KY"
+ },
+ "Central African Republic": {
+  "kind": "country",
+  "code": "CF"
+ },
+ "Chad": {
+  "kind": "country",
+  "code": "TD"
+ },
+ "Change": {
+  "kind": "text"
+ },
+ "Change the booking": {
+  "kind": "text"
+ },
+ "Change the password": {
+  "kind": "text"
+ },
+ "Changing…": {
+  "kind": "text"
+ },
+ "Channel": {
+  "kind": "text"
+ },
+ "Channel - Booking Cancellation": {
+  "kind": "text"
+ },
+ "Channel - Booking Confirmation": {
+  "kind": "text"
+ },
+ "Channel - Booking Modification": {
+  "kind": "text"
+ },
+ "Channel - Missing Booking Cancellation": {
+  "kind": "text"
+ },
+ "Channel - Missing Booking Modification": {
+  "kind": "text"
+ },
+ "Channel - Overbooking Notification": {
+  "kind": "text"
+ },
+ "Channel - Rate Mapping Error": {
+  "kind": "text"
+ },
+ "Channel Manager": {
+  "kind": "text"
+ },
+ "Channel manager password": {
+  "kind": "db"
+ },
+ "Channel Manager Settings": {
+  "kind": "text"
+ },
+ "Channel Managers": {
+  "kind": "text"
+ },
+ "Channel reference": {
+  "kind": "text"
+ },
+ "Channel report": {
+  "kind": "text"
+ },
+ "Channel Report": {
+  "kind": "text"
+ },
+ "ChannexPCI": {
+  "kind": "text"
+ },
+ "charge": {
+  "kind": "text"
+ },
+ "Charge": {
+  "kind": "text"
+ },
+ "Charge for the room": {
+  "kind": "text"
+ },
+ "Charge posted: {0}": {
+  "kind": "db"
+ },
+ "Charge reversed: {0}": {
+  "kind": "db"
+ },
+ "Charge this back to a guest": {
+  "kind": "text"
+ },
+ "Charged": {
+  "kind": "text"
+ },
+ "Charged to the folio.": {
+  "kind": "text"
+ },
+ "Charges": {
+  "kind": "text"
+ },
+ "Charges have already been posted at this rate. Retire it and add a new one rather than changing it.": {
+  "kind": "db"
+ },
+ "Charges have been posted at this rate, so its value is fixed.": {
+  "kind": "text"
+ },
+ "Charges have been posted with {0}, so it cannot be deleted. Untick Active to retire it.": {
+  "kind": "db"
+ },
+ "Charging…": {
+  "kind": "text"
+ },
+ "Check in": {
+  "kind": "text"
+ },
+ "Check In Notes:": {
+  "kind": "text"
+ },
+ "Check out": {
+  "kind": "text"
+ },
+ "Check-in from": {
+  "kind": "text"
+ },
+ "Check-In Text": {
+  "kind": "text"
+ },
+ "Check-out by": {
+  "kind": "text"
+ },
+ "Check-Out Text": {
+  "kind": "text"
+ },
+ "Checked against the departure date, which is not a night stayed. Use it to hold a stay across a peak night rather than losing the room mid-period.": {
+  "kind": "text"
+ },
+ "Checked In": {
+  "kind": "text"
+ },
+ "Checked Out": {
+  "kind": "text"
+ },
+ "checked_in": {
+  "kind": "db"
+ },
+ "checked_out": {
+  "kind": "db"
+ },
+ "Checking in…": {
+  "kind": "text"
+ },
+ "Checking out…": {
+  "kind": "text"
+ },
+ "Checking the link…": {
+  "kind": "text"
+ },
+ "Checking what is free…": {
+  "kind": "text"
+ },
+ "Children": {
+  "kind": "text"
+ },
+ "Chile": {
+  "kind": "country",
+  "code": "CL"
+ },
+ "China": {
+  "kind": "country",
+  "code": "CN"
+ },
+ "Choose": {
+  "kind": "text"
+ },
+ "Choose a booking first.": {
+  "kind": "text"
+ },
+ "Choose a booking status from the list": {
+  "kind": "db"
+ },
+ "Choose a category": {
+  "kind": "text"
+ },
+ "Choose a category for each default": {
+  "kind": "db"
+ },
+ "Choose a country from the list": {
+  "kind": "db"
+ },
+ "Choose a cut-off date from the business date on": {
+  "kind": "db"
+ },
+ "Choose a departure date after the arrival date": {
+  "kind": "db"
+ },
+ "Choose a language from the list": {
+  "kind": "text"
+ },
+ "Choose a payment method.": {
+  "kind": "text"
+ },
+ "Choose a room": {
+  "kind": "text"
+ },
+ "Choose a season, or the Default Season": {
+  "kind": "db"
+ },
+ "Choose a settlement from the list": {
+  "kind": "db"
+ },
+ "Choose a system from the list": {
+  "kind": "db"
+ },
+ "Choose a task": {
+  "kind": "db"
+ },
+ "Choose a template from the list": {
+  "kind": "db"
+ },
+ "Choose an address for multi-property bookings": {
+  "kind": "db"
+ },
+ "Choose an address for single-property bookings": {
+  "kind": "db"
+ },
+ "Choose at least one other customer to merge in": {
+  "kind": "db"
+ },
+ "Choose at least one other sales channel to merge in": {
+  "kind": "db"
+ },
+ "Choose at least one room type and one rate category.": {
+  "kind": "text"
+ },
+ "Choose category": {
+  "kind": "text"
+ },
+ "Choose days or hours before arrival": {
+  "kind": "db"
+ },
+ "Choose each default from this hotel's accounting categories": {
+  "kind": "db"
+ },
+ "Choose each trigger from the list": {
+  "kind": "db"
+ },
+ "Choose extra": {
+  "kind": "text"
+ },
+ "Choose Flexipass or Remotelock": {
+  "kind": "db"
+ },
+ "Choose how deposits are handled": {
+  "kind": "db"
+ },
+ "Choose how each condition compares": {
+  "kind": "db"
+ },
+ "Choose how many days to sync": {
+  "kind": "db"
+ },
+ "Choose how refunds of deposits are handled": {
+  "kind": "db"
+ },
+ "Choose Percent or Fixed": {
+  "kind": "db"
+ },
+ "Choose permissions from the list": {
+  "kind": "db"
+ },
+ "Choose season or event": {
+  "kind": "db"
+ },
+ "Choose SiteMinder or Vertical Booking": {
+  "kind": "db"
+ },
+ "Choose the booking to charge, or untick the box.": {
+  "kind": "text"
+ },
+ "Choose the cancellation policy": {
+  "kind": "db"
+ },
+ "Choose the category to merge into": {
+  "kind": "db"
+ },
+ "Choose the category to merge into.": {
+  "kind": "text"
+ },
+ "Choose the cut-off date": {
+  "kind": "db"
+ },
+ "Choose the cut-off time": {
+  "kind": "db"
+ },
+ "Choose the extra to merge into": {
+  "kind": "db"
+ },
+ "Choose the extra to merge into.": {
+  "kind": "text"
+ },
+ "Choose the kind": {
+  "kind": "db"
+ },
+ "Choose the no-show policy": {
+  "kind": "db"
+ },
+ "Choose the parent room type": {
+  "kind": "db"
+ },
+ "Choose the record to keep. Everything on the others moves to it. This cannot be undone from here.": {
+  "kind": "text"
+ },
+ "Choose the region from the list": {
+  "kind": "db"
+ },
+ "Choose the start and the end": {
+  "kind": "db"
+ },
+ "Choose the start and the end.": {
+  "kind": "text"
+ },
+ "Choose what each condition checks": {
+  "kind": "db"
+ },
+ "Choose when the remaining balance is paid": {
+  "kind": "db"
+ },
+ "Choose which customer to keep": {
+  "kind": "db"
+ },
+ "Choose…": {
+  "kind": "text"
+ },
+ "Christmas Island": {
+  "kind": "country",
+  "code": "CX"
+ },
+ "City": {
+  "kind": "text"
+ },
+ "City / Town / Village": {
+  "kind": "text"
+ },
+ "City Cabs": {
+  "kind": "text"
+ },
+ "Clean": {
+  "kind": "text"
+ },
+ "Clear": {
+  "kind": "text"
+ },
+ "Clear filter": {
+  "kind": "text"
+ },
+ "Clear the state or floor filter to see the whole house.": {
+  "kind": "text"
+ },
+ "Cleared {n} nights.": {
+  "kind": "plural",
+  "one": "Cleared {n} night."
+ },
+ "Client ID": {
+  "kind": "text"
+ },
+ "Client secret": {
+  "kind": "text"
+ },
+ "Close": {
+  "kind": "text"
+ },
+ "Close out": {
+  "kind": "text"
+ },
+ "Close Out": {
+  "kind": "text"
+ },
+ "Close preview": {
+  "kind": "text"
+ },
+ "Close shift": {
+  "kind": "text"
+ },
+ "Close the {0} open cashier shift(s) before closing the business date": {
+  "kind": "db"
+ },
+ "Close the booking": {
+  "kind": "text"
+ },
+ "Close the day": {
+  "kind": "text"
+ },
+ "Close without taking a booking": {
+  "kind": "text"
+ },
+ "Closed": {
+  "kind": "text"
+ },
+ "Closed cashier shifts are immutable": {
+  "kind": "db"
+ },
+ "Closed to arrival": {
+  "kind": "text"
+ },
+ "Closed To Arrival": {
+  "kind": "db"
+ },
+ "Closed to departure": {
+  "kind": "text"
+ },
+ "Closed To Departure": {
+  "kind": "db"
+ },
+ "Closes the room type on every rate plan at once, which is what makes it different from Stop sell.": {
+  "kind": "text"
+ },
+ "Closing…": {
+  "kind": "text"
+ },
+ "Cocos (Keeling) Islands": {
+  "kind": "country",
+  "code": "CC"
+ },
+ "Code": {
+  "kind": "text"
+ },
+ "Collected": {
+  "kind": "text"
+ },
+ "Colombia": {
+  "kind": "country",
+  "code": "CO"
+ },
+ "Color": {
+  "kind": "text"
+ },
+ "Colour": {
+  "kind": "text"
+ },
+ "Comes off every night the offer covers.": {
+  "kind": "text"
+ },
+ "Comments": {
+  "kind": "text"
+ },
+ "Commission": {
+  "kind": "text"
+ },
+ "Commission %": {
+  "kind": "text"
+ },
+ "Commission must be between 0 and 100 percent": {
+  "kind": "db"
+ },
+ "Commission must be between 0 and 100 percent.": {
+  "kind": "text"
+ },
+ "Common Door Name": {
+  "kind": "text"
+ },
+ "Communications & Notifications": {
+  "kind": "text"
+ },
+ "Comoros": {
+  "kind": "country",
+  "code": "KM"
+ },
+ "company": {
+  "kind": "text"
+ },
+ "Company": {
+  "kind": "text"
+ },
+ "Company booking": {
+  "kind": "text"
+ },
+ "Company Booking Color": {
+  "kind": "text"
+ },
+ "Company Information for Invoice": {
+  "kind": "text"
+ },
+ "Company name": {
+  "kind": "text"
+ },
+ "Company Name": {
+  "kind": "text"
+ },
+ "Company registration id": {
+  "kind": "text"
+ },
+ "Comparison": {
+  "kind": "text"
+ },
+ "Complete": {
+  "kind": "text"
+ },
+ "Complimentary": {
+  "kind": "text"
+ },
+ "Condition": {
+  "kind": "text"
+ },
+ "Conditions:": {
+  "kind": "text"
+ },
+ "Confirm": {
+  "kind": "text"
+ },
+ "Confirm the upgrade": {
+  "kind": "text"
+ },
+ "Confirmation Header Info Text Color": {
+  "kind": "text"
+ },
+ "confirmed": {
+  "kind": "db"
+ },
+ "Confirmed": {
+  "kind": "text"
+ },
+ "Confirmed bookings for today appear here.": {
+  "kind": "text"
+ },
+ "Congo": {
+  "kind": "country",
+  "code": "CG"
+ },
+ "Congo, Democratic Republic of the": {
+  "kind": "country",
+  "code": "CD"
+ },
+ "Connection Name": {
+  "kind": "text"
+ },
+ "Connectivity Settings": {
+  "kind": "text"
+ },
+ "Contact": {
+  "kind": "text"
+ },
+ "Convert prepayments to charges": {
+  "kind": "text"
+ },
+ "Convert prepayments to regular charges on booking checkin": {
+  "kind": "text"
+ },
+ "converted": {
+  "kind": "db"
+ },
+ "Converted": {
+  "kind": "text"
+ },
+ "Cook Islands": {
+  "kind": "country",
+  "code": "CK"
+ },
+ "Copied": {
+  "kind": "text"
+ },
+ "Copy": {
+  "kind": "text"
+ },
+ "Copy {name}": {
+  "kind": "text"
+ },
+ "Copy it now — it will not be shown again.": {
+  "kind": "text"
+ },
+ "Correspondence": {
+  "kind": "text"
+ },
+ "Costa Rica": {
+  "kind": "country",
+  "code": "CR"
+ },
+ "Côte d'Ivoire": {
+  "kind": "country",
+  "code": "CI"
+ },
+ "Count the cash in the drawer and enter the total.": {
+  "kind": "text"
+ },
+ "Count the float into the drawer and enter the total.": {
+  "kind": "text"
+ },
+ "Counted": {
+  "kind": "text"
+ },
+ "Counted blind at close": {
+  "kind": "text"
+ },
+ "Counted cash must be non-negative": {
+  "kind": "db"
+ },
+ "Countries": {
+  "kind": "text"
+ },
+ "Country": {
+  "kind": "text"
+ },
+ "Country must be a two-letter country code": {
+  "kind": "db"
+ },
+ "Country of residence": {
+  "kind": "text"
+ },
+ "Country report": {
+  "kind": "text"
+ },
+ "Country Report": {
+  "kind": "text"
+ },
+ "County / State / Province": {
+  "kind": "text"
+ },
+ "Covers": {
+  "kind": "text"
+ },
+ "covers in this range": {
+  "kind": "text"
+ },
+ "Create": {
+  "kind": "text"
+ },
+ "Create API Key": {
+  "kind": "text"
+ },
+ "Create Booking marker to intersect checkout date": {
+  "kind": "text"
+ },
+ "Create Currency Profile": {
+  "kind": "text"
+ },
+ "Create Customer": {
+  "kind": "text"
+ },
+ "Create it": {
+  "kind": "text"
+ },
+ "Create new identification type": {
+  "kind": "text"
+ },
+ "Create new trigger": {
+  "kind": "text"
+ },
+ "Create new widget": {
+  "kind": "text"
+ },
+ "Create one under Settings → Rate plans.": {
+  "kind": "text"
+ },
+ "Create Pos Profile": {
+  "kind": "text"
+ },
+ "Croatia": {
+  "kind": "country",
+  "code": "HR"
+ },
+ "CSS Editor": {
+  "kind": "text"
+ },
+ "CTA CTD SS": {
+  "kind": "text"
+ },
+ "Cuba": {
+  "kind": "country",
+  "code": "CU"
+ },
+ "Curaçao": {
+  "kind": "country",
+  "code": "CW"
+ },
+ "Currencies": {
+  "kind": "text"
+ },
+ "Currency": {
+  "kind": "text"
+ },
+ "current": {
+  "kind": "text"
+ },
+ "Current password": {
+  "kind": "text"
+ },
+ "Current staff user is not permitted to post financial transactions": {
+  "kind": "db"
+ },
+ "Custom cancellation policy": {
+  "kind": "text"
+ },
+ "Custom confirmation message": {
+  "kind": "text"
+ },
+ "Custom no-show policy": {
+  "kind": "text"
+ },
+ "Custom Payment Types": {
+  "kind": "text"
+ },
+ "Custom policy": {
+  "kind": "text"
+ },
+ "Custom Policy": {
+  "kind": "text"
+ },
+ "Custom Question 1 Title:": {
+  "kind": "text"
+ },
+ "Custom Question 2 Title:": {
+  "kind": "text"
+ },
+ "Custom refund policy": {
+  "kind": "text"
+ },
+ "Custom terms": {
+  "kind": "text"
+ },
+ "Customer": {
+  "kind": "text"
+ },
+ "Customer {n}": {
+  "kind": "text"
+ },
+ "Customer created.": {
+  "kind": "text"
+ },
+ "Customer Profiles": {
+  "kind": "text"
+ },
+ "Customer saved.": {
+  "kind": "text"
+ },
+ "Customers": {
+  "kind": "text"
+ },
+ "Customize Confirmation Email Reservation Colors:": {
+  "kind": "text"
+ },
+ "Cut-off date": {
+  "kind": "text"
+ },
+ "Cut-off time": {
+  "kind": "text"
+ },
+ "Cyprus": {
+  "kind": "country",
+  "code": "CY"
+ },
+ "Czechia": {
+  "kind": "country",
+  "code": "CZ"
+ },
+ "Daily checkout": {
+  "kind": "text"
+ },
+ "Daily Checkout Report": {
+  "kind": "text"
+ },
+ "Dashboard": {
+  "kind": "text"
+ },
+ "Date": {
+  "kind": "text"
+ },
+ "Date of birth": {
+  "kind": "text"
+ },
+ "Dates": {
+  "kind": "text"
+ },
+ "Dates deleted.": {
+  "kind": "text"
+ },
+ "Day": {
+  "kind": "text"
+ },
+ "Day closed": {
+  "kind": "text"
+ },
+ "days": {
+  "kind": "text"
+ },
+ "Days": {
+  "kind": "text"
+ },
+ "Days or hours": {
+  "kind": "text"
+ },
+ "days prior to arrival": {
+  "kind": "text"
+ },
+ "Days to sync:": {
+  "kind": "text"
+ },
+ "DBL": {
+  "kind": "text"
+ },
+ "Debtors": {
+  "kind": "text"
+ },
+ "Debtors report": {
+  "kind": "text"
+ },
+ "Debtors Report": {
+  "kind": "text"
+ },
+ "default": {
+  "kind": "text"
+ },
+ "Default": {
+  "kind": "text"
+ },
+ "Default Accounting Categories": {
+  "kind": "text"
+ },
+ "Default accounting categories saved.": {
+  "kind": "text"
+ },
+ "Default for accommodation": {
+  "kind": "text"
+ },
+ "Default for extras": {
+  "kind": "text"
+ },
+ "Default for payments": {
+  "kind": "text"
+ },
+ "Default for taxes": {
+  "kind": "text"
+ },
+ "Default language": {
+  "kind": "text"
+ },
+ "Default language saved.": {
+  "kind": "text"
+ },
+ "Default Notes": {
+  "kind": "text"
+ },
+ "Default Season": {
+  "kind": "text"
+ },
+ "Delete": {
+  "kind": "text"
+ },
+ "Delete {currency}": {
+  "kind": "text"
+ },
+ "Delete {currency}?": {
+  "kind": "text"
+ },
+ "Delete {name}": {
+  "kind": "text"
+ },
+ "Delete {name} {date} to {date2}": {
+  "kind": "text"
+ },
+ "Delete {name} and all its dates?": {
+  "kind": "text"
+ },
+ "Delete {name}, {date} - {date2}?": {
+  "kind": "text"
+ },
+ "Delete {name}?": {
+  "kind": "text"
+ },
+ "Delete {name}? Anything using it stops working at once.": {
+  "kind": "text"
+ },
+ "Delete {name}? It comes off every room type it is on.": {
+  "kind": "text"
+ },
+ "Delete {name}? Its link stops narrowing the rooms.": {
+  "kind": "text"
+ },
+ "Delete {name}? Its prices and restrictions go with it.": {
+  "kind": "text"
+ },
+ "Delete {name}? Its prices go with it.": {
+  "kind": "text"
+ },
+ "Delete {name}? Its saved password goes with it.": {
+  "kind": "text"
+ },
+ "Delete {name}? Its saved secret goes with it.": {
+  "kind": "text"
+ },
+ "Delete room {number}": {
+  "kind": "text"
+ },
+ "Delete room {number}? This cannot be undone.": {
+  "kind": "text"
+ },
+ "Delete the {name} profile?": {
+  "kind": "text"
+ },
+ "Delete the category {name}?": {
+  "kind": "text"
+ },
+ "Delete the extra {name}?": {
+  "kind": "text"
+ },
+ "Delete the template {name}?": {
+  "kind": "text"
+ },
+ "Delete this note?": {
+  "kind": "text"
+ },
+ "Delete widget {hash}": {
+  "kind": "text"
+ },
+ "Delete widget {hash}? Its embed code stops showing a widget.": {
+  "kind": "text"
+ },
+ "Denmark": {
+  "kind": "country",
+  "code": "DK"
+ },
+ "Departed": {
+  "kind": "text"
+ },
+ "Departs": {
+  "kind": "text"
+ },
+ "departure": {
+  "kind": "text"
+ },
+ "Departure": {
+  "kind": "text"
+ },
+ "Departures": {
+  "kind": "text"
+ },
+ "Departures clear from this list once the folio settles.": {
+  "kind": "text"
+ },
+ "Deposit report": {
+  "kind": "text"
+ },
+ "Deposit Report": {
+  "kind": "text"
+ },
+ "Deposits": {
+  "kind": "text"
+ },
+ "Deposits are refundable up to": {
+  "kind": "text"
+ },
+ "Deposits are refundable up to {n} days prior to arrival.": {
+  "kind": "plural",
+  "one": "Deposits are refundable up to {n} day prior to arrival."
+ },
+ "Description": {
+  "kind": "text"
+ },
+ "Dev Key Name": {
+  "kind": "text"
+ },
+ "Developer key": {
+  "kind": "text"
+ },
+ "Developers Keys": {
+  "kind": "text"
+ },
+ "dinner": {
+  "kind": "text"
+ },
+ "Dinner": {
+  "kind": "text"
+ },
+ "Direct": {
+  "kind": "text"
+ },
+ "Direct share": {
+  "kind": "text"
+ },
+ "Directions:": {
+  "kind": "text"
+ },
+ "Dirty": {
+  "kind": "text"
+ },
+ "Discount": {
+  "kind": "text"
+ },
+ "Discount amount must be positive and not exceed original charge": {
+  "kind": "db"
+ },
+ "Discount given": {
+  "kind": "text"
+ },
+ "Discounts": {
+  "kind": "text"
+ },
+ "Display Name": {
+  "kind": "text"
+ },
+ "Divider": {
+  "kind": "text"
+ },
+ "Djibouti": {
+  "kind": "country",
+  "code": "DJ"
+ },
+ "Do not disturb": {
+  "kind": "text"
+ },
+ "Do you have any other details?": {
+  "kind": "text"
+ },
+ "Document": {
+  "kind": "text"
+ },
+ "Document expiry": {
+  "kind": "text"
+ },
+ "Document number": {
+  "kind": "text"
+ },
+ "Document, nationality and date of birth": {
+  "kind": "text"
+ },
+ "Dominica": {
+  "kind": "country",
+  "code": "DM"
+ },
+ "Dominican Republic": {
+  "kind": "country",
+  "code": "DO"
+ },
+ "Done": {
+  "kind": "text"
+ },
+ "Double": {
+  "kind": "text"
+ },
+ "Download": {
+  "kind": "text"
+ },
+ "Download every customer matching this search, as a CSV Excel opens": {
+  "kind": "text"
+ },
+ "Draft": {
+  "kind": "text"
+ },
+ "Drawer": {
+  "kind": "text"
+ },
+ "Drop in's": {
+  "kind": "text"
+ },
+ "Drop the logo here, or click to choose it": {
+  "kind": "text"
+ },
+ "Due": {
+  "kind": "text"
+ },
+ "Due out": {
+  "kind": "text"
+ },
+ "Due out that day": {
+  "kind": "text"
+ },
+ "Due out today": {
+  "kind": "text"
+ },
+ "Due out tomorrow": {
+  "kind": "text"
+ },
+ "Each room line needs a whole number of rooms.": {
+  "kind": "text"
+ },
+ "Earlier": {
+  "kind": "text"
+ },
+ "Earlier dates": {
+  "kind": "text"
+ },
+ "Ecuador": {
+  "kind": "country",
+  "code": "EC"
+ },
+ "Edit": {
+  "kind": "text"
+ },
+ "Edit {currency}": {
+  "kind": "text"
+ },
+ "Edit {name}": {
+  "kind": "text"
+ },
+ "Edit Accounting System": {
+  "kind": "text"
+ },
+ "Edit Currency Profile": {
+  "kind": "text"
+ },
+ "Edit customer": {
+  "kind": "text"
+ },
+ "Edit Discount": {
+  "kind": "text"
+ },
+ "Edit event": {
+  "kind": "text"
+ },
+ "Edit Gateway": {
+  "kind": "text"
+ },
+ "Edit offer": {
+  "kind": "text"
+ },
+ "Edit payment type": {
+  "kind": "text"
+ },
+ "Edit Pos Profile": {
+  "kind": "text"
+ },
+ "Edit Profile": {
+  "kind": "text"
+ },
+ "Edit rate plan": {
+  "kind": "text"
+ },
+ "Edit room {number}": {
+  "kind": "text"
+ },
+ "Edit room type": {
+  "kind": "text"
+ },
+ "Edit season": {
+  "kind": "text"
+ },
+ "Edit tax": {
+  "kind": "text"
+ },
+ "Edit this customer": {
+  "kind": "text"
+ },
+ "Edit Virtual Room Type": {
+  "kind": "text"
+ },
+ "Edit widget {hash}": {
+  "kind": "text"
+ },
+ "Editors one above the other": {
+  "kind": "text"
+ },
+ "Editors side by side": {
+  "kind": "text"
+ },
+ "Egypt": {
+  "kind": "country",
+  "code": "EG"
+ },
+ "El Salvador": {
+  "kind": "country",
+  "code": "SV"
+ },
+ "Email": {
+  "kind": "text"
+ },
+ "Email address": {
+  "kind": "text"
+ },
+ "Email preference {0} must be on or off": {
+  "kind": "db"
+ },
+ "Email preferences": {
+  "kind": "text"
+ },
+ "Email preferences saved.": {
+  "kind": "text"
+ },
+ "Email Setup": {
+  "kind": "text"
+ },
+ "Email subject": {
+  "kind": "text"
+ },
+ "Email template added.": {
+  "kind": "text"
+ },
+ "Email template saved.": {
+  "kind": "text"
+ },
+ "Email Templates": {
+  "kind": "text"
+ },
+ "Emails that will be used for notifications": {
+  "kind": "text"
+ },
+ "Embed code": {
+  "kind": "text"
+ },
+ "Enable Accounting Categories Feature": {
+  "kind": "text"
+ },
+ "Enable Accounting Report": {
+  "kind": "text"
+ },
+ "Enable Custom Invoice Number Settings": {
+  "kind": "text"
+ },
+ "Enable Foreign Currency Invoices": {
+  "kind": "text"
+ },
+ "Enable Group Booking Feature": {
+  "kind": "text"
+ },
+ "Enable Housekeeping Feature": {
+  "kind": "text"
+ },
+ "Enable Housekeeping Status Modification Feature": {
+  "kind": "text"
+ },
+ "Enable room rate combination modification": {
+  "kind": "text"
+ },
+ "Enable SalesChannels Feature": {
+  "kind": "text"
+ },
+ "Enable three-column dashboard view without Statistics": {
+  "kind": "text"
+ },
+ "Enable Travia customer lookup": {
+  "kind": "text"
+ },
+ "Enabled": {
+  "kind": "text"
+ },
+ "End of day": {
+  "kind": "text"
+ },
+ "End of day report": {
+  "kind": "text"
+ },
+ "End Of Day Report": {
+  "kind": "text"
+ },
+ "Endpoint:": {
+  "kind": "text"
+ },
+ "Enter a nightly rate for {name}, or pick a rate plan that has one loaded.": {
+  "kind": "text"
+ },
+ "Enter a percentage between 0 and 100.": {
+  "kind": "text"
+ },
+ "Enter a percentage, like 15.": {
+  "kind": "text"
+ },
+ "Enter a whole number, or leave it blank to clear.": {
+  "kind": "text"
+ },
+ "Enter an amount like 2500 or 2500.50": {
+  "kind": "text"
+ },
+ "Enter an amount like 450 or 450.00": {
+  "kind": "text"
+ },
+ "Enter how many nights are paid for and how many are free.": {
+  "kind": "text"
+ },
+ "Enter how much comes off each night.": {
+  "kind": "text"
+ },
+ "Enter the company name.": {
+  "kind": "text"
+ },
+ "Enter the counted total, e.g. 18400": {
+  "kind": "text"
+ },
+ "Enter the float like 500 or 500.00": {
+  "kind": "text"
+ },
+ "Enter the guest's name.": {
+  "kind": "text"
+ },
+ "Enter your password": {
+  "kind": "text"
+ },
+ "Equatorial Guinea": {
+  "kind": "country",
+  "code": "GQ"
+ },
+ "Eritrea": {
+  "kind": "country",
+  "code": "ER"
+ },
+ "Esc to close": {
+  "kind": "text"
+ },
+ "Estonia": {
+  "kind": "country",
+  "code": "EE"
+ },
+ "Eswatini": {
+  "kind": "country",
+  "code": "SZ"
+ },
+ "Ethiopia": {
+  "kind": "country",
+  "code": "ET"
+ },
+ "Europe, Middle East & Africa": {
+  "kind": "text"
+ },
+ "Event": {
+  "kind": "text"
+ },
+ "Event name": {
+  "kind": "text"
+ },
+ "Events": {
+  "kind": "text"
+ },
+ "Every day": {
+  "kind": "text"
+ },
+ "Every folio settled": {
+  "kind": "text"
+ },
+ "Every folio with a balance appears here, for room bookings and meeting rooms alike.": {
+  "kind": "text"
+ },
+ "Every room is assigned.": {
+  "kind": "text"
+ },
+ "Every room sellable": {
+  "kind": "text"
+ },
+ "Everyone has left": {
+  "kind": "text"
+ },
+ "Everything else": {
+  "kind": "text"
+ },
+ "Everything posted to folios": {
+  "kind": "text"
+ },
+ "Everything, including staff": {
+  "kind": "text"
+ },
+ "Everything, including staff and settings": {
+  "kind": "text"
+ },
+ "Exclude {name} from email": {
+  "kind": "text"
+ },
+ "Exclude from email": {
+  "kind": "text"
+ },
+ "Expected in drawer": {
+  "kind": "text"
+ },
+ "expired": {
+  "kind": "db"
+ },
+ "Expired": {
+  "kind": "text"
+ },
+ "Expires": {
+  "kind": "text"
+ },
+ "Export to Excel": {
+  "kind": "text"
+ },
+ "Extend anyway, overbooking the house.": {
+  "kind": "text"
+ },
+ "External Code": {
+  "kind": "text"
+ },
+ "Extra": {
+  "kind": "text"
+ },
+ "Extra {0} merged into {1}": {
+  "kind": "db"
+ },
+ "Extra added.": {
+  "kind": "text"
+ },
+ "Extra category {0} merged into {1} ({2} extra{3} moved)": {
+  "kind": "db"
+ },
+ "Extra category added.": {
+  "kind": "text"
+ },
+ "Extra category saved.": {
+  "kind": "text"
+ },
+ "Extra saved.": {
+  "kind": "text"
+ },
+ "Extras": {
+  "kind": "text"
+ },
+ "Extras Categories": {
+  "kind": "text"
+ },
+ "Extras charged": {
+  "kind": "text"
+ },
+ "Extras per page": {
+  "kind": "text"
+ },
+ "Extras report": {
+  "kind": "text"
+ },
+ "Extras Report": {
+  "kind": "text"
+ },
+ "Extras revenue": {
+  "kind": "text"
+ },
+ "Facilities": {
+  "kind": "text"
+ },
+ "Facility added.": {
+  "kind": "text"
+ },
+ "Facility saved.": {
+  "kind": "text"
+ },
+ "Facility title": {
+  "kind": "text"
+ },
+ "Falkland Islands": {
+  "kind": "country",
+  "code": "FK"
+ },
+ "Faroe Islands": {
+  "kind": "country",
+  "code": "FO"
+ },
+ "Fax Number": {
+  "kind": "text"
+ },
+ "Field {value} name": {
+  "kind": "text"
+ },
+ "Field {value} type": {
+  "kind": "text"
+ },
+ "Field name": {
+  "kind": "text"
+ },
+ "Fiji": {
+  "kind": "country",
+  "code": "FJ"
+ },
+ "Filter by cancellation policy": {
+  "kind": "text"
+ },
+ "Filter by type": {
+  "kind": "text"
+ },
+ "Filters": {
+  "kind": "text"
+ },
+ "Finances": {
+  "kind": "text"
+ },
+ "Financial": {
+  "kind": "text"
+ },
+ "Financial record booking must match its folio booking": {
+  "kind": "db"
+ },
+ "Financial report": {
+  "kind": "text"
+ },
+ "Financial Report": {
+  "kind": "text"
+ },
+ "Find an existing guest": {
+  "kind": "text"
+ },
+ "Finding free rooms…": {
+  "kind": "text"
+ },
+ "Finland": {
+  "kind": "country",
+  "code": "FI"
+ },
+ "First day": {
+  "kind": "text"
+ },
+ "First name": {
+  "kind": "text"
+ },
+ "Fixed": {
+  "kind": "text"
+ },
+ "Fixed rate": {
+  "kind": "text"
+ },
+ "Flexipass": {
+  "kind": "text"
+ },
+ "Floor": {
+  "kind": "text"
+ },
+ "floor {floor}": {
+  "kind": "text"
+ },
+ "Floor {floor}": {
+  "kind": "text"
+ },
+ "floor {n}": {
+  "kind": "text"
+ },
+ "Folio": {
+  "kind": "text"
+ },
+ "Folio {0} opened": {
+  "kind": "db"
+ },
+ "Folio {n} belongs to a meeting room booking": {
+  "kind": "text"
+ },
+ "Folio not found for current property": {
+  "kind": "db"
+ },
+ "Folio report": {
+  "kind": "text"
+ },
+ "Folio Report": {
+  "kind": "text"
+ },
+ "Folio settled": {
+  "kind": "db"
+ },
+ "Folio/invoice template": {
+  "kind": "text"
+ },
+ "Folios": {
+  "kind": "text"
+ },
+ "Food & beverage": {
+  "kind": "text"
+ },
+ "Food and drink": {
+  "kind": "text"
+ },
+ "Footer saved.": {
+  "kind": "text"
+ },
+ "Footer Template": {
+  "kind": "text"
+ },
+ "forecast": {
+  "kind": "text"
+ },
+ "Forgot password?": {
+  "kind": "text"
+ },
+ "France": {
+  "kind": "country",
+  "code": "FR"
+ },
+ "Free cancellation at any time": {
+  "kind": "text"
+ },
+ "Free cancellation at any time.": {
+  "kind": "text"
+ },
+ "Free cancellation days cannot be more than 365": {
+  "kind": "db"
+ },
+ "Free cancellation days cannot be negative": {
+  "kind": "db"
+ },
+ "Free cancellation up": {
+  "kind": "text"
+ },
+ "Free cancellation up to {n} days before arrival.": {
+  "kind": "plural",
+  "one": "Free cancellation up to {n} day before arrival."
+ },
+ "Free cancellation up to {n} hours before arrival.": {
+  "kind": "plural",
+  "one": "Free cancellation up to {n} hour before arrival."
+ },
+ "Free On-Site Parking": {
+  "kind": "text"
+ },
+ "Free to cancel": {
+  "kind": "text"
+ },
+ "Free to cancel until {date}.": {
+  "kind": "text"
+ },
+ "Free to cancel until the deadline.": {
+  "kind": "text"
+ },
+ "Free until {date}": {
+  "kind": "text"
+ },
+ "Free Wifi in all areas": {
+  "kind": "text"
+ },
+ "Free WiFi in most areas depending on signal": {
+  "kind": "text"
+ },
+ "French Guiana": {
+  "kind": "country",
+  "code": "GF"
+ },
+ "French Polynesia": {
+  "kind": "country",
+  "code": "PF"
+ },
+ "French Southern Territories": {
+  "kind": "country",
+  "code": "TF"
+ },
+ "From": {
+  "kind": "text"
+ },
+ "From {date}": {
+  "kind": "text"
+ },
+ "From text": {
+  "kind": "text"
+ },
+ "From the plan": {
+  "kind": "text"
+ },
+ "Front desk": {
+  "kind": "text"
+ },
+ "Front desk, manager and admin accounts can add a customer": {
+  "kind": "text"
+ },
+ "Front desk, manager and admin accounts can change this": {
+  "kind": "text"
+ },
+ "Front desk, manager and admin accounts can take a booking. Ask a manager if you need access.": {
+  "kind": "text"
+ },
+ "Full name": {
+  "kind": "text"
+ },
+ "Full screen": {
+  "kind": "text"
+ },
+ "Full screen, {name}": {
+  "kind": "text"
+ },
+ "Gabon": {
+  "kind": "country",
+  "code": "GA"
+ },
+ "Gambia": {
+  "kind": "country",
+  "code": "GM"
+ },
+ "Gateway": {
+  "kind": "text"
+ },
+ "GDS": {
+  "kind": "text"
+ },
+ "General Invoice Settings": {
+  "kind": "text"
+ },
+ "General Settings": {
+  "kind": "text"
+ },
+ "General settings saved.": {
+  "kind": "text"
+ },
+ "Generate API key": {
+  "kind": "text"
+ },
+ "Georgia": {
+  "kind": "country",
+  "code": "GE"
+ },
+ "Germany": {
+  "kind": "country",
+  "code": "DE"
+ },
+ "Ghana": {
+  "kind": "country",
+  "code": "GH"
+ },
+ "Gibraltar": {
+  "kind": "country",
+  "code": "GI"
+ },
+ "Give a nightly rate, or pick a rate plan that has one loaded for these dates": {
+  "kind": "db"
+ },
+ "Give a nightly rate, or pick a rate plan that has one loaded.": {
+  "kind": "text"
+ },
+ "Give a run of room numbers, lowest first": {
+  "kind": "db"
+ },
+ "Give a run of whole room numbers.": {
+  "kind": "text"
+ },
+ "Give a subject": {
+  "kind": "db"
+ },
+ "Give each condition a value": {
+  "kind": "db"
+ },
+ "Give the address it went to": {
+  "kind": "db"
+ },
+ "Give the event a name.": {
+  "kind": "text"
+ },
+ "Give the meeting room a name.": {
+  "kind": "text"
+ },
+ "Give the post-departure email a subject, or turn it off": {
+  "kind": "db"
+ },
+ "Give the promotion a name.": {
+  "kind": "text"
+ },
+ "Give the run lowest first.": {
+  "kind": "text"
+ },
+ "Go to a date": {
+  "kind": "text"
+ },
+ "greater than": {
+  "kind": "text"
+ },
+ "Greece": {
+  "kind": "country",
+  "code": "GR"
+ },
+ "Greenland": {
+  "kind": "country",
+  "code": "GL"
+ },
+ "Grenada": {
+  "kind": "country",
+  "code": "GD"
+ },
+ "Gross": {
+  "kind": "text"
+ },
+ "Group Booking Color": {
+  "kind": "text"
+ },
+ "Group of {n} rooms": {
+  "kind": "text"
+ },
+ "Groups can be nested two deep": {
+  "kind": "db"
+ },
+ "Guadeloupe": {
+  "kind": "country",
+  "code": "GP"
+ },
+ "Guam": {
+  "kind": "country",
+  "code": "GU"
+ },
+ "Guatemala": {
+  "kind": "country",
+  "code": "GT"
+ },
+ "Guernsey": {
+  "kind": "country",
+  "code": "GG"
+ },
+ "Guest": {
+  "kind": "text"
+ },
+ "Guest booking page": {
+  "kind": "text"
+ },
+ "Guest checked in for booking {0}": {
+  "kind": "db"
+ },
+ "Guest checked out for booking {0}": {
+  "kind": "db"
+ },
+ "Guest Configuration": {
+  "kind": "text"
+ },
+ "Guest country": {
+  "kind": "text"
+ },
+ "Guest details saved.": {
+  "kind": "text"
+ },
+ "Guest Details Settings": {
+  "kind": "text"
+ },
+ "Guest field {0} has a type this system does not know": {
+  "kind": "db"
+ },
+ "Guest field {0} needs a name": {
+  "kind": "db"
+ },
+ "Guest notes": {
+  "kind": "text"
+ },
+ "Guest purchase": {
+  "kind": "text"
+ },
+ "Guest Registration Card": {
+  "kind": "text"
+ },
+ "Guest Registration Form": {
+  "kind": "text"
+ },
+ "Guest Registration Form Settings": {
+  "kind": "text"
+ },
+ "Guest signature": {
+  "kind": "text"
+ },
+ "guest@example.com": {
+  "kind": "text"
+ },
+ "Guests": {
+  "kind": "text"
+ },
+ "Guests appear here once they are checked in against the open business date.": {
+  "kind": "text"
+ },
+ "Guinea": {
+  "kind": "country",
+  "code": "GN"
+ },
+ "Guinea-Bissau": {
+  "kind": "country",
+  "code": "GW"
+ },
+ "Guyana": {
+  "kind": "country",
+  "code": "GY"
+ },
+ "Haiti": {
+  "kind": "country",
+  "code": "HT"
+ },
+ "Has access": {
+  "kind": "text"
+ },
+ "Hash code": {
+  "kind": "text"
+ },
+ "Heard Island and McDonald Islands": {
+  "kind": "country",
+  "code": "HM"
+ },
+ "Held": {
+  "kind": "text"
+ },
+ "Here you can add templates for faster communication with your guests": {
+  "kind": "text"
+ },
+ "Here you can choose subset of languages you want to support": {
+  "kind": "text"
+ },
+ "Here you can choose what type of emails you want to receive": {
+  "kind": "text"
+ },
+ "Hide cancellation area from calendar": {
+  "kind": "text"
+ },
+ "Hide hotel address in greetings section and show properties addresses and maps": {
+  "kind": "text"
+ },
+ "Hide rooms": {
+  "kind": "text"
+ },
+ "History": {
+  "kind": "text"
+ },
+ "Holy See": {
+  "kind": "country",
+  "code": "VA"
+ },
+ "Honduras": {
+  "kind": "country",
+  "code": "HN"
+ },
+ "Hong Kong": {
+  "kind": "country",
+  "code": "HK"
+ },
+ "Hotel Code:": {
+  "kind": "text"
+ },
+ "Hotel Content": {
+  "kind": "text"
+ },
+ "Hotel Details": {
+  "kind": "text"
+ },
+ "Hotel details saved.": {
+  "kind": "text"
+ },
+ "Hotel Emails Preferences": {
+  "kind": "text"
+ },
+ "Hotel feature {0} must be on or off": {
+  "kind": "db"
+ },
+ "Hotel Features": {
+  "kind": "text"
+ },
+ "Hotel features saved.": {
+  "kind": "text"
+ },
+ "Hotel ID": {
+  "kind": "text"
+ },
+ "Hotel name": {
+  "kind": "text"
+ },
+ "Hotel Operations": {
+  "kind": "text"
+ },
+ "Hotel Policy": {
+  "kind": "text"
+ },
+ "Hotel policy saved.": {
+  "kind": "text"
+ },
+ "Hotel Profile": {
+  "kind": "text"
+ },
+ "Hotel Properties": {
+  "kind": "text"
+ },
+ "Hotel properties saved.": {
+  "kind": "text"
+ },
+ "hours": {
+  "kind": "text"
+ },
+ "house expense": {
+  "kind": "text"
+ },
+ "Housekeeping": {
+  "kind": "text"
+ },
+ "Housekeeping for room {n}: {state}": {
+  "kind": "text"
+ },
+ "Housekeeping for room {roomNumber}: {name}. Change it.": {
+  "kind": "text"
+ },
+ "Housekeeping report": {
+  "kind": "text"
+ },
+ "Housekeeping Report": {
+  "kind": "text"
+ },
+ "Housekeeping Systems": {
+  "kind": "text"
+ },
+ "How do you handle deposits?": {
+  "kind": "text"
+ },
+ "How do you handle refunds of deposits?": {
+  "kind": "text"
+ },
+ "How long before arrival": {
+  "kind": "text"
+ },
+ "How many people is it for?": {
+  "kind": "text"
+ },
+ "Hungary": {
+  "kind": "country",
+  "code": "HU"
+ },
+ "Iceland": {
+  "kind": "country",
+  "code": "IS"
+ },
+ "Icon": {
+  "kind": "text"
+ },
+ "Id": {
+  "kind": "text"
+ },
+ "Id: {ref}": {
+  "kind": "text"
+ },
+ "Identification type": {
+  "kind": "text"
+ },
+ "Identification type added.": {
+  "kind": "text"
+ },
+ "Identification type saved.": {
+  "kind": "text"
+ },
+ "Identification type title": {
+  "kind": "text"
+ },
+ "Identification Types": {
+  "kind": "text"
+ },
+ "Identity": {
+  "kind": "text"
+ },
+ "If": {
+  "kind": "text"
+ },
+ "Immigration": {
+  "kind": "text"
+ },
+ "Immigration report": {
+  "kind": "text"
+ },
+ "Immigration Report": {
+  "kind": "text"
+ },
+ "In": {
+  "kind": "text"
+ },
+ "In / out": {
+  "kind": "text"
+ },
+ "In case of no-show or late cancellation the first night will be charged": {
+  "kind": "text"
+ },
+ "In case of no-show or late cancellation the first night will be charged.": {
+  "kind": "text"
+ },
+ "In case of no-show or late cancellation the total cost will be charged": {
+  "kind": "text"
+ },
+ "In case of no-show or late cancellation the total cost will be charged.": {
+  "kind": "text"
+ },
+ "In house": {
+  "kind": "text"
+ },
+ "In house report": {
+  "kind": "text"
+ },
+ "In House Report": {
+  "kind": "text"
+ },
+ "In house that night": {
+  "kind": "text"
+ },
+ "In the drawer": {
+  "kind": "text"
+ },
+ "In this range": {
+  "kind": "text"
+ },
+ "Inactive": {
+  "kind": "text"
+ },
+ "Inactive offers": {
+  "kind": "text"
+ },
+ "Include footer template": {
+  "kind": "text"
+ },
+ "Included in the rate": {
+  "kind": "text"
+ },
+ "Includes": {
+  "kind": "text"
+ },
+ "Inclusive — the room is held on this day too.": {
+  "kind": "text"
+ },
+ "Incomplete": {
+  "kind": "text"
+ },
+ "India": {
+  "kind": "country",
+  "code": "IN"
+ },
+ "Indonesia": {
+  "kind": "country",
+  "code": "ID"
+ },
+ "Inspected": {
+  "kind": "text"
+ },
+ "Internal Code": {
+  "kind": "text"
+ },
+ "Internal event": {
+  "kind": "text"
+ },
+ "Internet Access": {
+  "kind": "text"
+ },
+ "Invalid manual charge values": {
+  "kind": "db"
+ },
+ "Inventory": {
+  "kind": "text"
+ },
+ "Inventory Options Visibility": {
+  "kind": "text"
+ },
+ "Inventory options visibility saved.": {
+  "kind": "text"
+ },
+ "Inventory Settings": {
+  "kind": "text"
+ },
+ "Invoice": {
+  "kind": "text"
+ },
+ "Invoice logo": {
+  "kind": "text"
+ },
+ "Invoice Logo and Notes": {
+  "kind": "text"
+ },
+ "Invoice logo and notes saved.": {
+  "kind": "text"
+ },
+ "Invoice Number Settings": {
+  "kind": "text"
+ },
+ "Invoice number settings saved.": {
+  "kind": "text"
+ },
+ "Invoice Settings": {
+  "kind": "text"
+ },
+ "Invoice settings saved.": {
+  "kind": "text"
+ },
+ "Iran": {
+  "kind": "country",
+  "code": "IR"
+ },
+ "Iraq": {
+  "kind": "country",
+  "code": "IQ"
+ },
+ "Ireland": {
+  "kind": "country",
+  "code": "IE"
+ },
+ "Is Active": {
+  "kind": "text"
+ },
+ "Is Default": {
+  "kind": "text"
+ },
+ "Is Enabled": {
+  "kind": "text"
+ },
+ "Is Meal": {
+  "kind": "text"
+ },
+ "is not": {
+  "kind": "text"
+ },
+ "is required per booking": {
+  "kind": "text"
+ },
+ "is required per room booked": {
+  "kind": "text"
+ },
+ "Is Synced": {
+  "kind": "text"
+ },
+ "Isle of Man": {
+  "kind": "country",
+  "code": "IM"
+ },
+ "Israel": {
+  "kind": "country",
+  "code": "IL"
+ },
+ "It cannot end before it starts": {
+  "kind": "db"
+ },
+ "Italy": {
+  "kind": "country",
+  "code": "IT"
+ },
+ "Jamaica": {
+  "kind": "country",
+  "code": "JM"
+ },
+ "Japan": {
+  "kind": "country",
+  "code": "JP"
+ },
+ "Jersey": {
+  "kind": "country",
+  "code": "JE"
+ },
+ "Jordan": {
+  "kind": "country",
+  "code": "JO"
+ },
+ "Kazakhstan": {
+  "kind": "country",
+  "code": "KZ"
+ },
+ "Keep at least one language": {
+  "kind": "db"
+ },
+ "Keep each code to 60 characters": {
+  "kind": "db"
+ },
+ "Keep each text under 100,000 characters": {
+  "kind": "db"
+ },
+ "Keep it": {
+  "kind": "text"
+ },
+ "Keep it to thirty conditions": {
+  "kind": "db"
+ },
+ "Keep the abbreviation to 12 characters": {
+  "kind": "db"
+ },
+ "Keep the connection name to 80 characters": {
+  "kind": "db"
+ },
+ "Keep the description to 500 characters": {
+  "kind": "db"
+ },
+ "Keep the display name to 120 characters": {
+  "kind": "db"
+ },
+ "Keep the key code and the door name to 60 characters": {
+  "kind": "db"
+ },
+ "Keep the name to 120 characters": {
+  "kind": "db"
+ },
+ "Keep the name to 80 characters": {
+  "kind": "db"
+ },
+ "Keep the title to 120 characters": {
+  "kind": "db"
+ },
+ "Keep the title to 80 characters": {
+  "kind": "db"
+ },
+ "Keep this customer off mailings": {
+  "kind": "text"
+ },
+ "Keep:": {
+  "kind": "text"
+ },
+ "Keeps a long low-rate stay from blocking a period you expect to sell at a higher rate. Leave the box empty to clear the rule.": {
+  "kind": "text"
+ },
+ "Kenya": {
+  "kind": "country",
+  "code": "KE"
+ },
+ "Key Code": {
+  "kind": "text"
+ },
+ "Key codes are set per room.": {
+  "kind": "text"
+ },
+ "Key lock system secret": {
+  "kind": "db"
+ },
+ "Key Lock Systems": {
+  "kind": "text"
+ },
+ "Kind": {
+  "kind": "text"
+ },
+ "Kiribati": {
+  "kind": "country",
+  "code": "KI"
+ },
+ "Korea, Democratic People's Republic of": {
+  "kind": "country",
+  "code": "KP"
+ },
+ "Korea, Republic of": {
+  "kind": "country",
+  "code": "KR"
+ },
+ "Kuwait": {
+  "kind": "country",
+  "code": "KW"
+ },
+ "Kyrgyzstan": {
+  "kind": "country",
+  "code": "KG"
+ },
+ "Label color": {
+  "kind": "text"
+ },
+ "Language": {
+  "kind": "text"
+ },
+ "Language (optional)": {
+  "kind": "text"
+ },
+ "Language Settings": {
+  "kind": "text"
+ },
+ "Lao People's Democratic Republic": {
+  "kind": "country",
+  "code": "LA"
+ },
+ "Last booking date": {
+  "kind": "text"
+ },
+ "Last Booking Date": {
+  "kind": "text"
+ },
+ "Last day": {
+  "kind": "text"
+ },
+ "Last name": {
+  "kind": "text"
+ },
+ "Later": {
+  "kind": "text"
+ },
+ "Later dates": {
+  "kind": "text"
+ },
+ "Latitude": {
+  "kind": "text"
+ },
+ "Latitude and longitude are numbers, like 51.5014 and -0.1419.": {
+  "kind": "text"
+ },
+ "Latitude runs from -90 to 90": {
+  "kind": "db"
+ },
+ "Latvia": {
+  "kind": "country",
+  "code": "LV"
+ },
+ "Laundry": {
+  "kind": "text"
+ },
+ "Leave blank to apply automatically": {
+  "kind": "text"
+ },
+ "Leave full screen, {name}": {
+  "kind": "text"
+ },
+ "Lebanon": {
+  "kind": "country",
+  "code": "LB"
+ },
+ "Left": {
+  "kind": "text"
+ },
+ "Left owing": {
+  "kind": "text"
+ },
+ "Lesotho": {
+  "kind": "country",
+  "code": "LS"
+ },
+ "less than": {
+  "kind": "text"
+ },
+ "Let your guests know about the Internet access": {
+  "kind": "text"
+ },
+ "Let your guests know if children are allowed in your accommodation": {
+  "kind": "text"
+ },
+ "Let your guests know if pets are allowed in your accommodation": {
+  "kind": "text"
+ },
+ "Let your guests know if smoking is allowed": {
+  "kind": "text"
+ },
+ "Liberia": {
+  "kind": "country",
+  "code": "LR"
+ },
+ "Libya": {
+  "kind": "country",
+  "code": "LY"
+ },
+ "Liechtenstein": {
+  "kind": "country",
+  "code": "LI"
+ },
+ "Limited On-Site Parking Available": {
+  "kind": "text"
+ },
+ "Link": {
+  "kind": "text"
+ },
+ "Liquid Editor": {
+  "kind": "text"
+ },
+ "Lithuania": {
+  "kind": "country",
+  "code": "LT"
+ },
+ "Live": {
+  "kind": "text"
+ },
+ "Live Exchange": {
+  "kind": "text"
+ },
+ "Load Defaults": {
+  "kind": "text"
+ },
+ "Loading rooms…": {
+  "kind": "text"
+ },
+ "Loading…": {
+  "kind": "text"
+ },
+ "Locales": {
+  "kind": "text"
+ },
+ "Location": {
+  "kind": "text"
+ },
+ "Log out": {
+  "kind": "text"
+ },
+ "Longitude": {
+  "kind": "text"
+ },
+ "Longitude runs from -180 to 180": {
+  "kind": "db"
+ },
+ "Lost arrivals": {
+  "kind": "text"
+ },
+ "lunch": {
+  "kind": "text"
+ },
+ "Lunch": {
+  "kind": "text"
+ },
+ "Luxembourg": {
+  "kind": "country",
+  "code": "LU"
+ },
+ "Macao": {
+  "kind": "country",
+  "code": "MO"
+ },
+ "Madagascar": {
+  "kind": "country",
+  "code": "MG"
+ },
+ "Mail body": {
+  "kind": "text"
+ },
+ "Mail Body:": {
+  "kind": "text"
+ },
+ "main": {
+  "kind": "text"
+ },
+ "Main": {
+  "kind": "text"
+ },
+ "Main rate": {
+  "kind": "text"
+ },
+ "Malawi": {
+  "kind": "country",
+  "code": "MW"
+ },
+ "Malaysia": {
+  "kind": "country",
+  "code": "MY"
+ },
+ "Maldives": {
+  "kind": "country",
+  "code": "MV"
+ },
+ "Mali": {
+  "kind": "country",
+  "code": "ML"
+ },
+ "Malta": {
+  "kind": "country",
+  "code": "MT"
+ },
+ "Manage developers keys": {
+  "kind": "text"
+ },
+ "Manager": {
+  "kind": "text"
+ },
+ "Manager report": {
+  "kind": "text"
+ },
+ "Manager Report": {
+  "kind": "text"
+ },
+ "Map": {
+  "kind": "text"
+ },
+ "Mark all read": {
+  "kind": "text"
+ },
+ "Mark it": {
+  "kind": "text"
+ },
+ "Mark no show": {
+  "kind": "text"
+ },
+ "Marked as a no show.": {
+  "kind": "text"
+ },
+ "Marked cancelled.": {
+  "kind": "text"
+ },
+ "Marked converted.": {
+  "kind": "text"
+ },
+ "Marked expired.": {
+  "kind": "text"
+ },
+ "Marked offered.": {
+  "kind": "text"
+ },
+ "Marked waiting.": {
+  "kind": "text"
+ },
+ "Marking…": {
+  "kind": "text"
+ },
+ "Marshall Islands": {
+  "kind": "country",
+  "code": "MH"
+ },
+ "Martinique": {
+  "kind": "country",
+  "code": "MQ"
+ },
+ "Match": {
+  "kind": "text"
+ },
+ "Mauritania": {
+  "kind": "country",
+  "code": "MR"
+ },
+ "Mauritius": {
+  "kind": "country",
+  "code": "MU"
+ },
+ "Max": {
+  "kind": "text"
+ },
+ "Max nights": {
+  "kind": "text"
+ },
+ "Max stay": {
+  "kind": "text"
+ },
+ "Max Stay": {
+  "kind": "text"
+ },
+ "Mayotte": {
+  "kind": "country",
+  "code": "YT"
+ },
+ "Meal": {
+  "kind": "text"
+ },
+ "Meal report": {
+  "kind": "text"
+ },
+ "Meal Report": {
+  "kind": "text"
+ },
+ "Meals": {
+  "kind": "text"
+ },
+ "Meals come from the rate plan a stay was sold on. Set what a plan includes on the Inventory screen, under the rate plan.": {
+  "kind": "text"
+ },
+ "Meals included in the rate for {0}": {
+  "kind": "db"
+ },
+ "Medical": {
+  "kind": "text"
+ },
+ "Meeting room": {
+  "kind": "text"
+ },
+ "Meeting Room A": {
+  "kind": "text"
+ },
+ "Meeting room booking {0} cancelled": {
+  "kind": "db"
+ },
+ "Meeting rooms": {
+  "kind": "text"
+ },
+ "Meeting Rooms": {
+  "kind": "text"
+ },
+ "Merge": {
+  "kind": "text"
+ },
+ "Merge {n} customers into one": {
+  "kind": "text"
+ },
+ "Merge {name}": {
+  "kind": "text"
+ },
+ "Merge sales channels": {
+  "kind": "text"
+ },
+ "Merge Selected": {
+  "kind": "text"
+ },
+ "Merge them": {
+  "kind": "text"
+ },
+ "Merged into {name}.": {
+  "kind": "text"
+ },
+ "Merged into the channel kept.": {
+  "kind": "text"
+ },
+ "Merging…": {
+  "kind": "text"
+ },
+ "Method": {
+  "kind": "text"
+ },
+ "Methods that move physical cash": {
+  "kind": "text"
+ },
+ "Mexico": {
+  "kind": "country",
+  "code": "MX"
+ },
+ "Micronesia": {
+  "kind": "country",
+  "code": "FM"
+ },
+ "Min nights": {
+  "kind": "text"
+ },
+ "Min stay arrival": {
+  "kind": "text"
+ },
+ "Min Stay Arrival": {
+  "kind": "text"
+ },
+ "Min stay through": {
+  "kind": "text"
+ },
+ "Min Stay Through": {
+  "kind": "text"
+ },
+ "Minibar": {
+  "kind": "text"
+ },
+ "Minibar, laundry and food charges posted to a folio appear here.": {
+  "kind": "text"
+ },
+ "Miscellaneous": {
+  "kind": "text"
+ },
+ "Missing details": {
+  "kind": "text"
+ },
+ "Mixed": {
+  "kind": "db"
+ },
+ "Moldova": {
+  "kind": "country",
+  "code": "MD"
+ },
+ "Monaco": {
+  "kind": "country",
+  "code": "MC"
+ },
+ "Money received": {
+  "kind": "text"
+ },
+ "Money received in this range": {
+  "kind": "text"
+ },
+ "Money taken": {
+  "kind": "text"
+ },
+ "Mongolia": {
+  "kind": "country",
+  "code": "MN"
+ },
+ "Montenegro": {
+  "kind": "country",
+  "code": "ME"
+ },
+ "Month names": {
+  "kind": "text"
+ },
+ "Month names are twelve names separated by commas": {
+  "kind": "db"
+ },
+ "Montserrat": {
+  "kind": "country",
+  "code": "MS"
+ },
+ "Morocco": {
+  "kind": "country",
+  "code": "MA"
+ },
+ "Move {name}. Use the arrow keys.": {
+  "kind": "text"
+ },
+ "Move to": {
+  "kind": "text"
+ },
+ "Move to another room": {
+  "kind": "text"
+ },
+ "Movements": {
+  "kind": "text"
+ },
+ "Mozambique": {
+  "kind": "country",
+  "code": "MZ"
+ },
+ "MST MSA MXS": {
+  "kind": "text"
+ },
+ "Multi-property bookings:": {
+  "kind": "text"
+ },
+ "Multi-room inventory table": {
+  "kind": "text"
+ },
+ "Myanmar": {
+  "kind": "country",
+  "code": "MM"
+ },
+ "Name": {
+  "kind": "text"
+ },
+ "Name / Number": {
+  "kind": "text"
+ },
+ "Name of your hotel": {
+  "kind": "text"
+ },
+ "Name saved.": {
+  "kind": "text"
+ },
+ "Name, email, phone or customer number": {
+  "kind": "text"
+ },
+ "Name:": {
+  "kind": "text"
+ },
+ "Namibia": {
+  "kind": "country",
+  "code": "NA"
+ },
+ "Narrow the room column": {
+  "kind": "text"
+ },
+ "National ID": {
+  "kind": "text"
+ },
+ "National id number": {
+  "kind": "text"
+ },
+ "National Id Number": {
+  "kind": "text"
+ },
+ "Nationality": {
+  "kind": "text"
+ },
+ "Nationality must be a two-letter country code": {
+  "kind": "db"
+ },
+ "Nauru": {
+  "kind": "country",
+  "code": "NR"
+ },
+ "Needs service": {
+  "kind": "text"
+ },
+ "Nepal": {
+  "kind": "country",
+  "code": "NP"
+ },
+ "Net": {
+  "kind": "text"
+ },
+ "Net of discount": {
+  "kind": "text"
+ },
+ "Net of reversals": {
+  "kind": "text"
+ },
+ "Net of tax": {
+  "kind": "text"
+ },
+ "Net taken": {
+  "kind": "text"
+ },
+ "Net to the hotel": {
+  "kind": "text"
+ },
+ "Netherlands": {
+  "kind": "country",
+  "code": "NL"
+ },
+ "New booking": {
+  "kind": "text"
+ },
+ "New Booking Widget": {
+  "kind": "text"
+ },
+ "New Caledonia": {
+  "kind": "country",
+  "code": "NC"
+ },
+ "New customer": {
+  "kind": "text"
+ },
+ "New Dev Key name": {
+  "kind": "text"
+ },
+ "New Extra through booking process allowed": {
+  "kind": "text"
+ },
+ "New group booking": {
+  "kind": "text"
+ },
+ "New offer": {
+  "kind": "text"
+ },
+ "New password": {
+  "kind": "text"
+ },
+ "New payment type": {
+  "kind": "text"
+ },
+ "New rate plan": {
+  "kind": "text"
+ },
+ "New tax": {
+  "kind": "text"
+ },
+ "New Zealand": {
+  "kind": "country",
+  "code": "NZ"
+ },
+ "Next": {
+  "kind": "text"
+ },
+ "Next month": {
+  "kind": "text"
+ },
+ "Next page": {
+  "kind": "text"
+ },
+ "Next year": {
+  "kind": "text"
+ },
+ "Nicaragua": {
+  "kind": "country",
+  "code": "NI"
+ },
+ "Niger": {
+  "kind": "country",
+  "code": "NE"
+ },
+ "Nigeria": {
+  "kind": "country",
+  "code": "NG"
+ },
+ "Night": {
+  "kind": "text"
+ },
+ "Night audit at": {
+  "kind": "text"
+ },
+ "night deposit is required at the time of booking": {
+  "kind": "text"
+ },
+ "Nights": {
+  "kind": "text"
+ },
+ "Nights and adults are whole numbers": {
+  "kind": "db"
+ },
+ "Nights free": {
+  "kind": "text"
+ },
+ "Nights from": {
+  "kind": "text"
+ },
+ "Nights left": {
+  "kind": "text"
+ },
+ "Nights paid for": {
+  "kind": "text"
+ },
+ "Nights Text": {
+  "kind": "text"
+ },
+ "Nights to": {
+  "kind": "text"
+ },
+ "Niue": {
+  "kind": "country",
+  "code": "NU"
+ },
+ "no": {
+  "kind": "text"
+ },
+ "No": {
+  "kind": "text"
+ },
+ "No {0} free for those dates.": {
+  "kind": "db"
+ },
+ "no access": {
+  "kind": "text"
+ },
+ "No active sales channels.": {
+  "kind": "text"
+ },
+ "No active staff account for the current user": {
+  "kind": "db"
+ },
+ "No active staff account to clear the feed for": {
+  "kind": "db"
+ },
+ "No booking has an open balance, so this must be a house expense.": {
+  "kind": "text"
+ },
+ "No booking has an outstanding balance right now.": {
+  "kind": "text"
+ },
+ "No bookings match these filters": {
+  "kind": "text"
+ },
+ "No bookings were taken in this range": {
+  "kind": "text"
+ },
+ "No cancellation or modification can be applied to this booking": {
+  "kind": "text"
+ },
+ "No cancellation or modification can be applied to this booking.": {
+  "kind": "text"
+ },
+ "No channel": {
+  "kind": "db"
+ },
+ "No clean {type} is free for these dates. Housekeeping needs to release one first.": {
+  "kind": "text"
+ },
+ "No colour": {
+  "kind": "text"
+ },
+ "No contact details": {
+  "kind": "text"
+ },
+ "No customers match this search": {
+  "kind": "text"
+ },
+ "No Data": {
+  "kind": "text"
+ },
+ "No days in this range": {
+  "kind": "text"
+ },
+ "No deposit is required": {
+  "kind": "text"
+ },
+ "No deposit is required.": {
+  "kind": "text"
+ },
+ "No deposits are being held": {
+  "kind": "text"
+ },
+ "No dev keys available. Create first": {
+  "kind": "text"
+ },
+ "No discount matches.": {
+  "kind": "text"
+ },
+ "No draft sales channels.": {
+  "kind": "text"
+ },
+ "No extra matches that search.": {
+  "kind": "text"
+ },
+ "No extras to charge yet.": {
+  "kind": "text"
+ },
+ "No files yet": {
+  "kind": "text"
+ },
+ "No folio {n} on this property": {
+  "kind": "text"
+ },
+ "No folio was charged or paid in this range": {
+  "kind": "text"
+ },
+ "No guest on this folio": {
+  "kind": "db"
+ },
+ "No meals to cater for in this range": {
+  "kind": "text"
+ },
+ "No meeting rooms yet": {
+  "kind": "text"
+ },
+ "No name recorded": {
+  "kind": "db"
+ },
+ "No nights in this range": {
+  "kind": "text"
+ },
+ "No nights were stayed in this range": {
+  "kind": "text"
+ },
+ "No no-shows": {
+  "kind": "text"
+ },
+ "No of bookings": {
+  "kind": "text"
+ },
+ "No of Bookings": {
+  "kind": "text"
+ },
+ "No open business date for property": {
+  "kind": "db"
+ },
+ "No payments in this range": {
+  "kind": "text"
+ },
+ "No payments yet. Take one with the button above.": {
+  "kind": "text"
+ },
+ "No picture": {
+  "kind": "text"
+ },
+ "No plan — type the rate": {
+  "kind": "text"
+ },
+ "No policy": {
+  "kind": "text"
+ },
+ "No rate is loaded for {0} on this plan. Load one, or give a rate for the booking.": {
+  "kind": "db"
+ },
+ "No rate plan matches.": {
+  "kind": "text"
+ },
+ "No rate plan yet": {
+  "kind": "text"
+ },
+ "No room assigned": {
+  "kind": "text"
+ },
+ "No room matches “{roomQuery}”.": {
+  "kind": "text"
+ },
+ "No room types are set up": {
+  "kind": "text"
+ },
+ "No room types are set up yet. Add one under Settings.": {
+  "kind": "text"
+ },
+ "No room types are set up. Add room types and rooms before loading rates.": {
+  "kind": "text"
+ },
+ "No room types are set up. Add room types and rooms before taking a booking.": {
+  "kind": "text"
+ },
+ "No rooms are set up": {
+  "kind": "text"
+ },
+ "No rooms match these filters": {
+  "kind": "text"
+ },
+ "No rooms match. Clear the search box or pick a different state.": {
+  "kind": "text"
+ },
+ "No rooms on this booking yet. Add one.": {
+  "kind": "text"
+ },
+ "No show": {
+  "kind": "text"
+ },
+ "No Show": {
+  "kind": "text"
+ },
+ "No sources set up": {
+  "kind": "text"
+ },
+ "No staff account": {
+  "kind": "text"
+ },
+ "No tax": {
+  "kind": "text"
+ },
+ "no_show": {
+  "kind": "db"
+ },
+ "No-show fee for {0} (first night)": {
+  "kind": "db"
+ },
+ "No-Show or late cancellation policy": {
+  "kind": "text"
+ },
+ "No-show recorded by the night audit closing {0}": {
+  "kind": "db"
+ },
+ "No-shows": {
+  "kind": "text"
+ },
+ "No.": {
+  "kind": "text"
+ },
+ "Nobody arriving today": {
+  "kind": "text"
+ },
+ "Nobody found. Enter the guest below and they will be created with the booking.": {
+  "kind": "text"
+ },
+ "Nobody is arriving today": {
+  "kind": "text"
+ },
+ "Nobody is due out on this date": {
+  "kind": "text"
+ },
+ "Nobody is in house": {
+  "kind": "text"
+ },
+ "Nobody is in house tonight": {
+  "kind": "text"
+ },
+ "Nobody is waiting for these dates": {
+  "kind": "text"
+ },
+ "Nobody leaving": {
+  "kind": "text"
+ },
+ "Nobody owes anything": {
+  "kind": "text"
+ },
+ "Nobody stayed in this range": {
+  "kind": "text"
+ },
+ "Non-refundable": {
+  "kind": "text"
+ },
+ "None": {
+  "kind": "text"
+ },
+ "None cancelled": {
+  "kind": "text"
+ },
+ "None picked means every plan.": {
+  "kind": "text"
+ },
+ "None picked means every type.": {
+  "kind": "text"
+ },
+ "None reversed in this range": {
+  "kind": "text"
+ },
+ "None yet": {
+  "kind": "text"
+ },
+ "None yet.": {
+  "kind": "text"
+ },
+ "None yet. Add a category above first.": {
+  "kind": "text"
+ },
+ "None yet. Add a category, then the extras in it.": {
+  "kind": "text"
+ },
+ "None yet. Add a reaction.": {
+  "kind": "text"
+ },
+ "None yet. Add a room type before anything else.": {
+  "kind": "text"
+ },
+ "None yet. Add at least cash and card.": {
+  "kind": "text"
+ },
+ "None yet. Add at least Direct — a booking cannot be taken without a sales channel.": {
+  "kind": "text"
+ },
+ "None yet. Add one, then tick it on the room types that have it.": {
+  "kind": "text"
+ },
+ "None yet. Add Passport, National Identity Card or whatever your guests show.": {
+  "kind": "text"
+ },
+ "None yet. Add the accounts your books post to.": {
+  "kind": "text"
+ },
+ "None yet. Add the first extra.": {
+  "kind": "text"
+ },
+ "None yet. Add the rate the hotel sells.": {
+  "kind": "text"
+ },
+ "None yet. Add the terms your rates are sold under.": {
+  "kind": "text"
+ },
+ "None yet. Generate one to use the API.": {
+  "kind": "text"
+ },
+ "None yet. Without one, charges post with no tax.": {
+  "kind": "text"
+ },
+ "Norfolk Island": {
+  "kind": "country",
+  "code": "NF"
+ },
+ "North Macedonia": {
+  "kind": "country",
+  "code": "MK"
+ },
+ "Northern Mariana Islands": {
+  "kind": "country",
+  "code": "MP"
+ },
+ "Northern sales conference": {
+  "kind": "text"
+ },
+ "Norway": {
+  "kind": "country",
+  "code": "NO"
+ },
+ "Not active": {
+  "kind": "text"
+ },
+ "Not assigned": {
+  "kind": "text"
+ },
+ "Not authorised": {
+  "kind": "db"
+ },
+ "Not authorised to open a cashier shift": {
+  "kind": "db"
+ },
+ "Not cash": {
+  "kind": "text"
+ },
+ "Not cash — recorded against the folio but the drawer is unaffected.": {
+  "kind": "text"
+ },
+ "Not default": {
+  "kind": "text"
+ },
+ "Not priced": {
+  "kind": "text"
+ },
+ "Not recorded": {
+  "kind": "text"
+ },
+ "Not sellable": {
+  "kind": "text"
+ },
+ "Not set": {
+  "kind": "text"
+ },
+ "Not yet closed": {
+  "kind": "text"
+ },
+ "Note": {
+  "kind": "text"
+ },
+ "Note (optional)": {
+  "kind": "text"
+ },
+ "Notes are added by front desk, manager and admin accounts.": {
+  "kind": "text"
+ },
+ "Notes for staff": {
+  "kind": "text"
+ },
+ "Notes for the guest": {
+  "kind": "text"
+ },
+ "Nothing arrived? Check the spam folder, then try again. If the address was wrong, an administrator can tell you which one the account uses.": {
+  "kind": "text"
+ },
+ "Nothing but rooms was charged in this range": {
+  "kind": "text"
+ },
+ "Nothing charged beyond the room.": {
+  "kind": "text"
+ },
+ "Nothing charged yet.": {
+  "kind": "text"
+ },
+ "Nothing happened in this range": {
+  "kind": "text"
+ },
+ "Nothing has left the drawer this shift.": {
+  "kind": "text"
+ },
+ "Nothing here.": {
+  "kind": "text"
+ },
+ "Nothing is recorded for that date": {
+  "kind": "text"
+ },
+ "Nothing matches “{term}”. Search covers booking references, guest names and room numbers.": {
+  "kind": "text"
+ },
+ "Nothing matches that search.": {
+  "kind": "text"
+ },
+ "Nothing missing": {
+  "kind": "text"
+ },
+ "Nothing out of order": {
+  "kind": "text"
+ },
+ "Nothing posted yet.": {
+  "kind": "text"
+ },
+ "Nothing recorded": {
+  "kind": "text"
+ },
+ "Nothing recorded yet.": {
+  "kind": "text"
+ },
+ "Nothing sold in this range": {
+  "kind": "text"
+ },
+ "Nothing was cancelled for these arrival dates": {
+  "kind": "text"
+ },
+ "Nothing was collected in this range": {
+  "kind": "text"
+ },
+ "Nothing was earned in this range": {
+  "kind": "text"
+ },
+ "Nothing was stayed in this range": {
+  "kind": "text"
+ },
+ "Nothing yet": {
+  "kind": "text"
+ },
+ "now": {
+  "kind": "text"
+ },
+ "Number": {
+  "kind": "text"
+ },
+ "Occ": {
+  "kind": "text"
+ },
+ "Occupancy": {
+  "kind": "text"
+ },
+ "Occupancy must be at least one, and the maximum at least the base": {
+  "kind": "db"
+ },
+ "Occupancy report": {
+  "kind": "text"
+ },
+ "Occupancy Report": {
+  "kind": "text"
+ },
+ "occupied": {
+  "kind": "db"
+ },
+ "Occupied": {
+  "kind": "text"
+ },
+ "Occupied — check the guest out": {
+  "kind": "text"
+ },
+ "Occupied, do not disturb": {
+  "kind": "text"
+ },
+ "of": {
+  "kind": "text"
+ },
+ "Of nights have no country": {
+  "kind": "text"
+ },
+ "Of the bookings holding a deposit": {
+  "kind": "text"
+ },
+ "of these": {
+  "kind": "text"
+ },
+ "Of which cash": {
+  "kind": "text"
+ },
+ "Off each night": {
+  "kind": "text"
+ },
+ "Offer code": {
+  "kind": "text"
+ },
+ "offered": {
+  "kind": "db"
+ },
+ "Offered": {
+  "kind": "text"
+ },
+ "Offers": {
+  "kind": "text"
+ },
+ "Offline": {
+  "kind": "text"
+ },
+ "Oman": {
+  "kind": "country",
+  "code": "OM"
+ },
+ "Omit policy": {
+  "kind": "text"
+ },
+ "Omit this policy": {
+  "kind": "text"
+ },
+ "on": {
+  "kind": "text"
+ },
+ "On the books, 28 ahead": {
+  "kind": "text"
+ },
+ "On top of the rate": {
+  "kind": "text"
+ },
+ "One of the customers to merge is not on this property, or has already been merged away": {
+  "kind": "db"
+ },
+ "One of the sales channels to merge is not on this property": {
+  "kind": "db"
+ },
+ "One of those facilities no longer exists": {
+  "kind": "db"
+ },
+ "Online Booking Cut Off Date": {
+  "kind": "text"
+ },
+ "Online booking cut-off date saved.": {
+  "kind": "text"
+ },
+ "Only {0} of {1} free for these dates, and {2} asked for.": {
+  "kind": "db"
+ },
+ "Only {0} of {1} free for those dates, and this booking needs {2}.": {
+  "kind": "db"
+ },
+ "Only {n} free for these dates. Reduce the count, change the dates, or tick overbook below.": {
+  "kind": "text"
+ },
+ "Only a converted waitlist entry names a booking": {
+  "kind": "db"
+ },
+ "Only a manager or administrator can merge customers": {
+  "kind": "text"
+ },
+ "Only a settled folio can be closed": {
+  "kind": "db"
+ },
+ "Only administrators can change a member of staff": {
+  "kind": "db"
+ },
+ "Only an administrator can change a role, and not their own. Ask one if this is wrong.": {
+  "kind": "text"
+ },
+ "Only an administrator or manager can set cancellation terms": {
+  "kind": "db"
+ },
+ "Only an administrator or manager may close the business date": {
+  "kind": "db"
+ },
+ "Only cash payments may reference a cashier shift": {
+  "kind": "db"
+ },
+ "Only for arrivals on": {
+  "kind": "text"
+ },
+ "Only front desk, management or an administrator may assign a room": {
+  "kind": "db"
+ },
+ "Only front desk, management or an administrator may attach a file": {
+  "kind": "db"
+ },
+ "Only front desk, management or an administrator may change a room": {
+  "kind": "db"
+ },
+ "Only front desk, management or an administrator may check a guest in": {
+  "kind": "db"
+ },
+ "Only front desk, management or an administrator may check a guest out": {
+  "kind": "db"
+ },
+ "Only front desk, management or an administrator may record correspondence": {
+  "kind": "db"
+ },
+ "Only front desk, management or an administrator may remove a file": {
+  "kind": "db"
+ },
+ "Only front desk, manager and admin staff can add to the waitlist": {
+  "kind": "db"
+ },
+ "Only front desk, manager and admin staff can book a meeting room": {
+  "kind": "db"
+ },
+ "Only front desk, manager and admin staff can cancel a booking": {
+  "kind": "db"
+ },
+ "Only front desk, manager and admin staff can cancel a meeting room booking": {
+  "kind": "db"
+ },
+ "Only front desk, manager and admin staff can cancel a room": {
+  "kind": "db"
+ },
+ "Only front desk, manager and admin staff can change a booking": {
+  "kind": "db"
+ },
+ "Only front desk, manager and admin staff can change a customer": {
+  "kind": "db"
+ },
+ "Only front desk, manager and admin staff can change a rate": {
+  "kind": "db"
+ },
+ "Only front desk, manager and admin staff can change a waitlist entry": {
+  "kind": "db"
+ },
+ "Only front desk, manager and admin staff can confirm a booking": {
+  "kind": "db"
+ },
+ "Only front desk, manager and admin staff can restore a booking": {
+  "kind": "db"
+ },
+ "Only front desk, manager and admin staff can restore a room": {
+  "kind": "db"
+ },
+ "Only front desk, manager and admin staff can take a booking": {
+  "kind": "db"
+ },
+ "Only front office staff can change a guest's details": {
+  "kind": "db"
+ },
+ "Only managers and administrators can add rooms": {
+  "kind": "db"
+ },
+ "Only managers and administrators can change a rate plan": {
+  "kind": "db"
+ },
+ "Only managers and administrators can change a room": {
+  "kind": "db"
+ },
+ "Only managers and administrators can change a room photograph": {
+  "kind": "db"
+ },
+ "Only managers and administrators can change booking widgets": {
+  "kind": "db"
+ },
+ "Only managers and administrators can change channel managers": {
+  "kind": "db"
+ },
+ "Only managers and administrators can change connected systems": {
+  "kind": "db"
+ },
+ "Only managers and administrators can change key lock systems": {
+  "kind": "db"
+ },
+ "Only managers and administrators can change rates and availability": {
+  "kind": "db"
+ },
+ "Only managers and administrators can change reactions": {
+  "kind": "db"
+ },
+ "Only managers and administrators can change room types": {
+  "kind": "db"
+ },
+ "Only managers and administrators can change seasons": {
+  "kind": "db"
+ },
+ "Only managers and administrators can change templates": {
+  "kind": "db"
+ },
+ "Only managers and administrators can change the accounting categories": {
+  "kind": "db"
+ },
+ "Only managers and administrators can change the accounting systems": {
+  "kind": "db"
+ },
+ "Only managers and administrators can change the booking engine": {
+  "kind": "db"
+ },
+ "Only managers and administrators can change the calendar settings": {
+  "kind": "db"
+ },
+ "Only managers and administrators can change the cancellation policies": {
+  "kind": "db"
+ },
+ "Only managers and administrators can change the currencies": {
+  "kind": "db"
+ },
+ "Only managers and administrators can change the discounts": {
+  "kind": "db"
+ },
+ "Only managers and administrators can change the email preferences": {
+  "kind": "db"
+ },
+ "Only managers and administrators can change the email setup": {
+  "kind": "db"
+ },
+ "Only managers and administrators can change the extras": {
+  "kind": "db"
+ },
+ "Only managers and administrators can change the facilities": {
+  "kind": "db"
+ },
+ "Only managers and administrators can change the guest configuration": {
+  "kind": "db"
+ },
+ "Only managers and administrators can change the hotel features": {
+  "kind": "db"
+ },
+ "Only managers and administrators can change the hotel policy": {
+  "kind": "db"
+ },
+ "Only managers and administrators can change the inventory settings": {
+  "kind": "db"
+ },
+ "Only managers and administrators can change the invoice settings": {
+  "kind": "db"
+ },
+ "Only managers and administrators can change the language settings": {
+  "kind": "db"
+ },
+ "Only managers and administrators can change the payment gateways": {
+  "kind": "db"
+ },
+ "Only managers and administrators can change the pos profiles": {
+  "kind": "db"
+ },
+ "Only managers and administrators can change the property": {
+  "kind": "db"
+ },
+ "Only managers and administrators can change the taxes": {
+  "kind": "db"
+ },
+ "Only managers and administrators can change what a rate includes": {
+  "kind": "db"
+ },
+ "Only managers and administrators can create a rate plan": {
+  "kind": "db"
+ },
+ "Only managers and administrators can delete a room": {
+  "kind": "db"
+ },
+ "Only managers and administrators can manage API keys": {
+  "kind": "db"
+ },
+ "Only managers and administrators can merge sales channels": {
+  "kind": "db"
+ },
+ "Only managers and administrators can price what a rate includes": {
+  "kind": "db"
+ },
+ "Only managers and administrators can publish a rate": {
+  "kind": "db"
+ },
+ "Only managers and administrators can set up a promotion": {
+  "kind": "db"
+ },
+ "Only managers and administrators can set up booking sources": {
+  "kind": "db"
+ },
+ "Only managers and administrators can set up meeting rooms": {
+  "kind": "db"
+ },
+ "Only managers and administrators can set up payment methods": {
+  "kind": "db"
+ },
+ "Only managers and administrators can set up payment types": {
+  "kind": "db"
+ },
+ "Only managers and administrators can set up room types": {
+  "kind": "db"
+ },
+ "Only managers and administrators can set up sales channels": {
+  "kind": "db"
+ },
+ "Only managers and administrators can set up tax rates": {
+  "kind": "db"
+ },
+ "Only on these days": {
+  "kind": "text"
+ },
+ "Only these days": {
+  "kind": "text"
+ },
+ "ooo": {
+  "kind": "db"
+ },
+ "Open": {
+  "kind": "text"
+ },
+ "Open a new shift": {
+  "kind": "text"
+ },
+ "Open a shift": {
+  "kind": "text"
+ },
+ "Open cashier shift not found": {
+  "kind": "db"
+ },
+ "Open cashier shift not found for the current property": {
+  "kind": "db"
+ },
+ "Open cashier shift not found or not authorised": {
+  "kind": "db"
+ },
+ "Open folio not found for current property": {
+  "kind": "db"
+ },
+ "Open folio or active payment method not found": {
+  "kind": "db"
+ },
+ "Open in Customers": {
+  "kind": "text"
+ },
+ "Open navigation": {
+  "kind": "text"
+ },
+ "Open shift": {
+  "kind": "text"
+ },
+ "Open template editor": {
+  "kind": "text"
+ },
+ "Open the booking": {
+  "kind": "text"
+ },
+ "Opened": {
+  "kind": "text"
+ },
+ "Opening balance must be non-negative": {
+  "kind": "db"
+ },
+ "Opening float": {
+  "kind": "text"
+ },
+ "Opening…": {
+  "kind": "text"
+ },
+ "Optimize Customer Search": {
+  "kind": "text"
+ },
+ "Optional": {
+  "kind": "text"
+ },
+ "Optional — layout, equipment, catering": {
+  "kind": "text"
+ },
+ "Optional — search by name": {
+  "kind": "text"
+ },
+ "Optional — the guest never sees these": {
+  "kind": "text"
+ },
+ "Optional — what staff should know about it": {
+  "kind": "text"
+ },
+ "Order saved.": {
+  "kind": "text"
+ },
+ "Original charge not found or is already reversed": {
+  "kind": "db"
+ },
+ "Original folio item not found or is already a reversal": {
+  "kind": "db"
+ },
+ "Original payment not found or is already a reversal": {
+  "kind": "db"
+ },
+ "OTA": {
+  "kind": "text"
+ },
+ "Other": {
+  "kind": "text"
+ },
+ "Other details": {
+  "kind": "text"
+ },
+ "Other Policies": {
+  "kind": "text"
+ },
+ "Out of order": {
+  "kind": "text"
+ },
+ "Outstanding": {
+  "kind": "text"
+ },
+ "Outstanding balance {amount}": {
+  "kind": "text"
+ },
+ "Overdue": {
+  "kind": "text"
+ },
+ "Owed by the house": {
+  "kind": "text"
+ },
+ "Pace": {
+  "kind": "text"
+ },
+ "Page": {
+  "kind": "text"
+ },
+ "Page not found": {
+  "kind": "text"
+ },
+ "Paid": {
+  "kind": "text"
+ },
+ "Paid Booking Color": {
+  "kind": "text"
+ },
+ "Paid on": {
+  "kind": "text"
+ },
+ "Paid out": {
+  "kind": "text"
+ },
+ "Paid to": {
+  "kind": "text"
+ },
+ "Paid-outs this shift": {
+  "kind": "text"
+ },
+ "Pakistan": {
+  "kind": "country",
+  "code": "PK"
+ },
+ "Palau": {
+  "kind": "country",
+  "code": "PW"
+ },
+ "Palestine, State of": {
+  "kind": "country",
+  "code": "PS"
+ },
+ "Panama": {
+  "kind": "country",
+  "code": "PA"
+ },
+ "Papua New Guinea": {
+  "kind": "country",
+  "code": "PG"
+ },
+ "Paraguay": {
+  "kind": "country",
+  "code": "PY"
+ },
+ "Parent Room Type": {
+  "kind": "text"
+ },
+ "Parking": {
+  "kind": "text"
+ },
+ "Part paid": {
+  "kind": "text"
+ },
+ "Partially Paid Booking Color": {
+  "kind": "text"
+ },
+ "Party": {
+  "kind": "text"
+ },
+ "Passport": {
+  "kind": "text"
+ },
+ "Passport expiry": {
+  "kind": "text"
+ },
+ "Password": {
+  "kind": "text"
+ },
+ "Password changed.": {
+  "kind": "text"
+ },
+ "Past the free window": {
+  "kind": "text"
+ },
+ "Payable": {
+  "kind": "text"
+ },
+ "payment": {
+  "kind": "text"
+ },
+ "Payment amount must be positive": {
+  "kind": "db"
+ },
+ "Payment Gateway": {
+  "kind": "text"
+ },
+ "Payment Gateways": {
+  "kind": "text"
+ },
+ "Payment received via {0}": {
+  "kind": "db"
+ },
+ "Payment reversed via {0}": {
+  "kind": "db"
+ },
+ "Payment type": {
+  "kind": "text"
+ },
+ "Payment Types": {
+  "kind": "text"
+ },
+ "Payments": {
+  "kind": "text"
+ },
+ "Payments and the drawer": {
+  "kind": "text"
+ },
+ "Payments are dated to the business date they were taken on.": {
+  "kind": "text"
+ },
+ "Payments have already been taken by this method, so its kind is fixed. Retire it and add a new one.": {
+  "kind": "db"
+ },
+ "Payments have been taken as {0}, so its kind cannot change. Retire it and add a new one.": {
+  "kind": "db"
+ },
+ "Payments report": {
+  "kind": "text"
+ },
+ "Payments Report": {
+  "kind": "text"
+ },
+ "Payments taken": {
+  "kind": "text"
+ },
+ "Payments this shift": {
+  "kind": "text"
+ },
+ "Pays at the property": {
+  "kind": "text"
+ },
+ "pending": {
+  "kind": "db"
+ },
+ "Pending": {
+  "kind": "text"
+ },
+ "People": {
+  "kind": "text"
+ },
+ "Per room available": {
+  "kind": "text"
+ },
+ "Per room sold": {
+  "kind": "text"
+ },
+ "Percent": {
+  "kind": "text"
+ },
+ "Percent off": {
+  "kind": "text"
+ },
+ "Percentage off": {
+  "kind": "text"
+ },
+ "Permissions": {
+  "kind": "text"
+ },
+ "Person": {
+  "kind": "text"
+ },
+ "Personal": {
+  "kind": "text"
+ },
+ "Peru": {
+  "kind": "country",
+  "code": "PE"
+ },
+ "Pets": {
+  "kind": "text"
+ },
+ "Pets welcome, but may incur surcharge": {
+  "kind": "text"
+ },
+ "Philippines": {
+  "kind": "country",
+  "code": "PH"
+ },
+ "Phone": {
+  "kind": "text"
+ },
+ "Pick a category for the extra": {
+  "kind": "db"
+ },
+ "Pick a category for the extra.": {
+  "kind": "text"
+ },
+ "Pick a country from the list": {
+  "kind": "db"
+ },
+ "Pick a currency": {
+  "kind": "db"
+ },
+ "Pick a date the hotel has traded. The business date only exists once it has been opened.": {
+  "kind": "text"
+ },
+ "Pick a departure date after the arrival date.": {
+  "kind": "text"
+ },
+ "Pick a range that covers dates guests have stayed.": {
+  "kind": "text"
+ },
+ "Pick a range that covers dates the hotel has traded.": {
+  "kind": "text"
+ },
+ "Pick a rate plan": {
+  "kind": "db"
+ },
+ "Pick a rate plan before setting this": {
+  "kind": "db"
+ },
+ "Pick a rate plan first.": {
+  "kind": "text"
+ },
+ "Pick an accounting category for the extra": {
+  "kind": "db"
+ },
+ "Pick an existing guest, or enter a new one.": {
+  "kind": "text"
+ },
+ "Pick another business date, or check the arrivals and departures lists.": {
+  "kind": "text"
+ },
+ "Pick at least one room type.": {
+  "kind": "text"
+ },
+ "Pick the accounting system from the list": {
+  "kind": "db"
+ },
+ "Pick the colour from the picker": {
+  "kind": "db"
+ },
+ "Pick the colour: {setting}": {
+  "kind": "text"
+ },
+ "Pick the dates first.": {
+  "kind": "text"
+ },
+ "Pick the default language from the list": {
+  "kind": "db"
+ },
+ "Pick the extra to charge.": {
+  "kind": "text"
+ },
+ "Pick the gateway from the list": {
+  "kind": "db"
+ },
+ "Pick the pos type from the list": {
+  "kind": "db"
+ },
+ "Pick the rate": {
+  "kind": "db"
+ },
+ "Pick the room type this room belongs to.": {
+  "kind": "text"
+ },
+ "Pick the round logic from the list": {
+  "kind": "db"
+ },
+ "Pick what kind of payment this is": {
+  "kind": "db"
+ },
+ "Pick what to round to from the list": {
+  "kind": "db"
+ },
+ "Pick where the booking came from.": {
+  "kind": "text"
+ },
+ "Picture": {
+  "kind": "text"
+ },
+ "Pitcairn": {
+  "kind": "country",
+  "code": "PN"
+ },
+ "Plan": {
+  "kind": "text"
+ },
+ "Please add a footer which will be added to all new emails": {
+  "kind": "text"
+ },
+ "Poland": {
+  "kind": "country",
+  "code": "PL"
+ },
+ "Policy Name": {
+  "kind": "text"
+ },
+ "Policy Title:": {
+  "kind": "text"
+ },
+ "Portugal": {
+  "kind": "country",
+  "code": "PT"
+ },
+ "Pos": {
+  "kind": "text"
+ },
+ "Pos Profiles": {
+  "kind": "text"
+ },
+ "Pos Profiles List": {
+  "kind": "text"
+ },
+ "Pos Type": {
+  "kind": "text"
+ },
+ "Post departure email saved.": {
+  "kind": "text"
+ },
+ "Post Departure Email Setup": {
+  "kind": "text"
+ },
+ "Postal code": {
+  "kind": "text"
+ },
+ "Postcode": {
+  "kind": "text"
+ },
+ "Posted with the charge": {
+  "kind": "text"
+ },
+ "Pre arrival email saved.": {
+  "kind": "text"
+ },
+ "Pre Arrival Email Setup": {
+  "kind": "text"
+ },
+ "Pre-Arrival Email": {
+  "kind": "text"
+ },
+ "prepaid": {
+  "kind": "text"
+ },
+ "Prepaid to channel": {
+  "kind": "text"
+ },
+ "Prepaid to the channel": {
+  "kind": "text"
+ },
+ "Preview": {
+  "kind": "text"
+ },
+ "Preview Folio Number": {
+  "kind": "text"
+ },
+ "Preview ready.": {
+  "kind": "text"
+ },
+ "Previous": {
+  "kind": "text"
+ },
+ "Previous month": {
+  "kind": "text"
+ },
+ "Previous page": {
+  "kind": "text"
+ },
+ "Previous year": {
+  "kind": "text"
+ },
+ "Price": {
+  "kind": "text"
+ },
+ "Primary color": {
+  "kind": "text"
+ },
+ "Print": {
+  "kind": "text"
+ },
+ "Print invoice": {
+  "kind": "text"
+ },
+ "Priority": {
+  "kind": "text"
+ },
+ "Priority is a whole number from 0 to 999": {
+  "kind": "db"
+ },
+ "Priority is a whole number from 0 to 999.": {
+  "kind": "text"
+ },
+ "Profile": {
+  "kind": "text"
+ },
+ "Properties list": {
+  "kind": "text"
+ },
+ "Property": {
+  "kind": "text"
+ },
+ "Property ID": {
+  "kind": "text"
+ },
+ "Property name": {
+  "kind": "text"
+ },
+ "Property slug": {
+  "kind": "text"
+ },
+ "Property type": {
+  "kind": "text"
+ },
+ "published": {
+  "kind": "text"
+ },
+ "Published": {
+  "kind": "text"
+ },
+ "Puerto Rico": {
+  "kind": "country",
+  "code": "PR"
+ },
+ "Put in a room": {
+  "kind": "text"
+ },
+ "Put in room": {
+  "kind": "text"
+ },
+ "Qatar": {
+  "kind": "country",
+  "code": "QA"
+ },
+ "Quantity": {
+  "kind": "text"
+ },
+ "QuickBooks Online": {
+  "kind": "text"
+ },
+ "Quoted": {
+  "kind": "text"
+ },
+ "Rack": {
+  "kind": "text"
+ },
+ "Rate": {
+  "kind": "text"
+ },
+ "Rate a night": {
+  "kind": "text"
+ },
+ "Rate categories": {
+  "kind": "text"
+ },
+ "Rate Categories": {
+  "kind": "text"
+ },
+ "rate category": {
+  "kind": "text"
+ },
+ "Rate CVS configuration": {
+  "kind": "text"
+ },
+ "Rate less discount, before tax": {
+  "kind": "text"
+ },
+ "Rate less discount, excluding tax": {
+  "kind": "text"
+ },
+ "Rate plan": {
+  "kind": "text"
+ },
+ "Rate plan {name} created.": {
+  "kind": "text"
+ },
+ "Rate plan created.": {
+  "kind": "text"
+ },
+ "Rate plan report": {
+  "kind": "text"
+ },
+ "Rate Plan Report": {
+  "kind": "text"
+ },
+ "Rate plan saved.": {
+  "kind": "text"
+ },
+ "Rate plans": {
+  "kind": "text"
+ },
+ "Rate Plans": {
+  "kind": "text"
+ },
+ "Rate set on the nights that have not been charged.": {
+  "kind": "text"
+ },
+ "Rates": {
+  "kind": "text"
+ },
+ "Rates (All)": {
+  "kind": "text"
+ },
+ "Rates (Main)": {
+  "kind": "text"
+ },
+ "Rates are created and renamed under Settings → Rate plans.": {
+  "kind": "text"
+ },
+ "Rates, settings, the night audit and the drawer total": {
+  "kind": "text"
+ },
+ "Rates, settings, the night audit, the drawer total": {
+  "kind": "text"
+ },
+ "Reaction": {
+  "kind": "text"
+ },
+ "Reactions": {
+  "kind": "text"
+ },
+ "Ready": {
+  "kind": "text"
+ },
+ "Ready for a guest": {
+  "kind": "text"
+ },
+ "Ready for a guest, inspected": {
+  "kind": "text"
+ },
+ "Ready to sell": {
+  "kind": "text"
+ },
+ "Reason": {
+  "kind": "text"
+ },
+ "Reason, kept on the booking": {
+  "kind": "text"
+ },
+ "Received": {
+  "kind": "text"
+ },
+ "recharged to {rechargeBookingRef}": {
+  "kind": "text"
+ },
+ "Record": {
+  "kind": "text"
+ },
+ "Record an email": {
+  "kind": "text"
+ },
+ "Record paid-out": {
+  "kind": "text"
+ },
+ "Record what you have sent this guest, so the next person knows.": {
+  "kind": "text"
+ },
+ "Recorded on the booking's staff notes": {
+  "kind": "text"
+ },
+ "Recording…": {
+  "kind": "text"
+ },
+ "Redeem all prepayments that linked to booking on booking cancellation": {
+  "kind": "text"
+ },
+ "Redeem prepayments": {
+  "kind": "text"
+ },
+ "Reference": {
+  "kind": "text"
+ },
+ "Region:": {
+  "kind": "text"
+ },
+ "Registration card": {
+  "kind": "text"
+ },
+ "Registration form saved.": {
+  "kind": "text"
+ },
+ "Reload data": {
+  "kind": "text"
+ },
+ "Reloading…": {
+  "kind": "text"
+ },
+ "Remaining balance to be paid on": {
+  "kind": "text"
+ },
+ "Reminder Text": {
+  "kind": "text"
+ },
+ "Remotelock": {
+  "kind": "text"
+ },
+ "Remove": {
+  "kind": "text"
+ },
+ "Remove {e}": {
+  "kind": "text"
+ },
+ "Remove {email}": {
+  "kind": "text"
+ },
+ "Remove {name}": {
+  "kind": "text"
+ },
+ "Remove {names}? Values already entered on guests will no longer show.": {
+  "kind": "text"
+ },
+ "Remove condition": {
+  "kind": "text"
+ },
+ "Remove field {n}": {
+  "kind": "text"
+ },
+ "Remove group": {
+  "kind": "text"
+ },
+ "Remove logo": {
+  "kind": "text"
+ },
+ "Remove the picture": {
+  "kind": "text"
+ },
+ "Remove trigger": {
+  "kind": "text"
+ },
+ "Rename {roomTypeCode} in Settings": {
+  "kind": "text"
+ },
+ "Replace both editors with the default template?": {
+  "kind": "text"
+ },
+ "Replace the API key? The current one stops working at once.": {
+  "kind": "text"
+ },
+ "Replace the invoice logo": {
+  "kind": "text"
+ },
+ "Reply to Email Address": {
+  "kind": "text"
+ },
+ "Reports": {
+  "kind": "text"
+ },
+ "Request payment email saved.": {
+  "kind": "text"
+ },
+ "Request Payment Email Setup": {
+  "kind": "text"
+ },
+ "Requestor ID": {
+  "kind": "text"
+ },
+ "Reservation Details Background Color": {
+  "kind": "text"
+ },
+ "Reservation Details Text Color": {
+  "kind": "text"
+ },
+ "Reservation value": {
+  "kind": "text"
+ },
+ "Reservations": {
+  "kind": "text"
+ },
+ "Reservations report": {
+  "kind": "text"
+ },
+ "Reservations Report": {
+  "kind": "text"
+ },
+ "Reset": {
+  "kind": "text"
+ },
+ "Reset links expire after an hour and work only once, so an older email in the same thread will not do. Asking for a new one takes a moment.": {
+  "kind": "text"
+ },
+ "Reset your password": {
+  "kind": "text"
+ },
+ "Restaurant": {
+  "kind": "text"
+ },
+ "Restore": {
+  "kind": "text"
+ },
+ "Restore anyway": {
+  "kind": "text"
+ },
+ "Restore booking": {
+  "kind": "text"
+ },
+ "Restore it anyway": {
+  "kind": "text"
+ },
+ "Restore this booking": {
+  "kind": "text"
+ },
+ "Restore this room": {
+  "kind": "text"
+ },
+ "Restored a room on booking {0}": {
+  "kind": "db"
+ },
+ "Restoring…": {
+  "kind": "text"
+ },
+ "Retired": {
+  "kind": "text"
+ },
+ "Return room rates with hotel data": {
+  "kind": "text"
+ },
+ "Réunion": {
+  "kind": "country",
+  "code": "RE"
+ },
+ "Revenue": {
+  "kind": "text"
+ },
+ "Revenue and payment reports are open to front desk, cashier, manager and admin accounts. Ask a manager if you need access.": {
+  "kind": "text"
+ },
+ "Revenue booked with no commission": {
+  "kind": "text"
+ },
+ "Revenue earned": {
+  "kind": "text"
+ },
+ "Revenue over rooms available": {
+  "kind": "text"
+ },
+ "Revenue over rooms sold": {
+  "kind": "text"
+ },
+ "Revenue posted": {
+  "kind": "text"
+ },
+ "Revenue posts on the night audit, so a range with no closed days shows nothing.": {
+  "kind": "text"
+ },
+ "Revenue, 28 days back": {
+  "kind": "text"
+ },
+ "Reversal": {
+  "kind": "text"
+ },
+ "Reversal: {0}": {
+  "kind": "db"
+ },
+ "reversed": {
+  "kind": "text"
+ },
+ "Reversed": {
+  "kind": "text"
+ },
+ "RevPAR": {
+  "kind": "text"
+ },
+ "Right now": {
+  "kind": "text"
+ },
+ "Role": {
+  "kind": "text"
+ },
+ "Romania": {
+  "kind": "country",
+  "code": "RO"
+ },
+ "Room": {
+  "kind": "text"
+ },
+ "Room {0} already exists on this property": {
+  "kind": "db"
+ },
+ "Room {0} assigned to booking {1}": {
+  "kind": "db"
+ },
+ "Room {0} created as {1}": {
+  "kind": "db"
+ },
+ "Room {0} has {1} booking(s) against it and cannot be deleted. Put it out of order instead.": {
+  "kind": "db"
+ },
+ "Room {0} has a booking assigned from {1}. Move it to another room first.": {
+  "kind": "db"
+ },
+ "Room {0} has a guest in it. Check them out before changing its housekeeping state": {
+  "kind": "db"
+ },
+ "Room {0} has a guest in it. Check them out before disabling it.": {
+  "kind": "db"
+ },
+ "Room {0} has a guest in it. Check them out rather than changing the room.": {
+  "kind": "db"
+ },
+ "Room {0} has no guest in it, so there is nobody to disturb": {
+  "kind": "db"
+ },
+ "Room {0} is {1}, so it is not ready for a guest": {
+  "kind": "db"
+ },
+ "Room {0} is already taken for part of {1} to {2}": {
+  "kind": "db"
+ },
+ "Room {0} is disabled in Room Setup, so nobody can be put in it.": {
+  "kind": "db"
+ },
+ "Room {0} is disabled in Room Setup. Enable it first.": {
+  "kind": "db"
+ },
+ "Room {0} is made occupied by checking a guest in, not by setting it.": {
+  "kind": "db"
+ },
+ "Room {0} is not a {1}, which is what this booking was sold. Confirm the upgrade to put the guest in it.": {
+  "kind": "db"
+ },
+ "Room {0} is not the room type this booking was sold": {
+  "kind": "db"
+ },
+ "Room {0} status changed from {1} to {2}": {
+  "kind": "db"
+ },
+ "room {n}": {
+  "kind": "text"
+ },
+ "Room {n}": {
+  "kind": "text"
+ },
+ "Room {number}": {
+  "kind": "text"
+ },
+ "Room {number} deleted.": {
+  "kind": "text"
+ },
+ "Room {number} saved.": {
+  "kind": "text"
+ },
+ "Room {roomNumber}": {
+  "kind": "text"
+ },
+ "Room & Rate configuration": {
+  "kind": "text"
+ },
+ "Room and extras, less discounts, before tax": {
+  "kind": "text"
+ },
+ "Room Blocker Color": {
+  "kind": "text"
+ },
+ "Room cancelled. The rest of the booking is unchanged.": {
+  "kind": "text"
+ },
+ "Room charge for {0}": {
+  "kind": "db"
+ },
+ "Room charge must post on its open stay business date": {
+  "kind": "db"
+ },
+ "Room charges posted": {
+  "kind": "text"
+ },
+ "Room CVS configuration": {
+  "kind": "text"
+ },
+ "Room Details Background Color": {
+  "kind": "text"
+ },
+ "Room Details Text Color": {
+  "kind": "text"
+ },
+ "Room for {type}": {
+  "kind": "text"
+ },
+ "Room night discount exceeds room rate": {
+  "kind": "db"
+ },
+ "Room night does not belong to folio booking": {
+  "kind": "db"
+ },
+ "Room night must belong to the financial record booking": {
+  "kind": "db"
+ },
+ "Room nights": {
+  "kind": "text"
+ },
+ "Room nights are counted against the nights stayed, so widen the dates.": {
+  "kind": "text"
+ },
+ "Room nights lost": {
+  "kind": "text"
+ },
+ "Room number or type": {
+  "kind": "text"
+ },
+ "Room number, guest or room type": {
+  "kind": "text"
+ },
+ "Room Price And Nights Text Color": {
+  "kind": "text"
+ },
+ "Room Rate Combinations": {
+  "kind": "text"
+ },
+ "Room restored, and the house is oversold for those nights.": {
+  "kind": "text"
+ },
+ "Room restored.": {
+  "kind": "text"
+ },
+ "Room revenue": {
+  "kind": "text"
+ },
+ "Room Service": {
+  "kind": "text"
+ },
+ "Room Setup": {
+  "kind": "text"
+ },
+ "Room status, and no money at all": {
+  "kind": "text"
+ },
+ "room type": {
+  "kind": "text"
+ },
+ "Room type": {
+  "kind": "text"
+ },
+ "Room Type": {
+  "kind": "text"
+ },
+ "Room type / rate": {
+  "kind": "text"
+ },
+ "Room Type Facilities": {
+  "kind": "text"
+ },
+ "Room types": {
+  "kind": "text"
+ },
+ "Rooms": {
+  "kind": "text"
+ },
+ "Rooms added.": {
+  "kind": "text"
+ },
+ "Rooms differ — strictest shown": {
+  "kind": "text"
+ },
+ "Rooms occupied": {
+  "kind": "text"
+ },
+ "Rooms sellable": {
+  "kind": "text"
+ },
+ "Rooms sold": {
+  "kind": "text"
+ },
+ "Round down": {
+  "kind": "text"
+ },
+ "Round Logic:": {
+  "kind": "text"
+ },
+ "Round to nearest": {
+  "kind": "text"
+ },
+ "Round To:": {
+  "kind": "text"
+ },
+ "Round up": {
+  "kind": "text"
+ },
+ "Rounding Options": {
+  "kind": "text"
+ },
+ "Rounding options saved.": {
+  "kind": "text"
+ },
+ "Rows are room types, not rooms — a property can run well over a thousand rooms and this grid is the same height whatever the count.": {
+  "kind": "text"
+ },
+ "Run": {
+  "kind": "text"
+ },
+ "Russian Federation": {
+  "kind": "country",
+  "code": "RU"
+ },
+ "Rwanda": {
+  "kind": "country",
+  "code": "RW"
+ },
+ "Sage": {
+  "kind": "text"
+ },
+ "Saint Barthélemy": {
+  "kind": "country",
+  "code": "BL"
+ },
+ "Saint Helena, Ascension and Tristan da Cunha": {
+  "kind": "country",
+  "code": "SH"
+ },
+ "Saint Kitts and Nevis": {
+  "kind": "country",
+  "code": "KN"
+ },
+ "Saint Lucia": {
+  "kind": "country",
+  "code": "LC"
+ },
+ "Saint Martin (French part)": {
+  "kind": "country",
+  "code": "MF"
+ },
+ "Saint Pierre and Miquelon": {
+  "kind": "country",
+  "code": "PM"
+ },
+ "Saint Vincent and the Grenadines": {
+  "kind": "country",
+  "code": "VC"
+ },
+ "Sales channel": {
+  "kind": "text"
+ },
+ "Sales channel(s) {0} merged into {1}": {
+  "kind": "db"
+ },
+ "Sales Channels": {
+  "kind": "text"
+ },
+ "Same Day Booking Cut Off Time": {
+  "kind": "text"
+ },
+ "Same day booking cut-off time saved.": {
+  "kind": "text"
+ },
+ "Samoa": {
+  "kind": "country",
+  "code": "WS"
+ },
+ "Sample Guest": {
+  "kind": "text"
+ },
+ "Sample Hotel": {
+  "kind": "text"
+ },
+ "San Marino": {
+  "kind": "country",
+  "code": "SM"
+ },
+ "Sao Tome and Principe": {
+  "kind": "country",
+  "code": "ST"
+ },
+ "Satellite": {
+  "kind": "text"
+ },
+ "Saudi Arabia": {
+  "kind": "country",
+  "code": "SA"
+ },
+ "Save": {
+  "kind": "text"
+ },
+ "Save changes": {
+  "kind": "text"
+ },
+ "Save customer": {
+  "kind": "text"
+ },
+ "Save offer": {
+  "kind": "text"
+ },
+ "Save Template": {
+  "kind": "text"
+ },
+ "Save the name": {
+  "kind": "text"
+ },
+ "Save the password": {
+  "kind": "text"
+ },
+ "Save widget to get embed code": {
+  "kind": "text"
+ },
+ "Saved": {
+  "kind": "text"
+ },
+ "Saved Widgets": {
+  "kind": "text"
+ },
+ "Saving replaces which rate plans and room types this applies to with whatever is picked above.": {
+  "kind": "text"
+ },
+ "Saving…": {
+  "kind": "text"
+ },
+ "Say what the money was for.": {
+  "kind": "text"
+ },
+ "Say whether this rate is published or not": {
+  "kind": "db"
+ },
+ "Say which booking the waitlist entry became": {
+  "kind": "db"
+ },
+ "Search": {
+  "kind": "text"
+ },
+ "Search bookings by reservation id, token or invoice number": {
+  "kind": "text"
+ },
+ "Search bookings, guests and rooms": {
+  "kind": "text"
+ },
+ "Search bookings, guests and rooms (Ctrl K)": {
+  "kind": "text"
+ },
+ "Search by name, email or phone": {
+  "kind": "text"
+ },
+ "Search covers name, email and phone number.": {
+  "kind": "text"
+ },
+ "Search discounts": {
+  "kind": "text"
+ },
+ "Search discounts...": {
+  "kind": "text"
+ },
+ "Search extras": {
+  "kind": "text"
+ },
+ "Search rate plans": {
+  "kind": "text"
+ },
+ "Search rooms": {
+  "kind": "text"
+ },
+ "Search titles": {
+  "kind": "text"
+ },
+ "Searching…": {
+  "kind": "text"
+ },
+ "Season": {
+  "kind": "text"
+ },
+ "Season or event": {
+  "kind": "text"
+ },
+ "Seasons": {
+  "kind": "text"
+ },
+ "Seasons and Events": {
+  "kind": "text"
+ },
+ "Seasons And Events": {
+  "kind": "text"
+ },
+ "Seats": {
+  "kind": "text"
+ },
+ "seats {n}": {
+  "kind": "text"
+ },
+ "Seats {n}.": {
+  "kind": "text"
+ },
+ "Secure property access": {
+  "kind": "text"
+ },
+ "See all bookings": {
+  "kind": "text"
+ },
+ "Select": {
+  "kind": "text"
+ },
+ "Select {name}": {
+  "kind": "text"
+ },
+ "Select every customer on this page": {
+  "kind": "text"
+ },
+ "Sell this rate on the guest booking page.": {
+  "kind": "text"
+ },
+ "Sellable": {
+  "kind": "text"
+ },
+ "Send a new link": {
+  "kind": "text"
+ },
+ "Send email each day; include pdf with guest registration forms and folios for arriving guests": {
+  "kind": "text"
+ },
+ "Send Email to customer after departure": {
+  "kind": "text"
+ },
+ "Send Email to customer before arrival": {
+  "kind": "text"
+ },
+ "Send email when system receives a booking cancellation via channel": {
+  "kind": "text"
+ },
+ "Send email when system receives a booking cancellation via channel, but corresponding booking doesn't exist in system": {
+  "kind": "text"
+ },
+ "Send email when system receives booking modification via channel": {
+  "kind": "text"
+ },
+ "Send email when system receives booking modification via channel, but corresponding booking doesn't exist in system": {
+  "kind": "text"
+ },
+ "Send email when system receives booking that cannot be allocated. Possible reasons: 1. Overbooking. 2. There is space in calendar, but it split over several rooms of that type, needs manual intervention.": {
+  "kind": "text"
+ },
+ "Send email when system receives booking via channel": {
+  "kind": "text"
+ },
+ "Send email when system receives booking with room rate / room type combination that is not configured for sync or improperly configured": {
+  "kind": "text"
+ },
+ "Send one entry per weekday": {
+  "kind": "db"
+ },
+ "Send the link": {
+  "kind": "text"
+ },
+ "Sending…": {
+  "kind": "text"
+ },
+ "Senegal": {
+  "kind": "country",
+  "code": "SN"
+ },
+ "Serbia": {
+  "kind": "country",
+  "code": "RS"
+ },
+ "Set {amount} on {n} nights.": {
+  "kind": "plural",
+  "one": "Set {amount} on {n} night."
+ },
+ "Set a new password": {
+  "kind": "text"
+ },
+ "Set a price": {
+  "kind": "text"
+ },
+ "Set as hotel timezone": {
+  "kind": "text"
+ },
+ "Set at most two years at a time": {
+  "kind": "db"
+ },
+ "Set availability": {
+  "kind": "text"
+ },
+ "Set close out": {
+  "kind": "text"
+ },
+ "Set closed to arrival": {
+  "kind": "text"
+ },
+ "Set closed to departure": {
+  "kind": "text"
+ },
+ "Set Cut-Off Date": {
+  "kind": "text"
+ },
+ "Set max stay": {
+  "kind": "text"
+ },
+ "Set min stay arrival": {
+  "kind": "text"
+ },
+ "Set min stay through": {
+  "kind": "text"
+ },
+ "Set rate": {
+  "kind": "text"
+ },
+ "Set rates": {
+  "kind": "text"
+ },
+ "Set stop sell": {
+  "kind": "text"
+ },
+ "Set Time": {
+  "kind": "text"
+ },
+ "Settings": {
+  "kind": "text"
+ },
+ "settled": {
+  "kind": "text"
+ },
+ "Settled": {
+  "kind": "text"
+ },
+ "Settlement": {
+  "kind": "text"
+ },
+ "Seychelles": {
+  "kind": "country",
+  "code": "SC"
+ },
+ "Share": {
+  "kind": "text"
+ },
+ "Shift closed": {
+  "kind": "text"
+ },
+ "Shifts still open": {
+  "kind": "text"
+ },
+ "Shop": {
+  "kind": "text"
+ },
+ "Show {n} more": {
+  "kind": "text"
+ },
+ "Show channel abbreviation for bookings": {
+  "kind": "text"
+ },
+ "Show Closed To Arrival": {
+  "kind": "text"
+ },
+ "Show Closed To Departure": {
+  "kind": "text"
+ },
+ "Show Expired Rates": {
+  "kind": "text"
+ },
+ "Show hotel logo on the top of the email": {
+  "kind": "text"
+ },
+ "Show last name first for bookings": {
+  "kind": "text"
+ },
+ "Show line-per-payment in Payments Report Export": {
+  "kind": "text"
+ },
+ "Show Max Stay": {
+  "kind": "text"
+ },
+ "Show Min Stay Arrival": {
+  "kind": "text"
+ },
+ "Show Min Stay Through": {
+  "kind": "text"
+ },
+ "Show nights breakdown": {
+  "kind": "text"
+ },
+ "Show occupancy options": {
+  "kind": "text"
+ },
+ "Show Payment Terminal": {
+  "kind": "text"
+ },
+ "Show room number for extras": {
+  "kind": "text"
+ },
+ "Show seasons in calendar": {
+  "kind": "text"
+ },
+ "Show Stop Sell": {
+  "kind": "text"
+ },
+ "Show waitlist": {
+  "kind": "text"
+ },
+ "Sierra Leone": {
+  "kind": "country",
+  "code": "SL"
+ },
+ "Sign in": {
+  "kind": "text"
+ },
+ "Signing in...": {
+  "kind": "text"
+ },
+ "Singapore": {
+  "kind": "country",
+  "code": "SG"
+ },
+ "Single-property bookings:": {
+  "kind": "text"
+ },
+ "Sint Maarten (Dutch part)": {
+  "kind": "country",
+  "code": "SX"
+ },
+ "Site Minder": {
+  "kind": "text"
+ },
+ "Sleeps": {
+  "kind": "text"
+ },
+ "Sleeps {baseOccupancy}, at most {maxOccupancy}": {
+  "kind": "text"
+ },
+ "Sleeps {n}": {
+  "kind": "text"
+ },
+ "Sleeps {n} + {extra}": {
+  "kind": "text"
+ },
+ "Slovakia": {
+  "kind": "country",
+  "code": "SK"
+ },
+ "Slovenia": {
+  "kind": "country",
+  "code": "SI"
+ },
+ "Slug": {
+  "kind": "text"
+ },
+ "Smoking": {
+  "kind": "text"
+ },
+ "Smoking in permitted areas only": {
+  "kind": "text"
+ },
+ "Sold": {
+  "kind": "text"
+ },
+ "Sold as non-refundable ({policy}). The charge stands and stays on the folio.": {
+  "kind": "text"
+ },
+ "Sold from": {
+  "kind": "text"
+ },
+ "Sold to": {
+  "kind": "text"
+ },
+ "Sold under custom terms ({policy}). Check them before cancelling.": {
+  "kind": "text"
+ },
+ "Solomon Islands": {
+  "kind": "country",
+  "code": "SB"
+ },
+ "Somalia": {
+  "kind": "country",
+  "code": "SO"
+ },
+ "someone": {
+  "kind": "text"
+ },
+ "Sorry, no children and infants": {
+  "kind": "text"
+ },
+ "Sorry, no infants": {
+  "kind": "text"
+ },
+ "Sorry, no pets": {
+  "kind": "text"
+ },
+ "Sort by amount": {
+  "kind": "text"
+ },
+ "Sort by cancellation policy": {
+  "kind": "text"
+ },
+ "Sort by title": {
+  "kind": "text"
+ },
+ "Source": {
+  "kind": "text"
+ },
+ "Source and terms": {
+  "kind": "text"
+ },
+ "South Africa": {
+  "kind": "country",
+  "code": "ZA"
+ },
+ "South Georgia and the South Sandwich Islands": {
+  "kind": "country",
+  "code": "GS"
+ },
+ "South Sudan": {
+  "kind": "country",
+  "code": "SS"
+ },
+ "Spa": {
+  "kind": "text"
+ },
+ "Spain": {
+  "kind": "country",
+  "code": "ES"
+ },
+ "Sri Lanka": {
+  "kind": "country",
+  "code": "LK"
+ },
+ "Staff": {
+  "kind": "text"
+ },
+ "Staff advance": {
+  "kind": "text"
+ },
+ "Staff notes": {
+  "kind": "text"
+ },
+ "State": {
+  "kind": "text"
+ },
+ "State / region": {
+  "kind": "text"
+ },
+ "Statement Settings": {
+  "kind": "text"
+ },
+ "Statement settings saved.": {
+  "kind": "text"
+ },
+ "Status": {
+  "kind": "text"
+ },
+ "Stay": {
+  "kind": "text"
+ },
+ "Stay {stay}, pay {pay}": {
+  "kind": "text"
+ },
+ "Stay N, pay M": {
+  "kind": "text"
+ },
+ "Stay value": {
+  "kind": "text"
+ },
+ "Stayed": {
+  "kind": "text"
+ },
+ "Stays": {
+  "kind": "text"
+ },
+ "stays are missing something a return needs. Open the guest under": {
+  "kind": "text"
+ },
+ "Stays longer than {0} nights cannot be booked online. Please contact the hotel.": {
+  "kind": "db"
+ },
+ "Still selling": {
+  "kind": "text"
+ },
+ "Stop editing": {
+  "kind": "text"
+ },
+ "Stop searching": {
+  "kind": "text"
+ },
+ "Stop sell": {
+  "kind": "text"
+ },
+ "Stop Sell": {
+  "kind": "text"
+ },
+ "Stopped": {
+  "kind": "text"
+ },
+ "Stops this rate plan only. Other plans keep selling the same rooms — to close the room type outright, use Close out.": {
+  "kind": "text"
+ },
+ "Strictly no smoking": {
+  "kind": "text"
+ },
+ "Stripe SCA": {
+  "kind": "text"
+ },
+ "Subject": {
+  "kind": "text"
+ },
+ "Sudan": {
+  "kind": "country",
+  "code": "SD"
+ },
+ "Supplies": {
+  "kind": "text"
+ },
+ "Supported languages": {
+  "kind": "text"
+ },
+ "Supported languages saved.": {
+  "kind": "text"
+ },
+ "Suriname": {
+  "kind": "country",
+  "code": "SR"
+ },
+ "Svalbard and Jan Mayen": {
+  "kind": "country",
+  "code": "SJ"
+ },
+ "Sweden": {
+  "kind": "country",
+  "code": "SE"
+ },
+ "Sweeply": {
+  "kind": "text"
+ },
+ "Switzerland": {
+  "kind": "country",
+  "code": "CH"
+ },
+ "Sync as multi occupancy rates": {
+  "kind": "text"
+ },
+ "Synced At": {
+  "kind": "text"
+ },
+ "Syrian Arab Republic": {
+  "kind": "country",
+  "code": "SY"
+ },
+ "System": {
+  "kind": "text"
+ },
+ "System Settings": {
+  "kind": "text"
+ },
+ "Taiwan": {
+  "kind": "country",
+  "code": "TW"
+ },
+ "Tajikistan": {
+  "kind": "country",
+  "code": "TJ"
+ },
+ "Take a booking": {
+  "kind": "text"
+ },
+ "Take a booking arriving {date}": {
+  "kind": "text"
+ },
+ "Take a payment": {
+  "kind": "text"
+ },
+ "Take another": {
+  "kind": "text"
+ },
+ "Take payment": {
+  "kind": "text"
+ },
+ "Take the booking": {
+  "kind": "text"
+ },
+ "Take this booking against the restriction above.": {
+  "kind": "text"
+ },
+ "Take this booking anyway, overbooking the house.": {
+  "kind": "text"
+ },
+ "Taken": {
+  "kind": "text"
+ },
+ "Taken by": {
+  "kind": "text"
+ },
+ "Taking bookings is not available to your role": {
+  "kind": "text"
+ },
+ "Taking the booking…": {
+  "kind": "text"
+ },
+ "Taking…": {
+  "kind": "text"
+ },
+ "Tanzania": {
+  "kind": "country",
+  "code": "TZ"
+ },
+ "Task:": {
+  "kind": "text"
+ },
+ "Tasks": {
+  "kind": "text"
+ },
+ "Tax": {
+  "kind": "text"
+ },
+ "Tax cannot be applied to a negative amount": {
+  "kind": "db"
+ },
+ "Tax Information": {
+  "kind": "text"
+ },
+ "Tax rate": {
+  "kind": "text"
+ },
+ "Tax rate {0} is retired and cannot be applied to a new charge": {
+  "kind": "db"
+ },
+ "Taxes": {
+  "kind": "text"
+ },
+ "Taxes And Fees": {
+  "kind": "text"
+ },
+ "Taxi": {
+  "kind": "text"
+ },
+ "Telephone Number": {
+  "kind": "text"
+ },
+ "Template": {
+  "kind": "text"
+ },
+ "Template body": {
+  "kind": "text"
+ },
+ "Template preview": {
+  "kind": "text"
+ },
+ "Template saved.": {
+  "kind": "text"
+ },
+ "Template subject": {
+  "kind": "text"
+ },
+ "Template title": {
+  "kind": "text"
+ },
+ "Template variables": {
+  "kind": "text"
+ },
+ "Templates": {
+  "kind": "text"
+ },
+ "Terms and conditions": {
+  "kind": "text"
+ },
+ "Terms Text": {
+  "kind": "text"
+ },
+ "Text": {
+  "kind": "text"
+ },
+ "Text color": {
+  "kind": "text"
+ },
+ "Thailand": {
+  "kind": "country",
+  "code": "TH"
+ },
+ "That accounting category is not on this property": {
+  "kind": "db"
+ },
+ "That accounting system is already added. Edit it instead.": {
+  "kind": "db"
+ },
+ "That accounting system is not on this property": {
+  "kind": "db"
+ },
+ "That arrival date has passed": {
+  "kind": "db"
+ },
+ "That booked room does not belong to this property": {
+  "kind": "db"
+ },
+ "That booking does not belong to this property": {
+  "kind": "db"
+ },
+ "That booking has no open folio to recharge the paid-out to": {
+  "kind": "db"
+ },
+ "That booking has no open folio, so there is nothing to pay against.": {
+  "kind": "text"
+ },
+ "That booking is not on this property": {
+  "kind": "db"
+ },
+ "That booking source is not available on this property": {
+  "kind": "db"
+ },
+ "That booking source is not on this property": {
+  "kind": "db"
+ },
+ "That cancellation policy is not on this property": {
+  "kind": "db"
+ },
+ "That cannot be negative.": {
+  "kind": "text"
+ },
+ "That category no longer exists": {
+  "kind": "db"
+ },
+ "That channel manager is not on this property": {
+  "kind": "db"
+ },
+ "That connection is not on this property": {
+  "kind": "db"
+ },
+ "That currency is not on this property": {
+  "kind": "db"
+ },
+ "That customer could not be found.": {
+  "kind": "text"
+ },
+ "That customer is not on this property": {
+  "kind": "db"
+ },
+ "That customer is not on this property, or has been merged away": {
+  "kind": "db"
+ },
+ "That date is too far ahead to book online yet": {
+  "kind": "db"
+ },
+ "That developer key is not on this property": {
+  "kind": "db"
+ },
+ "That did not work.": {
+  "kind": "text"
+ },
+ "That discount is not on this property": {
+  "kind": "db"
+ },
+ "That email address does not look right": {
+  "kind": "db"
+ },
+ "That email template no longer exists": {
+  "kind": "db"
+ },
+ "That extra category no longer exists": {
+  "kind": "db"
+ },
+ "That extra is not in this property's catalog": {
+  "kind": "db"
+ },
+ "That extra no longer exists": {
+  "kind": "db"
+ },
+ "That facility no longer exists": {
+  "kind": "db"
+ },
+ "That file could not be opened.": {
+  "kind": "text"
+ },
+ "That file does not belong to this hotel's invoice": {
+  "kind": "db"
+ },
+ "That file does not belong to this room": {
+  "kind": "db"
+ },
+ "That file is empty": {
+  "kind": "db"
+ },
+ "That file is no longer saved.": {
+  "kind": "text"
+ },
+ "That file is not a picture. Use a JPEG, PNG or WebP.": {
+  "kind": "text"
+ },
+ "That file is not a picture. Use a JPEG, PNG, WebP or AVIF.": {
+  "kind": "text"
+ },
+ "That file is not on this property": {
+  "kind": "db"
+ },
+ "That file was not uploaded against this booking": {
+  "kind": "db"
+ },
+ "That gateway is not on this property": {
+  "kind": "db"
+ },
+ "That guest no longer exists": {
+  "kind": "db"
+ },
+ "That identification type no longer exists": {
+  "kind": "db"
+ },
+ "That is not a number of children": {
+  "kind": "db"
+ },
+ "That is not an amount. Try 120 or 120.50.": {
+  "kind": "text"
+ },
+ "That is not an amount. Try 15 or 15.00, or clear it to make the meal worth nothing.": {
+  "kind": "text"
+ },
+ "That is not an amount. Try 25 or 25.50.": {
+  "kind": "text"
+ },
+ "That is not an amount. Try 450 or 450.50.": {
+  "kind": "text"
+ },
+ "That is not something Inventory can set.": {
+  "kind": "text"
+ },
+ "That is not your current password.": {
+  "kind": "text"
+ },
+ "That is over {amount} out. A manager should look at this shift before the drawer is used again.": {
+  "kind": "text"
+ },
+ "That is the only room left on booking {0}. Cancel the booking instead": {
+  "kind": "db"
+ },
+ "That is the password you already have.": {
+  "kind": "text"
+ },
+ "That key lock system is not on this property": {
+  "kind": "db"
+ },
+ "That meeting room booking is not on this property": {
+  "kind": "db"
+ },
+ "That meeting room is not available on this property": {
+  "kind": "db"
+ },
+ "That meeting room is not on this property": {
+  "kind": "db"
+ },
+ "That member of staff is not on this property": {
+  "kind": "db"
+ },
+ "That note is not on this property": {
+  "kind": "db"
+ },
+ "That overlaps {0} ({1} - {2}). Seasons cannot overlap.": {
+  "kind": "db"
+ },
+ "That page does not exist": {
+  "kind": "text"
+ },
+ "That password is too long": {
+  "kind": "db"
+ },
+ "That payment method could not be read": {
+  "kind": "text"
+ },
+ "That payment method is not on this property": {
+  "kind": "db"
+ },
+ "That payment type is not on this property": {
+  "kind": "db"
+ },
+ "That picture is over 2MB. Save it smaller and try again.": {
+  "kind": "text"
+ },
+ "That picture is over 5MB. Save it smaller and try again.": {
+  "kind": "text"
+ },
+ "That pos profile is not on this property": {
+  "kind": "db"
+ },
+ "That profile is not on this property": {
+  "kind": "db"
+ },
+ "That promotion is not on this property": {
+  "kind": "db"
+ },
+ "That rate plan does not include {0}. Add the meal before pricing it.": {
+  "kind": "db"
+ },
+ "That rate plan is not available on this property": {
+  "kind": "db"
+ },
+ "That rate plan is not on this property": {
+  "kind": "db"
+ },
+ "That reaction is not on this property": {
+  "kind": "db"
+ },
+ "That room does not belong to this property": {
+  "kind": "db"
+ },
+ "That room has no price loaded for those dates": {
+  "kind": "db"
+ },
+ "That room is fully booked for those dates": {
+  "kind": "db"
+ },
+ "That room is not available on this rate": {
+  "kind": "db"
+ },
+ "That room is not on a booking for this property": {
+  "kind": "db"
+ },
+ "That room is not on this property": {
+  "kind": "db"
+ },
+ "That room line is not on this property": {
+  "kind": "db"
+ },
+ "That room on booking {0} has already departed": {
+  "kind": "db"
+ },
+ "That room on booking {0} is already cancelled": {
+  "kind": "db"
+ },
+ "That room on booking {0} is in house. Check the guest out rather than cancelling": {
+  "kind": "db"
+ },
+ "That room sleeps {0} people": {
+  "kind": "db"
+ },
+ "That room type is no longer on this property": {
+  "kind": "db"
+ },
+ "That room type is not on this property": {
+  "kind": "db"
+ },
+ "That room type is not on this property.": {
+  "kind": "db"
+ },
+ "That room type no longer exists": {
+  "kind": "db"
+ },
+ "That room was not cancelled on its own, so there is nothing to put back here": {
+  "kind": "db"
+ },
+ "That sales channel is not on this property": {
+  "kind": "db"
+ },
+ "That season is not on this property": {
+  "kind": "db"
+ },
+ "That season or event is not on this property": {
+  "kind": "db"
+ },
+ "That tax is not on this property": {
+  "kind": "db"
+ },
+ "That tax rate does not belong to this property": {
+  "kind": "db"
+ },
+ "That tax rate is not on this property": {
+  "kind": "db"
+ },
+ "That tax rate is not one of this property's": {
+  "kind": "db"
+ },
+ "That value is too long": {
+  "kind": "db"
+ },
+ "That virtual room type is not on this property": {
+  "kind": "db"
+ },
+ "That waitlist entry is not on this property": {
+  "kind": "db"
+ },
+ "That widget is not on this property": {
+  "kind": "db"
+ },
+ "That would remove your own access. Have another administrator do it.": {
+  "kind": "db"
+ },
+ "The address may have been mistyped, or the link that brought you here may be out of date.": {
+  "kind": "text"
+ },
+ "The address your staff account was set up with.": {
+  "kind": "text"
+ },
+ "The amount must be more than zero.": {
+  "kind": "text"
+ },
+ "The board starts on {date}. Go to another date.": {
+  "kind": "text"
+ },
+ "The booking was not returned. Check the bookings list before taking it again.": {
+  "kind": "text"
+ },
+ "The booking was not returned. Check the calendar before trying again.": {
+  "kind": "text"
+ },
+ "The booking's rooms did not load": {
+  "kind": "text"
+ },
+ "The category to merge into no longer exists": {
+  "kind": "db"
+ },
+ "The channel's own reference": {
+  "kind": "text"
+ },
+ "The cheapest qualifying nights go to zero. Stay 3 pay 2 gives one free night in every three.": {
+  "kind": "text"
+ },
+ "The check-in did not go through": {
+  "kind": "text"
+ },
+ "The check-out did not go through": {
+  "kind": "text"
+ },
+ "The colours must be a set of colours": {
+  "kind": "db"
+ },
+ "The conditions are not in a shape this screen writes": {
+  "kind": "db"
+ },
+ "The configuration file did not arrive; choose it again": {
+  "kind": "db"
+ },
+ "The counted total cannot be negative.": {
+  "kind": "text"
+ },
+ "The counted total must be zero or more.": {
+  "kind": "text"
+ },
+ "The customer to keep is not on this property, or has already been merged away": {
+  "kind": "db"
+ },
+ "The day closed but returned no summary. Check the activity feed.": {
+  "kind": "text"
+ },
+ "The day did not close": {
+  "kind": "text"
+ },
+ "The default language has to be one of the supported languages. Add it there first.": {
+  "kind": "db"
+ },
+ "The default language has to stay supported. Change the default first.": {
+  "kind": "db"
+ },
+ "The default notes can be at most 255 characters": {
+  "kind": "db"
+ },
+ "The departure date has to be after the arrival date.": {
+  "kind": "text"
+ },
+ "The departure date must be after the arrival date": {
+  "kind": "db"
+ },
+ "The departure date must be after the arrival date.": {
+  "kind": "text"
+ },
+ "The email preferences must be a set of switches": {
+  "kind": "db"
+ },
+ "The export could not be built.": {
+  "kind": "text"
+ },
+ "The extra to merge into no longer exists": {
+  "kind": "db"
+ },
+ "The feed was not marked read": {
+  "kind": "text"
+ },
+ "The float cannot be negative.": {
+  "kind": "text"
+ },
+ "The folio could not be read": {
+  "kind": "text"
+ },
+ "The folio is settled.": {
+  "kind": "text"
+ },
+ "The folio template could not be rendered: {error}. This is the built-in layout.": {
+  "kind": "text"
+ },
+ "The free window closed on {date}. A cancellation fee applies.": {
+  "kind": "text"
+ },
+ "The free window has closed. A cancellation fee applies.": {
+  "kind": "text"
+ },
+ "The From text can be up to 255 characters": {
+  "kind": "db"
+ },
+ "The Grand Hotel": {
+  "kind": "text"
+ },
+ "The guest fields must be a list": {
+  "kind": "db"
+ },
+ "The guest is in that room. Check them out, or move them to another room instead": {
+  "kind": "db"
+ },
+ "The guest lookup failed": {
+  "kind": "text"
+ },
+ "The guest record could not be read.": {
+  "kind": "text"
+ },
+ "The hotel features must be a set of switches": {
+  "kind": "db"
+ },
+ "The hotel needs a name": {
+  "kind": "db"
+ },
+ "The hotel needs a name.": {
+  "kind": "text"
+ },
+ "The house": {
+  "kind": "text"
+ },
+ "The last date must not be before the first": {
+  "kind": "db"
+ },
+ "The last date must not be before the first.": {
+  "kind": "text"
+ },
+ "The last day must not be before the first": {
+  "kind": "db"
+ },
+ "The last day must not be before the first.": {
+  "kind": "text"
+ },
+ "The last shift opened at {amount}.": {
+  "kind": "text"
+ },
+ "The logo text can be at most 255 characters": {
+  "kind": "db"
+ },
+ "The maximum occupancy cannot be below the base.": {
+  "kind": "text"
+ },
+ "The meals on this rate are priced at {0} but the night is worth {1}. Correct the meal values in Inventory.": {
+  "kind": "db"
+ },
+ "The next receptionist can now open a shift.": {
+  "kind": "text"
+ },
+ "The opening float must be zero or more.": {
+  "kind": "text"
+ },
+ "The others are removed and their bookings move to the one kept, at its commission.": {
+  "kind": "text"
+ },
+ "The paid-out was not recorded": {
+  "kind": "text"
+ },
+ "The payment was not recorded": {
+  "kind": "text"
+ },
+ "The policy is too long": {
+  "kind": "db"
+ },
+ "The price is a number, like 24 or 24.50.": {
+  "kind": "text"
+ },
+ "The property needs a check-in time, like 15:00": {
+  "kind": "db"
+ },
+ "The property needs a check-out time, like 11:00": {
+  "kind": "db"
+ },
+ "The property needs a name": {
+  "kind": "db"
+ },
+ "The property needs a name.": {
+  "kind": "text"
+ },
+ "The property needs a night audit time, like 02:00": {
+  "kind": "db"
+ },
+ "The quantity must be 999 or fewer": {
+  "kind": "db"
+ },
+ "The quantity must be a whole number, 1 or more.": {
+  "kind": "text"
+ },
+ "The quantity must be at least 1": {
+  "kind": "db"
+ },
+ "The rate for {name} is not an amount. Try 120 or 120.50.": {
+  "kind": "text"
+ },
+ "The remaining balance is to be paid on arrival.": {
+  "kind": "text"
+ },
+ "The remaining balance is to be paid on departure.": {
+  "kind": "text"
+ },
+ "The reminder text can be at most 2000 characters": {
+  "kind": "db"
+ },
+ "The return covers nights actually slept, so cancellations and no-shows never appear.": {
+  "kind": "text"
+ },
+ "The room list did not load. Check your connection, then try again.": {
+  "kind": "text"
+ },
+ "The room was not assigned": {
+  "kind": "text"
+ },
+ "The rooms come off the house immediately, which frees the inventory.": {
+  "kind": "text"
+ },
+ "The sales channel to keep is not on this property": {
+  "kind": "db"
+ },
+ "The shift closed but returned no figures. Check it in reports.": {
+  "kind": "text"
+ },
+ "The shift did not close": {
+  "kind": "text"
+ },
+ "The shift did not open": {
+  "kind": "text"
+ },
+ "The slug is letters, numbers, - and _, starting with a letter or number": {
+  "kind": "db"
+ },
+ "The subject can be up to 255 characters": {
+  "kind": "db"
+ },
+ "The template is too long": {
+  "kind": "text"
+ },
+ "The terms text can be at most 2000 characters": {
+  "kind": "db"
+ },
+ "The two new passwords do not match.": {
+  "kind": "text"
+ },
+ "The two passwords do not match.": {
+  "kind": "text"
+ },
+ "There are already {0} unconfirmed bookings on this email. The hotel will be in touch about those first.": {
+  "kind": "db"
+ },
+ "There are no rate plans yet, so there is nothing to price.": {
+  "kind": "text"
+ },
+ "There is already {0} called {1}": {
+  "kind": "db"
+ },
+ "There is already a developer key called {0}": {
+  "kind": "db"
+ },
+ "There is already a discount called {0}": {
+  "kind": "db"
+ },
+ "There is already a facility called {0}": {
+  "kind": "db"
+ },
+ "There is already a gateway called {0}": {
+  "kind": "db"
+ },
+ "There is already a payment type called {0}": {
+  "kind": "db"
+ },
+ "There is already a profile for this pos type. Edit that one instead.": {
+  "kind": "db"
+ },
+ "There is already a virtual room type called {0}": {
+  "kind": "db"
+ },
+ "There is already an accounting category called {0}": {
+  "kind": "db"
+ },
+ "There is already an email template called {0}": {
+  "kind": "db"
+ },
+ "There is already an extra category called {0}": {
+  "kind": "db"
+ },
+ "There is already an identification type called {0}": {
+  "kind": "db"
+ },
+ "There is no live promotion with the code {0}": {
+  "kind": "db"
+ },
+ "There is no open business date": {
+  "kind": "db"
+ },
+ "There is no open business date to close": {
+  "kind": "db"
+ },
+ "These rooms already exist: {0}": {
+  "kind": "db"
+ },
+ "They did not turn up (no show)": {
+  "kind": "text"
+ },
+ "This booking has no open folio to charge the extra to": {
+  "kind": "db"
+ },
+ "This booking still owes {amount}. Cancelling does not write that off — a cancellation fee is a real charge and somebody still has to chase it.": {
+  "kind": "text"
+ },
+ "This booking still owes {amount}. Cancelling frees the room but does not write that off.": {
+  "kind": "text"
+ },
+ "This folio still owes {amount}. Checking out does not settle it — take the payment first unless the balance is going to an account.": {
+  "kind": "text"
+ },
+ "This hotel has no accounting defaults to change": {
+  "kind": "db"
+ },
+ "This is the default policy. Make another policy the default instead.": {
+  "kind": "db"
+ },
+ "This page needs the link from the reset email. Ask for a new one below.": {
+  "kind": "text"
+ },
+ "This posts tonight’s room charge for every guest in house, closes": {
+  "kind": "text"
+ },
+ "This property already has a {0} method. Rename that one rather than adding a second.": {
+  "kind": "db"
+ },
+ "This property is not set up to take bookings online": {
+  "kind": "db"
+ },
+ "This rate is on stop sell for {0} on {1}.": {
+  "kind": "db"
+ },
+ "This report is not available to your role": {
+  "kind": "text"
+ },
+ "This report is switched off for this hotel": {
+  "kind": "text"
+ },
+ "this room": {
+  "kind": "text"
+ },
+ "This room type has no rooms set up yet.": {
+  "kind": "text"
+ },
+ "This rounding options would be used across whole system": {
+  "kind": "text"
+ },
+ "This screen is switched off.": {
+  "kind": "text"
+ },
+ "Through the drawer": {
+  "kind": "text"
+ },
+ "Tick at least one rate to apply this to.": {
+  "kind": "text"
+ },
+ "Tick the rates on the left to apply this to.": {
+  "kind": "text"
+ },
+ "Tick the room types on the left to apply this to.": {
+  "kind": "text"
+ },
+ "Tick two or more customers to merge them into one.": {
+  "kind": "text"
+ },
+ "Tick two or more rows, then fold them into one record": {
+  "kind": "text"
+ },
+ "Tick two or more sales channels to merge them into one.": {
+  "kind": "text"
+ },
+ "Timor-Leste": {
+  "kind": "country",
+  "code": "TL"
+ },
+ "Title": {
+  "kind": "text"
+ },
+ "Title / Description": {
+  "kind": "text"
+ },
+ "Title Text": {
+  "kind": "text"
+ },
+ "Title Text Color": {
+  "kind": "text"
+ },
+ "Title:": {
+  "kind": "text"
+ },
+ "To": {
+  "kind": "text"
+ },
+ "To clean": {
+  "kind": "text"
+ },
+ "to:": {
+  "kind": "text"
+ },
+ "Today": {
+  "kind": "text"
+ },
+ "Toggle full screen": {
+  "kind": "text"
+ },
+ "Togo": {
+  "kind": "country",
+  "code": "TG"
+ },
+ "Tokelau": {
+  "kind": "country",
+  "code": "TK"
+ },
+ "Tonga": {
+  "kind": "country",
+  "code": "TO"
+ },
+ "Total": {
+  "kind": "text"
+ },
+ "Total Due": {
+  "kind": "text"
+ },
+ "Total revenue": {
+  "kind": "text"
+ },
+ "Total Revenue": {
+  "kind": "text"
+ },
+ "Touched in this range": {
+  "kind": "text"
+ },
+ "Transport": {
+  "kind": "text"
+ },
+ "Triggers": {
+  "kind": "text"
+ },
+ "Trinidad and Tobago": {
+  "kind": "country",
+  "code": "TT"
+ },
+ "Try again": {
+  "kind": "text"
+ },
+ "Try clearing the search box or setting status back to all.": {
+  "kind": "text"
+ },
+ "Tunisia": {
+  "kind": "country",
+  "code": "TN"
+ },
+ "Türkiye": {
+  "kind": "country",
+  "code": "TR"
+ },
+ "Turkmenistan": {
+  "kind": "country",
+  "code": "TM"
+ },
+ "Turks and Caicos Islands": {
+  "kind": "country",
+  "code": "TC"
+ },
+ "Tuvalu": {
+  "kind": "country",
+  "code": "TV"
+ },
+ "Type": {
+  "kind": "text"
+ },
+ "Type at least two characters.": {
+  "kind": "text"
+ },
+ "Type it once more": {
+  "kind": "text"
+ },
+ "Type:": {
+  "kind": "text"
+ },
+ "Uganda": {
+  "kind": "country",
+  "code": "UG"
+ },
+ "Ukraine": {
+  "kind": "country",
+  "code": "UA"
+ },
+ "Unassigned": {
+  "kind": "text"
+ },
+ "United Arab Emirates": {
+  "kind": "country",
+  "code": "AE"
+ },
+ "United Kingdom": {
+  "kind": "country",
+  "code": "GB"
+ },
+ "United States Minor Outlying Islands": {
+  "kind": "country",
+  "code": "UM"
+ },
+ "United States of America": {
+  "kind": "country",
+  "code": "US"
+ },
+ "Unknown": {
+  "kind": "text"
+ },
+ "Unknown colour {0}": {
+  "kind": "db"
+ },
+ "Unknown email preference {0}": {
+  "kind": "db"
+ },
+ "Unknown hotel feature {0}": {
+  "kind": "db"
+ },
+ "Unknown language {0}": {
+  "kind": "db"
+ },
+ "Unnamed customer": {
+  "kind": "text"
+ },
+ "Unnamed guest": {
+  "kind": "text"
+ },
+ "Unnumbered": {
+  "kind": "text"
+ },
+ "Unpaid": {
+  "kind": "text"
+ },
+ "Unpaid Booking Color": {
+  "kind": "text"
+ },
+ "Unsettled folios": {
+  "kind": "text"
+ },
+ "Unticked, the hotel absorbs it as a house expense.": {
+  "kind": "text"
+ },
+ "Up to 10 addresses": {
+  "kind": "db"
+ },
+ "Up to 10 notification addresses": {
+  "kind": "db"
+ },
+ "Upgrade or move type": {
+  "kind": "text"
+ },
+ "Upload CSV Configuration to allocate Rooms and Rates": {
+  "kind": "text"
+ },
+ "Upload the invoice logo": {
+  "kind": "text"
+ },
+ "Uploading…": {
+  "kind": "text"
+ },
+ "Uruguay": {
+  "kind": "country",
+  "code": "UY"
+ },
+ "Use as default policy": {
+  "kind": "text"
+ },
+ "Use Booking Room id as Key Code": {
+  "kind": "text"
+ },
+ "Use Checkin With Confirmation Mode": {
+  "kind": "text"
+ },
+ "Use Checkout Date Instead Nights Count": {
+  "kind": "text"
+ },
+ "Use fixed width for zoom": {
+  "kind": "text"
+ },
+ "Use full balance": {
+  "kind": "text"
+ },
+ "Use hotel address in greetings section": {
+  "kind": "text"
+ },
+ "Use hotel address in greetings section and hide properties": {
+  "kind": "text"
+ },
+ "Use property address in greetings section": {
+  "kind": "text"
+ },
+ "Use Rounded Corners": {
+  "kind": "text"
+ },
+ "Use Text Instead of Logo": {
+  "kind": "text"
+ },
+ "Uzbekistan": {
+  "kind": "country",
+  "code": "UZ"
+ },
+ "vacant_clean": {
+  "kind": "db"
+ },
+ "vacant_dirty": {
+  "kind": "db"
+ },
+ "Value": {
+  "kind": "text"
+ },
+ "Value %": {
+  "kind": "text"
+ },
+ "Value lost": {
+  "kind": "text"
+ },
+ "Vanuatu": {
+  "kind": "country",
+  "code": "VU"
+ },
+ "Variance": {
+  "kind": "text"
+ },
+ "VAT": {
+  "kind": "text"
+ },
+ "Venezuela": {
+  "kind": "country",
+  "code": "VE"
+ },
+ "Vertical Booking": {
+  "kind": "text"
+ },
+ "Viet Nam": {
+  "kind": "country",
+  "code": "VN"
+ },
+ "View rooms ({n})": {
+  "kind": "text"
+ },
+ "Virgin Islands (British)": {
+  "kind": "country",
+  "code": "VG"
+ },
+ "Virgin Islands (U.S.)": {
+  "kind": "country",
+  "code": "VI"
+ },
+ "Virtual card": {
+  "kind": "text"
+ },
+ "Virtual room type": {
+  "kind": "text"
+ },
+ "Virtual Room Types": {
+  "kind": "text"
+ },
+ "waiting": {
+  "kind": "db"
+ },
+ "Waiting": {
+  "kind": "text"
+ },
+ "Waiting to be cleaned": {
+  "kind": "text"
+ },
+ "Waitlist entry marked {0}": {
+  "kind": "db"
+ },
+ "Wallis and Futuna": {
+  "kind": "country",
+  "code": "WF"
+ },
+ "We have the right to pre-authorise your card prior to arrival": {
+  "kind": "text"
+ },
+ "We have the right to pre-authorise your card prior to arrival.": {
+  "kind": "text"
+ },
+ "We will email you a link to set a new one": {
+  "kind": "text"
+ },
+ "Website": {
+  "kind": "text"
+ },
+ "Week day names": {
+  "kind": "text"
+ },
+ "Week day names are seven names separated by commas, starting on Sunday": {
+  "kind": "db"
+ },
+ "Weekend Border Color": {
+  "kind": "text"
+ },
+ "Western Sahara": {
+  "kind": "country",
+  "code": "EH"
+ },
+ "What": {
+  "kind": "text"
+ },
+ "What {lowerCase} on this rate is worth": {
+  "kind": "text"
+ },
+ "What a guest gets on this rate": {
+  "kind": "text"
+ },
+ "What is your timezone": {
+  "kind": "text"
+ },
+ "What it takes off": {
+  "kind": "text"
+ },
+ "What just happened": {
+  "kind": "text"
+ },
+ "What the channels are owed": {
+  "kind": "text"
+ },
+ "What they asked for": {
+  "kind": "text"
+ },
+ "What those stays are worth": {
+  "kind": "text"
+ },
+ "What was it for": {
+  "kind": "text"
+ },
+ "What was sent": {
+  "kind": "text"
+ },
+ "When": {
+  "kind": "text"
+ },
+ "When a guest asks for dates the hotel cannot sell, add them here rather than losing the enquiry.": {
+  "kind": "text"
+ },
+ "When chosen": {
+  "kind": "text"
+ },
+ "Where the month is going": {
+  "kind": "text"
+ },
+ "Who is waiting": {
+  "kind": "text"
+ },
+ "Whole number": {
+  "kind": "text"
+ },
+ "Wholesaler": {
+  "kind": "text"
+ },
+ "Widen the dates, or check that the range runs forwards.": {
+  "kind": "text"
+ },
+ "Widen the dates, or take a booking.": {
+  "kind": "text"
+ },
+ "Widen the dates, or take a payment on the cashier screen.": {
+  "kind": "text"
+ },
+ "Widen the room column": {
+  "kind": "text"
+ },
+ "Widget {hash} deleted.": {
+  "kind": "text"
+ },
+ "Widget saved.": {
+  "kind": "text"
+ },
+ "Winter early bird": {
+  "kind": "text"
+ },
+ "With at least one night": {
+  "kind": "text"
+ },
+ "Worth nothing": {
+  "kind": "text"
+ },
+ "Write each colour as # and six hex digits, like #0098d1": {
+  "kind": "db"
+ },
+ "Write how many days before arrival a deposit is refundable": {
+  "kind": "db"
+ },
+ "Write how many days before arrival cancellation is free": {
+  "kind": "db"
+ },
+ "Write how many hours before arrival cancellation is free": {
+  "kind": "db"
+ },
+ "Write how many nights the deposit is": {
+  "kind": "db"
+ },
+ "Write something in the note first.": {
+  "kind": "text"
+ },
+ "Write the abbreviation": {
+  "kind": "db"
+ },
+ "Write the amount as a number above 0, with up to two decimals.": {
+  "kind": "text"
+ },
+ "Write the children policy, or pick one of the listed options": {
+  "kind": "db"
+ },
+ "Write the connection name": {
+  "kind": "db"
+ },
+ "Write the custom cancellation policy": {
+  "kind": "db"
+ },
+ "Write the custom no-show policy": {
+  "kind": "db"
+ },
+ "Write the custom refund policy": {
+  "kind": "db"
+ },
+ "Write the deposit amount, above 0": {
+  "kind": "db"
+ },
+ "Write the deposit percentage, above 0 and up to 100": {
+  "kind": "db"
+ },
+ "Write the display name": {
+  "kind": "db"
+ },
+ "Write the fixed rate, above zero": {
+  "kind": "db"
+ },
+ "Write the fixed rate, above zero.": {
+  "kind": "text"
+ },
+ "Write the internet policy, or pick one of the listed options": {
+  "kind": "db"
+ },
+ "Write the key's name": {
+  "kind": "db"
+ },
+ "Write the name": {
+  "kind": "db"
+ },
+ "Write the parking policy, or pick one of the listed options": {
+  "kind": "db"
+ },
+ "Write the percentage as a number above 0 and up to 100, with up to two decimals.": {
+  "kind": "text"
+ },
+ "Write the pets policy, or pick one of the listed options": {
+  "kind": "db"
+ },
+ "Write the policy title": {
+  "kind": "db"
+ },
+ "Write the rate as a number above zero, with up to six decimals.": {
+  "kind": "text"
+ },
+ "Write the smoking policy, or pick one of the listed options": {
+  "kind": "db"
+ },
+ "Write the template, or load the defaults, before making it active": {
+  "kind": "db"
+ },
+ "Write the text to print instead of the logo": {
+  "kind": "db"
+ },
+ "Write the title": {
+  "kind": "db"
+ },
+ "Xero": {
+  "kind": "text"
+ },
+ "Yemen": {
+  "kind": "country",
+  "code": "YE"
+ },
+ "yes": {
+  "kind": "text"
+ },
+ "Yes": {
+  "kind": "text"
+ },
+ "Yes / No": {
+  "kind": "text"
+ },
+ "you": {
+  "kind": "text"
+ },
+ "You are not on a property.": {
+  "kind": "text"
+ },
+ "You can add up to one profile per each pos type": {
+  "kind": "text"
+ },
+ "You can read the inventory but not change it. Rates, restrictions and availability are set by managers and administrators.": {
+  "kind": "text"
+ },
+ "You can read the settings but not change them. Rooms, rates and sales channels are set by managers and administrators.": {
+  "kind": "text"
+ },
+ "You count it blind; the figure appears at close": {
+  "kind": "text"
+ },
+ "You do not have any accounting systems connected": {
+  "kind": "text"
+ },
+ "You do not have any additional guest fields.": {
+  "kind": "text"
+ },
+ "You do not have any payment gateways added": {
+  "kind": "text"
+ },
+ "You will be signed in once it is saved": {
+  "kind": "text"
+ },
+ "You're changing the language. The page will reload, so save anything you are working on first.": {
+  "kind": "text"
+ },
+ "you@example.com": {
+  "kind": "text"
+ },
+ "Your current timezone is:": {
+  "kind": "text"
+ },
+ "Your name": {
+  "kind": "text"
+ },
+ "Your name cannot be blank": {
+  "kind": "db"
+ },
+ "Your name cannot be blank.": {
+  "kind": "text"
+ },
+ "Your password": {
+  "kind": "text"
+ },
+ "Your Recent Stay at {propertyName}": {
+  "kind": "text"
+ },
+ "Your role cannot change a room's status": {
+  "kind": "db"
+ },
+ "Your session has expired. Sign in again and retry.": {
+  "kind": "text"
+ },
+ "Your sign-in worked, but it is not linked to an active staff account, so there is nothing to show. Either the account was never set up or it has been deactivated. An administrator can sort it out.": {
+  "kind": "text"
+ },
+ "Your Terms and Conditions:": {
+  "kind": "text"
+ },
+ "Zambia": {
+  "kind": "country",
+  "code": "ZM"
+ },
+ "Zimbabwe": {
+  "kind": "country",
+  "code": "ZW"
+ }
+}

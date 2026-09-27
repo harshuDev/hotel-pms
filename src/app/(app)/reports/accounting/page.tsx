@@ -4,7 +4,8 @@ import { ReportFeatureOff, ReportNoAccess, ReportTable } from "@/components/repo
 import { formatMoney, formatMoneyShort } from "@/lib/money";
 import { reportRange } from "@/lib/reports";
 import { ReportAccessError, getAccountingReport, getBusinessDate } from "@/lib/queries";
-import type { AccountingRow } from "@/lib/types";
+import type { AccountingRow, FolioItemType } from "@/lib/types";
+import { FOLIO_ITEM_LABEL } from "@/lib/folio-items";
 import { getAccountingSettings, getHotelFeatures, getPropertyCurrency } from "@/lib/queries";
 import type { AccountingCategory } from "@/lib/finance-profiles";
 import { pageTitle } from "@/lib/i18n/server";
@@ -132,7 +133,12 @@ export default async function AccountingReportPage({
           columns={[
             {
               header: tr("Category"),
-              cell: (r) => <span className="font-medium text-ink">{r.label}</span>,
+              // Postgres writes the type as a label ("Food Beverage"); the code is what is looked up.
+              cell: (r) => (
+                <span className="font-medium text-ink">
+                  {r.code in FOLIO_ITEM_LABEL ? tr(FOLIO_ITEM_LABEL[r.code as FolioItemType]) : r.label}
+                </span>
+              ),
             },
             {
               header: tr("Code"),

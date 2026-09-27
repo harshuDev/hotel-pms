@@ -20,17 +20,17 @@ import {
 
 const LOADERS: Record<StaffLocale, () => Promise<Dictionary>> = {
   en: async () => ({}),
-  de: () => import("@/lib/i18n/staff/de").then((m) => m.default),
-  el: () => import("@/lib/i18n/staff/el").then((m) => m.default),
-  es: () => import("@/lib/i18n/staff/es").then((m) => m.default),
-  fr: () => import("@/lib/i18n/staff/fr").then((m) => m.default),
-  id: () => import("@/lib/i18n/staff/id").then((m) => m.default),
-  it: () => import("@/lib/i18n/staff/it").then((m) => m.default),
-  pt: () => import("@/lib/i18n/staff/pt").then((m) => m.default),
-  ro: () => import("@/lib/i18n/staff/ro").then((m) => m.default),
-  "sl-SI": () => import("@/lib/i18n/staff/sl-SI").then((m) => m.default),
-  th: () => import("@/lib/i18n/staff/th").then((m) => m.default),
-  is: () => import("@/lib/i18n/staff/is").then((m) => m.default),
+  de: () => import("@/lib/i18n/staff/de.json").then((m) => m.default as Dictionary),
+  el: () => import("@/lib/i18n/staff/el.json").then((m) => m.default as Dictionary),
+  es: () => import("@/lib/i18n/staff/es.json").then((m) => m.default as Dictionary),
+  fr: () => import("@/lib/i18n/staff/fr.json").then((m) => m.default as Dictionary),
+  id: () => import("@/lib/i18n/staff/id.json").then((m) => m.default as Dictionary),
+  it: () => import("@/lib/i18n/staff/it.json").then((m) => m.default as Dictionary),
+  pt: () => import("@/lib/i18n/staff/pt.json").then((m) => m.default as Dictionary),
+  ro: () => import("@/lib/i18n/staff/ro.json").then((m) => m.default as Dictionary),
+  "sl-SI": () => import("@/lib/i18n/staff/sl-SI.json").then((m) => m.default as Dictionary),
+  th: () => import("@/lib/i18n/staff/th.json").then((m) => m.default as Dictionary),
+  is: () => import("@/lib/i18n/staff/is.json").then((m) => m.default as Dictionary),
 };
 
 export const getCookieLocale = cache(async (): Promise<StaffLocale> => {

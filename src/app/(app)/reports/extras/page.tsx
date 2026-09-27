@@ -8,26 +8,14 @@ import { ReportNoAccess, ReportTable } from "@/components/reports/report-table";
 import { formatMoney, formatMoneyShort } from "@/lib/money";
 import { reportRange } from "@/lib/reports";
 import { ReportAccessError, getBusinessDate, getExtrasReport } from "@/lib/queries";
-import type { ExtrasRow, FolioItemType } from "@/lib/types";
+import type { ExtrasRow } from "@/lib/types";
+import { FOLIO_ITEM_LABEL } from "@/lib/folio-items";
 import { getPropertyCurrency } from "@/lib/queries";
 import { pageTitle } from "@/lib/i18n/server";
 import { msg } from "@/lib/i18n/translate";
 
 export const generateMetadata = pageTitle(msg("Extras report"));
 
-/** The folio item types a guest sees on a bill, in plain words. */
-const ITEM_LABELS: Record<FolioItemType, string> = {
-  room_charge: msg("Room"),
-  tax: msg("Tax"),
-  food_beverage: msg("Food and drink"),
-  laundry: msg("Laundry"),
-  minibar: msg("Minibar"),
-  transport: msg("Transport"),
-  miscellaneous: msg("Miscellaneous"),
-  discount: msg("Discount"),
-  adjustment: msg("Adjustment"),
-  reversal: msg("Reversal"),
-};
 
 export default async function ExtrasReportPage({
   searchParams,
@@ -82,7 +70,7 @@ export default async function ExtrasReportPage({
         {best && (
           <ReportFigure
             label={tr("Biggest earner")}
-            value={tr(ITEM_LABELS[best.itemType])}
+            value={tr(FOLIO_ITEM_LABEL[best.itemType])}
             detail={formatMoney(best.netCents, currency)}
           />
         )}
@@ -99,7 +87,7 @@ export default async function ExtrasReportPage({
           {
             header: tr("Type"),
             cell: (r) => (
-              <span className="font-medium text-ink">{tr(ITEM_LABELS[r.itemType])}</span>
+              <span className="font-medium text-ink">{tr(FOLIO_ITEM_LABEL[r.itemType])}</span>
             ),
           },
           {
