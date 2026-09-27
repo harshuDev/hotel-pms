@@ -1,5 +1,6 @@
 "use client";
 
+import { useT } from "@/components/i18n";
 import { useMemo, useState } from "react";
 import { cn } from "@/components/ui";
 import { useCurrency } from "@/components/currency";
@@ -86,6 +87,7 @@ export function DiscountsPanel({
   pending: boolean;
   run: Run;
 }) {
+  const tr = useT();
   const currency = useCurrency();
   const symbol = CURRENCIES.find((c) => c.code === currency)?.symbol ?? currency;
   const [query, setQuery] = useState("");
@@ -150,7 +152,7 @@ export function DiscountsPanel({
     if (d.kind === "percent") {
       percentBps = parsePercentBps(d.amount);
       if (percentBps === null) {
-        setError("Write the percentage as a number above 0 and up to 100, with up to two decimals.");
+        setError(tr("Write the percentage as a number above 0 and up to 100, with up to two decimals."));
         return;
       }
     } else {
@@ -160,7 +162,7 @@ export function DiscountsPanel({
         amountCents = null;
       }
       if (amountCents === null || amountCents <= 0) {
-        setError("Write the amount as a number above 0, with up to two decimals.");
+        setError(tr("Write the amount as a number above 0, with up to two decimals."));
         return;
       }
     }
@@ -168,15 +170,15 @@ export function DiscountsPanel({
       const result = await saveDiscount({ id: d.id, title: d.title, kind: d.kind, percentBps, amountCents });
       if (result.ok) setDraft(null);
       return result;
-    }, `${d.title.trim() || "Discount"} saved.`);
+    }, tr("{name} saved.", { name: d.title.trim() || tr("Discount") }));
   }
 
   return (
     <div className="max-w-5xl space-y-4">
-      <h2 className="border-b border-line pb-1 text-[20px] text-ink">Discounts</h2>
+      <h2 className="border-b border-line pb-1 text-[20px] text-ink">{tr("Discounts")}</h2>
 
       <label className="relative block">
-        <span className="sr-only">Search discounts</span>
+        <span className="sr-only">{tr("Search discounts")}</span>
         <svg viewBox="0 0 16 16" className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 fill-ink-faint" aria-hidden="true">
           <path d="M6.5 1a5.5 5.5 0 014.38 8.83l3.65 3.64-1.06 1.06-3.64-3.65A5.5 5.5 0 116.5 1zm0 1.5a4 4 0 100 8 4 4 0 000-8z" />
         </svg>
@@ -184,7 +186,7 @@ export function DiscountsPanel({
           type="search"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search discounts..."
+          placeholder={tr("Search discounts...")}
           className="w-full rounded border border-line bg-white py-1.5 pl-8 pr-3 text-[13px] text-ink outline-none placeholder:text-ink-faint focus:border-brass"
         />
       </label>
@@ -198,19 +200,19 @@ export function DiscountsPanel({
                   type="button"
                   onClick={() => sort("title")}
                   className="flex w-full items-center justify-between gap-2"
-                  aria-label="Sort by title"
+                  aria-label={tr("Sort by title")}
                 >
-                  Title
+                  {tr("Title")}
                   <SortIcon active={sortBy === "title"} desc={desc} />
                 </button>
               </th>
               <th className={cn(th, "relative w-[35%]")}>
                 <div className="flex items-center justify-between gap-2">
-                  Type
+                  {tr("Type")}
                   <button
                     type="button"
                     onClick={() => setFilterOpen(!filterOpen)}
-                    aria-label="Filter by type"
+                    aria-label={tr("Filter by type")}
                     aria-expanded={filterOpen}
                     className="rounded p-1 hover:bg-shell"
                   >
@@ -232,7 +234,7 @@ export function DiscountsPanel({
                           kindFilter === k ? "font-semibold text-ink" : "text-ink-muted",
                         )}
                       >
-                        {k === null ? "All" : k === "percent" ? "Percent" : "Fixed"}
+                        {k === null ? tr("All") : k === "percent" ? tr("Percent") : tr("Fixed")}
                       </button>
                     ))}
                   </div>
@@ -243,27 +245,27 @@ export function DiscountsPanel({
                   type="button"
                   onClick={() => sort("amount")}
                   className="flex w-full items-center justify-between gap-2"
-                  aria-label="Sort by amount"
+                  aria-label={tr("Sort by amount")}
                 >
-                  Amount
+                  {tr("Amount")}
                   <SortIcon active={sortBy === "amount"} desc={desc} />
                 </button>
               </th>
-              <th className="w-28" aria-label="Actions" />
+              <th className="w-28" aria-label={tr("Actions")} />
             </tr>
           </thead>
           <tbody>
             {rows.map((d) => (
               <tr key={d.id} className="border-b border-line last:border-0">
                 <td className="px-3 py-3.5 text-ink">{d.title}</td>
-                <td className="bg-shell/40 px-3 py-3.5 text-ink">{d.kind === "percent" ? "Percent" : "Fixed"}</td>
+                <td className="bg-shell/40 px-3 py-3.5 text-ink">{d.kind === "percent" ? tr("Percent") : tr("Fixed")}</td>
                 <td className="tnum px-3 py-3.5 text-ink">{amountLabel(d)}</td>
                 <td className="px-3 py-2">
                   {canEdit && (
                     <span className="flex justify-end gap-3">
                       <button
                         type="button"
-                        aria-label={`Edit ${d.title}`}
+                        aria-label={tr("Edit {name}", { name: d.title })}
                         onClick={() => open(d)}
                         className="grid h-7 w-7 place-items-center rounded-full border border-brass text-brass hover:bg-brass/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-brass"
                       >
@@ -271,11 +273,11 @@ export function DiscountsPanel({
                       </button>
                       <button
                         type="button"
-                        aria-label={`Delete ${d.title}`}
+                        aria-label={tr("Delete {name}", { name: d.title })}
                         disabled={pending}
                         onClick={() => {
-                          if (!confirm(`Delete ${d.title}?`)) return;
-                          run(() => deleteDiscount(d.id), `${d.title} deleted.`);
+                          if (!confirm(tr("Delete {name}?", { name: d.title }))) return;
+                          run(() => deleteDiscount(d.id), tr("{name} deleted.", { name: d.title }));
                         }}
                         className="grid h-7 w-7 place-items-center rounded-full border border-rose-500 text-rose-600 hover:bg-rose-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-rose-500"
                       >
@@ -289,7 +291,7 @@ export function DiscountsPanel({
             {rows.length === 0 && (
               <tr>
                 <td colSpan={4} className="px-3 py-5 text-[13px] text-ink-muted">
-                  {discounts.length === 0 ? "None yet." : "No discount matches."}
+                  {discounts.length === 0 ? tr("None yet.") : tr("No discount matches.")}
                 </td>
               </tr>
             )}
@@ -303,21 +305,21 @@ export function DiscountsPanel({
             <circle cx="8" cy="8" r="8" className="fill-white" />
             <path d="M8 4.5v7M4.5 8h7" className="stroke-chrome-800" strokeWidth="2" strokeLinecap="round" />
           </svg>
-          Add Discount
+          {tr("Add Discount")}
         </button>
       )}
 
       {draft && (
         <Dialog
-          title={draft.id ? "Edit Discount" : "Add Discount"}
+          title={draft.id ? tr("Edit Discount") : tr("Add Discount")}
           onClose={() => setDraft(null)}
           footer={
             <>
               <button type="button" className={secondary} onClick={() => setDraft(null)}>
-                Cancel
+                {tr("Cancel")}
               </button>
               <button type="button" className={primary} disabled={pending} onClick={() => save(draft)}>
-                Save
+                {tr("Save")}
               </button>
             </>
           }
@@ -329,7 +331,7 @@ export function DiscountsPanel({
               save(draft);
             }}
           >
-            <label htmlFor="discount-title">Title:</label>
+            <label htmlFor="discount-title">{tr("Title:")}</label>
             <input
               id="discount-title"
               autoFocus
@@ -339,7 +341,7 @@ export function DiscountsPanel({
               className={input}
             />
 
-            <label htmlFor="discount-amount">Amount:</label>
+            <label htmlFor="discount-amount">{tr("Amount:")}</label>
             <div className="flex">
               <span className="grid min-w-[2.25rem] place-items-center rounded-l-md border border-r-0 border-line bg-shell px-2 text-ink-muted">
                 {draft.kind === "percent" ? "%" : symbol}
@@ -353,7 +355,7 @@ export function DiscountsPanel({
               />
             </div>
 
-            <span id="discount-type">Type:</span>
+            <span id="discount-type">{tr("Type:")}</span>
             <div role="radiogroup" aria-labelledby="discount-type" className="flex">
               {(["percent", "fixed"] as const).map((k, i) => (
                 <button
@@ -370,7 +372,7 @@ export function DiscountsPanel({
                       : "border-line bg-white text-ink hover:bg-shell",
                   )}
                 >
-                  {k === "percent" ? "Percent" : "Fixed"}
+                  {k === "percent" ? tr("Percent") : tr("Fixed")}
                 </button>
               ))}
             </div>

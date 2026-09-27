@@ -1,5 +1,7 @@
 "use client";
 
+import { useT } from "@/components/i18n";
+import { msg } from "@/lib/i18n/translate";
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/components/ui";
 import { Dialog, EditIcon } from "@/components/settings/finance-panels";
@@ -23,11 +25,11 @@ type Run = (fn: () => Promise<{ ok: boolean; error?: string }>, done: string) =>
 type Filter = "active" | "all" | "draft";
 
 const KINDS: { value: ChannelKind; label: string }[] = [
-  { value: "direct", label: "Direct" },
-  { value: "ota", label: "OTA" },
-  { value: "wholesaler", label: "Wholesaler" },
-  { value: "gds", label: "GDS" },
-  { value: "offline", label: "Offline" },
+  { value: "direct", label: msg("Direct") },
+  { value: "ota", label: msg("OTA") },
+  { value: "wholesaler", label: msg("Wholesaler") },
+  { value: "gds", label: msg("GDS") },
+  { value: "offline", label: msg("Offline") },
 ];
 
 type Draft = {
@@ -57,6 +59,7 @@ function CustomerPicker({
   value: { id: string; name: string } | null;
   onChange: (v: { id: string; name: string } | null) => void;
 }) {
+  const tr = useT();
   const [q, setQ] = useState("");
   const [results, setResults] = useState<{ id: string; name: string; kind: string }[]>([]);
   const [open, setOpen] = useState(false);
@@ -81,7 +84,7 @@ function CustomerPicker({
       <p className="flex items-center gap-3 border-b border-line py-1.5 text-[13.5px] text-ink">
         {value.name}
         <button type="button" className="text-[12px] text-rose-700 hover:underline" onClick={() => onChange(null)}>
-          Remove
+          {tr("Remove")}
         </button>
       </p>
     );
@@ -89,8 +92,8 @@ function CustomerPicker({
   return (
     <div className="relative">
       <input
-        aria-label="Associated Customer"
-        placeholder="Associated Customer"
+        aria-label={tr("Associated Customer")}
+        placeholder={tr("Associated Customer")}
         value={q}
         onChange={(e) => {
           setQ(e.target.value);
@@ -115,7 +118,7 @@ function CustomerPicker({
                 }}
               >
                 {c.name}
-                <span className="ml-2 text-[11.5px] text-ink-faint">{c.kind === "company" ? "Company" : "Guest"}</span>
+                <span className="ml-2 text-[11.5px] text-ink-faint">{c.kind === "company" ? tr("Company") : tr("Guest")}</span>
               </button>
             </li>
           ))}
@@ -136,6 +139,7 @@ export function SalesChannelsPanel({
   pending: boolean;
   run: Run;
 }) {
+  const tr = useT();
   const [filter, setFilter] = useState<Filter>("active");
   const [selected, setSelected] = useState<string[]>([]);
   const [draft, setDraft] = useState<Draft | null>(null);
@@ -161,30 +165,30 @@ export function SalesChannelsPanel({
       });
       if (result.ok) setDraft(null);
       return result;
-    }, `${d.name.trim() || "Sales channel"} saved.`);
+    }, tr("{name} saved.", { name: d.name.trim() || tr("Sales channel") }));
   }
 
   function openMerge() {
     setNote(null);
     if (picked.length < 2) {
-      setNote("Tick two or more sales channels to merge them into one.");
+      setNote(tr("Tick two or more sales channels to merge them into one."));
       return;
     }
     setMerging(picked[0].id);
   }
 
   const filters: { id: Filter; label: string }[] = [
-    { id: "active", label: "Active" },
-    { id: "all", label: "All" },
-    { id: "draft", label: "Draft" },
+    { id: "active", label: tr("Active") },
+    { id: "all", label: tr("All") },
+    { id: "draft", label: tr("Draft") },
   ];
 
   return (
     <div className="max-w-6xl">
       <section className={card}>
         <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 border-b border-line px-4 py-4 sm:px-6">
-          <h2 className="text-[15px] text-ink">Sales Channels</h2>
-          <nav aria-label="Status" className="flex items-center gap-2 text-[13px]">
+          <h2 className="text-[15px] text-ink">{tr("Sales Channels")}</h2>
+          <nav aria-label={tr("Status")} className="flex items-center gap-2 text-[13px]">
             {filters.map((f, i) => (
               <span key={f.id} className="flex items-center gap-2">
                 {i > 0 && <span className="text-ink-faint" aria-hidden="true">|</span>}
@@ -202,7 +206,7 @@ export function SalesChannelsPanel({
           <div className="flex justify-end">
             {canEdit && (
               <button type="button" className={secondary} onClick={openMerge}>
-                Merge
+                {tr("Merge")}
               </button>
             )}
           </div>
@@ -213,11 +217,11 @@ export function SalesChannelsPanel({
           <table className="w-full min-w-[34rem]">
             <thead>
               <tr className="border-b border-line">
-                <th className="w-10" aria-label="Select" />
-                <th className={th}>Name</th>
-                <th className={th}>Abbreviation</th>
-                <th className={th}>Status</th>
-                <th className="w-12" aria-label="Edit" />
+                <th className="w-10" aria-label={tr("Select")} />
+                <th className={th}>{tr("Name")}</th>
+                <th className={th}>{tr("Abbreviation")}</th>
+                <th className={th}>{tr("Status")}</th>
+                <th className="w-12" aria-label={tr("Edit")} />
               </tr>
             </thead>
             <tbody>
@@ -225,10 +229,10 @@ export function SalesChannelsPanel({
                 <tr>
                   <td colSpan={5} className="px-6 py-4 text-center text-[13px] text-ink-muted">
                     {channels.length === 0
-                      ? "None yet. Add at least Direct — a booking cannot be taken without a sales channel."
+                      ? tr("None yet. Add at least Direct — a booking cannot be taken without a sales channel.")
                       : filter === "draft"
-                        ? "No draft sales channels."
-                        : "No active sales channels."}
+                        ? tr("No draft sales channels.")
+                        : tr("No active sales channels.")}
                   </td>
                 </tr>
               ) : (
@@ -238,7 +242,7 @@ export function SalesChannelsPanel({
                       {canEdit && (
                         <input
                           type="checkbox"
-                          aria-label={`Select ${c.name}`}
+                          aria-label={tr("Select {name}", { name: c.name })}
                           className="h-4 w-4 accent-brass"
                           checked={selected.includes(c.id)}
                           onChange={(e) =>
@@ -252,12 +256,12 @@ export function SalesChannelsPanel({
                       {c.customerName && <span className="ml-2 text-[11.5px] text-ink-muted">{c.customerName}</span>}
                     </td>
                     <td className={td}>{c.code}</td>
-                    <td className={cn(td, !c.isActive && "text-ink-muted")}>{c.isActive ? "Active" : "Draft"}</td>
+                    <td className={cn(td, !c.isActive && "text-ink-muted")}>{c.isActive ? tr("Active") : tr("Draft")}</td>
                     <td className="py-1 pr-3 text-right">
                       {canEdit && (
                         <button
                           type="button"
-                          aria-label={`Edit ${c.name}`}
+                          aria-label={tr("Edit {name}", { name: c.name })}
                           className="grid h-8 w-8 place-items-center rounded text-brass hover:bg-shell"
                           onClick={() =>
                             setDraft({
@@ -291,44 +295,44 @@ export function SalesChannelsPanel({
             }}
           >
             <div className="space-y-4 px-4 py-4">
-              <h3 className="border-b border-line pb-1.5 text-[15px] text-ink">{draft.id ? "Edit" : "Create"}</h3>
-              <input aria-label="Name" placeholder="Name" value={draft.name} maxLength={80} autoFocus
+              <h3 className="border-b border-line pb-1.5 text-[15px] text-ink">{draft.id ? tr("Edit") : tr("Create")}</h3>
+              <input aria-label={tr("Name")} placeholder={tr("Name")} value={draft.name} maxLength={80} autoFocus
                 onChange={(e) => setDraft({ ...draft, name: e.target.value })} className={line} />
-              <input aria-label="Abbreviation" placeholder="Abbreviation" value={draft.code} maxLength={12}
+              <input aria-label={tr("Abbreviation")} placeholder={tr("Abbreviation")} value={draft.code} maxLength={12}
                 onChange={(e) => setDraft({ ...draft, code: e.target.value.toUpperCase() })} className={line} />
-              <div className="flex items-center gap-5 text-[13px] text-ink" role="radiogroup" aria-label="Status">
+              <div className="flex items-center gap-5 text-[13px] text-ink" role="radiogroup" aria-label={tr("Status")}>
                 {[
-                  { v: true, l: "Active" },
-                  { v: false, l: "Draft" },
+                  { v: true, l: msg("Active") },
+                  { v: false, l: msg("Draft") },
                 ].map((o) => (
                   <label key={o.l} className="flex items-center gap-1.5">
                     <input type="radio" name="sc-status" className="h-4 w-4 accent-brass"
                       checked={draft.isActive === o.v} onChange={() => setDraft({ ...draft, isActive: o.v })} />
-                    {o.l}
+                    {tr(o.l)}
                   </label>
                 ))}
               </div>
               <CustomerPicker value={draft.customer} onChange={(customer) => setDraft({ ...draft, customer })} />
               <div className="grid gap-4 sm:grid-cols-2">
                 <label className="block text-[11.5px] text-ink-muted">
-                  Kind
+                  {tr("Kind")}
                   <select value={draft.kind} onChange={(e) => setDraft({ ...draft, kind: e.target.value as ChannelKind })}
                     className={cn(line, "cursor-pointer")}>
                     {KINDS.map((k) => (
-                      <option key={k.value} value={k.value}>{k.label}</option>
+                      <option key={k.value} value={k.value}>{tr(k.label)}</option>
                     ))}
                   </select>
                 </label>
                 <label className="block text-[11.5px] text-ink-muted">
-                  Commission %
+                  {tr("Commission %")}
                   <input inputMode="decimal" value={draft.commission}
                     onChange={(e) => setDraft({ ...draft, commission: e.target.value })} className={cn(line, "tnum")} />
                 </label>
               </div>
             </div>
             <div className="flex justify-end gap-3 border-t border-line bg-shell px-4 py-3">
-              <button type="button" className={secondary} onClick={() => setDraft(null)}>Cancel</button>
-              <button type="submit" className={primary} disabled={pending}>Save</button>
+              <button type="button" className={secondary} onClick={() => setDraft(null)}>{tr("Cancel")}</button>
+              <button type="submit" className={primary} disabled={pending}>{tr("Save")}</button>
             </div>
           </form>
         )}
@@ -342,7 +346,7 @@ export function SalesChannelsPanel({
                 setDraft({ id: null, name: "", code: "", isActive: true, kind: "ota", commission: "0", customer: null })
               }
             >
-              Add new sales channel
+              {tr("Add new sales channel")}
             </button>
           ) : (
             <span className="block h-2" />
@@ -352,11 +356,11 @@ export function SalesChannelsPanel({
 
       {merging && (
         <Dialog
-          title="Merge sales channels"
+          title={tr("Merge sales channels")}
           onClose={() => setMerging(null)}
           footer={
             <>
-              <button type="button" className={secondary} onClick={() => setMerging(null)}>Cancel</button>
+              <button type="button" className={secondary} onClick={() => setMerging(null)}>{tr("Cancel")}</button>
               <button
                 type="button"
                 className={primary}
@@ -370,15 +374,15 @@ export function SalesChannelsPanel({
                       setSelected([]);
                     }
                     return result;
-                  }, `Merged into ${keep?.name ?? "the channel kept"}.`);
+                  }, keep ? tr("Merged into {name}.", { name: keep.name }) : tr("Merged into the channel kept."));
                 }}
               >
-                Merge
+                {tr("Merge")}
               </button>
             </>
           }
         >
-          <p className="text-[13px] text-ink">Keep:</p>
+          <p className="text-[13px] text-ink">{tr("Keep:")}</p>
           <div className="space-y-1.5">
             {picked.map((c) => (
               <label key={c.id} className="flex items-center gap-2 text-[13px] text-ink">
@@ -389,7 +393,7 @@ export function SalesChannelsPanel({
             ))}
           </div>
           <p className="text-[12.5px] text-ink-muted">
-            The others are removed and their bookings move to the one kept, at its commission.
+            {tr("The others are removed and their bookings move to the one kept, at its commission.")}
           </p>
         </Dialog>
       )}

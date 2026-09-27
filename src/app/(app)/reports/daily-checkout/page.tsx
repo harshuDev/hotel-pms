@@ -1,3 +1,4 @@
+import { getT } from "@/lib/i18n/server";
 import { format, isValid, parseISO } from "date-fns";
 import {
   ReportFigure,
@@ -13,8 +14,10 @@ import {
 } from "@/lib/queries";
 import type { CheckoutRow } from "@/lib/types";
 import { getPropertyCurrency } from "@/lib/queries";
+import { pageTitle } from "@/lib/i18n/server";
+import { msg } from "@/lib/i18n/translate";
 
-export const metadata = { title: "Daily checkout" };
+export const generateMetadata = pageTitle(msg("Daily checkout"));
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -23,6 +26,7 @@ export default async function DailyCheckoutPage({
 }: {
   searchParams: Promise<{ date?: string }>;
 }) {
+  const tr = await getT();
   const currency = await getPropertyCurrency();
   const sp = await searchParams;
   const businessDate = await getBusinessDate();
@@ -38,7 +42,7 @@ export default async function DailyCheckoutPage({
     if (error instanceof ReportAccessError) {
       return (
         <ReportShell
-          title="Daily checkout"
+          title={tr("Daily checkout")}
         >
           <ReportNoAccess />
         </ReportShell>
@@ -54,25 +58,25 @@ export default async function DailyCheckoutPage({
 
   return (
     <ReportShell
-      title="Daily checkout"
+      title={tr("Daily checkout")}
       action="/reports/daily-checkout"
       date={date}
     >
       <ReportFigures>
         <ReportFigure
-          label="Departures"
+          label={tr("Departures")}
           value={String(rows.length)}
-          detail={date === businessDate ? "Due out today" : "Due out that day"}
+          detail={date === businessDate ? tr("Due out today") : tr("Due out that day")}
         />
-        <ReportFigure label="Charged" value={formatMoneyShort(charges, currency)} />
-        <ReportFigure label="Settled" value={formatMoneyShort(payments, currency)} />
+        <ReportFigure label={tr("Charged")} value={formatMoneyShort(charges, currency)} />
+        <ReportFigure label={tr("Settled")} value={formatMoneyShort(payments, currency)} />
         <ReportFigure
-          label="Left owing"
+          label={tr("Left owing")}
           value={formatMoneyShort(outstanding, currency)}
           detail={
             owing === 0
-              ? "Every folio settled"
-              : `${owing} booking${owing === 1 ? "" : "s"} still owing`
+              ? tr("Every folio settled")
+              : tr.plural(owing, "{n} booking still owing", "{n} bookings still owing")
           }
           emphasis
         />
@@ -82,12 +86,12 @@ export default async function DailyCheckoutPage({
         rows={rows}
         rowKey={(r) => r.bookingId}
         minWidth="860px"
-        emptyTitle="Nobody is due out on this date"
-        emptyHint="Pick another business date, or check the arrivals and departures lists."
-        footLabel={`${rows.length} departure${rows.length === 1 ? "" : "s"}`}
+        emptyTitle={tr("Nobody is due out on this date")}
+        emptyHint={tr("Pick another business date, or check the arrivals and departures lists.")}
+        footLabel={tr.plural(rows.length, "{n} departure", "{n} departures")}
         columns={[
           {
-            header: "Booking",
+            header: tr("Booking"),
             cell: (r) => (
               <>
                 <span className="font-medium text-ink">{r.reference}</span>
@@ -96,44 +100,44 @@ export default async function DailyCheckoutPage({
             ),
           },
           {
-            header: "Room",
+            header: tr("Room"),
             cell: (r) => (
               <span className="tnum text-ink-muted">{r.roomNumbers ?? "—"}</span>
             ),
           },
           {
-            header: "Channel",
+            header: tr("Channel"),
             cell: (r) => (
               <span className="text-ink-faint">{r.channelName ?? "—"}</span>
             ),
           },
           {
-            header: "Arrived",
+            header: tr("Arrived"),
             cell: (r) => (
               <span className="whitespace-nowrap text-ink-muted">
-                {format(parseISO(r.checkIn), "d MMM")}
+                {tr.date(r.checkIn, "d MMM")}
               </span>
             ),
           },
           {
-            header: "Nights",
+            header: tr("Nights"),
             align: "right",
             cell: (r) => <span className="text-ink-muted">{r.nights}</span>,
           },
           {
-            header: "Charged",
+            header: tr("Charged"),
             align: "right",
             cell: (r) => <span className="text-ink-muted">{formatMoney(r.chargesCents, currency)}</span>,
             foot: formatMoney(charges, currency),
           },
           {
-            header: "Paid",
+            header: tr("Paid"),
             align: "right",
             cell: (r) => <span className="text-ink-muted">{formatMoney(r.paymentsCents, currency)}</span>,
             foot: formatMoney(payments, currency),
           },
           {
-            header: "Outstanding",
+            header: tr("Outstanding"),
             align: "right",
             cell: (r) => (
               <span
@@ -143,7 +147,7 @@ export default async function DailyCheckoutPage({
                     : "text-ink-faint"
                 }
               >
-                {r.outstandingCents === 0 ? "Settled" : formatMoney(r.outstandingCents, currency)}
+                {r.outstandingCents === 0 ? tr("Settled") : formatMoney(r.outstandingCents, currency)}
               </span>
             ),
             foot: formatMoney(outstanding, currency),

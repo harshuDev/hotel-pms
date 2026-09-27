@@ -1,4 +1,5 @@
 "use server";
+import { localised } from "@/lib/i18n/localised";
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
@@ -22,8 +23,9 @@ type Result<T = undefined> =
   | { ok: true; data: T }
   | { ok: false; error: string };
 
-function failure(message: string): { ok: false; error: string } {
-  return { ok: false, error: message };
+/** A refusal, in the reader's language (0106). */
+async function failure(message: string): Promise<{ ok: false; error: string }> {
+  return { ok: false, error: await localised(message) };
 }
 
 function revalidateBooking(bookingId: string) {

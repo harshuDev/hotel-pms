@@ -1,4 +1,5 @@
 "use server";
+import { localised } from "@/lib/i18n/localised";
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
@@ -21,7 +22,7 @@ export async function saveCalendarNote(input: {
   id: string | null;
 }): Promise<Result> {
   if (input.body.trim() === "") {
-    return { ok: false, error: "Write something in the note first." };
+    return { ok: false, error: await localised("Write something in the note first.") };
   }
 
   const supabase = await createClient();
@@ -31,7 +32,7 @@ export async function saveCalendarNote(input: {
     p_id: input.id,
   });
 
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
 
   revalidatePath("/calendar");
   return { ok: true };
@@ -41,7 +42,7 @@ export async function deleteCalendarNote(id: string): Promise<Result> {
   const supabase = await createClient();
   const { error } = await supabase.rpc("delete_calendar_note", { p_id: id });
 
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
 
   revalidatePath("/calendar");
   return { ok: true };

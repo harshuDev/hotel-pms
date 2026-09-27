@@ -9,8 +9,10 @@ import { customNames, WIDGET_TEXT_DEFAULTS } from "@/lib/booking-widgets";
 import { hotelToday, monthNames, weekdayNames } from "@/lib/i18n/calendar-names";
 import { dictionaryFor } from "@/lib/i18n/dictionary";
 import { isLocale, type Locale } from "@/lib/i18n/locales";
+import { pageTitle } from "@/lib/i18n/server";
+import { msg } from "@/lib/i18n/translate";
 
-export const metadata = { title: "Book now" };
+export const generateMetadata = pageTitle(msg("Book now"));
 
 /**
  * A Booking Widget (0100), drawn inside the iframe a hotel pastes into its

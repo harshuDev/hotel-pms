@@ -1,5 +1,7 @@
 "use client";
 
+import { useT } from "@/components/i18n";
+import { msg, type Translator } from "@/lib/i18n/translate";
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { format, parseISO } from "date-fns";
@@ -9,31 +11,24 @@ import { savePromotion } from "@/lib/actions/promotions";
 import type { Promotion, PromotionKind, RatePlan } from "@/lib/types";
 import { useCurrency } from "@/components/currency";
 
-const DOW = [
-  { value: 1, label: "Mon" },
-  { value: 2, label: "Tue" },
-  { value: 3, label: "Wed" },
-  { value: 4, label: "Thu" },
-  { value: 5, label: "Fri" },
-  { value: 6, label: "Sat" },
-  { value: 0, label: "Sun" },
-];
+/** Monday first; the names come from `tr.weekday()`. */
+const DOW = [1, 2, 3, 4, 5, 6, 0].map((value) => ({ value }));
 
 const KINDS: { value: PromotionKind; label: string; hint: string }[] = [
   {
     value: "percent_off",
-    label: "Percentage off",
-    hint: "Comes off every night the offer covers.",
+    label: msg("Percentage off"),
+    hint: msg("Comes off every night the offer covers."),
   },
   {
     value: "amount_off",
-    label: "Amount off a night",
-    hint: "A fixed sum off each night, never more than the night costs.",
+    label: msg("Amount off a night"),
+    hint: msg("A fixed sum off each night, never more than the night costs."),
   },
   {
     value: "free_nights",
-    label: "Stay N, pay M",
-    hint: "The cheapest qualifying nights go to zero. Stay 3 pay 2 gives one free night in every three.",
+    label: msg("Stay N, pay M"),
+    hint: msg("The cheapest qualifying nights go to zero. Stay 3 pay 2 gives one free night in every three."),
   },
 ];
 
@@ -41,55 +36,6 @@ const label =
   "mb-1 block text-xxs font-semibold uppercase tracking-[0.1em] text-ink-faint";
 const field =
   "w-full rounded-md border border-line px-3 py-2 text-[13px] text-ink focus:border-brass focus:outline-none focus:ring-1 focus:ring-brass";
-
-/** What a promotion takes off, as a phrase rather than a column of nulls. */
-function describe(p: Promotion, currency: string) {
-  switch (p.kind) {
-    case "percent_off":
-      return `${((p.percentBps ?? 0) / 100).toFixed(
-        (p.percentBps ?? 0) % 100 === 0 ? 0 : 2,
-      )}% off`;
-    case "amount_off":
-      return `${formatMoney(p.amountOffCents ?? 0, currency)} off a night`;
-    case "free_nights":
-      return `Stay ${(p.paidNights ?? 0) + (p.freeNights ?? 0)}, pay ${p.paidNights ?? 0}`;
-  }
-}
-
-/** The conditions, in the order a person would read them out. */
-function conditions(p: Promotion): string[] {
-  const out: string[] = [];
-  if (p.minNights && p.maxNights) out.push(`${p.minNights}–${p.maxNights} nights`);
-  else if (p.minNights) out.push(`${p.minNights}+ nights`);
-  else if (p.maxNights) out.push(`up to ${p.maxNights} nights`);
-
-  if (p.minAdvanceDays) out.push(`booked ${p.minAdvanceDays}+ days ahead`);
-  if (p.maxAdvanceDays !== null && p.maxAdvanceDays !== undefined)
-    out.push(`booked within ${p.maxAdvanceDays} days`);
-
-  if (p.arrivalDaysOfWeek && p.arrivalDaysOfWeek.length > 0) {
-    out.push(
-      `arriving ${p.arrivalDaysOfWeek
-        .map((d) => DOW.find((x) => x.value === d)?.label ?? d)
-        .join(", ")}`,
-    );
-  }
-  if (p.stayFrom || p.stayTo) {
-    out.push(
-      `nights ${p.stayFrom ? format(parseISO(p.stayFrom), "d MMM") : "any"} to ${
-        p.stayTo ? format(parseISO(p.stayTo), "d MMM") : "any"
-      }`,
-    );
-  }
-  if (p.sellFrom || p.sellTo) {
-    out.push(
-      `sold ${p.sellFrom ? format(parseISO(p.sellFrom), "d MMM") : "any"} to ${
-        p.sellTo ? format(parseISO(p.sellTo), "d MMM") : "any"
-      }`,
-    );
-  }
-  return out;
-}
 
 const EMPTY = {
   id: null as string | null,
@@ -123,11 +69,10 @@ const EMPTY = {
 /**
  * The headline figure on a card, short enough to sit in the artwork band.
  *
- * `describe()` above writes the same thing as a sentence for the form; this is
- * the poster version. Two renderings of one fact, because a card and a
- * paragraph do not want the same words.
+ * The poster version of what the offer takes off; the line under the name
+ * (`scopeLine()`) says it as a phrase.
  */
-function headline(p: Promotion, currency: string) {
+function headline(p: Promotion, currency: string, tr: Translator) {
   switch (p.kind) {
     case "percent_off": {
       const pct = (p.percentBps ?? 0) / 100;
@@ -136,19 +81,22 @@ function headline(p: Promotion, currency: string) {
     case "amount_off":
       return formatMoney(p.amountOffCents ?? 0, currency);
     case "free_nights":
-      return `${p.freeNights ?? 0} free`;
+      return tr("{n} free", { n: p.freeNights ?? 0 });
   }
 }
 
 /** The line under the name: what comes off, and what it comes off. */
-function scopeLine(p: Promotion, currency: string) {
+function scopeLine(p: Promotion, currency: string, tr: Translator) {
   const off =
     p.kind === "percent_off"
-      ? `${((p.percentBps ?? 0) / 100).toFixed(1)}% Discount`
+      ? tr("{pct}% Discount", { pct: ((p.percentBps ?? 0) / 100).toFixed(1) })
       : p.kind === "amount_off"
-        ? `${formatMoney(p.amountOffCents ?? 0, currency)} Discount`
-        : `Stay ${(p.paidNights ?? 0) + (p.freeNights ?? 0)}, pay ${p.paidNights ?? 0}`;
-  return `${off}, ${p.roomTypeNames ?? "All Rooms"}`;
+        ? tr("{amount} Discount", { amount: formatMoney(p.amountOffCents ?? 0, currency) })
+        : tr("Stay {stay}, pay {pay}", {
+            stay: (p.paidNights ?? 0) + (p.freeNights ?? 0),
+            pay: p.paidNights ?? 0,
+          });
+  return `${off}, ${p.roomTypeNames ?? tr("All Rooms")}`;
 }
 
 /**
@@ -162,11 +110,12 @@ function scopeLine(p: Promotion, currency: string) {
  * Monday first, matching the calendar's own week.
  */
 function DayBoxes({ days }: { days: number[] | null }) {
+  const tr = useT();
   return (
     <span className="flex gap-[3px]" title={
       days && days.length > 0
-        ? `Arrivals on ${days.map((d) => DOW.find((x) => x.value === d)?.label ?? d).join(", ")}`
-        : "Arrivals any day"
+        ? tr("Arrivals on {days}", { days: days.map((d) => tr.weekday(d)).join(", ") })
+        : tr("Arrivals any day")
     }>
       {DOW.map((d) => {
         const on = !days || days.length === 0 || days.includes(d.value);
@@ -186,13 +135,11 @@ function DayBoxes({ days }: { days: number[] | null }) {
 }
 
 /** The stay window, as the reference prints it: "04 Apr - 30 Jun". */
-function dateRange(p: Promotion) {
+function dateRange(p: Promotion, tr: Translator) {
   const from = p.stayFrom ?? p.sellFrom;
   const to = p.stayTo ?? p.sellTo;
-  if (!from && !to) return "Any dates";
-  return `${from ? format(parseISO(from), "dd MMM") : "Any"} - ${
-    to ? format(parseISO(to), "dd MMM") : "Any"
-  }`;
+  if (!from && !to) return tr("Any dates");
+  return `${from ? tr.date(from, "dd MMM") : tr("Any")} - ${to ? tr.date(to, "dd MMM") : tr("Any")}`;
 }
 
 /**
@@ -213,6 +160,7 @@ const TINTS = [
 ];
 
 function Artwork({ offer, muted }: { offer: Promotion; muted: boolean }) {
+  const tr = useT();
   const currency = useCurrency();
   // Deterministic: the same offer keeps the same tint across renders and
   // reloads, which a random pick would not.
@@ -229,7 +177,7 @@ function Artwork({ offer, muted }: { offer: Promotion; muted: boolean }) {
       )}
     >
       <span className="font-display text-3xl font-semibold tracking-tightest text-white">
-        {headline(offer, currency)}
+        {headline(offer, currency, tr)}
       </span>
     </div>
   );
@@ -244,6 +192,7 @@ function OfferCard({
   canEdit: boolean;
   onEdit: (p: Promotion) => void;
 }) {
+  const tr = useT();
   const currency = useCurrency();
   const muted = !offer.isActive;
 
@@ -261,7 +210,7 @@ function OfferCard({
           <p className="truncate font-display text-[13px] font-semibold uppercase tracking-[0.04em] text-ink">
             {offer.name}
           </p>
-          <p className="mt-0.5 truncate text-xs text-ink-muted">{scopeLine(offer, currency)}</p>
+          <p className="mt-0.5 truncate text-xs text-ink-muted">{scopeLine(offer, currency, tr)}</p>
         </div>
 
         <DayBoxes days={offer.arrivalDaysOfWeek} />
@@ -273,7 +222,7 @@ function OfferCard({
             </span>
           ) : (
             <span className="shrink-0 rounded bg-emerald-50 px-1.5 py-0.5 font-medium text-emerald-800">
-              Automatic
+              {tr("Automatic")}
             </span>
           )}
           {/*
@@ -282,7 +231,7 @@ function OfferCard({
             the cards in a row at different heights.
           */}
           <span className="tnum truncate whitespace-nowrap">
-            {offer.bookingsTaken} booking{offer.bookingsTaken === 1 ? "" : "s"}
+            {tr.plural(offer.bookingsTaken, "{n} booking", "{n} bookings")}
             {offer.discountGivenCents > 0 &&
               ` · ${formatMoney(offer.discountGivenCents, currency)}`}
           </span>
@@ -290,14 +239,14 @@ function OfferCard({
 
         <div className="mt-auto flex items-end justify-between gap-2 pt-1">
           <span className="tnum text-xs font-semibold text-ink">
-            {dateRange(offer)}
+            {dateRange(offer, tr)}
           </span>
           {canEdit && (
             <button
               onClick={() => onEdit(offer)}
               className="rounded-md border border-line px-2.5 py-1 text-xxs text-ink-muted transition hover:bg-shell hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brass"
             >
-              Edit
+              {tr("Edit")}
             </button>
           )}
         </div>
@@ -325,6 +274,7 @@ function OfferSection({
   /** The reference sets the inactive section on a wash. */
   tinted?: boolean;
 }) {
+  const tr = useT();
   return (
     <section
       className={cn(
@@ -353,13 +303,13 @@ function OfferSection({
           >
             <span className="text-2xl leading-none">+</span>
             <span className="font-display text-[15px] font-medium tracking-tightest">
-              Add offer
+              {tr("Add offer")}
             </span>
           </button>
         )}
 
         {offers.length === 0 && !onAdd && (
-          <p className="text-[13px] text-ink-muted">Nothing here.</p>
+          <p className="text-[13px] text-ink-muted">{tr("Nothing here.")}</p>
         )}
       </div>
 
@@ -381,6 +331,7 @@ export function PromotionsScreen({
   roomTypes: { id: string; code: string; name: string }[];
   canEdit: boolean;
 }) {
+  const tr = useT();
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [form, setForm] = useState<typeof EMPTY | null>(null);
@@ -429,14 +380,14 @@ export function PromotionsScreen({
       try {
         amountCents = parseMoney(form.amount);
       } catch {
-        setMessage({ ok: false, text: "That is not an amount. Try 25 or 25.50." });
+        setMessage({ ok: false, text: tr("That is not an amount. Try 25 or 25.50.") });
         return;
       }
     }
 
     const percent = form.percent.trim() === "" ? null : Number(form.percent);
     if (form.kind === "percent_off" && (percent === null || Number.isNaN(percent))) {
-      setMessage({ ok: false, text: "Enter a percentage, like 15." });
+      setMessage({ ok: false, text: tr("Enter a percentage, like 15.") });
       return;
     }
 
@@ -472,7 +423,7 @@ export function PromotionsScreen({
         return;
       }
       setForm(null);
-      setMessage({ ok: true, text: `${form.name} saved.` });
+      setMessage({ ok: true, text: tr("{name} saved.", { name: form.name }) });
       router.refresh();
     });
   }
@@ -488,7 +439,7 @@ export function PromotionsScreen({
             }}
             className="shrink-0 rounded-md bg-chrome-800 px-5 py-2 text-[13px] font-medium text-white hover:bg-chrome-900"
           >
-            Add offer
+            {tr("Add offer")}
           </button>
         </div>
       )}
@@ -507,43 +458,43 @@ export function PromotionsScreen({
       {form && (
         <div className="rounded-lg border border-line bg-white p-5 shadow-card">
           <h2 className="mb-4 font-display text-[15px] font-semibold tracking-tightest text-ink">
-            {form.id ? "Edit offer" : "New offer"}
+            {form.id ? tr("Edit offer") : tr("New offer")}
           </h2>
 
           <div className="grid gap-4 sm:grid-cols-4">
             <div className="sm:col-span-2">
-              <label htmlFor="p-name" className={label}>Name</label>
+              <label htmlFor="p-name" className={label}>{tr("Name")}</label>
               <input
                 id="p-name"
                 value={form.name}
-                placeholder="Winter early bird"
+                placeholder={tr("Winter early bird")}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
                 className={field}
               />
             </div>
             <div>
-              <label htmlFor="p-code" className={label}>Code</label>
+              <label htmlFor="p-code" className={label}>{tr("Code")}</label>
               <input
                 id="p-code"
                 value={form.code}
-                placeholder="Leave blank to apply automatically"
+                placeholder={tr("Leave blank to apply automatically")}
                 onChange={(e) => setForm({ ...form, code: e.target.value })}
                 className={field}
               />
             </div>
             <div>
-              <label htmlFor="p-priority" className={label}>Priority</label>
+              <label htmlFor="p-priority" className={label}>{tr("Priority")}</label>
               <input
                 id="p-priority"
                 value={form.priority}
                 onChange={(e) => setForm({ ...form, priority: e.target.value })}
                 className={cn(field, "tnum")}
               />
-              <p className="mt-1 text-xxs text-ink-faint">Breaks a tie only.</p>
+              <p className="mt-1 text-xxs text-ink-faint">{tr("Breaks a tie only.")}</p>
             </div>
 
             <div className="sm:col-span-4">
-              <span className={label}>What it takes off</span>
+              <span className={label}>{tr("What it takes off")}</span>
               <div className="flex flex-wrap gap-1.5">
                 {KINDS.map((k) => (
                   <button
@@ -557,18 +508,18 @@ export function PromotionsScreen({
                         : "border-line text-ink-muted hover:bg-shell hover:text-ink",
                     )}
                   >
-                    {k.label}
+                    {tr(k.label)}
                   </button>
                 ))}
               </div>
               <p className="mt-1.5 text-xs text-ink-faint">
-                {KINDS.find((k) => k.value === form.kind)?.hint}
+                {tr(KINDS.find((k) => k.value === form.kind)?.hint ?? "")}
               </p>
             </div>
 
             {form.kind === "percent_off" && (
               <div>
-                <label htmlFor="p-pct" className={label}>Percent off</label>
+                <label htmlFor="p-pct" className={label}>{tr("Percent off")}</label>
                 <input
                   id="p-pct"
                   value={form.percent}
@@ -581,7 +532,7 @@ export function PromotionsScreen({
             )}
             {form.kind === "amount_off" && (
               <div>
-                <label htmlFor="p-amt" className={label}>Off each night</label>
+                <label htmlFor="p-amt" className={label}>{tr("Off each night")}</label>
                 <input
                   id="p-amt"
                   value={form.amount}
@@ -595,7 +546,7 @@ export function PromotionsScreen({
             {form.kind === "free_nights" && (
               <>
                 <div>
-                  <label htmlFor="p-paid" className={label}>Nights paid for</label>
+                  <label htmlFor="p-paid" className={label}>{tr("Nights paid for")}</label>
                   <input
                     id="p-paid"
                     value={form.paidNights}
@@ -605,7 +556,7 @@ export function PromotionsScreen({
                   />
                 </div>
                 <div>
-                  <label htmlFor="p-free" className={label}>Nights free</label>
+                  <label htmlFor="p-free" className={label}>{tr("Nights free")}</label>
                   <input
                     id="p-free"
                     value={form.freeNights}
@@ -618,57 +569,57 @@ export function PromotionsScreen({
             )}
 
             <div>
-              <label htmlFor="p-sf" className={label}>Sold from</label>
+              <label htmlFor="p-sf" className={label}>{tr("Sold from")}</label>
               <input id="p-sf" type="date" value={form.sellFrom}
                 onChange={(e) => setForm({ ...form, sellFrom: e.target.value })}
                 className={cn(field, "tnum")} />
             </div>
             <div>
-              <label htmlFor="p-st" className={label}>Sold to</label>
+              <label htmlFor="p-st" className={label}>{tr("Sold to")}</label>
               <input id="p-st" type="date" value={form.sellTo}
                 onChange={(e) => setForm({ ...form, sellTo: e.target.value })}
                 className={cn(field, "tnum")} />
             </div>
             <div>
-              <label htmlFor="p-yf" className={label}>Nights from</label>
+              <label htmlFor="p-yf" className={label}>{tr("Nights from")}</label>
               <input id="p-yf" type="date" value={form.stayFrom}
                 onChange={(e) => setForm({ ...form, stayFrom: e.target.value })}
                 className={cn(field, "tnum")} />
             </div>
             <div>
-              <label htmlFor="p-yt" className={label}>Nights to</label>
+              <label htmlFor="p-yt" className={label}>{tr("Nights to")}</label>
               <input id="p-yt" type="date" value={form.stayTo}
                 onChange={(e) => setForm({ ...form, stayTo: e.target.value })}
                 className={cn(field, "tnum")} />
             </div>
 
             <div>
-              <label htmlFor="p-min" className={label}>Min nights</label>
+              <label htmlFor="p-min" className={label}>{tr("Min nights")}</label>
               <input id="p-min" value={form.minNights} inputMode="numeric"
                 onChange={(e) => setForm({ ...form, minNights: e.target.value })}
                 className={cn(field, "tnum")} />
             </div>
             <div>
-              <label htmlFor="p-max" className={label}>Max nights</label>
+              <label htmlFor="p-max" className={label}>{tr("Max nights")}</label>
               <input id="p-max" value={form.maxNights} inputMode="numeric"
                 onChange={(e) => setForm({ ...form, maxNights: e.target.value })}
                 className={cn(field, "tnum")} />
             </div>
             <div>
-              <label htmlFor="p-adv" className={label}>Booked at least (days ahead)</label>
+              <label htmlFor="p-adv" className={label}>{tr("Booked at least (days ahead)")}</label>
               <input id="p-adv" value={form.minAdvanceDays} inputMode="numeric"
                 onChange={(e) => setForm({ ...form, minAdvanceDays: e.target.value })}
                 className={cn(field, "tnum")} />
             </div>
             <div>
-              <label htmlFor="p-last" className={label}>Booked within (days)</label>
+              <label htmlFor="p-last" className={label}>{tr("Booked within (days)")}</label>
               <input id="p-last" value={form.maxAdvanceDays} inputMode="numeric"
                 onChange={(e) => setForm({ ...form, maxAdvanceDays: e.target.value })}
                 className={cn(field, "tnum")} />
             </div>
 
             <div className="sm:col-span-2">
-              <span className={label}>Only for arrivals on</span>
+              <span className={label}>{tr("Only for arrivals on")}</span>
               <div className="flex flex-wrap gap-1">
                 {DOW.map((d) => (
                   <button
@@ -689,14 +640,14 @@ export function PromotionsScreen({
                         : "border-line text-ink-muted hover:bg-shell hover:text-ink",
                     )}
                   >
-                    {d.label}
+                    {tr.weekday(d.value)}
                   </button>
                 ))}
               </div>
             </div>
 
             <div>
-              <span className={label}>Rate plans</span>
+              <span className={label}>{tr("Rate plans")}</span>
               <div className="flex flex-wrap gap-1">
                 {ratePlans.map((rp) => (
                   <button
@@ -721,10 +672,10 @@ export function PromotionsScreen({
                   </button>
                 ))}
               </div>
-              <p className="mt-1 text-xxs text-ink-faint">None picked means every plan.</p>
+              <p className="mt-1 text-xxs text-ink-faint">{tr("None picked means every plan.")}</p>
             </div>
             <div>
-              <span className={label}>Room types</span>
+              <span className={label}>{tr("Room types")}</span>
               <div className="flex flex-wrap gap-1">
                 {roomTypes.map((rt) => (
                   <button
@@ -749,15 +700,15 @@ export function PromotionsScreen({
                   </button>
                 ))}
               </div>
-              <p className="mt-1 text-xxs text-ink-faint">None picked means every type.</p>
+              <p className="mt-1 text-xxs text-ink-faint">{tr("None picked means every type.")}</p>
             </div>
 
             <div className="sm:col-span-4">
-              <label htmlFor="p-desc" className={label}>Description</label>
+              <label htmlFor="p-desc" className={label}>{tr("Description")}</label>
               <input
                 id="p-desc"
                 value={form.description}
-                placeholder="Optional — what staff should know about it"
+                placeholder={tr("Optional — what staff should know about it")}
                 onChange={(e) => setForm({ ...form, description: e.target.value })}
                 className={field}
               />
@@ -771,7 +722,7 @@ export function PromotionsScreen({
                 checked={form.isActive}
                 onChange={(e) => setForm({ ...form, isActive: e.target.checked })}
               />
-              Live
+              {tr("Live")}
             </label>
           )}
 
@@ -780,20 +731,19 @@ export function PromotionsScreen({
               onClick={() => setForm(null)}
               className="rounded-md border border-line px-4 py-2 text-[13px] text-ink-muted hover:bg-shell hover:text-ink"
             >
-              Cancel
+              {tr("Cancel")}
             </button>
             <button
               onClick={submit}
               disabled={pending}
               className="rounded-md bg-chrome-800 px-6 py-2.5 text-[13px] font-medium text-white hover:bg-chrome-900 disabled:opacity-50"
             >
-              {pending ? "Saving…" : "Save offer"}
+              {pending ? tr("Saving…") : tr("Save offer")}
             </button>
           </div>
           {form.id && (
             <p className="mt-3 text-xs leading-relaxed text-ink-faint">
-              Saving replaces which rate plans and room types this applies to
-              with whatever is picked above.
+              {tr("Saving replaces which rate plans and room types this applies to with whatever is picked above.")}
             </p>
           )}
         </div>
@@ -806,7 +756,7 @@ export function PromotionsScreen({
         weekdays (those seven squares) and the stay dates.
       */}
       <OfferSection
-        title="Active offers"
+        title={tr("Active offers")}
         offers={promotions.filter((p) => p.isActive)}
         canEdit={canEdit}
         onEdit={edit}
@@ -816,14 +766,14 @@ export function PromotionsScreen({
         }}
         emptyHint={
           canEdit
-            ? "Add one to take a percentage or an amount off, or to give a night free on a longer stay."
-            : "A manager or administrator sets these up."
+            ? tr("Add one to take a percentage or an amount off, or to give a night free on a longer stay.")
+            : tr("A manager or administrator sets these up.")
         }
       />
 
       {promotions.some((p) => !p.isActive) && (
         <OfferSection
-          title="Inactive offers"
+          title={tr("Inactive offers")}
           offers={promotions.filter((p) => !p.isActive)}
           canEdit={canEdit}
           onEdit={edit}

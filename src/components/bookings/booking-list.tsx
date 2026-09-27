@@ -1,3 +1,5 @@
+import { getT } from "@/lib/i18n/server";
+import { msg } from "@/lib/i18n/translate";
 import Link from "next/link";
 import { format, parseISO } from "date-fns";
 import { EmptyState, StatusBadge, cn } from "@/components/ui";
@@ -6,16 +8,16 @@ import type { Booking } from "@/lib/types";
 import { getPropertyCurrency } from "@/lib/queries";
 
 const COLS = [
-  "Booking",
-  "Room",
-  "Arrival",
-  "Departure",
-  "Nights",
-  "Guests",
-  "Source",
-  "Status",
-  "Total",
-  "Total Due",
+  msg("Booking"),
+  msg("Room"),
+  msg("Arrival"),
+  msg("Departure"),
+  msg("Nights"),
+  msg("Guests"),
+  msg("Source"),
+  msg("Status"),
+  msg("Total"),
+  msg("Total Due"),
 ];
 
 /**
@@ -34,6 +36,7 @@ export async function BookingList({
   empty: string;
   hint: string;
 }) {
+  const tr = await getT();
   const currency = await getPropertyCurrency();
   if (rows.length === 0) {
     return (
@@ -58,7 +61,7 @@ export async function BookingList({
                     (i === 4 || i === 5) && "text-center",
                   )}
                 >
-                  {c}
+                  {tr(c)}
                 </th>
               ))}
             </tr>
@@ -93,10 +96,10 @@ export async function BookingList({
                   </span>
                 </td>
                 <td className="whitespace-nowrap px-3 py-3 text-ink-muted">
-                  {format(parseISO(b.arrivalDate), "d MMM yyyy")}
+                  {tr.date(b.arrivalDate, "d MMM yyyy")}
                 </td>
                 <td className="whitespace-nowrap px-3 py-3 text-ink-muted">
-                  {format(parseISO(b.departureDate), "d MMM yyyy")}
+                  {tr.date(b.departureDate, "d MMM yyyy")}
                 </td>
                 <td className="tnum px-3 py-3 text-center text-ink-muted">
                   {b.nights}
@@ -108,7 +111,7 @@ export async function BookingList({
                   {b.channelName}
                   {b.settlement !== "at_property" && (
                     <span className="ml-1.5 rounded bg-slate-100 px-1.5 py-0.5 text-[10px] text-slate-600">
-                      prepaid
+                      {tr("prepaid")}
                     </span>
                   )}
                 </td>

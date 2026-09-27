@@ -1,4 +1,5 @@
 "use server";
+import { localised, localisedAs } from "@/lib/i18n/localised";
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
@@ -37,7 +38,7 @@ export async function closeBusinessDate(): Promise<
   const { data, error } = await supabase.rpc("close_business_date");
 
   if (error) {
-    return { ok: false, error: `The day did not close: ${error.message}` };
+    return { ok: false, error: await localisedAs("The day did not close", error.message) };
   }
 
   const row = (
@@ -52,7 +53,7 @@ export async function closeBusinessDate(): Promise<
   if (!row) {
     return {
       ok: false,
-      error: "The day closed but returned no summary. Check the activity feed.",
+      error: await localised("The day closed but returned no summary. Check the activity feed."),
     };
   }
 

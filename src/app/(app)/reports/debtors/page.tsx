@@ -1,26 +1,30 @@
+import { getT } from "@/lib/i18n/server";
 import { format, parseISO } from "date-fns";
 import { EmptyState, StatusBadge, cn } from "@/components/ui";
 import { ReportShell } from "@/components/reports/report-shell";
 import { formatMoney } from "@/lib/money";
 import { getDebtorsReport } from "@/lib/queries";
 import { getPropertyCurrency } from "@/lib/queries";
+import { pageTitle } from "@/lib/i18n/server";
+import { msg } from "@/lib/i18n/translate";
 
-export const metadata = { title: "Debtors report" };
+export const generateMetadata = pageTitle(msg("Debtors report"));
 
 export default async function DebtorsReportPage() {
+  const tr = await getT();
   const currency = await getPropertyCurrency();
   const rows = await getDebtorsReport();
   const total = rows.reduce((sum, r) => sum + r.outstandingCents, 0);
 
   return (
     <ReportShell
-      title="Debtors"
+      title={tr("Debtors")}
     >
       <div className="rounded-lg border border-line bg-white p-4 shadow-card">
         {rows.length === 0 ? (
           <EmptyState
-            title="Nobody owes anything"
-            hint="Every folio with a balance appears here, for room bookings and meeting rooms alike."
+            title={tr("Nobody owes anything")}
+            hint={tr("Every folio with a balance appears here, for room bookings and meeting rooms alike.")}
           />
         ) : (
           <>
@@ -29,17 +33,17 @@ export default async function DebtorsReportPage() {
                 <thead>
                   <tr className="border-b border-line text-left text-ink-faint">
                     {[
-                      "Booking",
-                      "Kind",
-                      "Status",
-                      "Last day",
-                      "Overdue",
-                      "Charges",
-                      "Paid",
-                      "Outstanding",
+                      msg("Booking"),
+                      msg("Kind"),
+                      msg("Status"),
+                      msg("Last day"),
+                      msg("Overdue"),
+                      msg("Charges"),
+                      msg("Paid"),
+                      msg("Outstanding"),
                     ].map((c, i) => (
                       <th
-                        key={c}
+                        key={tr(c)}
                         className={cn(
                           "whitespace-nowrap px-3 pb-2.5 text-xxs font-semibold uppercase tracking-[0.1em]",
                           i >= 4 && "text-right",
@@ -68,14 +72,14 @@ export default async function DebtorsReportPage() {
                               : "bg-shell text-ink-muted ring-line",
                           )}
                         >
-                          {r.kind === "meeting_room" ? "Meeting room" : "Room"}
+                          {r.kind === "meeting_room" ? tr("Meeting room") : tr("Room")}
                         </span>
                       </td>
                       <td className="px-3 py-3">
                         <StatusBadge status={r.status} />
                       </td>
                       <td className="whitespace-nowrap px-3 py-3 text-ink-muted">
-                        {format(parseISO(r.checkOut), "d MMM yyyy")}
+                        {tr.date(r.checkOut, "d MMM yyyy")}
                       </td>
                       <td
                         className={cn(
@@ -85,7 +89,7 @@ export default async function DebtorsReportPage() {
                             : "text-ink-faint",
                         )}
                       >
-                        {r.daysOverdue > 0 ? `${r.daysOverdue}d` : "—"}
+                        {r.daysOverdue > 0 ? tr("{n}d", { n: r.daysOverdue }) : "—"}
                       </td>
                       <td className="tnum whitespace-nowrap px-3 py-3 text-right text-ink-muted">
                         {formatMoney(r.chargesCents, currency)}
@@ -102,7 +106,7 @@ export default async function DebtorsReportPage() {
                 <tfoot>
                   <tr className="border-t border-line-strong">
                     <td colSpan={7} className="px-3 pt-3 text-right font-medium text-ink">
-                      {rows.length} booking{rows.length === 1 ? "" : "s"} owing
+                      {tr.plural(rows.length, "{n} booking owing", "{n} bookings owing")}
                     </td>
                     <td className="tnum whitespace-nowrap px-3 pt-3 text-right font-semibold text-rose-600">
                       {formatMoney(total, currency)}

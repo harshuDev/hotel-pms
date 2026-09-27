@@ -1,5 +1,6 @@
 "use client";
 
+import { useT } from "@/components/i18n";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { cn } from "@/components/ui";
@@ -131,6 +132,7 @@ export function RoomTypesPanel({
   pending: boolean;
   run: Run;
 }) {
+  const tr = useT();
   // The calendar's rail links here to rename a type, so arriving with that id
   // opens its form. An id that no longer exists opens nothing.
   const [draft, setDraft] = useState<TypeDraft | null>(() => {
@@ -151,7 +153,7 @@ export function RoomTypesPanel({
     next.splice(from, 1);
     next.splice(to, 0, id);
     setOrder(next);
-    run(() => setRoomTypeOrder(next), "Order saved.");
+    run(() => setRoomTypeOrder(next), tr("Order saved."));
   }
 
   function save(d: TypeDraft) {
@@ -175,26 +177,26 @@ export function RoomTypesPanel({
       }
       setDraft(null);
       return { ok: true };
-    }, `${d.name.trim() || "Room type"} saved.`);
+    }, tr("{name} saved.", { name: d.name.trim() || tr("Room type") }));
   }
 
   return (
     <div className="max-w-5xl space-y-6">
-      <PageHeading title="Room Type" />
+      <PageHeading title={tr("Room Type")} />
 
       <section className={cn(card, "px-4 pb-5 pt-4 sm:px-7")}>
-        <h3 className="border-b border-line pb-3 text-[17px] text-ink">Room types</h3>
+        <h3 className="border-b border-line pb-3 text-[17px] text-ink">{tr("Room types")}</h3>
         {rows.length === 0 ? (
-          <p className="py-5 text-[13px] text-ink-muted">None yet. Add a room type before anything else.</p>
+          <p className="py-5 text-[13px] text-ink-muted">{tr("None yet. Add a room type before anything else.")}</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full min-w-[36rem] text-[13px]">
               <thead>
                 <tr className="border-b border-line">
-                  <th className={cn(th, "w-[40%]")}>Display Name</th>
-                  <th className={cn(th, "w-[34%]")}>Room Type</th>
-                  <th className={th}>Occupancy</th>
-                  <th className="w-20" aria-label="Actions" />
+                  <th className={cn(th, "w-[40%]")}>{tr("Display Name")}</th>
+                  <th className={cn(th, "w-[34%]")}>{tr("Room Type")}</th>
+                  <th className={th}>{tr("Occupancy")}</th>
+                  <th className="w-20" aria-label={tr("Actions")} />
                 </tr>
               </thead>
               <tbody>
@@ -226,7 +228,7 @@ export function RoomTypesPanel({
                         {canEdit && (
                           <button
                             type="button"
-                            aria-label={`Move ${t.name}. Use the arrow keys.`}
+                            aria-label={tr("Move {name}. Use the arrow keys.", { name: t.name })}
                             className="cursor-grab rounded p-0.5 text-ink hover:bg-shell focus-visible:outline focus-visible:outline-2 focus-visible:outline-brass"
                             onKeyDown={(e) => {
                               if (e.key === "ArrowUp") {
@@ -247,7 +249,7 @@ export function RoomTypesPanel({
                     </td>
                     <td className="px-2 py-1.5 text-ink">{t.name}</td>
                     <td className="tnum px-2 py-1.5 text-ink">
-                      <span className="inline-flex items-center gap-1" title={`Sleeps ${t.baseOccupancy}, at most ${t.maxOccupancy}`}>
+                      <span className="inline-flex items-center gap-1" title={tr("Sleeps {baseOccupancy}, at most {maxOccupancy}", { baseOccupancy: t.baseOccupancy, maxOccupancy: t.maxOccupancy })}>
                         <PersonIcon />
                         {t.baseOccupancy}
                         {t.maxOccupancy > t.baseOccupancy && <span className="text-ink-muted">+ {t.maxOccupancy - t.baseOccupancy}</span>}
@@ -256,7 +258,7 @@ export function RoomTypesPanel({
                     <td className="py-0.5">
                       {canEdit && (
                         <span className="flex justify-end">
-                          <button type="button" aria-label={`Edit ${t.name}`} className={iconButton} onClick={() => setDraft(draftOf(t))}>
+                          <button type="button" aria-label={tr("Edit {name}", { name: t.name })} className={iconButton} onClick={() => setDraft(draftOf(t))}>
                             <EditIcon />
                           </button>
                           {/* A type with rooms in it is not offered for deletion;
@@ -264,15 +266,15 @@ export function RoomTypesPanel({
                           {t.roomCount === 0 && (
                             <button
                               type="button"
-                              aria-label={`Delete ${t.name}`}
+                              aria-label={tr("Delete {name}", { name: t.name })}
                               className={iconButton}
                               onClick={() => {
-                                if (!confirm(`Delete ${t.name}? Its prices and restrictions go with it.`)) return;
+                                if (!confirm(tr("Delete {name}? Its prices and restrictions go with it.", { name: t.name }))) return;
                                 run(async () => {
                                   const result = await deleteRoomType(t.id);
                                   if (result.ok && draft?.id === t.id) setDraft(null);
                                   return result;
-                                }, `${t.name} deleted.`);
+                                }, tr("{name} deleted.", { name: t.name }));
                               }}
                             >
                               <CrossIcon />
@@ -297,39 +299,39 @@ export function RoomTypesPanel({
             }}
           >
             <h4 className="border-b border-line pb-1 text-[16px] text-ink">
-              {draft.id ? `Edit ${draft.name || "room type"}` : "Add Room Type"}
+              {draft.id ? (draft.name ? tr("Edit {name}", { name: draft.name }) : tr("Edit room type")) : tr("Add Room Type")}
             </h4>
             <div className="mt-4 grid gap-4 sm:grid-cols-4">
               <label className={label}>
-                Code
+                {tr("Code")}
                 <input
                   value={draft.code}
-                  placeholder="DBL"
+                  placeholder={tr("DBL")}
                   onChange={(e) => setDraft({ ...draft, code: e.target.value.toUpperCase() })}
                   className={cn(field, "uppercase")}
                 />
               </label>
               <label className={cn(label, "sm:col-span-3")}>
-                Room Type
+                {tr("Room Type")}
                 <input
                   value={draft.name}
-                  placeholder="Double"
+                  placeholder={tr("Double")}
                   onChange={(e) => setDraft({ ...draft, name: e.target.value })}
                   className={field}
                 />
               </label>
               <label className={cn(label, "sm:col-span-2")}>
-                Display Name
+                {tr("Display Name")}
                 <input
                   value={draft.displayName}
-                  placeholder={draft.name || "As the room type"}
+                  placeholder={draft.name || tr("As the room type")}
                   maxLength={120}
                   onChange={(e) => setDraft({ ...draft, displayName: e.target.value })}
                   className={field}
                 />
               </label>
               <label className={label}>
-                Sleeps
+                {tr("Sleeps")}
                 <input
                   inputMode="numeric"
                   value={draft.baseOccupancy}
@@ -338,7 +340,7 @@ export function RoomTypesPanel({
                 />
               </label>
               <label className={label}>
-                Max
+                {tr("Max")}
                 <input
                   inputMode="numeric"
                   value={draft.maxOccupancy}
@@ -348,7 +350,7 @@ export function RoomTypesPanel({
               </label>
             </div>
             <label className={cn(label, "mt-4")}>
-              Description
+              {tr("Description")}
               <textarea
                 rows={3}
                 value={draft.description}
@@ -358,7 +360,7 @@ export function RoomTypesPanel({
             </label>
             {facilities.length > 0 && (
               <fieldset className="mt-4">
-                <legend className={label}>Facilities</legend>
+                <legend className={label}>{tr("Facilities")}</legend>
                 <div className="mt-1 grid gap-x-4 gap-y-2 sm:grid-cols-2 lg:grid-cols-3">
                   {facilities.map((f) => (
                     <label key={f.id} className="flex items-center gap-2 text-[13px] text-ink">
@@ -384,10 +386,10 @@ export function RoomTypesPanel({
             )}
             <div className="mt-5 flex justify-end gap-3">
               <button type="button" className={secondary} onClick={() => setDraft(null)}>
-                Cancel
+                {tr("Cancel")}
               </button>
               <button type="submit" className={primary} disabled={pending}>
-                Save
+                {tr("Save")}
               </button>
             </div>
           </form>
@@ -410,21 +412,21 @@ export function RoomTypesPanel({
               })
             }
           >
-            + Add Room Type
+            {tr("+ Add Room Type")}
           </button>
         )}
       </section>
 
       {/* Virtual Room Types -- stored, not yet sold. */}
       <section className={cn(card, "px-4 pb-5 pt-4 sm:px-7")}>
-        <h3 className="border-b border-line pb-3 text-[17px] text-ink">Virtual Room Types</h3>
+        <h3 className="border-b border-line pb-3 text-[17px] text-ink">{tr("Virtual Room Types")}</h3>
         <div className="overflow-x-auto">
           <table className="w-full min-w-[30rem] text-[13px]">
             <thead>
               <tr className="border-b border-line">
-                <th className={cn(th, "w-[50%]")}>Display Name</th>
-                <th className={th}>Parent Room Type</th>
-                <th className="w-20" aria-label="Actions" />
+                <th className={cn(th, "w-[50%]")}>{tr("Display Name")}</th>
+                <th className={th}>{tr("Parent Room Type")}</th>
+                <th className="w-20" aria-label={tr("Actions")} />
               </tr>
             </thead>
             <tbody>
@@ -437,7 +439,7 @@ export function RoomTypesPanel({
                       <span className="flex justify-end">
                         <button
                           type="button"
-                          aria-label={`Edit ${v.displayName}`}
+                          aria-label={tr("Edit {name}", { name: v.displayName })}
                           className={iconButton}
                           onClick={() => setVirtual({ id: v.id, displayName: v.displayName, parent: v.parentRoomTypeId })}
                         >
@@ -445,11 +447,11 @@ export function RoomTypesPanel({
                         </button>
                         <button
                           type="button"
-                          aria-label={`Delete ${v.displayName}`}
+                          aria-label={tr("Delete {name}", { name: v.displayName })}
                           className={iconButton}
                           onClick={() => {
-                            if (!confirm(`Delete ${v.displayName}?`)) return;
-                            run(() => deleteVirtualRoomType(v.id), `${v.displayName} deleted.`);
+                            if (!confirm(tr("Delete {name}?", { name: v.displayName }))) return;
+                            run(() => deleteVirtualRoomType(v.id), tr("{name} deleted.", { name: v.displayName }));
                           }}
                         >
                           <CrossIcon />
@@ -476,15 +478,15 @@ export function RoomTypesPanel({
                 });
                 if (result.ok) setVirtual(null);
                 return result;
-              }, `${virtual.displayName.trim() || "Virtual room type"} saved.`);
+              }, tr("{name} saved.", { name: virtual.displayName.trim() || tr("Virtual room type") }));
             }}
           >
             <h4 className="border-b border-line pb-1 text-[16px] text-ink">
-              {virtual.id ? "Edit Virtual Room Type" : "Add Virtual Room Type"}
+              {virtual.id ? tr("Edit Virtual Room Type") : tr("Add Virtual Room Type")}
             </h4>
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
               <label className={label}>
-                Display Name
+                {tr("Display Name")}
                 <input
                   autoFocus
                   value={virtual.displayName}
@@ -494,13 +496,13 @@ export function RoomTypesPanel({
                 />
               </label>
               <label className={label}>
-                Parent Room Type
+                {tr("Parent Room Type")}
                 <select
                   value={virtual.parent}
                   onChange={(e) => setVirtual({ ...virtual, parent: e.target.value })}
                   className={field}
                 >
-                  <option value="">Choose</option>
+                  <option value="">{tr("Choose")}</option>
                   {rows.map((t) => (
                     <option key={t.id} value={t.id}>
                       {t.name}
@@ -511,10 +513,10 @@ export function RoomTypesPanel({
             </div>
             <div className="mt-5 flex justify-end gap-3">
               <button type="button" className={secondary} onClick={() => setVirtual(null)}>
-                Cancel
+                {tr("Cancel")}
               </button>
               <button type="submit" className={primary} disabled={pending}>
-                Save
+                {tr("Save")}
               </button>
             </div>
           </form>
@@ -526,7 +528,7 @@ export function RoomTypesPanel({
             className={cn(addLink, "mt-3")}
             onClick={() => setVirtual({ id: null, displayName: "", parent: rows[0].id })}
           >
-            + Add Virtual Room Type
+            {tr("+ Add Virtual Room Type")}
           </button>
         )}
       </section>
@@ -592,6 +594,7 @@ export function RoomSetupPanel({
   pending: boolean;
   run: Run;
 }) {
+  const tr = useT();
   const router = useRouter();
   const [search, setSearch] = useState(roomQuery);
   const [draft, setDraft] = useState<RoomDraft | null>(null);
@@ -627,14 +630,14 @@ export function RoomSetupPanel({
       }
       setDraft(null);
       return { ok: true };
-    }, `Room ${d.number.trim() || ""} saved.`);
+    }, tr("Room {number} saved.", { number: d.number.trim() }));
   }
 
   const current = draft?.id ? rooms.rows.find((r) => r.id === draft.id) ?? null : null;
 
   return (
     <div className="max-w-6xl space-y-2">
-      <PageHeading title="Room Setup" />
+      <PageHeading title={tr("Room Setup")} />
       <section className={cn(card, "px-4 pb-6 pt-5 sm:px-7")}>
         {/* Paged and searched in Postgres: a property can hold ~1,800 rooms. */}
         <form
@@ -645,18 +648,18 @@ export function RoomSetupPanel({
           className="mb-3 flex flex-wrap items-center justify-end gap-2"
         >
           <label htmlFor="room-setup-q" className="sr-only">
-            Search rooms
+            {tr("Search rooms")}
           </label>
           <input
             id="room-setup-q"
             type="search"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Room number or type"
+            placeholder={tr("Room number or type")}
             className="w-56 rounded-md border border-line px-3 py-1.5 text-[13px] text-ink outline-none focus:border-brass"
           />
           <button type="submit" className={cn(secondary, "px-3 py-1.5")}>
-            Search
+            {tr("Search")}
           </button>
           {roomQuery !== "" && (
             <button
@@ -667,7 +670,7 @@ export function RoomSetupPanel({
               }}
               className="text-[13px] text-ink-muted underline-offset-2 hover:text-ink hover:underline"
             >
-              Clear
+              {tr("Clear")}
             </button>
           )}
         </form>
@@ -676,17 +679,17 @@ export function RoomSetupPanel({
           <table className="w-full min-w-[62rem] text-[12.5px]">
             <thead>
               <tr className="border-b border-line align-bottom">
-                <th className={th}>Name / Number</th>
-                <th className={th}>Room Type</th>
-                <th className={th}>Property</th>
-                <th className={cn(th, "text-center")}>Priority</th>
-                <th className={cn(th, "text-center")}>Available Online</th>
-                <th className={cn(th, "text-center")}>Enabled</th>
-                <th className={cn(th, "text-center")}>Key Code</th>
-                <th className={cn(th, "text-center")}>Common Door Name</th>
-                <th className={cn(th, "text-center")}>Color</th>
-                <th className={cn(th, "text-center")}>Divider</th>
-                <th className="w-20" aria-label="Actions" />
+                <th className={th}>{tr("Name / Number")}</th>
+                <th className={th}>{tr("Room Type")}</th>
+                <th className={th}>{tr("Property")}</th>
+                <th className={cn(th, "text-center")}>{tr("Priority")}</th>
+                <th className={cn(th, "text-center")}>{tr("Available Online")}</th>
+                <th className={cn(th, "text-center")}>{tr("Enabled")}</th>
+                <th className={cn(th, "text-center")}>{tr("Key Code")}</th>
+                <th className={cn(th, "text-center")}>{tr("Common Door Name")}</th>
+                <th className={cn(th, "text-center")}>{tr("Color")}</th>
+                <th className={cn(th, "text-center")}>{tr("Divider")}</th>
+                <th className="w-20" aria-label={tr("Actions")} />
               </tr>
             </thead>
             <tbody>
@@ -696,8 +699,8 @@ export function RoomSetupPanel({
                   <td className="px-2 py-2.5 text-ink">{r.roomTypeName}</td>
                   <td className="px-2 py-2.5 uppercase text-ink">{propertyName}</td>
                   <td className="tnum px-2 py-2.5 text-center text-ink">{r.priority}</td>
-                  <td className="px-2 py-2.5">{r.availableOnline && <Check label="Available online" />}</td>
-                  <td className="px-2 py-2.5">{r.isEnabled && <Check label="Enabled" />}</td>
+                  <td className="px-2 py-2.5">{r.availableOnline && <Check label={tr("Available online")} />}</td>
+                  <td className="px-2 py-2.5">{r.isEnabled && <Check label={tr("Enabled")} />}</td>
                   <td className="px-2 py-2.5 text-center text-ink">{r.keyCode ?? ""}</td>
                   <td className="px-2 py-2.5 text-center text-ink">{r.doorName ?? ""}</td>
                   <td className="px-2 py-2.5">
@@ -705,11 +708,11 @@ export function RoomSetupPanel({
                       <span className="mx-auto block h-3.5 w-6 rounded-sm" style={{ backgroundColor: r.color }} title={r.color} />
                     )}
                   </td>
-                  <td className="px-2 py-2.5">{r.hasDivider && <Check label="Divider" />}</td>
+                  <td className="px-2 py-2.5">{r.hasDivider && <Check label={tr("Divider")} />}</td>
                   <td className="py-1">
                     {canEdit && (
                       <span className="flex justify-end">
-                        <button type="button" aria-label={`Edit room ${r.number}`} className={iconButton} onClick={() => setDraft(roomDraftOf(r))}>
+                        <button type="button" aria-label={tr("Edit room {number}", { number: r.number })} className={iconButton} onClick={() => setDraft(roomDraftOf(r))}>
                           <EditIcon />
                         </button>
                         {/* Only a room nobody has been booked into can go;
@@ -717,11 +720,11 @@ export function RoomSetupPanel({
                         {!r.hasBookings && (
                           <button
                             type="button"
-                            aria-label={`Delete room ${r.number}`}
+                            aria-label={tr("Delete room {number}", { number: r.number })}
                             className={iconButton}
                             onClick={() => {
-                              if (!confirm(`Delete room ${r.number}? This cannot be undone.`)) return;
-                              run(() => deleteRoom(r.id), `Room ${r.number} deleted.`);
+                              if (!confirm(tr("Delete room {number}? This cannot be undone.", { number: r.number }))) return;
+                              run(() => deleteRoom(r.id), tr("Room {number} deleted.", { number: r.number }));
                             }}
                           >
                             <CrossIcon />
@@ -736,10 +739,10 @@ export function RoomSetupPanel({
                 <tr>
                   <td colSpan={11} className="px-2 py-5 text-[13px] text-ink-muted">
                     {roomQuery !== ""
-                      ? `No room matches “${roomQuery}”.`
+                      ? tr("No room matches “{roomQuery}”.", { roomQuery: roomQuery })
                       : roomTypes.length === 0
-                        ? "Add a room type first. Every room belongs to one."
-                        : "None yet."}
+                        ? tr("Add a room type first. Every room belongs to one.")
+                        : tr("None yet.")}
                   </td>
                 </tr>
               )}
@@ -755,12 +758,14 @@ export function RoomSetupPanel({
               disabled={rooms.page <= 1}
               className={cn(secondary, "px-3 py-1.5 disabled:opacity-40")}
             >
-              Previous
+              {tr("Previous")}
             </button>
             <span className="tnum text-ink-faint">
-              {(rooms.page - 1) * rooms.perPage + 1}
-              {"–"}
-              {Math.min(rooms.page * rooms.perPage, rooms.total)} of {rooms.total}
+              {tr("{from}–{to} of {total}", {
+                from: (rooms.page - 1) * rooms.perPage + 1,
+                to: Math.min(rooms.page * rooms.perPage, rooms.total),
+                total: rooms.total,
+              })}
             </span>
             <button
               type="button"
@@ -768,7 +773,7 @@ export function RoomSetupPanel({
               disabled={rooms.page * rooms.perPage >= rooms.total}
               className={cn(secondary, "px-3 py-1.5 disabled:opacity-40")}
             >
-              Next
+              {tr("Next")}
             </button>
           </div>
         )}
@@ -795,7 +800,7 @@ export function RoomSetupPanel({
                 })
               }
             >
-              + Add Room
+              {tr("+ Add Room")}
             </button>
             {/* Rooms in a run: a property can hold ~1,800 of them. */}
             <button
@@ -803,7 +808,7 @@ export function RoomSetupPanel({
               className={addLink}
               onClick={() => setRunForm({ roomTypeId: roomTypes[0].id, first: "", last: "", floor: "" })}
             >
-              + Add Rooms in a Run
+              {tr("+ Add Rooms in a Run")}
             </button>
           </div>
         )}
@@ -823,13 +828,13 @@ export function RoomSetupPanel({
                 });
                 if (result.ok) setRunForm(null);
                 return result;
-              }, "Rooms added.");
+              }, tr("Rooms added."));
             }}
           >
-            <h4 className="border-b border-line pb-1 text-[16px] text-ink">Add Rooms in a Run</h4>
+            <h4 className="border-b border-line pb-1 text-[16px] text-ink">{tr("Add Rooms in a Run")}</h4>
             <div className="mt-4 grid gap-4 sm:grid-cols-5">
               <label className={cn(label, "sm:col-span-2")}>
-                Room Type
+                {tr("Room Type")}
                 <select
                   value={runForm.roomTypeId}
                   onChange={(e) => setRunForm({ ...runForm, roomTypeId: e.target.value })}
@@ -843,27 +848,27 @@ export function RoomSetupPanel({
                 </select>
               </label>
               <label className={label}>
-                From
+                {tr("From")}
                 <input inputMode="numeric" placeholder="101" value={runForm.first}
                   onChange={(e) => setRunForm({ ...runForm, first: e.target.value })} className={cn(field, "tnum")} />
               </label>
               <label className={label}>
-                To
+                {tr("To")}
                 <input inputMode="numeric" placeholder="120" value={runForm.last}
                   onChange={(e) => setRunForm({ ...runForm, last: e.target.value })} className={cn(field, "tnum")} />
               </label>
               <label className={label}>
-                Floor
+                {tr("Floor")}
                 <input inputMode="numeric" placeholder="1" value={runForm.floor}
                   onChange={(e) => setRunForm({ ...runForm, floor: e.target.value })} className={cn(field, "tnum")} />
               </label>
             </div>
             <div className="mt-5 flex justify-end gap-3">
               <button type="button" className={secondary} onClick={() => setRunForm(null)}>
-                Cancel
+                {tr("Cancel")}
               </button>
               <button type="submit" className={primary} disabled={pending}>
-                Add the run
+                {tr("Add the run")}
               </button>
             </div>
           </form>
@@ -881,32 +886,32 @@ export function RoomSetupPanel({
                 const result = await saveKeyCodeSetting(on);
                 if (!result.ok) setKeyCode(!on);
                 return result;
-              }, on ? "Booking room id is the key code." : "Key codes are set per room.");
+              }, on ? tr("Booking room id is the key code.") : tr("Key codes are set per room."));
             }}
             className="h-[18px] w-[18px] accent-brass"
           />
-          Use Booking Room id as Key Code
+          {tr("Use Booking Room id as Key Code")}
         </label>
       </section>
 
       {draft && (
         <Dialog
-          title={draft.id ? `Room ${current?.number ?? draft.number}` : "Add Room"}
+          title={draft.id ? tr("Room {number}", { number: current?.number ?? draft.number }) : tr("Add Room")}
           onClose={() => setDraft(null)}
           footer={
             <>
               <button type="button" className={secondary} onClick={() => setDraft(null)}>
-                Cancel
+                {tr("Cancel")}
               </button>
               <button type="button" className={primary} disabled={pending} onClick={() => save(draft)}>
-                Save
+                {tr("Save")}
               </button>
             </>
           }
         >
           <div className="grid gap-4 sm:grid-cols-2">
             <label className={label}>
-              Name / Number
+              {tr("Name / Number")}
               <input
                 autoFocus
                 value={draft.number}
@@ -915,7 +920,7 @@ export function RoomSetupPanel({
               />
             </label>
             <label className={label}>
-              Room Type
+              {tr("Room Type")}
               <select
                 value={draft.roomTypeId}
                 onChange={(e) => setDraft({ ...draft, roomTypeId: e.target.value })}
@@ -929,7 +934,7 @@ export function RoomSetupPanel({
               </select>
             </label>
             <label className={label}>
-              Floor
+              {tr("Floor")}
               <input
                 inputMode="numeric"
                 value={draft.floor}
@@ -938,7 +943,7 @@ export function RoomSetupPanel({
               />
             </label>
             <label className={label}>
-              Priority
+              {tr("Priority")}
               <input
                 inputMode="numeric"
                 value={draft.priority}
@@ -947,7 +952,7 @@ export function RoomSetupPanel({
               />
             </label>
             <label className={label}>
-              Key Code
+              {tr("Key Code")}
               <input
                 value={draft.keyCode}
                 maxLength={60}
@@ -956,7 +961,7 @@ export function RoomSetupPanel({
               />
             </label>
             <label className={label}>
-              Common Door Name
+              {tr("Common Door Name")}
               <input
                 value={draft.doorName}
                 maxLength={60}
@@ -965,11 +970,11 @@ export function RoomSetupPanel({
               />
             </label>
             <div>
-              <span className={label}>Color</span>
+              <span className={label}>{tr("Color")}</span>
               <span className="mt-1 flex items-center gap-2">
                 <input
                   type="color"
-                  aria-label="Color"
+                  aria-label={tr("Color")}
                   value={draft.color ?? "#7fa7dc"}
                   onChange={(e) => setDraft({ ...draft, color: e.target.value })}
                   className="h-9 w-14 cursor-pointer rounded border border-line bg-white p-0.5"
@@ -980,10 +985,10 @@ export function RoomSetupPanel({
                     className="text-[12.5px] text-ink-muted underline-offset-2 hover:text-ink hover:underline"
                     onClick={() => setDraft({ ...draft, color: null })}
                   >
-                    No colour
+                    {tr("No colour")}
                   </button>
                 ) : (
-                  <span className="text-[12.5px] text-ink-faint">None</span>
+                  <span className="text-[12.5px] text-ink-faint">{tr("None")}</span>
                 )}
               </span>
             </div>
@@ -991,26 +996,26 @@ export function RoomSetupPanel({
               <label className="flex items-center gap-2">
                 <input type="checkbox" checked={draft.availableOnline} className={tick}
                   onChange={(e) => setDraft({ ...draft, availableOnline: e.target.checked })} />
-                Available Online
+                {tr("Available Online")}
               </label>
               <label className="flex items-center gap-2">
                 <input type="checkbox" checked={draft.isEnabled} className={tick}
                   onChange={(e) => setDraft({ ...draft, isEnabled: e.target.checked })} />
-                Enabled
+                {tr("Enabled")}
               </label>
               <label className="flex items-center gap-2">
                 <input type="checkbox" checked={draft.hasDivider} className={tick}
                   onChange={(e) => setDraft({ ...draft, hasDivider: e.target.checked })} />
-                Divider
+                {tr("Divider")}
               </label>
             </div>
           </div>
           {!draft.isEnabled && draft.wasEnabled && (
-            <p className="text-[12.5px] text-warn-deep">A disabled room is out of order and cannot be sold.</p>
+            <p className="text-[12.5px] text-warn-deep">{tr("A disabled room is out of order and cannot be sold.")}</p>
           )}
           {current && (
             <div className="border-t border-line pt-4">
-              <span className={label}>Picture</span>
+              <span className={label}>{tr("Picture")}</span>
               <RoomPhoto
                 propertyId={propertyId}
                 roomId={current.id}

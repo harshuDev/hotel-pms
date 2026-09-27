@@ -1,3 +1,4 @@
+import { msg } from "@/lib/i18n/translate";
 /**
  * Settings -> Connectivity Settings -> Key Lock Systems (0102) and
  * Housekeeping Systems (0103): one table, `system_connections`, one panel,
@@ -11,15 +12,15 @@
  */
 export const SYSTEM_CATEGORIES = {
   key_lock: {
-    title: "Key Lock Systems",
+    title: msg("Key Lock Systems"),
     providers: [
-      { id: "flexipass", label: "Flexipass", account: "Account", secret: "API key" },
-      { id: "remotelock", label: "Remotelock", account: "Client ID", secret: "Client secret" },
+      { id: "flexipass", label: msg("Flexipass"), account: msg("Account"), secret: "API key" },
+      { id: "remotelock", label: msg("Remotelock"), account: msg("Client ID"), secret: msg("Client secret") },
     ],
   },
   housekeeping: {
-    title: "Housekeeping Systems",
-    providers: [{ id: "sweeply", label: "Sweeply", account: "Property ID", secret: "API key" }],
+    title: msg("Housekeeping Systems"),
+    providers: [{ id: "sweeply", label: msg("Sweeply"), account: msg("Property ID"), secret: "API key" }],
   },
 } as const;
 

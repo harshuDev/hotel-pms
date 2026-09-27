@@ -46,8 +46,10 @@ import {
   getStaffSettings,
   getTaxRateSettings,
 } from "@/lib/queries";
+import { pageTitle } from "@/lib/i18n/server";
+import { msg } from "@/lib/i18n/translate";
 
-export const metadata = { title: "Settings" };
+export const generateMetadata = pageTitle(msg("Settings"));
 
 export default async function SettingsPage({
   searchParams,

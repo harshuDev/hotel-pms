@@ -1,4 +1,5 @@
 "use server";
+import { localised, localisedAs } from "@/lib/i18n/localised";
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
@@ -15,15 +16,15 @@ export type ActionResult<T = null> =
   | { ok: false; error: string };
 
 /** Postgres raises these as plain exceptions; the message is the useful part. */
-function failed(prefix: string, message: string): ActionResult<never> {
-  return { ok: false, error: `${prefix}: ${message}` };
+async function failed(prefix: string, message: string): Promise<ActionResult<never>> {
+  return { ok: false, error: await localisedAs(prefix, message) };
 }
 
 export async function openShift(
   openingFloatCents: number,
 ): Promise<ActionResult> {
   if (!Number.isSafeInteger(openingFloatCents) || openingFloatCents < 0) {
-    return { ok: false, error: "The opening float must be zero or more." };
+    return { ok: false, error: await localised("The opening float must be zero or more.") };
   }
 
   const supabase = await createClient();
@@ -46,7 +47,7 @@ export async function takePayment(input: {
   shiftId: string;
 }): Promise<ActionResult> {
   if (!Number.isSafeInteger(input.amountCents) || input.amountCents <= 0) {
-    return { ok: false, error: "The amount must be more than zero." };
+    return { ok: false, error: await localised("The amount must be more than zero.") };
   }
 
   const supabase = await createClient();
@@ -79,8 +80,9 @@ export async function takePayment(input: {
   if (!folio) {
     return {
       ok: false,
-      error:
+      error: await localised(
         "That booking has no open folio, so there is nothing to pay against.",
+      ),
     };
   }
 
@@ -110,10 +112,10 @@ export async function recordPaidOut(input: {
   rechargeBookingId: string | null;
 }): Promise<ActionResult> {
   if (!Number.isSafeInteger(input.amountCents) || input.amountCents <= 0) {
-    return { ok: false, error: "The amount must be more than zero." };
+    return { ok: false, error: await localised("The amount must be more than zero.") };
   }
   if (!input.reason.trim()) {
-    return { ok: false, error: "Say what the money was for." };
+    return { ok: false, error: await localised("Say what the money was for.") };
   }
 
   const supabase = await createClient();
@@ -148,7 +150,7 @@ export async function closeShift(input: {
   notes: string | null;
 }): Promise<ActionResult<{ expectedCents: number; varianceCents: number }>> {
   if (!Number.isSafeInteger(input.countedCents) || input.countedCents < 0) {
-    return { ok: false, error: "The counted total must be zero or more." };
+    return { ok: false, error: await localised("The counted total must be zero or more.") };
   }
 
   const supabase = await createClient();
@@ -170,7 +172,7 @@ export async function closeShift(input: {
   if (!row) {
     return {
       ok: false,
-      error: "The shift closed but returned no figures. Check it in reports.",
+      error: await localised("The shift closed but returned no figures. Check it in reports."),
     };
   }
 

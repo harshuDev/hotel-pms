@@ -1,3 +1,4 @@
+import { getT } from "@/lib/i18n/server";
 import { format, parseISO } from "date-fns";
 import Link from "next/link";
 import {
@@ -14,8 +15,10 @@ import {
   getImmigrationReport,
 } from "@/lib/queries";
 import type { ImmigrationRow } from "@/lib/types";
+import { pageTitle } from "@/lib/i18n/server";
+import { msg } from "@/lib/i18n/translate";
 
-export const metadata = { title: "Immigration report" };
+export const generateMetadata = pageTitle(msg("Immigration report"));
 
 /**
  * The return a hotel files with the police or the border force.
@@ -32,6 +35,7 @@ export default async function ImmigrationReportPage({
 }: {
   searchParams: Promise<{ from?: string; to?: string }>;
 }) {
+  const tr = await getT();
   const sp = await searchParams;
   const businessDate = await getBusinessDate();
   const range = reportRange(businessDate, sp.from, sp.to);
@@ -43,7 +47,7 @@ export default async function ImmigrationReportPage({
     if (error instanceof ReportAccessError) {
       return (
         <ReportShell
-          title="Immigration"
+          title={tr("Immigration")}
         >
           <ReportNoAccess />
         </ReportShell>
@@ -56,38 +60,35 @@ export default async function ImmigrationReportPage({
 
   return (
     <ReportShell
-      title="Immigration"
+      title={tr("Immigration")}
       action="/reports/immigration"
       range={range}
     >
       <ReportFigures>
         <ReportFigure
-          label="Stays"
+          label={tr("Stays")}
           value={String(rows.length)}
-          detail="In this range"
+          detail={tr("In this range")}
           emphasis
         />
         <ReportFigure
-          label="Complete"
+          label={tr("Complete")}
           value={String(rows.length - incomplete.length)}
-          detail="Document, nationality and date of birth"
+          detail={tr("Document, nationality and date of birth")}
         />
         <ReportFigure
-          label="Incomplete"
+          label={tr("Incomplete")}
           value={String(incomplete.length)}
-          detail={incomplete.length > 0 ? "Cannot be filed as they stand" : "Nothing missing"}
+          detail={incomplete.length > 0 ? tr("Cannot be filed as they stand") : tr("Nothing missing")}
         />
       </ReportFigures>
 
       {incomplete.length > 0 && (
         <div className="mb-4 rounded-lg border border-warn/40 bg-warn-wash px-4 py-3 text-[13px] text-warn-deep">
-          {incomplete.length} of these {rows.length} stays are missing something a
-          return needs. Open the guest under{" "}
+          {tr("{n} of these {total} stays are missing something a return needs.", { n: incomplete.length, total: rows.length })}{" "}
           <Link href="/customers" className="underline underline-offset-2">
-            Customers
-          </Link>{" "}
-          and fill in the Identity fields — nationality, a document number and a
-          date of birth.
+            {tr("Open the guest in Customers and fill in the Identity fields — nationality, a document number and a date of birth.")}
+          </Link>
         </div>
       )}
 
@@ -95,25 +96,25 @@ export default async function ImmigrationReportPage({
         rows={rows}
         rowKey={(r) => r.bookingId}
         minWidth="1040px"
-        emptyTitle="Nobody stayed in this range"
-        emptyHint="The return covers nights actually slept, so cancellations and no-shows never appear."
-        footLabel={`${rows.length} stay${rows.length === 1 ? "" : "s"}`}
+        emptyTitle={tr("Nobody stayed in this range")}
+        emptyHint={tr("The return covers nights actually slept, so cancellations and no-shows never appear.")}
+        footLabel={tr.plural(rows.length, "{n} stay", "{n} stays")}
         columns={[
           {
             header: "",
             cell: (r) =>
               r.isComplete ? (
-                <span className="text-emerald-600" title="Complete">
+                <span className="text-emerald-600" title={tr("Complete")}>
                   ●
                 </span>
               ) : (
-                <span className="text-warn" title="Missing details">
+                <span className="text-warn" title={tr("Missing details")}>
                   ●
                 </span>
               ),
           },
           {
-            header: "Reference",
+            header: tr("Reference"),
             cell: (r) => (
               <Link
                 href={`/bookings/${r.bookingId}`}
@@ -124,66 +125,66 @@ export default async function ImmigrationReportPage({
             ),
           },
           {
-            header: "Guest",
+            header: tr("Guest"),
             cell: (r) => <span className="text-ink">{r.guestName}</span>,
           },
           {
-            header: "Room",
+            header: tr("Room"),
             cell: (r) => <span className="tnum text-ink-faint">{r.roomNumber}</span>,
           },
           {
-            header: "Nationality",
+            header: tr("Nationality"),
             cell: (r) =>
               r.nationality ? (
-                <span className="text-ink-muted">{countryName(r.nationality)}</span>
+                <span className="text-ink-muted">{tr(countryName(r.nationality))}</span>
               ) : (
-                <span className="text-warn-deep">Not recorded</span>
+                <span className="text-warn-deep">{tr("Not recorded")}</span>
               ),
           },
           {
-            header: "Document",
+            header: tr("Document"),
             cell: (r) => {
               const doc = r.passportNumber ?? r.nationalIdNumber;
               return doc ? (
                 <span className="tnum text-ink-muted">{doc}</span>
               ) : (
-                <span className="text-warn-deep">Not recorded</span>
+                <span className="text-warn-deep">{tr("Not recorded")}</span>
               );
             },
           },
           {
-            header: "Expires",
+            header: tr("Expires"),
             cell: (r) => (
               <span className="tnum whitespace-nowrap text-ink-faint">
                 {r.passportExpiry
-                  ? format(parseISO(r.passportExpiry), "d MMM yyyy")
+                  ? tr.date(r.passportExpiry, "d MMM yyyy")
                   : "—"}
               </span>
             ),
           },
           {
-            header: "Born",
+            header: tr("Born"),
             cell: (r) =>
               r.dateOfBirth ? (
                 <span className="tnum whitespace-nowrap text-ink-muted">
-                  {format(parseISO(r.dateOfBirth), "d MMM yyyy")}
+                  {tr.date(r.dateOfBirth, "d MMM yyyy")}
                 </span>
               ) : (
-                <span className="text-warn-deep">Not recorded</span>
+                <span className="text-warn-deep">{tr("Not recorded")}</span>
               ),
           },
           {
-            header: "Stay",
+            header: tr("Stay"),
             align: "right",
             cell: (r) => (
               <span className="tnum whitespace-nowrap text-ink-muted">
-                {format(parseISO(r.checkIn), "d MMM")} –{" "}
-                {format(parseISO(r.checkOut), "d MMM")}
+                {tr.date(r.checkIn, "d MMM")} –{" "}
+                {tr.date(r.checkOut, "d MMM")}
               </span>
             ),
           },
           {
-            header: "Nights",
+            header: tr("Nights"),
             align: "right",
             cell: (r) => <span className="tnum text-ink-muted">{r.nights}</span>,
           },

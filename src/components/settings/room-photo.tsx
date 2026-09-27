@@ -1,5 +1,6 @@
 "use client";
 
+import { useT } from "@/components/i18n";
 import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { cn } from "@/components/ui";
@@ -37,6 +38,7 @@ export function RoomPhoto({
   photoUrl: string | null;
   photoPath: string | null;
 }) {
+  const tr = useT();
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState<string | null>(null);
@@ -47,11 +49,11 @@ export function RoomPhoto({
     setError(null);
 
     if (!TYPES.includes(file.type)) {
-      setError("That file is not a picture. Use a JPEG, PNG, WebP or AVIF.");
+      setError(tr("That file is not a picture. Use a JPEG, PNG, WebP or AVIF."));
       return;
     }
     if (file.size > MAX_BYTES) {
-      setError("That picture is over 5MB. Save it smaller and try again.");
+      setError(tr("That picture is over 5MB. Save it smaller and try again."));
       return;
     }
 
@@ -124,12 +126,12 @@ export function RoomPhoto({
           // and a rebuild every time a property is added.
           <img
             src={photoUrl}
-            alt={`Room ${roomNumber}`}
+            alt={tr("Room {roomNumber}", { roomNumber: roomNumber })}
             className="h-full w-full object-cover"
           />
         ) : (
           <span className="grid h-full w-full place-items-center text-xxs text-ink-faint">
-            No picture
+            {tr("No picture")}
           </span>
         )}
       </div>
@@ -148,14 +150,14 @@ export function RoomPhoto({
         />
 
         <div className="mt-2 flex items-center gap-3 text-[12.5px]">
-          {working && <span className="text-ink-faint">Uploading&hellip;</span>}
+          {working && <span className="text-ink-faint">{tr("Uploading…")}</span>}
           {photoUrl && !working && (
             <button
               type="button"
               onClick={remove}
               className="text-ink-muted underline-offset-2 hover:text-ink hover:underline"
             >
-              Remove the picture
+              {tr("Remove the picture")}
             </button>
           )}
         </div>

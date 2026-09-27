@@ -1,3 +1,4 @@
+import { getCookieT } from "@/lib/i18n/server";
 import Link from "next/link";
 
 /**
@@ -14,9 +15,14 @@ import Link from "next/link";
  * the page an unauthenticated stranger reaches on a bad URL, where there is no
  * property to read.
  */
-export const metadata = { title: "Page not found" };
+export async function generateMetadata() {
+  const tr = await getCookieT();
+  return { title: tr("Page not found") };
+}
 
-export default function NotFound() {
+export default async function NotFound() {
+  // Cookie only: this page deliberately makes no database query.
+  const tr = await getCookieT();
   return (
     <main className="grid min-h-screen place-items-center bg-shell px-6">
       <div className="mx-auto max-w-md rounded-lg border border-line bg-white px-8 py-16 text-center shadow-card">
@@ -24,17 +30,16 @@ export default function NotFound() {
           404
         </p>
         <h1 className="mt-3 font-display text-[22px] font-semibold tracking-tightest text-ink">
-          That page does not exist
+          {tr("That page does not exist")}
         </h1>
         <p className="mx-auto mt-3 max-w-[38ch] text-[13px] leading-relaxed text-ink-muted">
-          The address may have been mistyped, or the link that brought you here
-          may be out of date.
+          {tr("The address may have been mistyped, or the link that brought you here may be out of date.")}
         </p>
         <Link
           href="/dashboard"
           className="mt-6 inline-block rounded-md bg-chrome-800 px-5 py-2 text-[13px] font-medium text-white transition hover:bg-chrome-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brass"
         >
-          Back to the dashboard
+          {tr("Back to the dashboard")}
         </Link>
       </div>
     </main>

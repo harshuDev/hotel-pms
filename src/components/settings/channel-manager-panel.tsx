@@ -1,10 +1,10 @@
 "use client";
 
+import { useT } from "@/components/i18n";
 import { useState } from "react";
 import { cn } from "@/components/ui";
 import { Menu, MenuItem } from "@/components/menu";
 import { EditIcon } from "@/components/settings/finance-panels";
-import { formatStampInProperty } from "@/lib/dates";
 import {
   CHANNEL_MANAGERS,
   DAYS_TO_SYNC,
@@ -160,6 +160,7 @@ function ConfigFileField({
   onChange: (v: FileDraft) => void;
   onError: (message: string) => void;
 }) {
+  const tr = useT();
   const current = value === undefined ? saved : value === null ? null : value.name;
   return (
     <Row label={label} htmlFor={id}>
@@ -173,7 +174,7 @@ function ConfigFileField({
           if (!file) return;
           const csv = await file.text();
           if (csv.length > MAX_CONFIG_CHARS) {
-            onError(`${file.name} is larger than 256 KB.`);
+            onError(tr("{name} is larger than 256 KB.", { name: file.name }));
             return;
           }
           onChange({ name: file.name, csv });
@@ -193,11 +194,11 @@ function ConfigFileField({
                 else onError(result.error);
               }}
             >
-              Download
+              {tr("Download")}
             </button>
           )}
           <button type="button" className="text-rose-700 hover:underline" onClick={() => onChange(saved ? null : undefined)}>
-            Remove
+            {tr("Remove")}
           </button>
         </p>
       )}
@@ -218,6 +219,7 @@ export function ChannelManagerPanel({
   pending: boolean;
   run: Run;
 }) {
+  const tr = useT();
   const [draft, setDraft] = useState<Draft | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [fileError, setFileError] = useState<string | null>(null);
@@ -249,7 +251,7 @@ export function ChannelManagerPanel({
       });
       if (result.ok) setDraft(null);
       return result;
-    }, `${d.connectionName.trim() || channelManagerLabel(d.provider)} saved.`);
+    }, tr("{channelManagerLabel} saved.", { channelManagerLabel: d.connectionName.trim() || channelManagerLabel(d.provider) }));
   }
 
   const vb = draft?.provider === "vertical_booking";
@@ -257,19 +259,19 @@ export function ChannelManagerPanel({
 
   return (
     <div className="max-w-6xl space-y-2">
-      <h2 className="border-b border-line pb-1 text-[24px] text-ink">Channel Manager Settings</h2>
+      <h2 className="border-b border-line pb-1 text-[24px] text-ink">{tr("Channel Manager Settings")}</h2>
       <section className={card}>
         <div className="px-4 pb-6 pt-6 sm:px-8">
-          <h3 className="border-b border-line pb-2 text-[16px] text-ink">Channel Managers</h3>
+          <h3 className="border-b border-line pb-2 text-[16px] text-ink">{tr("Channel Managers")}</h3>
           <div className="overflow-x-auto">
             <table className="w-full min-w-[36rem] text-[13px]">
               <thead>
                 <tr className="border-b border-line">
-                  <th className={cn(th, "w-[40%]")}>Title</th>
-                  <th className={th}>Is Active</th>
-                  <th className={th}>Is Synced</th>
-                  <th className={th}>Synced At</th>
-                  <th className="w-20" aria-label="Actions" />
+                  <th className={cn(th, "w-[40%]")}>{tr("Title")}</th>
+                  <th className={th}>{tr("Is Active")}</th>
+                  <th className={th}>{tr("Is Synced")}</th>
+                  <th className={th}>{tr("Synced At")}</th>
+                  <th className="w-20" aria-label={tr("Actions")} />
                 </tr>
               </thead>
               <tbody>
@@ -277,31 +279,31 @@ export function ChannelManagerPanel({
                   <tr key={c.id} className={cn("border-b border-line", draft?.id === c.id && "bg-shell/70")}>
                     <td className="px-1.5 py-1.5 text-ink">
                       {c.connectionName}
-                      <span className="ml-2 text-[11.5px] text-ink-muted">{channelManagerLabel(c.provider)}</span>
+                      <span className="ml-2 text-[11.5px] text-ink-muted">{tr(channelManagerLabel(c.provider))}</span>
                     </td>
-                    <td className="px-1.5 py-1.5 text-ink">{c.isActive ? "Yes" : "No"}</td>
-                    <td className="px-1.5 py-1.5 text-ink">{c.isSynced ? "Yes" : "No"}</td>
+                    <td className="px-1.5 py-1.5 text-ink">{c.isActive ? tr("Yes") : tr("No")}</td>
+                    <td className="px-1.5 py-1.5 text-ink">{c.isSynced ? tr("Yes") : tr("No")}</td>
                     <td className="tnum px-1.5 py-1.5 text-ink">
-                      {c.syncedAt ? formatStampInProperty(c.syncedAt, timezone) : "—"}
+                      {c.syncedAt ? tr.stamp(c.syncedAt, timezone) : "—"}
                     </td>
                     <td className="py-0.5">
                       {canEdit && (
                         <span className="flex justify-end">
-                          <button type="button" aria-label={`Edit ${c.connectionName}`} className={iconButton}
+                          <button type="button" aria-label={tr("Edit {name}", { name: c.connectionName })} className={iconButton}
                             onClick={() => { setFileError(null); setDraft(draftOf(c)); }}>
                             <EditIcon />
                           </button>
                           <button
                             type="button"
-                            aria-label={`Delete ${c.connectionName}`}
+                            aria-label={tr("Delete {name}", { name: c.connectionName })}
                             className={iconButton}
                             onClick={() => {
-                              if (!confirm(`Delete ${c.connectionName}? Its saved password goes with it.`)) return;
+                              if (!confirm(tr("Delete {name}? Its saved password goes with it.", { name: c.connectionName }))) return;
                               run(async () => {
                                 const result = await deleteChannelManager(c.id);
                                 if (result.ok && draft?.id === c.id) setDraft(null);
                                 return result;
-                              }, `${c.connectionName} deleted.`);
+                              }, tr("{name} deleted.", { name: c.connectionName }));
                             }}
                           >
                             <CrossIcon />
@@ -323,12 +325,12 @@ export function ChannelManagerPanel({
                 save(draft);
               }}
             >
-              <Row label="Name:">
+              <Row label={tr("Name:")}>
                 <p className="rounded border border-line bg-shell px-2.5 py-1.5 text-[13px] text-ink-muted">
                   {draft.provider}
                 </p>
               </Row>
-              <Row label="Connection Name" htmlFor="cm-name">
+              <Row label={tr("Connection Name")} htmlFor="cm-name">
                 <input id="cm-name" value={draft.connectionName} maxLength={80} autoFocus
                   onChange={(e) => set({ connectionName: e.target.value })} className={field} />
               </Row>
@@ -336,31 +338,31 @@ export function ChannelManagerPanel({
                 <label className="flex items-center gap-2 text-[13px] text-ink">
                   <input type="checkbox" checked={draft.isActive} className={tickbox}
                     onChange={(e) => set({ isActive: e.target.checked })} />
-                  Is Active
+                  {tr("Is Active")}
                 </label>
               </div>
-              <Row label={vb ? `${who} Username` : `${who} Username:`} htmlFor="cm-user">
+              <Row label={vb ? tr("{who} Username", { who: who }) : tr("{who} Username:", { who: who })} htmlFor="cm-user">
                 <input id="cm-user" value={draft.username} maxLength={120} autoComplete="off"
                   onChange={(e) => set({ username: e.target.value })} className={field} />
               </Row>
-              <Row label={vb ? `${who} password` : `${who} password:`} htmlFor="cm-pass">
+              <Row label={vb ? tr("{who} password", { who: who }) : tr("{who} password:", { who: who })} htmlFor="cm-pass">
                 <input id="cm-pass" type="password" value={draft.password} maxLength={200}
                   autoComplete="new-password"
-                  placeholder={draft.hasPassword ? "Saved" : ""}
+                  placeholder={draft.hasPassword ? tr("Saved") : ""}
                   onChange={(e) => set({ password: e.target.value })} className={field} />
               </Row>
               {vb && (
-                <Row label="Requestor ID" htmlFor="cm-req">
+                <Row label={tr("Requestor ID")} htmlFor="cm-req">
                   <input id="cm-req" value={draft.requestorId} maxLength={60}
                     onChange={(e) => set({ requestorId: e.target.value })} className={field} />
                 </Row>
               )}
-              <Row label={vb ? "Hotel ID" : "Hotel Code:"} htmlFor="cm-hotel">
+              <Row label={vb ? tr("Hotel ID") : tr("Hotel Code:")} htmlFor="cm-hotel">
                 <input id="cm-hotel" value={draft.hotelCode} maxLength={60}
                   onChange={(e) => set({ hotelCode: e.target.value })} className={field} />
               </Row>
               {!vb && (
-                <Row label="Region:" htmlFor="cm-region">
+                <Row label={tr("Region:")} htmlFor="cm-region">
                   <select id="cm-region" value={draft.region} onChange={(e) => set({ region: e.target.value })}
                     className={cn(field, "cursor-pointer")}>
                     <option value="" />
@@ -370,7 +372,7 @@ export function ChannelManagerPanel({
                   </select>
                 </Row>
               )}
-              <Row label="Days to sync:" htmlFor="cm-days">
+              <Row label={tr("Days to sync:")} htmlFor="cm-days">
                 <select id="cm-days" value={draft.daysToSync}
                   onChange={(e) => set({ daysToSync: Number(e.target.value) })}
                   className={cn(field, "cursor-pointer")}>
@@ -381,7 +383,7 @@ export function ChannelManagerPanel({
               </Row>
               <ConfigFileField
                 id="cm-room"
-                label={vb ? "Room CVS configuration" : "Room & Rate configuration"}
+                label={vb ? tr("Room CVS configuration") : tr("Room & Rate configuration")}
                 connectionId={draft.id}
                 which="room"
                 saved={draft.savedRoomConfig}
@@ -392,7 +394,7 @@ export function ChannelManagerPanel({
               {vb && (
                 <ConfigFileField
                   id="cm-rate"
-                  label="Rate CVS configuration"
+                  label={tr("Rate CVS configuration")}
                   connectionId={draft.id}
                   which="rate"
                   saved={draft.savedRateConfig}
@@ -406,16 +408,16 @@ export function ChannelManagerPanel({
                   <label className="flex items-center gap-2 text-[13px] text-ink">
                     <input type="checkbox" checked={draft.syncMultiOccupancy} className={tickbox}
                       onChange={(e) => set({ syncMultiOccupancy: e.target.checked })} />
-                    Sync as multi occupancy rates
+                    {tr("Sync as multi occupancy rates")}
                   </label>
                 </div>
               )}
-              <p className="text-center text-[12px] text-ink">Upload CSV Configuration to allocate Rooms and Rates</p>
+              <p className="text-center text-[12px] text-ink">{tr("Upload CSV Configuration to allocate Rooms and Rates")}</p>
               {fileError && <p role="alert" className="text-center text-[12.5px] text-rose-700">{fileError}</p>}
               <div className="flex justify-end gap-3">
-                <button type="submit" className={primary} disabled={pending}>Save</button>
+                <button type="submit" className={primary} disabled={pending}>{tr("Save")}</button>
                 <button type="button" className={secondary} onClick={() => { setFileError(null); setDraft(null); }}>
-                  Cancel
+                  {tr("Cancel")}
                 </button>
               </div>
             </form>
@@ -425,7 +427,7 @@ export function ChannelManagerPanel({
         {canEdit && !draft && free.length > 0 && (
           <div className="rounded-b-lg border-t border-line bg-shell px-4 py-4 sm:px-8">
             <Menu
-              label="Add channel"
+              label={tr("Add channel")}
               open={menuOpen}
               onOpenChange={setMenuOpen}
               triggerClassName={primary}

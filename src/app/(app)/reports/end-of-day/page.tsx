@@ -1,3 +1,4 @@
+import { getT } from "@/lib/i18n/server";
 import { format, isValid, parseISO } from "date-fns";
 import { EmptyState } from "@/components/ui";
 import { ReportFigure, ReportFigures, ReportShell } from "@/components/reports/report-shell";
@@ -6,8 +7,10 @@ import { formatMoney, formatMoneyShort } from "@/lib/money";
 import { ReportAccessError, getBusinessDate, getEndOfDayReport } from "@/lib/queries";
 import type { EndOfDayRow } from "@/lib/types";
 import { getPropertyCurrency } from "@/lib/queries";
+import { pageTitle } from "@/lib/i18n/server";
+import { msg } from "@/lib/i18n/translate";
 
-export const metadata = { title: "End of day report" };
+export const generateMetadata = pageTitle(msg("End of day report"));
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -24,6 +27,7 @@ export default async function EndOfDayReportPage({
 }: {
   searchParams: Promise<{ date?: string }>;
 }) {
+  const tr = await getT();
   const currency = await getPropertyCurrency();
   const sp = await searchParams;
   const businessDate = await getBusinessDate();
@@ -41,7 +45,7 @@ export default async function EndOfDayReportPage({
   } catch (error) {
     if (error instanceof ReportAccessError) {
       return (
-        <ReportShell title="End of day">
+        <ReportShell title={tr("End of day")}>
           <ReportNoAccess />
         </ReportShell>
       );
@@ -49,89 +53,90 @@ export default async function EndOfDayReportPage({
     throw error;
   }
 
-  const pretty = format(parseISO(date), "EEEE d MMMM yyyy");
+  const pretty = tr.date(date, "EEEE d MMMM yyyy");
 
   return (
     <ReportShell
-      title="End of day"
+      title={tr("End of day")}
       action="/reports/end-of-day"
       date={date}
     >
       {!row ? (
         <div className="rounded-lg border border-line bg-white p-4 shadow-card">
           <EmptyState
-            title="Nothing is recorded for that date"
-            hint="Pick a date the hotel has traded. The business date only exists once it has been opened."
+            title={tr("Nothing is recorded for that date")}
+            hint={tr("Pick a date the hotel has traded. The business date only exists once it has been opened.")}
           />
         </div>
       ) : (
         <>
           <ReportFigures>
             <ReportFigure
-              label="Occupancy"
+              label={tr("Occupancy")}
               value={`${row.occupancyPct}%`}
-              detail={`${row.roomsSold} of ${row.sellableRooms} rooms`}
+              detail={tr("{roomsSold} of {sellableRooms} rooms", { roomsSold: row.roomsSold, sellableRooms: row.sellableRooms })}
               emphasis
             />
             <ReportFigure
-              label="Revenue"
+              label={tr("Revenue")}
               value={formatMoneyShort(row.roomRevenueCents + row.otherRevenueCents, currency)}
-              detail={`${formatMoneyShort(row.roomRevenueCents, currency)} rooms`}
+              detail={tr("{amount} rooms", { amount: formatMoneyShort(row.roomRevenueCents, currency) })}
             />
             <ReportFigure
-              label="Collected"
+              label={tr("Collected")}
               value={formatMoneyShort(row.paymentsCents, currency)}
-              detail={`${formatMoneyShort(row.drawerCents, currency)} in cash`}
+              detail={tr("{amount} in cash", { amount: formatMoneyShort(row.drawerCents, currency) })}
             />
             <ReportFigure
-              label="Day"
-              value={row.dateStatus === "closed" ? "Closed" : "Open"}
+              label={tr("Day")}
+              value={row.dateStatus === "closed" ? tr("Closed") : tr("Open")}
               detail={
                 row.closedAt
                   ? `by ${row.closedBy ?? "somebody"} at ${format(parseISO(row.closedAt), "HH:mm")}`
-                  : "Not yet closed"
+                  : tr("Not yet closed")
               }
             />
           </ReportFigures>
 
           {row.shiftsOpen > 0 && (
             <div className="mb-4 rounded-lg border border-warn/40 bg-warn-wash px-4 py-3 text-[13px] text-warn-deep">
-              {row.shiftsOpen} cashier shift
-              {row.shiftsOpen === 1 ? " is" : "s are"} still open on this date. The
-              night audit refuses to close a day while one is, so the figures below
-              can still move.
+              {tr.plural(
+                row.shiftsOpen,
+                "{n} cashier shift is still open on this date. The night audit refuses to close a day while one is, so the figures below can still move.",
+                "{n} cashier shifts are still open on this date. The night audit refuses to close a day while one is, so the figures below can still move.",
+              )}
             </div>
           )}
 
           <div className="grid gap-4 sm:grid-cols-2">
-            <Panel title="Movements">
-              <Line label="Arrivals" value={String(row.arrivals)} />
-              <Line label="Departures" value={String(row.departures)} />
-              <Line label="In house that night" value={String(row.inHouse)} />
+            <Panel title={tr("Movements")}>
+              <Line label={tr("Arrivals")} value={String(row.arrivals)} />
+              <Line label={tr("Departures")} value={String(row.departures)} />
+              <Line label={tr("In house that night")} value={String(row.inHouse)} />
               <Line
-                label="No-shows"
+                label={tr("No-shows")}
                 value={String(row.noShows)}
                 tone={row.noShows > 0 ? "warn" : undefined}
               />
             </Panel>
 
-            <Panel title="Rooms">
-              <Line label="Rooms sold" value={String(row.roomsSold)} />
-              <Line label="Rooms sellable" value={String(row.sellableRooms)} />
-              <Line label="Occupancy" value={`${row.occupancyPct}%`} />
+            <Panel title={tr("Rooms")}>
+              <Line label={tr("Rooms sold")} value={String(row.roomsSold)} />
+              <Line label={tr("Rooms sellable")} value={String(row.sellableRooms)} />
+              <Line label={tr("Occupancy")} value={`${row.occupancyPct}%`} />
             </Panel>
 
-            <Panel title="Revenue posted">
-              <Line label="Accommodation" value={formatMoney(row.roomRevenueCents, currency)} />
-              <Line label="Everything else" value={formatMoney(row.otherRevenueCents, currency)} />
-              <Line label="Tax" value={formatMoney(row.taxCents, currency)} />
+            <Panel title={tr("Revenue posted")}>
+              <Line label={tr("Accommodation")} value={formatMoney(row.roomRevenueCents, currency)} />
+              <Line label={tr("Everything else")} value={formatMoney(row.otherRevenueCents, currency)} />
+              <Line label={tr("Tax")} value={formatMoney(row.taxCents, currency)} />
             </Panel>
 
-            <Panel title="Money taken">
-              <Line label="All methods" value={formatMoney(row.paymentsCents, currency)} />
-              <Line label="Of which cash" value={formatMoney(row.drawerCents, currency)} />
+            <Panel title={tr("Money taken")}>
+              <Line label={tr("All methods")} value={formatMoney(row.paymentsCents, currency)} />
+              <Line label={tr("Of which cash")} value={formatMoney(row.drawerCents, currency)} />
               <Line
-                label="Shifts still open"
+                label={tr("Shifts still open")}
                 value={String(row.shiftsOpen)}
                 tone={row.shiftsOpen > 0 ? "warn" : undefined}
               />

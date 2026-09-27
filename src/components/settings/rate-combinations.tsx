@@ -1,5 +1,6 @@
 "use client";
 
+import { useT } from "@/components/i18n";
 import { useState } from "react";
 import { useCurrency } from "@/components/currency";
 import { formatMoneyInput, parseMoney } from "@/lib/money";
@@ -31,7 +32,8 @@ import { saveWeekRates } from "@/lib/actions/settings";
 
 type Run = (fn: () => Promise<{ ok: boolean; error?: string }>, done: string) => void;
 
-const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+/** Monday first, as the reference's grid is; `tr.weekday` counts from Sunday. */
+const WEEKDAY_OF = [1, 2, 3, 4, 5, 6, 0];
 
 type DayDraft = {
   rate: string;
@@ -46,7 +48,7 @@ type DayDraft = {
 const EMPTY: DayDraft = { rate: "", mst: "", msa: "", mxs: "", cta: false, ctd: false, ss: false };
 
 function draftsFor(rates: WeekRate[], plan: string, type: string, season: string | null): DayDraft[] {
-  return DAYS.map((_, i) => {
+  return WEEKDAY_OF.map((_, i) => {
     const w = rates.find(
       (r) => r.ratePlanId === plan && r.roomTypeId === type && r.seasonTypeId === season && r.weekday === i + 1,
     );
@@ -92,6 +94,7 @@ export function RateCombinations({
   pending: boolean;
   run: Run;
 }) {
+  const tr = useT();
   const currency = useCurrency();
   const [season, setSeason] = useState<string | null>(null);
   const [typeIds, setTypeIds] = useState<string[]>(roomTypes.map((t) => t.id));
@@ -120,11 +123,11 @@ export function RateCombinations({
         try {
           rateCents = parseMoney(d.rate);
         } catch {
-          setNotes({ ...notes, [key(plan.id, type.id)]: `${DAYS[i]}: write the rate as a number.` });
+          setNotes({ ...notes, [key(plan.id, type.id)]: tr("{day}: write the rate as a number.", { day: tr.weekday(WEEKDAY_OF[i]) }) });
           return;
         }
         if (rateCents < 0) {
-          setNotes({ ...notes, [key(plan.id, type.id)]: `${DAYS[i]}: a rate cannot be negative.` });
+          setNotes({ ...notes, [key(plan.id, type.id)]: tr("{day}: a rate cannot be negative.", { day: tr.weekday(WEEKDAY_OF[i]) }) });
           return;
         }
       }
@@ -132,7 +135,7 @@ export function RateCombinations({
       const msa = nights(d.msa);
       const mxs = nights(d.mxs);
       if (mst === "bad" || msa === "bad" || mxs === "bad") {
-        setNotes({ ...notes, [key(plan.id, type.id)]: `${DAYS[i]}: a stay rule is a number of nights, 1 to 365.` });
+        setNotes({ ...notes, [key(plan.id, type.id)]: tr("{day}: a stay rule is a number of nights, 1 to 365.", { day: tr.weekday(WEEKDAY_OF[i]) }) });
         return;
       }
       days.push({
@@ -151,15 +154,15 @@ export function RateCombinations({
       const result = await saveWeekRates({ ratePlanId: plan.id, roomTypeId: type.id, seasonTypeId: season, days });
       if (result.ok) {
         const n = result.data.filled;
-        setNotes({ ...notes, [k]: `${n} night${n === 1 ? "" : "s"} priced` });
+        setNotes({ ...notes, [k]: tr.plural(n, "{n} night priced", "{n} nights priced") });
       }
       return result;
-    }, `${plan.name} on ${type.name} saved.`);
+    }, tr("{name} on {name2} saved.", { name: plan.name, name2: type.name }));
   }
 
   const shownTypes = roomTypes.filter((t) => typeIds.includes(t.id));
   const shownPlans = ratePlans.filter((p) => planIds.includes(p.id));
-  const policyName = (id: string | null) => cancellationPolicies.find((c) => c.id === id)?.name ?? "No policy";
+  const policyName = (id: string | null) => cancellationPolicies.find((c) => c.id === id)?.name ?? tr("No policy");
 
   function Chips({
     all,
@@ -180,16 +183,16 @@ export function RateCombinations({
           .map((a) => (
             <span key={a.id} className="flex items-center gap-1 rounded border border-line bg-shell px-1.5 py-0.5 text-[11.5px] text-ink">
               {a.name}
-              <button type="button" aria-label={`Remove ${a.name}`} className="text-ink-faint hover:text-ink"
+              <button type="button" aria-label={tr("Remove {name}", { name: a.name })} className="text-ink-faint hover:text-ink"
                 onClick={() => set(chosen.filter((c) => c !== a.id))}>
                 ×
               </button>
             </span>
           ))}
         {rest.length > 0 && (
-          <select aria-label={`Add ${l}`} value="" onChange={(e) => e.target.value && set([...chosen, e.target.value])}
+          <select aria-label={tr("Add {what}", { what: l })} value="" onChange={(e) => e.target.value && set([...chosen, e.target.value])}
             className="min-w-[4rem] flex-1 border-0 bg-transparent text-[11.5px] text-ink-muted outline-none">
-            <option value="">Add…</option>
+            <option value="">{tr("Add…")}</option>
             {rest.map((a) => (
               <option key={a.id} value={a.id}>{a.name}</option>
             ))}
@@ -201,50 +204,50 @@ export function RateCombinations({
 
   return (
     <section className="rounded border border-line bg-white p-4 shadow-card sm:p-6">
-      <h3 className="border-b border-line pb-1 text-[14px] text-ink">Filters</h3>
+      <h3 className="border-b border-line pb-1 text-[14px] text-ink">{tr("Filters")}</h3>
       <div className="mt-3 grid gap-4 md:grid-cols-[14rem_1fr_1fr]">
         <label className="block text-[11px] text-ink-muted">
-          Season
+          {tr("Season")}
           <select value={season ?? ""} onChange={(e) => setSeason(e.target.value || null)}
             className="mt-1 w-full rounded border border-line bg-white px-2 py-1.5 text-[12.5px] text-ink">
-            <option value="">Default Season</option>
+            <option value="">{tr("Default Season")}</option>
             {seasons.map((s) => (
               <option key={s.id} value={s.id}>{s.name}</option>
             ))}
           </select>
         </label>
         <div className="text-[11px] text-ink-muted">
-          Room types
+          {tr("Room types")}
           <div className="mt-1">
-            {Chips({ all: roomTypes.map((t) => ({ id: t.id, name: t.displayName ?? t.name })), chosen: typeIds, set: setTypeIds, label: "room type" })}
+            {Chips({ all: roomTypes.map((t) => ({ id: t.id, name: t.displayName ?? t.name })), chosen: typeIds, set: setTypeIds, label: tr("room type") })}
           </div>
         </div>
         <div className="text-[11px] text-ink-muted">
-          Rate Categories
+          {tr("Rate Categories")}
           <div className="mt-1">
-            {Chips({ all: ratePlans.map((p) => ({ id: p.id, name: p.name })), chosen: planIds, set: setPlanIds, label: "rate category" })}
+            {Chips({ all: ratePlans.map((p) => ({ id: p.id, name: p.name })), chosen: planIds, set: setPlanIds, label: tr("rate category") })}
           </div>
         </div>
       </div>
 
-      <h3 className="mt-6 border-b border-line pb-1 text-[14px] text-ink">Room Rate Combinations</h3>
+      <h3 className="mt-6 border-b border-line pb-1 text-[14px] text-ink">{tr("Room Rate Combinations")}</h3>
       {shownTypes.length === 0 || shownPlans.length === 0 ? (
-        <p className="mt-3 text-[12.5px] text-ink-muted">Choose at least one room type and one rate category.</p>
+        <p className="mt-3 text-[12.5px] text-ink-muted">{tr("Choose at least one room type and one rate category.")}</p>
       ) : (
         <div className="mt-2 overflow-x-auto">
           <table className="w-full min-w-[64rem] text-[11.5px]">
             <thead>
               <tr>
-                <th className="px-2 py-2 text-left align-bottom text-[12px] font-semibold text-ink">Room types</th>
-                {DAYS.map((d) => (
+                <th className="px-2 py-2 text-left align-bottom text-[12px] font-semibold text-ink">{tr("Room types")}</th>
+                {WEEKDAY_OF.map((d) => (
                   <th key={d} className="px-1 py-2 text-center font-normal text-ink-muted">
-                    <span className="block text-[12px] font-semibold text-ink">{d}</span>
-                    <span className="block">Rate</span>
-                    <span className="block text-[9.5px]">MST MSA MXS</span>
-                    <span className="block text-[9.5px]">CTA CTD SS</span>
+                    <span className="block text-[12px] font-semibold text-ink">{tr.weekday(d)}</span>
+                    <span className="block">{tr("Rate")}</span>
+                    <span className="block text-[9.5px]">{tr("MST MSA MXS")}</span>
+                    <span className="block text-[9.5px]">{tr("CTA CTD SS")}</span>
                   </th>
                 ))}
-                <th className="w-20" aria-label="Save" />
+                <th className="w-20" aria-label={tr("Save")} />
               </tr>
             </thead>
             <tbody>
@@ -261,8 +264,9 @@ export function RateCombinations({
                         <td className="px-2 py-2">
                           <p className="text-[12.5px] font-semibold text-ink">{p.name}</p>
                           <p className="text-[11px] text-ink-muted">
-                            Sleeps {t.baseOccupancy}
-                            {t.maxOccupancy > t.baseOccupancy ? ` + ${t.maxOccupancy - t.baseOccupancy}` : ""}
+                            {t.maxOccupancy > t.baseOccupancy
+                              ? tr("Sleeps {n} + {extra}", { n: t.baseOccupancy, extra: t.maxOccupancy - t.baseOccupancy })
+                              : tr("Sleeps {n}", { n: t.baseOccupancy })}
                           </p>
                           <p className="text-[11px] text-ink-muted">
                             {policyName(p.cancellationPolicyId)}, {currency}
@@ -270,24 +274,24 @@ export function RateCombinations({
                         </td>
                         {row.map((d, i) => (
                           <td key={i} className="px-1 py-2 text-center">
-                            <input aria-label={`${p.name}, ${t.name}, ${DAYS[i]} rate`} inputMode="decimal"
+                            <input aria-label={tr("{name}, {name2}, {value} rate", { name: p.name, name2: t.name, value: tr.weekday(WEEKDAY_OF[i]) })} inputMode="decimal"
                               value={d.rate} readOnly={!canEdit}
                               onChange={(e) => setDay(p.id, t.id, i, { rate: e.target.value })}
                               className="tnum w-[4.6rem] rounded border border-line bg-white px-1 py-0.5 text-center text-[12px] text-ink outline-none focus:border-brass" />
                             <span className="mt-1 flex justify-center gap-0.5">
-                              <input aria-label={`${DAYS[i]} min stay through`} inputMode="numeric" value={d.mst} readOnly={!canEdit}
+                              <input aria-label={tr("{value} min stay through", { value: tr.weekday(WEEKDAY_OF[i]) })} inputMode="numeric" value={d.mst} readOnly={!canEdit}
                                 onChange={(e) => setDay(p.id, t.id, i, { mst: e.target.value })} className={small} />
-                              <input aria-label={`${DAYS[i]} min stay arrival`} inputMode="numeric" value={d.msa} readOnly={!canEdit}
+                              <input aria-label={tr("{value} min stay arrival", { value: tr.weekday(WEEKDAY_OF[i]) })} inputMode="numeric" value={d.msa} readOnly={!canEdit}
                                 onChange={(e) => setDay(p.id, t.id, i, { msa: e.target.value })} className={small} />
-                              <input aria-label={`${DAYS[i]} max stay`} inputMode="numeric" value={d.mxs} readOnly={!canEdit}
+                              <input aria-label={tr("{value} max stay", { value: tr.weekday(WEEKDAY_OF[i]) })} inputMode="numeric" value={d.mxs} readOnly={!canEdit}
                                 onChange={(e) => setDay(p.id, t.id, i, { mxs: e.target.value })} className={small} />
                             </span>
                             <span className="mt-1 flex justify-center gap-2.5">
-                              <input type="checkbox" aria-label={`${DAYS[i]} closed to arrival`} checked={d.cta} readOnly={!canEdit}
+                              <input type="checkbox" aria-label={tr("{value} closed to arrival", { value: tr.weekday(WEEKDAY_OF[i]) })} checked={d.cta} readOnly={!canEdit}
                                 onChange={(e) => canEdit && setDay(p.id, t.id, i, { cta: e.target.checked })} className="h-3 w-3 accent-brass" />
-                              <input type="checkbox" aria-label={`${DAYS[i]} closed to departure`} checked={d.ctd} readOnly={!canEdit}
+                              <input type="checkbox" aria-label={tr("{value} closed to departure", { value: tr.weekday(WEEKDAY_OF[i]) })} checked={d.ctd} readOnly={!canEdit}
                                 onChange={(e) => canEdit && setDay(p.id, t.id, i, { ctd: e.target.checked })} className="h-3 w-3 accent-brass" />
-                              <input type="checkbox" aria-label={`${DAYS[i]} stop sell`} checked={d.ss} readOnly={!canEdit}
+                              <input type="checkbox" aria-label={tr("{value} stop sell", { value: tr.weekday(WEEKDAY_OF[i]) })} checked={d.ss} readOnly={!canEdit}
                                 onChange={(e) => canEdit && setDay(p.id, t.id, i, { ss: e.target.checked })} className="h-3 w-3 accent-brass" />
                             </span>
                           </td>
@@ -296,7 +300,7 @@ export function RateCombinations({
                           {canEdit && (
                             <button type="button" disabled={pending} onClick={() => save(p, t)}
                               className="rounded-md bg-chrome-800 px-3 py-1.5 text-[11.5px] font-semibold text-white hover:bg-chrome-900 disabled:opacity-50">
-                              Save
+                              {tr("Save")}
                             </button>
                           )}
                           {note && <p className="mt-1 text-[10.5px] text-ink-muted">{note}</p>}

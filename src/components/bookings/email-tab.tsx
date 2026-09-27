@@ -1,10 +1,10 @@
 "use client";
 
+import { useT } from "@/components/i18n";
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { EmptyState } from "@/components/ui";
 import { logBookingEmail } from "@/lib/actions/booking-files";
-import { formatStampInProperty } from "@/lib/dates";
 import type { BookingEmail } from "@/lib/types";
 import type { EmailTemplate } from "@/lib/email-preferences";
 
@@ -46,6 +46,7 @@ export function EmailTab({
    */
   templates: EmailTemplate[];
 }) {
+  const tr = useT();
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [to, setTo] = useState(defaultTo ?? "");
@@ -82,7 +83,7 @@ export function EmailTab({
     <div className="rounded-lg border border-line bg-white shadow-card">
       <div className="flex items-center justify-between gap-3 border-b border-line px-4 py-3">
         <h2 className="font-display text-[15px] font-semibold tracking-tightest text-ink">
-          Correspondence
+          {tr("Correspondence")}
         </h2>
         {canEdit && !open && (
           <button
@@ -90,7 +91,7 @@ export function EmailTab({
             onClick={() => setOpen(true)}
             className="rounded-md bg-chrome-800 px-3 py-1.5 text-[13px] font-medium text-white transition hover:bg-chrome-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brass"
           >
-            Record an email
+            {tr("Record an email")}
           </button>
         )}
       </div>
@@ -100,7 +101,7 @@ export function EmailTab({
           {templates.length > 0 && (
             <div>
               <label htmlFor="email-template" className={label}>
-                Template
+                {tr("Template")}
               </label>
               <select
                 id="email-template"
@@ -113,7 +114,7 @@ export function EmailTab({
                 }}
                 className={field}
               >
-                <option value="">None</option>
+                <option value="">{tr("None")}</option>
                 {templates.map((t) => (
                   <option key={t.id} value={t.id}>
                     {t.title}
@@ -124,7 +125,7 @@ export function EmailTab({
           )}
           <div>
             <label htmlFor="email-to" className={label}>
-              To
+              {tr("To")}
             </label>
             <input
               id="email-to"
@@ -132,12 +133,12 @@ export function EmailTab({
               value={to}
               onChange={(e) => setTo(e.target.value)}
               className={field}
-              placeholder="guest@example.com"
+              placeholder={tr("guest@example.com")}
             />
           </div>
           <div>
             <label htmlFor="email-subject" className={label}>
-              Subject
+              {tr("Subject")}
             </label>
             <input
               id="email-subject"
@@ -145,12 +146,12 @@ export function EmailTab({
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
               className={field}
-              placeholder="Booking confirmation"
+              placeholder={tr("Booking confirmation")}
             />
           </div>
           <div>
             <label htmlFor="email-body" className={label}>
-              What was sent
+              {tr("What was sent")}
             </label>
             <textarea
               id="email-body"
@@ -180,7 +181,7 @@ export function EmailTab({
               onClick={submit}
               className="rounded-md bg-chrome-800 px-4 py-2 text-[13px] font-medium text-white transition hover:bg-chrome-900 disabled:opacity-50"
             >
-              {pending ? "Recording…" : "Record"}
+              {pending ? tr("Recording…") : tr("Record")}
             </button>
             <button
               type="button"
@@ -190,7 +191,7 @@ export function EmailTab({
               }}
               className="rounded-md border border-line px-4 py-2 text-[13px] text-ink-muted transition hover:bg-shell hover:text-ink"
             >
-              Cancel
+              {tr("Cancel")}
             </button>
           </div>
         </div>
@@ -198,10 +199,10 @@ export function EmailTab({
 
       {emails.length === 0 ? (
         <EmptyState
-          title="Nothing recorded"
+          title={tr("Nothing recorded")}
           hint={
             canEdit
-              ? "Record what you have sent this guest, so the next person knows."
+              ? tr("Record what you have sent this guest, so the next person knows.")
               : undefined
           }
         />
@@ -214,7 +215,7 @@ export function EmailTab({
                   {e.subject}
                 </span>
                 <span className="tnum shrink-0 text-xxs text-ink-faint">
-                  {formatStampInProperty(e.sentAt, timezone)}
+                  {tr.stamp(e.sentAt, timezone)}
                 </span>
               </div>
               <div className="mt-0.5 truncate text-xxs text-ink-muted">

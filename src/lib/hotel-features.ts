@@ -1,3 +1,4 @@
+import { msg } from "@/lib/i18n/translate";
 /**
  * Settings -> System Settings -> Hotel Features (0076), in the client's
  * reference's order and wording, down to its mixed casing ("Enable room rate
@@ -27,76 +28,76 @@
  * away.
  */
 export const HOTEL_FEATURES = [
-  { id: "housekeeping", label: "Enable Housekeeping Feature", default: true, wired: true },
+  { id: "housekeeping", label: msg("Enable Housekeeping Feature"), default: true, wired: true },
   {
     id: "housekeeping_status_modification",
-    label: "Enable Housekeeping Status Modification Feature",
+    label: msg("Enable Housekeeping Status Modification Feature"),
     default: true,
     wired: true,
   },
   {
     id: "room_rate_combination_modification",
-    label: "Enable room rate combination modification",
+    label: msg("Enable room rate combination modification"),
     default: false,
     wired: false,
   },
-  { id: "sales_channels", label: "Enable SalesChannels Feature", default: true, wired: false },
-  { id: "group_booking", label: "Enable Group Booking Feature", default: true, wired: true },
+  { id: "sales_channels", label: msg("Enable SalesChannels Feature"), default: true, wired: false },
+  { id: "group_booking", label: msg("Enable Group Booking Feature"), default: true, wired: true },
   {
     id: "checkin_confirmation_mode",
-    label: "Use Checkin With Confirmation Mode",
+    label: msg("Use Checkin With Confirmation Mode"),
     default: false,
     wired: false,
   },
   {
     id: "payments_export_line_per_payment",
-    label: "Show line-per-payment in Payments Report Export",
+    label: msg("Show line-per-payment in Payments Report Export"),
     default: true,
     wired: false,
   },
   {
     id: "accounting_categories",
-    label: "Enable Accounting Categories Feature",
+    label: msg("Enable Accounting Categories Feature"),
     default: true,
     wired: false,
   },
-  { id: "accounting_report", label: "Enable Accounting Report", default: true, wired: true },
-  { id: "invoice_date_changes", label: "Allow changes to invoice date", default: true, wired: false },
+  { id: "accounting_report", label: msg("Enable Accounting Report"), default: true, wired: true },
+  { id: "invoice_date_changes", label: msg("Allow changes to invoice date"), default: true, wired: false },
   {
     id: "invoice_number_changes",
-    label: "Allow changes to invoice number",
+    label: msg("Allow changes to invoice number"),
     default: true,
     wired: false,
   },
-  { id: "payment_edit", label: "Allow 'Edit' action for payments", default: true, wired: false },
+  { id: "payment_edit", label: msg("Allow 'Edit' action for payments"), default: true, wired: false },
   {
     id: "foreign_currency_invoices",
-    label: "Enable Foreign Currency Invoices",
+    label: msg("Enable Foreign Currency Invoices"),
     default: false,
     wired: false,
   },
   {
     id: "new_extra_in_booking",
-    label: "New Extra through booking process allowed",
+    label: msg("New Extra through booking process allowed"),
     default: true,
     wired: false,
   },
-  { id: "multi_room_inventory_table", label: "Multi-room inventory table", default: true, wired: false },
-  { id: "payment_terminal", label: "Show Payment Terminal", default: false, wired: false },
+  { id: "multi_room_inventory_table", label: msg("Multi-room inventory table"), default: true, wired: false },
+  { id: "payment_terminal", label: msg("Show Payment Terminal"), default: false, wired: false },
   {
     id: "three_column_dashboard",
-    label: "Enable three-column dashboard view without Statistics",
+    label: msg("Enable three-column dashboard view without Statistics"),
     default: false,
     wired: false,
   },
   {
     id: "room_rates_with_hotel_data",
-    label: "Return room rates with hotel data",
+    label: msg("Return room rates with hotel data"),
     default: true,
     wired: false,
   },
-  { id: "travia_customer_lookup", label: "Enable Travia customer lookup", default: false, wired: false },
-  { id: "optimize_customer_search", label: "Optimize Customer Search", default: false, wired: false },
+  { id: "travia_customer_lookup", label: msg("Enable Travia customer lookup"), default: false, wired: false },
+  { id: "optimize_customer_search", label: msg("Optimize Customer Search"), default: false, wired: false },
 ] as const;
 
 export type HotelFeatureId = (typeof HOTEL_FEATURES)[number]["id"];

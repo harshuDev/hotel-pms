@@ -1,5 +1,6 @@
 "use client";
 
+import { useT } from "@/components/i18n";
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { addDays, differenceInCalendarDays, format, parseISO } from "date-fns";
@@ -68,6 +69,7 @@ export function NewBookingForm({
   /** The room type whose row was clicked. */
   initialRoomTypeId?: string;
 }) {
+  const tr = useT();
   const currency = useCurrency();
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -283,22 +285,22 @@ export function NewBookingForm({
     setBlock(null);
 
     if (nights < 1) {
-      setError("The departure date must be after the arrival date.");
+      setError(tr("The departure date must be after the arrival date."));
       return;
     }
     if (lines.length === 0) {
-      setError("Add at least one room to the booking.");
+      setError(tr("Add at least one room to the booking."));
       return;
     }
     for (const line of lines) {
-      const name = typeById.get(line.roomTypeId)?.name ?? "this room";
+      const name = typeById.get(line.roomTypeId)?.name ?? tr("this room");
       if (rateIsNonsense(line)) {
-        setError(`The rate for ${name} is not an amount. Try 120 or 120.50.`);
+        setError(tr("The rate for {name} is not an amount. Try 120 or 120.50.", { name: name }));
         return;
       }
       if (rateCents(line) === null && !ratePlanId) {
         setError(
-          `Enter a nightly rate for ${name}, or pick a rate plan that has one loaded.`,
+          tr("Enter a nightly rate for {name}, or pick a rate plan that has one loaded.", { name: name }),
         );
         return;
       }
@@ -311,14 +313,14 @@ export function NewBookingForm({
       if (named === "") {
         setError(
           newGuest.kind === "company"
-            ? "Enter the company name."
-            : "Enter the guest's name.",
+            ? tr("Enter the company name.")
+            : tr("Enter the guest's name."),
         );
         return;
       }
     }
     if (!channelId) {
-      setError("Pick where the booking came from.");
+      setError(tr("Pick where the booking came from."));
       return;
     }
 
@@ -388,18 +390,21 @@ export function NewBookingForm({
     return (
       <div className="rounded-lg border border-line bg-white p-8 text-center shadow-card">
         <p className="font-display text-2xl font-semibold tracking-tightest text-ink">
-          Booking {taken.reference} taken
+          {tr("Booking {reference} taken", { reference: taken.reference })}
         </p>
         <p className="mx-auto mt-2 max-w-md text-[13px] leading-relaxed text-ink-muted">
-          {nights} night{nights === 1 ? "" : "s"} from{" "}
-          {format(parseISO(checkIn), "d MMM")}, {lines.reduce((s, l) => s + l.quantity, 0)}{" "}
-          room{lines.reduce((s, l) => s + l.quantity, 0) === 1 ? "" : "s"}. No room
-          has been assigned yet — that happens at check-in.
+          {tr("{nights} from {date}, {rooms}. No room has been assigned yet — that happens at check-in.", {
+            nights: tr.plural(nights, "{n} night", "{n} nights"),
+            date: tr.date(checkIn, "d MMM"),
+            rooms: tr.plural(lines.reduce((s, l) => s + l.quantity, 0), "{n} room", "{n} rooms"),
+          })}
         </p>
         {taken.promotionName && (
           <p className="mx-auto mt-3 max-w-md rounded-md bg-emerald-50 px-3 py-2.5 text-[13px] leading-relaxed text-emerald-800">
-            <span className="font-medium">{taken.promotionName}</span> applied,
-            taking {formatMoney(taken.discountCents, currency)} off the stay.
+            {tr("{offer} applied, taking {amount} off the stay.", {
+              offer: taken.promotionName,
+              amount: formatMoney(taken.discountCents, currency),
+            })}
           </p>
         )}
         <div className="mt-5 flex justify-center gap-2">
@@ -407,13 +412,13 @@ export function NewBookingForm({
             href={`/bookings/${taken.bookingId}`}
             className="rounded-md bg-chrome-800 px-5 py-2 text-[13px] font-medium text-white hover:bg-chrome-900"
           >
-            Open the booking
+            {tr("Open the booking")}
           </a>
           <a
             href="/bookings"
             className="rounded-md border border-line px-5 py-2 text-[13px] text-ink-muted hover:bg-shell hover:text-ink"
           >
-            See all bookings
+            {tr("See all bookings")}
           </a>
           <button
             onClick={() => {
@@ -437,7 +442,7 @@ export function NewBookingForm({
             }}
             className="rounded-md border border-line px-5 py-2 text-[13px] text-ink-muted hover:bg-shell hover:text-ink"
           >
-            Take another
+            {tr("Take another")}
           </button>
         </div>
       </div>
@@ -449,12 +454,12 @@ export function NewBookingForm({
       {/* Stay ---------------------------------------------------------- */}
       <section className="rounded-lg border border-chrome-700 bg-chrome-800 p-5 shadow-card">
         <h2 className="mb-4 font-display text-[15px] font-semibold tracking-tightest text-white">
-          Stay
+          {tr("Stay")}
         </h2>
         <div className="grid gap-4 sm:grid-cols-4">
           <div>
             <label htmlFor="check-in" className={labelDark}>
-              Arrival
+              {tr("Arrival")}
             </label>
             <input
               id="check-in"
@@ -473,7 +478,7 @@ export function NewBookingForm({
           </div>
           <div>
             <label htmlFor="check-out" className={labelDark}>
-              Departure
+              {tr("Departure")}
             </label>
             <input
               id="check-out"
@@ -486,7 +491,7 @@ export function NewBookingForm({
           </div>
           <div>
             <label htmlFor="adults" className={labelDark}>
-              Adults
+              {tr("Adults")}
             </label>
             <input
               id="adults"
@@ -499,7 +504,7 @@ export function NewBookingForm({
           </div>
           <div>
             <label htmlFor="children" className={labelDark}>
-              Children
+              {tr("Children")}
             </label>
             <input
               id="children"
@@ -513,8 +518,12 @@ export function NewBookingForm({
         </div>
         <p className="mt-3 text-xs text-white/60">
           {nights > 0
-            ? `${nights} night${nights === 1 ? "" : "s"}, ${format(parseISO(checkIn), "EEE d MMM")} to ${format(parseISO(checkOut), "EEE d MMM")}`
-            : "Pick a departure date after the arrival date."}
+            ? tr("{nights}, {from} to {to}", {
+                nights: tr.plural(nights, "{n} night", "{n} nights"),
+                from: tr.date(checkIn, "EEE d MMM"),
+                to: tr.date(checkOut, "EEE d MMM"),
+              })
+            : tr("Pick a departure date after the arrival date.")}
         </p>
       </section>
 
@@ -522,7 +531,7 @@ export function NewBookingForm({
       <section className="rounded-lg border border-line bg-white p-5 shadow-card">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="font-display text-[15px] font-semibold tracking-tightest text-ink">
-            Rooms
+            {tr("Rooms")}
           </h2>
           <button
             type="button"
@@ -530,7 +539,7 @@ export function NewBookingForm({
             disabled={types.length === 0}
             className="rounded-md border border-line px-3 py-1.5 text-[13px] text-ink-muted hover:bg-shell hover:text-ink disabled:opacity-40"
           >
-            Add a room
+            {tr("Add a room")}
           </button>
         </div>
 
@@ -543,10 +552,10 @@ export function NewBookingForm({
         {types.length === 0 ? (
           <p className="py-6 text-center text-[13px] text-ink-muted">
             {loadingTypes
-              ? "Checking what is free…"
+              ? tr("Checking what is free…")
               : nights < 1
-                ? "Pick the dates first."
-                : "No room types are set up. Add room types and rooms before taking a booking."}
+                ? tr("Pick the dates first.")
+                : tr("No room types are set up. Add room types and rooms before taking a booking.")}
           </p>
         ) : (
           <>
@@ -565,7 +574,7 @@ export function NewBookingForm({
                           : "bg-shell text-ink-muted",
                     )}
                   >
-                    {t.name}: {left} free of {t.totalRooms}
+                    {t.name}: {tr("{left} free of {total}", { left, total: t.totalRooms })}
                   </span>
                 );
               })}
@@ -573,7 +582,7 @@ export function NewBookingForm({
 
             {lines.length === 0 ? (
               <p className="py-4 text-center text-[13px] text-ink-muted">
-                No rooms on this booking yet. Add one.
+                {tr("No rooms on this booking yet. Add one.")}
               </p>
             ) : (
               <div className="space-y-2">
@@ -589,7 +598,7 @@ export function NewBookingForm({
                       )}
                     >
                       <div>
-                        <label className={label}>Room type</label>
+                        <label className={label}>{tr("Room type")}</label>
                         <select
                           value={line.roomTypeId}
                           onChange={(e) =>
@@ -605,7 +614,7 @@ export function NewBookingForm({
                         </select>
                       </div>
                       <div>
-                        <label className={label}>Rooms</label>
+                        <label className={label}>{tr("Rooms")}</label>
                         <input
                           type="number"
                           min={1}
@@ -619,18 +628,18 @@ export function NewBookingForm({
                         />
                       </div>
                       <div>
-                        <label className={label}>Rate a night</label>
+                        <label className={label}>{tr("Rate a night")}</label>
                         <input
                           type="text"
                           inputMode="decimal"
-                          placeholder={ratePlanId ? "From the plan" : "0.00"}
+                          placeholder={ratePlanId ? tr("From the plan") : "0.00"}
                           value={line.rate}
                           onChange={(e) => setLine(line.key, { rate: e.target.value })}
                           className={cn(fieldDark, "tnum")}
                         />
                       </div>
                       <div>
-                        <label className={label}>Adults</label>
+                        <label className={label}>{tr("Adults")}</label>
                         <input
                           type="number"
                           min={1}
@@ -644,7 +653,7 @@ export function NewBookingForm({
                         />
                       </div>
                       <div>
-                        <label className={label}>Children</label>
+                        <label className={label}>{tr("Children")}</label>
                         <input
                           type="number"
                           min={0}
@@ -665,13 +674,12 @@ export function NewBookingForm({
                           }
                           className="rounded-md border border-line px-3 py-2 text-[13px] text-ink-muted hover:bg-shell hover:text-ink"
                         >
-                          Remove
+                          {tr("Remove")}
                         </button>
                       </div>
                       {over && (
                         <p className="text-xs text-rose-700 sm:col-span-6">
-                          Only {Math.max(left, 0)} free for these dates. Reduce the
-                          count, change the dates, or tick overbook below.
+                          {tr("Only {n} free for these dates. Reduce the count, change the dates, or tick overbook below.", { n: Math.max(left, 0) })}
                         </p>
                       )}
                     </div>
@@ -687,7 +695,7 @@ export function NewBookingForm({
       {/* Guest --------------------------------------------------------- */}
       <section className="rounded-lg border border-line bg-white p-5 shadow-card">
         <h2 className="mb-4 font-display text-[15px] font-semibold tracking-tightest text-ink">
-          Guest
+          {tr("Guest")}
         </h2>
 
         {guest.mode === "existing" ? (
@@ -701,20 +709,20 @@ export function NewBookingForm({
               }}
               className="text-[13px] text-ink-muted underline-offset-2 hover:text-ink hover:underline"
             >
-              Change
+              {tr("Change")}
             </button>
           </div>
         ) : (
           <>
             <div className="mb-4">
               <label htmlFor="guest-search" className={label}>
-                Find an existing guest
+                {tr("Find an existing guest")}
               </label>
               <input
                 id="guest-search"
                 type="search"
                 value={query}
-                placeholder="Name, email, phone or customer number"
+                placeholder={tr("Name, email, phone or customer number")}
                 onChange={(e) => setQuery(e.target.value)}
                 className={field}
               />
@@ -739,8 +747,7 @@ export function NewBookingForm({
               )}
               {query.trim().length >= 2 && matches.length === 0 && (
                 <p className="mt-1.5 text-xs text-ink-faint">
-                  Nobody found. Enter the guest below and they will be created
-                  with the booking.
+                  {tr("Nobody found. Enter the guest below and they will be created with the booking.")}
                 </p>
               )}
             </div>
@@ -748,7 +755,7 @@ export function NewBookingForm({
             <div className="grid gap-4 sm:grid-cols-3">
               <div>
                 <label htmlFor="guest-kind" className={label}>
-                  Booking for
+                  {tr("Booking for")}
                 </label>
                 <select
                   id="guest-kind"
@@ -761,14 +768,14 @@ export function NewBookingForm({
                   }
                   className={field}
                 >
-                  <option value="personal">A person</option>
-                  <option value="company">A company</option>
+                  <option value="personal">{tr("A person")}</option>
+                  <option value="company">{tr("A company")}</option>
                 </select>
               </div>
               {newGuest.kind === "company" ? (
                 <div className="sm:col-span-2">
                   <label htmlFor="company" className={label}>
-                    Company name
+                    {tr("Company name")}
                   </label>
                   <input
                     id="company"
@@ -783,7 +790,7 @@ export function NewBookingForm({
                 <>
                   <div>
                     <label htmlFor="first-name" className={label}>
-                      First name
+                      {tr("First name")}
                     </label>
                     <input
                       id="first-name"
@@ -796,7 +803,7 @@ export function NewBookingForm({
                   </div>
                   <div>
                     <label htmlFor="last-name" className={label}>
-                      Last name
+                      {tr("Last name")}
                     </label>
                     <input
                       id="last-name"
@@ -811,7 +818,7 @@ export function NewBookingForm({
               )}
               <div>
                 <label htmlFor="email" className={label}>
-                  Email
+                  {tr("Email")}
                 </label>
                 <input
                   id="email"
@@ -825,7 +832,7 @@ export function NewBookingForm({
               </div>
               <div>
                 <label htmlFor="phone" className={label}>
-                  Phone
+                  {tr("Phone")}
                 </label>
                 <input
                   id="phone"
@@ -845,12 +852,12 @@ export function NewBookingForm({
       {/* Source and terms ---------------------------------------------- */}
       <section className="rounded-lg border border-line bg-white p-5 shadow-card">
         <h2 className="mb-4 font-display text-[15px] font-semibold tracking-tightest text-ink">
-          Source and terms
+          {tr("Source and terms")}
         </h2>
         <div className="grid gap-4 sm:grid-cols-4">
           <div>
             <label htmlFor="rate-plan" className={label}>
-              Rate plan
+              {tr("Rate plan")}
             </label>
             <select
               id="rate-plan"
@@ -858,7 +865,7 @@ export function NewBookingForm({
               onChange={(e) => setRatePlanId(e.target.value)}
               className={field}
             >
-              <option value="">No plan — type the rate</option>
+              <option value="">{tr("No plan — type the rate")}</option>
               {ratePlans.map((p) => (
                 <option key={p.id} value={p.id}>
                   {p.name}
@@ -868,7 +875,7 @@ export function NewBookingForm({
           </div>
           <div>
             <label htmlFor="channel" className={label}>
-              Came from
+              {tr("Came from")}
             </label>
             <select
               id="channel"
@@ -876,7 +883,7 @@ export function NewBookingForm({
               onChange={(e) => setChannelId(e.target.value)}
               className={field}
             >
-              {channels.length === 0 && <option value="">No sources set up</option>}
+              {channels.length === 0 && <option value="">{tr("No sources set up")}</option>}
               {channels.map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.name}
@@ -886,7 +893,7 @@ export function NewBookingForm({
           </div>
           <div>
             <label htmlFor="status" className={label}>
-              Status
+              {tr("Status")}
             </label>
             <select
               id="status"
@@ -896,13 +903,13 @@ export function NewBookingForm({
               }
               className={field}
             >
-              <option value="confirmed">Confirmed</option>
-              <option value="pending">Pending</option>
+              <option value="confirmed">{tr("Confirmed")}</option>
+              <option value="pending">{tr("Pending")}</option>
             </select>
           </div>
           <div>
             <label htmlFor="settlement" className={label}>
-              Settlement
+              {tr("Settlement")}
             </label>
             <select
               id="settlement"
@@ -910,14 +917,14 @@ export function NewBookingForm({
               onChange={(e) => setSettlement(e.target.value as Settlement)}
               className={field}
             >
-              <option value="at_property">Pays at the property</option>
-              <option value="prepaid_to_channel">Prepaid to the channel</option>
-              <option value="virtual_card">Virtual card</option>
+              <option value="at_property">{tr("Pays at the property")}</option>
+              <option value="prepaid_to_channel">{tr("Prepaid to the channel")}</option>
+              <option value="virtual_card">{tr("Virtual card")}</option>
             </select>
           </div>
           <div>
             <label htmlFor="tax" className={label}>
-              Tax rate
+              {tr("Tax rate")}
             </label>
             <select
               id="tax"
@@ -925,7 +932,7 @@ export function NewBookingForm({
               onChange={(e) => setTaxRateId(e.target.value)}
               className={field}
             >
-              <option value="">No tax</option>
+              <option value="">{tr("No tax")}</option>
               {taxRates.map((t) => (
                 <option key={t.id} value={t.id}>
                   {t.name}
@@ -940,49 +947,49 @@ export function NewBookingForm({
               and deliberately stays that way. Read one as the other.
             */}
             <label htmlFor="promo" className={label}>
-              Offer code
+              {tr("Offer code")}
             </label>
             <input
               id="promo"
               value={promotionCode}
               onChange={(e) => setPromotionCode(e.target.value.toUpperCase())}
-              placeholder="Optional"
+              placeholder={tr("Optional")}
               className={cn(field, "uppercase")}
             />
           </div>
           <div>
             <label htmlFor="external" className={label}>
-              The channel&apos;s own reference
+              {tr("The channel's own reference")}
             </label>
             <input
               id="external"
               value={externalReference}
               onChange={(e) => setExternalReference(e.target.value)}
-              placeholder="Optional"
+              placeholder={tr("Optional")}
               className={field}
             />
           </div>
           <div className="sm:col-span-2">
             <label htmlFor="guest-notes" className={label}>
-              Notes for the guest
+              {tr("Notes for the guest")}
             </label>
             <input
               id="guest-notes"
               value={guestNotes}
               onChange={(e) => setGuestNotes(e.target.value)}
-              placeholder="Optional"
+              placeholder={tr("Optional")}
               className={field}
             />
           </div>
           <div className="sm:col-span-4">
             <label htmlFor="internal-notes" className={label}>
-              Notes for staff
+              {tr("Notes for staff")}
             </label>
             <input
               id="internal-notes"
               value={internalNotes}
               onChange={(e) => setInternalNotes(e.target.value)}
-              placeholder="Optional — the guest never sees these"
+              placeholder={tr("Optional — the guest never sees these")}
               className={field}
             />
           </div>
@@ -1005,7 +1012,7 @@ export function NewBookingForm({
               className="mt-0.5"
             />
             <span className="text-[13px] leading-relaxed text-warn-deep">
-              Take this booking against the restriction above.
+              {tr("Take this booking against the restriction above.")}
             </span>
           </label>
         )}
@@ -1018,7 +1025,7 @@ export function NewBookingForm({
               className="mt-0.5"
             />
             <span className="text-[13px] leading-relaxed text-warn-deep">
-              Take this booking anyway, overbooking the house.
+              {tr("Take this booking anyway, overbooking the house.")}
             </span>
           </label>
         )}
@@ -1029,7 +1036,7 @@ export function NewBookingForm({
             disabled={pending}
             className="rounded-md bg-chrome-800 px-6 py-2.5 text-[13px] font-medium text-white hover:bg-chrome-900 disabled:opacity-50"
           >
-            {pending ? "Taking the booking…" : "Take the booking"}
+            {pending ? tr("Taking the booking…") : tr("Take the booking")}
           </button>
         </div>
       </section>

@@ -1,11 +1,13 @@
 "use client";
 
+import { useT } from "@/components/i18n";
 import { FormEvent, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
 export default function LoginPage() {
+  const tr = useT();
   const router = useRouter();
 
   const [email, setEmail] = useState("");
@@ -43,10 +45,10 @@ export default function LoginPage() {
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
           <p className="text-xxs font-semibold uppercase tracking-[0.18em] text-brass">
-            Hotel Operations
+            {tr("Hotel Operations")}
           </p>
           <h1 className="mt-3 font-display text-[28px] font-semibold tracking-tightest text-ink">
-            The Grand Hotel
+            {tr("The Grand Hotel")}
           </h1>
         </div>
 
@@ -57,7 +59,7 @@ export default function LoginPage() {
                 htmlFor="email"
                 className="mb-1.5 block text-xs font-medium text-ink"
               >
-                Email
+                {tr("Email")}
               </label>
               <input
                 id="email"
@@ -68,7 +70,7 @@ export default function LoginPage() {
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
                 className="w-full rounded-md border border-line bg-white px-3 py-2.5 text-sm text-ink outline-none transition focus:border-brass focus:ring-2 focus:ring-brass/20"
-                placeholder="you@example.com"
+                placeholder={tr("you@example.com")}
               />
             </div>
 
@@ -78,13 +80,13 @@ export default function LoginPage() {
                   htmlFor="password"
                   className="block text-xs font-medium text-ink"
                 >
-                  Password
+                  {tr("Password")}
                 </label>
                 <Link
                   href="/forgot-password"
                   className="text-xs text-ink-muted underline-offset-2 transition hover:text-ink hover:underline"
                 >
-                  Forgot password?
+                  {tr("Forgot password?")}
                 </Link>
               </div>
               <input
@@ -96,7 +98,7 @@ export default function LoginPage() {
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
                 className="w-full rounded-md border border-line bg-white px-3 py-2.5 text-sm text-ink outline-none transition focus:border-brass focus:ring-2 focus:ring-brass/20"
-                placeholder="Enter your password"
+                placeholder={tr("Enter your password")}
               />
             </div>
 
@@ -114,13 +116,13 @@ export default function LoginPage() {
               disabled={loading}
               className="w-full rounded-md bg-ink px-4 py-2.5 text-sm font-medium text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {loading ? "Signing in..." : "Sign in"}
+              {loading ? tr("Signing in...") : tr("Sign in")}
             </button>
           </form>
         </section>
 
         <p className="mt-5 text-center text-xxs text-ink-faint">
-          Secure property access
+          {tr("Secure property access")}
         </p>
       </div>
     </main>

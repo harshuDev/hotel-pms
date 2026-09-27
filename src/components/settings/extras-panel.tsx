@@ -1,5 +1,7 @@
 "use client";
 
+import { useT } from "@/components/i18n";
+import { msg } from "@/lib/i18n/translate";
 import { Fragment, useMemo, useState } from "react";
 import { cn } from "@/components/ui";
 import { formatMoney, formatMoneyInput } from "@/lib/money";
@@ -85,10 +87,11 @@ function MergeIcon() {
 }
 
 function MealIcon() {
+  const tr = useT();
   return (
     <svg viewBox="0 0 24 24" className="h-[15px] w-[15px]" fill="none" stroke="currentColor"
       strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" role="img"
-      aria-label="Meal">
+      aria-label={tr("Meal")}>
       <path d="M7 3v8M5 3v5a2 2 0 0 0 4 0V3M7 11v10" />
       <path d="M16 21V3c-2 1.5-3 4-3 7v3h3" />
     </svg>
@@ -118,6 +121,7 @@ export function ExtrasPanel({
   pending: boolean;
   run: Run;
 }) {
+  const tr = useT();
   const currency = useCurrency();
   const { categories, extras } = catalog;
 
@@ -146,7 +150,7 @@ export function ExtrasPanel({
       });
       if (result.ok) setCat(null);
       return result;
-    }, draft.id ? "Extra category saved." : "Extra category added.");
+    }, draft.id ? tr("Extra category saved.") : tr("Extra category added."));
   }
 
   function categoryEditor() {
@@ -156,7 +160,7 @@ export function ExtrasPanel({
         <td className="px-0 py-2.5 pr-3">
           <input
             autoFocus
-            aria-label="Category title"
+            aria-label={tr("Category title")}
             value={cat.title}
             onChange={(e) => setCat({ ...cat, title: e.target.value })}
             onKeyDown={(e) => {
@@ -168,12 +172,12 @@ export function ExtrasPanel({
         </td>
         <td className="py-2.5 pr-3">
           <select
-            aria-label="Category taxes"
+            aria-label={tr("Category taxes")}
             value={cat.taxRateId}
             onChange={(e) => setCat({ ...cat, taxRateId: e.target.value })}
             className={field}
           >
-            <option value="">No tax</option>
+            <option value="">{tr("No tax")}</option>
             {taxOptions(cat.taxRateId).map((t) => (
               <option key={t.id} value={t.id}>
                 {t.name}
@@ -183,10 +187,10 @@ export function ExtrasPanel({
         </td>
         <td className="whitespace-nowrap py-2.5 text-right">
           <button type="button" onClick={() => setCat(null)} className={cn(secondary, "mr-2")}>
-            Cancel
+            {tr("Cancel")}
           </button>
           <button type="button" onClick={saveCategory} disabled={pending} className={primary}>
-            Save
+            {tr("Save")}
           </button>
         </td>
       </tr>
@@ -239,7 +243,7 @@ export function ExtrasPanel({
       });
       if (result.ok) setEx(null);
       return result;
-    }, draft.id ? "Extra saved." : "Extra added.");
+    }, draft.id ? tr("Extra saved.") : tr("Extra added."));
   }
 
   const head =
@@ -249,16 +253,16 @@ export function ExtrasPanel({
     <div className="max-w-6xl space-y-5">
       {/* Extras Categories -------------------------------------------- */}
       <h2 className="font-display text-[26px] font-semibold tracking-tightest text-ink">
-        Extras Categories
+        {tr("Extras Categories")}
       </h2>
       <div className={cn(card, "px-6 py-7 sm:px-10")}>
         <div className="overflow-x-auto">
           <table className="w-full min-w-[30rem] text-[13.5px]">
             <thead>
               <tr className="border-b-2 border-line text-left text-ink">
-                <th className="w-[48%] pb-2 font-semibold">Title</th>
-                <th className="pb-2 font-semibold">Taxes</th>
-                <th className="w-44 pb-2" aria-label="Actions" />
+                <th className="w-[48%] pb-2 font-semibold">{tr("Title")}</th>
+                <th className="pb-2 font-semibold">{tr("Taxes")}</th>
+                <th className="w-44 pb-2" aria-label={tr("Actions")} />
               </tr>
             </thead>
             <tbody>
@@ -274,8 +278,8 @@ export function ExtrasPanel({
                         <span className="flex justify-end gap-1">
                           <button
                             type="button"
-                            title="Edit"
-                            aria-label={`Edit ${c.title}`}
+                            title={tr("Edit")}
+                            aria-label={tr("Edit {name}", { name: c.title })}
                             onClick={() =>
                               setCat({ id: c.id, title: c.title, taxRateId: c.taxRateId ?? "" })
                             }
@@ -285,8 +289,8 @@ export function ExtrasPanel({
                           </button>
                           <button
                             type="button"
-                            title="Merge"
-                            aria-label={`Merge ${c.title}`}
+                            title={tr("Merge")}
+                            aria-label={tr("Merge {name}", { name: c.title })}
                             onClick={() => setMergingCat({ id: c.id, title: c.title })}
                             className={cn(iconButton, "text-brass")}
                           >
@@ -294,12 +298,12 @@ export function ExtrasPanel({
                           </button>
                           <button
                             type="button"
-                            title="Delete"
-                            aria-label={`Delete ${c.title}`}
+                            title={tr("Delete")}
+                            aria-label={tr("Delete {name}", { name: c.title })}
                             disabled={pending}
                             onClick={() => {
-                              if (!confirm(`Delete the category ${c.title}?`)) return;
-                              run(() => deleteExtraCategory(c.id), `${c.title} deleted.`);
+                              if (!confirm(tr("Delete the category {name}?", { name: c.title }))) return;
+                              run(() => deleteExtraCategory(c.id), tr("{name} deleted.", { name: c.title }));
                             }}
                             className={cn(iconButton, "text-lg font-semibold leading-none text-brass")}
                           >
@@ -317,7 +321,7 @@ export function ExtrasPanel({
         </div>
         {categories.length === 0 && cat === null && (
           <p className="py-4 text-[13px] text-ink-muted">
-            None yet. Add a category, then the extras in it.
+            {tr("None yet. Add a category, then the extras in it.")}
           </p>
         )}
         {canEdit && cat === null && (
@@ -326,18 +330,18 @@ export function ExtrasPanel({
             onClick={() => setCat({ id: null, title: "", taxRateId: "" })}
             className="mt-4 text-[13.5px] font-semibold text-brass hover:underline"
           >
-            + Add Extra Category
+            {tr("+ Add Extra Category")}
           </button>
         )}
       </div>
 
       {/* Extras ---------------------------------------------------------- */}
       <h2 className="pt-4 font-display text-[26px] font-semibold tracking-tightest text-ink">
-        Extras
+        {tr("Extras")}
       </h2>
       <div className={cn(card, "px-6 py-8 sm:px-10")}>
         <label className="relative block">
-          <span className="sr-only">Search extras</span>
+          <span className="sr-only">{tr("Search extras")}</span>
           <svg viewBox="0 0 24 24" className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-faint"
             fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
             <circle cx="11" cy="11" r="7" />
@@ -350,7 +354,7 @@ export function ExtrasPanel({
               setQuery(e.target.value);
               setPage(1);
             }}
-            placeholder="Search"
+            placeholder={tr("Search")}
             className={cn(field, "py-2.5 pl-9 text-[14px]")}
           />
         </label>
@@ -359,14 +363,14 @@ export function ExtrasPanel({
           <table className="w-full min-w-[46rem] text-[13.5px]">
             <thead>
               <tr className="bg-shell">
-                {["Title", "Category", "Is Meal", "Price", "Taxes", "Accounting Category"].map(
+                {[msg("Title"), msg("Category"), msg("Is Meal"), msg("Price"), msg("Taxes"), msg("Accounting Category")].map(
                   (h) => (
                     <th key={h} className={head}>
-                      <span className="block border-r border-line pr-4">{h}</span>
+                      <span className="block border-r border-line pr-4">{tr(h)}</span>
                     </th>
                   ),
                 )}
-                <th className="w-32 px-4 py-4" aria-label="Actions" />
+                <th className="w-32 px-4 py-4" aria-label={tr("Actions")} />
               </tr>
             </thead>
             <tbody>
@@ -394,8 +398,8 @@ export function ExtrasPanel({
                         <span className="flex justify-end gap-1.5">
                           <button
                             type="button"
-                            title="Edit"
-                            aria-label={`Edit ${e.title}`}
+                            title={tr("Edit")}
+                            aria-label={tr("Edit {name}", { name: e.title })}
                             onClick={() =>
                               setEx({
                                 id: e.id,
@@ -412,8 +416,8 @@ export function ExtrasPanel({
                           </button>
                           <button
                             type="button"
-                            title="Merge"
-                            aria-label={`Merge ${e.title}`}
+                            title={tr("Merge")}
+                            aria-label={tr("Merge {name}", { name: e.title })}
                             onClick={() => setMerging({ id: e.id, title: e.title })}
                             className={cn(iconButton, "border border-line text-ink")}
                           >
@@ -421,12 +425,12 @@ export function ExtrasPanel({
                           </button>
                           <button
                             type="button"
-                            title="Delete"
-                            aria-label={`Delete ${e.title}`}
+                            title={tr("Delete")}
+                            aria-label={tr("Delete {name}", { name: e.title })}
                             disabled={pending}
                             onClick={() => {
-                              if (!confirm(`Delete the extra ${e.title}?`)) return;
-                              run(() => deleteExtra(e.id), `${e.title} deleted.`);
+                              if (!confirm(tr("Delete the extra {name}?", { name: e.title }))) return;
+                              run(() => deleteExtra(e.id), tr("{name} deleted.", { name: e.title }));
                             }}
                             className={cn(iconButton, "border border-line text-ink")}
                           >
@@ -443,9 +447,9 @@ export function ExtrasPanel({
                   <td colSpan={7} className="px-4 py-6 text-center text-[13px] text-ink-muted">
                     {extras.length === 0
                       ? categories.length === 0
-                        ? "None yet. Add a category above first."
-                        : "None yet. Add the first extra."
-                      : "No extra matches that search."}
+                        ? tr("None yet. Add a category above first.")
+                        : tr("None yet. Add the first extra.")
+                      : tr("No extra matches that search.")}
                   </td>
                 </tr>
               )}
@@ -455,7 +459,7 @@ export function ExtrasPanel({
                 <tr className="bg-shell/50">
                   <td colSpan={7} className="px-4 py-3">
                     <button type="button" onClick={newExtra} className={primary}>
-                      <span aria-hidden="true" className="mr-1.5">⊕</span>Add Extra
+                      <span aria-hidden="true" className="mr-1.5">⊕</span>{tr("Add Extra")}
                     </button>
                   </td>
                 </tr>
@@ -468,7 +472,7 @@ export function ExtrasPanel({
           <div className="mt-4 flex flex-wrap items-center justify-end gap-2 text-[13px]">
             <button
               type="button"
-              aria-label="Previous page"
+              aria-label={tr("Previous page")}
               disabled={current === 1}
               onClick={() => setPage(current - 1)}
               className="h-8 w-8 rounded border border-line text-ink-muted hover:bg-shell disabled:opacity-40"
@@ -491,7 +495,7 @@ export function ExtrasPanel({
             ))}
             <button
               type="button"
-              aria-label="Next page"
+              aria-label={tr("Next page")}
               disabled={current === pages}
               onClick={() => setPage(current + 1)}
               className="h-8 w-8 rounded border border-line text-ink-muted hover:bg-shell disabled:opacity-40"
@@ -499,7 +503,7 @@ export function ExtrasPanel({
               ›
             </button>
             <select
-              aria-label="Extras per page"
+              aria-label={tr("Extras per page")}
               value={perPage}
               onChange={(e) => {
                 setPerPage(Number(e.target.value));
@@ -509,7 +513,7 @@ export function ExtrasPanel({
             >
               {PAGE_SIZES.map((n) => (
                 <option key={n} value={n}>
-                  {n} / page
+                  {tr("{n} / page", { n })}
                 </option>
               ))}
             </select>
@@ -520,11 +524,11 @@ export function ExtrasPanel({
       {ex && canEdit && (
         <div className={cn(card, "p-6 sm:p-7")}>
           <h3 className="mb-5 font-display text-[18px] font-semibold tracking-tightest text-ink">
-            {ex.id ? ex.title || "Extra" : "Add Extra"}
+            {ex.id ? ex.title || tr("Extra") : tr("Add Extra")}
           </h3>
           <div className="grid gap-4 sm:grid-cols-2">
             <label className="block text-[13px] text-ink">
-              Title
+              {tr("Title")}
               <input
                 autoFocus
                 value={ex.title}
@@ -533,7 +537,7 @@ export function ExtrasPanel({
               />
             </label>
             <label className="block text-[13px] text-ink">
-              Category
+              {tr("Category")}
               <select
                 value={ex.categoryId}
                 onChange={(e) => setEx({ ...ex, categoryId: e.target.value })}
@@ -547,7 +551,7 @@ export function ExtrasPanel({
               </select>
             </label>
             <label className="block text-[13px] text-ink">
-              Price
+              {tr("Price")}
               <input
                 inputMode="decimal"
                 value={ex.price}
@@ -557,7 +561,7 @@ export function ExtrasPanel({
               />
             </label>
             <label className="block text-[13px] text-ink">
-              Taxes
+              {tr("Taxes")}
               <select
                 value={ex.taxRateId}
                 onChange={(e) => setEx({ ...ex, taxRateId: e.target.value })}
@@ -565,8 +569,8 @@ export function ExtrasPanel({
               >
                 <option value="">
                   {taxName(categoryById.get(ex.categoryId)?.taxRateId ?? null)
-                    ? `As category (${taxName(categoryById.get(ex.categoryId)?.taxRateId ?? null)})`
-                    : "No tax"}
+                    ? tr("As category ({tax})", { tax: taxName(categoryById.get(ex.categoryId)?.taxRateId ?? null) })
+                    : tr("No tax")}
                 </option>
                 {taxOptions(ex.taxRateId).map((t) => (
                   <option key={t.id} value={t.id}>
@@ -576,7 +580,7 @@ export function ExtrasPanel({
               </select>
             </label>
             <label className="block text-[13px] text-ink">
-              Accounting Category
+              {tr("Accounting Category")}
               <select
                 value={ex.itemType}
                 onChange={(e) => setEx({ ...ex, itemType: e.target.value as ExtraItemType })}
@@ -592,10 +596,10 @@ export function ExtrasPanel({
           </div>
           <div className="mt-6 flex justify-end gap-2">
             <button type="button" onClick={() => setEx(null)} className={secondary}>
-              Cancel
+              {tr("Cancel")}
             </button>
             <button type="button" onClick={saveExtraDraft} disabled={pending} className={primary}>
-              Save
+              {tr("Save")}
             </button>
           </div>
         </div>
@@ -605,7 +609,7 @@ export function ExtrasPanel({
           key={mergingCat.id}
           source={mergingCat}
           options={categories.filter((c) => c.id !== mergingCat.id)}
-          placeholder="Choose category"
+          placeholder={tr("Choose category")}
           pending={pending}
           onClose={() => setMergingCat(null)}
           onMerge={(targetId) => {
@@ -615,7 +619,7 @@ export function ExtrasPanel({
               const result = await mergeExtraCategory({ sourceId: source.id, targetId });
               if (result.ok) setMergingCat(null);
               return result;
-            }, `${source.title} merged into ${target?.title ?? "the chosen category"}.`);
+            }, target ? tr("{name} merged into {target}.", { name: source.title, target: target.title }) : tr("{name} merged.", { name: source.title }));
           }}
         />
       )}
@@ -624,7 +628,7 @@ export function ExtrasPanel({
           key={merging.id}
           source={merging}
           options={extras.filter((e) => e.id !== merging.id)}
-          placeholder="Choose extra"
+          placeholder={tr("Choose extra")}
           pending={pending}
           onClose={() => setMerging(null)}
           onMerge={(targetId) => {
@@ -634,7 +638,7 @@ export function ExtrasPanel({
               const result = await mergeExtra({ sourceId: source.id, targetId });
               if (result.ok) setMerging(null);
               return result;
-            }, `${source.title} merged into ${target?.title ?? "the chosen extra"}.`);
+            }, target ? tr("{name} merged into {target}.", { name: source.title, target: target.title }) : tr("{name} merged.", { name: source.title }));
           }}
         />
       )}
@@ -663,6 +667,7 @@ function MergeDialog({
   onClose: () => void;
   onMerge: (targetId: string) => void;
 }) {
+  const tr = useT();
   const [query, setQuery] = useState("");
   const [targetId, setTargetId] = useState("");
   const [open, setOpen] = useState(true);
@@ -682,12 +687,12 @@ function MergeDialog({
       <div className="w-full max-w-lg rounded-lg bg-white shadow-xl">
         <div className="flex items-center justify-between border-b border-line px-6 py-4">
           <h3 id="merge-title" className="text-[16px] text-ink">
-            Merge <span className="font-semibold">{source.title}</span> to:
+            {tr("Merge {name} to:", { name: source.title })}
           </h3>
           <button
             type="button"
             onClick={onClose}
-            aria-label="Close"
+            aria-label={tr("Close")}
             className="rounded p-1 text-ink-muted hover:bg-shell hover:text-ink"
           >
             <span aria-hidden="true" className="text-lg leading-none">✕</span>
@@ -721,7 +726,7 @@ function MergeDialog({
               className="absolute inset-x-6 top-full z-10 -mt-3 max-h-64 overflow-y-auto rounded-md border border-line bg-white py-1 shadow-lg"
             >
               {shown.length === 0 ? (
-                <li className="px-3 py-2 text-[13px] text-ink-muted">Nothing matches that search.</li>
+                <li className="px-3 py-2 text-[13px] text-ink-muted">{tr("Nothing matches that search.")}</li>
               ) : (
                 shown.map((o) => (
                   <li key={o.id} role="option" aria-selected={o.id === targetId}>
@@ -752,7 +757,7 @@ function MergeDialog({
             disabled={pending}
             className={primary}
           >
-            Merge
+            {tr("Merge")}
           </button>
         </div>
       </div>

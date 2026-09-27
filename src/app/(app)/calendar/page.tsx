@@ -1,3 +1,4 @@
+import { getT } from "@/lib/i18n/server";
 import { addDays, format, isValid, parseISO, subDays } from "date-fns";
 import { formatMoney } from "@/lib/money";
 import { EmptyState } from "@/components/ui";
@@ -41,8 +42,10 @@ import {
 } from "@/lib/queries";
 import { getCalendarSettings, getHotelFeatures, getPropertyCurrency } from "@/lib/queries";
 import { housekeepingMode } from "@/lib/hotel-features";
+import { pageTitle } from "@/lib/i18n/server";
+import { msg } from "@/lib/i18n/translate";
 
-export const metadata = { title: "Calendar" };
+export const generateMetadata = pageTitle(msg("Calendar"));
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -84,6 +87,7 @@ export default async function CalendarPage({
     booking?: string;
   }>;
 }) {
+  const tr = await getT();
   const currency = await getPropertyCurrency();
   const sp = await searchParams;
   const businessDate = await getBusinessDate();
@@ -333,8 +337,8 @@ export default async function CalendarPage({
       {types.length === 0 ? (
         <div className="rounded-lg border border-line bg-white p-4 shadow-card">
           <EmptyState
-            title="No room types are set up"
-            hint="Add room types and rooms in Settings before the calendar can show anything."
+            title={tr("No room types are set up")}
+            hint={tr("Add room types and rooms in Settings before the calendar can show anything.")}
           />
         </div>
       ) : (
@@ -373,8 +377,8 @@ export default async function CalendarPage({
 
       {openBooking && bookDate && (
         <BookingDialog
-          title="Take a booking"
-          subtitle={`Arriving ${format(parseISO(bookDate), "EEEE d MMMM yyyy")}`}
+          title={tr("Take a booking")}
+          subtitle={tr("Arriving {date}", { date: tr.date(bookDate, "EEEE d MMMM yyyy") })}
           closeHref={href(from, railW)}
         >
           {/*
@@ -421,8 +425,8 @@ export default async function CalendarPage({
       */}
       {noteDate && (
         <BookingDialog
-          title="Add note"
-          subtitle={format(parseISO(noteDate), "EEEE d MMMM yyyy")}
+          title={tr("Add note")}
+          subtitle={tr.date(noteDate, "EEEE d MMMM yyyy")}
           closeHref={href(from, railW)}
         >
           <NoteForm
@@ -448,11 +452,11 @@ export default async function CalendarPage({
           title={peek.detail.reference}
           subtitle={
             peek.detail.externalReference
-              ? `${peek.detail.channelName ?? "Channel"} booking ${peek.detail.externalReference}`
+              ? tr("{channel} booking {reference}", { channel: peek.detail.channelName ?? tr("Channel"), reference: peek.detail.externalReference })
               : (peek.detail.channelName ?? peek.detail.customerName)
           }
           closeHref={href(from, railW)}
-          closeLabel="Close the booking"
+          closeLabel={tr("Close the booking")}
           side
           /*
             The three figures the reference's panel carries along its top.
@@ -464,16 +468,16 @@ export default async function CalendarPage({
           */
           meta={[
             {
-              label: "Total",
+              label: tr("Total"),
               value: formatMoney(peek.detail.chargesCents, currency),
             },
             {
-              label: "Paid",
+              label: tr("Paid"),
               value: formatMoney(peek.detail.paymentsCents, currency),
               tone: "paid" as const,
             },
             {
-              label: "Due",
+              label: tr("Due"),
               value: formatMoney(peek.detail.balanceCents, currency),
               tone: peek.detail.balanceCents > 0 ? ("due" as const) : undefined,
             },
@@ -502,7 +506,7 @@ export default async function CalendarPage({
             cancellationTerms={peek.terms}
             timezone={property.timezone}
             backHref={href(from, railW)}
-            backLabel="Back to the calendar"
+            backLabel={tr("Back to the calendar")}
             inDialog
             canEdit={
               peekStaff !== null &&
@@ -524,17 +528,16 @@ export default async function CalendarPage({
       */}
       {bookDate && !mayBook && (
         <BookingDialog
-          title="Take a booking"
-          subtitle={format(parseISO(bookDate), "EEEE d MMMM yyyy")}
+          title={tr("Take a booking")}
+          subtitle={tr.date(bookDate, "EEEE d MMMM yyyy")}
           closeHref={href(from, railW)}
         >
           <div className="rounded-lg border border-line bg-white p-8 text-center shadow-card">
             <p className="font-display text-lg font-semibold tracking-tightest text-ink">
-              Taking bookings is not available to your role
+              {tr("Taking bookings is not available to your role")}
             </p>
             <p className="mx-auto mt-2 max-w-md text-[13px] leading-relaxed text-ink-muted">
-              Front desk, manager and admin accounts can take a booking. Ask a
-              manager if you need access.
+              {tr("Front desk, manager and admin accounts can take a booking. Ask a manager if you need access.")}
             </p>
           </div>
         </BookingDialog>

@@ -1,3 +1,4 @@
+import { getT } from "@/lib/i18n/server";
 import { isValid, parseISO } from "date-fns";
 import { format, addDays } from "date-fns";
 import { PageHeader } from "@/components/ui";
@@ -8,8 +9,10 @@ import {
   getCurrentStaffUser,
   getRatesGrid,
 } from "@/lib/queries";
+import { pageTitle } from "@/lib/i18n/server";
+import { msg } from "@/lib/i18n/translate";
 
-export const metadata = { title: "Rates (All)" };
+export const generateMetadata = pageTitle(msg("Rates (All)"));
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -28,6 +31,7 @@ export default async function Page({
 }: {
   searchParams: Promise<{ from?: string }>;
 }) {
+  const tr = await getT();
   const sp = await searchParams;
   const [staff, businessDate] = await Promise.all([
     getCurrentStaffUser(),
@@ -47,7 +51,7 @@ export default async function Page({
   return (
     <div>
       <PageHeader
-        title="Rates (All)"
+        title={tr("Rates (All)")}
       />
       <RatesScreen
         cells={cells}

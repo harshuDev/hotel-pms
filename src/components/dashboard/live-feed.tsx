@@ -1,8 +1,8 @@
 "use client";
 
+import { useT } from "@/components/i18n";
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { formatDistanceToNowStrict } from "date-fns";
 import { Card, FeedDot, cn } from "@/components/ui";
 import { markActivitySeen } from "@/lib/actions/activity";
 import type { ActivityItem } from "@/lib/types";
@@ -30,6 +30,7 @@ function Emphasised({ text, terms }: { text: string; terms: string[] }) {
 }
 
 export function LiveFeed({ items }: { items: ActivityItem[] }) {
+  const tr = useT();
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   // Marked optimistically so the highlight goes at once; the server decides
@@ -51,8 +52,8 @@ export function LiveFeed({ items }: { items: ActivityItem[] }) {
 
   return (
     <Card
-      eyebrow="Activity"
-      title="What just happened"
+      eyebrow={tr("Activity")}
+      title={tr("What just happened")}
       className="h-[588px]"
       bodyClassName="overflow-y-auto"
       action={
@@ -68,7 +69,7 @@ export function LiveFeed({ items }: { items: ActivityItem[] }) {
             because somebody glanced at it. The old word promised the list
             would empty, it did not, and the button got reported as broken.
           */}
-          {pending ? "Marking…" : read || !anyUnread ? "All read" : "Mark all read"}
+          {pending ? tr("Marking…") : read || !anyUnread ? tr("All read") : tr("Mark all read")}
         </button>
       }
     >
@@ -91,10 +92,12 @@ export function LiveFeed({ items }: { items: ActivityItem[] }) {
               )}
             >
               <p className="text-[12.5px] leading-snug text-ink-muted">
-                <Emphasised text={item.summary} terms={item.emphasis} />
+                {/* The log's own sentence, translated by pattern (0106); the
+                    references and names it emphasises pass through unchanged. */}
+                <Emphasised text={tr.message(item.summary)} terms={item.emphasis} />
               </p>
               <p className="mt-0.5 text-xxs text-ink-faint">
-                {formatDistanceToNowStrict(new Date(item.createdAt))} ago
+                {tr.since(item.createdAt)}
               </p>
             </div>
           </li>

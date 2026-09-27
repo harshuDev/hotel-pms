@@ -1,5 +1,7 @@
 "use client";
 
+import { useT } from "@/components/i18n";
+import { msg } from "@/lib/i18n/translate";
 import { useMemo, useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -22,15 +24,15 @@ import type {
 } from "@/lib/types";
 import { useCurrency } from "@/components/currency";
 
-const DOW = [
-  { value: 1, label: "Mon" },
-  { value: 2, label: "Tue" },
-  { value: 3, label: "Wed" },
-  { value: 4, label: "Thu" },
-  { value: 5, label: "Fri" },
-  { value: 6, label: "Sat" },
-  { value: 0, label: "Sun" },
-];
+/** Monday first, as the grid reads; the names come from `tr.weekday()`. */
+const DOW = [1, 2, 3, 4, 5, 6, 0].map((value) => ({ value }));
+
+/** A meal as it sits inside a sentence, "includes breakfast, dinner". */
+const MEAL_IN_SENTENCE: Record<MealType, string> = {
+  breakfast: msg("breakfast"),
+  lunch: msg("lunch"),
+  dinner: msg("dinner"),
+};
 
 const label =
   "mb-1 block text-xxs font-semibold uppercase tracking-[0.1em] text-ink-faint";
@@ -61,6 +63,7 @@ export function InventoryScreen({
    */
   lockedToDefaultPlan?: boolean;
 }) {
+  const tr = useT();
   const currency = useCurrency();
   const spec = SCREENS[fieldName];
   const router = useRouter();
@@ -104,8 +107,8 @@ export function InventoryScreen({
   function show(cell: InventoryCell | undefined) {
     if (!cell) return "—";
     const raw = spec.read(cell);
-    if (spec.kind === "flag") return raw ? "Yes" : "";
-    if (raw === null) return spec.kind === "count" ? "All" : "—";
+    if (spec.kind === "flag") return raw ? tr("Yes") : "";
+    if (raw === null) return spec.kind === "count" ? tr("All") : "—";
     if (spec.kind === "money") return formatMoney(raw as number, currency);
     return String(raw);
   }
@@ -137,13 +140,13 @@ export function InventoryScreen({
       try {
         parsed = parseMoney(value);
       } catch {
-        setMessage({ ok: false, text: "That is not an amount. Try 120 or 120.50." });
+        setMessage({ ok: false, text: tr("That is not an amount. Try 120 or 120.50.") });
         return;
       }
     } else {
       const n = Number(value);
       if (!Number.isSafeInteger(n)) {
-        setMessage({ ok: false, text: "Enter a whole number, or leave it blank to clear." });
+        setMessage({ ok: false, text: tr("Enter a whole number, or leave it blank to clear.") });
         return;
       }
       parsed = n;
@@ -168,7 +171,9 @@ export function InventoryScreen({
       const n = result.data.nightsWritten;
       setMessage({
         ok: true,
-        text: `${spec.title} set on ${n} room-night${n === 1 ? "" : "s"}.`,
+        text: tr.plural(n, "{field} set on {n} room-night.", "{field} set on {n} room-nights.", {
+          field: tr(spec.title),
+        }),
       });
       router.refresh();
     });
@@ -177,9 +182,9 @@ export function InventoryScreen({
   const selectedPlan = plans.find((p) => p.id === planId) ?? null;
 
   const MEALS: { value: MealType; label: string }[] = [
-    { value: "breakfast", label: "Breakfast" },
-    { value: "lunch", label: "Lunch" },
-    { value: "dinner", label: "Dinner" },
+    { value: "breakfast", label: tr("Breakfast") },
+    { value: "lunch", label: tr("Lunch") },
+    { value: "dinner", label: tr("Dinner") },
   ];
 
   function priceMeal(
@@ -196,7 +201,7 @@ export function InventoryScreen({
       } catch {
         setMessage({
           ok: false,
-          text: "That is not an amount. Try 15 or 15.00, or clear it to make the meal worth nothing.",
+          text: tr("That is not an amount. Try 15 or 15.00, or clear it to make the meal worth nothing."),
         });
         return;
       }
@@ -216,8 +221,8 @@ export function InventoryScreen({
         ok: true,
         text:
           valueCents === null
-            ? `${label} on ${plan.name} is worth nothing again, so nothing is posted for it.`
-            : `${label} on ${plan.name} is worth ${formatMoney(valueCents, currency)}. Nights charged from the next night audit split it out as food.`,
+            ? tr("{name} on {name2} is worth nothing again, so nothing is posted for it.", { name: label, name2: plan.name })
+            : tr("{name} on {name2} is worth {amount}. Nights charged from the next night audit split it out as food.", { name: label, name2: plan.name, amount: formatMoney(valueCents, currency) }),
       });
       router.refresh();
     });
@@ -242,10 +247,11 @@ export function InventoryScreen({
         ok: true,
         text:
           next.length === 0
-            ? `${plan.name} includes no meals.`
-            : `${plan.name} includes ${next
-                .map((m) => MEALS.find((x) => x.value === m)?.label.toLowerCase())
-                .join(", ")}.`,
+            ? tr("{name} includes no meals.", { name: plan.name })
+            : tr("{name} includes {meals}.", {
+                name: plan.name,
+                meals: next.map((m) => tr(MEAL_IN_SENTENCE[m])).join(", "),
+              }),
       });
       router.refresh();
     });
@@ -262,8 +268,8 @@ export function InventoryScreen({
       setMessage({
         ok: true,
         text: isPublic
-          ? `${plan.name} is now on the guest booking page.`
-          : `${plan.name} is off the guest booking page.`,
+          ? tr("{name} is now on the guest booking page.", { name: plan.name })
+          : tr("{name} is off the guest booking page.", { name: plan.name }),
       });
       router.refresh();
     });
@@ -283,7 +289,7 @@ export function InventoryScreen({
         return;
       }
       setNewPlan(null);
-      setMessage({ ok: true, text: `Rate plan ${newPlan.name} created.` });
+      setMessage({ ok: true, text: tr("Rate plan {name} created.", { name: newPlan.name }) });
       router.refresh();
     });
   }
@@ -303,19 +309,19 @@ export function InventoryScreen({
         <div className="flex flex-wrap items-end gap-3">
           {spec.needsPlan && (
             <div className="min-w-[200px]">
-              <span className={label}>Rate plan</span>
+              <span className={label}>{tr("Rate plan")}</span>
               {plans.length === 0 ? (
-                <p className="text-[13px] text-ink-muted">None yet</p>
+                <p className="text-[13px] text-ink-muted">{tr("None yet")}</p>
               ) : lockedToDefaultPlan ? (
                 <p className="text-[13px] text-ink">
                   <span className="font-medium">
-                    {plans.find((p) => p.id === planId)?.name ?? "None"}
+                    {plans.find((p) => p.id === planId)?.name ?? tr("None")}
                   </span>
                   <Link
                     href="/inventory/rates-all"
                     className="ml-2 text-xxs text-ink-faint underline underline-offset-2 hover:text-ink"
                   >
-                    all plans
+                    {tr("all plans")}
                   </Link>
                 </p>
               ) : (
@@ -333,10 +339,10 @@ export function InventoryScreen({
                     >
                       {p.name}
                       {p.isDefault && (
-                        <span className="ml-1.5 text-xxs opacity-70">default</span>
+                        <span className="ml-1.5 text-xxs opacity-70">{tr("default")}</span>
                       )}
                       {p.isPublic && (
-                        <span className="ml-1.5 text-xxs opacity-70">published</span>
+                        <span className="ml-1.5 text-xxs opacity-70">{tr("published")}</span>
                       )}
                     </Link>
                   ))}
@@ -352,13 +358,13 @@ export function InventoryScreen({
                     className="mt-0.5"
                   />
                   <span>
-                    Sell this rate on the guest booking page.
+                    {tr("Sell this rate on the guest booking page.")}
                   </span>
                 </label>
               )}
               {selectedPlan && (
                 <div className="mt-3">
-                  <span className={label}>Includes</span>
+                  <span className={label}>{tr("Includes")}</span>
                   <div className="flex flex-col gap-2">
                     {MEALS.map((m) => {
                       const on = selectedPlan.meals.includes(m.value);
@@ -383,9 +389,9 @@ export function InventoryScreen({
                               defaultValue={
                                 value === undefined ? "" : formatMoneyInput(value)
                               }
-                              placeholder="Worth nothing"
+                              placeholder={tr("Worth nothing")}
                               disabled={pending}
-                              aria-label={`What ${m.label.toLowerCase()} on this rate is worth`}
+                              aria-label={tr("What {lowerCase} on this rate is worth", { lowerCase: m.label.toLowerCase() })}
                               onBlur={(e) =>
                                 priceMeal(selectedPlan, m.value, e.target.value)
                               }
@@ -410,13 +416,13 @@ export function InventoryScreen({
             href={href({ from: format(addDays(parseISO(from), -nights), "yyyy-MM-dd") })}
             className="rounded-md border border-line px-3 py-1.5 text-[13px] text-ink-muted hover:bg-shell hover:text-ink"
           >
-            Earlier
+            {tr("Earlier")}
           </Link>
           <Link
             href={href({ from: format(addDays(parseISO(from), nights), "yyyy-MM-dd") })}
             className="rounded-md border border-line px-3 py-1.5 text-[13px] text-ink-muted hover:bg-shell hover:text-ink"
           >
-            Later
+            {tr("Later")}
           </Link>
         </div>
       </div>
@@ -424,19 +430,19 @@ export function InventoryScreen({
       {spec.needsPlan && plans.length === 0 && (
         <div className="rounded-lg border border-line bg-white p-6 shadow-card">
           <p className="font-display text-[15px] font-semibold tracking-tightest text-ink">
-            No rate plan yet
+            {tr("No rate plan yet")}
           </p>
           {canEdit ? (
             newPlan ? (
               <div className="mt-4 flex flex-wrap items-end gap-3">
                 <div>
                   <label htmlFor="plan-code" className={label}>
-                    Code
+                    {tr("Code")}
                   </label>
                   <input
                     id="plan-code"
                     value={newPlan.code}
-                    placeholder="BAR"
+                    placeholder={tr("BAR")}
                     onChange={(e) =>
                       setNewPlan({ ...newPlan, code: e.target.value })
                     }
@@ -445,12 +451,12 @@ export function InventoryScreen({
                 </div>
                 <div>
                   <label htmlFor="plan-name" className={label}>
-                    Name
+                    {tr("Name")}
                   </label>
                   <input
                     id="plan-name"
                     value={newPlan.name}
-                    placeholder="Best available rate"
+                    placeholder={tr("Best available rate")}
                     onChange={(e) =>
                       setNewPlan({ ...newPlan, name: e.target.value })
                     }
@@ -462,13 +468,13 @@ export function InventoryScreen({
                   disabled={pending}
                   className="rounded-md bg-chrome-800 px-5 py-2 text-[13px] font-medium text-white hover:bg-chrome-900 disabled:opacity-50"
                 >
-                  Create it
+                  {tr("Create it")}
                 </button>
                 <button
                   onClick={() => setNewPlan(null)}
                   className="rounded-md border border-line px-4 py-2 text-[13px] text-ink-muted hover:bg-shell hover:text-ink"
                 >
-                  Cancel
+                  {tr("Cancel")}
                 </button>
               </div>
             ) : (
@@ -476,12 +482,12 @@ export function InventoryScreen({
                 onClick={() => setNewPlan({ code: "", name: "" })}
                 className="mt-4 rounded-md bg-chrome-800 px-5 py-2 text-[13px] font-medium text-white hover:bg-chrome-900"
               >
-                New rate plan
+                {tr("New rate plan")}
               </button>
             )
           ) : (
             <p className="mt-3 text-[13px] text-ink-faint">
-              A manager or administrator can create one.
+              {tr("A manager or administrator can create one.")}
             </p>
           )}
         </div>
@@ -491,8 +497,7 @@ export function InventoryScreen({
       <div className="rounded-lg border border-line bg-white p-4 shadow-card">
         {types.length === 0 ? (
           <p className="py-8 text-center text-[13px] text-ink-muted">
-            No room types are set up. Add room types and rooms before loading
-            rates.
+            {tr("No room types are set up. Add room types and rooms before loading rates.")}
           </p>
         ) : (
           <>
@@ -501,7 +506,7 @@ export function InventoryScreen({
                 <thead>
                   <tr>
                     <th className="sticky left-0 z-10 bg-white px-3 pb-2.5 text-left text-xxs font-semibold uppercase tracking-[0.1em] text-ink-faint">
-                      Room type
+                      {tr("Room type")}
                     </th>
                     {dates.map((d) => {
                       const day = parseISO(d);
@@ -514,7 +519,7 @@ export function InventoryScreen({
                             weekend ? "text-ink-muted" : "text-ink-faint",
                           )}
                         >
-                          <span className="block">{format(day, "EEEEE")}</span>
+                          <span className="block">{tr.date(day, "EEEEE")}</span>
                           <span className="tnum block text-[11px] font-normal">
                             {format(day, "d")}
                           </span>
@@ -548,7 +553,7 @@ export function InventoryScreen({
                             key={d}
                             title={
                               cell
-                                ? `${cell.sold} sold of ${cell.sellable} sellable`
+                                ? tr("{sold} sold of {sellable} sellable", { sold: cell.sold, sellable: cell.sellable })
                                 : undefined
                             }
                             className={cn(
@@ -566,9 +571,7 @@ export function InventoryScreen({
               </table>
             </div>
             <p className="mt-3 text-xs leading-relaxed text-ink-faint">
-              {spec.note} Rows are room types, not rooms — a property can run
-              well over a thousand rooms and this grid is the same height
-              whatever the count.
+              {tr(spec.note)} {tr("Rows are room types, not rooms — a property can run well over a thousand rooms and this grid is the same height whatever the count.")}
             </p>
           </>
         )}
@@ -578,13 +581,13 @@ export function InventoryScreen({
       {canEdit && types.length > 0 && (!spec.needsPlan || planId) && (
         <div className="rounded-lg border border-line bg-white p-5 shadow-card">
           <h2 className="mb-4 font-display text-[15px] font-semibold tracking-tightest text-ink">
-            Set {spec.title.toLowerCase()}
+            {tr(spec.setHeading)}
           </h2>
 
           <div className="grid gap-4 sm:grid-cols-4">
             <div>
               <label htmlFor="edit-from" className={label}>
-                From
+                {tr("From")}
               </label>
               <input
                 id="edit-from"
@@ -596,7 +599,7 @@ export function InventoryScreen({
             </div>
             <div>
               <label htmlFor="edit-to" className={label}>
-                To
+                {tr("To")}
               </label>
               <input
                 id="edit-to"
@@ -607,7 +610,7 @@ export function InventoryScreen({
               />
             </div>
             <div className="sm:col-span-2">
-              <span className={label}>Only on these days</span>
+              <span className={label}>{tr("Only on these days")}</span>
               <div className="flex flex-wrap gap-1">
                 {DOW.map((d) => (
                   <button
@@ -621,7 +624,7 @@ export function InventoryScreen({
                         : "border-line text-ink-muted hover:bg-shell hover:text-ink",
                     )}
                   >
-                    {d.label}
+                    {tr.weekday(d.value)}
                   </button>
                 ))}
                 {dow.length > 0 && (
@@ -630,14 +633,14 @@ export function InventoryScreen({
                     onClick={() => setDow([])}
                     className="rounded-md px-2 py-1.5 text-xs text-ink-faint underline-offset-2 hover:text-ink hover:underline"
                   >
-                    Every day
+                    {tr("Every day")}
                   </button>
                 )}
               </div>
             </div>
             <div>
               <label htmlFor="edit-value" className={label}>
-                {spec.valueLabel}
+                {tr(spec.valueLabel)}
               </label>
               {spec.kind === "flag" ? (
                 <select
@@ -646,8 +649,8 @@ export function InventoryScreen({
                   onChange={(e) => setFlag(e.target.value === "on")}
                   className={field}
                 >
-                  <option value="on">Yes</option>
-                  <option value="off">No</option>
+                  <option value="on">{tr("Yes")}</option>
+                  <option value="off">{tr("No")}</option>
                 </select>
               ) : (
                 <input
@@ -655,7 +658,7 @@ export function InventoryScreen({
                   type="text"
                   inputMode={spec.kind === "money" ? "decimal" : "numeric"}
                   value={value}
-                  placeholder={spec.kind === "money" ? "120.00" : "Blank clears"}
+                  placeholder={spec.kind === "money" ? "120.00" : tr("Blank clears")}
                   onChange={(e) => setValue(e.target.value)}
                   className={cn(field, "tnum")}
                 />
@@ -664,8 +667,8 @@ export function InventoryScreen({
             <div className="sm:col-span-3 flex items-end">
               <p className="text-xs leading-relaxed text-ink-faint">
                 {selected.length === 0
-                  ? "Tick the room types on the left to apply this to."
-                  : `${selected.length} room type${selected.length === 1 ? "" : "s"} selected.`}
+                  ? tr("Tick the room types on the left to apply this to.")
+                  : tr.plural(selected.length, "{n} room type selected.", "{n} room types selected.")}
               </p>
             </div>
           </div>
@@ -690,7 +693,7 @@ export function InventoryScreen({
               disabled={pending || selected.length === 0}
               className="rounded-md bg-chrome-800 px-6 py-2.5 text-[13px] font-medium text-white hover:bg-chrome-900 disabled:opacity-50"
             >
-              {pending ? "Applying…" : "Apply"}
+              {pending ? tr("Applying…") : tr("Apply")}
             </button>
           </div>
         </div>
@@ -698,8 +701,7 @@ export function InventoryScreen({
 
       {!canEdit && types.length > 0 && (
         <p className="rounded-lg border border-line bg-white px-5 py-4 text-[13px] leading-relaxed text-ink-muted shadow-card">
-          You can read the inventory but not change it. Rates, restrictions and
-          availability are set by managers and administrators.
+          {tr("You can read the inventory but not change it. Rates, restrictions and availability are set by managers and administrators.")}
         </p>
       )}
     </div>

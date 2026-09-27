@@ -1,5 +1,7 @@
 "use client";
 
+import { useT } from "@/components/i18n";
+import { msg } from "@/lib/i18n/translate";
 import { useEffect, useState, useTransition } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
@@ -63,7 +65,7 @@ import { EmailSetupPanel } from "@/components/settings/email-setup-panel";
 import type { Facility } from "@/lib/facilities";
 import type { ExtrasCatalog } from "@/lib/extras";
 import { SETTINGS_NAV, type SettingsTab } from "@/lib/settings-tabs";
-import { COUNTRIES } from "@/lib/countries";
+import { countriesIn } from "@/lib/countries";
 import { CURRENCIES, currencyOptionLabel } from "@/lib/currencies";
 import {
   CUSTOM_POLICY,
@@ -111,11 +113,11 @@ export type { SettingsTab } from "@/lib/settings-tabs";
 
 
 const ROLES: { value: StaffRole; label: string; note: string }[] = [
-  { value: "admin", label: "Administrator", note: "Everything, including staff" },
-  { value: "manager", label: "Manager", note: "Rates, settings, the night audit, the drawer total" },
-  { value: "front_desk", label: "Front desk", note: "Bookings, check-in and out, payments" },
-  { value: "cashier", label: "Cashier", note: "Payments and the drawer" },
-  { value: "housekeeping", label: "Housekeeping", note: "Room status, and no money at all" },
+  { value: "admin", label: msg("Administrator"), note: msg("Everything, including staff") },
+  { value: "manager", label: msg("Manager"), note: msg("Rates, settings, the night audit, the drawer total") },
+  { value: "front_desk", label: msg("Front desk"), note: msg("Bookings, check-in and out, payments") },
+  { value: "cashier", label: msg("Cashier"), note: msg("Payments and the drawer") },
+  { value: "housekeeping", label: msg("Housekeeping"), note: msg("Room status, and no money at all") },
 ];
 
 const label =
@@ -306,6 +308,7 @@ export function SettingsScreen({
   canEdit: boolean;
   isAdmin: boolean;
 }) {
+  const tr = useT();
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
@@ -315,7 +318,7 @@ export function SettingsScreen({
     startTransition(async () => {
       const result = await fn();
       if (!result.ok) {
-        setMessage({ ok: false, text: result.error ?? "That did not work." });
+        setMessage({ ok: false, text: result.error ?? tr("That did not work.") });
         return;
       }
       setMessage({ ok: true, text: done });
@@ -369,7 +372,7 @@ export function SettingsScreen({
   /* -- Hotel Policy (0068) ------------------------------------------- */
   const [policies, setPolicies] = useState<HotelPolicies>(hotelPolicies);
   const customField = (key: HotelPolicyKey) => `${key}Custom` as const;
-  const policySummary = hotelPolicySummary({
+  const policySummary = hotelPolicySummary(tr, {
     choice: (key) => policies[key],
     custom: (key) => policies[customField(key)],
     other: policies.otherPolicies,
@@ -413,8 +416,7 @@ export function SettingsScreen({
 
       {!canEdit && (
         <p className={cn(card, "text-[13px] leading-relaxed text-ink-muted")}>
-          You can read the settings but not change them. Rooms, rates and
-          sales channels are set by managers and administrators.
+          {tr("You can read the settings but not change them. Rooms, rates and sales channels are set by managers and administrators.")}
         </p>
       )}
 
@@ -427,47 +429,47 @@ export function SettingsScreen({
         */
         <div className={cn(card, "max-w-3xl p-6 sm:p-7")}>
           <h2 className="mb-6 font-display text-[26px] font-semibold tracking-tightest text-ink">
-            Hotel Details
+            {tr("Hotel Details")}
           </h2>
 
           <div className="space-y-4">
-            <DetailRow label="Property ID" htmlFor="d-id">
+            <DetailRow label={tr("Property ID")} htmlFor="d-id">
               <input id="d-id" value={property.id} readOnly className={readOnlyField} />
             </DetailRow>
-            <DetailRow label="Property slug" htmlFor="d-slug">
+            <DetailRow label={tr("Property slug")} htmlFor="d-slug">
               <input id="d-slug" value={property.slug ?? ""} readOnly className={readOnlyField} />
             </DetailRow>
-            <DetailRow label="Company Name" htmlFor="d-company">
+            <DetailRow label={tr("Company Name")} htmlFor="d-company">
               <input
                 id="d-company"
                 value={details.companyName}
-                placeholder="Company Name"
+                placeholder={tr("Company Name")}
                 disabled={!canEdit}
                 onChange={(e) => setDetails({ ...details, companyName: e.target.value })}
                 className={field}
               />
             </DetailRow>
-            <DetailRow label="Company registration id" htmlFor="d-reg">
+            <DetailRow label={tr("Company registration id")} htmlFor="d-reg">
               <input
                 id="d-reg"
                 value={details.companyRegistrationId}
-                placeholder="Company registration id"
+                placeholder={tr("Company registration id")}
                 disabled={!canEdit}
                 onChange={(e) => setDetails({ ...details, companyRegistrationId: e.target.value })}
                 className={field}
               />
             </DetailRow>
-            <DetailRow label="Property type" htmlFor="d-type">
+            <DetailRow label={tr("Property type")} htmlFor="d-type">
               <input
                 id="d-type"
                 value={details.propertyType}
-                placeholder="Property type"
+                placeholder={tr("Property type")}
                 disabled={!canEdit}
                 onChange={(e) => setDetails({ ...details, propertyType: e.target.value })}
                 className={field}
               />
             </DetailRow>
-            <DetailRow label="Country" htmlFor="d-country">
+            <DetailRow label={tr("Country")} htmlFor="d-country">
               <select
                 id="d-country"
                 value={details.country}
@@ -475,93 +477,93 @@ export function SettingsScreen({
                 onChange={(e) => setDetails({ ...details, country: e.target.value })}
                 className={field}
               >
-                <option value="">Country</option>
-                {COUNTRIES.map((c) => (
+                <option value="">{tr("Country")}</option>
+                {countriesIn(tr).map((c) => (
                   <option key={c.code} value={c.code}>
                     {c.name}
                   </option>
                 ))}
               </select>
             </DetailRow>
-            <DetailRow label="Name of your hotel" htmlFor="d-name">
+            <DetailRow label={tr("Name of your hotel")} htmlFor="d-name">
               <input
                 id="d-name"
                 value={details.name}
-                placeholder="Name of your hotel"
+                placeholder={tr("Name of your hotel")}
                 disabled={!canEdit}
                 onChange={(e) => setDetails({ ...details, name: e.target.value })}
                 className={field}
               />
             </DetailRow>
-            <DetailRow label="Address" htmlFor="d-addr1">
+            <DetailRow label={tr("Address")} htmlFor="d-addr1">
               <input
                 id="d-addr1"
                 value={details.addressLine1}
-                placeholder="Address"
+                placeholder={tr("Address")}
                 disabled={!canEdit}
                 onChange={(e) => setDetails({ ...details, addressLine1: e.target.value })}
                 className={field}
               />
             </DetailRow>
-            <DetailRow label="Address line 2" htmlFor="d-addr2">
+            <DetailRow label={tr("Address line 2")} htmlFor="d-addr2">
               <input
                 id="d-addr2"
                 value={details.addressLine2}
-                placeholder="Address line 2"
+                placeholder={tr("Address line 2")}
                 disabled={!canEdit}
                 onChange={(e) => setDetails({ ...details, addressLine2: e.target.value })}
                 className={field}
               />
             </DetailRow>
-            <DetailRow label="City / Town / Village" htmlFor="d-city">
+            <DetailRow label={tr("City / Town / Village")} htmlFor="d-city">
               <input
                 id="d-city"
                 value={details.city}
-                placeholder="City / Town / Village"
+                placeholder={tr("City / Town / Village")}
                 disabled={!canEdit}
                 onChange={(e) => setDetails({ ...details, city: e.target.value })}
                 className={field}
               />
             </DetailRow>
-            <DetailRow label="County / State / Province" htmlFor="d-region">
+            <DetailRow label={tr("County / State / Province")} htmlFor="d-region">
               <input
                 id="d-region"
                 value={details.region}
-                placeholder="County / State / Province"
+                placeholder={tr("County / State / Province")}
                 disabled={!canEdit}
                 onChange={(e) => setDetails({ ...details, region: e.target.value })}
                 className={field}
               />
             </DetailRow>
-            <DetailRow label="Postcode" htmlFor="d-post">
+            <DetailRow label={tr("Postcode")} htmlFor="d-post">
               <input
                 id="d-post"
                 value={details.postcode}
-                placeholder="Postcode"
+                placeholder={tr("Postcode")}
                 disabled={!canEdit}
                 onChange={(e) => setDetails({ ...details, postcode: e.target.value })}
                 className={field}
               />
             </DetailRow>
 
-            <h3 className="pt-3 text-[18px] text-ink">Location</h3>
-            <DetailRow label="Latitude" htmlFor="d-lat">
+            <h3 className="pt-3 text-[18px] text-ink">{tr("Location")}</h3>
+            <DetailRow label={tr("Latitude")} htmlFor="d-lat">
               <input
                 id="d-lat"
                 inputMode="decimal"
                 value={details.latitude}
-                placeholder="Latitude"
+                placeholder={tr("Latitude")}
                 disabled={!canEdit}
                 onChange={(e) => setDetails({ ...details, latitude: e.target.value })}
                 className={cn(field, "tnum")}
               />
             </DetailRow>
-            <DetailRow label="Longitude" htmlFor="d-lng">
+            <DetailRow label={tr("Longitude")} htmlFor="d-lng">
               <input
                 id="d-lng"
                 inputMode="decimal"
                 value={details.longitude}
-                placeholder="Longitude"
+                placeholder={tr("Longitude")}
                 disabled={!canEdit}
                 onChange={(e) => setDetails({ ...details, longitude: e.target.value })}
                 className={cn(field, "tnum")}
@@ -582,51 +584,51 @@ export function SettingsScreen({
               }
             />
 
-            <DetailRow label="Telephone Number" htmlFor="d-phone">
+            <DetailRow label={tr("Telephone Number")} htmlFor="d-phone">
               <input
                 id="d-phone"
                 type="tel"
                 value={details.phone}
-                placeholder="Telephone Number"
+                placeholder={tr("Telephone Number")}
                 disabled={!canEdit}
                 onChange={(e) => setDetails({ ...details, phone: e.target.value })}
                 className={field}
               />
             </DetailRow>
-            <DetailRow label="Fax Number" htmlFor="d-fax">
+            <DetailRow label={tr("Fax Number")} htmlFor="d-fax">
               <input
                 id="d-fax"
                 type="tel"
                 value={details.fax}
-                placeholder="Fax Number"
+                placeholder={tr("Fax Number")}
                 disabled={!canEdit}
                 onChange={(e) => setDetails({ ...details, fax: e.target.value })}
                 className={field}
               />
             </DetailRow>
-            <DetailRow label="Email address" htmlFor="d-email">
+            <DetailRow label={tr("Email address")} htmlFor="d-email">
               <input
                 id="d-email"
                 type="email"
                 value={details.email}
-                placeholder="Email address"
+                placeholder={tr("Email address")}
                 disabled={!canEdit}
                 onChange={(e) => setDetails({ ...details, email: e.target.value })}
                 className={field}
               />
             </DetailRow>
-            <DetailRow label="Website" htmlFor="d-web">
+            <DetailRow label={tr("Website")} htmlFor="d-web">
               <input
                 id="d-web"
                 type="url"
                 value={details.website}
-                placeholder="Website"
+                placeholder={tr("Website")}
                 disabled={!canEdit}
                 onChange={(e) => setDetails({ ...details, website: e.target.value })}
                 className={field}
               />
             </DetailRow>
-            <DetailRow label="Currency" htmlFor="d-cur">
+            <DetailRow label={tr("Currency")} htmlFor="d-cur">
               <select
                 id="d-cur"
                 value={details.currency}
@@ -645,7 +647,7 @@ export function SettingsScreen({
                 ))}
               </select>
             </DetailRow>
-            <DetailRow label="What is your timezone" htmlFor="d-tz">
+            <DetailRow label={tr("What is your timezone")} htmlFor="d-tz">
               <select
                 id="d-tz"
                 value={details.timezone}
@@ -661,14 +663,14 @@ export function SettingsScreen({
               </select>
               {browserZone && (
                 <p className="mt-1.5 text-[13px] text-ink-muted">
-                  Your current timezone is: {browserZone}.{" "}
+                  {tr("Your current timezone is: {zone}.", { zone: browserZone })}{" "}
                   {canEdit && browserZone !== details.timezone && (
                     <button
                       type="button"
                       onClick={() => setDetails({ ...details, timezone: browserZone })}
                       className="text-brass hover:underline focus-visible:underline focus-visible:outline-none"
                     >
-                      Set as hotel timezone
+                      {tr("Set as hotel timezone")}
                     </button>
                   )}
                 </p>
@@ -679,11 +681,11 @@ export function SettingsScreen({
           {canEdit && (
             <div className="mt-6 flex justify-end">
               <button
-                onClick={() => run(() => saveHotelDetails(details), "Hotel details saved.")}
+                onClick={() => run(() => saveHotelDetails(details), tr("Hotel details saved."))}
                 disabled={pending}
                 className={primary}
               >
-                Save
+                {tr("Save")}
               </button>
             </div>
           )}
@@ -702,24 +704,24 @@ export function SettingsScreen({
         */
         <div className="max-w-5xl space-y-5">
           <h2 className="font-display text-[26px] font-semibold tracking-tightest text-ink">
-            Hotel Properties
+            {tr("Hotel Properties")}
           </h2>
 
           <div className="overflow-hidden rounded-lg border border-line bg-white shadow-card">
             <h3 className="border-b border-line px-6 py-4 text-[16px] text-ink">
-              Properties list
+              {tr("Properties list")}
             </h3>
             <div className="overflow-x-auto px-6 py-6">
               <table className="w-full min-w-[34rem] text-[13.5px]">
                 <thead>
                   <tr className="bg-shell text-left text-ink">
                     <th className="w-[38%] px-4 py-4 font-normal">
-                      <span className="block border-r border-line">Property name</span>
+                      <span className="block border-r border-line">{tr("Property name")}</span>
                     </th>
                     <th className="px-4 py-4 font-normal">
-                      <span className="block border-r border-line">Address</span>
+                      <span className="block border-r border-line">{tr("Address")}</span>
                     </th>
-                    <th className="w-20 px-4 py-4" aria-label="Actions" />
+                    <th className="w-20 px-4 py-4" aria-label={tr("Actions")} />
                   </tr>
                 </thead>
                 <tbody>
@@ -741,8 +743,8 @@ export function SettingsScreen({
                         <button
                           type="button"
                           onClick={() => setEditingTimes(true)}
-                          aria-label={`Edit ${property.name}`}
-                          title="Edit"
+                          aria-label={tr("Edit {name}", { name: property.name })}
+                          title={tr("Edit")}
                           className="rounded p-1 text-ink hover:bg-shell"
                         >
                           <svg
@@ -773,7 +775,7 @@ export function SettingsScreen({
                 {property.name}
               </h3>
               <div className="space-y-4">
-                <DetailRow label="Check-in from" htmlFor="h-in">
+                <DetailRow label={tr("Check-in from")} htmlFor="h-in">
                   <input
                     id="h-in"
                     type="time"
@@ -782,7 +784,7 @@ export function SettingsScreen({
                     className={cn(field, "tnum")}
                   />
                 </DetailRow>
-                <DetailRow label="Check-out by" htmlFor="h-out">
+                <DetailRow label={tr("Check-out by")} htmlFor="h-out">
                   <input
                     id="h-out"
                     type="time"
@@ -791,7 +793,7 @@ export function SettingsScreen({
                     className={cn(field, "tnum")}
                   />
                 </DetailRow>
-                <DetailRow label="Night audit at" htmlFor="h-audit">
+                <DetailRow label={tr("Night audit at")} htmlFor="h-audit">
                   <input
                     id="h-audit"
                     type="time"
@@ -807,7 +809,7 @@ export function SettingsScreen({
                   onClick={() => setEditingTimes(false)}
                   className={secondary}
                 >
-                  Cancel
+                  {tr("Cancel")}
                 </button>
                 <button
                   type="button"
@@ -816,12 +818,12 @@ export function SettingsScreen({
                       const result = await saveHotelTimes(times);
                       if (result.ok) setEditingTimes(false);
                       return result;
-                    }, "Hotel properties saved.")
+                    }, tr("Hotel properties saved."))
                   }
                   disabled={pending}
                   className={primary}
                 >
-                  Save
+                  {tr("Save")}
                 </button>
               </div>
             </div>
@@ -838,7 +840,7 @@ export function SettingsScreen({
         */
         <div className="max-w-5xl space-y-5">
           <h2 className="font-display text-[26px] font-semibold tracking-tightest text-ink">
-            Hotel Policy
+            {tr("Hotel Policy")}
           </h2>
 
           <div className={cn(card, "px-6 py-7 sm:px-10")}>
@@ -858,8 +860,8 @@ export function SettingsScreen({
                     <div className={cn("space-y-2", section.prompt ? "mt-2" : "mt-4")}>
                       {[
                         ...section.options,
-                        { id: CUSTOM_POLICY, label: "Custom policy" },
-                        { id: OMIT_POLICY, label: "Omit this policy" },
+                        { id: CUSTOM_POLICY, label: tr("Custom policy") },
+                        { id: OMIT_POLICY, label: tr("Omit this policy") },
                       ].map((option) => (
                         <label
                           key={option.id}
@@ -882,7 +884,7 @@ export function SettingsScreen({
                     </div>
                     {choice === CUSTOM_POLICY && (
                       <textarea
-                        aria-label={`${section.title} policy`}
+                        aria-label={tr("{name} policy", { name: section.title })}
                         value={policies[custom] ?? ""}
                         disabled={!canEdit}
                         onChange={(e) =>
@@ -898,7 +900,7 @@ export function SettingsScreen({
 
               <div>
                 <h3 className="w-full border-b border-line pb-2 text-[20px] text-ink">
-                  <label htmlFor="policy-other">Other Policies</label>
+                  <label htmlFor="policy-other">{tr("Other Policies")}</label>
                 </h3>
                 <textarea
                   id="policy-other"
@@ -921,11 +923,11 @@ export function SettingsScreen({
               <div className="mt-5 flex justify-center">
                 <button
                   type="button"
-                  onClick={() => run(() => saveHotelPolicies(policies), "Hotel policy saved.")}
+                  onClick={() => run(() => saveHotelPolicies(policies), tr("Hotel policy saved."))}
                   disabled={pending}
                   className={primary}
                 >
-                  Save
+                  {tr("Save")}
                 </button>
               </div>
             )}
@@ -1252,18 +1254,18 @@ export function SettingsScreen({
       {tab === "staff" && (
         <div className={card}>
           <h2 className="mb-4 font-display text-[15px] font-semibold tracking-tightest text-ink">
-            Staff
+            {tr("Staff")}
           </h2>
 
           <table className="w-full text-[13px]">
             <thead>
               <tr className="border-b border-line text-left text-ink-faint">
-                {["Name", "Role", "", ""].map((c, i) => (
+                {[msg("Name"), msg("Role"), "", ""].map((c, i) => (
                   <th
                     key={c || i}
                     className="whitespace-nowrap px-3 pb-2.5 text-xxs font-semibold uppercase tracking-[0.1em]"
                   >
-                    {c}
+                    {c && tr(c)}
                   </th>
                 ))}
               </tr>
@@ -1277,7 +1279,7 @@ export function SettingsScreen({
                   canEdit={isAdmin}
                   pending={pending}
                   onSave={(next) =>
-                    run(() => saveStaffUser(next), `${next.fullName} saved.`)
+                    run(() => saveStaffUser(next), tr("{name} saved.", { name: next.fullName }))
                   }
                 />
               ))}
@@ -1285,9 +1287,8 @@ export function SettingsScreen({
           </table>
 
           <Note>
-            <strong className="font-medium text-ink">Adding a new login is not here.</strong>{" "}
-            A new member of staff is invited in Supabase Auth, and then
-            appears in this list.
+            <strong className="font-medium text-ink">{tr("Adding a new login is not here.")}</strong>{" "}
+            {tr("A new member of staff is invited in Supabase Auth, and then appears in this list.")}
           </Note>
         </div>
       )}
@@ -1314,6 +1315,7 @@ function StaffRow({
     isActive: boolean;
   }) => void;
 }) {
+  const tr = useT();
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState(staff.fullName);
   const [role, setRole] = useState<StaffRole>(staff.role);
@@ -1324,13 +1326,16 @@ function StaffRow({
       <tr className={cn(!staff.isActive && "opacity-55")}>
         <td className="px-3 py-2.5 font-medium text-ink">
           {staff.fullName}
-          {isMe && <span className="ml-1.5 text-xxs font-normal text-ink-faint">you</span>}
+          {isMe && <span className="ml-1.5 text-xxs font-normal text-ink-faint">{tr("you")}</span>}
         </td>
         <td className="px-3 py-2.5 text-ink-muted">
-          {ROLES.find((r) => r.value === staff.role)?.label ?? staff.role}
+          {(() => {
+            const label = ROLES.find((r) => r.value === staff.role)?.label;
+            return label ? tr(label) : staff.role;
+          })()}
         </td>
         <td className="px-3 py-2.5 text-xxs text-ink-faint">
-          {staff.isActive ? "" : "no access"}
+          {staff.isActive ? "" : tr("no access")}
         </td>
         <td className="px-3 py-2.5 text-right">
           {canEdit && (
@@ -1338,7 +1343,7 @@ function StaffRow({
               onClick={() => setEditing(true)}
               className="text-ink-muted underline-offset-2 hover:text-ink hover:underline"
             >
-              Edit
+              {tr("Edit")}
             </button>
           )}
         </td>
@@ -1353,7 +1358,7 @@ function StaffRow({
           value={name}
           onChange={(e) => setName(e.target.value)}
           className={field}
-          aria-label="Name"
+          aria-label={tr("Name")}
         />
       </td>
       <td className="px-3 py-2.5">
@@ -1361,14 +1366,17 @@ function StaffRow({
           value={role}
           onChange={(e) => setRole(e.target.value as StaffRole)}
           className={field}
-          aria-label="Role"
+          aria-label={tr("Role")}
         >
           {ROLES.map((r) => (
-            <option key={r.value} value={r.value}>{r.label}</option>
+            <option key={r.value} value={r.value}>{tr(r.label)}</option>
           ))}
         </select>
         <span className="mt-1 block text-xxs text-ink-faint">
-          {ROLES.find((r) => r.value === role)?.note}
+          {(() => {
+            const note = ROLES.find((r) => r.value === role)?.note;
+            return note ? tr(note) : null;
+          })()}
         </span>
       </td>
       <td className="px-3 py-2.5">
@@ -1378,7 +1386,7 @@ function StaffRow({
             checked={active}
             onChange={(e) => setActive(e.target.checked)}
           />
-          Has access
+          {tr("Has access")}
         </label>
       </td>
       <td className="whitespace-nowrap px-3 py-2.5 text-right">
@@ -1386,7 +1394,7 @@ function StaffRow({
           onClick={() => setEditing(false)}
           className="mr-2 text-ink-muted underline-offset-2 hover:text-ink hover:underline"
         >
-          Cancel
+          {tr("Cancel")}
         </button>
         <button
           onClick={() => {
@@ -1396,7 +1404,7 @@ function StaffRow({
           disabled={pending}
           className="font-medium text-brass underline-offset-2 hover:underline disabled:opacity-50"
         >
-          Save
+          {tr("Save")}
         </button>
       </td>
     </tr>
@@ -1415,6 +1423,7 @@ function StaffRow({
  * a reload and a bookmark all land where somebody was.
  */
 function SettingsSidebar({ tab }: { tab: SettingsTab }) {
+  const tr = useT();
   const [open, setOpen] = useState<Set<string>>(
     () =>
       new Set(
@@ -1435,7 +1444,7 @@ function SettingsSidebar({ tab }: { tab: SettingsTab }) {
 
   return (
     <aside className="shrink-0 bg-chrome-900 py-2 lg:w-60">
-      <nav aria-label="Settings">
+      <nav aria-label={tr("Settings")}>
         {SETTINGS_NAV.map((section) => {
           const expanded = open.has(section.title);
           return (

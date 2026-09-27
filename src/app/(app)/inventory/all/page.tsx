@@ -1,3 +1,4 @@
+import { getT } from "@/lib/i18n/server";
 import { isValid, parseISO } from "date-fns";
 import Link from "next/link";
 import { PageHeader, cn } from "@/components/ui";
@@ -8,8 +9,10 @@ import {
   getInventoryGrid,
   getRatePlans,
 } from "@/lib/queries";
+import { pageTitle } from "@/lib/i18n/server";
+import { msg } from "@/lib/i18n/translate";
 
-export const metadata = { title: "Inventory" };
+export const generateMetadata = pageTitle(msg("Inventory"));
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -25,6 +28,7 @@ export default async function Page({
 }: {
   searchParams: Promise<{ plan?: string; from?: string }>;
 }) {
+  const tr = await getT();
   const sp = await searchParams;
   const [businessDate, plans] = await Promise.all([
     getBusinessDate(),
@@ -51,13 +55,13 @@ export default async function Page({
   return (
     <div>
       <PageHeader
-        title="Inventory"
+        title={tr("Inventory")}
       />
 
       {plans.length > 1 && (
         <div className="mb-3 flex flex-wrap items-center gap-1.5">
           <span className="mr-1 text-xxs font-semibold uppercase tracking-[0.1em] text-ink-faint">
-            Rate plan
+            {tr("Rate plan")}
           </span>
           {plans.map((p) => (
             <Link

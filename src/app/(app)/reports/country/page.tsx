@@ -1,3 +1,4 @@
+import { getT } from "@/lib/i18n/server";
 import {
   ReportFigure,
   ReportFigures,
@@ -10,8 +11,10 @@ import { reportRange } from "@/lib/reports";
 import { ReportAccessError, getBusinessDate, getCountryReport } from "@/lib/queries";
 import type { CountryRow } from "@/lib/types";
 import { getPropertyCurrency } from "@/lib/queries";
+import { pageTitle } from "@/lib/i18n/server";
+import { msg } from "@/lib/i18n/translate";
 
-export const metadata = { title: "Country report" };
+export const generateMetadata = pageTitle(msg("Country report"));
 
 /**
  * Where the hotel's guests come from.
@@ -29,6 +32,7 @@ export default async function CountryReportPage({
 }: {
   searchParams: Promise<{ from?: string; to?: string }>;
 }) {
+  const tr = await getT();
   const currency = await getPropertyCurrency();
   const sp = await searchParams;
   const businessDate = await getBusinessDate();
@@ -40,7 +44,7 @@ export default async function CountryReportPage({
   } catch (error) {
     if (error instanceof ReportAccessError) {
       return (
-        <ReportShell title="Countries">
+        <ReportShell title={tr("Countries")}>
           <ReportNoAccess />
         </ReportShell>
       );
@@ -57,29 +61,29 @@ export default async function CountryReportPage({
 
   return (
     <ReportShell
-      title="Countries"
+      title={tr("Countries")}
       action="/reports/country"
       range={range}
     >
       <ReportFigures>
         <ReportFigure
-          label="Countries"
+          label={tr("Countries")}
           value={String(known.length)}
-          detail="With at least one night"
+          detail={tr("With at least one night")}
           emphasis
         />
         {top && (
           <ReportFigure
-            label="Biggest market"
-            value={countryName(top.country)}
-            detail={`${top.roomNights} night${top.roomNights === 1 ? "" : "s"}`}
+            label={tr("Biggest market")}
+            value={tr(countryName(top.country))}
+            detail={tr.plural(top.roomNights, "{n} night", "{n} nights")}
           />
         )}
-        <ReportFigure label="Room nights" value={String(nights)} />
+        <ReportFigure label={tr("Room nights")} value={String(nights)} />
         <ReportFigure
-          label="Not recorded"
+          label={tr("Not recorded")}
           value={unknown ? `${Math.round((unknown.roomNights / (nights || 1)) * 100)}%` : "0%"}
-          detail="Of nights have no country"
+          detail={tr("Of nights have no country")}
         />
       </ReportFigures>
 
@@ -87,12 +91,12 @@ export default async function CountryReportPage({
         rows={rows}
         rowKey={(r) => r.country}
         minWidth="720px"
-        emptyTitle="No nights were stayed in this range"
-        emptyHint="Pick a range that covers dates guests have stayed."
-        footLabel={`${rows.length} row${rows.length === 1 ? "" : "s"}`}
+        emptyTitle={tr("No nights were stayed in this range")}
+        emptyHint={tr("Pick a range that covers dates guests have stayed.")}
+        footLabel={tr.plural(rows.length, "{n} row", "{n} rows")}
         columns={[
           {
-            header: "Country",
+            header: tr("Country"),
             cell: (r) => (
               <span
                 className={
@@ -101,29 +105,29 @@ export default async function CountryReportPage({
                     : "font-medium text-ink"
                 }
               >
-                {countryName(r.country)}
+                {tr(countryName(r.country))}
               </span>
             ),
           },
           {
-            header: "Bookings",
+            header: tr("Bookings"),
             align: "right",
             cell: (r) => <span className="tnum text-ink-muted">{r.bookings}</span>,
           },
           {
-            header: "Guests",
+            header: tr("Guests"),
             align: "right",
             cell: (r) => <span className="tnum text-ink-muted">{r.guests}</span>,
             foot: String(guests),
           },
           {
-            header: "Room nights",
+            header: tr("Room nights"),
             align: "right",
             cell: (r) => <span className="tnum font-medium text-ink">{r.roomNights}</span>,
             foot: String(nights),
           },
           {
-            header: "Share",
+            header: tr("Share"),
             align: "right",
             cell: (r) => (
               <span className="tnum text-ink-faint">
@@ -132,7 +136,7 @@ export default async function CountryReportPage({
             ),
           },
           {
-            header: "Revenue",
+            header: tr("Revenue"),
             align: "right",
             cell: (r) => <span className="tnum text-ink-muted">{formatMoney(r.revenueCents, currency)}</span>,
             foot: formatMoney(revenue, currency),

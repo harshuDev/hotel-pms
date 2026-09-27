@@ -1,5 +1,7 @@
 "use client";
 
+import { useT } from "@/components/i18n";
+import { msg } from "@/lib/i18n/translate";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { cn } from "@/components/ui";
@@ -20,9 +22,9 @@ import { globalSearch, type SearchHit } from "@/lib/actions/search";
  */
 
 const KIND_LABEL: Record<SearchHit["kind"], string> = {
-  booking: "Bookings",
-  customer: "Customers",
-  room: "Rooms",
+  booking: msg("Bookings"),
+  customer: msg("Customers"),
+  room: msg("Rooms"),
 };
 
 /** Where a hit goes. Rooms have no page of their own; the list is filtered. */
@@ -31,15 +33,14 @@ function hrefFor(hit: SearchHit) {
     case "booking":
       return `/bookings/${hit.id}`;
     case "customer":
-      return `/customers?q=${encodeURIComponent(hit.title)}`;
+      return `/customers?q=${encodeURIComponent(hit.term)}`;
     case "room":
-      return `/reports/housekeeping?q=${encodeURIComponent(
-        hit.title.replace(/^Room\s+/i, ""),
-      )}`;
+      return `/reports/housekeeping?q=${encodeURIComponent(hit.term)}`;
   }
 }
 
 export function SearchOverlay({ onClose }: { onClose: () => void }) {
+  const tr = useT();
   const router = useRouter();
   const [term, setTerm] = useState("");
   const [hits, setHits] = useState<SearchHit[]>([]);
@@ -132,7 +133,7 @@ export function SearchOverlay({ onClose }: { onClose: () => void }) {
         ref={panelRef}
         role="dialog"
         aria-modal="true"
-        aria-label="Search"
+        aria-label={tr("Search")}
         className="w-full max-w-xl overflow-hidden rounded-lg border border-line bg-white shadow-lift"
       >
         <div className="flex items-center gap-2.5 border-b border-line px-4">
@@ -153,11 +154,11 @@ export function SearchOverlay({ onClose }: { onClose: () => void }) {
             value={term}
             onChange={(e) => setTerm(e.target.value)}
             onKeyDown={onKeyDown}
-            placeholder="Booking reference, guest name or room number"
-            aria-label="Search bookings, guests and rooms"
+            placeholder={tr("Booking reference, guest name or room number")}
+            aria-label={tr("Search bookings, guests and rooms")}
             className="w-full bg-transparent py-3.5 text-[14px] text-ink outline-none placeholder:text-ink-faint"
           />
-          {busy && <span className="shrink-0 text-xxs text-ink-faint">Searching…</span>}
+          {busy && <span className="shrink-0 text-xxs text-ink-faint">{tr("Searching…")}</span>}
         </div>
 
         {groups.length > 0 && (
@@ -165,7 +166,7 @@ export function SearchOverlay({ onClose }: { onClose: () => void }) {
             {groups.map((group) => (
               <li key={group.kind}>
                 <p className="px-4 pb-1 pt-2 text-xxs font-semibold uppercase tracking-[0.1em] text-ink-faint">
-                  {KIND_LABEL[group.kind]}
+                  {tr(KIND_LABEL[group.kind])}
                 </p>
                 <ul>
                   {group.hits.map((hit) => {
@@ -208,21 +209,20 @@ export function SearchOverlay({ onClose }: { onClose: () => void }) {
 
         {showEmpty && (
           <p className="px-4 py-6 text-center text-[13px] text-ink-muted">
-            Nothing matches “{term.trim()}”. Search covers booking references,
-            guest names and room numbers.
+            {tr("Nothing matches “{term}”. Search covers booking references, guest names and room numbers.", { term: term.trim() })}
           </p>
         )}
 
         {term.trim().length < 2 && (
           <p className="px-4 py-6 text-center text-[13px] text-ink-faint">
-            Type at least two characters.
+            {tr("Type at least two characters.")}
           </p>
         )}
 
         <div className="flex items-center gap-3 border-t border-line bg-shell/60 px-4 py-2 text-xxs text-ink-faint">
-          <span>↑↓ to move</span>
-          <span>↵ to open</span>
-          <span>Esc to close</span>
+          <span>{tr("↑↓ to move")}</span>
+          <span>{tr("↵ to open")}</span>
+          <span>{tr("Esc to close")}</span>
         </div>
       </div>
     </div>

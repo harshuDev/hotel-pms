@@ -1,4 +1,7 @@
 "use server";
+import { localised } from "@/lib/i18n/localised";
+import { getT } from "@/lib/i18n/server";
+import type { Translator } from "@/lib/i18n/translate";
 
 import type { InventoryVisibility } from "@/lib/inventory-settings";
 import type { CancellationTerms } from "@/lib/cancellation-policy";
@@ -53,10 +56,10 @@ export async function saveProperty(input: {
   auditCloseTime: string;
 }): Promise<ActionResult<null>> {
   if (input.name.trim() === "") {
-    return { ok: false, error: "The property needs a name." };
+    return { ok: false, error: await localised("The property needs a name.") };
   }
   if (input.currency.trim().length !== 3) {
-    return { ok: false, error: "A currency is three letters, like GBP." };
+    return { ok: false, error: await localised("A currency is three letters, like GBP.") };
   }
 
   const supabase = await createClient();
@@ -72,7 +75,7 @@ export async function saveProperty(input: {
     p_audit_close_time: input.auditCloseTime || null,
   });
 
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
 
   revalidateSettings();
   return { ok: true, data: null };
@@ -107,7 +110,7 @@ export async function saveHotelDetails(input: {
   website: string;
 }): Promise<ActionResult<null>> {
   if (input.name.trim() === "") {
-    return { ok: false, error: "The hotel needs a name." };
+    return { ok: false, error: await localised("The hotel needs a name.") };
   }
 
   // Coordinates arrive as text from two inputs and a map. Blank is "no
@@ -122,7 +125,7 @@ export async function saveHotelDetails(input: {
   const latitude = coord(input.latitude);
   const longitude = coord(input.longitude);
   if (latitude === "bad" || longitude === "bad") {
-    return { ok: false, error: "Latitude and longitude are numbers, like 51.5014 and -0.1419." };
+    return { ok: false, error: await localised("Latitude and longitude are numbers, like 51.5014 and -0.1419.") };
   }
 
   const supabase = await createClient();
@@ -147,7 +150,7 @@ export async function saveHotelDetails(input: {
     p_website: input.website,
   });
 
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
 
   revalidateSettings();
   // The name and the timezone reach the top bar and the browser tab.
@@ -168,7 +171,7 @@ export async function saveHotelTimes(input: {
     p_audit_close_time: input.auditCloseTime || nullableArg<string>(null),
   });
 
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
 
   revalidateSettings();
   return { ok: true, data: null };
@@ -194,7 +197,7 @@ export async function saveHotelPolicies(
     p_other_policies: nullableArg(input.otherPolicies),
   });
 
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
 
   revalidateSettings();
   return { ok: true, data: null };
@@ -215,7 +218,7 @@ export async function saveExtraCategory(input: {
   taxRateId: string | null;
 }): Promise<ActionResult<{ id: string }>> {
   if (input.title.trim() === "") {
-    return { ok: false, error: "An extra category needs a title." };
+    return { ok: false, error: await localised("An extra category needs a title.") };
   }
   const supabase = await createClient();
   const { data, error } = await supabase.rpc("save_extra_category", {
@@ -225,7 +228,7 @@ export async function saveExtraCategory(input: {
     // Null is "no tax of its own".
     p_tax_rate_id: nullableArg(input.taxRateId),
   });
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
   revalidateExtras();
   return { ok: true, data: { id: data } };
 }
@@ -233,7 +236,7 @@ export async function saveExtraCategory(input: {
 export async function deleteExtraCategory(id: string): Promise<ActionResult<null>> {
   const supabase = await createClient();
   const { error } = await supabase.rpc("delete_extra_category", { p_id: id });
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
   revalidateExtras();
   return { ok: true, data: null };
 }
@@ -247,17 +250,17 @@ export async function saveExtra(input: {
   taxRateId: string | null;
   itemType: ExtraItemType;
 }): Promise<ActionResult<{ id: string }>> {
-  if (input.title.trim() === "") return { ok: false, error: "An extra needs a title." };
-  if (input.categoryId === "") return { ok: false, error: "Pick a category for the extra." };
+  if (input.title.trim() === "") return { ok: false, error: await localised("An extra needs a title.") };
+  if (input.categoryId === "") return { ok: false, error: await localised("Pick a category for the extra.") };
 
   let priceCents: number;
   try {
     priceCents = parseMoney(input.price);
   } catch {
-    return { ok: false, error: "The price is a number, like 24 or 24.50." };
+    return { ok: false, error: await localised("The price is a number, like 24 or 24.50.") };
   }
   if (!Number.isInteger(priceCents) || priceCents < 0) {
-    return { ok: false, error: "The price is a number, like 24 or 24.50." };
+    return { ok: false, error: await localised("The price is a number, like 24 or 24.50.") };
   }
 
   const supabase = await createClient();
@@ -270,7 +273,7 @@ export async function saveExtra(input: {
     p_tax_rate_id: nullableArg(input.taxRateId),
     p_item_type: input.itemType,
   });
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
   revalidateExtras();
   return { ok: true, data: { id: data } };
 }
@@ -284,13 +287,13 @@ export async function mergeExtra(input: {
   sourceId: string;
   targetId: string;
 }): Promise<ActionResult<null>> {
-  if (!input.targetId) return { ok: false, error: "Choose the extra to merge into." };
+  if (!input.targetId) return { ok: false, error: await localised("Choose the extra to merge into.") };
   const supabase = await createClient();
   const { error } = await supabase.rpc("merge_extra", {
     p_source_id: input.sourceId,
     p_target_id: input.targetId,
   });
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
   revalidateExtras();
   return { ok: true, data: null };
 }
@@ -303,13 +306,13 @@ export async function mergeExtraCategory(input: {
   sourceId: string;
   targetId: string;
 }): Promise<ActionResult<{ moved: number }>> {
-  if (!input.targetId) return { ok: false, error: "Choose the category to merge into." };
+  if (!input.targetId) return { ok: false, error: await localised("Choose the category to merge into.") };
   const supabase = await createClient();
   const { data, error } = await supabase.rpc("merge_extra_category", {
     p_source_id: input.sourceId,
     p_target_id: input.targetId,
   });
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
   revalidateExtras();
   return { ok: true, data: { moved: data ?? 0 } };
 }
@@ -317,7 +320,7 @@ export async function mergeExtraCategory(input: {
 export async function deleteExtra(id: string): Promise<ActionResult<null>> {
   const supabase = await createClient();
   const { error } = await supabase.rpc("delete_extra", { p_id: id });
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
   revalidateExtras();
   return { ok: true, data: null };
 }
@@ -329,7 +332,7 @@ export async function saveFacility(input: {
   title: string;
   icon: FacilityIcon;
 }): Promise<ActionResult<{ id: string }>> {
-  if (input.title.trim() === "") return { ok: false, error: "A facility needs a title." };
+  if (input.title.trim() === "") return { ok: false, error: await localised("A facility needs a title.") };
   const supabase = await createClient();
   const { data, error } = await supabase.rpc("save_facility", {
     // Null is a new facility; an id is the one being corrected.
@@ -337,7 +340,7 @@ export async function saveFacility(input: {
     p_title: input.title,
     p_icon: input.icon,
   });
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
   revalidateSettings();
   return { ok: true, data: { id: data } };
 }
@@ -345,7 +348,7 @@ export async function saveFacility(input: {
 export async function deleteFacility(id: string): Promise<ActionResult<null>> {
   const supabase = await createClient();
   const { error } = await supabase.rpc("delete_facility", { p_id: id });
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
   revalidateSettings();
   return { ok: true, data: null };
 }
@@ -360,7 +363,7 @@ export async function setRoomTypeDescription(input: {
     p_room_type_id: input.roomTypeId,
     p_description: input.description,
   });
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
   revalidateSettings();
   return { ok: true, data: null };
 }
@@ -375,7 +378,7 @@ export async function setRoomTypeFacilities(input: {
     p_room_type_id: input.roomTypeId,
     p_facility_ids: input.facilityIds,
   });
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
   revalidateSettings();
   return { ok: true, data: null };
 }
@@ -395,7 +398,7 @@ export async function saveIdentificationType(input: {
   title: string;
 }): Promise<ActionResult<{ id: string }>> {
   if (input.title.trim() === "") {
-    return { ok: false, error: "An identification type needs a title." };
+    return { ok: false, error: await localised("An identification type needs a title.") };
   }
   const supabase = await createClient();
   const { data, error } = await supabase.rpc("save_identification_type", {
@@ -403,7 +406,7 @@ export async function saveIdentificationType(input: {
     p_id: nullableArg(input.id),
     p_title: input.title,
   });
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
   revalidateGuestConfig();
   return { ok: true, data: { id: data } };
 }
@@ -411,7 +414,7 @@ export async function saveIdentificationType(input: {
 export async function deleteIdentificationType(id: string): Promise<ActionResult<null>> {
   const supabase = await createClient();
   const { error } = await supabase.rpc("delete_identification_type", { p_id: id });
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
   revalidateGuestConfig();
   return { ok: true, data: null };
 }
@@ -424,7 +427,7 @@ export async function saveGuestFields(
   const { error } = await supabase.rpc("save_guest_fields", {
     p_fields: fields.map((f) => ({ id: f.id ?? "", label: f.label, kind: f.kind })),
   });
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
   revalidateGuestConfig();
   return { ok: true, data: null };
 }
@@ -440,7 +443,7 @@ export async function saveRegistrationForm(input: {
     p_question_2: input.question2,
     p_terms: input.terms,
   });
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
   revalidateGuestConfig();
   return { ok: true, data: null };
 }
@@ -456,7 +459,7 @@ export async function saveHotelEmailSettings(input: {
     p_emails: input.notificationEmails,
     p_preferences: input.preferences,
   });
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
   revalidateSettings();
   return { ok: true, data: null };
 }
@@ -468,7 +471,7 @@ export async function saveHotelFeatures(
 ): Promise<ActionResult<null>> {
   const supabase = await createClient();
   const { error } = await supabase.rpc("save_hotel_features", { p_features: features });
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
   // The switches take menu items out of the nav and change the calendar's
   // housekeeping dots, so every page under the app layout is affected.
   revalidatePath("/", "layout");
@@ -499,7 +502,7 @@ export async function saveCalendarSettings(
     p_hide_cancellation_area: input.hideCancellationArea,
     p_show_waitlist: input.showWaitlist,
   });
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
   revalidateSettings();
   revalidatePath("/calendar");
   return { ok: true, data: null };
@@ -537,7 +540,7 @@ export async function saveInvoiceGeneral(input: {
     p_address: input.address,
     p_postcode: input.postcode,
   });
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
   revalidateInvoice();
   return { ok: true, data: null };
 }
@@ -553,7 +556,7 @@ export async function saveInvoiceLogoAndNotes(input: {
     p_logo_text: input.logoText,
     p_notes: input.notes,
   });
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
   revalidateInvoice();
   return { ok: true, data: null };
 }
@@ -567,7 +570,7 @@ export async function saveRoundingOptions(input: {
     p_round_logic: input.roundLogic,
     p_round_to: input.roundTo,
   });
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
   revalidateInvoice();
   return { ok: true, data: null };
 }
@@ -577,7 +580,7 @@ export async function saveInvoiceNumberSettings(customInvoiceNumbers: boolean): 
   const { error } = await supabase.rpc("save_invoice_number_settings", {
     p_custom_invoice_numbers: customInvoiceNumbers,
   });
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
   revalidateInvoice();
   return { ok: true, data: null };
 }
@@ -591,7 +594,7 @@ export async function saveStatementSettings(input: {
     p_reminder_text: input.reminderText,
     p_terms_text: input.termsText,
   });
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
   revalidateInvoice();
   return { ok: true, data: null };
 }
@@ -607,7 +610,7 @@ export async function setInvoiceLogo(path: string | null): Promise<ActionResult<
     // Null takes the logo off.
     p_logo_path: nullableArg(path),
   });
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
   if (previous && previous !== path) {
     await supabase.storage.from(HOTEL_ASSETS_BUCKET).remove([previous]);
   }
@@ -629,7 +632,7 @@ export async function savePosProfile(input: {
     p_pos_type: input.posType,
     p_is_enabled: input.isEnabled,
   });
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
   revalidateSettings();
   return { ok: true, data: null };
 }
@@ -637,7 +640,7 @@ export async function savePosProfile(input: {
 export async function deletePosProfile(id: string): Promise<ActionResult<null>> {
   const supabase = await createClient();
   const { error } = await supabase.rpc("delete_pos_profile", { p_id: id });
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
   revalidateSettings();
   return { ok: true, data: null };
 }
@@ -661,7 +664,7 @@ export async function saveDiscount(input: {
     p_percent_bps: nullableArg(input.kind === "percent" ? input.percentBps : null),
     p_amount_cents: nullableArg(input.kind === "fixed" ? input.amountCents : null),
   });
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
   revalidateSettings();
   return { ok: true, data: null };
 }
@@ -669,7 +672,7 @@ export async function saveDiscount(input: {
 export async function deleteDiscount(id: string): Promise<ActionResult<null>> {
   const supabase = await createClient();
   const { error } = await supabase.rpc("delete_discount", { p_id: id });
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
   revalidateSettings();
   return { ok: true, data: null };
 }
@@ -692,7 +695,7 @@ export async function saveOnlineBookingCutoff(input: {
     // Null with the box unticked; Postgres refuses it with the box ticked.
     p_date: nullableArg(input.enabled && input.date ? input.date : null),
   });
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
   revalidateInventorySettings();
   return { ok: true, data: null };
 }
@@ -707,7 +710,7 @@ export async function saveSameDayBookingCutoff(input: {
     // Null with the box unticked; Postgres refuses it with the box ticked.
     p_time: nullableArg(input.enabled && input.time ? input.time : null),
   });
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
   revalidateInventorySettings();
   return { ok: true, data: null };
 }
@@ -724,7 +727,7 @@ export async function saveInventoryVisibility(
     p_max_stay: visibility.max_stay,
     p_stop_sell: visibility.stop_sell,
   });
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
   revalidateInventorySettings();
   return { ok: true, data: null };
 }
@@ -745,7 +748,7 @@ export async function savePaymentGateway(input: {
     p_title: input.title,
     p_is_default: input.isDefault,
   });
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
   revalidateSettings();
   return { ok: true, data: null };
 }
@@ -753,7 +756,7 @@ export async function savePaymentGateway(input: {
 export async function deletePaymentGateway(id: string): Promise<ActionResult<null>> {
   const supabase = await createClient();
   const { error } = await supabase.rpc("delete_payment_gateway", { p_id: id });
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
   revalidateSettings();
   return { ok: true, data: null };
 }
@@ -812,7 +815,7 @@ export async function saveChannelManager(input: {
     p_rate_config_name: nullableArg(rate.name),
     p_rate_config_csv: nullableArg(rate.csv),
   });
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
   revalidateSettings();
   return { ok: true, data: null };
 }
@@ -820,7 +823,7 @@ export async function saveChannelManager(input: {
 export async function deleteChannelManager(id: string): Promise<ActionResult<null>> {
   const supabase = await createClient();
   const { error } = await supabase.rpc("delete_channel_manager", { p_id: id });
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
   revalidateSettings();
   return { ok: true, data: null };
 }
@@ -836,10 +839,10 @@ export async function getChannelManagerConfig(
     .select("room_config_name, room_config_csv, rate_config_name, rate_config_csv")
     .eq("id", id)
     .maybeSingle();
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
   const name = which === "room" ? data?.room_config_name : data?.rate_config_name;
   const csv = which === "room" ? data?.room_config_csv : data?.rate_config_csv;
-  if (!name || csv == null) return { ok: false, error: "That file is no longer saved." };
+  if (!name || csv == null) return { ok: false, error: await localised("That file is no longer saved.") };
   return { ok: true, data: { name, csv } };
 }
 
@@ -856,7 +859,7 @@ export async function saveBookingEngineTexts(input: {
     p_privacy_policy: input.privacyPolicy,
     p_terms: input.terms,
   });
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
   revalidateSettings();
   return { ok: true, data: null };
 }
@@ -876,7 +879,7 @@ export async function saveBookingEngineProfile(input: {
     p_slug: input.slug,
     p_room_type_ids: input.roomTypeIds,
   });
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
   revalidateSettings();
   return { ok: true, data: null };
 }
@@ -884,7 +887,7 @@ export async function saveBookingEngineProfile(input: {
 export async function deleteBookingEngineProfile(id: string): Promise<ActionResult<null>> {
   const supabase = await createClient();
   const { error } = await supabase.rpc("delete_booking_engine_profile", { p_id: id });
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
   revalidateSettings();
   return { ok: true, data: null };
 }
@@ -916,7 +919,7 @@ export async function saveBookingWidget(
     // Null is the hotel's default language.
     p_language: nullableArg(input.language),
   });
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
   revalidateSettings();
   return { ok: true, data: { hash: data as string } };
 }
@@ -924,7 +927,7 @@ export async function saveBookingWidget(
 export async function deleteBookingWidget(id: string): Promise<ActionResult<null>> {
   const supabase = await createClient();
   const { error } = await supabase.rpc("delete_booking_widget", { p_id: id });
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
   revalidateSettings();
   return { ok: true, data: null };
 }
@@ -935,7 +938,7 @@ export async function deleteBookingWidget(id: string): Promise<ActionResult<null
 export async function generateApiKey(): Promise<ActionResult<{ key: string }>> {
   const supabase = await createClient();
   const { data, error } = await supabase.rpc("generate_api_key");
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
   revalidateSettings();
   return { ok: true, data: { key: data as string } };
 }
@@ -950,7 +953,7 @@ export async function createDeveloperKey(
     p_name: name,
     p_permissions: permissions,
   });
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
   revalidateSettings();
   return { ok: true, data: { key: data as string } };
 }
@@ -968,7 +971,7 @@ export async function updateDeveloperKey(input: {
     p_permissions: input.permissions,
     p_is_active: input.isActive,
   });
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
   revalidateSettings();
   return { ok: true, data: null };
 }
@@ -976,7 +979,7 @@ export async function updateDeveloperKey(input: {
 export async function deleteDeveloperKey(id: string): Promise<ActionResult<null>> {
   const supabase = await createClient();
   const { error } = await supabase.rpc("delete_developer_key", { p_id: id });
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
   revalidateSettings();
   return { ok: true, data: null };
 }
@@ -1003,7 +1006,7 @@ export async function saveSystemConnection(input: {
     // Null keeps the saved secret.
     p_secret: nullableArg(input.secret === "" ? null : input.secret),
   });
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
   revalidateSettings();
   return { ok: true, data: null };
 }
@@ -1011,7 +1014,7 @@ export async function saveSystemConnection(input: {
 export async function deleteSystemConnection(id: string): Promise<ActionResult<null>> {
   const supabase = await createClient();
   const { error } = await supabase.rpc("delete_system_connection", { p_id: id });
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
   revalidateSettings();
   return { ok: true, data: null };
 }
@@ -1030,7 +1033,7 @@ export async function saveAccountingSystem(input: {
     p_provider: input.provider,
     p_is_enabled: input.isEnabled,
   });
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
   revalidateSettings();
   return { ok: true, data: null };
 }
@@ -1038,7 +1041,7 @@ export async function saveAccountingSystem(input: {
 export async function deleteAccountingSystem(id: string): Promise<ActionResult<null>> {
   const supabase = await createClient();
   const { error } = await supabase.rpc("delete_accounting_system", { p_id: id });
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
   revalidateSettings();
   return { ok: true, data: null };
 }
@@ -1066,7 +1069,7 @@ export async function saveAccountingCategory(input: {
     p_internal_code: input.internalCode,
     p_external_code: input.externalCode,
   });
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
   revalidateAccounting();
   return { ok: true, data: null };
 }
@@ -1074,7 +1077,7 @@ export async function saveAccountingCategory(input: {
 export async function deleteAccountingCategory(id: string): Promise<ActionResult<null>> {
   const supabase = await createClient();
   const { error } = await supabase.rpc("delete_accounting_category", { p_id: id });
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
   revalidateAccounting();
   return { ok: true, data: null };
 }
@@ -1092,7 +1095,7 @@ export async function saveAccountingDefaults(input: {
     p_taxes_id: input.taxesId,
     p_payments_id: input.paymentsId,
   });
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
   revalidateAccounting();
   return { ok: true, data: null };
 }
@@ -1104,7 +1107,7 @@ export async function saveCurrencyProfile(input: {
   fixedRateMicros: number | null;
 }): Promise<ActionResult<null>> {
   if (input.rateKind === "fixed" && (input.fixedRateMicros === null || input.fixedRateMicros <= 0)) {
-    return { ok: false, error: "Write the fixed rate, above zero." };
+    return { ok: false, error: await localised("Write the fixed rate, above zero.") };
   }
   const supabase = await createClient();
   const { error } = await supabase.rpc("save_currency_profile", {
@@ -1115,7 +1118,7 @@ export async function saveCurrencyProfile(input: {
     // Null on a live rate: there is no figure to store.
     p_fixed_rate_micros: nullableArg(input.rateKind === "fixed" ? input.fixedRateMicros : null),
   });
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
   revalidateSettings();
   return { ok: true, data: null };
 }
@@ -1123,7 +1126,7 @@ export async function saveCurrencyProfile(input: {
 export async function deleteCurrencyProfile(id: string): Promise<ActionResult<null>> {
   const supabase = await createClient();
   const { error } = await supabase.rpc("delete_currency_profile", { p_id: id });
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
   revalidateSettings();
   return { ok: true, data: null };
 }
@@ -1139,7 +1142,7 @@ function revalidateLanguages() {
 export async function saveDefaultLanguage(locale: string): Promise<ActionResult<null>> {
   const supabase = await createClient();
   const { error } = await supabase.rpc("save_default_language", { p_locale: locale });
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
   revalidateLanguages();
   return { ok: true, data: null };
 }
@@ -1147,7 +1150,7 @@ export async function saveDefaultLanguage(locale: string): Promise<ActionResult<
 export async function saveSupportedLanguages(locales: string[]): Promise<ActionResult<null>> {
   const supabase = await createClient();
   const { error } = await supabase.rpc("save_supported_languages", { p_locales: locales });
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
   revalidateLanguages();
   return { ok: true, data: null };
 }
@@ -1162,8 +1165,8 @@ function revalidateEmail() {
 }
 
 /** Every Email Setup save ends the same way; the RPC names stay typed. */
-function emailDone(error: { message: string } | null): ActionResult<null> {
-  if (error) return { ok: false, error: error.message };
+async function emailDone(error: { message: string } | null): Promise<ActionResult<null>> {
+  if (error) return { ok: false, error: await localised(error.message) };
   revalidateEmail();
   return { ok: true, data: null };
 }
@@ -1250,7 +1253,7 @@ export async function saveEmailTemplate(input: {
   subject: string;
   body: string;
 }): Promise<ActionResult<{ id: string }>> {
-  if (input.title.trim() === "") return { ok: false, error: "An email template needs a title." };
+  if (input.title.trim() === "") return { ok: false, error: await localised("An email template needs a title.") };
   const supabase = await createClient();
   const { data, error } = await supabase.rpc("save_email_template", {
     // Null is a new template; an id is the one being corrected.
@@ -1259,7 +1262,7 @@ export async function saveEmailTemplate(input: {
     p_subject: input.subject,
     p_body: input.body,
   });
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
   revalidateEmail();
   return { ok: true, data: { id: data } };
 }
@@ -1278,10 +1281,10 @@ export async function saveRoomType(input: {
   maxOccupancy: number;
 }): Promise<ActionResult<{ id: string }>> {
   if (input.code.trim() === "" || input.name.trim() === "") {
-    return { ok: false, error: "A room type needs a code and a name." };
+    return { ok: false, error: await localised("A room type needs a code and a name.") };
   }
   if (input.maxOccupancy < input.baseOccupancy) {
-    return { ok: false, error: "The maximum occupancy cannot be below the base." };
+    return { ok: false, error: await localised("The maximum occupancy cannot be below the base.") };
   }
 
   const supabase = await createClient();
@@ -1294,7 +1297,7 @@ export async function saveRoomType(input: {
     p_sort_order: null,
   });
 
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
 
   revalidateSettings();
   return { ok: true, data: { id: data as string } };
@@ -1312,7 +1315,7 @@ export async function setRoomTypeDisplayName(input: {
     p_room_type_id: input.roomTypeId,
     p_display_name: input.displayName,
   });
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
   revalidateSettings();
   revalidatePath("/calendar");
   return { ok: true, data: null };
@@ -1322,7 +1325,7 @@ export async function setRoomTypeDisplayName(input: {
 export async function setRoomTypeOrder(ids: string[]): Promise<ActionResult<null>> {
   const supabase = await createClient();
   const { error } = await supabase.rpc("set_room_type_order", { p_ids: ids });
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
   revalidateSettings();
   revalidatePath("/calendar");
   return { ok: true, data: null };
@@ -1332,7 +1335,7 @@ export async function setRoomTypeOrder(ids: string[]): Promise<ActionResult<null
 export async function deleteRoomType(id: string): Promise<ActionResult<null>> {
   const supabase = await createClient();
   const { error } = await supabase.rpc("delete_room_type", { p_room_type_id: id });
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
   revalidateSettings();
   revalidatePath("/calendar");
   return { ok: true, data: null };
@@ -1350,7 +1353,7 @@ export async function saveVirtualRoomType(input: {
     p_display_name: input.displayName,
     p_parent_room_type_id: input.parentRoomTypeId,
   });
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
   revalidateSettings();
   return { ok: true, data: null };
 }
@@ -1358,7 +1361,7 @@ export async function saveVirtualRoomType(input: {
 export async function deleteVirtualRoomType(id: string): Promise<ActionResult<null>> {
   const supabase = await createClient();
   const { error } = await supabase.rpc("delete_virtual_room_type", { p_id: id });
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
   revalidateSettings();
   return { ok: true, data: null };
 }
@@ -1375,7 +1378,7 @@ export async function setRoomSetup(input: {
   hasDivider: boolean;
 }): Promise<ActionResult<null>> {
   if (!Number.isSafeInteger(input.priority) || input.priority < 0 || input.priority > 999) {
-    return { ok: false, error: "Priority is a whole number from 0 to 999." };
+    return { ok: false, error: await localised("Priority is a whole number from 0 to 999.") };
   }
   const supabase = await createClient();
   const { error } = await supabase.rpc("set_room_setup", {
@@ -1388,7 +1391,7 @@ export async function setRoomSetup(input: {
     p_color: nullableArg(input.color),
     p_has_divider: input.hasDivider,
   });
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
   revalidateSettings();
   revalidatePath("/calendar");
   return { ok: true, data: null };
@@ -1404,7 +1407,7 @@ export async function setRoomEnabled(input: {
     p_room_id: input.roomId,
     p_enabled: input.enabled,
   });
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
   revalidateSettings();
   revalidatePath("/calendar");
   revalidatePath("/dashboard");
@@ -1415,7 +1418,7 @@ export async function setRoomEnabled(input: {
 export async function saveKeyCodeSetting(on: boolean): Promise<ActionResult<null>> {
   const supabase = await createClient();
   const { error } = await supabase.rpc("save_key_code_setting", { p_on: on });
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
   revalidateSettings();
   return { ok: true, data: null };
 }
@@ -1432,10 +1435,10 @@ export async function createRooms(input: {
   prefix: string;
 }): Promise<ActionResult<{ created: number }>> {
   if (!Number.isSafeInteger(input.first) || !Number.isSafeInteger(input.last)) {
-    return { ok: false, error: "Give a run of whole room numbers." };
+    return { ok: false, error: await localised("Give a run of whole room numbers.") };
   }
   if (input.last < input.first) {
-    return { ok: false, error: "Give the run lowest first." };
+    return { ok: false, error: await localised("Give the run lowest first.") };
   }
 
   const supabase = await createClient();
@@ -1447,7 +1450,7 @@ export async function createRooms(input: {
     p_prefix: input.prefix,
   });
 
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
 
   revalidateSettings();
   return { ok: true, data: { created: Number(data ?? 0) } };
@@ -1472,13 +1475,13 @@ export async function saveRoom(input: {
   floor: number | null;
 }): Promise<ActionResult<{ id: string }>> {
   if (input.number.trim() === "") {
-    return { ok: false, error: "A room needs a number." };
+    return { ok: false, error: await localised("A room needs a number.") };
   }
   if (input.roomTypeId === "") {
-    return { ok: false, error: "Pick the room type this room belongs to." };
+    return { ok: false, error: await localised("Pick the room type this room belongs to.") };
   }
   if (input.floor !== null && !Number.isSafeInteger(input.floor)) {
-    return { ok: false, error: "A floor is a whole number, or leave it blank." };
+    return { ok: false, error: await localised("A floor is a whole number, or leave it blank.") };
   }
 
   const supabase = await createClient();
@@ -1489,7 +1492,7 @@ export async function saveRoom(input: {
     p_floor: input.floor,
   });
 
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
 
   revalidateSettings();
   return { ok: true, data: { id: data as string } };
@@ -1527,7 +1530,7 @@ export async function deleteRoom(
     .maybeSingle();
 
   const { error } = await supabase.rpc("delete_room", { p_room_id: roomId });
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
 
   if (room?.photo_path) {
     // Best effort, and deliberately not fatal: the room is already gone, and
@@ -1566,7 +1569,7 @@ export async function setRoomPhoto(input: {
     p_photo_path: input.path,
   });
 
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
 
   if (input.previousPath && input.previousPath !== input.path) {
     await supabase.storage.from(ROOM_PHOTO_BUCKET).remove([input.previousPath]);
@@ -1597,7 +1600,7 @@ export async function savePaymentType(input: {
   isActive: boolean;
 }): Promise<ActionResult<{ id: string }>> {
   if (input.title.trim() === "") {
-    return { ok: false, error: "A payment type needs a title." };
+    return { ok: false, error: await localised("A payment type needs a title.") };
   }
 
   const supabase = await createClient();
@@ -1611,7 +1614,7 @@ export async function savePaymentType(input: {
     p_is_active: input.isActive,
   });
 
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
 
   revalidateSettings();
   // What the cashier may take a payment by has changed.
@@ -1636,7 +1639,7 @@ export async function setRoomStatus(input: {
     p_status: input.status,
   });
 
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
 
   revalidatePath("/reports/housekeeping");
   revalidatePath("/dashboard");
@@ -1668,7 +1671,7 @@ export async function setRoomHousekeeping(input: {
     p_choice: input.choice,
   });
 
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
 
   revalidatePath("/reports/housekeeping");
   revalidatePath("/dashboard");
@@ -1695,7 +1698,7 @@ export async function setRoomDoNotDisturb(
     p_on: on,
   });
 
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
 
   revalidatePath("/reports/housekeeping");
   revalidatePath("/calendar");
@@ -1713,7 +1716,7 @@ export async function saveChannel(input: {
   customerId: string | null;
 }): Promise<ActionResult<{ id: string }>> {
   if (input.commissionBps < 0 || input.commissionBps > 10000) {
-    return { ok: false, error: "Commission must be between 0 and 100 percent." };
+    return { ok: false, error: await localised("Commission must be between 0 and 100 percent.") };
   }
 
   const supabase = await createClient();
@@ -1729,7 +1732,7 @@ export async function saveChannel(input: {
     p_customer_id: nullableArg(input.customerId),
   });
 
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
 
   revalidateSettings();
   return { ok: true, data: { id: data as string } };
@@ -1745,7 +1748,7 @@ export async function mergeChannels(
     p_keep_id: keepId,
     p_merge_ids: mergeIds,
   });
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
   revalidateSettings();
   return { ok: true, data: { moved: data ?? 0 } };
 }
@@ -1761,7 +1764,7 @@ export async function searchCustomersForPicker(
     p_limit: 10,
     p_offset: 0,
   });
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
   return {
     ok: true,
     data: (data ?? []).map((r) => ({
@@ -1780,10 +1783,10 @@ export async function saveTaxRate(input: {
   isActive: boolean;
 }): Promise<ActionResult<{ id: string }>> {
   if (input.name.trim() === "") {
-    return { ok: false, error: "A tax rate needs a name." };
+    return { ok: false, error: await localised("A tax rate needs a name.") };
   }
   if (!Number.isSafeInteger(input.rateBps) || input.rateBps < 0 || input.rateBps > 10000) {
-    return { ok: false, error: "A tax rate must be between 0 and 100 percent." };
+    return { ok: false, error: await localised("A tax rate must be between 0 and 100 percent.") };
   }
 
   const supabase = await createClient();
@@ -1795,7 +1798,7 @@ export async function saveTaxRate(input: {
     p_is_active: input.isActive,
   });
 
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
 
   revalidateSettings();
   return { ok: true, data: { id: data as string } };
@@ -1808,7 +1811,7 @@ export async function saveTaxRate(input: {
 export async function setTaxRateOrder(ids: string[]): Promise<ActionResult<null>> {
   const supabase = await createClient();
   const { error } = await supabase.rpc("set_tax_rate_order", { p_ids: ids });
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
   revalidateSettings();
   return { ok: true, data: null };
 }
@@ -1817,7 +1820,7 @@ export async function setTaxRateOrder(ids: string[]): Promise<ActionResult<null>
 export async function deleteTaxRate(id: string): Promise<ActionResult<null>> {
   const supabase = await createClient();
   const { error } = await supabase.rpc("delete_tax_rate", { p_id: id });
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
   revalidateSettings();
   return { ok: true, data: null };
 }
@@ -1848,7 +1851,7 @@ export async function saveSeasonType(input: {
     p_name: input.name,
     p_color: input.color,
   });
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
   revalidateSettings();
   revalidatePath("/calendar");
   return { ok: true, data: { id: data as string } };
@@ -1858,7 +1861,7 @@ export async function saveSeasonType(input: {
 export async function deleteSeasonType(id: string): Promise<ActionResult<null>> {
   const supabase = await createClient();
   const { error } = await supabase.rpc("delete_season_type", { p_id: id });
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
   revalidateSettings();
   revalidatePath("/calendar");
   return { ok: true, data: null };
@@ -1871,7 +1874,7 @@ export async function addSeasonRange(input: {
   endsOn: string;
 }): Promise<ActionResult<null>> {
   if (!input.startsOn || !input.endsOn) {
-    return { ok: false, error: "Choose the start and the end." };
+    return { ok: false, error: await localised("Choose the start and the end.") };
   }
   const supabase = await createClient();
   const { error } = await supabase.rpc("add_season_range", {
@@ -1879,7 +1882,7 @@ export async function addSeasonRange(input: {
     p_starts_on: input.startsOn,
     p_ends_on: input.endsOn,
   });
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
   revalidateSettings();
   revalidatePath("/calendar");
   return { ok: true, data: null };
@@ -1895,7 +1898,7 @@ export async function deleteSeason(id: string): Promise<ActionResult<null>> {
   const supabase = await createClient();
   const { error } = await supabase.rpc("delete_season", { p_id: id });
 
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
 
   revalidateSettings();
   revalidatePath("/calendar");
@@ -1909,7 +1912,7 @@ export async function saveStaffUser(input: {
   isActive: boolean;
 }): Promise<ActionResult<{ id: string }>> {
   if (input.fullName.trim() === "") {
-    return { ok: false, error: "A member of staff needs a name." };
+    return { ok: false, error: await localised("A member of staff needs a name.") };
   }
 
   const supabase = await createClient();
@@ -1920,7 +1923,7 @@ export async function saveStaffUser(input: {
     p_is_active: input.isActive,
   });
 
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
 
   revalidateSettings();
   return { ok: true, data: { id: data as string } };
@@ -1960,7 +1963,7 @@ export async function saveRatePlan(input: {
     p_id: input.id,
   });
 
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
 
   revalidatePath("/settings");
   // Every Inventory screen reads the plans, and the Rates grid draws a row per
@@ -2009,7 +2012,7 @@ export async function saveCancellationPolicyTerms(input: {
     p_is_default: input.isDefault,
     p_summary: input.summary,
   });
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
   revalidatePath("/settings");
   // The guest booking page quotes the terms, and a booking screen reads them.
   revalidatePath("/book", "layout");
@@ -2021,7 +2024,7 @@ export async function saveCancellationPolicyTerms(input: {
 export async function deleteCancellationPolicy(id: string): Promise<ActionResult<null>> {
   const supabase = await createClient();
   const { error } = await supabase.rpc("delete_cancellation_policy", { p_id: id });
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
   revalidatePath("/settings");
   return { ok: true, data: null };
 }
@@ -2064,7 +2067,7 @@ export async function saveWeekRates(input: {
       stop_sell: d.stopSell,
     })),
   });
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
   revalidatePath("/settings");
   revalidatePath("/inventory", "layout");
   revalidatePath("/calendar");
@@ -2075,7 +2078,7 @@ export async function saveWeekRates(input: {
 export async function deleteRatePlan(id: string): Promise<ActionResult<null>> {
   const supabase = await createClient();
   const { error } = await supabase.rpc("delete_rate_plan", { p_rate_plan_id: id });
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
   revalidatePath("/settings");
   revalidatePath("/inventory", "layout");
   revalidatePath("/book", "layout");
@@ -2101,7 +2104,7 @@ export async function setRatePlanCancellationPolicy(
     p_cancellation_policy_id: cancellationPolicyId,
   });
 
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
 
   revalidatePath("/settings");
   revalidatePath("/inventory", "layout");
@@ -2133,7 +2136,7 @@ export async function saveReaction(input: {
     p_events: input.events,
     p_is_enabled: input.isEnabled,
   });
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
   revalidateSettings();
   return { ok: true, data: { id: data } };
 }
@@ -2141,7 +2144,7 @@ export async function saveReaction(input: {
 export async function deleteReaction(id: string): Promise<ActionResult<null>> {
   const supabase = await createClient();
   const { error } = await supabase.rpc("delete_reaction", { p_id: id });
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
   revalidateSettings();
   return { ok: true, data: null };
 }
@@ -2160,39 +2163,39 @@ export async function saveDocumentTemplate(input: {
     p_css: input.css,
     p_is_active: input.isActive,
   });
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
   revalidateSettings();
   revalidatePath("/bookings", "layout");
   return { ok: true, data: null };
 }
 
 /** What PREVIEW fills a template with when no folio number is given. */
-function sampleInvoice(currency: string, today: string): InvoiceView {
+function sampleInvoice(currency: string, today: string, tr: Translator): InvoiceView {
   return {
     bookingId: "",
     reference: "BK-000000",
-    issuer: "Sample Hotel",
-    issuerAddress: "1 Example Street, Example City",
+    issuer: tr("Sample Hotel"),
+    issuerAddress: tr("1 Example Street, Example City"),
     phone: "+00 000 000 000",
     email: "reception@example.com",
     logoUrl: null,
     logoText: null,
     invoiceNumber: 1000,
     date: today,
-    guest: { name: "Sample Guest", email: "guest@example.com", phone: null },
+    guest: { name: tr("Sample Guest"), email: "guest@example.com", phone: null },
     checkIn: today,
     checkOut: today,
-    roomsLabel: "101 · Double",
+    roomsLabel: `101 · ${tr("Double")}`,
     rows: [
-      { key: "a", date: today, description: "Accommodation", room: "101", netCents: 10000, taxCents: 2000, grossCents: 12000 },
-      { key: "b", date: today, description: "Minibar", room: null, netCents: 500, taxCents: 100, grossCents: 600 },
+      { key: "a", date: today, description: tr("Accommodation"), room: "101", netCents: 10000, taxCents: 2000, grossCents: 12000 },
+      { key: "b", date: today, description: tr("Minibar"), room: null, netCents: 500, taxCents: 100, grossCents: 600 },
     ],
     showRoom: true,
     vatRegistered: true,
     netCents: 10500,
     taxCents: 2100,
     totalCents: 12600,
-    payments: [{ key: "p", date: today, description: "Card", amountCents: 5000, reversed: false }],
+    payments: [{ key: "p", date: today, description: tr("Card"), amountCents: 5000, reversed: false }],
     balanceCents: 7600,
     notes: null,
     currency,
@@ -2210,29 +2213,30 @@ export async function previewInvoiceTemplate(input: {
   css: string;
 }): Promise<ActionResult<{ html: string; css: string }>> {
   if (input.liquid.length > 200_000 || input.css.length > 100_000) {
-    return { ok: false, error: "The template is too long" };
+    return { ok: false, error: await localised("The template is too long") };
   }
   let view: InvoiceView | null;
   const typed = input.folioNumber.trim();
   if (typed === "") {
     // Dated by the hotel's business date, never the server's clock.
     const [currency, today] = await Promise.all([getPropertyCurrency(), getBusinessDate()]);
-    view = sampleInvoice(currency, today);
+    view = sampleInvoice(currency, today, await getT());
   } else {
-    if (!/^[0-9]{1,12}$/.test(typed)) return { ok: false, error: "A folio number is digits only" };
+    if (!/^[0-9]{1,12}$/.test(typed)) return { ok: false, error: await localised("A folio number is digits only") };
     const supabase = await createClient();
     const { data, error } = await supabase
       .from("folios")
       .select("booking_id")
       .eq("folio_number", Number(typed))
       .maybeSingle();
-    if (error) return { ok: false, error: error.message };
-    if (!data) return { ok: false, error: `No folio ${typed} on this property` };
-    if (!data.booking_id) return { ok: false, error: `Folio ${typed} belongs to a meeting room booking` };
+    if (error) return { ok: false, error: await localised(error.message) };
+    const tr = await getT();
+    if (!data) return { ok: false, error: tr("No folio {n} on this property", { n: typed }) };
+    if (!data.booking_id) return { ok: false, error: tr("Folio {n} belongs to a meeting room booking", { n: typed }) };
     view = await loadInvoice(data.booking_id);
-    if (!view) return { ok: false, error: `No folio ${typed} on this property` };
+    if (!view) return { ok: false, error: tr("No folio {n} on this property", { n: typed }) };
   }
-  const rendered = await renderInvoiceTemplate(input.liquid, input.css, invoiceLiquidData(view));
+  const rendered = await renderInvoiceTemplate(input.liquid, input.css, invoiceLiquidData(view, await getT()));
   if (!rendered.ok) return { ok: false, error: rendered.error };
   return { ok: true, data: { html: rendered.html, css: rendered.css } };
 }

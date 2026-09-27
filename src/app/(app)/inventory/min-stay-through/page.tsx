@@ -1,6 +1,8 @@
 import { InventoryPage } from "@/components/inventory/inventory-page";
+import { pageTitle } from "@/lib/i18n/server";
+import { msg } from "@/lib/i18n/translate";
 
-export const metadata = { title: "Min stay through" };
+export const generateMetadata = pageTitle(msg("Min stay through"));
 
 export default async function Page({
   searchParams,

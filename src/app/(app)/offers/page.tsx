@@ -1,3 +1,4 @@
+import { getT } from "@/lib/i18n/server";
 import { PageHeader } from "@/components/ui";
 import { PromotionsScreen } from "@/components/promotions/promotions-screen";
 import {
@@ -6,10 +7,13 @@ import {
   getRatePlans,
   getRoomTypes,
 } from "@/lib/queries";
+import { pageTitle } from "@/lib/i18n/server";
+import { msg } from "@/lib/i18n/translate";
 
-export const metadata = { title: "Offers" };
+export const generateMetadata = pageTitle(msg("Offers"));
 
 export default async function OffersPage() {
+  const tr = await getT();
   const [promotions, ratePlans, roomTypes, staff] = await Promise.all([
     getPromotions(),
     getRatePlans(),
@@ -20,7 +24,7 @@ export default async function OffersPage() {
   return (
     <div>
       <PageHeader
-        title="Offers"
+        title={tr("Offers")}
       />
       <PromotionsScreen
         promotions={promotions}

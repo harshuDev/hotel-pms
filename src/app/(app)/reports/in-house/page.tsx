@@ -1,3 +1,4 @@
+import { getT } from "@/lib/i18n/server";
 import { format, parseISO } from "date-fns";
 import {
   ReportFigure,
@@ -9,10 +10,13 @@ import { ReportTable } from "@/components/reports/report-table";
 import { formatMoney, formatMoneyShort } from "@/lib/money";
 import { getBusinessDate, getInHouseReport } from "@/lib/queries";
 import { getPropertyCurrency } from "@/lib/queries";
+import { pageTitle } from "@/lib/i18n/server";
+import { msg } from "@/lib/i18n/translate";
 
-export const metadata = { title: "In house report" };
+export const generateMetadata = pageTitle(msg("In house report"));
 
 export default async function InHouseReportPage() {
+  const tr = await getT();
   const currency = await getPropertyCurrency();
   // Not behind the money gate: knowing who is in which room is an operational
   // question every role needs answered, housekeeping included.
@@ -28,25 +32,25 @@ export default async function InHouseReportPage() {
 
   return (
     <ReportShell
-      title="In house"
+      title={tr("In house")}
       date={businessDate}
     >
       <ReportFigures>
         <ReportFigure
-          label="Rooms occupied"
+          label={tr("Rooms occupied")}
           value={String(rows.length)}
-          detail={unassigned > 0 ? `${unassigned} with no room assigned` : undefined}
+          detail={unassigned > 0 ? tr("{unassigned} with no room assigned", { unassigned: unassigned }) : undefined}
         />
-        <ReportFigure label="Guests" value={String(guests)} detail="Adults and children" />
+        <ReportFigure label={tr("Guests")} value={String(guests)} detail={tr("Adults and children")} />
         <ReportFigure
-          label="Due out tomorrow"
+          label={tr("Due out tomorrow")}
           value={String(dueOut)}
-          detail={dueOut === 0 ? "Nobody leaving" : undefined}
+          detail={dueOut === 0 ? tr("Nobody leaving") : undefined}
         />
         <ReportFigure
-          label="Owed by the house"
+          label={tr("Owed by the house")}
           value={formatMoneyShort(owing, currency)}
-          detail="Across every folio on these bookings"
+          detail={tr("Across every folio on these bookings")}
           emphasis
         />
       </ReportFigures>
@@ -55,23 +59,23 @@ export default async function InHouseReportPage() {
         rows={rows}
         rowKey={(r) => `${r.bookingId}-${r.roomNumber ?? "none"}`}
         minWidth="900px"
-        emptyTitle="Nobody is in house tonight"
-        emptyHint="Guests appear here once they are checked in against the open business date."
-        footLabel={`${rows.length} room${rows.length === 1 ? "" : "s"}`}
+        emptyTitle={tr("Nobody is in house tonight")}
+        emptyHint={tr("Guests appear here once they are checked in against the open business date.")}
+        footLabel={tr.plural(rows.length, "{n} room", "{n} rooms")}
         columns={[
           {
-            header: "Room",
+            header: tr("Room"),
             cell: (r) => (
               <>
                 <span className="tnum font-medium text-ink">
-                  {r.roomNumber ?? "Not assigned"}
+                  {r.roomNumber ?? tr("Not assigned")}
                 </span>
                 <span className="block text-xxs text-ink-faint">{r.roomTypeName}</span>
               </>
             ),
           },
           {
-            header: "Guest",
+            header: tr("Guest"),
             cell: (r) => (
               <>
                 <span className="text-ink">{r.guestName}</span>
@@ -80,41 +84,41 @@ export default async function InHouseReportPage() {
             ),
           },
           {
-            header: "Channel",
+            header: tr("Channel"),
             cell: (r) => <span className="text-ink-faint">{r.channelName ?? "—"}</span>,
           },
           {
-            header: "Arrived",
+            header: tr("Arrived"),
             cell: (r) => (
               <span className="whitespace-nowrap text-ink-muted">
-                {format(parseISO(r.checkIn), "d MMM")}
+                {tr.date(r.checkIn, "d MMM")}
               </span>
             ),
           },
           {
-            header: "Departs",
+            header: tr("Departs"),
             cell: (r) => (
               <span className="whitespace-nowrap text-ink-muted">
-                {format(parseISO(r.checkOut), "d MMM")}
+                {tr.date(r.checkOut, "d MMM")}
               </span>
             ),
           },
           {
-            header: "Stayed",
+            header: tr("Stayed"),
             align: "right",
             cell: (r) => <span className="text-ink-muted">{r.nightsStayed}</span>,
           },
           {
-            header: "Left",
+            header: tr("Left"),
             align: "right",
             cell: (r) => (
               <span className={r.nightsLeft === 0 ? "font-medium text-warn-deep" : "text-ink-muted"}>
-                {r.nightsLeft === 0 ? "Due out" : r.nightsLeft}
+                {r.nightsLeft === 0 ? tr("Due out") : r.nightsLeft}
               </span>
             ),
           },
           {
-            header: "Guests",
+            header: tr("Guests"),
             align: "right",
             cell: (r) => (
               <span className="text-ink-faint">
@@ -124,7 +128,7 @@ export default async function InHouseReportPage() {
             ),
           },
           {
-            header: "Balance",
+            header: tr("Balance"),
             align: "right",
             cell: (r) => (
               <span
@@ -132,7 +136,7 @@ export default async function InHouseReportPage() {
                   r.balanceCents > 0 ? "font-medium text-rose-600" : "text-ink-faint"
                 }
               >
-                {r.balanceCents === 0 ? "Settled" : formatMoney(r.balanceCents, currency)}
+                {r.balanceCents === 0 ? tr("Settled") : formatMoney(r.balanceCents, currency)}
               </span>
             ),
             foot: formatMoney(owing, currency),

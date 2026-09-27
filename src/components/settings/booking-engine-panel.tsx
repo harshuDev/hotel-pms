@@ -1,5 +1,6 @@
 "use client";
 
+import { useT } from "@/components/i18n";
 import { useRef, useState } from "react";
 import { cn } from "@/components/ui";
 import { Menu, MenuItem } from "@/components/menu";
@@ -77,19 +78,21 @@ function CrossIcon() {
 }
 
 function OpenLink({ href }: { href: string }) {
+  const tr = useT();
   return (
     <a href={href} target="_blank" rel="noopener" className="inline-flex items-center gap-1 text-brass hover:underline">
       <EditIcon />
-      Open
+      {tr("Open")}
     </a>
   );
 }
 
 function DropIns({ onPick }: { onPick: (token: string) => void }) {
+  const tr = useT();
   const [open, setOpen] = useState(false);
   return (
     <Menu
-      label="Drop in's"
+      label={tr("Drop in's")}
       open={open}
       onOpenChange={setOpen}
       align="end"
@@ -103,7 +106,7 @@ function DropIns({ onPick }: { onPick: (token: string) => void }) {
             onPick(p.token);
           }}
         >
-          {p.label} <span className="text-ink-faint">{p.token}</span>
+          {tr(p.label)} <span className="text-ink-faint">{p.token}</span>
         </MenuItem>
       ))}
     </Menu>
@@ -170,6 +173,7 @@ export function BookingEnginePanel({
   pending: boolean;
   run: Run;
 }) {
+  const tr = useT();
   const [draft, setDraft] = useState<ProfileDraft | null>(null);
   const [privacy, setPrivacy] = useState(texts.privacyPolicy ?? DEFAULT_PRIVACY_POLICY);
   const [terms, setTerms] = useState(texts.terms ?? "");
@@ -186,7 +190,7 @@ export function BookingEnginePanel({
       });
       if (result.ok) setDraft(null);
       return result;
-    }, `${d.title.trim() || "Profile"} saved.`);
+    }, tr("{name} saved.", { name: d.title.trim() || tr("Profile") }));
   }
 
   function saveTexts() {
@@ -197,7 +201,7 @@ export function BookingEnginePanel({
           privacyPolicy: privacy.trim() === DEFAULT_PRIVACY_POLICY.trim() ? "" : privacy,
           terms,
         }),
-      "Booking engine saved.",
+      tr("Booking engine saved."),
     );
   }
 
@@ -205,20 +209,20 @@ export function BookingEnginePanel({
     <div className="max-w-6xl space-y-6">
       <section className={card}>
         <div className="px-4 pt-5 sm:px-6">
-          <h2 className="border-b border-line pb-2 text-[16px] text-ink">Booking Engine Profiles</h2>
+          <h2 className="border-b border-line pb-2 text-[16px] text-ink">{tr("Booking Engine Profiles")}</h2>
           <div className="overflow-x-auto">
             <table className="w-full min-w-[36rem]">
               <thead>
                 <tr className="border-b border-line">
-                  <th className={cn(th, "w-[40%]")}>Title</th>
-                  <th className={th}>Slug</th>
-                  <th className={th}>Link</th>
-                  <th className="w-16" aria-label="Actions" />
+                  <th className={cn(th, "w-[40%]")}>{tr("Title")}</th>
+                  <th className={th}>{tr("Slug")}</th>
+                  <th className={th}>{tr("Link")}</th>
+                  <th className="w-16" aria-label={tr("Actions")} />
                 </tr>
               </thead>
               <tbody>
                 <tr className="border-b border-line">
-                  <td className={cn(td, "text-ink")}>Default</td>
+                  <td className={cn(td, "text-ink")}>{tr("Default")}</td>
                   <td className={td} />
                   <td className={td}><OpenLink href={base} /></td>
                   <td />
@@ -238,21 +242,21 @@ export function BookingEnginePanel({
                     <td className="py-0.5">
                       {canEdit && (
                         <span className="flex justify-end">
-                          <button type="button" aria-label={`Edit ${p.title}`} className={iconButton}
+                          <button type="button" aria-label={tr("Edit {name}", { name: p.title })} className={iconButton}
                             onClick={() => setDraft({ id: p.id, title: p.title, slug: p.slug, slugTouched: true, roomTypeIds: p.roomTypeIds })}>
                             <EditIcon />
                           </button>
                           <button
                             type="button"
-                            aria-label={`Delete ${p.title}`}
+                            aria-label={tr("Delete {name}", { name: p.title })}
                             className={iconButton}
                             onClick={() => {
-                              if (!confirm(`Delete ${p.title}? Its link stops narrowing the rooms.`)) return;
+                              if (!confirm(tr("Delete {name}? Its link stops narrowing the rooms.", { name: p.title }))) return;
                               run(async () => {
                                 const result = await deleteBookingEngineProfile(p.id);
                                 if (result.ok && draft?.id === p.id) setDraft(null);
                                 return result;
-                              }, `${p.title} deleted.`);
+                              }, tr("{name} deleted.", { name: p.title }));
                             }}
                           >
                             <CrossIcon />
@@ -286,11 +290,11 @@ export function BookingEnginePanel({
               }}
             >
               <h3 className="border-b border-line pb-1 text-[15px] text-ink">
-                {draft.id ? "Edit Profile" : "Add New Profile"}
+                {draft.id ? tr("Edit Profile") : tr("Add New Profile")}
               </h3>
               <div className="grid gap-3 sm:grid-cols-2">
                 <label className="block text-[12px] text-ink-muted">
-                  Title
+                  {tr("Title")}
                   <input value={draft.title} maxLength={80} autoFocus
                     onChange={(e) => {
                       const title = e.target.value;
@@ -299,14 +303,14 @@ export function BookingEnginePanel({
                     className={cn(field, "mt-1")} />
                 </label>
                 <label className="block text-[12px] text-ink-muted">
-                  Slug
+                  {tr("Slug")}
                   <input value={draft.slug} maxLength={60}
                     onChange={(e) => setDraft({ ...draft, slug: e.target.value.toLowerCase(), slugTouched: true })}
                     className={cn(field, "mt-1")} />
                 </label>
               </div>
               <fieldset>
-                <legend className="text-[12px] text-ink-muted">Room types</legend>
+                <legend className="text-[12px] text-ink-muted">{tr("Room types")}</legend>
                 <div className="mt-1 flex flex-wrap gap-x-5 gap-y-1.5">
                   {roomTypes.map((t) => (
                     <label key={t.id} className="flex items-center gap-2 text-[13px] text-ink">
@@ -329,8 +333,8 @@ export function BookingEnginePanel({
                 </div>
               </fieldset>
               <div className="flex justify-end gap-3">
-                <button type="button" className={secondary} onClick={() => setDraft(null)}>Cancel</button>
-                <button type="submit" className={primary} disabled={pending}>Save</button>
+                <button type="button" className={secondary} onClick={() => setDraft(null)}>{tr("Cancel")}</button>
+                <button type="submit" className={primary} disabled={pending}>{tr("Save")}</button>
               </div>
             </form>
           )}
@@ -339,7 +343,7 @@ export function BookingEnginePanel({
           <div className="mt-4 rounded-b-lg border-t border-line bg-shell px-4 py-3 sm:px-6">
             <button type="button" className={primary}
               onClick={() => setDraft({ id: null, title: "", slug: "", slugTouched: false, roomTypeIds: [] })}>
-              Add new profile
+              {tr("Add new profile")}
             </button>
           </div>
         ) : (
@@ -349,13 +353,13 @@ export function BookingEnginePanel({
 
       <section className={card}>
         <div className="space-y-8 px-4 py-5 sm:px-6">
-          <TextCard title="Booking Engine - Privacy Policy" value={privacy} onChange={setPrivacy} rows={22} canEdit={canEdit} />
-          <TextCard title="Booking Engine - Terms & Conditions" value={terms} onChange={setTerms} rows={6} canEdit={canEdit} />
+          <TextCard title={tr("Booking Engine - Privacy Policy")} value={privacy} onChange={setPrivacy} rows={22} canEdit={canEdit} />
+          <TextCard title={tr("Booking Engine - Terms & Conditions")} value={terms} onChange={setTerms} rows={6} canEdit={canEdit} />
         </div>
         {canEdit && (
           <div className="flex justify-end rounded-b-lg border-t border-line bg-shell px-4 py-3 sm:px-6">
             <button type="button" className={primary} disabled={pending} onClick={saveTexts}>
-              Save
+              {tr("Save")}
             </button>
           </div>
         )}

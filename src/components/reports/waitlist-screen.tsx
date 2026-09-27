@@ -1,5 +1,7 @@
 "use client";
 
+import { useT } from "@/components/i18n";
+import { msg } from "@/lib/i18n/translate";
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { format, parseISO } from "date-fns";
@@ -20,11 +22,20 @@ import type { RoomTypeSetting, WaitlistRow, WaitlistStatus } from "@/lib/types";
  */
 
 const STATUS_LABEL: Record<WaitlistStatus, string> = {
-  waiting: "Waiting",
-  offered: "Offered",
-  converted: "Converted",
-  expired: "Expired",
-  canceled: "Cancelled",
+  waiting: msg("Waiting"),
+  offered: msg("Offered"),
+  converted: msg("Converted"),
+  expired: msg("Expired"),
+  canceled: msg("Cancelled"),
+};
+
+/** The confirmation, whole: lower-casing a translated status is not safe. */
+const MARKED: Record<WaitlistStatus, string> = {
+  waiting: msg("Marked waiting."),
+  offered: msg("Marked offered."),
+  converted: msg("Marked converted."),
+  expired: msg("Marked expired."),
+  canceled: msg("Marked cancelled."),
 };
 
 const STATUS_TONE: Record<WaitlistStatus, string> = {
@@ -77,6 +88,7 @@ export function WaitlistScreen({
   businessDate: string;
   canEdit: boolean;
 }) {
+  const tr = useT();
   const router = useRouter();
   const [form, setForm] = useState<FormState | null>(null);
   const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
@@ -87,7 +99,7 @@ export function WaitlistScreen({
     if (form.checkOut <= form.checkIn) {
       setMessage({
         ok: false,
-        text: "The departure date has to be after the arrival date.",
+        text: tr("The departure date has to be after the arrival date."),
       });
       return;
     }
@@ -114,7 +126,7 @@ export function WaitlistScreen({
         return;
       }
       setForm(null);
-      setMessage({ ok: true, text: "Added to the waitlist." });
+      setMessage({ ok: true, text: tr("Added to the waitlist.") });
       router.refresh();
     });
   }
@@ -126,7 +138,7 @@ export function WaitlistScreen({
         setMessage({ ok: false, text: result.error });
         return;
       }
-      setMessage({ ok: true, text: `Marked ${STATUS_LABEL[status].toLowerCase()}.` });
+      setMessage({ ok: true, text: tr(MARKED[status]) });
       router.refresh();
     });
   }
@@ -156,26 +168,26 @@ export function WaitlistScreen({
               }}
               className="rounded-md bg-chrome-800 px-4 py-2 text-[13px] font-medium text-white hover:bg-chrome-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-brass"
             >
-              Add to waitlist
+              {tr("Add to waitlist")}
             </button>
           ) : (
             <div className="rounded-lg border border-line bg-white p-4 shadow-card">
               <h2 className="mb-3 font-display text-[15px] tracking-tightest text-ink">
-                Add to waitlist
+                {tr("Add to waitlist")}
               </h2>
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 <div>
-                  <label className={label} htmlFor="w-name">Name</label>
+                  <label className={label} htmlFor="w-name">{tr("Name")}</label>
                   <input
                     id="w-name"
                     value={form.contactName}
                     onChange={(e) => setForm({ ...form, contactName: e.target.value })}
                     className={field}
-                    placeholder="Who is waiting"
+                    placeholder={tr("Who is waiting")}
                   />
                 </div>
                 <div>
-                  <label className={label} htmlFor="w-email">Email</label>
+                  <label className={label} htmlFor="w-email">{tr("Email")}</label>
                   <input
                     id="w-email"
                     type="email"
@@ -185,7 +197,7 @@ export function WaitlistScreen({
                   />
                 </div>
                 <div>
-                  <label className={label} htmlFor="w-phone">Phone</label>
+                  <label className={label} htmlFor="w-phone">{tr("Phone")}</label>
                   <input
                     id="w-phone"
                     value={form.contactPhone}
@@ -194,7 +206,7 @@ export function WaitlistScreen({
                   />
                 </div>
                 <div>
-                  <label className={label} htmlFor="w-type">Room type</label>
+                  <label className={label} htmlFor="w-type">{tr("Room type")}</label>
                   <select
                     id="w-type"
                     value={form.roomTypeId}
@@ -203,7 +215,7 @@ export function WaitlistScreen({
                   >
                     {/* Any is first and is the default: somebody who wants a
                         room at all on a sold-out night does not care which. */}
-                    <option value="">Any room type</option>
+                    <option value="">{tr("Any room type")}</option>
                     {roomTypes.map((t) => (
                       <option key={t.id} value={t.id}>
                         {t.name}
@@ -212,7 +224,7 @@ export function WaitlistScreen({
                   </select>
                 </div>
                 <div>
-                  <label className={label} htmlFor="w-in">Arrival</label>
+                  <label className={label} htmlFor="w-in">{tr("Arrival")}</label>
                   <input
                     id="w-in"
                     type="date"
@@ -222,7 +234,7 @@ export function WaitlistScreen({
                   />
                 </div>
                 <div>
-                  <label className={label} htmlFor="w-out">Departure</label>
+                  <label className={label} htmlFor="w-out">{tr("Departure")}</label>
                   <input
                     id="w-out"
                     type="date"
@@ -232,7 +244,7 @@ export function WaitlistScreen({
                   />
                 </div>
                 <div>
-                  <label className={label} htmlFor="w-adults">Adults</label>
+                  <label className={label} htmlFor="w-adults">{tr("Adults")}</label>
                   <input
                     id="w-adults"
                     type="number"
@@ -245,7 +257,7 @@ export function WaitlistScreen({
                   />
                 </div>
                 <div>
-                  <label className={label} htmlFor="w-children">Children</label>
+                  <label className={label} htmlFor="w-children">{tr("Children")}</label>
                   <input
                     id="w-children"
                     type="number"
@@ -258,13 +270,13 @@ export function WaitlistScreen({
                   />
                 </div>
                 <div className="sm:col-span-2 lg:col-span-1">
-                  <label className={label} htmlFor="w-notes">Note</label>
+                  <label className={label} htmlFor="w-notes">{tr("Note")}</label>
                   <input
                     id="w-notes"
                     value={form.notes}
                     onChange={(e) => setForm({ ...form, notes: e.target.value })}
                     className={field}
-                    placeholder="What they asked for"
+                    placeholder={tr("What they asked for")}
                   />
                 </div>
               </div>
@@ -275,13 +287,13 @@ export function WaitlistScreen({
                   disabled={pending}
                   className="rounded-md bg-chrome-800 px-5 py-2 text-[13px] font-medium text-white hover:bg-chrome-900 disabled:opacity-50"
                 >
-                  {pending ? "Adding…" : "Add to waitlist"}
+                  {pending ? tr("Adding…") : tr("Add to waitlist")}
                 </button>
                 <button
                   onClick={() => setForm(null)}
                   className="rounded-md border border-line px-4 py-2 text-[13px] text-ink-muted hover:bg-shell"
                 >
-                  Cancel
+                  {tr("Cancel")}
                 </button>
               </div>
             </div>
@@ -292,21 +304,21 @@ export function WaitlistScreen({
       <div className="rounded-lg border border-line bg-white p-4 shadow-card">
         {rows.length === 0 ? (
           <EmptyState
-            title="Nobody is waiting for these dates"
-            hint="When a guest asks for dates the hotel cannot sell, add them here rather than losing the enquiry."
+            title={tr("Nobody is waiting for these dates")}
+            hint={tr("When a guest asks for dates the hotel cannot sell, add them here rather than losing the enquiry.")}
           />
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full min-w-[980px] text-[13px]">
               <thead>
                 <tr className="border-b border-line text-left text-ink-faint">
-                  {["Guest", "Contact", "Room type", "Dates", "Party", "Status", "Note", ""].map(
+                  {[msg("Guest"), msg("Contact"), msg("Room type"), msg("Dates"), msg("Party"), msg("Status"), msg("Note"), ""].map(
                     (c, i) => (
                       <th
                         key={c || `c${i}`}
                         className="whitespace-nowrap px-3 pb-2.5 text-xxs font-semibold uppercase tracking-[0.1em]"
                       >
-                        {c}
+                        {c && tr(c)}
                       </th>
                     ),
                   )}
@@ -315,15 +327,15 @@ export function WaitlistScreen({
               <tbody className="divide-y divide-line">
                 {rows.map((r) => (
                   <tr key={r.id}>
-                    <td className="px-3 py-2.5 font-medium text-ink">{r.guestName}</td>
+                    <td className="px-3 py-2.5 font-medium text-ink">{tr.message(r.guestName)}</td>
                     <td className="px-3 py-2.5 text-ink-muted">
                       {r.contactEmail ?? r.contactPhone ?? "—"}
                     </td>
-                    <td className="px-3 py-2.5 text-ink-muted">{r.roomTypeName}</td>
+                    <td className="px-3 py-2.5 text-ink-muted">{tr.message(r.roomTypeName)}</td>
                     <td className="tnum whitespace-nowrap px-3 py-2.5 text-ink-muted">
-                      {format(parseISO(r.checkIn), "d MMM")} –{" "}
-                      {format(parseISO(r.checkOut), "d MMM")}
-                      <span className="ml-1 text-ink-faint">({r.nights}n)</span>
+                      {tr.date(r.checkIn, "d MMM")} –{" "}
+                      {tr.date(r.checkOut, "d MMM")}
+                      <span className="ml-1 text-ink-faint">({tr("{n}n", { n: r.nights })})</span>
                     </td>
                     <td className="tnum px-3 py-2.5 text-ink-faint">
                       {r.adults}
@@ -331,7 +343,7 @@ export function WaitlistScreen({
                     </td>
                     <td className="px-3 py-2.5">
                       <span className={cn("font-medium", STATUS_TONE[r.status])}>
-                        {STATUS_LABEL[r.status]}
+                        {tr(STATUS_LABEL[r.status])}
                       </span>
                       {r.convertedReference && (
                         <span className="ml-1 text-ink-faint">
@@ -351,7 +363,7 @@ export function WaitlistScreen({
                               disabled={pending}
                               className="rounded border border-line px-2 py-1 text-xxs text-ink-muted hover:bg-shell disabled:opacity-50"
                             >
-                              Offered
+                              {tr("Offered")}
                             </button>
                           )}
                           {/*
@@ -365,14 +377,14 @@ export function WaitlistScreen({
                             href={`/bookings/new?check_in=${r.checkIn}&check_out=${r.checkOut}`}
                             className="rounded border border-line px-2 py-1 text-xxs text-ink-muted hover:bg-shell"
                           >
-                            Book
+                            {tr("Book")}
                           </Link>
                           <button
                             onClick={() => move(r.id, "canceled")}
                             disabled={pending}
                             className="rounded border border-line px-2 py-1 text-xxs text-ink-muted hover:bg-shell disabled:opacity-50"
                           >
-                            Cancel
+                            {tr("Cancel")}
                           </button>
                         </span>
                       )}

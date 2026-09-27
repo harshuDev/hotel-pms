@@ -1,5 +1,6 @@
 "use client";
 
+import { useT } from "@/components/i18n";
 import "leaflet/dist/leaflet.css";
 import { useEffect, useRef, useState } from "react";
 import L from "leaflet";
@@ -78,6 +79,7 @@ export default function LocationMap({
   onChange: (lat: number, lng: number) => void;
   disabled: boolean;
 }) {
+  const tr = useT();
   const [layer, setLayer] = useState<"map" | "satellite">("map");
   const frameRef = useRef<HTMLDivElement>(null);
   const hasPoint = latitude !== null && longitude !== null;
@@ -136,7 +138,7 @@ export default function LocationMap({
               layer === l ? "font-medium text-ink" : "text-ink-muted hover:bg-shell",
             )}
           >
-            {l === "map" ? "Map" : "Satellite"}
+            {l === "map" ? tr("Map") : tr("Satellite")}
           </button>
         ))}
       </div>
@@ -150,8 +152,8 @@ export default function LocationMap({
           if (document.fullscreenElement) void document.exitFullscreen();
           else void el.requestFullscreen();
         }}
-        aria-label="Toggle full screen"
-        title="Full screen"
+        aria-label={tr("Toggle full screen")}
+        title={tr("Full screen")}
         className="absolute right-2.5 top-2.5 z-[1000] grid h-10 w-10 place-items-center rounded-sm bg-white text-ink-muted shadow-md outline-none hover:text-ink focus-visible:ring-2 focus-visible:ring-brass"
       >
         <svg viewBox="0 0 18 18" aria-hidden="true" className="h-[18px] w-[18px]" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">

@@ -1,3 +1,4 @@
+import { msg } from "@/lib/i18n/translate";
 /**
  * Settings -> Connectivity Settings -> Channel Manager (0097). STORED, NOT
  * YET CONNECTED: nothing talks to SiteMinder or Vertical Booking yet.
@@ -12,8 +13,8 @@
  */
 
 export const CHANNEL_MANAGERS = [
-  { id: "site_minder", label: "Site Minder" },
-  { id: "vertical_booking", label: "Vertical Booking" },
+  { id: "site_minder", label: msg("Site Minder") },
+  { id: "vertical_booking", label: msg("Vertical Booking") },
 ] as const;
 
 export type ChannelManagerProvider = (typeof CHANNEL_MANAGERS)[number]["id"];
@@ -23,9 +24,9 @@ export function channelManagerLabel(id: string): string {
 }
 
 export const REGIONS = [
-  { id: "emea", label: "Europe, Middle East & Africa" },
-  { id: "apac", label: "Asia Pacific" },
-  { id: "americas", label: "Americas" },
+  { id: "emea", label: msg("Europe, Middle East & Africa") },
+  { id: "apac", label: msg("Asia Pacific") },
+  { id: "americas", label: msg("Americas") },
 ] as const;
 
 export const DAYS_TO_SYNC = [90, 180, 365, 400, 500, 730] as const;

@@ -1,6 +1,8 @@
 import { InventoryPage } from "@/components/inventory/inventory-page";
+import { pageTitle } from "@/lib/i18n/server";
+import { msg } from "@/lib/i18n/translate";
 
-export const metadata = { title: "Closed to departure" };
+export const generateMetadata = pageTitle(msg("Closed to departure"));
 
 export default async function Page({
   searchParams,

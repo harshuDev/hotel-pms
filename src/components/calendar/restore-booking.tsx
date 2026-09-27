@@ -1,5 +1,6 @@
 "use client";
 
+import { useT } from "@/components/i18n";
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { cn } from "@/components/ui";
@@ -25,6 +26,7 @@ import { restoreBooking } from "@/lib/actions/booking-edit";
  * shape as taking a booking that would oversell. It is never one click.
  */
 export function RestoreBooking({ bookingId }: { bookingId: string }) {
+  const tr = useT();
   const router = useRouter();
   const [blocked, setBlocked] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -52,15 +54,15 @@ export function RestoreBooking({ bookingId }: { bookingId: string }) {
         type="button"
         disabled={pending}
         onClick={() => run(false)}
-        title="Restore this booking"
-        aria-label="Restore this booking"
+        title={tr("Restore this booking")}
+        aria-label={tr("Restore this booking")}
         className={cn(
           "rounded border border-emerald-300 bg-white px-1 text-[10.5px] font-medium leading-4 text-emerald-700 shadow-card transition",
           "hover:bg-emerald-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500",
           "disabled:opacity-50",
         )}
       >
-        {pending ? "…" : "Restore"}
+        {pending ? "…" : tr("Restore")}
       </button>
 
       {(blocked || error) && (
@@ -76,7 +78,7 @@ export function RestoreBooking({ bookingId }: { bookingId: string }) {
                 onClick={() => run(true)}
                 className="rounded bg-rose-600 px-1.5 py-0.5 text-[11px] font-medium text-white hover:bg-rose-700 disabled:opacity-50"
               >
-                Restore anyway
+                {tr("Restore anyway")}
               </button>
             )}
             <button
@@ -87,7 +89,7 @@ export function RestoreBooking({ bookingId }: { bookingId: string }) {
               }}
               className="rounded border border-line px-1.5 py-0.5 text-[11px] text-ink-muted hover:bg-shell"
             >
-              Close
+              {tr("Close")}
             </button>
           </span>
         </span>

@@ -1,5 +1,6 @@
 "use client";
 
+import { useT } from "@/components/i18n";
 import { useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -28,6 +29,7 @@ export function ChargeExtra({
   bookingId: string;
   catalog: ExtrasCatalog;
 }) {
+  const tr = useT();
   const currency = useCurrency();
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -38,9 +40,9 @@ export function ChargeExtra({
   if (catalog.extras.length === 0) {
     return (
       <p className="text-[13px] text-ink-muted">
-        No extras to charge yet.{" "}
+        {tr("No extras to charge yet.")}{" "}
         <Link href="/settings?tab=extras" className="text-brass underline-offset-2 hover:underline">
-          Add them in Settings
+          {tr("Add them in Settings")}
         </Link>
         .
       </p>
@@ -51,7 +53,7 @@ export function ChargeExtra({
 
   function submit() {
     if (!chosen) {
-      setMessage({ ok: false, text: "Pick the extra to charge." });
+      setMessage({ ok: false, text: tr("Pick the extra to charge.") });
       return;
     }
     const qty = Number(quantity);
@@ -63,7 +65,10 @@ export function ChargeExtra({
         setMessage({ ok: false, text: result.error });
         return;
       }
-      setMessage({ ok: true, text: `${qty > 1 ? `${qty} × ` : ""}${what} charged.` });
+      setMessage({
+        ok: true,
+        text: qty > 1 ? tr("{qty} × {what} charged.", { qty, what }) : tr("{what} charged.", { what }),
+      });
       setExtraId("");
       setQuantity("1");
       router.refresh();
@@ -77,13 +82,13 @@ export function ChargeExtra({
     <div>
       <div className="flex flex-wrap items-end gap-2">
         <label className="min-w-[14rem] flex-1 text-[12px] text-ink-muted">
-          Extra
+          {tr("Extra")}
           <select
             value={extraId}
             onChange={(e) => setExtraId(e.target.value)}
             className={cn(field, "mt-1 w-full")}
           >
-            <option value="">Choose…</option>
+            <option value="">{tr("Choose…")}</option>
             {catalog.categories.map((c) => {
               const inCategory = catalog.extras.filter((e) => e.categoryId === c.id);
               if (inCategory.length === 0) return null;
@@ -100,7 +105,7 @@ export function ChargeExtra({
           </select>
         </label>
         <label className="w-20 text-[12px] text-ink-muted">
-          Quantity
+          {tr("Quantity")}
           <input
             type="number"
             min={1}
@@ -117,7 +122,7 @@ export function ChargeExtra({
           disabled={pending}
           className="rounded-md bg-chrome-800 px-4 py-2 text-[13px] font-medium text-white hover:bg-chrome-900 disabled:opacity-50"
         >
-          {pending ? "Charging…" : "Charge"}
+          {pending ? tr("Charging…") : tr("Charge")}
         </button>
       </div>
       {message && (

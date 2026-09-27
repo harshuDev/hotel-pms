@@ -1,3 +1,4 @@
+import { getT } from "@/lib/i18n/server";
 import { isValid, parseISO } from "date-fns";
 import Link from "next/link";
 import { PageHeader } from "@/components/ui";
@@ -36,6 +37,7 @@ export async function InventoryPage({
   /** Two routes share the `rate` field and need different headings. */
   title?: string;
 }) {
+  const tr = await getT();
   const spec = SCREENS[fieldName];
   const sp = await searchParams;
 
@@ -45,16 +47,15 @@ export async function InventoryPage({
     const label = INVENTORY_VISIBILITY.find((v) => v.field === fieldName)?.label;
     return (
       <div>
-        <PageHeader title={title ?? spec.title} />
+        <PageHeader title={title ?? tr(spec.title)} />
         <div className="rounded-lg border border-line bg-white p-5 text-[13px] text-ink shadow-card">
-          This screen is switched off.{" "}
+          {tr("This screen is switched off.")}{" "}
           <Link
             href="/settings?tab=inventory-settings"
             className="text-brass underline-offset-2 hover:underline"
           >
-            {label} in Inventory Settings
-          </Link>{" "}
-          turns it back on.
+            {tr("{setting} in Inventory Settings turns it back on.", { setting: label ? tr(label) : "" })}
+          </Link>
         </div>
       </div>
     );
@@ -92,7 +93,7 @@ export async function InventoryPage({
   return (
     <div>
       <PageHeader
-        title={title ?? spec.title}
+        title={title ?? tr(spec.title)}
       />
       <InventoryScreen
         fieldName={fieldName}

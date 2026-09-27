@@ -1,5 +1,6 @@
 "use client";
 
+import { useT } from "@/components/i18n";
 import { useState } from "react";
 import { cn } from "@/components/ui";
 import { useCurrency } from "@/components/currency";
@@ -164,6 +165,7 @@ export function CancellationPolicyPanel({
   pending: boolean;
   run: Run;
 }) {
+  const tr = useT();
   const currency = useCurrency();
   // The reference writes the currency code beside a deposit amount ("MXN").
   const symbol = currency;
@@ -173,7 +175,7 @@ export function CancellationPolicyPanel({
     setDraft((d) => (d ? { ...d, [key]: value } : d));
   }
 
-  const summary = draft ? cancellationPolicySummary(termsOf(draft), currency) : "";
+  const summary = draft ? cancellationPolicySummary(termsOf(draft), currency, tr) : "";
 
   function save(d: Draft) {
     run(async () => {
@@ -182,11 +184,11 @@ export function CancellationPolicyPanel({
         name: d.name,
         terms: termsOf(d),
         isDefault: d.isDefault,
-        summary: cancellationPolicySummary(termsOf(d), currency),
+        summary: cancellationPolicySummary(termsOf(d), currency, tr),
       });
       if (result.ok) setDraft(null);
       return result;
-    }, `${d.name.trim() || "Cancellation policy"} saved.`);
+    }, tr("{name} saved.", { name: d.name.trim() || tr("Cancellation policy") }));
   }
 
   function radio<K extends "depositRule" | "refundRule" | "cancelRule" | "noShowRule">(
@@ -207,15 +209,15 @@ export function CancellationPolicyPanel({
 
   return (
     <div className="max-w-5xl space-y-2">
-      <h2 className="border-b border-line pb-1 text-[22px] text-ink">Cancellation Policy</h2>
+      <h2 className="border-b border-line pb-1 text-[22px] text-ink">{tr("Cancellation Policy")}</h2>
       <section className={cn(card, "px-4 pb-6 pt-5 sm:px-10")}>
         <div className="overflow-x-auto">
           <table className="w-full min-w-[28rem] text-[13px]">
             <thead>
               <tr className="border-b-2 border-line">
-                <th className="w-[60%] px-2 py-2.5 text-left font-semibold text-ink">Policy Name</th>
-                <th className="px-2 py-2.5 text-left font-semibold text-ink">Default</th>
-                <th className="w-20" aria-label="Actions" />
+                <th className="w-[60%] px-2 py-2.5 text-left font-semibold text-ink">{tr("Policy Name")}</th>
+                <th className="px-2 py-2.5 text-left font-semibold text-ink">{tr("Default")}</th>
+                <th className="w-20" aria-label={tr("Actions")} />
               </tr>
             </thead>
             <tbody>
@@ -225,7 +227,7 @@ export function CancellationPolicyPanel({
                   <td className="px-2 py-2.5">
                     <span
                       role="img"
-                      aria-label={p.isDefault ? "Default" : "Not default"}
+                      aria-label={p.isDefault ? tr("Default") : tr("Not default")}
                       className={cn("block h-3 w-3 rounded-full", p.isDefault ? "bg-emerald-500" : "bg-slate-400")}
                     />
                   </td>
@@ -234,7 +236,7 @@ export function CancellationPolicyPanel({
                       <span className="flex justify-end">
                         <button
                           type="button"
-                          aria-label={`Edit ${p.name}`}
+                          aria-label={tr("Edit {name}", { name: p.name })}
                           className={iconButton}
                           onClick={() => setDraft(draftOf(p, policies.length))}
                         >
@@ -245,15 +247,15 @@ export function CancellationPolicyPanel({
                         {!p.isDefault && (
                           <button
                             type="button"
-                            aria-label={`Delete ${p.name}`}
+                            aria-label={tr("Delete {name}", { name: p.name })}
                             className={iconButton}
                             onClick={() => {
-                              if (!confirm(`Delete ${p.name}?`)) return;
+                              if (!confirm(tr("Delete {name}?", { name: p.name }))) return;
                               run(async () => {
                                 const result = await deleteCancellationPolicy(p.id);
                                 if (result.ok && draft?.id === p.id) setDraft(null);
                                 return result;
-                              }, `${p.name} deleted.`);
+                              }, tr("{name} deleted.", { name: p.name }));
                             }}
                           >
                             <CrossIcon />
@@ -267,7 +269,7 @@ export function CancellationPolicyPanel({
               {policies.length === 0 && (
                 <tr>
                   <td colSpan={3} className="px-2 py-5 text-ink-muted">
-                    None yet. Add the terms your rates are sold under.
+                    {tr("None yet. Add the terms your rates are sold under.")}
                   </td>
                 </tr>
               )}
@@ -281,7 +283,7 @@ export function CancellationPolicyPanel({
             className="mt-3 text-[13px] font-semibold text-brass hover:underline"
             onClick={() => setDraft(draftOf(null, policies.length))}
           >
-            + Add Cancellation Policy
+            {tr("+ Add Cancellation Policy")}
           </button>
         )}
 
@@ -294,7 +296,7 @@ export function CancellationPolicyPanel({
             }}
           >
             <label className="flex flex-wrap items-center gap-4 px-2 text-[13.5px] text-ink-muted">
-              <span className="w-32">Policy Title:</span>
+              <span className="w-32">{tr("Policy Title:")}</span>
               <input
                 autoFocus
                 value={draft.name}
@@ -303,68 +305,68 @@ export function CancellationPolicyPanel({
               />
             </label>
 
-            <h3 className={heading}>How do you handle deposits?</h3>
+            <h3 className={heading}>{tr("How do you handle deposits?")}</h3>
             <div className="mt-2 px-2">
-              <label className={option}>{radio("depositRule", "none", "dep")}No deposit is required</label>
+              <label className={option}>{radio("depositRule", "none", "dep")}{tr("No deposit is required")}</label>
               <label className={option}>
-                {radio("depositRule", "full", "dep")}A deposit equal to the total cost is required at the time of booking
+                {radio("depositRule", "full", "dep")}{tr("A deposit equal to the total cost is required at the time of booking")}
               </label>
               <label className={option}>
                 {radio("depositRule", "nights", "dep")}
-                <input aria-label="Nights" inputMode="numeric" value={draft.depositNights} className={small}
+                <input aria-label={tr("Nights")} inputMode="numeric" value={draft.depositNights} className={small}
                   onFocus={() => set("depositRule", "nights")}
                   onChange={(e) => set("depositNights", e.target.value)} />
-                night deposit is required at the time of booking
+                {tr("night deposit is required at the time of booking")}
               </label>
               <label className={option}>
                 {radio("depositRule", "percent", "dep")}
-                <input aria-label="Percent" inputMode="decimal" value={draft.depositPercent} className={small}
+                <input aria-label={tr("Percent")} inputMode="decimal" value={draft.depositPercent} className={small}
                   onFocus={() => set("depositRule", "percent")}
                   onChange={(e) => set("depositPercent", e.target.value)} />
-                % deposit is required at the time of booking
+                {tr("% deposit is required at the time of booking")}
               </label>
               <label className={option}>
                 {radio("depositRule", "per_booking", "dep")}
-                <input aria-label="Amount per booking" inputMode="decimal"
+                <input aria-label={tr("Amount per booking")} inputMode="decimal"
                   value={draft.depositRule === "per_booking" ? draft.depositAmount : ""} className={small}
                   onFocus={() => set("depositRule", "per_booking")}
                   onChange={(e) => set("depositAmount", e.target.value)} />
-                {symbol} is required per booking
+                {symbol} {tr("is required per booking")}
               </label>
               <label className={option}>
                 {radio("depositRule", "per_room", "dep")}
-                <input aria-label="Amount per room" inputMode="decimal"
+                <input aria-label={tr("Amount per room")} inputMode="decimal"
                   value={draft.depositRule === "per_room" ? draft.depositAmount : ""} className={small}
                   onFocus={() => set("depositRule", "per_room")}
                   onChange={(e) => set("depositAmount", e.target.value)} />
-                {symbol} is required per room booked
+                {symbol} {tr("is required per room booked")}
               </label>
             </div>
 
-            <h3 className={heading}>How do you handle refunds of deposits?</h3>
+            <h3 className={heading}>{tr("How do you handle refunds of deposits?")}</h3>
             <div className="mt-2 px-2">
-              <label className={option}>{radio("refundRule", "non_refundable", "ref")}All deposits are non-refundable</label>
+              <label className={option}>{radio("refundRule", "non_refundable", "ref")}{tr("All deposits are non-refundable")}</label>
               <label className={option}>
-                {radio("refundRule", "until_days", "ref")}Deposits are refundable up to
-                <input aria-label="Days" inputMode="numeric" value={draft.refundDays} className={small}
+                {radio("refundRule", "until_days", "ref")}{tr("Deposits are refundable up to")}
+                <input aria-label={tr("Days")} inputMode="numeric" value={draft.refundDays} className={small}
                   onFocus={() => set("refundRule", "until_days")}
                   onChange={(e) => set("refundDays", e.target.value)} />
-                days prior to arrival
+                {tr("days prior to arrival")}
               </label>
-              <label className={option}>{radio("refundRule", "custom", "ref")}Custom Policy</label>
+              <label className={option}>{radio("refundRule", "custom", "ref")}{tr("Custom Policy")}</label>
               {draft.refundRule === "custom" && (
-                <textarea aria-label="Custom refund policy" rows={2} value={draft.refundCustom} className={text}
+                <textarea aria-label={tr("Custom refund policy")} rows={2} value={draft.refundCustom} className={text}
                   onChange={(e) => set("refundCustom", e.target.value)} />
               )}
             </div>
 
-            <h3 className={heading}>Do you have any other details?</h3>
+            <h3 className={heading}>{tr("Do you have any other details?")}</h3>
             <div className="mt-2 px-2">
               <label className={option}>
                 <input type="checkbox" checked={draft.balanceOn} className="h-3.5 w-3.5 accent-brass"
                   onChange={(e) => set("balanceOn", e.target.checked)} />
-                Remaining balance to be paid on
-                <select aria-label="Paid on" value={draft.balanceDue}
+                {tr("Remaining balance to be paid on")}
+                <select aria-label={tr("Paid on")} value={draft.balanceDue}
                   onChange={(e) => {
                     set("balanceDue", e.target.value as BalanceDue | "");
                     if (e.target.value) set("balanceOn", true);
@@ -372,82 +374,82 @@ export function CancellationPolicyPanel({
                   className="rounded border border-line bg-white px-1.5 py-0.5 text-[12.5px] text-ink">
                   <option value="" />
                   {BALANCE_DUE_OPTIONS.map((o) => (
-                    <option key={o.id} value={o.id}>{o.label}</option>
+                    <option key={o.id} value={o.id}>{tr(o.label)}</option>
                   ))}
                 </select>
               </label>
               <label className={option}>
                 <input type="checkbox" checked={draft.preauthoriseCard} className="h-3.5 w-3.5 accent-brass"
                   onChange={(e) => set("preauthoriseCard", e.target.checked)} />
-                We have the right to pre-authorise your card prior to arrival
+                {tr("We have the right to pre-authorise your card prior to arrival")}
               </label>
               <label className={option}>
                 <input type="checkbox" checked={draft.otherOn} className="h-3.5 w-3.5 accent-brass"
                   onChange={(e) => set("otherOn", e.target.checked)} />
-                Custom Policy
+                {tr("Custom Policy")}
               </label>
               {draft.otherOn && (
-                <textarea aria-label="Other details" rows={2} value={draft.otherCustom} className={text}
+                <textarea aria-label={tr("Other details")} rows={2} value={draft.otherCustom} className={text}
                   onChange={(e) => set("otherCustom", e.target.value)} />
               )}
             </div>
 
-            <h3 className={heading}>Cancellation Policy</h3>
+            <h3 className={heading}>{tr("Cancellation Policy")}</h3>
             <div className="mt-2 px-2">
-              <label className={option}>{radio("cancelRule", "free_any_time", "can")}Free cancellation at any time</label>
+              <label className={option}>{radio("cancelRule", "free_any_time", "can")}{tr("Free cancellation at any time")}</label>
               <label className={option}>
-                {radio("cancelRule", "no_cancellation", "can")}No cancellation or modification can be applied to this booking
+                {radio("cancelRule", "no_cancellation", "can")}{tr("No cancellation or modification can be applied to this booking")}
               </label>
               <label className={option}>
-                {radio("cancelRule", "free_until", "can")}Free cancellation up
-                <input aria-label="How long before arrival" inputMode="numeric" value={draft.cancelValue} className={small}
+                {radio("cancelRule", "free_until", "can")}{tr("Free cancellation up")}
+                <input aria-label={tr("How long before arrival")} inputMode="numeric" value={draft.cancelValue} className={small}
                   onFocus={() => set("cancelRule", "free_until")}
                   onChange={(e) => set("cancelValue", e.target.value)} />
-                <select aria-label="Days or hours" value={draft.cancelUnit}
+                <select aria-label={tr("Days or hours")} value={draft.cancelUnit}
                   onChange={(e) => set("cancelUnit", e.target.value as CancelUnit)}
                   className="rounded border border-line bg-white px-1.5 py-0.5 text-[12.5px] text-ink">
-                  <option value="days">days</option>
-                  <option value="hours">hours</option>
+                  <option value="days">{tr("days")}</option>
+                  <option value="hours">{tr("hours")}</option>
                 </select>
-                before arrival
+                {tr("before arrival")}
               </label>
-              <label className={option}>{radio("cancelRule", "custom", "can")}Custom Policy</label>
+              <label className={option}>{radio("cancelRule", "custom", "can")}{tr("Custom Policy")}</label>
               {draft.cancelRule === "custom" && (
-                <textarea aria-label="Custom cancellation policy" rows={2} value={draft.cancelCustom} className={text}
+                <textarea aria-label={tr("Custom cancellation policy")} rows={2} value={draft.cancelCustom} className={text}
                   onChange={(e) => set("cancelCustom", e.target.value)} />
               )}
             </div>
 
-            <h3 className={heading}>No-Show or late cancellation policy</h3>
+            <h3 className={heading}>{tr("No-Show or late cancellation policy")}</h3>
             <div className="mt-2 px-2">
               <label className={option}>
-                {radio("noShowRule", "first_night", "ns")}In case of no-show or late cancellation the first night will be charged
+                {radio("noShowRule", "first_night", "ns")}{tr("In case of no-show or late cancellation the first night will be charged")}
               </label>
               <label className={option}>
-                {radio("noShowRule", "total", "ns")}In case of no-show or late cancellation the total cost will be charged
+                {radio("noShowRule", "total", "ns")}{tr("In case of no-show or late cancellation the total cost will be charged")}
               </label>
-              <label className={option}>{radio("noShowRule", "custom", "ns")}Custom Policy</label>
+              <label className={option}>{radio("noShowRule", "custom", "ns")}{tr("Custom Policy")}</label>
               {draft.noShowRule === "custom" && (
-                <textarea aria-label="Custom no-show policy" rows={2} value={draft.noShowCustom} className={text}
+                <textarea aria-label={tr("Custom no-show policy")} rows={2} value={draft.noShowCustom} className={text}
                   onChange={(e) => set("noShowCustom", e.target.value)} />
               )}
             </div>
 
-            <h3 className={heading}>Breakfast</h3>
+            <h3 className={heading}>{tr("Breakfast")}</h3>
             <div className="mt-2 px-2">
               <label className={option}>
                 <input type="checkbox" checked={draft.breakfastOmit} className="h-3.5 w-3.5 accent-brass"
                   onChange={(e) => set("breakfastOmit", e.target.checked)} />
-                Omit policy
+                {tr("Omit policy")}
               </label>
               {!draft.breakfastOmit && (
-                <textarea aria-label="Breakfast policy" rows={2} value={draft.breakfastCustom} className={text}
+                <textarea aria-label={tr("Breakfast policy")} rows={2} value={draft.breakfastCustom} className={text}
                   onChange={(e) => set("breakfastCustom", e.target.value)} />
               )}
               <label className={cn(option, "mt-3")}>
                 <input type="checkbox" checked={draft.isDefault} className="h-3.5 w-3.5 accent-brass"
                   onChange={(e) => set("isDefault", e.target.checked)} />
-                Use as default policy
+                {tr("Use as default policy")}
               </label>
             </div>
 
@@ -455,10 +457,10 @@ export function CancellationPolicyPanel({
 
             <div className="mt-5 flex justify-center gap-3">
               <button type="submit" className={primary} disabled={pending}>
-                Save
+                {tr("Save")}
               </button>
               <button type="button" className={secondary} onClick={() => setDraft(null)}>
-                Cancel
+                {tr("Cancel")}
               </button>
             </div>
           </form>

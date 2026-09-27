@@ -1,3 +1,4 @@
+import { getT } from "@/lib/i18n/server";
 import { format, parseISO } from "date-fns";
 import { StatusBadge } from "@/components/ui";
 import {
@@ -15,14 +16,17 @@ import {
 } from "@/lib/queries";
 import type { BookingProductionRow, ChannelProductionRow } from "@/lib/types";
 import { getPropertyCurrency } from "@/lib/queries";
+import { pageTitle } from "@/lib/i18n/server";
+import { msg } from "@/lib/i18n/translate";
 
-export const metadata = { title: "Booking report" };
+export const generateMetadata = pageTitle(msg("Booking report"));
 
 export default async function BookingReportPage({
   searchParams,
 }: {
   searchParams: Promise<{ from?: string; to?: string }>;
 }) {
+  const tr = await getT();
   const currency = await getPropertyCurrency();
   const sp = await searchParams;
   const businessDate = await getBusinessDate();
@@ -42,25 +46,25 @@ export default async function BookingReportPage({
 
   return (
     <ReportShell
-      title="Booking"
+      title={tr("Booking")}
       action="/reports/booking"
       range={range}
     >
       <ReportFigures>
         <ReportFigure
-          label="Bookings taken"
+          label={tr("Bookings taken")}
           value={String(rows.length)}
-          detail={lost > 0 ? `${lost} since cancelled` : "None cancelled"}
+          detail={lost > 0 ? tr("{lost} since cancelled", { lost: lost }) : tr("None cancelled")}
         />
-        <ReportFigure label="Room nights" value={String(roomNights)} />
+        <ReportFigure label={tr("Room nights")} value={String(roomNights)} />
         <ReportFigure
-          label="Value"
+          label={tr("Value")}
           value={formatMoneyShort(value, currency)}
-          detail="Rate less discount, before tax"
+          detail={tr("Rate less discount, before tax")}
           emphasis
         />
         <ReportFigure
-          label="Average booking"
+          label={tr("Average booking")}
           value={rows.length > 0 ? formatMoney(Math.round(value / rows.length), currency) : "—"}
         />
       </ReportFigures>
@@ -70,27 +74,27 @@ export default async function BookingReportPage({
           rows={byChannel}
           rowKey={(r) => r.channelName}
           minWidth="620px"
-          emptyTitle="No bookings were taken in this range"
-          emptyHint="Widen the dates, or take a booking."
-          footLabel={`${byChannel.length} channel${byChannel.length === 1 ? "" : "s"}`}
+          emptyTitle={tr("No bookings were taken in this range")}
+          emptyHint={tr("Widen the dates, or take a booking.")}
+          footLabel={tr.plural(byChannel.length, "{n} channel", "{n} channels")}
           columns={[
             {
-              header: "Channel",
+              header: tr("Channel"),
               cell: (r) => <span className="font-medium text-ink">{r.channelName}</span>,
             },
             {
-              header: "Kind",
+              header: tr("Kind"),
               cell: (r) => (
                 <span className="text-ink-faint">{r.channelKind ?? "—"}</span>
               ),
             },
             {
-              header: "Bookings",
+              header: tr("Bookings"),
               align: "right",
               cell: (r) => <span className="text-ink-muted">{r.bookingCount}</span>,
             },
             {
-              header: "Cancelled",
+              header: tr("Cancelled"),
               align: "right",
               cell: (r) => (
                 <span className={r.canceledCount > 0 ? "text-warn-deep" : "text-ink-faint"}>
@@ -99,12 +103,12 @@ export default async function BookingReportPage({
               ),
             },
             {
-              header: "Room nights",
+              header: tr("Room nights"),
               align: "right",
               cell: (r) => <span className="text-ink-muted">{r.roomNights}</span>,
             },
             {
-              header: "Value",
+              header: tr("Value"),
               align: "right",
               cell: (r) => (
                 <span className="font-medium text-ink">{formatMoney(r.valueCents, currency)}</span>
@@ -119,20 +123,20 @@ export default async function BookingReportPage({
         rows={rows}
         rowKey={(r) => r.bookingId}
         minWidth="900px"
-        emptyTitle="No bookings were taken in this range"
-        emptyHint="Widen the dates, or take a booking."
-        footLabel={`${rows.length} booking${rows.length === 1 ? "" : "s"}`}
+        emptyTitle={tr("No bookings were taken in this range")}
+        emptyHint={tr("Widen the dates, or take a booking.")}
+        footLabel={tr.plural(rows.length, "{n} booking", "{n} bookings")}
         columns={[
           {
-            header: "Booked",
+            header: tr("Booked"),
             cell: (r) => (
               <span className="whitespace-nowrap text-ink-muted">
-                {format(parseISO(r.bookedOn), "d MMM")}
+                {tr.date(r.bookedOn, "d MMM")}
               </span>
             ),
           },
           {
-            header: "Booking",
+            header: tr("Booking"),
             cell: (r) => (
               <>
                 <span className="font-medium text-ink">{r.reference}</span>
@@ -141,35 +145,35 @@ export default async function BookingReportPage({
             ),
           },
           {
-            header: "Status",
+            header: tr("Status"),
             cell: (r) => <StatusBadge status={r.status} />,
           },
           {
-            header: "Channel",
+            header: tr("Channel"),
             cell: (r) => (
               <span className="text-ink-faint">{r.channelName ?? "—"}</span>
             ),
           },
           {
-            header: "Arrival",
+            header: tr("Arrival"),
             cell: (r) => (
               <span className="whitespace-nowrap text-ink-muted">
-                {format(parseISO(r.checkIn), "d MMM")}
+                {tr.date(r.checkIn, "d MMM")}
               </span>
             ),
           },
           {
-            header: "Nights",
+            header: tr("Nights"),
             align: "right",
             cell: (r) => <span className="text-ink-muted">{r.nights}</span>,
           },
           {
-            header: "Rooms",
+            header: tr("Rooms"),
             align: "right",
             cell: (r) => <span className="text-ink-muted">{r.roomCount}</span>,
           },
           {
-            header: "Value",
+            header: tr("Value"),
             align: "right",
             cell: (r) => (
               <span className="font-medium text-ink">{formatMoney(r.valueCents, currency)}</span>

@@ -1,3 +1,4 @@
+import { getT } from "@/lib/i18n/server";
 import { format, parseISO } from "date-fns";
 import { cn } from "@/components/ui";
 import {
@@ -15,14 +16,17 @@ import {
 } from "@/lib/queries";
 import type { FinancialRow } from "@/lib/types";
 import { getPropertyCurrency } from "@/lib/queries";
+import { pageTitle } from "@/lib/i18n/server";
+import { msg } from "@/lib/i18n/translate";
 
-export const metadata = { title: "Financial report" };
+export const generateMetadata = pageTitle(msg("Financial report"));
 
 export default async function FinancialReportPage({
   searchParams,
 }: {
   searchParams: Promise<{ from?: string; to?: string }>;
 }) {
+  const tr = await getT();
   const currency = await getPropertyCurrency();
   const sp = await searchParams;
   const businessDate = await getBusinessDate();
@@ -35,7 +39,7 @@ export default async function FinancialReportPage({
     if (error instanceof ReportAccessError) {
       return (
         <ReportShell
-          title="Financial"
+          title={tr("Financial")}
         >
           <ReportNoAccess />
         </ReportShell>
@@ -57,27 +61,27 @@ export default async function FinancialReportPage({
 
   return (
     <ReportShell
-      title="Financial"
+      title={tr("Financial")}
       action="/reports/financial"
       range={range}
     >
       <ReportFigures>
         <ReportFigure
-          label="Revenue"
+          label={tr("Revenue")}
           value={formatMoneyShort(room + extras + discounts, currency)}
-          detail="Room and extras, less discounts, before tax"
+          detail={tr("Room and extras, less discounts, before tax")}
           emphasis
         />
-        <ReportFigure label="Tax" value={formatMoneyShort(tax, currency)} detail="Posted with the charge" />
+        <ReportFigure label={tr("Tax")} value={formatMoneyShort(tax, currency)} detail={tr("Posted with the charge")} />
         <ReportFigure
-          label="Charged"
+          label={tr("Charged")}
           value={formatMoneyShort(charges, currency)}
-          detail="Everything posted to folios"
+          detail={tr("Everything posted to folios")}
         />
         <ReportFigure
-          label="Received"
+          label={tr("Received")}
           value={formatMoneyShort(payments, currency)}
-          detail={`${formatMoneyShort(drawer, currency)} through the drawer`}
+          detail={tr("{amount} through the drawer", { amount: formatMoneyShort(drawer, currency) })}
         />
       </ReportFigures>
 
@@ -85,32 +89,32 @@ export default async function FinancialReportPage({
         rows={rows}
         rowKey={(r) => r.businessDate}
         minWidth="880px"
-        emptyTitle="No days in this range"
-        emptyHint="Widen the dates, or check that the range runs forwards."
-        footLabel={`${rows.length} day${rows.length === 1 ? "" : "s"}`}
+        emptyTitle={tr("No days in this range")}
+        emptyHint={tr("Widen the dates, or check that the range runs forwards.")}
+        footLabel={tr.plural(rows.length, "{n} day", "{n} days")}
         columns={[
           {
-            header: "Business date",
+            header: tr("Business date"),
             cell: (r) => (
               <span className="whitespace-nowrap text-ink">
-                {format(parseISO(r.businessDate), "EEE d MMM")}
+                {tr.date(r.businessDate, "EEE d MMM")}
               </span>
             ),
           },
           {
-            header: "Room",
+            header: tr("Room"),
             align: "right",
             cell: (r) => <span className="text-ink-muted">{formatMoney(r.roomRevenueCents, currency)}</span>,
             foot: formatMoney(room, currency),
           },
           {
-            header: "Extras",
+            header: tr("Extras"),
             align: "right",
             cell: (r) => <span className="text-ink-muted">{formatMoney(r.extrasRevenueCents, currency)}</span>,
             foot: formatMoney(extras, currency),
           },
           {
-            header: "Discounts",
+            header: tr("Discounts"),
             align: "right",
             cell: (r) => (
               <span className={r.discountsCents < 0 ? "text-warn-deep" : "text-ink-faint"}>
@@ -120,19 +124,19 @@ export default async function FinancialReportPage({
             foot: discounts === 0 ? "—" : formatMoney(discounts, currency),
           },
           {
-            header: "Tax",
+            header: tr("Tax"),
             align: "right",
             cell: (r) => <span className="text-ink-faint">{formatMoney(r.taxCents, currency)}</span>,
             foot: formatMoney(tax, currency),
           },
           {
-            header: "Charged",
+            header: tr("Charged"),
             align: "right",
             cell: (r) => <span className="font-medium text-ink">{formatMoney(r.chargesCents, currency)}</span>,
             foot: formatMoney(charges, currency),
           },
           {
-            header: "Received",
+            header: tr("Received"),
             align: "right",
             cell: (r) => (
               <span className={cn(r.paymentsCents > 0 ? "text-ink" : "text-ink-faint")}>
@@ -142,7 +146,7 @@ export default async function FinancialReportPage({
             foot: formatMoney(payments, currency),
           },
           {
-            header: "Of which cash",
+            header: tr("Of which cash"),
             align: "right",
             cell: (r) => <span className="text-ink-faint">{formatMoney(r.drawerPaymentsCents, currency)}</span>,
             foot: formatMoney(drawer, currency),

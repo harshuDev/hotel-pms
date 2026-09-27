@@ -1,4 +1,5 @@
 "use server";
+import { localised } from "@/lib/i18n/localised";
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
@@ -91,26 +92,26 @@ export async function applyInventory(
 ): Promise<ActionResult<{ nightsWritten: number }>> {
   const spec = FIELDS[edit.field];
   if (!spec) {
-    return { ok: false, error: "That is not something Inventory can set." };
+    return { ok: false, error: await localised("That is not something Inventory can set.") };
   }
   if (edit.roomTypeIds.length === 0) {
-    return { ok: false, error: "Pick at least one room type." };
+    return { ok: false, error: await localised("Pick at least one room type.") };
   }
   if (edit.to < edit.from) {
-    return { ok: false, error: "The last date must not be before the first." };
+    return { ok: false, error: await localised("The last date must not be before the first.") };
   }
   if (spec.needsPlan && !edit.ratePlanId) {
-    return { ok: false, error: "Pick a rate plan first." };
+    return { ok: false, error: await localised("Pick a rate plan first.") };
   }
   if (spec.kind !== "flag" && edit.value !== null) {
     if (typeof edit.value !== "number" || !Number.isSafeInteger(edit.value)) {
-      return { ok: false, error: "Enter a whole number, or leave it blank to clear." };
+      return { ok: false, error: await localised("Enter a whole number, or leave it blank to clear.") };
     }
     if (edit.value < 0) {
-      return { ok: false, error: "That cannot be negative." };
+      return { ok: false, error: await localised("That cannot be negative.") };
     }
     if (spec.kind === "nights" && edit.value === 0) {
-      return { ok: false, error: "A stay rule of zero nights means nothing. Leave it blank to clear it." };
+      return { ok: false, error: await localised("A stay rule of zero nights means nothing. Leave it blank to clear it.") };
     }
   }
 
@@ -127,7 +128,7 @@ export async function applyInventory(
 
   const { data, error } = await supabase.rpc(spec.rpc, args);
 
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
 
   // Everything downstream of a price or a closed date.
   revalidatePath("/inventory", "layout");
@@ -144,7 +145,7 @@ export async function createRatePlan(input: {
   isDefault: boolean;
 }): Promise<ActionResult<{ id: string }>> {
   if (input.code.trim() === "" || input.name.trim() === "") {
-    return { ok: false, error: "A rate plan needs a code and a name." };
+    return { ok: false, error: await localised("A rate plan needs a code and a name.") };
   }
 
   const supabase = await createClient();
@@ -155,7 +156,7 @@ export async function createRatePlan(input: {
     p_is_default: input.isDefault,
   });
 
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
 
   revalidatePath("/inventory", "layout");
   return { ok: true, data: { id: data as string } };
@@ -178,7 +179,7 @@ export async function setRatePlanPublic(input: {
     p_is_public: input.isPublic,
   });
 
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
 
   revalidatePath("/inventory", "layout");
   // What a guest can see has changed.
@@ -203,7 +204,7 @@ export async function setRatePlanMeals(input: {
     p_meals: input.meals,
   });
 
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
 
   revalidatePath("/inventory", "layout");
   revalidatePath("/reports/meal");
@@ -232,7 +233,7 @@ export async function setRatePlanMealValue(input: {
 }): Promise<ActionResult<null>> {
   if (input.valueCents !== null) {
     if (!Number.isSafeInteger(input.valueCents) || input.valueCents < 0) {
-      return { ok: false, error: "A meal cannot be worth less than nothing." };
+      return { ok: false, error: await localised("A meal cannot be worth less than nothing.") };
     }
   }
 
@@ -243,7 +244,7 @@ export async function setRatePlanMealValue(input: {
     p_value_cents: input.valueCents,
   });
 
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: await localised(error.message) };
 
   revalidatePath("/inventory", "layout");
   revalidatePath("/reports/meal");
@@ -275,7 +276,7 @@ export async function applyRates(edit: {
   value: number | null;
 }): Promise<ActionResult<{ nightsWritten: number }>> {
   if (edit.pairs.length === 0) {
-    return { ok: false, error: "Tick at least one rate to apply this to." };
+    return { ok: false, error: await localised("Tick at least one rate to apply this to.") };
   }
 
   const byPlan = new Map<string, string[]>();

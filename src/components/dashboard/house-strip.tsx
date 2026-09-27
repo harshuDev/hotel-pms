@@ -1,3 +1,4 @@
+import { getT } from "@/lib/i18n/server";
 import { cn } from "@/components/ui";
 import { formatMoney, formatMoneyShort } from "@/lib/money";
 import type { HouseSummary } from "@/lib/types";
@@ -45,45 +46,46 @@ function Metric({
 }
 
 export async function HouseStrip({ s }: { s: HouseSummary }) {
+  const tr = await getT();
   const currency = await getPropertyCurrency();
   return (
     <div className="flex flex-wrap rounded-lg border border-line bg-white shadow-card">
       <Metric
-        label="Occupancy"
+        label={tr("Occupancy")}
         value={`${s.occupancyPct}%`}
-        detail={`${s.occupied} of ${s.sellable} sellable`}
+        detail={tr("{occupied} of {sellable} sellable", { occupied: s.occupied, sellable: s.sellable })}
         bar={s.occupancyPct}
       />
       <Metric
-        label="Arriving"
+        label={tr("Arriving")}
         value={String(s.arrivals)}
-        detail={`${s.departures} due out`}
+        detail={tr("{n} due out", { n: s.departures })}
         tone="brass"
       />
       <Metric
-        label="ADR tonight"
+        label={tr("ADR tonight")}
         value={formatMoneyShort(s.adrCents, currency)}
-        detail="Average of in-house rates"
+        detail={tr("Average of in-house rates")}
       />
       <Metric
-        label="In the drawer"
+        label={tr("In the drawer")}
         value={s.drawerCents === null ? "—" : formatMoney(s.drawerCents, currency)}
         detail={
           s.drawerCents === null
-            ? "Counted blind at close"
-            : "Cash only, this shift"
+            ? tr("Counted blind at close")
+            : tr("Cash only, this shift")
         }
       />
       <Metric
-        label="Outstanding"
+        label={tr("Outstanding")}
         value={formatMoneyShort(s.outstandingCents, currency)}
-        detail="Unsettled folios"
+        detail={tr("Unsettled folios")}
         tone={s.outstandingCents > 0 ? "warn" : "neutral"}
       />
       <Metric
-        label="Housekeeping"
+        label={tr("Housekeeping")}
         value={String(s.vacantDirty)}
-        detail={s.ooo > 0 ? `${s.ooo} out of order` : "Nothing out of order"}
+        detail={s.ooo > 0 ? tr("{n} out of order", { n: s.ooo }) : tr("Nothing out of order")}
       />
     </div>
   );

@@ -1,3 +1,4 @@
+import { getT } from "@/lib/i18n/server";
 import { format, parseISO } from "date-fns";
 import { EmptyState, cn } from "@/components/ui";
 import {
@@ -13,14 +14,17 @@ import {
   getOccupancySummary,
 } from "@/lib/queries";
 import { getPropertyCurrency } from "@/lib/queries";
+import { pageTitle } from "@/lib/i18n/server";
+import { msg } from "@/lib/i18n/translate";
 
-export const metadata = { title: "Occupancy report" };
+export const generateMetadata = pageTitle(msg("Occupancy report"));
 
 export default async function OccupancyReportPage({
   searchParams,
 }: {
   searchParams: Promise<{ from?: string; to?: string }>;
 }) {
+  const tr = await getT();
   const currency = await getPropertyCurrency();
   const sp = await searchParams;
   const businessDate = await getBusinessDate();
@@ -33,39 +37,39 @@ export default async function OccupancyReportPage({
 
   return (
     <ReportShell
-      title="Occupancy"
+      title={tr("Occupancy")}
       action="/reports/occupancy"
       range={range}
     >
       <ReportFigures>
         <ReportFigure
-          label="Occupancy"
+          label={tr("Occupancy")}
           value={`${summary.occupancyPct}%`}
-          detail={`${summary.roomsSold} of ${summary.roomNightsAvailable} room nights`}
+          detail={tr("{roomsSold} of {roomNightsAvailable} room nights", { roomsSold: summary.roomsSold, roomNightsAvailable: summary.roomNightsAvailable })}
         />
         <ReportFigure
-          label="Room revenue"
+          label={tr("Room revenue")}
           value={formatMoneyShort(summary.roomRevenueCents, currency)}
-          detail="Rate less discount, excluding tax"
+          detail={tr("Rate less discount, excluding tax")}
         />
         <ReportFigure
-          label="ADR"
+          label={tr("ADR")}
           value={formatMoney(summary.adrCents, currency)}
-          detail="Revenue over rooms sold"
+          detail={tr("Revenue over rooms sold")}
           emphasis
         />
         <ReportFigure
-          label="RevPAR"
+          label={tr("RevPAR")}
           value={formatMoney(summary.revparCents, currency)}
-          detail="Revenue over rooms available"
+          detail={tr("Revenue over rooms available")}
         />
       </ReportFigures>
 
       <div className="rounded-lg border border-line bg-white p-4 shadow-card">
         {rows.length === 0 ? (
           <EmptyState
-            title="No nights in this range"
-            hint="Widen the dates, or check that the range runs forwards."
+            title={tr("No nights in this range")}
+            hint={tr("Widen the dates, or check that the range runs forwards.")}
           />
         ) : (
           <div className="overflow-x-auto">
@@ -73,16 +77,16 @@ export default async function OccupancyReportPage({
               <thead>
                 <tr className="border-b border-line text-left text-ink-faint">
                   {[
-                    "Night",
-                    "Rooms sold",
-                    "Sellable",
-                    "Occupancy",
-                    "Room revenue",
-                    "ADR",
-                    "RevPAR",
+                    msg("Night"),
+                    msg("Rooms sold"),
+                    msg("Sellable"),
+                    msg("Occupancy"),
+                    msg("Room revenue"),
+                    msg("ADR"),
+                    msg("RevPAR"),
                   ].map((c, i) => (
                     <th
-                      key={c}
+                      key={tr(c)}
                       className={cn(
                         "whitespace-nowrap px-3 pb-2.5 text-xxs font-semibold uppercase tracking-[0.1em]",
                         i >= 1 && "text-right",
@@ -97,7 +101,7 @@ export default async function OccupancyReportPage({
                 {rows.map((r) => (
                   <tr key={r.date} className="hover:bg-shell">
                     <td className="whitespace-nowrap px-3 py-2.5 text-ink">
-                      {format(parseISO(r.date), "EEE d MMM")}
+                      {tr.date(r.date, "EEE d MMM")}
                     </td>
                     <td className="tnum px-3 py-2.5 text-right text-ink-muted">
                       {r.roomsSold}

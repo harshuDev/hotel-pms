@@ -1,3 +1,4 @@
+import { getT } from "@/lib/i18n/server";
 import { format, parseISO, subDays } from "date-fns";
 import { HouseBoard } from "@/components/dashboard/house-board";
 import { HouseStrip } from "@/components/dashboard/house-strip";
@@ -16,10 +17,13 @@ import {
   getRevenueSeries,
   PACE_DAYS,
 } from "@/lib/queries";
+import { pageTitle } from "@/lib/i18n/server";
+import { msg } from "@/lib/i18n/translate";
 
-export const metadata = { title: "Dashboard" };
+export const generateMetadata = pageTitle(msg("Dashboard"));
 
 export default async function DashboardPage() {
+  const tr = await getT();
   const today = await getBusinessDate();
 
   // The pace chart reads backwards and forwards from the business date:
@@ -51,10 +55,10 @@ export default async function DashboardPage() {
       <div className="flex flex-wrap items-end justify-between gap-2">
         <div>
           <h1 className="font-display text-[26px] font-semibold leading-none tracking-tightest text-ink">
-            Dashboard
+            {tr("Dashboard")}
           </h1>
           <p className="mt-1.5 text-[13px] text-ink-muted">
-            business day open
+            {tr("business day open")}
           </p>
         </div>
         {canCloseDay && <CloseDay businessDate={today} />}

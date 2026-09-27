@@ -1,5 +1,6 @@
 "use client";
 
+import { useT } from "@/components/i18n";
 import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -18,6 +19,7 @@ type Stage =
   | { name: "invalid"; reason: string };
 
 export default function ResetPasswordPage() {
+  const tr = useT();
   const router = useRouter();
 
   const [stage, setStage] = useState<Stage>({ name: "checking" });
@@ -97,7 +99,7 @@ export default function ResetPasswordPage() {
         name: "invalid",
         reason:
           failure ??
-          "This page needs the link from the reset email. Ask for a new one below.",
+          tr("This page needs the link from the reset email. Ask for a new one below."),
       });
     }
 
@@ -112,11 +114,11 @@ export default function ResetPasswordPage() {
     setError("");
 
     if (password.length < MIN_LENGTH) {
-      setError(`A password needs at least ${MIN_LENGTH} characters.`);
+      setError(tr("A password needs at least {n} characters.", { n: MIN_LENGTH }));
       return;
     }
     if (password !== confirm) {
-      setError("The two passwords do not match.");
+      setError(tr("The two passwords do not match."));
       return;
     }
 
@@ -142,20 +144,20 @@ export default function ResetPasswordPage() {
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
           <p className="text-xxs font-semibold uppercase tracking-[0.18em] text-brass">
-            Hotel Operations
+            {tr("Hotel Operations")}
           </p>
           <h1 className="mt-3 font-display text-[28px] font-semibold tracking-tightest text-ink">
-            Set a new password
+            {tr("Set a new password")}
           </h1>
           <p className="mt-2 text-[13px] text-ink-muted">
-            You will be signed in once it is saved
+            {tr("You will be signed in once it is saved")}
           </p>
         </div>
 
         <section className="rounded-lg border border-line bg-white p-6 shadow-card">
           {stage.name === "checking" && (
             <p className="py-6 text-center text-[13px] text-ink-muted">
-              Checking the link…
+              {tr("Checking the link…")}
             </p>
           )}
 
@@ -168,15 +170,13 @@ export default function ResetPasswordPage() {
                 {stage.reason}
               </div>
               <p className="text-xs leading-relaxed text-ink-muted">
-                Reset links expire after an hour and work only once, so an older
-                email in the same thread will not do. Asking for a new one takes
-                a moment.
+                {tr("Reset links expire after an hour and work only once, so an older email in the same thread will not do. Asking for a new one takes a moment.")}
               </p>
               <Link
                 href="/forgot-password"
                 className="block w-full rounded-md bg-ink px-4 py-2.5 text-center text-sm font-medium text-white transition hover:opacity-90"
               >
-                Send a new link
+                {tr("Send a new link")}
               </Link>
             </div>
           )}
@@ -188,7 +188,7 @@ export default function ResetPasswordPage() {
                   htmlFor="password"
                   className="mb-1.5 block text-xs font-medium text-ink"
                 >
-                  New password
+                  {tr("New password")}
                 </label>
                 <input
                   id="password"
@@ -200,7 +200,7 @@ export default function ResetPasswordPage() {
                   value={password}
                   onChange={(event) => setPassword(event.target.value)}
                   className="w-full rounded-md border border-line bg-white px-3 py-2.5 text-sm text-ink outline-none transition focus:border-brass focus:ring-2 focus:ring-brass/20"
-                  placeholder={`At least ${MIN_LENGTH} characters`}
+                  placeholder={tr("At least {n} characters", { n: MIN_LENGTH })}
                 />
               </div>
 
@@ -209,7 +209,7 @@ export default function ResetPasswordPage() {
                   htmlFor="confirm"
                   className="mb-1.5 block text-xs font-medium text-ink"
                 >
-                  Again
+                  {tr("Again")}
                 </label>
                 <input
                   id="confirm"
@@ -220,7 +220,7 @@ export default function ResetPasswordPage() {
                   value={confirm}
                   onChange={(event) => setConfirm(event.target.value)}
                   className="w-full rounded-md border border-line bg-white px-3 py-2.5 text-sm text-ink outline-none transition focus:border-brass focus:ring-2 focus:ring-brass/20"
-                  placeholder="Type it once more"
+                  placeholder={tr("Type it once more")}
                 />
               </div>
 
@@ -238,14 +238,14 @@ export default function ResetPasswordPage() {
                 disabled={saving}
                 className="w-full rounded-md bg-ink px-4 py-2.5 text-sm font-medium text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                {saving ? "Saving…" : "Save the password"}
+                {saving ? tr("Saving…") : tr("Save the password")}
               </button>
             </form>
           )}
         </section>
 
         <p className="mt-5 text-center text-xxs text-ink-faint">
-          Secure property access
+          {tr("Secure property access")}
         </p>
       </div>
     </main>

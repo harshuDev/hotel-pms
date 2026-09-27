@@ -1,3 +1,5 @@
+import { getT } from "@/lib/i18n/server";
+import { msg } from "@/lib/i18n/translate";
 import { Fragment, type CSSProperties } from "react";
 import Link from "next/link";
 import { AssignRoom } from "@/components/calendar/assign-room";
@@ -143,12 +145,12 @@ const BAR_TONE: Record<
  * stays, because scanning forty bars for a colour is faster than reading them.
  */
 const STATUS_LABEL: Record<BookingStatus, string> = {
-  pending: "Pending",
-  confirmed: "Confirmed",
-  checked_in: "In house",
-  checked_out: "Departed",
-  canceled: "Cancelled",
-  no_show: "No show",
+  pending: msg("Pending"),
+  confirmed: msg("Confirmed"),
+  checked_in: msg("In house"),
+  checked_out: msg("Departed"),
+  canceled: msg("Cancelled"),
+  no_show: msg("No show"),
 };
 
 /**
@@ -201,9 +203,9 @@ interface BoardBar {
  * seen.
  */
 const PAYMENT_LABEL: Record<BookingPaymentState, string> = {
-  unpaid: "Unpaid",
-  partial: "Part paid",
-  paid: "Paid",
+  unpaid: msg("Unpaid"),
+  partial: msg("Part paid"),
+  paid: msg("Paid"),
 };
 
 /** Saturday and Sunday columns, edged in the Weekend Border Color. */
@@ -312,6 +314,7 @@ async function Bars({
       sense: a live booking has nothing to restore. */
   canRestore?: boolean;
 }) {
+  const tr = await getT();
   const currency = await getPropertyCurrency();
   return (
     <>
@@ -357,18 +360,22 @@ async function Bars({
             title={[
               bar.reference,
               bar.guestName,
-              `${format(parseISO(bar.checkIn), "d MMM")} to ${format(
-                parseISO(bar.checkOut),
-                "d MMM",
-              )}`,
-              STATUS_LABEL[bar.status],
-              `${bar.guests} guest${bar.guests === 1 ? "" : "s"}`,
+              tr("{from} to {to}", {
+                from: tr.date(bar.checkIn, "d MMM"),
+                to: tr.date(bar.checkOut, "d MMM"),
+              }),
+              tr(STATUS_LABEL[bar.status]),
+              tr.plural(bar.guests, "{n} guest", "{n} guests"),
               bar.ratePlanName,
-              bar.roomNumber ? `room ${bar.roomNumber}` : null,
+              bar.roomNumber ? tr("room {n}", { n: bar.roomNumber }) : null,
               bar.channelCode,
-              bar.isCompany ? "Company booking" : (bar.roomCount ?? 1) > 1 ? `Group of ${bar.roomCount} rooms` : null,
+              bar.isCompany
+                ? tr("Company booking")
+                : (bar.roomCount ?? 1) > 1
+                  ? tr("Group of {n} rooms", { n: bar.roomCount ?? 1 })
+                  : null,
               formatMoney(bar.valueCents, currency),
-              bar.paymentState ? PAYMENT_LABEL[bar.paymentState] : null,
+              bar.paymentState ? tr(PAYMENT_LABEL[bar.paymentState]) : null,
             ]
               .filter(Boolean)
               .join(" · ")}
@@ -454,7 +461,7 @@ async function Bars({
                 */}
                 {cols >= 2 && (
                   <span className={cn("shrink-0 font-semibold", tone.text)}>
-                    {STATUS_LABEL[bar.status]}
+                    {tr(STATUS_LABEL[bar.status])}
                   </span>
                 )}
                 {cols >= 2 && (
@@ -574,7 +581,7 @@ async function Bars({
   );
 }
 
-function DayCells({
+async function DayCells({
   dates,
   businessDate,
   cells,
@@ -592,6 +599,7 @@ function DayCells({
    */
   bookHref?: (date: string) => string;
 }) {
+  const tr = await getT();
   return (
     <div className="absolute inset-0 flex">
       {dates.map((d) => {
@@ -613,7 +621,7 @@ function DayCells({
         const figure =
           withFoot && cell ? (
             <span
-              title={`${cell.sold} sold of ${cell.sellable} sellable`}
+              title={tr("{sold} sold of {sellable} sellable", { sold: cell.sold, sellable: cell.sellable })}
               /*
                 BOLD, at the client's request: "ye jo 60 60 dekh rhe ho likha
                 hua hai, inko bold krna hai".
@@ -661,7 +669,7 @@ function DayCells({
           <Link
             key={d}
             href={bookHref(d)}
-            title={`Take a booking arriving ${format(parseISO(d), "d MMM")}`}
+            title={tr("Take a booking arriving {date}", { date: tr.date(d, "d MMM") })}
             className={tone}
             style={width}
           >
@@ -797,10 +805,10 @@ function Gutter({ railW, gridW }: { railW: number; gridW: number }) {
  * dirty" was not.
  */
 const ROOM_STATUS_LABEL: Record<RoomStatus, string> = {
-  vacant_clean: "Ready for a guest",
-  vacant_dirty: "Waiting to be cleaned",
-  occupied: "Occupied",
-  ooo: "Out of order",
+  vacant_clean: msg("Ready for a guest"),
+  vacant_dirty: msg("Waiting to be cleaned"),
+  occupied: msg("Occupied"),
+  ooo: msg("Out of order"),
 };
 
 const ROOM_STATUS_DOT: Record<RoomStatus, string> = {
@@ -834,9 +842,9 @@ function roomDot(room: CalendarRoom) {
 
 function roomDotLabel(room: CalendarRoom) {
   if (room.roomStatus === "vacant_clean" && room.isInspected)
-    return "Ready for a guest, inspected";
+    return msg("Ready for a guest, inspected");
   if (room.roomStatus === "occupied" && room.doNotDisturb)
-    return "Occupied, do not disturb";
+    return msg("Occupied, do not disturb");
   return ROOM_STATUS_LABEL[room.roomStatus];
 }
 
@@ -856,7 +864,7 @@ const EMPTY_CELLS = new Map<string, AvailabilityCell>();
  * one. It keeps its height when empty so the board does not jump as rooms are
  * allocated through the day.
  */
-function UnassignedRow({
+async function UnassignedRow({
   bars,
   dates,
   railW,
@@ -886,6 +894,7 @@ function UnassignedRow({
   /** Opens the details popup instead of navigating away. */
   bookingHref?: (bookingId: string) => string;
 }) {
+  const tr = await getT();
   const { placed, lanes } = packLanes(bars, dates);
   return (
     <div className="flex items-stretch">
@@ -894,7 +903,7 @@ function UnassignedRow({
         style={{ width: railW }}
       >
         <span className="truncate text-[12px] font-medium uppercase tracking-[0.06em] text-white/70">
-          Unassigned
+          {tr("Unassigned")}
         </span>
         {/*
           HOLDING AREA IS THIS BAND NOW. The client removed the standalone
@@ -905,7 +914,7 @@ function UnassignedRow({
           systems will look for it.
         */}
         <span className="truncate text-xxs uppercase tracking-[0.06em] text-white/40">
-          (Holding area)
+          {tr("(Holding area)")}
         </span>
         {/*
           The count and nothing else. There was a line of prose under this
@@ -939,7 +948,7 @@ function UnassignedRow({
   );
 }
 
-export function CalendarBoard({
+export async function CalendarBoard({
   dates,
   businessDate,
   types,
@@ -1031,6 +1040,7 @@ export function CalendarBoard({
    */
   look: CalendarSettings;
 }) {
+  const tr = await getT();
   const gridW = dates.length * COL_W;
   const first = parseISO(dates[0]);
 
@@ -1112,7 +1122,7 @@ export function CalendarBoard({
       */}
       <Link
         href={shiftHref(-days)}
-        aria-label="Earlier dates"
+        aria-label={tr("Earlier dates")}
         className="absolute z-40 flex h-5 w-5 items-center justify-center rounded-full bg-white/90 text-ink-muted shadow-card hover:text-ink"
         style={{ left: railW + 6, top: HEAD_H + (SEASON_H - 20) / 2 }}
       >
@@ -1120,7 +1130,7 @@ export function CalendarBoard({
       </Link>
       <Link
         href={shiftHref(days)}
-        aria-label="Later dates"
+        aria-label={tr("Later dates")}
         className="absolute right-2 z-40 flex h-5 w-5 items-center justify-center rounded-full bg-white/90 text-ink-muted shadow-card hover:text-ink"
         style={{ top: HEAD_H + (SEASON_H - 20) / 2 }}
       >
@@ -1163,21 +1173,21 @@ export function CalendarBoard({
             >
               <div className="flex items-center justify-between">
                 <span className="text-xxs font-semibold uppercase tracking-[0.12em] text-white/70">
-                  Date
+                  {tr("Date")}
                 </span>
                 <span className="flex items-center gap-1">
                   <Link
                     href={railHref(RAIL_STEP)}
-                    aria-label="Widen the room column"
-                    title="Widen the room column"
+                    aria-label={tr("Widen the room column")}
+                    title={tr("Widen the room column")}
                     className="flex h-4 w-4 items-center justify-center rounded-sm bg-white/15 text-xs leading-none text-white hover:bg-white/30"
                   >
                     +
                   </Link>
                   <Link
                     href={railHref(-RAIL_STEP)}
-                    aria-label="Narrow the room column"
-                    title="Narrow the room column"
+                    aria-label={tr("Narrow the room column")}
+                    title={tr("Narrow the room column")}
                     className="flex h-4 w-4 items-center justify-center rounded-sm bg-white/15 text-xs leading-none text-white hover:bg-white/30"
                   >
                     −
@@ -1202,10 +1212,10 @@ export function CalendarBoard({
               */}
               <Link
                 href={todayHref}
-                title="Back to the current dates"
+                title={tr("Back to the current dates")}
                 className="mt-0.5 inline-flex rounded-sm bg-white/15 px-1.5 py-[1px] text-xxs font-medium text-white transition hover:bg-white/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
               >
-                Today
+                {tr("Today")}
               </Link>
               {/*
                 Paging a month at a time is fine for next week and useless for
@@ -1258,12 +1268,12 @@ export function CalendarBoard({
                         {format(day, "d")}
                       </span>
                       <span className="text-[12.5px] text-ink">
-                        {format(day, "EEEE")}
+                        {tr.date(day, "EEEE")}
                       </span>
                     </div>
                     <div className="flex items-center justify-center gap-1 text-xxs text-ink-faint">
                       {/* CAPITALS, as the client asked. */}
-                      <span className="uppercase">{format(day, "MMMM")}</span>
+                      <span className="uppercase">{tr.date(day, "MMMM")}</span>
                       {/*
                         The day's notes: a marker and a count, never the words.
                         A column is 118px wide and an operational note is a
@@ -1274,13 +1284,15 @@ export function CalendarBoard({
                         href={noteHref(d)}
                         title={
                           dayNotes.length === 0
-                            ? `Add a note for ${format(day, "d MMM")}`
+                            ? tr("Add a note for {date}", { date: tr.date(day, "d MMM") })
                             : dayNotes.map((n) => n.body).join("\n")
                         }
                         aria-label={
                           dayNotes.length === 0
-                            ? `Add a note for ${format(day, "d MMM")}`
-                            : `${dayNotes.length} note${dayNotes.length === 1 ? "" : "s"} on ${format(day, "d MMM")}`
+                            ? tr("Add a note for {date}", { date: tr.date(day, "d MMM") })
+                            : tr.plural(dayNotes.length, "{n} note on {date}", "{n} notes on {date}", {
+                                date: tr.date(day, "d MMM"),
+                              })
                         }
                         className={cn(
                           "inline-flex items-center gap-0.5 rounded border px-1 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brass",
@@ -1418,8 +1430,8 @@ export function CalendarBoard({
                     */}
                     <Link
                       href={`/settings?tab=room-types&edit=${t.roomTypeId}`}
-                      title={`Rename ${t.roomTypeCode} in Settings`}
-                      aria-label={`Rename ${t.roomTypeCode} in Settings`}
+                      title={tr("Rename {roomTypeCode} in Settings", { roomTypeCode: t.roomTypeCode })}
+                      aria-label={tr("Rename {roomTypeCode} in Settings", { roomTypeCode: t.roomTypeCode })}
                       className="absolute right-2 top-2 flex h-5 w-5 items-center justify-center rounded bg-white/15 text-white opacity-0 transition hover:bg-white/30 focus:opacity-100 focus-visible:ring-2 focus-visible:ring-white group-hover/rail:opacity-100"
                     >
                       <svg viewBox="0 0 16 16" aria-hidden className="h-3 w-3 fill-current">
@@ -1453,7 +1465,7 @@ export function CalendarBoard({
                         {t.roomTypeName}
                       </div>
                       <div className="tnum mt-0.5 text-xxs text-white/50">
-                        {typeRooms.length} room{typeRooms.length === 1 ? "" : "s"}
+                        {tr.plural(typeRooms.length, "{n} room", "{n} rooms")}
                       </div>
                     </div>
                   </div>
@@ -1524,7 +1536,7 @@ export function CalendarBoard({
                             isInspected={room.isInspected}
                             doNotDisturb={room.doNotDisturb}
                             dotClass={roomDot(room)}
-                            label={roomDotLabel(room)}
+                            label={tr(roomDotLabel(room))}
                           />
                         )}
                         {/* Modification switched off: the status is still
@@ -1534,8 +1546,8 @@ export function CalendarBoard({
                         {housekeeping === "view" && (
                           <span
                             role="img"
-                            title={roomDotLabel(room)}
-                            aria-label={`Housekeeping for room ${room.roomNumber}: ${roomDotLabel(room)}`}
+                            title={tr(roomDotLabel(room))}
+                            aria-label={tr("Housekeeping for room {n}: {state}", { n: room.roomNumber, state: tr(roomDotLabel(room)) })}
                             className={cn("block h-2.5 w-2.5 shrink-0 rounded-full", roomDot(room))}
                           />
                         )}
@@ -1630,7 +1642,7 @@ export function CalendarBoard({
             <>
               <Gutter railW={railW} gridW={gridW} />
               <ExtraRow
-                label="Cancelled"
+                label={tr("Cancelled")}
                 canRestore
                 pinned={canceledBars.length > 0}
                 backHref={selfHref}

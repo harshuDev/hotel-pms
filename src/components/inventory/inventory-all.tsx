@@ -1,3 +1,5 @@
+import { getT } from "@/lib/i18n/server";
+import { msg } from "@/lib/i18n/translate";
 import { Fragment } from "react";
 import Link from "next/link";
 import { format, parseISO } from "date-fns";
@@ -39,7 +41,7 @@ interface FieldRow {
 const ROWS: FieldRow[] = [
   {
     key: "rate",
-    label: "Rate",
+    label: msg("Rate"),
     href: "/inventory/rates-all",
     // A null rate is not free: nothing can be sold on this plan that night.
     read: (c, currency) => (c.rateCents === null ? null : formatMoney(c.rateCents, currency)),
@@ -47,7 +49,7 @@ const ROWS: FieldRow[] = [
   },
   {
     key: "allotment",
-    label: "Availability",
+    label: msg("Availability"),
     href: "/inventory/availability",
     // The sellable figure, not the allotment: that is what can actually go.
     read: (c) => String(c.sellable),
@@ -55,65 +57,66 @@ const ROWS: FieldRow[] = [
   },
   {
     key: "sold",
-    label: "Sold",
+    label: msg("Sold"),
     href: "/inventory/availability",
     read: (c) => String(c.sold),
   },
   {
     key: "min_stay_through",
     visibility: "min_stay_through",
-    label: "Min stay through",
+    label: msg("Min stay through"),
     href: "/inventory/min-stay-through",
     read: (c) => (c.minStayThrough === null ? null : String(c.minStayThrough)),
   },
   {
     key: "min_stay_arrival",
     visibility: "min_stay_arrival",
-    label: "Min stay arrival",
+    label: msg("Min stay arrival"),
     href: "/inventory/min-stay-arrival",
     read: (c) => (c.minStayArrival === null ? null : String(c.minStayArrival)),
   },
   {
     key: "max_stay",
     visibility: "max_stay",
-    label: "Max stay",
+    label: msg("Max stay"),
     href: "/inventory/max-stay",
     read: (c) => (c.maxStay === null ? null : String(c.maxStay)),
   },
   {
     key: "cta",
     visibility: "closed_to_arrival",
-    label: "Closed to arrival",
+    label: msg("Closed to arrival"),
     href: "/inventory/cta",
-    read: (c) => (c.closedToArrival ? "Yes" : null),
+    read: (c) => (c.closedToArrival ? msg("Yes") : null),
     blocking: (c) => c.closedToArrival,
   },
   {
     key: "ctd",
     visibility: "closed_to_departure",
-    label: "Closed to departure",
+    label: msg("Closed to departure"),
     href: "/inventory/ctd",
-    read: (c) => (c.closedToDeparture ? "Yes" : null),
+    read: (c) => (c.closedToDeparture ? msg("Yes") : null),
     blocking: (c) => c.closedToDeparture,
   },
   {
     key: "stop_sell",
     visibility: "stop_sell",
-    label: "Stop sell",
+    label: msg("Stop sell"),
     href: "/inventory/stop-sell",
-    read: (c) => (c.stopSell ? "Yes" : null),
+    read: (c) => (c.stopSell ? msg("Yes") : null),
     blocking: (c) => c.stopSell,
   },
   {
     key: "close_out",
-    label: "Close out",
+    label: msg("Close out"),
     href: "/inventory/close-out",
-    read: (c) => (c.closeOut ? "Yes" : null),
+    read: (c) => (c.closeOut ? msg("Yes") : null),
     blocking: (c) => c.closeOut,
   },
 ];
 
 export async function InventoryAll({ cells }: { cells: InventoryCell[] }) {
+  const tr = await getT();
   const [currency, inventorySettings] = await Promise.all([
     getPropertyCurrency(),
     getInventorySettings(),
@@ -135,7 +138,7 @@ export async function InventoryAll({ cells }: { cells: InventoryCell[] }) {
   if (dates.length === 0 || types.length === 0) {
     return (
       <div className="rounded-lg border border-line bg-white p-4 text-[13px] text-ink-muted shadow-card">
-        No room types are set up yet. Add one under Settings.
+        {tr("No room types are set up yet. Add one under Settings.")}
       </div>
     );
   }
@@ -147,7 +150,7 @@ export async function InventoryAll({ cells }: { cells: InventoryCell[] }) {
           <thead>
             <tr>
               <th className="sticky left-0 z-10 bg-white px-3 pb-2.5 text-left text-xxs font-semibold uppercase tracking-[0.1em] text-ink-faint">
-                Room type
+                {tr("Room type")}
               </th>
               {dates.map((d) => {
                 const day = parseISO(d);
@@ -160,7 +163,7 @@ export async function InventoryAll({ cells }: { cells: InventoryCell[] }) {
                       weekend ? "text-ink-muted" : "text-ink-faint",
                     )}
                   >
-                    <span className="block">{format(day, "EEEEE")}</span>
+                    <span className="block">{tr.date(day, "EEEEE")}</span>
                     <span className="tnum block text-[11px] font-normal">
                       {format(day, "d")}
                     </span>
@@ -185,8 +188,8 @@ export async function InventoryAll({ cells }: { cells: InventoryCell[] }) {
                   >
                     {t.roomTypeName}
                     <span className="ml-2 text-xxs font-normal text-ink-faint">
-                      {t.physicalRooms} room{t.physicalRooms === 1 ? "" : "s"}
-                      {t.outOfOrder > 0 ? `, ${t.outOfOrder} out of order` : ""}
+                      {tr.plural(t.physicalRooms, "{n} room", "{n} rooms")}
+                      {t.outOfOrder > 0 ? `, ${tr("{n} out of order", { n: t.outOfOrder })}` : ""}
                     </span>
                   </td>
                 </tr>
@@ -197,7 +200,7 @@ export async function InventoryAll({ cells }: { cells: InventoryCell[] }) {
                         href={row.href}
                         className="text-ink-muted underline-offset-2 hover:text-ink hover:underline"
                       >
-                        {row.label}
+                        {tr(row.label)}
                       </Link>
                     </td>
                     {dates.map((d) => {
@@ -218,7 +221,7 @@ export async function InventoryAll({ cells }: { cells: InventoryCell[] }) {
                         >
                           {/* A dash, not a blank: "no rule" is an answer, and an
                               empty cell reads as a grid that failed to load. */}
-                          {value ?? "—"}
+                          {value === null ? "—" : tr.message(value)}
                         </td>
                       );
                     })}

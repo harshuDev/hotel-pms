@@ -1,3 +1,4 @@
+import { msg } from "@/lib/i18n/translate";
 import type { InventoryCell, InventoryField } from "@/lib/types";
 
 /**
@@ -19,80 +20,94 @@ export interface ScreenSpec {
   valueLabel: string;
   /** One line under the grid saying what the number means. */
   note: string;
+  /**
+   * The bulk editor's heading, whole (0106). It was "Set " + the title in
+   * lower case, which lower-cases a German noun and fixes English word order.
+   */
+  setHeading: string;
 }
 
 export const SCREENS: Record<InventoryField, ScreenSpec> = {
   rate: {
-    title: "Rates",
+    setHeading: msg("Set rates"),
+    title: msg("Rates"),
     kind: "money",
     needsPlan: true,
     read: (c) => c.rateCents,
-    valueLabel: "Rate a night",
-    note: "A night with no rate loaded is not free — it cannot be sold on this plan at all, and taking a booking against it will say so. Leave the box empty and apply to clear a rate back to nothing.",
+    valueLabel: msg("Rate a night"),
+    note: msg("A night with no rate loaded is not free — it cannot be sold on this plan at all, and taking a booking against it will say so. Leave the box empty and apply to clear a rate back to nothing."),
   },
   min_stay_through: {
-    title: "Min stay through",
+    setHeading: msg("Set min stay through"),
+    title: msg("Min stay through"),
     kind: "nights",
     needsPlan: true,
     read: (c) => c.minStayThrough,
-    valueLabel: "Nights",
-    note: "Applies to any stay covering the night, whenever it arrived. Use this to stop one-night bookings eating into a busy weekend. Leave the box empty to clear the rule.",
+    valueLabel: msg("Nights"),
+    note: msg("Applies to any stay covering the night, whenever it arrived. Use this to stop one-night bookings eating into a busy weekend. Leave the box empty to clear the rule."),
   },
   min_stay_arrival: {
-    title: "Min stay arrival",
+    setHeading: msg("Set min stay arrival"),
+    title: msg("Min stay arrival"),
     kind: "nights",
     needsPlan: true,
     read: (c) => c.minStayArrival,
-    valueLabel: "Nights",
-    note: "Applies only to stays arriving that day, so a guest already in house is unaffected. Leave the box empty to clear the rule.",
+    valueLabel: msg("Nights"),
+    note: msg("Applies only to stays arriving that day, so a guest already in house is unaffected. Leave the box empty to clear the rule."),
   },
   max_stay: {
-    title: "Max stay",
+    setHeading: msg("Set max stay"),
+    title: msg("Max stay"),
     kind: "nights",
     needsPlan: true,
     read: (c) => c.maxStay,
-    valueLabel: "Nights",
-    note: "Keeps a long low-rate stay from blocking a period you expect to sell at a higher rate. Leave the box empty to clear the rule.",
+    valueLabel: msg("Nights"),
+    note: msg("Keeps a long low-rate stay from blocking a period you expect to sell at a higher rate. Leave the box empty to clear the rule."),
   },
   closed_to_arrival: {
-    title: "Closed to arrival",
+    setHeading: msg("Set closed to arrival"),
+    title: msg("Closed to arrival"),
     kind: "flag",
     needsPlan: true,
     read: (c) => c.closedToArrival,
-    valueLabel: "Closed",
-    note: "A guest already staying can stay through a closed date; only arrivals are refused.",
+    valueLabel: msg("Closed"),
+    note: msg("A guest already staying can stay through a closed date; only arrivals are refused."),
   },
   closed_to_departure: {
-    title: "Closed to departure",
+    setHeading: msg("Set closed to departure"),
+    title: msg("Closed to departure"),
     kind: "flag",
     needsPlan: true,
     read: (c) => c.closedToDeparture,
-    valueLabel: "Closed",
-    note: "Checked against the departure date, which is not a night stayed. Use it to hold a stay across a peak night rather than losing the room mid-period.",
+    valueLabel: msg("Closed"),
+    note: msg("Checked against the departure date, which is not a night stayed. Use it to hold a stay across a peak night rather than losing the room mid-period."),
   },
   stop_sell: {
-    title: "Stop sell",
+    setHeading: msg("Set stop sell"),
+    title: msg("Stop sell"),
     kind: "flag",
     needsPlan: true,
     read: (c) => c.stopSell,
-    valueLabel: "Stopped",
-    note: "Stops this rate plan only. Other plans keep selling the same rooms — to close the room type outright, use Close out.",
+    valueLabel: msg("Stopped"),
+    note: msg("Stops this rate plan only. Other plans keep selling the same rooms — to close the room type outright, use Close out."),
   },
   allotment: {
-    title: "Availability",
+    setHeading: msg("Set availability"),
+    title: msg("Availability"),
     kind: "count",
     needsPlan: false,
     read: (c) => c.allotment,
-    valueLabel: "Rooms",
-    note: "A ceiling, never a promise: rooms out of order still come off the top, so the sellable figure can be lower than the allotment but never higher. Leave the box empty to go back to selling every room that exists.",
+    valueLabel: msg("Rooms"),
+    note: msg("A ceiling, never a promise: rooms out of order still come off the top, so the sellable figure can be lower than the allotment but never higher. Leave the box empty to go back to selling every room that exists."),
   },
   close_out: {
-    title: "Close out",
+    setHeading: msg("Set close out"),
+    title: msg("Close out"),
     kind: "flag",
     needsPlan: false,
     read: (c) => c.closeOut,
-    valueLabel: "Closed",
-    note: "Closes the room type on every rate plan at once, which is what makes it different from Stop sell.",
+    valueLabel: msg("Closed"),
+    note: msg("Closes the room type on every rate plan at once, which is what makes it different from Stop sell."),
   },
 };
 

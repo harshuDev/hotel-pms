@@ -1,9 +1,11 @@
 "use client";
 
+import { useT } from "@/components/i18n";
+import { msg } from "@/lib/i18n/translate";
 import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { cn } from "@/components/ui";
-import { COUNTRIES } from "@/lib/countries";
+import { countriesIn } from "@/lib/countries";
 import { createClient } from "@/lib/supabase/client";
 import {
   HOTEL_ASSETS_BUCKET,
@@ -101,6 +103,7 @@ export function InvoiceSettingsPanel({
   pending: boolean;
   run: Run;
 }) {
+  const tr = useT();
   const router = useRouter();
   const [general, setGeneral] = useState({
     showRoomNumberForExtras: settings.showRoomNumberForExtras,
@@ -137,11 +140,11 @@ export function InvoiceSettingsPanel({
   async function upload(file: File) {
     setLogoError(null);
     if (!LOGO_TYPES.includes(file.type)) {
-      setLogoError("That file is not a picture. Use a JPEG, PNG or WebP.");
+      setLogoError(tr("That file is not a picture. Use a JPEG, PNG or WebP."));
       return;
     }
     if (file.size > LOGO_MAX_BYTES) {
-      setLogoError("That picture is over 2MB. Save it smaller and try again.");
+      setLogoError(tr("That picture is over 2MB. Save it smaller and try again."));
       return;
     }
     setUploading(true);
@@ -191,14 +194,14 @@ export function InvoiceSettingsPanel({
     <div className="max-w-5xl space-y-8">
       {/* General Invoice Settings ----------------------------------------- */}
       <section className={card}>
-        <h2 className="border-b border-line px-4 py-4 text-[19px] text-ink">General Invoice Settings</h2>
+        <h2 className="border-b border-line px-4 py-4 text-[19px] text-ink">{tr("General Invoice Settings")}</h2>
         <div className="px-4 pb-6 pt-4">
           <div className="space-y-3">
             {(
               [
-                ["showRoomNumberForExtras", "Show room number for extras"],
-                ["showNightsBreakdown", "Show nights breakdown"],
-                ["vatRegistered", "Are you VAT Registered"],
+                ["showRoomNumberForExtras", msg("Show room number for extras")],
+                ["showNightsBreakdown", msg("Show nights breakdown")],
+                ["vatRegistered", msg("Are you VAT Registered")],
               ] as const
             ).map(([key, label]) => (
               <label key={key} className="flex items-center gap-2.5 text-[14px] text-ink">
@@ -209,19 +212,19 @@ export function InvoiceSettingsPanel({
                   onChange={(e) => set({ [key]: e.target.checked })}
                   className="h-[18px] w-[18px] accent-brass"
                 />
-                {label}
+                {tr(label)}
               </label>
             ))}
           </div>
 
-          <h3 className="mt-10 text-[16px] text-ink">Company Information for Invoice</h3>
+          <h3 className="mt-10 text-[16px] text-ink">{tr("Company Information for Invoice")}</h3>
           <p className="border-b border-line pb-1.5 text-[11.5px] text-ink">
-            By default we use Hotel Name and Hotel Address, but you can override that values here.
+            {tr("By default we use Hotel Name and Hotel Address, but you can override that values here.")}
           </p>
           <div className="mt-2 space-y-4">
             <Field
               id="inv-company"
-              label="Company Name"
+              label={tr("Company Name")}
               value={general.companyName}
               onChange={(v) => set({ companyName: v })}
               disabled={!canEdit}
@@ -229,14 +232,14 @@ export function InvoiceSettingsPanel({
             <div className="relative">
               <select
                 id="inv-country"
-                aria-label="Country"
+                aria-label={tr("Country")}
                 value={general.country}
                 disabled={!canEdit}
                 onChange={(e) => set({ country: e.target.value })}
                 className={cn(line, "cursor-pointer", general.country === "" && "text-ink-muted")}
               >
-                <option value="">Country</option>
-                {COUNTRIES.map((c) => (
+                <option value="">{tr("Country")}</option>
+                {countriesIn(tr).map((c) => (
                   <option key={c.code} value={c.code} className="text-ink">
                     {c.name}
                   </option>
@@ -244,34 +247,34 @@ export function InvoiceSettingsPanel({
               </select>
               {general.country !== "" && (
                 <label htmlFor="inv-country" className="absolute left-0.5 top-0 text-[11px] text-ink-muted">
-                  Country
+                  {tr("Country")}
                 </label>
               )}
             </div>
             <Field
               id="inv-region"
-              label="County / State / Province"
+              label={tr("County / State / Province")}
               value={general.region}
               onChange={(v) => set({ region: v })}
               disabled={!canEdit}
             />
             <Field
               id="inv-city"
-              label="City / Town / Village"
+              label={tr("City / Town / Village")}
               value={general.city}
               onChange={(v) => set({ city: v })}
               disabled={!canEdit}
             />
             <Field
               id="inv-address"
-              label="Address"
+              label={tr("Address")}
               value={general.address}
               onChange={(v) => set({ address: v })}
               disabled={!canEdit}
             />
             <Field
               id="inv-postcode"
-              label="Postcode"
+              label={tr("Postcode")}
               value={general.postcode}
               onChange={(v) => set({ postcode: v })}
               disabled={!canEdit}
@@ -284,9 +287,9 @@ export function InvoiceSettingsPanel({
               type="button"
               disabled={pending}
               className={primary}
-              onClick={() => run(() => saveInvoiceGeneral(general), "Invoice settings saved.")}
+              onClick={() => run(() => saveInvoiceGeneral(general), tr("Invoice settings saved."))}
             >
-              Save
+              {tr("Save")}
             </button>
           </div>
         )}
@@ -294,7 +297,7 @@ export function InvoiceSettingsPanel({
 
       {/* Invoice Logo and Notes ------------------------------------------- */}
       <section className={card}>
-        <h2 className="border-b border-line px-4 py-4 text-[19px] text-ink">Invoice Logo and Notes</h2>
+        <h2 className="border-b border-line px-4 py-4 text-[19px] text-ink">{tr("Invoice Logo and Notes")}</h2>
         <div className="px-4 pb-6 pt-8">
           {/*
             The drop zone IS the upload control, as the reference's is: click
@@ -326,7 +329,7 @@ export function InvoiceSettingsPanel({
                 onClick={() => fileRef.current?.click()}
                 disabled={busy}
                 className="absolute inset-0 rounded focus-visible:outline focus-visible:outline-2 focus-visible:outline-brass"
-                aria-label={settings.logoUrl ? "Replace the invoice logo" : "Upload the invoice logo"}
+                aria-label={settings.logoUrl ? tr("Replace the invoice logo") : tr("Upload the invoice logo")}
               />
             ) : null}
             {settings.logoUrl ? (
@@ -334,12 +337,12 @@ export function InvoiceSettingsPanel({
               // is a runtime host; next/image would need it in remotePatterns.
               <img
                 src={settings.logoUrl}
-                alt="Invoice logo"
+                alt={tr("Invoice logo")}
                 className="pointer-events-none max-h-[160px] max-w-[80%] object-contain"
               />
             ) : (
               <span className="pointer-events-none text-[13px] text-ink-muted">
-                {busy ? "Uploading…" : "Drop the logo here, or click to choose it"}
+                {busy ? tr("Uploading…") : tr("Drop the logo here, or click to choose it")}
               </span>
             )}
             <input
@@ -360,7 +363,7 @@ export function InvoiceSettingsPanel({
               disabled={busy}
               className="mt-2 text-[12.5px] text-rose-700 underline-offset-2 hover:underline disabled:opacity-50"
             >
-              Remove logo
+              {tr("Remove logo")}
             </button>
           )}
           {logoError && (
@@ -377,12 +380,12 @@ export function InvoiceSettingsPanel({
               onChange={(e) => setUseText(e.target.checked)}
               className="h-[18px] w-[18px] accent-brass"
             />
-            Use Text Instead of Logo
+            {tr("Use Text Instead of Logo")}
           </label>
 
           <div className="mt-4">
             <label htmlFor="inv-logo-text" className="block text-[11px] text-ink-muted">
-              Text
+              {tr("Text")}
             </label>
             <input
               id="inv-logo-text"
@@ -400,7 +403,7 @@ export function InvoiceSettingsPanel({
           <div className="mt-2">
             <Field
               id="inv-notes"
-              label="Default Notes"
+              label={tr("Default Notes")}
               value={notes}
               maxLength={NOTES_MAX}
               onChange={setNotes}
@@ -420,11 +423,11 @@ export function InvoiceSettingsPanel({
               onClick={() =>
                 run(
                   () => saveInvoiceLogoAndNotes({ useTextInsteadOfLogo: useText, logoText, notes }),
-                  "Invoice logo and notes saved.",
+                  tr("Invoice logo and notes saved."),
                 )
               }
             >
-              Save
+              {tr("Save")}
             </button>
           </div>
         )}
@@ -433,12 +436,12 @@ export function InvoiceSettingsPanel({
       {/* Rounding Options ------------------------------------------------- */}
       <section className={card}>
         <div className="border-b border-line px-4 py-4">
-          <h2 className="text-[19px] text-ink">Rounding Options</h2>
-          <p className="text-[13px] text-ink">This rounding options would be used across whole system</p>
+          <h2 className="text-[19px] text-ink">{tr("Rounding Options")}</h2>
+          <p className="text-[13px] text-ink">{tr("This rounding options would be used across whole system")}</p>
         </div>
         <div className="grid gap-3 px-4 py-4 sm:grid-cols-[minmax(10rem,16rem)_1fr] sm:items-center">
           <label htmlFor="inv-round-logic" className="text-[14px] text-ink-muted">
-            Round Logic:
+            {tr("Round Logic:")}
           </label>
           <select
             id="inv-round-logic"
@@ -449,12 +452,12 @@ export function InvoiceSettingsPanel({
           >
             {ROUND_LOGIC.map((o) => (
               <option key={o.id} value={o.id}>
-                {o.label}
+                {tr(o.label)}
               </option>
             ))}
           </select>
           <label htmlFor="inv-round-to" className="text-[14px] text-ink-muted">
-            Round To:
+            {tr("Round To:")}
           </label>
           <select
             id="inv-round-to"
@@ -465,7 +468,7 @@ export function InvoiceSettingsPanel({
           >
             {ROUND_TO.map((o) => (
               <option key={o.id} value={o.id}>
-                {o.label}
+                {tr(o.label)}
               </option>
             ))}
           </select>
@@ -476,9 +479,9 @@ export function InvoiceSettingsPanel({
               type="button"
               disabled={pending}
               className={primary}
-              onClick={() => run(() => saveRoundingOptions({ roundLogic, roundTo }), "Rounding options saved.")}
+              onClick={() => run(() => saveRoundingOptions({ roundLogic, roundTo }), tr("Rounding options saved."))}
             >
-              Save
+              {tr("Save")}
             </button>
           </div>
         )}
@@ -486,7 +489,7 @@ export function InvoiceSettingsPanel({
 
       {/* Invoice Number Settings ------------------------------------------ */}
       <section className={card}>
-        <h2 className="border-b border-line px-4 py-4 text-[19px] text-ink">Invoice Number Settings</h2>
+        <h2 className="border-b border-line px-4 py-4 text-[19px] text-ink">{tr("Invoice Number Settings")}</h2>
         <div className="px-4 py-5">
           <label className="flex items-center gap-2.5 text-[14px] text-ink">
             <input
@@ -496,10 +499,10 @@ export function InvoiceSettingsPanel({
               onChange={(e) => setCustomNumbers(e.target.checked)}
               className="h-[18px] w-[18px] accent-brass"
             />
-            Enable Custom Invoice Number Settings
+            {tr("Enable Custom Invoice Number Settings")}
           </label>
           <p className="mt-8 text-center text-[12px] text-ink">
-            By default we use simple increment number for your invoices.
+            {tr("By default we use simple increment number for your invoices.")}
           </p>
         </div>
         {canEdit && (
@@ -508,9 +511,9 @@ export function InvoiceSettingsPanel({
               type="button"
               disabled={pending}
               className={primary}
-              onClick={() => run(() => saveInvoiceNumberSettings(customNumbers), "Invoice number settings saved.")}
+              onClick={() => run(() => saveInvoiceNumberSettings(customNumbers), tr("Invoice number settings saved."))}
             >
-              Save
+              {tr("Save")}
             </button>
           </div>
         )}
@@ -518,11 +521,11 @@ export function InvoiceSettingsPanel({
 
       {/* Statement Settings ----------------------------------------------- */}
       <section className={card}>
-        <h2 className="border-b border-line px-4 py-4 text-[19px] text-ink">Statement Settings</h2>
+        <h2 className="border-b border-line px-4 py-4 text-[19px] text-ink">{tr("Statement Settings")}</h2>
         <div className="space-y-4 px-4 pb-6 pt-3">
           <Field
             id="inv-reminder"
-            label="Reminder Text"
+            label={tr("Reminder Text")}
             value={reminder}
             maxLength={2000}
             onChange={setReminder}
@@ -530,7 +533,7 @@ export function InvoiceSettingsPanel({
           />
           <Field
             id="inv-terms"
-            label="Terms Text"
+            label={tr("Terms Text")}
             value={terms}
             maxLength={2000}
             onChange={setTerms}
@@ -546,11 +549,11 @@ export function InvoiceSettingsPanel({
               onClick={() =>
                 run(
                   () => saveStatementSettings({ reminderText: reminder, termsText: terms }),
-                  "Statement settings saved.",
+                  tr("Statement settings saved."),
                 )
               }
             >
-              Save
+              {tr("Save")}
             </button>
           </div>
         )}

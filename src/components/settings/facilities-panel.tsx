@@ -1,5 +1,6 @@
 "use client";
 
+import { useT } from "@/components/i18n";
 import { Fragment, useState } from "react";
 import { cn } from "@/components/ui";
 import { FacilityIcon } from "@/components/settings/facility-icon";
@@ -39,6 +40,7 @@ export function FacilitiesPanel({
   pending: boolean;
   run: Run;
 }) {
+  const tr = useT();
   const [draft, setDraft] = useState<Draft | null>(null);
 
   function save() {
@@ -48,7 +50,7 @@ export function FacilitiesPanel({
       const result = await saveFacility(d);
       if (result.ok) setDraft(null);
       return result;
-    }, d.id ? "Facility saved." : "Facility added.");
+    }, d.id ? tr("Facility saved.") : tr("Facility added."));
   }
 
   function editorRow() {
@@ -61,7 +63,7 @@ export function FacilitiesPanel({
               <FacilityIcon name={draft.icon} />
             </span>
             <select
-              aria-label="Icon"
+              aria-label={tr("Icon")}
               value={draft.icon}
               onChange={(e) => setDraft({ ...draft, icon: e.target.value as IconName })}
               className={cn(field, "max-w-[11rem]")}
@@ -77,7 +79,7 @@ export function FacilitiesPanel({
         <td className="py-2 pr-3">
           <input
             autoFocus
-            aria-label="Facility title"
+            aria-label={tr("Facility title")}
             value={draft.title}
             onChange={(e) => setDraft({ ...draft, title: e.target.value })}
             onKeyDown={(e) => {
@@ -89,10 +91,10 @@ export function FacilitiesPanel({
         </td>
         <td className="whitespace-nowrap py-2 text-right">
           <button type="button" onClick={() => setDraft(null)} className={cn(secondary, "mr-2")}>
-            Cancel
+            {tr("Cancel")}
           </button>
           <button type="button" onClick={save} disabled={pending} className={primary}>
-            Save
+            {tr("Save")}
           </button>
         </td>
       </tr>
@@ -102,16 +104,16 @@ export function FacilitiesPanel({
   return (
     <div className="max-w-6xl space-y-4">
       <h2 className="font-display text-[26px] font-semibold tracking-tightest text-ink">
-        Facilities
+        {tr("Facilities")}
       </h2>
       <div className="rounded-lg border border-line bg-white px-6 py-7 shadow-card sm:px-8">
         <div className="overflow-x-auto">
           <table className="w-full min-w-[32rem] text-[13px]">
             <thead>
               <tr className="border-b-2 border-line text-left text-ink">
-                <th className="w-[45%] pb-2 pl-1 font-semibold">Icon</th>
-                <th className="pb-2 font-semibold">Title</th>
-                <th className="w-40 pb-2" aria-label="Actions" />
+                <th className="w-[45%] pb-2 pl-1 font-semibold">{tr("Icon")}</th>
+                <th className="pb-2 font-semibold">{tr("Title")}</th>
+                <th className="w-40 pb-2" aria-label={tr("Actions")} />
               </tr>
             </thead>
             <tbody>
@@ -132,8 +134,8 @@ export function FacilitiesPanel({
                         <span className="flex justify-end gap-0.5">
                           <button
                             type="button"
-                            title="Edit"
-                            aria-label={`Edit ${f.title}`}
+                            title={tr("Edit")}
+                            aria-label={tr("Edit {name}", { name: f.title })}
                             onClick={() => setDraft({ id: f.id, title: f.title, icon: f.icon })}
                             className={iconButton}
                           >
@@ -145,14 +147,14 @@ export function FacilitiesPanel({
                           </button>
                           <button
                             type="button"
-                            title="Delete"
-                            aria-label={`Delete ${f.title}`}
+                            title={tr("Delete")}
+                            aria-label={tr("Delete {name}", { name: f.title })}
                             disabled={pending}
                             onClick={() => {
-                              if (!confirm(`Delete ${f.title}? It comes off every room type it is on.`)) {
+                              if (!confirm(tr("Delete {name}? It comes off every room type it is on.", { name: f.title }))) {
                                 return;
                               }
-                              run(() => deleteFacility(f.id), `${f.title} deleted.`);
+                              run(() => deleteFacility(f.id), tr("{name} deleted.", { name: f.title }));
                             }}
                             className={cn(iconButton, "text-[15px] font-bold leading-none")}
                           >
@@ -170,7 +172,7 @@ export function FacilitiesPanel({
         </div>
         {facilities.length === 0 && draft === null && (
           <p className="py-4 text-[13px] text-ink-muted">
-            None yet. Add one, then tick it on the room types that have it.
+            {tr("None yet. Add one, then tick it on the room types that have it.")}
           </p>
         )}
         {canEdit && draft === null && (
@@ -179,7 +181,7 @@ export function FacilitiesPanel({
             onClick={() => setDraft({ id: null, title: "", icon: "check" })}
             className="mt-3 text-[13px] font-semibold text-brass hover:underline"
           >
-            + Add Facility
+            {tr("+ Add Facility")}
           </button>
         )}
       </div>

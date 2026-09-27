@@ -14,8 +14,10 @@ import { getCurrentStaffUser } from "@/lib/queries";
 import { LOCALES, isLocale, type Locale } from "@/lib/i18n/locales";
 import { dictionaryFor } from "@/lib/i18n/dictionary";
 import { hotelToday, monthNames, weekdayNames } from "@/lib/i18n/calendar-names";
+import { pageTitle } from "@/lib/i18n/server";
+import { msg } from "@/lib/i18n/translate";
 
-export const metadata = { title: "Book a room" };
+export const generateMetadata = pageTitle(msg("Book a room"));
 
 /**
  * The public booking page. No session, no staff account, no nav.

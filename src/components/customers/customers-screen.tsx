@@ -1,5 +1,7 @@
 "use client";
 
+import { useT } from "@/components/i18n";
+import { msg } from "@/lib/i18n/translate";
 import { useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -13,7 +15,7 @@ import {
   saveCustomer,
   setExcludeFromEmail,
 } from "@/lib/actions/customers";
-import { COUNTRIES } from "@/lib/countries";
+import { countriesIn } from "@/lib/countries";
 import type { GuestField, IdentificationType } from "@/lib/guest-config";
 import type { Customer, CustomerKind } from "@/lib/types";
 import { useCurrency } from "@/components/currency";
@@ -31,9 +33,9 @@ import { useCurrency } from "@/components/currency";
  */
 
 const TABS = [
-  { key: "all", label: "All" },
-  { key: "personal", label: "Personal" },
-  { key: "company", label: "Company" },
+  { key: "all", label: msg("All") },
+  { key: "personal", label: msg("Personal") },
+  { key: "company", label: msg("Company") },
 ];
 
 const label =
@@ -107,6 +109,7 @@ export function CustomersScreen({
   identificationTypes: IdentificationType[];
   guestFields: GuestField[];
 }) {
+  const tr = useT();
   const currency = useCurrency();
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -159,7 +162,7 @@ export function CustomersScreen({
       setForm(null);
       setMessage({
         ok: true,
-        text: form.id ? "Customer saved." : "Customer created.",
+        text: form.id ? tr("Customer saved.") : tr("Customer created."),
       });
       router.refresh();
     });
@@ -182,7 +185,7 @@ export function CustomersScreen({
     if (selectedRows.length < 2) {
       setMessage({
         ok: false,
-        text: "Tick two or more customers to merge them into one.",
+        text: tr("Tick two or more customers to merge them into one."),
       });
       return;
     }
@@ -210,7 +213,11 @@ export function CustomersScreen({
       setSelected(new Set());
       setMessage({
         ok: true,
-        text: `${d.customersMerged} record${d.customersMerged === 1 ? "" : "s"} merged. ${d.bookingsMoved} booking${d.bookingsMoved === 1 ? "" : "s"} and ${d.foliosMoved} folio${d.foliosMoved === 1 ? "" : "s"} moved across.`,
+        text: tr("{records} merged. {bookings} and {folios} moved across.", {
+          records: tr.plural(d.customersMerged, "{n} record", "{n} records"),
+          bookings: tr.plural(d.bookingsMoved, "{n} booking", "{n} bookings"),
+          folios: tr.plural(d.foliosMoved, "{n} folio", "{n} folios"),
+        }),
       });
       router.refresh();
     });
@@ -247,8 +254,10 @@ export function CustomersScreen({
       setMessage({
         ok: true,
         text: result.data.capped
-          ? `${result.data.rows} customers exported — the export stops at ${result.data.rows}, so this is not the whole list. Narrow the search and export again.`
-          : `${result.data.rows} customer${result.data.rows === 1 ? "" : "s"} exported to ${result.data.filename}.`,
+          ? tr("{n} customers exported — the export stops at {n}, so this is not the whole list. Narrow the search and export again.", { n: result.data.rows })
+          : tr.plural(result.data.rows, "{n} customer exported to {file}.", "{n} customers exported to {file}.", {
+              file: result.data.filename,
+            }),
       });
     });
   }
@@ -261,7 +270,7 @@ export function CustomersScreen({
       <div className="mb-4 flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="font-display text-2xl font-semibold tracking-tightest text-ink">
-            Customer Profiles
+            {tr("Customer Profiles")}
           </h1>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -270,8 +279,8 @@ export function CustomersScreen({
             disabled={!canEdit || pending}
             title={
               canEdit
-                ? "Add a customer without taking a booking"
-                : "Front desk, manager and admin accounts can add a customer"
+                ? tr("Add a customer without taking a booking")
+                : tr("Front desk, manager and admin accounts can add a customer")
             }
             className={cn(
               toolbar,
@@ -280,15 +289,15 @@ export function CustomersScreen({
                 : "cursor-not-allowed text-ink-faint",
             )}
           >
-            Create Customer
+            {tr("Create Customer")}
           </button>
           <button
             onClick={openMerge}
             disabled={!canMerge || pending}
             title={
               canMerge
-                ? "Tick two or more rows, then fold them into one record"
-                : "Only a manager or administrator can merge customers"
+                ? tr("Tick two or more rows, then fold them into one record")
+                : tr("Only a manager or administrator can merge customers")
             }
             className={cn(
               toolbar,
@@ -297,7 +306,7 @@ export function CustomersScreen({
                 : "cursor-not-allowed text-ink-faint",
             )}
           >
-            Merge Selected
+            {tr("Merge Selected")}
             {selected.size > 0 && (
               <span className="ml-1.5 tnum rounded bg-brass px-1.5 py-0.5 text-white">
                 {selected.size}
@@ -307,10 +316,10 @@ export function CustomersScreen({
           <button
             onClick={exportCsv}
             disabled={pending}
-            title="Download every customer matching this search, as a CSV Excel opens"
+            title={tr("Download every customer matching this search, as a CSV Excel opens")}
             className={cn(toolbar, "text-ink-muted hover:bg-shell hover:text-ink")}
           >
-            Export to Excel
+            {tr("Export to Excel")}
           </button>
         </div>
       </div>
@@ -331,12 +340,12 @@ export function CustomersScreen({
       {form && (
         <div className="mb-4 rounded-lg border border-line bg-shell/60 p-4">
           <h2 className="mb-3 font-display text-[15px] font-semibold tracking-tightest text-ink">
-            {form.id ? "Edit customer" : "New customer"}
+            {form.id ? tr("Edit customer") : tr("New customer")}
           </h2>
 
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             <div>
-              <label className={label} htmlFor="c-kind">Kind</label>
+              <label className={label} htmlFor="c-kind">{tr("Kind")}</label>
               <select
                 id="c-kind"
                 value={form.kind}
@@ -345,15 +354,15 @@ export function CustomersScreen({
                 }
                 className={field}
               >
-                <option value="personal">Person</option>
-                <option value="company">Company</option>
+                <option value="personal">{tr("Person")}</option>
+                <option value="company">{tr("Company")}</option>
               </select>
             </div>
 
             {form.kind === "personal" ? (
               <>
                 <div>
-                  <label className={label} htmlFor="c-first">First name</label>
+                  <label className={label} htmlFor="c-first">{tr("First name")}</label>
                   <input
                     id="c-first"
                     value={form.firstName}
@@ -362,7 +371,7 @@ export function CustomersScreen({
                   />
                 </div>
                 <div>
-                  <label className={label} htmlFor="c-last">Last name</label>
+                  <label className={label} htmlFor="c-last">{tr("Last name")}</label>
                   <input
                     id="c-last"
                     value={form.lastName}
@@ -373,7 +382,7 @@ export function CustomersScreen({
               </>
             ) : (
               <div className="sm:col-span-2">
-                <label className={label} htmlFor="c-company">Company name</label>
+                <label className={label} htmlFor="c-company">{tr("Company name")}</label>
                 <input
                   id="c-company"
                   value={form.companyName}
@@ -384,7 +393,7 @@ export function CustomersScreen({
             )}
 
             <div>
-              <label className={label} htmlFor="c-nid">National id number</label>
+              <label className={label} htmlFor="c-nid">{tr("National id number")}</label>
               <input
                 id="c-nid"
                 value={form.nationalIdNumber}
@@ -395,7 +404,7 @@ export function CustomersScreen({
               />
             </div>
             <div>
-              <label className={label} htmlFor="c-email">Email</label>
+              <label className={label} htmlFor="c-email">{tr("Email")}</label>
               <input
                 id="c-email"
                 type="email"
@@ -405,7 +414,7 @@ export function CustomersScreen({
               />
             </div>
             <div>
-              <label className={label} htmlFor="c-phone">Phone</label>
+              <label className={label} htmlFor="c-phone">{tr("Phone")}</label>
               <input
                 id="c-phone"
                 value={form.phone}
@@ -427,11 +436,11 @@ export function CustomersScreen({
           */}
           <fieldset className="mt-4 rounded-md border border-line bg-shell/50 p-3">
             <legend className="px-1 text-xxs font-semibold uppercase tracking-[0.1em] text-ink-faint">
-              Identity
+              {tr("Identity")}
             </legend>
             <div className="grid gap-3 sm:grid-cols-2">
               <div>
-                <label className={label} htmlFor="c-nationality">Nationality</label>
+                <label className={label} htmlFor="c-nationality">{tr("Nationality")}</label>
                 <select
                   id="c-nationality"
                   value={form.nationality}
@@ -440,8 +449,8 @@ export function CustomersScreen({
                   }
                   className={field}
                 >
-                  <option value="">Not recorded</option>
-                  {COUNTRIES.map((c) => (
+                  <option value="">{tr("Not recorded")}</option>
+                  {countriesIn(tr).map((c) => (
                     <option key={c.code} value={c.code}>
                       {c.name}
                     </option>
@@ -449,15 +458,15 @@ export function CustomersScreen({
                 </select>
               </div>
               <div>
-                <label className={label} htmlFor="c-country">Country of residence</label>
+                <label className={label} htmlFor="c-country">{tr("Country of residence")}</label>
                 <select
                   id="c-country"
                   value={form.country}
                   onChange={(e) => setForm({ ...form, country: e.target.value })}
                   className={field}
                 >
-                  <option value="">Not recorded</option>
-                  {COUNTRIES.map((c) => (
+                  <option value="">{tr("Not recorded")}</option>
+                  {countriesIn(tr).map((c) => (
                     <option key={c.code} value={c.code}>
                       {c.name}
                     </option>
@@ -466,7 +475,7 @@ export function CustomersScreen({
               </div>
               {identificationTypes.length > 0 && (
                 <div className="sm:col-span-2">
-                  <label className={label} htmlFor="c-id-type">Identification type</label>
+                  <label className={label} htmlFor="c-id-type">{tr("Identification type")}</label>
                   <select
                     id="c-id-type"
                     value={form.identificationTypeId}
@@ -475,7 +484,7 @@ export function CustomersScreen({
                     }
                     className={field}
                   >
-                    <option value="">Not recorded</option>
+                    <option value="">{tr("Not recorded")}</option>
                     {identificationTypes.map((t) => (
                       <option key={t.id} value={t.id}>
                         {t.title}
@@ -485,7 +494,7 @@ export function CustomersScreen({
                 </div>
               )}
               <div>
-                <label className={label} htmlFor="c-passport">Document number</label>
+                <label className={label} htmlFor="c-passport">{tr("Document number")}</label>
                 <input
                   id="c-passport"
                   value={form.passportNumber}
@@ -496,7 +505,7 @@ export function CustomersScreen({
                 />
               </div>
               <div>
-                <label className={label} htmlFor="c-passport-exp">Document expiry</label>
+                <label className={label} htmlFor="c-passport-exp">{tr("Document expiry")}</label>
                 <input
                   id="c-passport-exp"
                   type="date"
@@ -508,7 +517,7 @@ export function CustomersScreen({
                 />
               </div>
               <div>
-                <label className={label} htmlFor="c-dob">Date of birth</label>
+                <label className={label} htmlFor="c-dob">{tr("Date of birth")}</label>
                 <input
                   id="c-dob"
                   type="date"
@@ -526,7 +535,7 @@ export function CustomersScreen({
           {guestFields.length > 0 && (
             <fieldset className="mt-4 rounded-md border border-line bg-shell/50 p-3">
               <legend className="px-1 text-xxs font-semibold uppercase tracking-[0.1em] text-ink-faint">
-                Additional details
+                {tr("Additional details")}
               </legend>
               <div className="grid gap-3 sm:grid-cols-2">
                 {guestFields.map((f) => {
@@ -539,9 +548,9 @@ export function CustomersScreen({
                       <label className={label} htmlFor={id}>{f.label}</label>
                       {f.kind === "yes_no" ? (
                         <select id={id} value={value} onChange={(e) => set(e.target.value)} className={field}>
-                          <option value="">Not recorded</option>
-                          <option value="yes">Yes</option>
-                          <option value="no">No</option>
+                          <option value="">{tr("Not recorded")}</option>
+                          <option value="yes">{tr("Yes")}</option>
+                          <option value="no">{tr("No")}</option>
                         </select>
                       ) : (
                         <input
@@ -569,7 +578,7 @@ export function CustomersScreen({
               }
               className="h-3.5 w-3.5 accent-brass"
             />
-            Exclude from email
+            {tr("Exclude from email")}
           </label>
 
           <div className="mt-4 flex gap-2">
@@ -578,13 +587,13 @@ export function CustomersScreen({
               disabled={pending}
               className="rounded-md bg-chrome-800 px-5 py-2 text-[13px] font-medium text-white hover:bg-chrome-900 disabled:opacity-60"
             >
-              {pending ? "Saving…" : "Save customer"}
+              {pending ? tr("Saving…") : tr("Save customer")}
             </button>
             <button
               onClick={() => setForm(null)}
               className="rounded-md border border-line px-5 py-2 text-[13px] text-ink-muted hover:bg-shell hover:text-ink"
             >
-              Cancel
+              {tr("Cancel")}
             </button>
           </div>
         </div>
@@ -593,11 +602,10 @@ export function CustomersScreen({
       {merging && (
         <div className="mb-4 rounded-lg border border-warn/40 bg-warn-wash p-4">
           <h2 className="font-display text-[15px] font-semibold tracking-tightest text-warn-deep">
-            Merge {selectedRows.length} customers into one
+            {tr("Merge {n} customers into one", { n: selectedRows.length })}
           </h2>
           <p className="mt-1 text-[13px] leading-relaxed text-warn-deep">
-            Choose the record to keep. Everything on the others moves to it.
-            This cannot be undone from here.
+            {tr("Choose the record to keep. Everything on the others moves to it. This cannot be undone from here.")}
           </p>
 
           <div className="mt-3 space-y-1.5">
@@ -614,9 +622,9 @@ export function CustomersScreen({
                   className="accent-brass"
                 />
                 <span className="font-medium">{c.name}</span>
-                <span className="text-xxs text-ink-faint">Id: {c.ref}</span>
+                <span className="text-xxs text-ink-faint">{tr("Id: {ref}", { ref: c.ref })}</span>
                 <span className="tnum ml-auto text-xxs text-ink-muted">
-                  {c.bookingCount} booking{c.bookingCount === 1 ? "" : "s"}
+                  {tr.plural(c.bookingCount, "{n} booking", "{n} bookings")}
                   {c.email ? ` · ${c.email}` : ""}
                 </span>
               </label>
@@ -629,13 +637,13 @@ export function CustomersScreen({
               disabled={pending || !keepId}
               className="rounded-md bg-warn-deep px-5 py-2 text-[13px] font-medium text-white hover:opacity-90 disabled:opacity-60"
             >
-              {pending ? "Merging…" : "Merge them"}
+              {pending ? tr("Merging…") : tr("Merge them")}
             </button>
             <button
               onClick={() => setMerging(false)}
               className="rounded-md border border-line bg-white px-5 py-2 text-[13px] text-ink-muted hover:text-ink"
             >
-              Cancel
+              {tr("Cancel")}
             </button>
           </div>
         </div>
@@ -647,12 +655,12 @@ export function CustomersScreen({
             type="search"
             name="q"
             defaultValue={q}
-            placeholder="Search by name, email or phone"
+            placeholder={tr("Search by name, email or phone")}
             className="min-w-[220px] flex-1 rounded-md border border-line px-3.5 py-2 text-[13px] placeholder:text-ink-faint"
           />
           <input type="hidden" name="kind" value={kind} />
           <button className="rounded-md bg-chrome-800 px-5 py-2 text-[13px] font-medium text-white hover:bg-chrome-900">
-            Search
+            {tr("Search")}
           </button>
         </form>
         <div className="flex items-center gap-2 text-sm">
@@ -667,7 +675,7 @@ export function CustomersScreen({
                     : "text-nav hover:underline",
                 )}
               >
-                {t.label}
+                {tr(t.label)}
               </Link>
             </span>
           ))}
@@ -676,8 +684,8 @@ export function CustomersScreen({
 
       {rows.length === 0 ? (
         <EmptyState
-          title="No customers match this search"
-          hint="Search covers name, email and phone number."
+          title={tr("No customers match this search")}
+          hint={tr("Search covers name, email and phone number.")}
         />
       ) : (
         <>
@@ -697,23 +705,23 @@ export function CustomersScreen({
                         )
                       }
                       className="h-3.5 w-3.5 accent-brass"
-                      aria-label="Select every customer on this page"
+                      aria-label={tr("Select every customer on this page")}
                     />
                   </th>
-                  <th className="px-3 pb-2.5 text-xxs font-semibold uppercase tracking-[0.1em]">Name</th>
-                  <th className="px-3 pb-2.5 text-xxs font-semibold uppercase tracking-[0.1em]">National Id Number</th>
-                  <th className="px-3 pb-2.5 text-xxs font-semibold uppercase tracking-[0.1em]">Email</th>
+                  <th className="px-3 pb-2.5 text-xxs font-semibold uppercase tracking-[0.1em]">{tr("Name")}</th>
+                  <th className="px-3 pb-2.5 text-xxs font-semibold uppercase tracking-[0.1em]">{tr("National Id Number")}</th>
+                  <th className="px-3 pb-2.5 text-xxs font-semibold uppercase tracking-[0.1em]">{tr("Email")}</th>
                   <th className="px-3 pb-2.5 text-center text-xxs font-semibold uppercase tracking-[0.1em]">
-                    Exclude from email
+                    {tr("Exclude from email")}
                   </th>
                   <th className="px-3 pb-2.5 text-center text-xxs font-semibold uppercase tracking-[0.1em]">
-                    No of Bookings
+                    {tr("No of Bookings")}
                   </th>
                   <th className="px-3 pb-2.5 text-right text-xxs font-semibold uppercase tracking-[0.1em]">
-                    Total Revenue
+                    {tr("Total Revenue")}
                   </th>
-                  <th className="px-3 pb-2.5 text-xxs font-semibold uppercase tracking-[0.1em]">Last Booking Date</th>
-                  <th className="px-3 pb-2.5 text-right text-xxs font-semibold uppercase tracking-[0.1em]">Amount</th>
+                  <th className="px-3 pb-2.5 text-xxs font-semibold uppercase tracking-[0.1em]">{tr("Last Booking Date")}</th>
+                  <th className="px-3 pb-2.5 text-right text-xxs font-semibold uppercase tracking-[0.1em]">{tr("Amount")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-line">
@@ -731,7 +739,7 @@ export function CustomersScreen({
                         checked={selected.has(c.id)}
                         onChange={() => toggle(c.id)}
                         className="h-3.5 w-3.5 accent-brass"
-                        aria-label={`Select ${c.name}`}
+                        aria-label={tr("Select {name}", { name: c.name })}
                       />
                     </td>
                     <td className="px-3 py-3">
@@ -739,7 +747,7 @@ export function CustomersScreen({
                         <button
                           onClick={() => openEdit(c.id)}
                           className="font-medium text-ink hover:text-brass hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brass"
-                          title="Edit this customer"
+                          title={tr("Edit this customer")}
                         >
                           {c.name}
                         </button>
@@ -747,11 +755,11 @@ export function CustomersScreen({
                         <span className="font-medium text-ink">{c.name}</span>
                       )}
                       <span className="ml-1.5 text-xxs text-ink-faint">
-                        Id: {c.ref}
+                        {tr("Id: {ref}", { ref: c.ref })}
                       </span>
                       {c.kind === "company" && (
                         <span className="ml-1.5 rounded bg-slate-100 px-1.5 py-0.5 text-[10px] text-slate-600">
-                          company
+                          {tr("company")}
                         </span>
                       )}
                     </td>
@@ -771,11 +779,11 @@ export function CustomersScreen({
                         onChange={() => toggleExclude(c)}
                         disabled={!canEdit || pending}
                         className="h-3.5 w-3.5 accent-brass disabled:cursor-not-allowed"
-                        aria-label={`Exclude ${c.name} from email`}
+                        aria-label={tr("Exclude {name} from email", { name: c.name })}
                         title={
                           canEdit
-                            ? "Keep this customer off mailings"
-                            : "Front desk, manager and admin accounts can change this"
+                            ? tr("Keep this customer off mailings")
+                            : tr("Front desk, manager and admin accounts can change this")
                         }
                       />
                     </td>
@@ -787,7 +795,7 @@ export function CustomersScreen({
                     </td>
                     <td className="whitespace-nowrap px-3 py-3 text-ink-muted">
                       {c.lastBookingDate
-                        ? format(parseISO(c.lastBookingDate), "MMM d, yyyy")
+                        ? tr.date(c.lastBookingDate, "MMM d, yyyy")
                         : "—"}
                     </td>
                     <td
@@ -806,8 +814,11 @@ export function CustomersScreen({
 
           <div className="mt-3 flex items-center justify-between text-sm text-ink-muted">
             <p>
-              {(page - 1) * perPage + 1}–{Math.min(page * perPage, total)} of{" "}
-              {total}
+              {tr("{from}–{to} of {total}", {
+                from: (page - 1) * perPage + 1,
+                to: Math.min(page * perPage, total),
+                total,
+              })}
             </p>
             <div className="flex gap-1">
               {Array.from({ length: pages }, (_, i) => i + 1).map((p) => (

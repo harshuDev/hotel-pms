@@ -1,5 +1,7 @@
 "use client";
 
+import { useT } from "@/components/i18n";
+import { msg } from "@/lib/i18n/translate";
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { cn } from "@/components/ui";
@@ -8,19 +10,19 @@ import { saveOwnProfile } from "@/lib/actions/profile";
 import type { StaffRole } from "@/lib/types";
 
 const ROLE_LABEL: Record<StaffRole, string> = {
-  admin: "Administrator",
-  manager: "Manager",
-  front_desk: "Front desk",
-  cashier: "Cashier",
-  housekeeping: "Housekeeping",
+  admin: msg("Administrator"),
+  manager: msg("Manager"),
+  front_desk: msg("Front desk"),
+  cashier: msg("Cashier"),
+  housekeeping: msg("Housekeeping"),
 };
 
 const ROLE_NOTE: Record<StaffRole, string> = {
-  admin: "Everything, including staff and settings",
-  manager: "Rates, settings, the night audit and the drawer total",
-  front_desk: "Bookings, check-in and out, payments",
-  cashier: "Payments and the drawer",
-  housekeeping: "Room status, and no money at all",
+  admin: msg("Everything, including staff and settings"),
+  manager: msg("Rates, settings, the night audit and the drawer total"),
+  front_desk: msg("Bookings, check-in and out, payments"),
+  cashier: msg("Payments and the drawer"),
+  housekeeping: msg("Room status, and no money at all"),
 };
 
 /** Matches the reset screen, and stricter than GoTrue's own minimum of six. */
@@ -55,6 +57,7 @@ export function ProfileScreen({
   fullName: string;
   role: StaffRole;
 }) {
+  const tr = useT();
   const router = useRouter();
 
   const [name, setName] = useState(fullName);
@@ -72,10 +75,10 @@ export function ProfileScreen({
     startSaveName(async () => {
       const result = await saveOwnProfile({ fullName: name });
       if (!result.ok) {
-        setNameMessage({ ok: false, text: result.error ?? "That did not work." });
+        setNameMessage({ ok: false, text: result.error ?? tr("That did not work.") });
         return;
       }
-      setNameMessage({ ok: true, text: "Name saved." });
+      setNameMessage({ ok: true, text: tr("Name saved.") });
       router.refresh();
     });
   }
@@ -87,16 +90,16 @@ export function ProfileScreen({
     if (next.length < MIN_LENGTH) {
       setPasswordMessage({
         ok: false,
-        text: `A password needs at least ${MIN_LENGTH} characters.`,
+        text: tr("A password needs at least {n} characters.", { n: MIN_LENGTH }),
       });
       return;
     }
     if (next !== confirm) {
-      setPasswordMessage({ ok: false, text: "The two new passwords do not match." });
+      setPasswordMessage({ ok: false, text: tr("The two new passwords do not match.") });
       return;
     }
     if (next === current) {
-      setPasswordMessage({ ok: false, text: "That is the password you already have." });
+      setPasswordMessage({ ok: false, text: tr("That is the password you already have.") });
       return;
     }
 
@@ -115,7 +118,7 @@ export function ProfileScreen({
       setSavingPassword(false);
       setPasswordMessage({
         ok: false,
-        text: "Your session has expired. Sign in again and retry.",
+        text: tr("Your session has expired. Sign in again and retry."),
       });
       return;
     }
@@ -127,7 +130,7 @@ export function ProfileScreen({
 
     if (wrongPassword) {
       setSavingPassword(false);
-      setPasswordMessage({ ok: false, text: "That is not your current password." });
+      setPasswordMessage({ ok: false, text: tr("That is not your current password.") });
       return;
     }
 
@@ -142,18 +145,18 @@ export function ProfileScreen({
     setCurrent("");
     setNext("");
     setConfirm("");
-    setPasswordMessage({ ok: true, text: "Password changed." });
+    setPasswordMessage({ ok: true, text: tr("Password changed.") });
   }
 
   return (
     <div className="grid gap-3 lg:grid-cols-2">
       <div className={card}>
         <h2 className="mb-4 font-display text-[15px] font-semibold tracking-tightest text-ink">
-          Your name
+          {tr("Your name")}
         </h2>
 
         <div>
-          <label htmlFor="full-name" className={label}>Full name</label>
+          <label htmlFor="full-name" className={label}>{tr("Full name")}</label>
           <input
             id="full-name"
             value={name}
@@ -163,14 +166,13 @@ export function ProfileScreen({
         </div>
 
         <div className="mt-4 rounded-md bg-shell px-3 py-2.5">
-          <p className={label}>Role</p>
-          <p className="text-[13px] text-ink">{ROLE_LABEL[role]}</p>
+          <p className={label}>{tr("Role")}</p>
+          <p className="text-[13px] text-ink">{tr(ROLE_LABEL[role])}</p>
           <p className="mt-0.5 text-xs leading-relaxed text-ink-muted">
-            {ROLE_NOTE[role]}
+            {tr(ROLE_NOTE[role])}
           </p>
           <p className="mt-2 text-xs leading-relaxed text-ink-faint">
-            Only an administrator can change a role, and not their own. Ask one
-            if this is wrong.
+            {tr("Only an administrator can change a role, and not their own. Ask one if this is wrong.")}
           </p>
         </div>
 
@@ -180,7 +182,7 @@ export function ProfileScreen({
             disabled={savingName || name.trim() === "" || name === fullName}
             className={primary}
           >
-            {savingName ? "Saving…" : "Save the name"}
+            {savingName ? tr("Saving…") : tr("Save the name")}
           </button>
         </div>
 
@@ -189,12 +191,12 @@ export function ProfileScreen({
 
       <div className={card}>
         <h2 className="mb-4 font-display text-[15px] font-semibold tracking-tightest text-ink">
-          Your password
+          {tr("Your password")}
         </h2>
 
         <form onSubmit={submitPassword} className="space-y-4">
           <div>
-            <label htmlFor="current-password" className={label}>Current password</label>
+            <label htmlFor="current-password" className={label}>{tr("Current password")}</label>
             <input
               id="current-password"
               type="password"
@@ -207,7 +209,7 @@ export function ProfileScreen({
           </div>
 
           <div>
-            <label htmlFor="new-password" className={label}>New password</label>
+            <label htmlFor="new-password" className={label}>{tr("New password")}</label>
             <input
               id="new-password"
               type="password"
@@ -215,13 +217,13 @@ export function ProfileScreen({
               required
               value={next}
               onChange={(e) => setNext(e.target.value)}
-              placeholder={`At least ${MIN_LENGTH} characters`}
+              placeholder={tr("At least {n} characters", { n: MIN_LENGTH })}
               className={field}
             />
           </div>
 
           <div>
-            <label htmlFor="confirm-password" className={label}>Again</label>
+            <label htmlFor="confirm-password" className={label}>{tr("Again")}</label>
             <input
               id="confirm-password"
               type="password"
@@ -234,7 +236,7 @@ export function ProfileScreen({
           </div>
 
           <button type="submit" disabled={savingPassword} className={primary}>
-            {savingPassword ? "Changing…" : "Change the password"}
+            {savingPassword ? tr("Changing…") : tr("Change the password")}
           </button>
         </form>
 
