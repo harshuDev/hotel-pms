@@ -57,8 +57,14 @@ for (const locale of LOCALES) {
       continue;
     }
     if (value.trim() === "") report(locale, `${JSON.stringify(key)} is empty`);
-    if (placeholders(value) !== want)
-      report(locale, `${JSON.stringify(key)}: placeholders {${placeholders(value)}} but the key has {${want}}`);
+    // A Postgres message may leave out a captured value that only makes
+    // sense in English (the "s" of "extra{3}"); it may never invent one.
+    const got = placeholders(value);
+    const ok =
+      meta.kind === "db"
+        ? got.split(",").filter(Boolean).every((p) => want.split(",").includes(p))
+        : got === want;
+    if (!ok) report(locale, `${JSON.stringify(key)}: placeholders {${got}} but the key has {${want}}`);
   }
   for (const key of Object.keys(dict)) {
     if (!(key in catalog)) report(locale, `stale key ${JSON.stringify(key)} is not in the catalog`);
