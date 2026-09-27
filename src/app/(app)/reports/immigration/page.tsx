@@ -85,11 +85,10 @@ export default async function ImmigrationReportPage({
 
       {incomplete.length > 0 && (
         <div className="mb-4 rounded-lg border border-warn/40 bg-warn-wash px-4 py-3 text-[13px] text-warn-deep">
-          {incomplete.length} {tr("of these")}{" "}{rows.length} {tr("stays are missing something a return needs. Open the guest under")}{" "}
+          {tr("{n} of these {total} stays are missing something a return needs.", { n: incomplete.length, total: rows.length })}{" "}
           <Link href="/customers" className="underline underline-offset-2">
-            {tr("Customers")}
-          </Link>{" "}
-          {tr("and fill in the Identity fields — nationality, a document number and a date of birth.")}
+            {tr("Open the guest in Customers and fill in the Identity fields — nationality, a document number and a date of birth.")}
+          </Link>
         </div>
       )}
 

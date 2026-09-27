@@ -187,8 +187,11 @@ export default async function BookingsPage({
 
           <div className="mt-3 flex items-center justify-between text-sm text-ink-muted">
             <p>
-              {(page - 1) * perPage + 1}–{Math.min(page * perPage, total)} {tr("of")}{" "}
-              {total}
+              {tr("{from}–{to} of {total}", {
+                from: (page - 1) * perPage + 1,
+                to: Math.min(page * perPage, total),
+                total,
+              })}
             </p>
             <div className="flex gap-1">
               <Link

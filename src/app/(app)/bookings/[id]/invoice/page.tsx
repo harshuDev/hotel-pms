@@ -123,7 +123,7 @@ export default async function InvoicePage({
           <div className="text-right">
             <p className="font-display text-[20px] font-semibold tracking-tightest text-ink">{tr("Invoice")}</p>
             {v.invoiceNumber !== null && (
-              <p className="tnum mt-1 text-[13px] text-ink">{tr("No.")}{" "}{v.invoiceNumber}</p>
+              <p className="tnum mt-1 text-[13px] text-ink">{tr("No. {n}", { n: v.invoiceNumber })}</p>
             )}
             <p className="tnum text-[13px] text-ink-muted">{v.reference}</p>
             <p className="tnum text-[13px] text-ink-muted">{day(v.date)}</p>

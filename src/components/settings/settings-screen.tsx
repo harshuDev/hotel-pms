@@ -663,7 +663,7 @@ export function SettingsScreen({
               </select>
               {browserZone && (
                 <p className="mt-1.5 text-[13px] text-ink-muted">
-                  {tr("Your current timezone is:")}{" "}{browserZone}.{" "}
+                  {tr("Your current timezone is: {zone}.", { zone: browserZone })}{" "}
                   {canEdit && browserZone !== details.timezone && (
                     <button
                       type="button"

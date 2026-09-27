@@ -107,7 +107,7 @@ export function CloseDay({ businessDate }: { businessDate: string }) {
                     and there is nothing to warn anybody about.
                   */}
                   <p className="text-sm leading-relaxed text-ink-muted">
-                    {tr("This posts tonight’s room charge for every guest in house, closes")}{" "}<span className="font-medium text-ink">{day}</span>{tr(", and opens the next day. It cannot be undone.")}
+                    {tr("This posts tonight’s room charge for every guest in house, closes {day}, and opens the next day. It cannot be undone.", { day })}
                   </p>
 
                   {error && (

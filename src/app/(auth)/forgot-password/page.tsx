@@ -62,7 +62,7 @@ export default function ForgotPasswordPage() {
                 role="status"
                 className="rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2.5 text-xs leading-relaxed text-emerald-800"
               >
-                {tr("If")}{" "}{email.trim()} {tr("belongs to a staff account, a link to set a new password is on its way. It expires in an hour, and it only works once.")}
+                {tr("If {email} belongs to a staff account, a link to set a new password is on its way. It expires in an hour, and it only works once.", { email: email.trim() })}
               </div>
               <p className="text-xs leading-relaxed text-ink-muted">
                 {tr("Nothing arrived? Check the spam folder, then try again. If the address was wrong, an administrator can tell you which one the account uses.")}

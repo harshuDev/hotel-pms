@@ -687,7 +687,7 @@ function MergeDialog({
       <div className="w-full max-w-lg rounded-lg bg-white shadow-xl">
         <div className="flex items-center justify-between border-b border-line px-6 py-4">
           <h3 id="merge-title" className="text-[16px] text-ink">
-            {tr("Merge")}{" "}<span className="font-semibold">{source.title}</span> {tr("to:")}
+            {tr("Merge {name} to:", { name: source.title })}
           </h3>
           <button
             type="button"

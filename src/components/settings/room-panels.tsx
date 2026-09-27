@@ -761,9 +761,11 @@ export function RoomSetupPanel({
               {tr("Previous")}
             </button>
             <span className="tnum text-ink-faint">
-              {(rooms.page - 1) * rooms.perPage + 1}
-              {"–"}
-              {Math.min(rooms.page * rooms.perPage, rooms.total)} {tr("of")}{" "}{rooms.total}
+              {tr("{from}–{to} of {total}", {
+                from: (rooms.page - 1) * rooms.perPage + 1,
+                to: Math.min(rooms.page * rooms.perPage, rooms.total),
+                total: rooms.total,
+              })}
             </span>
             <button
               type="button"

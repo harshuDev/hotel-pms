@@ -1,7 +1,4 @@
 {
- ", and opens the next day. It cannot be undone.": {
-  "kind": "text"
- },
  "(Holding area)": {
   "kind": "text"
  },
@@ -181,6 +178,9 @@
  "{n} notes on {date}": {
   "kind": "plural",
   "one": "{n} note on {date}"
+ },
+ "{n} of these {total} stays are missing something a return needs.": {
+  "kind": "text"
  },
  "{n} out of order": {
   "kind": "text"
@@ -1129,9 +1129,6 @@
  "An identification type needs a title.": {
   "kind": "text"
  },
- "and fill in the Identity fields — nationality, a document number and a date of birth.": {
-  "kind": "text"
- },
  "Andorra": {
   "kind": "country",
   "code": "AD"
@@ -1386,9 +1383,6 @@
  "Belize": {
   "kind": "country",
   "code": "BZ"
- },
- "belongs to a staff account, a link to set a new password is on its way. It expires in an hour, and it only works once.": {
-  "kind": "text"
  },
  "Benin": {
   "kind": "country",
@@ -3871,7 +3865,7 @@
  "Identity": {
   "kind": "text"
  },
- "If": {
+ "If {email} belongs to a staff account, a link to set a new password is on its way. It expires in an hour, and it only works once.": {
   "kind": "text"
  },
  "Immigration": {
@@ -4481,6 +4475,9 @@
  "Merge {name}": {
   "kind": "text"
  },
+ "Merge {name} to:": {
+  "kind": "text"
+ },
  "Merge sales channels": {
   "kind": "text"
  },
@@ -4993,7 +4990,7 @@
  "No-shows": {
   "kind": "text"
  },
- "No.": {
+ "No. {n}": {
   "kind": "text"
  },
  "Nobody arriving today": {
@@ -5258,16 +5255,10 @@
  "Occupied, do not disturb": {
   "kind": "text"
  },
- "of": {
-  "kind": "text"
- },
  "Of nights have no country": {
   "kind": "text"
  },
  "Of the bookings holding a deposit": {
-  "kind": "text"
- },
- "of these": {
   "kind": "text"
  },
  "Of which cash": {
@@ -5619,6 +5610,9 @@
  "Open the booking": {
   "kind": "text"
  },
+ "Open the guest in Customers and fill in the Identity fields — nationality, a document number and a date of birth.": {
+  "kind": "text"
+ },
  "Opened": {
   "kind": "text"
  },
@@ -5691,7 +5685,7 @@
  "Pace": {
   "kind": "text"
  },
- "Page": {
+ "Page {page} of {last}": {
   "kind": "text"
  },
  "Page not found": {
@@ -7232,9 +7226,6 @@
  "Stays": {
   "kind": "text"
  },
- "stays are missing something a return needs. Open the guest under": {
-  "kind": "text"
- },
  "Stays longer than {0} nights cannot be booked online. Please contact the hotel.": {
   "kind": "db"
  },
@@ -8082,7 +8073,7 @@
  "This page needs the link from the reset email. Ask for a new one below.": {
   "kind": "text"
  },
- "This posts tonight’s room charge for every guest in house, closes": {
+ "This posts tonight’s room charge for every guest in house, closes {day}, and opens the next day. It cannot be undone.": {
   "kind": "text"
  },
  "This property already has a {0} method. Rename that one rather than adding a second.": {
@@ -8156,9 +8147,6 @@
   "kind": "text"
  },
  "To clean": {
-  "kind": "text"
- },
- "to:": {
   "kind": "text"
  },
  "Today": {
@@ -8684,7 +8672,7 @@
  "you@example.com": {
   "kind": "text"
  },
- "Your current timezone is:": {
+ "Your current timezone is: {zone}.": {
   "kind": "text"
  },
  "Your name": {

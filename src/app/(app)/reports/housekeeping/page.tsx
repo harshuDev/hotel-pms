@@ -241,7 +241,7 @@ export default async function HousekeepingReportPage({
             href={href({ state })}
             className="ml-1 rounded-md border border-line px-3 py-1.5 text-[13px] text-ink-muted hover:bg-shell hover:text-ink"
           >
-            {tr("Floor")}{" "}{floor} ✕
+            {tr("Floor {floor}", { floor })} ✕
           </Link>
         )}
       </div>
@@ -326,7 +326,7 @@ export default async function HousekeepingReportPage({
       {lastPage > 1 && (
         <div className="mt-3 flex items-center justify-between text-[13px]">
           <p className="text-ink-faint">
-            {tr("Page")}{" "}{page} {tr("of")}{" "}{lastPage}
+            {tr("Page {page} of {last}", { page, last: lastPage })}
           </p>
           <div className="flex gap-2">
             {page > 1 && (
