@@ -638,7 +638,7 @@
  "A paid-out needs a reason": {
   "kind": "db"
  },
- "A password needs at least {mIN_LENGTH} characters.": {
+ "A password needs at least {n} characters.": {
   "kind": "text"
  },
  "A payment method needs a kind": {
@@ -791,7 +791,7 @@
  "Add": {
   "kind": "text"
  },
- "Add {l}": {
+ "Add {what}": {
   "kind": "text"
  },
  "Add a customer without taking a booking": {
@@ -1248,7 +1248,7 @@
   "kind": "country",
   "code": "AW"
  },
- "As category ({taxRateId})": {
+ "As category ({tax})": {
   "kind": "text"
  },
  "As the room type": {
@@ -1260,7 +1260,7 @@
  "Associated Customer": {
   "kind": "text"
  },
- "At least {mIN_LENGTH} characters": {
+ "At least {n} characters": {
   "kind": "text"
  },
  "At property": {

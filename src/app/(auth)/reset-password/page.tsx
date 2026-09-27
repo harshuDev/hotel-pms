@@ -114,7 +114,7 @@ export default function ResetPasswordPage() {
     setError("");
 
     if (password.length < MIN_LENGTH) {
-      setError(tr("A password needs at least {mIN_LENGTH} characters.", { mIN_LENGTH: MIN_LENGTH }));
+      setError(tr("A password needs at least {n} characters.", { n: MIN_LENGTH }));
       return;
     }
     if (password !== confirm) {
@@ -200,7 +200,7 @@ export default function ResetPasswordPage() {
                   value={password}
                   onChange={(event) => setPassword(event.target.value)}
                   className="w-full rounded-md border border-line bg-white px-3 py-2.5 text-sm text-ink outline-none transition focus:border-brass focus:ring-2 focus:ring-brass/20"
-                  placeholder={tr("At least {mIN_LENGTH} characters", { mIN_LENGTH: MIN_LENGTH })}
+                  placeholder={tr("At least {n} characters", { n: MIN_LENGTH })}
                 />
               </div>
 

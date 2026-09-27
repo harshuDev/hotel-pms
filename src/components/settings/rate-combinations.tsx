@@ -190,7 +190,7 @@ export function RateCombinations({
             </span>
           ))}
         {rest.length > 0 && (
-          <select aria-label={tr("Add {l}", { l: l })} value="" onChange={(e) => e.target.value && set([...chosen, e.target.value])}
+          <select aria-label={tr("Add {what}", { what: l })} value="" onChange={(e) => e.target.value && set([...chosen, e.target.value])}
             className="min-w-[4rem] flex-1 border-0 bg-transparent text-[11.5px] text-ink-muted outline-none">
             <option value="">{tr("Add…")}</option>
             {rest.map((a) => (

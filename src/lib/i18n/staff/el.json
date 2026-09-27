@@ -1,4 +1,333 @@
 {
+ "(Holding area)": "(Χώρος αναμονής)",
+ "{abs}d ago": "πριν από {abs} ημ.",
+ "{amount} Discount": "Έκπτωση {amount}",
+ "{amount} in cash": "{amount} σε μετρητά",
+ "{amount} is required per booking.": "Απαιτούνται {amount} ανά κράτηση.",
+ "{amount} is required per room booked.": "Απαιτούνται {amount} ανά κρατημένο δωμάτιο.",
+ "{amount} of it in cash": "εκ των οποίων {amount} σε μετρητά",
+ "{amount} off": "{amount} έκπτωση",
+ "{amount} owing": "{amount} οφειλή",
+ "{amount} rooms": "{amount} δωμάτια",
+ "{amount} rooms, {amount2} other": "{amount} δωμάτια, {amount2} άλλα",
+ "{amount} through the drawer": "{amount} μέσω ταμείου",
+ "{channel} booking {reference}": "Κράτηση {channel} {reference}",
+ "{channelManagerLabel} saved.": "{channelManagerLabel}: αποθηκεύτηκε.",
+ "{charged} charged, {paid} paid": "{charged} χρέωση, {paid} πληρωμή",
+ "{clean} vacant dirty, {dueOut} due out": "{clean} ελεύθερα ακαθάριστα, {dueOut} αναχωρήσεις",
+ "{currency} deleted.": "{currency}: διαγράφηκε.",
+ "{currency} saved.": "{currency}: αποθηκεύτηκε.",
+ "{day}: a rate cannot be negative.": "{day}: η τιμή δεν μπορεί να είναι αρνητική.",
+ "{day}: a stay rule is a number of nights, 1 to 365.": "{day}: ένας κανόνας διαμονής είναι αριθμός διανυκτερεύσεων, από 1 έως 365.",
+ "{day}: write the rate as a number.": "{day}: γράψτε την τιμή ως αριθμό.",
+ "{field} set on {n} room-nights.": {
+  "one": "{field} ορίστηκε σε {n} δωματιο-νύχτα.",
+  "other": "{field} ορίστηκε σε {n} δωματιο-νύχτες."
+ },
+ "{from} to {to}": "{from} έως {to}",
+ "{from}–{to} of {total}": "{from}–{to} από {total}",
+ "{label} picker": "Επιλογέας {label}",
+ "{left} free of {total}": "{left} ελεύθερα από {total}",
+ "{length} transactions": "{length} συναλλαγές",
+ "{lost} since cancelled": "{lost} από την ακύρωση",
+ "{matches} of {total}": "{matches} από {total}",
+ "{n} / page": "{n} / σελίδα",
+ "{n} adults": {
+  "one": "{n} ενήλικας",
+  "other": "{n} ενήλικες"
+ },
+ "{n} bookings": {
+  "one": "{n} κράτηση",
+  "other": "{n} κρατήσεις"
+ },
+ "{n} bookings owing": {
+  "one": "{n} κράτηση με οφειλή",
+  "other": "{n} κρατήσεις με οφειλή"
+ },
+ "{n} bookings still owing": {
+  "one": "{n} κράτηση ακόμη με οφειλή",
+  "other": "{n} κρατήσεις ακόμη με οφειλή"
+ },
+ "{n} cashier shifts are still open on this date. The night audit refuses to close a day while one is, so the figures below can still move.": {
+  "one": "{n} βάρδια ταμείου είναι ακόμη ανοιχτή σε αυτή την ημερομηνία. Ο νυχτερινός έλεγχος δεν κλείνει μια ημέρα όσο υπάρχει ανοιχτή, οπότε τα παρακάτω ποσά μπορεί ακόμη να αλλάξουν.",
+  "other": "{n} βάρδιες ταμείου είναι ακόμη ανοιχτές σε αυτή την ημερομηνία. Ο νυχτερινός έλεγχος δεν κλείνει μια ημέρα όσο υπάρχει ανοιχτή, οπότε τα παρακάτω ποσά μπορεί ακόμη να αλλάξουν."
+ },
+ "{n} categories": {
+  "one": "{n} κατηγορία",
+  "other": "{n} κατηγορίες"
+ },
+ "{n} channels": {
+  "one": "{n} κανάλι",
+  "other": "{n} κανάλια"
+ },
+ "{n} children": {
+  "one": "{n} παιδί",
+  "other": "{n} παιδιά"
+ },
+ "{n} customers exported — the export stops at {n}, so this is not the whole list. Narrow the search and export again.": "Εξήχθησαν {n} πελάτες — η εξαγωγή σταματά στους {n}, οπότε δεν είναι ολόκληρη η λίστα. Περιορίστε την αναζήτηση και εξαγάγετε ξανά.",
+ "{n} customers exported to {file}.": {
+  "one": "{n} πελάτης εξήχθη στο {file}.",
+  "other": "{n} πελάτες εξήχθησαν στο {file}."
+ },
+ "{n} days": {
+  "one": "{n} ημέρα",
+  "other": "{n} ημέρες"
+ },
+ "{n} departures": {
+  "one": "{n} αναχώρηση",
+  "other": "{n} αναχωρήσεις"
+ },
+ "{n} due out": "{n} αναχωρήσεις",
+ "{n} floors": {
+  "one": "{n} όροφος",
+  "other": "{n} όροφοι"
+ },
+ "{n} folios": {
+  "one": "{n} λογαριασμός",
+  "other": "{n} λογαριασμοί"
+ },
+ "{n} free": "{n} ελεύθερα",
+ "{n} guests": {
+  "one": "{n} επισκέπτης",
+  "other": "{n} επισκέπτες"
+ },
+ "{n} methods": {
+  "one": "{n} μέθοδος",
+  "other": "{n} μέθοδοι"
+ },
+ "{n} nights": {
+  "one": "{n} διανυκτέρευση",
+  "other": "{n} διανυκτερεύσεις"
+ },
+ "{n} nights have no rate. Nights added by an extension come in at zero because no rate plan was named — set a rate before the night audit runs, or the stay will be charged as free.": {
+  "one": "{n} διανυκτέρευση δεν έχει τιμή. Οι διανυκτερεύσεις που προστίθενται με παράταση μπαίνουν με μηδέν επειδή δεν ορίστηκε πλάνο τιμών — ορίστε τιμή πριν από τον νυχτερινό έλεγχο, αλλιώς η διαμονή θα χρεωθεί ως δωρεάν.",
+  "other": "{n} διανυκτερεύσεις δεν έχουν τιμή. Οι διανυκτερεύσεις που προστίθενται με παράταση μπαίνουν με μηδέν επειδή δεν ορίστηκε πλάνο τιμών — ορίστε τιμή πριν από τον νυχτερινό έλεγχο, αλλιώς η διαμονή θα χρεωθεί ως δωρεάν."
+ },
+ "{n} nights priced": {
+  "one": "{n} διανυκτέρευση με τιμή",
+  "other": "{n} διανυκτερεύσεις με τιμή"
+ },
+ "{n} no shows": {
+  "one": "{n} μη εμφάνιση",
+  "other": "{n} μη εμφανίσεις"
+ },
+ "{n} notes on {date}": {
+  "one": "{n} σημείωση στις {date}",
+  "other": "{n} σημειώσεις στις {date}"
+ },
+ "{n} of these {total} stays are missing something a return needs.": "Σε {n} από αυτές τις {total} διαμονές λείπει κάτι που απαιτεί η δήλωση.",
+ "{n} out of order": "{n} εκτός λειτουργίας",
+ "{n} pax": "{n} άτ.",
+ "{n} people": {
+  "one": "{n} άτομο",
+  "other": "{n} άτομα"
+ },
+ "{n} plans": {
+  "one": "{n} πλάνο",
+  "other": "{n} πλάνα"
+ },
+ "{n} rates": {
+  "one": "{n} τιμή",
+  "other": "{n} τιμές"
+ },
+ "{n} rates selected. Leave the box empty to clear the price and take them off sale.": {
+  "one": "Επιλέχθηκε {n} τιμή. Αφήστε το πεδίο κενό για να διαγράψετε την τιμή και να την αποσύρετε από την πώληση.",
+  "other": "Επιλέχθηκαν {n} τιμές. Αφήστε το πεδίο κενό για να διαγράψετε την τιμή και να τις αποσύρετε από την πώληση."
+ },
+ "{n} records": {
+  "one": "{n} εγγραφή",
+  "other": "{n} εγγραφές"
+ },
+ "{n} room nights": {
+  "one": "{n} δωματιο-νύχτα",
+  "other": "{n} δωματιο-νύχτες"
+ },
+ "{n} room types selected.": {
+  "one": "Επιλέχθηκε {n} τύπος δωματίου.",
+  "other": "Επιλέχθηκαν {n} τύποι δωματίων."
+ },
+ "{n} rooms": {
+  "one": "{n} δωμάτιο",
+  "other": "{n} δωμάτια"
+ },
+ "{n} rows": {
+  "one": "{n} γραμμή",
+  "other": "{n} γραμμές"
+ },
+ "{n} stays": {
+  "one": "{n} διαμονή",
+  "other": "{n} διαμονές"
+ },
+ "{n} types": {
+  "one": "{n} τύπος",
+  "other": "{n} τύποι"
+ },
+ "{n} unassigned": "{n} χωρίς δωμάτιο",
+ "{n}d": "{n} ημ.",
+ "{n}n": "{n} ν.",
+ "{name} — change": "{name} — αλλαγή",
+ "{name} · opened {time} · business date {date}": "{name} · άνοιξε {time} · επιχειρησιακή ημερομηνία {date}",
+ "{name} (copy)": "{name} (αντίγραφο)",
+ "{name} (reversed)": "{name} (αντιλογισμός)",
+ "{name} active": "{name} ενεργό",
+ "{name} added.": "{name}: προστέθηκε.",
+ "{name} dashboard": "Πίνακας ελέγχου {name}",
+ "{name} dates added.": "{name}: προστέθηκαν ημερομηνίες.",
+ "{name} deleted.": "{name}: διαγράφηκε.",
+ "{name} includes {meals}.": "{name} περιλαμβάνει {meals}.",
+ "{name} includes no meals.": "{name} δεν περιλαμβάνει γεύματα.",
+ "{name} is active": "{name} είναι ενεργό",
+ "{name} is larger than 256 KB.": "{name}: μεγαλύτερο από 256 KB.",
+ "{name} is now on the guest booking page.": "{name}: είναι πλέον στη σελίδα κρατήσεων επισκεπτών.",
+ "{name} is off the guest booking page.": "{name}: δεν είναι πλέον στη σελίδα κρατήσεων επισκεπτών.",
+ "{name} merged into {target}.": "{name} συγχωνεύτηκε στο {target}.",
+ "{name} merged.": "{name} συγχωνεύτηκε.",
+ "{name} must be a colour like #003580.": "{name} πρέπει να είναι χρώμα όπως #003580.",
+ "{name} on {name2} is worth {amount}. Nights charged from the next night audit split it out as food.": "{name} στο {name2} αξίζει {amount}. Οι διανυκτερεύσεις που χρεώνονται από τον επόμενο νυχτερινό έλεγχο το διαχωρίζουν ως φαγητό.",
+ "{name} on {name2} is worth nothing again, so nothing is posted for it.": "{name} στο {name2} δεν αξίζει ξανά τίποτα, οπότε δεν καταχωρείται τίποτα.",
+ "{name} on {name2} saved.": "{name} στο {name2}: αποθηκεύτηκε.",
+ "{name} policy": "Πολιτική {name}",
+ "{name} profile deleted.": "Το προφίλ {name} διαγράφηκε.",
+ "{name} profile saved.": "Το προφίλ {name} αποθηκεύτηκε.",
+ "{name} saved.": "{name}: αποθηκεύτηκε.",
+ "{name}, {name2}, {value} rate": "Τιμή {name}, {name2}, {value}",
+ "{nights} from {date}, {rooms}. No room has been assigned yet — that happens at check-in.": "{nights} από {date}, {rooms}. Δεν έχει ανατεθεί ακόμη δωμάτιο — αυτό γίνεται στο check-in.",
+ "{nights}, {from} to {to}": "{nights}, {from} έως {to}",
+ "{occupied} of {sellable} sellable": "{occupied} από {sellable} διαθέσιμα προς πώληση",
+ "{offer} applied, taking {amount} off the stay.": "{offer} εφαρμόστηκε, αφαιρώντας {amount} από τη διαμονή.",
+ "{pct}% Discount": "Έκπτωση {pct}%",
+ "{pct}% occupied": "{pct}% κατειλημμένο",
+ "{pending} still pending": "{pending} ακόμη σε εκκρεμότητα",
+ "{plan} is not loaded on {type} for {date}, so it cannot be sold": "Το {plan} δεν έχει φορτωθεί στο {type} για {date}, οπότε δεν μπορεί να πωληθεί",
+ "{qty} × {what} charged.": "{qty} × {what} χρεώθηκε.",
+ "{records} merged. {bookings} and {folios} moved across.": "{records} συγχωνεύτηκαν. {bookings} και {folios} μεταφέρθηκαν.",
+ "{reference} booked.": "{reference}: κρατήθηκε.",
+ "{reversals} reversed": "{reversals} αντιλογισμένα",
+ "{roomsSold} of {nights} room nights": "{roomsSold} από {nights} δωματιο-νύχτες",
+ "{roomsSold} of {roomNightsAvailable} room nights": "{roomsSold} από {roomNightsAvailable} δωματιο-νύχτες",
+ "{roomsSold} of {sellableRooms} rooms": "{roomsSold} από {sellableRooms} δωμάτια",
+ "{setting} in Inventory Settings turns it back on.": "Το {setting} στις ρυθμίσεις αποθέματος το ενεργοποιεί ξανά.",
+ "{shown} of {total} rooms": "{shown} από {total} δωμάτια",
+ "{sold} sold of {sellable} sellable": "{sold} πωλήθηκαν από {sellable} διαθέσιμα",
+ "{unassigned} with no room assigned": "{unassigned} χωρίς ανατεθειμένο δωμάτιο",
+ "{value} closed to arrival": "{value} κλειστό για αφίξεις",
+ "{value} closed to departure": "{value} κλειστό για αναχωρήσεις",
+ "{value} max stay": "{value} μέγιστη διαμονή",
+ "{value} min stay arrival": "{value} ελάχιστη διαμονή κατά την άφιξη",
+ "{value} min stay through": "{value} ελάχιστη συνεχής διαμονή",
+ "{value} stop sell": "{value} διακοπή πωλήσεων",
+ "{value}% of rack": "{value}% της τιμής καταλόγου",
+ "{what} charged.": "{what} χρεώθηκε.",
+ "{who} password": "Κωδικός {who}",
+ "{who} password:": "Κωδικός {who}:",
+ "{who} Username": "Όνομα χρήστη {who}",
+ "{who} Username:": "Όνομα χρήστη {who}:",
+ "% deposit is required at the time of booking": "% προκαταβολή απαιτείται κατά την κράτηση",
+ "↑↓ to move": "↑↓ για μετακίνηση",
+ "↵ to open": "↵ για άνοιγμα",
+ "+ Add Cancellation Policy": "+ Προσθήκη πολιτικής ακύρωσης",
+ "+ Add email template": "+ Προσθήκη προτύπου email",
+ "+ Add Extra Category": "+ Προσθήκη κατηγορίας έξτρα",
+ "+ Add Facility": "+ Προσθήκη παροχής",
+ "+ Add Room": "+ Προσθήκη δωματίου",
+ "+ Add Room Type": "+ Προσθήκη τύπου δωματίου",
+ "+ Add Rooms in a Run": "+ Προσθήκη σειράς δωματίων",
+ "+ Add Virtual Room Type": "+ Προσθήκη εικονικού τύπου δωματίου",
+ "1 Example Street, Example City": "Οδός Παραδείγματος 1, Πόλη Παραδείγματος",
+ "1 Point after dot": "1 δεκαδικό ψηφίο",
+ "120.00, or blank to clear": "120.00, ή κενό για διαγραφή",
+ "2 Points after dot": "2 δεκαδικά ψηφία",
+ "A {0} booking cannot be given a room": "Μια κράτηση σε κατάσταση {0} δεν μπορεί να πάρει δωμάτιο",
+ "A {n} night deposit is required at the time of booking.": {
+  "one": "Απαιτείται προκαταβολή {n} διανυκτέρευσης κατά την κράτηση.",
+  "other": "Απαιτείται προκαταβολή {n} διανυκτερεύσεων κατά την κράτηση."
+ },
+ "A {percent}% deposit is required at the time of booking.": "Απαιτείται προκαταβολή {percent}% κατά την κράτηση.",
+ "A booking appears here once a guest checks in, and leaves when they check out.": "Μια κράτηση εμφανίζεται εδώ μόλις ο επισκέπτης κάνει check-in και φεύγει με το check-out.",
+ "A booking appears here once a payment is taken against it and before the guest checks in.": "Μια κράτηση εμφανίζεται εδώ μόλις ληφθεί πληρωμή σε αυτήν και πριν ο επισκέπτης κάνει check-in.",
+ "A booking needs a first and last name": "Μια κράτηση χρειάζεται όνομα και επώνυμο",
+ "A booking needs a guest: pick an existing customer or enter a new one": "Μια κράτηση χρειάζεται επισκέπτη: επιλέξτε υπάρχοντα πελάτη ή καταχωρίστε νέο",
+ "A booking needs at least one adult": "Μια κράτηση χρειάζεται τουλάχιστον έναν ενήλικα",
+ "A booking needs at least one room": "Μια κράτηση χρειάζεται τουλάχιστον ένα δωμάτιο",
+ "A booking source needs a code and a name": "Μια πηγή κράτησης χρειάζεται κωδικό και όνομα",
+ "A cancellation policy needs a name": "Μια πολιτική ακύρωσης χρειάζεται όνομα",
+ "A capacity has to be a whole number of seats.": "Η χωρητικότητα πρέπει να είναι ακέραιος αριθμός θέσεων.",
+ "A category cannot be merged into itself": "Μια κατηγορία δεν μπορεί να συγχωνευτεί με τον εαυτό της",
+ "A ceiling, never a promise: rooms out of order still come off the top, so the sellable figure can be lower than the allotment but never higher. Leave the box empty to go back to selling every room that exists.": "Ένα ανώτατο όριο, ποτέ υπόσχεση: τα δωμάτια εκτός λειτουργίας αφαιρούνται πάντα, οπότε ο αριθμός προς πώληση μπορεί να είναι μικρότερος από το allotment αλλά ποτέ μεγαλύτερος. Αφήστε το πεδίο κενό για να πουλάτε ξανά κάθε υπάρχον δωμάτιο.",
+ "A charge must be more than nothing": "Μια χρέωση πρέπει να είναι μεγαλύτερη από το μηδέν",
+ "A charge must be more than nothing.": "Μια χρέωση πρέπει να είναι μεγαλύτερη από το μηδέν.",
+ "A chosen room type is not on this property": "Ένας επιλεγμένος τύπος δωματίου δεν ανήκει σε αυτό το κατάλυμα",
+ "A company": "Εταιρεία",
+ "A company needs a company name": "Μια εταιρεία χρειάζεται επωνυμία",
+ "A condition names something that is not on this property": "Μια συνθήκη αναφέρει κάτι που δεν ανήκει σε αυτό το κατάλυμα",
+ "A configuration file can be at most 256 KB": "Ένα αρχείο ρυθμίσεων μπορεί να είναι έως 256 KB",
+ "A connection cannot change channel manager": "Μια σύνδεση δεν μπορεί να αλλάξει channel manager",
+ "A connection cannot change provider": "Μια σύνδεση δεν μπορεί να αλλάξει πάροχο",
+ "A connection cannot change system": "Μια σύνδεση δεν μπορεί να αλλάξει σύστημα",
+ "A currency is three letters, like GBP.": "Ένα νόμισμα είναι τρία γράμματα, όπως GBP.",
+ "A customer is needed before any money can be charged.": "Χρειάζεται πελάτης πριν χρεωθούν χρήματα.",
+ "A dash means no rate is loaded for that rate on that room type, which is not the same as free — a booking against it is refused. That is also how a room type is taken off a rate: clear the price rather than looking for a switch.": "Μια παύλα σημαίνει ότι δεν έχει φορτωθεί τιμή για αυτή την τιμή σε αυτόν τον τύπο δωματίου, κάτι που δεν σημαίνει δωρεάν: μια κράτηση σε αυτήν απορρίπτεται. Έτσι αποσύρεται και ένας τύπος δωματίου από μια τιμή: διαγράψτε την τιμή αντί να ψάχνετε διακόπτη.",
+ "A deposit equal to the total cost is required at the time of booking": "Απαιτείται προκαταβολή ίση με το συνολικό κόστος κατά την κράτηση",
+ "A deposit equal to the total cost is required at the time of booking.": "Απαιτείται προκαταβολή ίση με το συνολικό κόστος κατά την κράτηση.",
+ "A disabled room is out of order and cannot be sold.": "Ένα απενεργοποιημένο δωμάτιο είναι εκτός λειτουργίας και δεν μπορεί να πωληθεί.",
+ "A facility needs a title": "Μια παροχή χρειάζεται τίτλο",
+ "A facility needs a title.": "Μια παροχή χρειάζεται τίτλο.",
+ "A fixed discount is more than 0": "Μια σταθερή έκπτωση είναι μεγαλύτερη από 0",
+ "A fixed sum off each night, never more than the night costs.": "Ένα σταθερό ποσό ανά διανυκτέρευση, ποτέ περισσότερο από όσο κοστίζει η διανυκτέρευση.",
+ "A floor is a whole number, or leave it blank.": "Ο όροφος είναι ακέραιος αριθμός, ή αφήστε κενό.",
+ "A folio is created on its first charge, so a booking that has taken no money yet has none.": "Ένας λογαριασμός δημιουργείται με την πρώτη χρέωση, οπότε μια κράτηση χωρίς κίνηση χρημάτων δεν έχει κανέναν.",
+ "A folio number is digits only": "Ο αριθμός λογαριασμού περιέχει μόνο ψηφία",
+ "A guest already staying can stay through a closed date; only arrivals are refused.": "Ένας επισκέπτης που ήδη διαμένει μπορεί να μείνει σε κλειστή ημερομηνία· απορρίπτονται μόνο οι αφίξεις.",
+ "A hotel usually has several, like Room Only, Bed and Breakfast and Non-refundable.": "Ένα ξενοδοχείο έχει συνήθως αρκετά, όπως Μόνο δωμάτιο, Δωμάτιο με πρωινό και Μη επιστρεπτέα.",
+ "A location needs both a latitude and a longitude": "Μια τοποθεσία χρειάζεται γεωγραφικό πλάτος και μήκος",
+ "A manager can turn it back on with “{feature}” in Settings → Hotel Features.": "Ένας διευθυντής μπορεί να το ενεργοποιήσει ξανά με «{feature}» στις Ρυθμίσεις → Λειτουργίες ξενοδοχείου.",
+ "A manager or administrator can create one.": "Ένας διευθυντής ή διαχειριστής μπορεί να δημιουργήσει ένα.",
+ "A manager or administrator sets these up.": "Τα ρυθμίζει ένας διευθυντής ή διαχειριστής.",
+ "A meal cannot be worth less than nothing": "Ένα γεύμα δεν μπορεί να αξίζει λιγότερο από τίποτα",
+ "A meal cannot be worth less than nothing.": "Ένα γεύμα δεν μπορεί να αξίζει λιγότερο από τίποτα.",
+ "A meeting room booking needs a guest count": "Μια κράτηση αίθουσας συσκέψεων χρειάζεται αριθμό συμμετεχόντων",
+ "A meeting room booking needs an event name": "Μια κράτηση αίθουσας συσκέψεων χρειάζεται όνομα εκδήλωσης",
+ "A meeting room needs a name": "Μια αίθουσα συσκέψεων χρειάζεται όνομα",
+ "A member of staff needs a name": "Ένα μέλος του προσωπικού χρειάζεται όνομα",
+ "A member of staff needs a name.": "Ένα μέλος του προσωπικού χρειάζεται όνομα.",
+ "A new booking can only be taken as pending or confirmed": "Μια νέα κράτηση μπορεί να καταχωριστεί μόνο ως εκκρεμής ή επιβεβαιωμένη",
+ "A new member of staff is invited in Supabase Auth, and then appears in this list.": "Ένα νέο μέλος του προσωπικού προσκαλείται στο Supabase Auth και μετά εμφανίζεται σε αυτή τη λίστα.",
+ "A night with no rate loaded is not free — it cannot be sold on this plan at all, and taking a booking against it will say so. Leave the box empty and apply to clear a rate back to nothing.": "Μια διανυκτέρευση χωρίς φορτωμένη τιμή δεν είναι δωρεάν — δεν μπορεί να πωληθεί σε αυτό το πλάνο, και μια κράτηση σε αυτήν θα το αναφέρει. Αφήστε το πεδίο κενό και εφαρμόστε για να διαγράψετε μια τιμή.",
+ "A nightly rate cannot be negative": "Η τιμή ανά διανυκτέρευση δεν μπορεί να είναι αρνητική",
+ "A nightly rate cannot be negative.": "Η τιμή ανά διανυκτέρευση δεν μπορεί να είναι αρνητική.",
+ "A note needs a date": "Μια σημείωση χρειάζεται ημερομηνία",
+ "A note needs something written in it": "Μια σημείωση χρειάζεται κείμενο",
+ "A paid-out may only be recorded against your own open shift": "Μια εκταμίευση μπορεί να καταχωριστεί μόνο στη δική σας ανοιχτή βάρδια",
+ "A paid-out must be more than zero": "Μια εκταμίευση πρέπει να είναι μεγαλύτερη από το μηδέν",
+ "A paid-out needs a reason": "Μια εκταμίευση χρειάζεται αιτιολογία",
+ "A password needs at least {n} characters.": "Ο κωδικός χρειάζεται τουλάχιστον {n} χαρακτήρες.",
+ "A payment method needs a kind": "Ένας τρόπος πληρωμής χρειάζεται είδος",
+ "A payment method needs a name": "Ένας τρόπος πληρωμής χρειάζεται όνομα",
+ "A payment type needs a title": "Ένας τύπος πληρωμής χρειάζεται τίτλο",
+ "A payment type needs a title.": "Ένας τύπος πληρωμής χρειάζεται τίτλο.",
+ "A percent discount is more than 0 and at most 100": "Μια ποσοστιαία έκπτωση είναι μεγαλύτερη από 0 και έως 100",
+ "A person": "Ένα πρόσωπο",
+ "A person needs a first name": "Ένα πρόσωπο χρειάζεται όνομα",
+ "A promotion needs a name": "Μια προσφορά χρειάζεται όνομα",
+ "A rate plan needs a code and a name": "Ένα πλάνο τιμών χρειάζεται κωδικό και όνομα",
+ "A rate plan needs a code and a name.": "Ένα πλάνο τιμών χρειάζεται κωδικό και όνομα.",
+ "A room line must be for between one and fifty rooms": "Μια γραμμή δωματίων πρέπει να είναι από ένα έως πενήντα δωμάτια",
+ "A room needs a number": "Ένα δωμάτιο χρειάζεται αριθμό",
+ "A room needs a number.": "Ένα δωμάτιο χρειάζεται αριθμό.",
+ "A room type needs a code and a name": "Ένας τύπος δωματίου χρειάζεται κωδικό και όνομα",
+ "A room type needs a code and a name.": "Ένας τύπος δωματίου χρειάζεται κωδικό και όνομα.",
+ "A season cannot end before it starts": "Μια σεζόν δεν μπορεί να τελειώνει πριν αρχίσει",
+ "A stay over {0} may run at most {1} nights, and this one is {2}.": "Μια διαμονή που περιλαμβάνει {0} μπορεί να διαρκέσει έως {1} διανυκτερεύσεις, και αυτή έχει {2}.",
+ "A stay over {0} must run at least {1} nights, and this one is {2}.": "Μια διαμονή που περιλαμβάνει {0} πρέπει να διαρκέσει τουλάχιστον {1} διανυκτερεύσεις, και αυτή έχει {2}.",
+ "A stay rule of zero nights means nothing. Leave it blank to clear it.": "Ένας κανόνας διαμονής μηδέν διανυκτερεύσεων δεν σημαίνει τίποτα. Αφήστε το κενό για να τον διαγράψετε.",
+ "A tax rate must be between 0 and 100 percent": "Ο συντελεστής φόρου πρέπει να είναι μεταξύ 0 και 100 τοις εκατό",
+ "A tax rate must be between 0 and 100 percent.": "Ο συντελεστής φόρου πρέπει να είναι μεταξύ 0 και 100 τοις εκατό.",
+ "A tax rate needs a name": "Ένας συντελεστής φόρου χρειάζεται όνομα",
+ "A tax rate needs a name.": "Ένας συντελεστής φόρου χρειάζεται όνομα.",
+ "A waitlist entry needs an arrival and a departure date": "Μια εγγραφή λίστας αναμονής χρειάζεται ημερομηνία άφιξης και αναχώρησης",
+ "A waitlist entry needs either a customer or a contact name": "Μια εγγραφή λίστας αναμονής χρειάζεται πελάτη ή όνομα επαφής",
+ "Abbreviation": "Συντομογραφία",
+ "Accommodation": "Διαμονή",
  "Afghanistan": "Αφγανιστάν",
  "Åland Islands": "Νήσοι Όλαντ",
  "Albania": "Αλβανία",

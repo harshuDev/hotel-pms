@@ -1,4 +1,300 @@
 {
+ "(Holding area)": "(Area penampungan)",
+ "{abs}d ago": "{abs} hr lalu",
+ "{amount} Discount": "Diskon {amount}",
+ "{amount} in cash": "{amount} tunai",
+ "{amount} is required per booking.": "{amount} diperlukan per reservasi.",
+ "{amount} is required per room booked.": "{amount} diperlukan per kamar yang dipesan.",
+ "{amount} of it in cash": "{amount} di antaranya tunai",
+ "{amount} off": "potongan {amount}",
+ "{amount} owing": "{amount} terutang",
+ "{amount} rooms": "{amount} kamar",
+ "{amount} rooms, {amount2} other": "{amount} kamar, {amount2} lainnya",
+ "{amount} through the drawer": "{amount} melalui laci kas",
+ "{channel} booking {reference}": "Reservasi {channel} {reference}",
+ "{channelManagerLabel} saved.": "{channelManagerLabel} disimpan.",
+ "{charged} charged, {paid} paid": "{charged} ditagih, {paid} dibayar",
+ "{clean} vacant dirty, {dueOut} due out": "{clean} kosong kotor, {dueOut} akan check-out",
+ "{currency} deleted.": "{currency} dihapus.",
+ "{currency} saved.": "{currency} disimpan.",
+ "{day}: a rate cannot be negative.": "{day}: tarif tidak boleh negatif.",
+ "{day}: a stay rule is a number of nights, 1 to 365.": "{day}: aturan menginap adalah jumlah malam, 1 sampai 365.",
+ "{day}: write the rate as a number.": "{day}: tulis tarif sebagai angka.",
+ "{field} set on {n} room-nights.": {
+  "other": "{field} diatur pada {n} malam-kamar."
+ },
+ "{from} to {to}": "{from} sampai {to}",
+ "{from}–{to} of {total}": "{from}–{to} dari {total}",
+ "{label} picker": "Pemilih {label}",
+ "{left} free of {total}": "{left} kosong dari {total}",
+ "{length} transactions": "{length} transaksi",
+ "{lost} since cancelled": "{lost} sejak dibatalkan",
+ "{matches} of {total}": "{matches} dari {total}",
+ "{n} / page": "{n} / halaman",
+ "{n} adults": {
+  "other": "{n} dewasa"
+ },
+ "{n} bookings": {
+  "other": "{n} reservasi"
+ },
+ "{n} bookings owing": {
+  "other": "{n} reservasi terutang"
+ },
+ "{n} bookings still owing": {
+  "other": "{n} reservasi masih terutang"
+ },
+ "{n} cashier shifts are still open on this date. The night audit refuses to close a day while one is, so the figures below can still move.": {
+  "other": "{n} shift kasir masih terbuka pada tanggal ini. Audit malam menolak menutup hari selama masih ada yang terbuka, jadi angka di bawah masih bisa berubah."
+ },
+ "{n} categories": {
+  "other": "{n} kategori"
+ },
+ "{n} channels": {
+  "other": "{n} kanal"
+ },
+ "{n} children": {
+  "other": "{n} anak"
+ },
+ "{n} customers exported — the export stops at {n}, so this is not the whole list. Narrow the search and export again.": "{n} pelanggan diekspor — ekspor berhenti di {n}, jadi ini bukan daftar lengkap. Persempit pencarian lalu ekspor lagi.",
+ "{n} customers exported to {file}.": {
+  "other": "{n} pelanggan diekspor ke {file}."
+ },
+ "{n} days": {
+  "other": "{n} hari"
+ },
+ "{n} departures": {
+  "other": "{n} keberangkatan"
+ },
+ "{n} due out": "{n} akan check-out",
+ "{n} floors": {
+  "other": "{n} lantai"
+ },
+ "{n} folios": {
+  "other": "{n} folio"
+ },
+ "{n} free": "{n} kosong",
+ "{n} guests": {
+  "other": "{n} tamu"
+ },
+ "{n} methods": {
+  "other": "{n} metode"
+ },
+ "{n} nights": {
+  "other": "{n} malam"
+ },
+ "{n} nights have no rate. Nights added by an extension come in at zero because no rate plan was named — set a rate before the night audit runs, or the stay will be charged as free.": {
+  "other": "{n} malam belum punya tarif. Malam yang ditambahkan lewat perpanjangan masuk dengan nol karena tidak ada paket tarif yang disebut — atur tarif sebelum audit malam berjalan, atau menginap akan ditagih gratis."
+ },
+ "{n} nights priced": {
+  "other": "{n} malam diberi harga"
+ },
+ "{n} no shows": {
+  "other": "{n} tidak datang"
+ },
+ "{n} notes on {date}": {
+  "other": "{n} catatan pada {date}"
+ },
+ "{n} of these {total} stays are missing something a return needs.": "{n} dari {total} masa inap ini kekurangan sesuatu yang dibutuhkan laporan.",
+ "{n} out of order": "{n} rusak",
+ "{n} pax": "{n} org",
+ "{n} people": {
+  "other": "{n} orang"
+ },
+ "{n} plans": {
+  "other": "{n} paket"
+ },
+ "{n} rates": {
+  "other": "{n} tarif"
+ },
+ "{n} rates selected. Leave the box empty to clear the price and take them off sale.": {
+  "other": "{n} tarif dipilih. Biarkan kotak kosong untuk menghapus harga dan menariknya dari penjualan."
+ },
+ "{n} records": {
+  "other": "{n} data"
+ },
+ "{n} room nights": {
+  "other": "{n} malam-kamar"
+ },
+ "{n} room types selected.": {
+  "other": "{n} tipe kamar dipilih."
+ },
+ "{n} rooms": {
+  "other": "{n} kamar"
+ },
+ "{n} rows": {
+  "other": "{n} baris"
+ },
+ "{n} stays": {
+  "other": "{n} masa inap"
+ },
+ "{n} types": {
+  "other": "{n} tipe"
+ },
+ "{n} unassigned": "{n} belum ditempatkan",
+ "{n}d": "{n} hr",
+ "{n}n": "{n} mlm",
+ "{name} — change": "{name} — ubah",
+ "{name} · opened {time} · business date {date}": "{name} · dibuka {time} · tanggal operasional {date}",
+ "{name} (copy)": "{name} (salinan)",
+ "{name} (reversed)": "{name} (dibatalkan)",
+ "{name} active": "{name} aktif",
+ "{name} added.": "{name} ditambahkan.",
+ "{name} dashboard": "Dasbor {name}",
+ "{name} dates added.": "Tanggal {name} ditambahkan.",
+ "{name} deleted.": "{name} dihapus.",
+ "{name} includes {meals}.": "{name} termasuk {meals}.",
+ "{name} includes no meals.": "{name} tidak termasuk makan.",
+ "{name} is active": "{name} aktif",
+ "{name} is larger than 256 KB.": "{name} lebih besar dari 256 KB.",
+ "{name} is now on the guest booking page.": "{name} sekarang ada di halaman pemesanan tamu.",
+ "{name} is off the guest booking page.": "{name} tidak lagi ada di halaman pemesanan tamu.",
+ "{name} merged into {target}.": "{name} digabung ke {target}.",
+ "{name} merged.": "{name} digabung.",
+ "{name} must be a colour like #003580.": "{name} harus berupa warna seperti #003580.",
+ "{name} on {name2} is worth {amount}. Nights charged from the next night audit split it out as food.": "{name} pada {name2} bernilai {amount}. Malam yang ditagih sejak audit malam berikutnya memisahkannya sebagai makanan.",
+ "{name} on {name2} is worth nothing again, so nothing is posted for it.": "{name} pada {name2} kembali tidak bernilai, jadi tidak ada yang dibukukan.",
+ "{name} on {name2} saved.": "{name} pada {name2} disimpan.",
+ "{name} policy": "Kebijakan {name}",
+ "{name} profile deleted.": "Profil {name} dihapus.",
+ "{name} profile saved.": "Profil {name} disimpan.",
+ "{name} saved.": "{name} disimpan.",
+ "{name}, {name2}, {value} rate": "Tarif {name}, {name2}, {value}",
+ "{nights} from {date}, {rooms}. No room has been assigned yet — that happens at check-in.": "{nights} mulai {date}, {rooms}. Belum ada kamar yang ditempatkan — itu dilakukan saat check-in.",
+ "{nights}, {from} to {to}": "{nights}, {from} sampai {to}",
+ "{occupied} of {sellable} sellable": "{occupied} dari {sellable} dapat dijual",
+ "{offer} applied, taking {amount} off the stay.": "{offer} diterapkan, mengurangi {amount} dari masa inap.",
+ "{pct}% Discount": "Diskon {pct}%",
+ "{pct}% occupied": "{pct}% terisi",
+ "{pending} still pending": "{pending} masih tertunda",
+ "{plan} is not loaded on {type} for {date}, so it cannot be sold": "{plan} belum dimuat pada {type} untuk {date}, jadi tidak bisa dijual",
+ "{qty} × {what} charged.": "{qty} × {what} ditagih.",
+ "{records} merged. {bookings} and {folios} moved across.": "{records} digabung. {bookings} dan {folios} dipindahkan.",
+ "{reference} booked.": "{reference} dipesan.",
+ "{reversals} reversed": "{reversals} dibatalkan",
+ "{roomsSold} of {nights} room nights": "{roomsSold} dari {nights} malam-kamar",
+ "{roomsSold} of {roomNightsAvailable} room nights": "{roomsSold} dari {roomNightsAvailable} malam-kamar",
+ "{roomsSold} of {sellableRooms} rooms": "{roomsSold} dari {sellableRooms} kamar",
+ "{setting} in Inventory Settings turns it back on.": "{setting} di Pengaturan Inventaris mengaktifkannya kembali.",
+ "{shown} of {total} rooms": "{shown} dari {total} kamar",
+ "{sold} sold of {sellable} sellable": "{sold} terjual dari {sellable} dapat dijual",
+ "{unassigned} with no room assigned": "{unassigned} tanpa kamar",
+ "{value} closed to arrival": "{value} tertutup untuk kedatangan",
+ "{value} closed to departure": "{value} tertutup untuk keberangkatan",
+ "{value} max stay": "{value} maksimum menginap",
+ "{value} min stay arrival": "{value} minimum menginap saat kedatangan",
+ "{value} min stay through": "{value} minimum menginap berturut-turut",
+ "{value} stop sell": "{value} stop jual",
+ "{value}% of rack": "{value}% dari tarif rak",
+ "{what} charged.": "{what} ditagih.",
+ "{who} password": "Kata sandi {who}",
+ "{who} password:": "Kata sandi {who}:",
+ "{who} Username": "Nama pengguna {who}",
+ "{who} Username:": "Nama pengguna {who}:",
+ "% deposit is required at the time of booking": "% deposit diperlukan saat pemesanan",
+ "↑↓ to move": "↑↓ untuk berpindah",
+ "↵ to open": "↵ untuk membuka",
+ "+ Add Cancellation Policy": "+ Tambah kebijakan pembatalan",
+ "+ Add email template": "+ Tambah templat email",
+ "+ Add Extra Category": "+ Tambah kategori ekstra",
+ "+ Add Facility": "+ Tambah fasilitas",
+ "+ Add Room": "+ Tambah kamar",
+ "+ Add Room Type": "+ Tambah tipe kamar",
+ "+ Add Rooms in a Run": "+ Tambah serangkaian kamar",
+ "+ Add Virtual Room Type": "+ Tambah tipe kamar virtual",
+ "1 Example Street, Example City": "Jalan Contoh 1, Kota Contoh",
+ "1 Point after dot": "1 angka di belakang koma",
+ "120.00, or blank to clear": "120.00, atau kosong untuk menghapus",
+ "2 Points after dot": "2 angka di belakang koma",
+ "A {0} booking cannot be given a room": "Reservasi {0} tidak bisa diberi kamar",
+ "A {n} night deposit is required at the time of booking.": {
+  "other": "Deposit {n} malam diperlukan saat pemesanan."
+ },
+ "A {percent}% deposit is required at the time of booking.": "Deposit {percent}% diperlukan saat pemesanan.",
+ "A booking appears here once a guest checks in, and leaves when they check out.": "Reservasi muncul di sini begitu tamu check-in, dan hilang saat check-out.",
+ "A booking appears here once a payment is taken against it and before the guest checks in.": "Reservasi muncul di sini begitu pembayaran diterima dan sebelum tamu check-in.",
+ "A booking needs a first and last name": "Reservasi memerlukan nama depan dan belakang",
+ "A booking needs a guest: pick an existing customer or enter a new one": "Reservasi memerlukan tamu: pilih pelanggan yang ada atau masukkan yang baru",
+ "A booking needs at least one adult": "Reservasi memerlukan minimal satu orang dewasa",
+ "A booking needs at least one room": "Reservasi memerlukan minimal satu kamar",
+ "A booking source needs a code and a name": "Sumber reservasi memerlukan kode dan nama",
+ "A cancellation policy needs a name": "Kebijakan pembatalan memerlukan nama",
+ "A capacity has to be a whole number of seats.": "Kapasitas harus berupa bilangan bulat kursi.",
+ "A category cannot be merged into itself": "Kategori tidak bisa digabung dengan dirinya sendiri",
+ "A ceiling, never a promise: rooms out of order still come off the top, so the sellable figure can be lower than the allotment but never higher. Leave the box empty to go back to selling every room that exists.": "Batas atas, bukan janji: kamar yang rusak tetap dikurangi, jadi angka yang dapat dijual bisa lebih rendah dari alokasi tetapi tidak pernah lebih tinggi. Biarkan kotak kosong untuk kembali menjual semua kamar yang ada.",
+ "A charge must be more than nothing": "Tagihan harus lebih dari nol",
+ "A charge must be more than nothing.": "Tagihan harus lebih dari nol.",
+ "A chosen room type is not on this property": "Tipe kamar yang dipilih bukan milik properti ini",
+ "A company": "Perusahaan",
+ "A company needs a company name": "Perusahaan memerlukan nama perusahaan",
+ "A condition names something that is not on this property": "Sebuah kondisi menyebut sesuatu yang bukan milik properti ini",
+ "A configuration file can be at most 256 KB": "File konfigurasi paling besar 256 KB",
+ "A connection cannot change channel manager": "Koneksi tidak bisa mengganti channel manager",
+ "A connection cannot change provider": "Koneksi tidak bisa mengganti penyedia",
+ "A connection cannot change system": "Koneksi tidak bisa mengganti sistem",
+ "A currency is three letters, like GBP.": "Mata uang terdiri dari tiga huruf, seperti GBP.",
+ "A customer is needed before any money can be charged.": "Diperlukan pelanggan sebelum uang dapat ditagih.",
+ "A dash means no rate is loaded for that rate on that room type, which is not the same as free — a booking against it is refused. That is also how a room type is taken off a rate: clear the price rather than looking for a switch.": "Tanda strip berarti tidak ada tarif yang dimuat untuk tarif itu pada tipe kamar itu, yang tidak sama dengan gratis: reservasi atasnya ditolak. Begitu juga cara menarik tipe kamar dari suatu tarif: hapus harganya alih-alih mencari sakelar.",
+ "A deposit equal to the total cost is required at the time of booking": "Deposit sebesar total biaya diperlukan saat pemesanan",
+ "A deposit equal to the total cost is required at the time of booking.": "Deposit sebesar total biaya diperlukan saat pemesanan.",
+ "A disabled room is out of order and cannot be sold.": "Kamar yang dinonaktifkan dianggap rusak dan tidak dapat dijual.",
+ "A facility needs a title": "Fasilitas memerlukan judul",
+ "A facility needs a title.": "Fasilitas memerlukan judul.",
+ "A fixed discount is more than 0": "Diskon tetap lebih dari 0",
+ "A fixed sum off each night, never more than the night costs.": "Jumlah tetap per malam, tidak pernah lebih dari harga malam itu.",
+ "A floor is a whole number, or leave it blank.": "Lantai adalah bilangan bulat, atau biarkan kosong.",
+ "A folio is created on its first charge, so a booking that has taken no money yet has none.": "Folio dibuat pada tagihan pertama, jadi reservasi yang belum ada transaksi uang belum memilikinya.",
+ "A folio number is digits only": "Nomor folio hanya berisi angka",
+ "A guest already staying can stay through a closed date; only arrivals are refused.": "Tamu yang sudah menginap boleh tetap tinggal melewati tanggal tertutup; hanya kedatangan yang ditolak.",
+ "A hotel usually has several, like Room Only, Bed and Breakfast and Non-refundable.": "Hotel biasanya punya beberapa, seperti Kamar Saja, Kamar dan Sarapan, dan Tidak dapat dikembalikan.",
+ "A location needs both a latitude and a longitude": "Lokasi memerlukan lintang dan bujur",
+ "A manager can turn it back on with “{feature}” in Settings → Hotel Features.": "Manajer dapat mengaktifkannya kembali dengan “{feature}” di Pengaturan → Fitur Hotel.",
+ "A manager or administrator can create one.": "Manajer atau administrator dapat membuatnya.",
+ "A manager or administrator sets these up.": "Manajer atau administrator yang mengaturnya.",
+ "A meal cannot be worth less than nothing": "Makanan tidak boleh bernilai kurang dari nol",
+ "A meal cannot be worth less than nothing.": "Makanan tidak boleh bernilai kurang dari nol.",
+ "A meeting room booking needs a guest count": "Reservasi ruang rapat memerlukan jumlah peserta",
+ "A meeting room booking needs an event name": "Reservasi ruang rapat memerlukan nama acara",
+ "A meeting room needs a name": "Ruang rapat memerlukan nama",
+ "A member of staff needs a name": "Anggota staf memerlukan nama",
+ "A member of staff needs a name.": "Anggota staf memerlukan nama.",
+ "A new booking can only be taken as pending or confirmed": "Reservasi baru hanya bisa dibuat sebagai tertunda atau terkonfirmasi",
+ "A new member of staff is invited in Supabase Auth, and then appears in this list.": "Anggota staf baru diundang di Supabase Auth, lalu muncul di daftar ini.",
+ "A night with no rate loaded is not free — it cannot be sold on this plan at all, and taking a booking against it will say so. Leave the box empty and apply to clear a rate back to nothing.": "Malam tanpa tarif bukan gratis — malam itu sama sekali tidak bisa dijual pada paket ini, dan reservasi atasnya akan memberi tahu. Biarkan kotak kosong lalu terapkan untuk menghapus tarif.",
+ "A nightly rate cannot be negative": "Tarif per malam tidak boleh negatif",
+ "A nightly rate cannot be negative.": "Tarif per malam tidak boleh negatif.",
+ "A note needs a date": "Catatan memerlukan tanggal",
+ "A note needs something written in it": "Catatan memerlukan isi",
+ "A paid-out may only be recorded against your own open shift": "Pengeluaran kas hanya dapat dicatat pada shift Anda sendiri yang terbuka",
+ "A paid-out must be more than zero": "Pengeluaran kas harus lebih dari nol",
+ "A paid-out needs a reason": "Pengeluaran kas memerlukan alasan",
+ "A password needs at least {n} characters.": "Kata sandi memerlukan minimal {n} karakter.",
+ "A payment method needs a kind": "Metode pembayaran memerlukan jenis",
+ "A payment method needs a name": "Metode pembayaran memerlukan nama",
+ "A payment type needs a title": "Tipe pembayaran memerlukan judul",
+ "A payment type needs a title.": "Tipe pembayaran memerlukan judul.",
+ "A percent discount is more than 0 and at most 100": "Diskon persen lebih dari 0 dan paling banyak 100",
+ "A person": "Perorangan",
+ "A person needs a first name": "Perorangan memerlukan nama depan",
+ "A promotion needs a name": "Penawaran memerlukan nama",
+ "A rate plan needs a code and a name": "Paket tarif memerlukan kode dan nama",
+ "A rate plan needs a code and a name.": "Paket tarif memerlukan kode dan nama.",
+ "A room line must be for between one and fifty rooms": "Satu baris kamar harus berisi satu sampai lima puluh kamar",
+ "A room needs a number": "Kamar memerlukan nomor",
+ "A room needs a number.": "Kamar memerlukan nomor.",
+ "A room type needs a code and a name": "Tipe kamar memerlukan kode dan nama",
+ "A room type needs a code and a name.": "Tipe kamar memerlukan kode dan nama.",
+ "A season cannot end before it starts": "Musim tidak boleh berakhir sebelum dimulai",
+ "A stay over {0} may run at most {1} nights, and this one is {2}.": "Masa inap yang mencakup {0} paling lama {1} malam, dan yang ini {2}.",
+ "A stay over {0} must run at least {1} nights, and this one is {2}.": "Masa inap yang mencakup {0} minimal {1} malam, dan yang ini {2}.",
+ "A stay rule of zero nights means nothing. Leave it blank to clear it.": "Aturan menginap nol malam tidak berarti apa-apa. Biarkan kosong untuk menghapusnya.",
+ "A tax rate must be between 0 and 100 percent": "Tarif pajak harus antara 0 dan 100 persen",
+ "A tax rate must be between 0 and 100 percent.": "Tarif pajak harus antara 0 dan 100 persen.",
+ "A tax rate needs a name": "Tarif pajak memerlukan nama",
+ "A tax rate needs a name.": "Tarif pajak memerlukan nama.",
+ "A waitlist entry needs an arrival and a departure date": "Entri daftar tunggu memerlukan tanggal kedatangan dan keberangkatan",
+ "A waitlist entry needs either a customer or a contact name": "Entri daftar tunggu memerlukan pelanggan atau nama kontak",
+ "Abbreviation": "Singkatan",
+ "Accommodation": "Akomodasi",
  "Afghanistan": "Afganistan",
  "Åland Islands": "Kepulauan Aland",
  "Albania": "Albania",

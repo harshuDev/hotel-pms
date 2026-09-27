@@ -569,7 +569,7 @@ export function ExtrasPanel({
               >
                 <option value="">
                   {taxName(categoryById.get(ex.categoryId)?.taxRateId ?? null)
-                    ? tr("As category ({taxRateId})", { taxRateId: taxName(categoryById.get(ex.categoryId)?.taxRateId ?? null) })
+                    ? tr("As category ({tax})", { tax: taxName(categoryById.get(ex.categoryId)?.taxRateId ?? null) })
                     : tr("No tax")}
                 </option>
                 {taxOptions(ex.taxRateId).map((t) => (

@@ -1,4 +1,300 @@
 {
+ "(Holding area)": "(พื้นที่พักรอ)",
+ "{abs}d ago": "{abs} วันที่แล้ว",
+ "{amount} Discount": "ส่วนลด {amount}",
+ "{amount} in cash": "เงินสด {amount}",
+ "{amount} is required per booking.": "ต้องชำระ {amount} ต่อการจอง",
+ "{amount} is required per room booked.": "ต้องชำระ {amount} ต่อห้องที่จอง",
+ "{amount} of it in cash": "เป็นเงินสด {amount}",
+ "{amount} off": "ลด {amount}",
+ "{amount} owing": "ค้างชำระ {amount}",
+ "{amount} rooms": "{amount} ห้อง",
+ "{amount} rooms, {amount2} other": "{amount} ห้อง, อื่นๆ {amount2}",
+ "{amount} through the drawer": "{amount} ผ่านลิ้นชักเงินสด",
+ "{channel} booking {reference}": "การจอง {channel} {reference}",
+ "{channelManagerLabel} saved.": "บันทึก {channelManagerLabel} แล้ว",
+ "{charged} charged, {paid} paid": "เรียกเก็บ {charged}, ชำระ {paid}",
+ "{clean} vacant dirty, {dueOut} due out": "ว่างรอทำความสะอาด {clean}, ครบกำหนดออก {dueOut}",
+ "{currency} deleted.": "ลบ {currency} แล้ว",
+ "{currency} saved.": "บันทึก {currency} แล้ว",
+ "{day}: a rate cannot be negative.": "{day}: ราคาต้องไม่ติดลบ",
+ "{day}: a stay rule is a number of nights, 1 to 365.": "{day}: กฎการเข้าพักคือจำนวนคืน 1 ถึง 365",
+ "{day}: write the rate as a number.": "{day}: กรอกราคาเป็นตัวเลข",
+ "{field} set on {n} room-nights.": {
+  "other": "ตั้งค่า {field} ใน {n} ห้อง-คืน"
+ },
+ "{from} to {to}": "{from} ถึง {to}",
+ "{from}–{to} of {total}": "{from}–{to} จาก {total}",
+ "{label} picker": "ตัวเลือก {label}",
+ "{left} free of {total}": "ว่าง {left} จาก {total}",
+ "{length} transactions": "{length} รายการ",
+ "{lost} since cancelled": "{lost} ตั้งแต่ยกเลิก",
+ "{matches} of {total}": "{matches} จาก {total}",
+ "{n} / page": "{n} / หน้า",
+ "{n} adults": {
+  "other": "ผู้ใหญ่ {n} คน"
+ },
+ "{n} bookings": {
+  "other": "{n} การจอง"
+ },
+ "{n} bookings owing": {
+  "other": "{n} การจองที่ค้างชำระ"
+ },
+ "{n} bookings still owing": {
+  "other": "{n} การจองที่ยังค้างชำระ"
+ },
+ "{n} cashier shifts are still open on this date. The night audit refuses to close a day while one is, so the figures below can still move.": {
+  "other": "ยังมีกะแคชเชียร์เปิดอยู่ {n} กะในวันนี้ การตรวจสอบกลางคืนจะไม่ปิดวันขณะที่ยังมีกะเปิดอยู่ ตัวเลขด้านล่างจึงยังเปลี่ยนแปลงได้"
+ },
+ "{n} categories": {
+  "other": "{n} หมวดหมู่"
+ },
+ "{n} channels": {
+  "other": "{n} ช่องทาง"
+ },
+ "{n} children": {
+  "other": "เด็ก {n} คน"
+ },
+ "{n} customers exported — the export stops at {n}, so this is not the whole list. Narrow the search and export again.": "ส่งออกลูกค้า {n} ราย — การส่งออกหยุดที่ {n} รายการนี้จึงไม่ใช่รายชื่อทั้งหมด จำกัดการค้นหาแล้วส่งออกอีกครั้ง",
+ "{n} customers exported to {file}.": {
+  "other": "ส่งออกลูกค้า {n} รายไปยัง {file} แล้ว"
+ },
+ "{n} days": {
+  "other": "{n} วัน"
+ },
+ "{n} departures": {
+  "other": "ขาออก {n} รายการ"
+ },
+ "{n} due out": "ครบกำหนดออก {n}",
+ "{n} floors": {
+  "other": "{n} ชั้น"
+ },
+ "{n} folios": {
+  "other": "{n} โฟลิโอ"
+ },
+ "{n} free": "ว่าง {n}",
+ "{n} guests": {
+  "other": "แขก {n} คน"
+ },
+ "{n} methods": {
+  "other": "{n} วิธี"
+ },
+ "{n} nights": {
+  "other": "{n} คืน"
+ },
+ "{n} nights have no rate. Nights added by an extension come in at zero because no rate plan was named — set a rate before the night audit runs, or the stay will be charged as free.": {
+  "other": "{n} คืนยังไม่มีราคา คืนที่เพิ่มจากการขยายเวลาจะเป็นศูนย์เพราะไม่ได้ระบุแผนราคา — ตั้งราคาก่อนการตรวจสอบกลางคืน มิฉะนั้นการเข้าพักจะถูกคิดเป็นฟรี"
+ },
+ "{n} nights priced": {
+  "other": "กำหนดราคาแล้ว {n} คืน"
+ },
+ "{n} no shows": {
+  "other": "ไม่มาเข้าพัก {n} ราย"
+ },
+ "{n} notes on {date}": {
+  "other": "{n} บันทึกในวันที่ {date}"
+ },
+ "{n} of these {total} stays are missing something a return needs.": "{n} จาก {total} การเข้าพักนี้ยังขาดข้อมูลที่การแจ้งรายงานต้องการ",
+ "{n} out of order": "ใช้งานไม่ได้ {n}",
+ "{n} pax": "{n} คน",
+ "{n} people": {
+  "other": "{n} คน"
+ },
+ "{n} plans": {
+  "other": "{n} แผน"
+ },
+ "{n} rates": {
+  "other": "{n} ราคา"
+ },
+ "{n} rates selected. Leave the box empty to clear the price and take them off sale.": {
+  "other": "เลือกแล้ว {n} ราคา เว้นช่องว่างไว้เพื่อลบราคาและนำออกจากการขาย"
+ },
+ "{n} records": {
+  "other": "{n} รายการ"
+ },
+ "{n} room nights": {
+  "other": "{n} ห้อง-คืน"
+ },
+ "{n} room types selected.": {
+  "other": "เลือกประเภทห้องแล้ว {n} ประเภท"
+ },
+ "{n} rooms": {
+  "other": "{n} ห้อง"
+ },
+ "{n} rows": {
+  "other": "{n} แถว"
+ },
+ "{n} stays": {
+  "other": "{n} การเข้าพัก"
+ },
+ "{n} types": {
+  "other": "{n} ประเภท"
+ },
+ "{n} unassigned": "ยังไม่จัดห้อง {n}",
+ "{n}d": "{n} วัน",
+ "{n}n": "{n} คืน",
+ "{name} — change": "{name} — เปลี่ยน",
+ "{name} · opened {time} · business date {date}": "{name} · เปิดเมื่อ {time} · วันทำการ {date}",
+ "{name} (copy)": "{name} (สำเนา)",
+ "{name} (reversed)": "{name} (กลับรายการ)",
+ "{name} active": "{name} ใช้งานอยู่",
+ "{name} added.": "เพิ่ม {name} แล้ว",
+ "{name} dashboard": "แดชบอร์ด {name}",
+ "{name} dates added.": "เพิ่มวันที่ของ {name} แล้ว",
+ "{name} deleted.": "ลบ {name} แล้ว",
+ "{name} includes {meals}.": "{name} รวม {meals}",
+ "{name} includes no meals.": "{name} ไม่รวมอาหาร",
+ "{name} is active": "{name} ใช้งานอยู่",
+ "{name} is larger than 256 KB.": "{name} ใหญ่กว่า 256 KB",
+ "{name} is now on the guest booking page.": "{name} อยู่บนหน้าจองของแขกแล้ว",
+ "{name} is off the guest booking page.": "{name} ไม่อยู่บนหน้าจองของแขกแล้ว",
+ "{name} merged into {target}.": "รวม {name} เข้ากับ {target} แล้ว",
+ "{name} merged.": "รวม {name} แล้ว",
+ "{name} must be a colour like #003580.": "{name} ต้องเป็นสี เช่น #003580",
+ "{name} on {name2} is worth {amount}. Nights charged from the next night audit split it out as food.": "{name} ใน {name2} มีมูลค่า {amount} คืนที่เรียกเก็บตั้งแต่การตรวจสอบกลางคืนครั้งถัดไปจะแยกเป็นค่าอาหาร",
+ "{name} on {name2} is worth nothing again, so nothing is posted for it.": "{name} ใน {name2} กลับเป็นไม่มีมูลค่า จึงไม่มีการลงบัญชี",
+ "{name} on {name2} saved.": "บันทึก {name} ใน {name2} แล้ว",
+ "{name} policy": "นโยบาย {name}",
+ "{name} profile deleted.": "ลบโปรไฟล์ {name} แล้ว",
+ "{name} profile saved.": "บันทึกโปรไฟล์ {name} แล้ว",
+ "{name} saved.": "บันทึก {name} แล้ว",
+ "{name}, {name2}, {value} rate": "ราคา {name}, {name2}, {value}",
+ "{nights} from {date}, {rooms}. No room has been assigned yet — that happens at check-in.": "{nights} ตั้งแต่ {date}, {rooms} ยังไม่ได้จัดห้อง — จะจัดตอนเช็คอิน",
+ "{nights}, {from} to {to}": "{nights}, {from} ถึง {to}",
+ "{occupied} of {sellable} sellable": "{occupied} จาก {sellable} ที่ขายได้",
+ "{offer} applied, taking {amount} off the stay.": "ใช้ {offer} แล้ว ลด {amount} จากการเข้าพัก",
+ "{pct}% Discount": "ส่วนลด {pct}%",
+ "{pct}% occupied": "เข้าพัก {pct}%",
+ "{pending} still pending": "ยังรอดำเนินการ {pending}",
+ "{plan} is not loaded on {type} for {date}, so it cannot be sold": "{plan} ยังไม่ได้โหลดใน {type} สำหรับ {date} จึงขายไม่ได้",
+ "{qty} × {what} charged.": "เรียกเก็บ {qty} × {what} แล้ว",
+ "{records} merged. {bookings} and {folios} moved across.": "รวม {records} แล้ว ย้าย {bookings} และ {folios} แล้ว",
+ "{reference} booked.": "จอง {reference} แล้ว",
+ "{reversals} reversed": "กลับรายการ {reversals}",
+ "{roomsSold} of {nights} room nights": "{roomsSold} จาก {nights} ห้อง-คืน",
+ "{roomsSold} of {roomNightsAvailable} room nights": "{roomsSold} จาก {roomNightsAvailable} ห้อง-คืน",
+ "{roomsSold} of {sellableRooms} rooms": "{roomsSold} จาก {sellableRooms} ห้อง",
+ "{setting} in Inventory Settings turns it back on.": "{setting} ในการตั้งค่าคลังห้องจะเปิดใช้อีกครั้ง",
+ "{shown} of {total} rooms": "{shown} จาก {total} ห้อง",
+ "{sold} sold of {sellable} sellable": "ขายแล้ว {sold} จาก {sellable} ที่ขายได้",
+ "{unassigned} with no room assigned": "{unassigned} ยังไม่ได้จัดห้อง",
+ "{value} closed to arrival": "{value} ปิดรับเข้าพัก",
+ "{value} closed to departure": "{value} ปิดรับเช็คเอาท์",
+ "{value} max stay": "{value} พักสูงสุด",
+ "{value} min stay arrival": "{value} พักขั้นต่ำเมื่อมาถึง",
+ "{value} min stay through": "{value} พักขั้นต่ำต่อเนื่อง",
+ "{value} stop sell": "{value} หยุดขาย",
+ "{value}% of rack": "{value}% ของราคาปกติ",
+ "{what} charged.": "เรียกเก็บ {what} แล้ว",
+ "{who} password": "รหัสผ่าน {who}",
+ "{who} password:": "รหัสผ่าน {who}:",
+ "{who} Username": "ชื่อผู้ใช้ {who}",
+ "{who} Username:": "ชื่อผู้ใช้ {who}:",
+ "% deposit is required at the time of booking": "% ต้องชำระมัดจำเมื่อจอง",
+ "↑↓ to move": "↑↓ เพื่อเลื่อน",
+ "↵ to open": "↵ เพื่อเปิด",
+ "+ Add Cancellation Policy": "+ เพิ่มนโยบายการยกเลิก",
+ "+ Add email template": "+ เพิ่มเทมเพลตอีเมล",
+ "+ Add Extra Category": "+ เพิ่มหมวดหมู่รายการเสริม",
+ "+ Add Facility": "+ เพิ่มสิ่งอำนวยความสะดวก",
+ "+ Add Room": "+ เพิ่มห้อง",
+ "+ Add Room Type": "+ เพิ่มประเภทห้อง",
+ "+ Add Rooms in a Run": "+ เพิ่มห้องเป็นชุด",
+ "+ Add Virtual Room Type": "+ เพิ่มประเภทห้องเสมือน",
+ "1 Example Street, Example City": "1 ถนนตัวอย่าง เมืองตัวอย่าง",
+ "1 Point after dot": "ทศนิยม 1 ตำแหน่ง",
+ "120.00, or blank to clear": "120.00 หรือเว้นว่างเพื่อล้าง",
+ "2 Points after dot": "ทศนิยม 2 ตำแหน่ง",
+ "A {0} booking cannot be given a room": "การจองสถานะ {0} ไม่สามารถจัดห้องได้",
+ "A {n} night deposit is required at the time of booking.": {
+  "other": "ต้องชำระมัดจำ {n} คืนเมื่อจอง"
+ },
+ "A {percent}% deposit is required at the time of booking.": "ต้องชำระมัดจำ {percent}% เมื่อจอง",
+ "A booking appears here once a guest checks in, and leaves when they check out.": "การจองจะปรากฏที่นี่เมื่อแขกเช็คอิน และหายไปเมื่อเช็คเอาท์",
+ "A booking appears here once a payment is taken against it and before the guest checks in.": "การจองจะปรากฏที่นี่เมื่อได้รับชำระเงินและก่อนแขกเช็คอิน",
+ "A booking needs a first and last name": "การจองต้องมีชื่อและนามสกุล",
+ "A booking needs a guest: pick an existing customer or enter a new one": "การจองต้องมีแขก: เลือกลูกค้าที่มีอยู่หรือกรอกลูกค้าใหม่",
+ "A booking needs at least one adult": "การจองต้องมีผู้ใหญ่อย่างน้อยหนึ่งคน",
+ "A booking needs at least one room": "การจองต้องมีอย่างน้อยหนึ่งห้อง",
+ "A booking source needs a code and a name": "แหล่งการจองต้องมีรหัสและชื่อ",
+ "A cancellation policy needs a name": "นโยบายการยกเลิกต้องมีชื่อ",
+ "A capacity has to be a whole number of seats.": "ความจุต้องเป็นจำนวนที่นั่งเต็ม",
+ "A category cannot be merged into itself": "ไม่สามารถรวมหมวดหมู่เข้ากับตัวเองได้",
+ "A ceiling, never a promise: rooms out of order still come off the top, so the sellable figure can be lower than the allotment but never higher. Leave the box empty to go back to selling every room that exists.": "เป็นเพดาน ไม่ใช่คำสัญญา: ห้องที่ใช้งานไม่ได้ยังคงถูกหักออก ตัวเลขที่ขายได้จึงอาจต่ำกว่าโควตาแต่ไม่สูงกว่า เว้นช่องว่างเพื่อกลับไปขายทุกห้องที่มีอยู่",
+ "A charge must be more than nothing": "รายการเรียกเก็บต้องมากกว่าศูนย์",
+ "A charge must be more than nothing.": "รายการเรียกเก็บต้องมากกว่าศูนย์",
+ "A chosen room type is not on this property": "ประเภทห้องที่เลือกไม่ได้อยู่ในที่พักนี้",
+ "A company": "บริษัท",
+ "A company needs a company name": "บริษัทต้องมีชื่อบริษัท",
+ "A condition names something that is not on this property": "เงื่อนไขอ้างถึงสิ่งที่ไม่ได้อยู่ในที่พักนี้",
+ "A configuration file can be at most 256 KB": "ไฟล์การตั้งค่าต้องไม่เกิน 256 KB",
+ "A connection cannot change channel manager": "การเชื่อมต่อไม่สามารถเปลี่ยน channel manager ได้",
+ "A connection cannot change provider": "การเชื่อมต่อไม่สามารถเปลี่ยนผู้ให้บริการได้",
+ "A connection cannot change system": "การเชื่อมต่อไม่สามารถเปลี่ยนระบบได้",
+ "A currency is three letters, like GBP.": "สกุลเงินเป็นตัวอักษรสามตัว เช่น GBP",
+ "A customer is needed before any money can be charged.": "ต้องมีลูกค้าก่อนจึงจะเรียกเก็บเงินได้",
+ "A dash means no rate is loaded for that rate on that room type, which is not the same as free — a booking against it is refused. That is also how a room type is taken off a rate: clear the price rather than looking for a switch.": "ขีดหมายถึงยังไม่มีราคาสำหรับราคานั้นในประเภทห้องนั้น ซึ่งไม่เหมือนกับฟรี: การจองกับราคานั้นจะถูกปฏิเสธ นี่ก็เป็นวิธีนำประเภทห้องออกจากราคาเช่นกัน: ล้างราคาแทนที่จะหาสวิตช์",
+ "A deposit equal to the total cost is required at the time of booking": "ต้องชำระมัดจำเท่ากับค่าใช้จ่ายทั้งหมดเมื่อจอง",
+ "A deposit equal to the total cost is required at the time of booking.": "ต้องชำระมัดจำเท่ากับค่าใช้จ่ายทั้งหมดเมื่อจอง",
+ "A disabled room is out of order and cannot be sold.": "ห้องที่ปิดใช้งานถือว่าใช้งานไม่ได้และขายไม่ได้",
+ "A facility needs a title": "สิ่งอำนวยความสะดวกต้องมีชื่อ",
+ "A facility needs a title.": "สิ่งอำนวยความสะดวกต้องมีชื่อ",
+ "A fixed discount is more than 0": "ส่วนลดคงที่ต้องมากกว่า 0",
+ "A fixed sum off each night, never more than the night costs.": "จำนวนคงที่ต่อคืน ไม่เกินราคาของคืนนั้น",
+ "A floor is a whole number, or leave it blank.": "ชั้นเป็นจำนวนเต็ม หรือเว้นว่างไว้",
+ "A folio is created on its first charge, so a booking that has taken no money yet has none.": "โฟลิโอจะถูกสร้างเมื่อมีรายการเรียกเก็บแรก การจองที่ยังไม่มีการรับเงินจึงยังไม่มีโฟลิโอ",
+ "A folio number is digits only": "หมายเลขโฟลิโอเป็นตัวเลขเท่านั้น",
+ "A guest already staying can stay through a closed date; only arrivals are refused.": "แขกที่พักอยู่แล้วพักต่อผ่านวันที่ปิดได้ เฉพาะการเข้าพักใหม่เท่านั้นที่ถูกปฏิเสธ",
+ "A hotel usually has several, like Room Only, Bed and Breakfast and Non-refundable.": "โรงแรมมักมีหลายแผน เช่น ห้องพักอย่างเดียว ห้องพักพร้อมอาหารเช้า และไม่คืนเงิน",
+ "A location needs both a latitude and a longitude": "ตำแหน่งต้องมีทั้งละติจูดและลองจิจูด",
+ "A manager can turn it back on with “{feature}” in Settings → Hotel Features.": "ผู้จัดการสามารถเปิดใช้อีกครั้งได้ด้วย “{feature}” ในการตั้งค่า → ฟีเจอร์ของโรงแรม",
+ "A manager or administrator can create one.": "ผู้จัดการหรือผู้ดูแลระบบสามารถสร้างได้",
+ "A manager or administrator sets these up.": "ผู้จัดการหรือผู้ดูแลระบบเป็นผู้ตั้งค่า",
+ "A meal cannot be worth less than nothing": "อาหารจะมีมูลค่าน้อยกว่าศูนย์ไม่ได้",
+ "A meal cannot be worth less than nothing.": "อาหารจะมีมูลค่าน้อยกว่าศูนย์ไม่ได้",
+ "A meeting room booking needs a guest count": "การจองห้องประชุมต้องระบุจำนวนผู้เข้าร่วม",
+ "A meeting room booking needs an event name": "การจองห้องประชุมต้องมีชื่องาน",
+ "A meeting room needs a name": "ห้องประชุมต้องมีชื่อ",
+ "A member of staff needs a name": "พนักงานต้องมีชื่อ",
+ "A member of staff needs a name.": "พนักงานต้องมีชื่อ",
+ "A new booking can only be taken as pending or confirmed": "การจองใหม่รับได้เฉพาะสถานะรอดำเนินการหรือยืนยันแล้ว",
+ "A new member of staff is invited in Supabase Auth, and then appears in this list.": "พนักงานใหม่จะได้รับเชิญใน Supabase Auth แล้วจึงปรากฏในรายการนี้",
+ "A night with no rate loaded is not free — it cannot be sold on this plan at all, and taking a booking against it will say so. Leave the box empty and apply to clear a rate back to nothing.": "คืนที่ไม่มีราคาไม่ใช่ฟรี — ขายในแผนนี้ไม่ได้เลย และการจองกับคืนนั้นจะแจ้งให้ทราบ เว้นช่องว่างแล้วกดใช้เพื่อล้างราคา",
+ "A nightly rate cannot be negative": "ราคาต่อคืนต้องไม่ติดลบ",
+ "A nightly rate cannot be negative.": "ราคาต่อคืนต้องไม่ติดลบ",
+ "A note needs a date": "บันทึกต้องมีวันที่",
+ "A note needs something written in it": "บันทึกต้องมีข้อความ",
+ "A paid-out may only be recorded against your own open shift": "การจ่ายเงินออกบันทึกได้เฉพาะในกะที่เปิดอยู่ของคุณเอง",
+ "A paid-out must be more than zero": "การจ่ายเงินออกต้องมากกว่าศูนย์",
+ "A paid-out needs a reason": "การจ่ายเงินออกต้องมีเหตุผล",
+ "A password needs at least {n} characters.": "รหัสผ่านต้องมีอย่างน้อย {n} ตัวอักษร",
+ "A payment method needs a kind": "วิธีการชำระเงินต้องมีประเภท",
+ "A payment method needs a name": "วิธีการชำระเงินต้องมีชื่อ",
+ "A payment type needs a title": "ประเภทการชำระเงินต้องมีชื่อ",
+ "A payment type needs a title.": "ประเภทการชำระเงินต้องมีชื่อ",
+ "A percent discount is more than 0 and at most 100": "ส่วนลดเป็นเปอร์เซ็นต์ต้องมากกว่า 0 และไม่เกิน 100",
+ "A person": "บุคคล",
+ "A person needs a first name": "บุคคลต้องมีชื่อ",
+ "A promotion needs a name": "ข้อเสนอต้องมีชื่อ",
+ "A rate plan needs a code and a name": "แผนราคาต้องมีรหัสและชื่อ",
+ "A rate plan needs a code and a name.": "แผนราคาต้องมีรหัสและชื่อ",
+ "A room line must be for between one and fifty rooms": "รายการห้องต้องมีหนึ่งถึงห้าสิบห้อง",
+ "A room needs a number": "ห้องต้องมีหมายเลข",
+ "A room needs a number.": "ห้องต้องมีหมายเลข",
+ "A room type needs a code and a name": "ประเภทห้องต้องมีรหัสและชื่อ",
+ "A room type needs a code and a name.": "ประเภทห้องต้องมีรหัสและชื่อ",
+ "A season cannot end before it starts": "ฤดูกาลจะสิ้นสุดก่อนเริ่มไม่ได้",
+ "A stay over {0} may run at most {1} nights, and this one is {2}.": "การเข้าพักที่ครอบคลุม {0} พักได้สูงสุด {1} คืน และการเข้าพักนี้มี {2} คืน",
+ "A stay over {0} must run at least {1} nights, and this one is {2}.": "การเข้าพักที่ครอบคลุม {0} ต้องพักอย่างน้อย {1} คืน และการเข้าพักนี้มี {2} คืน",
+ "A stay rule of zero nights means nothing. Leave it blank to clear it.": "กฎการเข้าพักศูนย์คืนไม่มีความหมาย เว้นว่างเพื่อล้าง",
+ "A tax rate must be between 0 and 100 percent": "อัตราภาษีต้องอยู่ระหว่าง 0 ถึง 100 เปอร์เซ็นต์",
+ "A tax rate must be between 0 and 100 percent.": "อัตราภาษีต้องอยู่ระหว่าง 0 ถึง 100 เปอร์เซ็นต์",
+ "A tax rate needs a name": "อัตราภาษีต้องมีชื่อ",
+ "A tax rate needs a name.": "อัตราภาษีต้องมีชื่อ",
+ "A waitlist entry needs an arrival and a departure date": "รายการรอคิวต้องมีวันที่เข้าพักและวันที่ออก",
+ "A waitlist entry needs either a customer or a contact name": "รายการรอคิวต้องมีลูกค้าหรือชื่อผู้ติดต่อ",
+ "Abbreviation": "ตัวย่อ",
+ "Accommodation": "ที่พัก",
  "Afghanistan": "อัฟกานิสถาน",
  "Åland Islands": "หมู่เกาะโอลันด์",
  "Albania": "แอลเบเนีย",

@@ -1,4 +1,333 @@
 {
+ "(Holding area)": "(Biðsvæði)",
+ "{abs}d ago": "fyrir {abs} d.",
+ "{amount} Discount": "{amount} afsláttur",
+ "{amount} in cash": "{amount} í reiðufé",
+ "{amount} is required per booking.": "{amount} er krafist fyrir hverja bókun.",
+ "{amount} is required per room booked.": "{amount} er krafist fyrir hvert bókað herbergi.",
+ "{amount} of it in cash": "þar af {amount} í reiðufé",
+ "{amount} off": "{amount} afsláttur",
+ "{amount} owing": "{amount} ógreitt",
+ "{amount} rooms": "{amount} herbergi",
+ "{amount} rooms, {amount2} other": "{amount} herbergi, {amount2} annað",
+ "{amount} through the drawer": "{amount} í gegnum kassann",
+ "{channel} booking {reference}": "{channel}-bókun {reference}",
+ "{channelManagerLabel} saved.": "{channelManagerLabel} vistað.",
+ "{charged} charged, {paid} paid": "{charged} gjaldfært, {paid} greitt",
+ "{clean} vacant dirty, {dueOut} due out": "{clean} laus óhrein, {dueOut} brottfarir",
+ "{currency} deleted.": "{currency} eytt.",
+ "{currency} saved.": "{currency} vistað.",
+ "{day}: a rate cannot be negative.": "{day}: verð má ekki vera neikvætt.",
+ "{day}: a stay rule is a number of nights, 1 to 365.": "{day}: dvalarregla er fjöldi nótta, 1 til 365.",
+ "{day}: write the rate as a number.": "{day}: skrifaðu verðið sem tölu.",
+ "{field} set on {n} room-nights.": {
+  "one": "{field} stillt á {n} herbergisnótt.",
+  "other": "{field} stillt á {n} herbergisnætur."
+ },
+ "{from} to {to}": "{from} til {to}",
+ "{from}–{to} of {total}": "{from}–{to} af {total}",
+ "{label} picker": "{label}-val",
+ "{left} free of {total}": "{left} laus af {total}",
+ "{length} transactions": "{length} færslur",
+ "{lost} since cancelled": "{lost} frá afbókun",
+ "{matches} of {total}": "{matches} af {total}",
+ "{n} / page": "{n} / síðu",
+ "{n} adults": {
+  "one": "{n} fullorðinn",
+  "other": "{n} fullorðnir"
+ },
+ "{n} bookings": {
+  "one": "{n} bókun",
+  "other": "{n} bókanir"
+ },
+ "{n} bookings owing": {
+  "one": "{n} bókun með skuld",
+  "other": "{n} bókanir með skuld"
+ },
+ "{n} bookings still owing": {
+  "one": "{n} bókun enn með skuld",
+  "other": "{n} bókanir enn með skuld"
+ },
+ "{n} cashier shifts are still open on this date. The night audit refuses to close a day while one is, so the figures below can still move.": {
+  "one": "{n} kassavakt er enn opin á þessum degi. Næturuppgjörið lokar ekki degi á meðan ein er opin, svo tölurnar hér fyrir neðan geta enn breyst.",
+  "other": "{n} kassavaktir eru enn opnar á þessum degi. Næturuppgjörið lokar ekki degi á meðan ein er opin, svo tölurnar hér fyrir neðan geta enn breyst."
+ },
+ "{n} categories": {
+  "one": "{n} flokkur",
+  "other": "{n} flokkar"
+ },
+ "{n} channels": {
+  "one": "{n} rás",
+  "other": "{n} rásir"
+ },
+ "{n} children": {
+  "one": "{n} barn",
+  "other": "{n} börn"
+ },
+ "{n} customers exported — the export stops at {n}, so this is not the whole list. Narrow the search and export again.": "{n} viðskiptavinir fluttir út — útflutningurinn stöðvast við {n}, svo þetta er ekki allur listinn. Þrengdu leitina og fluttu aftur út.",
+ "{n} customers exported to {file}.": {
+  "one": "{n} viðskiptavinur fluttur út í {file}.",
+  "other": "{n} viðskiptavinir fluttir út í {file}."
+ },
+ "{n} days": {
+  "one": "{n} dagur",
+  "other": "{n} dagar"
+ },
+ "{n} departures": {
+  "one": "{n} brottför",
+  "other": "{n} brottfarir"
+ },
+ "{n} due out": "{n} brottfarir",
+ "{n} floors": {
+  "one": "{n} hæð",
+  "other": "{n} hæðir"
+ },
+ "{n} folios": {
+  "one": "{n} reikningur",
+  "other": "{n} reikningar"
+ },
+ "{n} free": "{n} laus",
+ "{n} guests": {
+  "one": "{n} gestur",
+  "other": "{n} gestir"
+ },
+ "{n} methods": {
+  "one": "{n} greiðslumáti",
+  "other": "{n} greiðslumátar"
+ },
+ "{n} nights": {
+  "one": "{n} nótt",
+  "other": "{n} nætur"
+ },
+ "{n} nights have no rate. Nights added by an extension come in at zero because no rate plan was named — set a rate before the night audit runs, or the stay will be charged as free.": {
+  "one": "{n} nótt hefur ekkert verð. Nætur sem bætast við með framlengingu koma inn á núlli því engin verðáætlun var tilgreind — settu verð áður en næturuppgjörið keyrir, annars verður dvölin gjaldfærð sem ókeypis.",
+  "other": "{n} nætur hafa ekkert verð. Nætur sem bætast við með framlengingu koma inn á núlli því engin verðáætlun var tilgreind — settu verð áður en næturuppgjörið keyrir, annars verður dvölin gjaldfærð sem ókeypis."
+ },
+ "{n} nights priced": {
+  "one": "{n} nótt verðlögð",
+  "other": "{n} nætur verðlagðar"
+ },
+ "{n} no shows": {
+  "one": "{n} mætti ekki",
+  "other": "{n} mættu ekki"
+ },
+ "{n} notes on {date}": {
+  "one": "{n} athugasemd {date}",
+  "other": "{n} athugasemdir {date}"
+ },
+ "{n} of these {total} stays are missing something a return needs.": "Í {n} af þessum {total} dvölum vantar eitthvað sem skýrslan þarfnast.",
+ "{n} out of order": "{n} ónothæf",
+ "{n} pax": "{n} manns",
+ "{n} people": {
+  "one": "{n} manneskja",
+  "other": "{n} manns"
+ },
+ "{n} plans": {
+  "one": "{n} áætlun",
+  "other": "{n} áætlanir"
+ },
+ "{n} rates": {
+  "one": "{n} verð",
+  "other": "{n} verð"
+ },
+ "{n} rates selected. Leave the box empty to clear the price and take them off sale.": {
+  "one": "{n} verð valið. Skildu reitinn eftir tóman til að hreinsa verðið og taka það úr sölu.",
+  "other": "{n} verð valin. Skildu reitinn eftir tóman til að hreinsa verðið og taka þau úr sölu."
+ },
+ "{n} records": {
+  "one": "{n} færsla",
+  "other": "{n} færslur"
+ },
+ "{n} room nights": {
+  "one": "{n} herbergisnótt",
+  "other": "{n} herbergisnætur"
+ },
+ "{n} room types selected.": {
+  "one": "{n} herbergistegund valin.",
+  "other": "{n} herbergistegundir valdar."
+ },
+ "{n} rooms": {
+  "one": "{n} herbergi",
+  "other": "{n} herbergi"
+ },
+ "{n} rows": {
+  "one": "{n} lína",
+  "other": "{n} línur"
+ },
+ "{n} stays": {
+  "one": "{n} dvöl",
+  "other": "{n} dvalir"
+ },
+ "{n} types": {
+  "one": "{n} tegund",
+  "other": "{n} tegundir"
+ },
+ "{n} unassigned": "{n} án herbergis",
+ "{n}d": "{n} d.",
+ "{n}n": "{n} n.",
+ "{name} — change": "{name} — breyta",
+ "{name} · opened {time} · business date {date}": "{name} · opnað {time} · rekstrardagur {date}",
+ "{name} (copy)": "{name} (afrit)",
+ "{name} (reversed)": "{name} (bakfært)",
+ "{name} active": "{name} virkt",
+ "{name} added.": "{name} bætt við.",
+ "{name} dashboard": "Stjórnborð {name}",
+ "{name} dates added.": "Dagsetningum bætt við {name}.",
+ "{name} deleted.": "{name} eytt.",
+ "{name} includes {meals}.": "{name} inniheldur {meals}.",
+ "{name} includes no meals.": "{name} inniheldur engar máltíðir.",
+ "{name} is active": "{name} er virkt",
+ "{name} is larger than 256 KB.": "{name} er stærra en 256 KB.",
+ "{name} is now on the guest booking page.": "{name} er nú á bókunarsíðu gesta.",
+ "{name} is off the guest booking page.": "{name} er ekki lengur á bókunarsíðu gesta.",
+ "{name} merged into {target}.": "{name} sameinað í {target}.",
+ "{name} merged.": "{name} sameinað.",
+ "{name} must be a colour like #003580.": "{name} verður að vera litur eins og #003580.",
+ "{name} on {name2} is worth {amount}. Nights charged from the next night audit split it out as food.": "{name} á {name2} er {amount} virði. Nætur gjaldfærðar frá næsta næturuppgjöri skilja það frá sem mat.",
+ "{name} on {name2} is worth nothing again, so nothing is posted for it.": "{name} á {name2} er aftur einskis virði, svo ekkert er bókað fyrir það.",
+ "{name} on {name2} saved.": "{name} á {name2} vistað.",
+ "{name} policy": "Stefna {name}",
+ "{name} profile deleted.": "Prófílnum {name} eytt.",
+ "{name} profile saved.": "Prófíllinn {name} vistaður.",
+ "{name} saved.": "{name} vistað.",
+ "{name}, {name2}, {value} rate": "Verð {name}, {name2}, {value}",
+ "{nights} from {date}, {rooms}. No room has been assigned yet — that happens at check-in.": "{nights} frá {date}, {rooms}. Ekkert herbergi hefur verið úthlutað enn — það gerist við innritun.",
+ "{nights}, {from} to {to}": "{nights}, {from} til {to}",
+ "{occupied} of {sellable} sellable": "{occupied} af {sellable} söluhæfum",
+ "{offer} applied, taking {amount} off the stay.": "{offer} notað, {amount} dregið af dvölinni.",
+ "{pct}% Discount": "{pct}% afsláttur",
+ "{pct}% occupied": "{pct}% nýting",
+ "{pending} still pending": "{pending} enn í bið",
+ "{plan} is not loaded on {type} for {date}, so it cannot be sold": "{plan} er ekki hlaðið á {type} fyrir {date}, svo það er ekki hægt að selja það",
+ "{qty} × {what} charged.": "{qty} × {what} gjaldfært.",
+ "{records} merged. {bookings} and {folios} moved across.": "{records} sameinað. {bookings} og {folios} flutt yfir.",
+ "{reference} booked.": "{reference} bókað.",
+ "{reversals} reversed": "{reversals} bakfært",
+ "{roomsSold} of {nights} room nights": "{roomsSold} af {nights} herbergisnóttum",
+ "{roomsSold} of {roomNightsAvailable} room nights": "{roomsSold} af {roomNightsAvailable} herbergisnóttum",
+ "{roomsSold} of {sellableRooms} rooms": "{roomsSold} af {sellableRooms} herbergjum",
+ "{setting} in Inventory Settings turns it back on.": "{setting} í birgðastillingum kveikir aftur á því.",
+ "{shown} of {total} rooms": "{shown} af {total} herbergjum",
+ "{sold} sold of {sellable} sellable": "{sold} seld af {sellable} söluhæfum",
+ "{unassigned} with no room assigned": "{unassigned} án úthlutaðs herbergis",
+ "{value} closed to arrival": "{value} lokað fyrir komur",
+ "{value} closed to departure": "{value} lokað fyrir brottfarir",
+ "{value} max stay": "{value} hámarksdvöl",
+ "{value} min stay arrival": "{value} lágmarksdvöl við komu",
+ "{value} min stay through": "{value} samfelld lágmarksdvöl",
+ "{value} stop sell": "{value} sölustöðvun",
+ "{value}% of rack": "{value}% af listaverði",
+ "{what} charged.": "{what} gjaldfært.",
+ "{who} password": "Lykilorð {who}",
+ "{who} password:": "Lykilorð {who}:",
+ "{who} Username": "Notandanafn {who}",
+ "{who} Username:": "Notandanafn {who}:",
+ "% deposit is required at the time of booking": "% innborgun er krafist við bókun",
+ "↑↓ to move": "↑↓ til að færa",
+ "↵ to open": "↵ til að opna",
+ "+ Add Cancellation Policy": "+ Bæta við afbókunarskilmálum",
+ "+ Add email template": "+ Bæta við tölvupóstsniðmáti",
+ "+ Add Extra Category": "+ Bæta við aukaflokki",
+ "+ Add Facility": "+ Bæta við aðstöðu",
+ "+ Add Room": "+ Bæta við herbergi",
+ "+ Add Room Type": "+ Bæta við herbergistegund",
+ "+ Add Rooms in a Run": "+ Bæta við herbergjaröð",
+ "+ Add Virtual Room Type": "+ Bæta við sýndarherbergistegund",
+ "1 Example Street, Example City": "Dæmigata 1, Dæmibær",
+ "1 Point after dot": "1 aukastafur",
+ "120.00, or blank to clear": "120.00, eða autt til að hreinsa",
+ "2 Points after dot": "2 aukastafir",
+ "A {0} booking cannot be given a room": "Bókun með stöðuna {0} getur ekki fengið herbergi",
+ "A {n} night deposit is required at the time of booking.": {
+  "one": "Innborgunar fyrir {n} nótt er krafist við bókun.",
+  "other": "Innborgunar fyrir {n} nætur er krafist við bókun."
+ },
+ "A {percent}% deposit is required at the time of booking.": "Innborgunar upp á {percent}% er krafist við bókun.",
+ "A booking appears here once a guest checks in, and leaves when they check out.": "Bókun birtist hér þegar gestur skráir sig inn og hverfur við útskráningu.",
+ "A booking appears here once a payment is taken against it and before the guest checks in.": "Bókun birtist hér þegar greiðsla berst á hana og áður en gesturinn skráir sig inn.",
+ "A booking needs a first and last name": "Bókun þarf fornafn og eftirnafn",
+ "A booking needs a guest: pick an existing customer or enter a new one": "Bókun þarf gest: veldu fyrirliggjandi viðskiptavin eða skráðu nýjan",
+ "A booking needs at least one adult": "Bókun þarf að minnsta kosti einn fullorðinn",
+ "A booking needs at least one room": "Bókun þarf að minnsta kosti eitt herbergi",
+ "A booking source needs a code and a name": "Bókunaruppruni þarf kóða og nafn",
+ "A cancellation policy needs a name": "Afbókunarskilmálar þurfa nafn",
+ "A capacity has to be a whole number of seats.": "Rými þarf að vera heil tala sæta.",
+ "A category cannot be merged into itself": "Ekki er hægt að sameina flokk við sjálfan sig",
+ "A ceiling, never a promise: rooms out of order still come off the top, so the sellable figure can be lower than the allotment but never higher. Leave the box empty to go back to selling every room that exists.": "Þak, aldrei loforð: ónothæf herbergi dragast samt frá, svo söluhæfa talan getur verið lægri en úthlutunin en aldrei hærri. Skildu reitinn eftir tóman til að selja aftur öll herbergi sem til eru.",
+ "A charge must be more than nothing": "Gjaldfærsla verður að vera meira en ekkert",
+ "A charge must be more than nothing.": "Gjaldfærsla verður að vera meira en ekkert.",
+ "A chosen room type is not on this property": "Valin herbergistegund tilheyrir ekki þessum gististað",
+ "A company": "Fyrirtæki",
+ "A company needs a company name": "Fyrirtæki þarf fyrirtækjanafn",
+ "A condition names something that is not on this property": "Skilyrði nefnir eitthvað sem tilheyrir ekki þessum gististað",
+ "A configuration file can be at most 256 KB": "Stillingaskrá má mest vera 256 KB",
+ "A connection cannot change channel manager": "Tenging getur ekki skipt um rásastjóra",
+ "A connection cannot change provider": "Tenging getur ekki skipt um þjónustuaðila",
+ "A connection cannot change system": "Tenging getur ekki skipt um kerfi",
+ "A currency is three letters, like GBP.": "Gjaldmiðill er þrír stafir, t.d. GBP.",
+ "A customer is needed before any money can be charged.": "Viðskiptavinur þarf að vera til staðar áður en hægt er að gjaldfæra.",
+ "A dash means no rate is loaded for that rate on that room type, which is not the same as free — a booking against it is refused. That is also how a room type is taken off a rate: clear the price rather than looking for a switch.": "Strik þýðir að ekkert verð er hlaðið fyrir það verð á þeirri herbergistegund, sem er ekki það sama og ókeypis: bókun á það er hafnað. Þannig er herbergistegund líka tekin af verði: hreinsaðu verðið í stað þess að leita að rofa.",
+ "A deposit equal to the total cost is required at the time of booking": "Innborgunar sem nemur heildarkostnaði er krafist við bókun",
+ "A deposit equal to the total cost is required at the time of booking.": "Innborgunar sem nemur heildarkostnaði er krafist við bókun.",
+ "A disabled room is out of order and cannot be sold.": "Óvirkt herbergi er ónothæft og er ekki hægt að selja.",
+ "A facility needs a title": "Aðstaða þarf titil",
+ "A facility needs a title.": "Aðstaða þarf titil.",
+ "A fixed discount is more than 0": "Fastur afsláttur er meira en 0",
+ "A fixed sum off each night, never more than the night costs.": "Föst upphæð á nótt, aldrei meira en nóttin kostar.",
+ "A floor is a whole number, or leave it blank.": "Hæð er heil tala, eða skildu eftir autt.",
+ "A folio is created on its first charge, so a booking that has taken no money yet has none.": "Reikningur verður til við fyrstu gjaldfærslu, svo bókun sem hefur enga peningahreyfingu hefur engan.",
+ "A folio number is digits only": "Reikningsnúmer er aðeins tölustafir",
+ "A guest already staying can stay through a closed date; only arrivals are refused.": "Gestur sem þegar dvelur getur verið áfram yfir lokaðan dag; aðeins komum er hafnað.",
+ "A hotel usually has several, like Room Only, Bed and Breakfast and Non-refundable.": "Hótel hefur yfirleitt nokkrar, t.d. Aðeins gisting, Gisting með morgunverði og Óendurgreiðanlegt.",
+ "A location needs both a latitude and a longitude": "Staðsetning þarf breiddar- og lengdargráðu",
+ "A manager can turn it back on with “{feature}” in Settings → Hotel Features.": "Stjórnandi getur kveikt aftur á því með „{feature}“ í Stillingar → Hótelaðgerðir.",
+ "A manager or administrator can create one.": "Stjórnandi eða kerfisstjóri getur búið eitt til.",
+ "A manager or administrator sets these up.": "Stjórnandi eða kerfisstjóri setur þetta upp.",
+ "A meal cannot be worth less than nothing": "Máltíð getur ekki verið minna en einskis virði",
+ "A meal cannot be worth less than nothing.": "Máltíð getur ekki verið minna en einskis virði.",
+ "A meeting room booking needs a guest count": "Bókun fundarherbergis þarf fjölda gesta",
+ "A meeting room booking needs an event name": "Bókun fundarherbergis þarf heiti viðburðar",
+ "A meeting room needs a name": "Fundarherbergi þarf nafn",
+ "A member of staff needs a name": "Starfsmaður þarf nafn",
+ "A member of staff needs a name.": "Starfsmaður þarf nafn.",
+ "A new booking can only be taken as pending or confirmed": "Aðeins er hægt að taka nýja bókun sem í bið eða staðfesta",
+ "A new member of staff is invited in Supabase Auth, and then appears in this list.": "Nýjum starfsmanni er boðið í Supabase Auth og hann birtist síðan á þessum lista.",
+ "A night with no rate loaded is not free — it cannot be sold on this plan at all, and taking a booking against it will say so. Leave the box empty and apply to clear a rate back to nothing.": "Nótt án hlaðins verðs er ekki ókeypis — ekki er hægt að selja hana á þessari áætlun og bókun á hana mun segja það. Skildu reitinn eftir tóman og beittu til að hreinsa verð.",
+ "A nightly rate cannot be negative": "Næturverð má ekki vera neikvætt",
+ "A nightly rate cannot be negative.": "Næturverð má ekki vera neikvætt.",
+ "A note needs a date": "Athugasemd þarf dagsetningu",
+ "A note needs something written in it": "Athugasemd þarf texta",
+ "A paid-out may only be recorded against your own open shift": "Útgreiðslu má aðeins skrá á eigin opnu vakt",
+ "A paid-out must be more than zero": "Útgreiðsla verður að vera meira en núll",
+ "A paid-out needs a reason": "Útgreiðsla þarf ástæðu",
+ "A password needs at least {n} characters.": "Lykilorð þarf að minnsta kosti {n} stafi.",
+ "A payment method needs a kind": "Greiðslumáti þarf tegund",
+ "A payment method needs a name": "Greiðslumáti þarf nafn",
+ "A payment type needs a title": "Greiðslutegund þarf titil",
+ "A payment type needs a title.": "Greiðslutegund þarf titil.",
+ "A percent discount is more than 0 and at most 100": "Prósentuafsláttur er meira en 0 og mest 100",
+ "A person": "Einstaklingur",
+ "A person needs a first name": "Einstaklingur þarf fornafn",
+ "A promotion needs a name": "Tilboð þarf nafn",
+ "A rate plan needs a code and a name": "Verðáætlun þarf kóða og nafn",
+ "A rate plan needs a code and a name.": "Verðáætlun þarf kóða og nafn.",
+ "A room line must be for between one and fifty rooms": "Herbergjalína verður að vera fyrir eitt til fimmtíu herbergi",
+ "A room needs a number": "Herbergi þarf númer",
+ "A room needs a number.": "Herbergi þarf númer.",
+ "A room type needs a code and a name": "Herbergistegund þarf kóða og nafn",
+ "A room type needs a code and a name.": "Herbergistegund þarf kóða og nafn.",
+ "A season cannot end before it starts": "Tímabil getur ekki endað áður en það byrjar",
+ "A stay over {0} may run at most {1} nights, and this one is {2}.": "Dvöl sem nær yfir {0} má mest vera {1} nætur, og þessi er {2}.",
+ "A stay over {0} must run at least {1} nights, and this one is {2}.": "Dvöl sem nær yfir {0} verður að vera að minnsta kosti {1} nætur, og þessi er {2}.",
+ "A stay rule of zero nights means nothing. Leave it blank to clear it.": "Dvalarregla upp á núll nætur þýðir ekkert. Skildu eftir autt til að hreinsa hana.",
+ "A tax rate must be between 0 and 100 percent": "Skatthlutfall verður að vera á milli 0 og 100 prósent",
+ "A tax rate must be between 0 and 100 percent.": "Skatthlutfall verður að vera á milli 0 og 100 prósent.",
+ "A tax rate needs a name": "Skatthlutfall þarf nafn",
+ "A tax rate needs a name.": "Skatthlutfall þarf nafn.",
+ "A waitlist entry needs an arrival and a departure date": "Færsla á biðlista þarf komu- og brottfarardag",
+ "A waitlist entry needs either a customer or a contact name": "Færsla á biðlista þarf viðskiptavin eða tengiliðsnafn",
+ "Abbreviation": "Skammstöfun",
+ "Accommodation": "Gisting",
  "Afghanistan": "Afganistan",
  "Åland Islands": "Álandseyjar",
  "Albania": "Albanía",

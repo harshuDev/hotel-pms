@@ -1,4 +1,333 @@
 {
+ "(Holding area)": "(Wartebereich)",
+ "{abs}d ago": "vor {abs} T.",
+ "{amount} Discount": "{amount} Rabatt",
+ "{amount} in cash": "{amount} in bar",
+ "{amount} is required per booking.": "{amount} ist pro Buchung erforderlich.",
+ "{amount} is required per room booked.": "{amount} ist pro gebuchtem Zimmer erforderlich.",
+ "{amount} of it in cash": "davon {amount} in bar",
+ "{amount} off": "{amount} Nachlass",
+ "{amount} owing": "{amount} offen",
+ "{amount} rooms": "{amount} Zimmer",
+ "{amount} rooms, {amount2} other": "{amount} Zimmer, {amount2} sonstige",
+ "{amount} through the drawer": "{amount} über die Kasse",
+ "{channel} booking {reference}": "{channel}-Buchung {reference}",
+ "{channelManagerLabel} saved.": "{channelManagerLabel} gespeichert.",
+ "{charged} charged, {paid} paid": "{charged} belastet, {paid} bezahlt",
+ "{clean} vacant dirty, {dueOut} due out": "{clean} frei und schmutzig, {dueOut} Abreisen",
+ "{currency} deleted.": "{currency} gelöscht.",
+ "{currency} saved.": "{currency} gespeichert.",
+ "{day}: a rate cannot be negative.": "{day}: Ein Preis darf nicht negativ sein.",
+ "{day}: a stay rule is a number of nights, 1 to 365.": "{day}: Eine Aufenthaltsregel ist eine Anzahl von Nächten, 1 bis 365.",
+ "{day}: write the rate as a number.": "{day}: Geben Sie den Preis als Zahl ein.",
+ "{field} set on {n} room-nights.": {
+  "one": "{field} für {n} Zimmernacht gesetzt.",
+  "other": "{field} für {n} Zimmernächte gesetzt."
+ },
+ "{from} to {to}": "{from} bis {to}",
+ "{from}–{to} of {total}": "{from}–{to} von {total}",
+ "{label} picker": "{label}-Auswahl",
+ "{left} free of {total}": "{left} von {total} frei",
+ "{length} transactions": "{length} Buchungen",
+ "{lost} since cancelled": "{lost} seit der Stornierung",
+ "{matches} of {total}": "{matches} von {total}",
+ "{n} / page": "{n} / Seite",
+ "{n} adults": {
+  "one": "{n} Erwachsener",
+  "other": "{n} Erwachsene"
+ },
+ "{n} bookings": {
+  "one": "{n} Buchung",
+  "other": "{n} Buchungen"
+ },
+ "{n} bookings owing": {
+  "one": "{n} Buchung offen",
+  "other": "{n} Buchungen offen"
+ },
+ "{n} bookings still owing": {
+  "one": "{n} Buchung noch offen",
+  "other": "{n} Buchungen noch offen"
+ },
+ "{n} cashier shifts are still open on this date. The night audit refuses to close a day while one is, so the figures below can still move.": {
+  "one": "{n} Kassenschicht ist an diesem Datum noch offen. Der Nachtabschluss schließt keinen Tag, solange eine offen ist, daher können sich die Zahlen unten noch ändern.",
+  "other": "{n} Kassenschichten sind an diesem Datum noch offen. Der Nachtabschluss schließt keinen Tag, solange eine offen ist, daher können sich die Zahlen unten noch ändern."
+ },
+ "{n} categories": {
+  "one": "{n} Kategorie",
+  "other": "{n} Kategorien"
+ },
+ "{n} channels": {
+  "one": "{n} Kanal",
+  "other": "{n} Kanäle"
+ },
+ "{n} children": {
+  "one": "{n} Kind",
+  "other": "{n} Kinder"
+ },
+ "{n} customers exported — the export stops at {n}, so this is not the whole list. Narrow the search and export again.": "{n} Kunden exportiert – der Export endet bei {n}, dies ist also nicht die ganze Liste. Grenzen Sie die Suche ein und exportieren Sie erneut.",
+ "{n} customers exported to {file}.": {
+  "one": "{n} Kunde nach {file} exportiert.",
+  "other": "{n} Kunden nach {file} exportiert."
+ },
+ "{n} days": {
+  "one": "{n} Tag",
+  "other": "{n} Tage"
+ },
+ "{n} departures": {
+  "one": "{n} Abreise",
+  "other": "{n} Abreisen"
+ },
+ "{n} due out": "{n} Abreisen",
+ "{n} floors": {
+  "one": "{n} Etage",
+  "other": "{n} Etagen"
+ },
+ "{n} folios": {
+  "one": "{n} Folio",
+  "other": "{n} Folios"
+ },
+ "{n} free": "{n} frei",
+ "{n} guests": {
+  "one": "{n} Gast",
+  "other": "{n} Gäste"
+ },
+ "{n} methods": {
+  "one": "{n} Zahlungsart",
+  "other": "{n} Zahlungsarten"
+ },
+ "{n} nights": {
+  "one": "{n} Nacht",
+  "other": "{n} Nächte"
+ },
+ "{n} nights have no rate. Nights added by an extension come in at zero because no rate plan was named — set a rate before the night audit runs, or the stay will be charged as free.": {
+  "one": "{n} Nacht hat keinen Preis. Durch eine Verlängerung hinzugefügte Nächte kommen mit null herein, weil kein Ratenplan angegeben wurde – setzen Sie einen Preis vor dem Nachtabschluss, sonst wird der Aufenthalt als kostenlos berechnet.",
+  "other": "{n} Nächte haben keinen Preis. Durch eine Verlängerung hinzugefügte Nächte kommen mit null herein, weil kein Ratenplan angegeben wurde – setzen Sie einen Preis vor dem Nachtabschluss, sonst wird der Aufenthalt als kostenlos berechnet."
+ },
+ "{n} nights priced": {
+  "one": "{n} Nacht bepreist",
+  "other": "{n} Nächte bepreist"
+ },
+ "{n} no shows": {
+  "one": "{n} No-Show",
+  "other": "{n} No-Shows"
+ },
+ "{n} notes on {date}": {
+  "one": "{n} Notiz am {date}",
+  "other": "{n} Notizen am {date}"
+ },
+ "{n} of these {total} stays are missing something a return needs.": "Bei {n} dieser {total} Aufenthalte fehlt etwas, das eine Meldung braucht.",
+ "{n} out of order": "{n} außer Betrieb",
+ "{n} pax": "{n} Pers.",
+ "{n} people": {
+  "one": "{n} Person",
+  "other": "{n} Personen"
+ },
+ "{n} plans": {
+  "one": "{n} Plan",
+  "other": "{n} Pläne"
+ },
+ "{n} rates": {
+  "one": "{n} Rate",
+  "other": "{n} Raten"
+ },
+ "{n} rates selected. Leave the box empty to clear the price and take them off sale.": {
+  "one": "{n} Rate ausgewählt. Lassen Sie das Feld leer, um den Preis zu löschen und sie aus dem Verkauf zu nehmen.",
+  "other": "{n} Raten ausgewählt. Lassen Sie das Feld leer, um den Preis zu löschen und sie aus dem Verkauf zu nehmen."
+ },
+ "{n} records": {
+  "one": "{n} Datensatz",
+  "other": "{n} Datensätze"
+ },
+ "{n} room nights": {
+  "one": "{n} Zimmernacht",
+  "other": "{n} Zimmernächte"
+ },
+ "{n} room types selected.": {
+  "one": "{n} Zimmertyp ausgewählt.",
+  "other": "{n} Zimmertypen ausgewählt."
+ },
+ "{n} rooms": {
+  "one": "{n} Zimmer",
+  "other": "{n} Zimmer"
+ },
+ "{n} rows": {
+  "one": "{n} Zeile",
+  "other": "{n} Zeilen"
+ },
+ "{n} stays": {
+  "one": "{n} Aufenthalt",
+  "other": "{n} Aufenthalte"
+ },
+ "{n} types": {
+  "one": "{n} Typ",
+  "other": "{n} Typen"
+ },
+ "{n} unassigned": "{n} ohne Zimmer",
+ "{n}d": "{n} T.",
+ "{n}n": "{n} N.",
+ "{name} — change": "{name} – ändern",
+ "{name} · opened {time} · business date {date}": "{name} · geöffnet {time} · Geschäftstag {date}",
+ "{name} (copy)": "{name} (Kopie)",
+ "{name} (reversed)": "{name} (storniert)",
+ "{name} active": "{name} aktiv",
+ "{name} added.": "{name} hinzugefügt.",
+ "{name} dashboard": "{name} Dashboard",
+ "{name} dates added.": "{name}: Daten hinzugefügt.",
+ "{name} deleted.": "{name} gelöscht.",
+ "{name} includes {meals}.": "{name} enthält {meals}.",
+ "{name} includes no meals.": "{name} enthält keine Mahlzeiten.",
+ "{name} is active": "{name} ist aktiv",
+ "{name} is larger than 256 KB.": "{name} ist größer als 256 KB.",
+ "{name} is now on the guest booking page.": "{name} ist jetzt auf der Gäste-Buchungsseite.",
+ "{name} is off the guest booking page.": "{name} ist nicht mehr auf der Gäste-Buchungsseite.",
+ "{name} merged into {target}.": "{name} in {target} zusammengeführt.",
+ "{name} merged.": "{name} zusammengeführt.",
+ "{name} must be a colour like #003580.": "{name} muss eine Farbe wie #003580 sein.",
+ "{name} on {name2} is worth {amount}. Nights charged from the next night audit split it out as food.": "{name} bei {name2} ist {amount} wert. Nächte, die ab dem nächsten Nachtabschluss belastet werden, weisen dies als Verpflegung aus.",
+ "{name} on {name2} is worth nothing again, so nothing is posted for it.": "{name} bei {name2} ist wieder nichts wert, daher wird dafür nichts gebucht.",
+ "{name} on {name2} saved.": "{name} bei {name2} gespeichert.",
+ "{name} policy": "Richtlinie {name}",
+ "{name} profile deleted.": "Profil {name} gelöscht.",
+ "{name} profile saved.": "Profil {name} gespeichert.",
+ "{name} saved.": "{name} gespeichert.",
+ "{name}, {name2}, {value} rate": "{name}, {name2}, Preis {value}",
+ "{nights} from {date}, {rooms}. No room has been assigned yet — that happens at check-in.": "{nights} ab {date}, {rooms}. Es ist noch kein Zimmer zugewiesen – das geschieht beim Check-in.",
+ "{nights}, {from} to {to}": "{nights}, {from} bis {to}",
+ "{occupied} of {sellable} sellable": "{occupied} von {sellable} verkaufbar",
+ "{offer} applied, taking {amount} off the stay.": "{offer} angewendet, {amount} Nachlass auf den Aufenthalt.",
+ "{pct}% Discount": "{pct} % Rabatt",
+ "{pct}% occupied": "{pct} % belegt",
+ "{pending} still pending": "{pending} noch ausstehend",
+ "{plan} is not loaded on {type} for {date}, so it cannot be sold": "{plan} ist für {type} am {date} nicht geladen und kann daher nicht verkauft werden",
+ "{qty} × {what} charged.": "{qty} × {what} belastet.",
+ "{records} merged. {bookings} and {folios} moved across.": "{records} zusammengeführt. {bookings} und {folios} übertragen.",
+ "{reference} booked.": "{reference} gebucht.",
+ "{reversals} reversed": "{reversals} storniert",
+ "{roomsSold} of {nights} room nights": "{roomsSold} von {nights} Zimmernächten",
+ "{roomsSold} of {roomNightsAvailable} room nights": "{roomsSold} von {roomNightsAvailable} Zimmernächten",
+ "{roomsSold} of {sellableRooms} rooms": "{roomsSold} von {sellableRooms} Zimmern",
+ "{setting} in Inventory Settings turns it back on.": "{setting} in den Inventareinstellungen schaltet es wieder ein.",
+ "{shown} of {total} rooms": "{shown} von {total} Zimmern",
+ "{sold} sold of {sellable} sellable": "{sold} verkauft von {sellable} verkaufbar",
+ "{unassigned} with no room assigned": "{unassigned} ohne zugewiesenes Zimmer",
+ "{value} closed to arrival": "{value} Anreise gesperrt",
+ "{value} closed to departure": "{value} Abreise gesperrt",
+ "{value} max stay": "{value} Höchstaufenthalt",
+ "{value} min stay arrival": "{value} Mindestaufenthalt bei Anreise",
+ "{value} min stay through": "{value} Mindestaufenthalt durchgehend",
+ "{value} stop sell": "{value} Verkaufsstopp",
+ "{value}% of rack": "{value} % des Listenpreises",
+ "{what} charged.": "{what} belastet.",
+ "{who} password": "{who} Passwort",
+ "{who} password:": "{who} Passwort:",
+ "{who} Username": "{who} Benutzername",
+ "{who} Username:": "{who} Benutzername:",
+ "% deposit is required at the time of booking": "% Anzahlung ist bei der Buchung fällig",
+ "↑↓ to move": "↑↓ zum Bewegen",
+ "↵ to open": "↵ zum Öffnen",
+ "+ Add Cancellation Policy": "+ Stornierungsrichtlinie hinzufügen",
+ "+ Add email template": "+ E-Mail-Vorlage hinzufügen",
+ "+ Add Extra Category": "+ Extra-Kategorie hinzufügen",
+ "+ Add Facility": "+ Ausstattung hinzufügen",
+ "+ Add Room": "+ Zimmer hinzufügen",
+ "+ Add Room Type": "+ Zimmertyp hinzufügen",
+ "+ Add Rooms in a Run": "+ Zimmerreihe hinzufügen",
+ "+ Add Virtual Room Type": "+ Virtuellen Zimmertyp hinzufügen",
+ "1 Example Street, Example City": "Beispielstraße 1, Beispielstadt",
+ "1 Point after dot": "1 Nachkommastelle",
+ "120.00, or blank to clear": "120.00, oder leer zum Löschen",
+ "2 Points after dot": "2 Nachkommastellen",
+ "A {0} booking cannot be given a room": "Eine Buchung im Status {0} kann kein Zimmer erhalten",
+ "A {n} night deposit is required at the time of booking.": {
+  "one": "Eine Anzahlung von {n} Nacht ist bei der Buchung fällig.",
+  "other": "Eine Anzahlung von {n} Nächten ist bei der Buchung fällig."
+ },
+ "A {percent}% deposit is required at the time of booking.": "Eine Anzahlung von {percent} % ist bei der Buchung fällig.",
+ "A booking appears here once a guest checks in, and leaves when they check out.": "Eine Buchung erscheint hier, sobald ein Gast eincheckt, und verschwindet beim Check-out.",
+ "A booking appears here once a payment is taken against it and before the guest checks in.": "Eine Buchung erscheint hier, sobald eine Zahlung darauf eingeht und bevor der Gast eincheckt.",
+ "A booking needs a first and last name": "Eine Buchung braucht Vor- und Nachnamen",
+ "A booking needs a guest: pick an existing customer or enter a new one": "Eine Buchung braucht einen Gast: Wählen Sie einen bestehenden Kunden oder legen Sie einen neuen an",
+ "A booking needs at least one adult": "Eine Buchung braucht mindestens einen Erwachsenen",
+ "A booking needs at least one room": "Eine Buchung braucht mindestens ein Zimmer",
+ "A booking source needs a code and a name": "Eine Buchungsquelle braucht einen Code und einen Namen",
+ "A cancellation policy needs a name": "Eine Stornierungsrichtlinie braucht einen Namen",
+ "A capacity has to be a whole number of seats.": "Die Kapazität muss eine ganze Zahl von Plätzen sein.",
+ "A category cannot be merged into itself": "Eine Kategorie kann nicht mit sich selbst zusammengeführt werden",
+ "A ceiling, never a promise: rooms out of order still come off the top, so the sellable figure can be lower than the allotment but never higher. Leave the box empty to go back to selling every room that exists.": "Eine Obergrenze, keine Zusage: Zimmer außer Betrieb werden trotzdem abgezogen, daher kann die verkaufbare Zahl unter dem Kontingent liegen, aber nie darüber. Lassen Sie das Feld leer, um wieder jedes vorhandene Zimmer zu verkaufen.",
+ "A charge must be more than nothing": "Eine Belastung muss mehr als nichts sein",
+ "A charge must be more than nothing.": "Eine Belastung muss mehr als nichts sein.",
+ "A chosen room type is not on this property": "Ein gewählter Zimmertyp gehört nicht zu diesem Haus",
+ "A company": "Ein Unternehmen",
+ "A company needs a company name": "Ein Unternehmen braucht einen Firmennamen",
+ "A condition names something that is not on this property": "Eine Bedingung nennt etwas, das nicht zu diesem Haus gehört",
+ "A configuration file can be at most 256 KB": "Eine Konfigurationsdatei darf höchstens 256 KB groß sein",
+ "A connection cannot change channel manager": "Bei einer Verbindung kann der Channel Manager nicht geändert werden",
+ "A connection cannot change provider": "Bei einer Verbindung kann der Anbieter nicht geändert werden",
+ "A connection cannot change system": "Bei einer Verbindung kann das System nicht geändert werden",
+ "A currency is three letters, like GBP.": "Eine Währung besteht aus drei Buchstaben, z. B. GBP.",
+ "A customer is needed before any money can be charged.": "Ein Kunde ist nötig, bevor Geld belastet werden kann.",
+ "A dash means no rate is loaded for that rate on that room type, which is not the same as free — a booking against it is refused. That is also how a room type is taken off a rate: clear the price rather than looking for a switch.": "Ein Strich bedeutet, dass für diese Rate auf diesem Zimmertyp kein Preis geladen ist – das ist nicht dasselbe wie kostenlos, eine Buchung darauf wird abgelehnt. So wird ein Zimmertyp auch von einer Rate genommen: Preis löschen, statt einen Schalter zu suchen.",
+ "A deposit equal to the total cost is required at the time of booking": "Eine Anzahlung in Höhe des Gesamtbetrags ist bei der Buchung fällig",
+ "A deposit equal to the total cost is required at the time of booking.": "Eine Anzahlung in Höhe des Gesamtbetrags ist bei der Buchung fällig.",
+ "A disabled room is out of order and cannot be sold.": "Ein deaktiviertes Zimmer ist außer Betrieb und kann nicht verkauft werden.",
+ "A facility needs a title": "Eine Ausstattung braucht einen Titel",
+ "A facility needs a title.": "Eine Ausstattung braucht einen Titel.",
+ "A fixed discount is more than 0": "Ein fester Rabatt ist größer als 0",
+ "A fixed sum off each night, never more than the night costs.": "Ein fester Betrag pro Nacht, nie mehr als die Nacht kostet.",
+ "A floor is a whole number, or leave it blank.": "Eine Etage ist eine ganze Zahl, oder leer lassen.",
+ "A folio is created on its first charge, so a booking that has taken no money yet has none.": "Ein Folio entsteht mit der ersten Belastung; eine Buchung ohne bisherige Zahlungen hat also keines.",
+ "A folio number is digits only": "Eine Folionummer besteht nur aus Ziffern",
+ "A guest already staying can stay through a closed date; only arrivals are refused.": "Ein bereits anwesender Gast kann über ein gesperrtes Datum bleiben; nur Anreisen werden abgelehnt.",
+ "A hotel usually has several, like Room Only, Bed and Breakfast and Non-refundable.": "Ein Hotel hat meist mehrere, z. B. Nur Übernachtung, Übernachtung mit Frühstück und Nicht erstattbar.",
+ "A location needs both a latitude and a longitude": "Ein Standort braucht Breiten- und Längengrad",
+ "A manager can turn it back on with “{feature}” in Settings → Hotel Features.": "Ein Manager kann es mit „{feature}“ unter Einstellungen → Hotelfunktionen wieder einschalten.",
+ "A manager or administrator can create one.": "Ein Manager oder Administrator kann eines anlegen.",
+ "A manager or administrator sets these up.": "Ein Manager oder Administrator richtet diese ein.",
+ "A meal cannot be worth less than nothing": "Eine Mahlzeit kann nicht weniger als nichts wert sein",
+ "A meal cannot be worth less than nothing.": "Eine Mahlzeit kann nicht weniger als nichts wert sein.",
+ "A meeting room booking needs a guest count": "Eine Tagungsraumbuchung braucht eine Gästezahl",
+ "A meeting room booking needs an event name": "Eine Tagungsraumbuchung braucht einen Veranstaltungsnamen",
+ "A meeting room needs a name": "Ein Tagungsraum braucht einen Namen",
+ "A member of staff needs a name": "Ein Mitarbeiter braucht einen Namen",
+ "A member of staff needs a name.": "Ein Mitarbeiter braucht einen Namen.",
+ "A new booking can only be taken as pending or confirmed": "Eine neue Buchung kann nur als ausstehend oder bestätigt angelegt werden",
+ "A new member of staff is invited in Supabase Auth, and then appears in this list.": "Neue Mitarbeiter werden in Supabase Auth eingeladen und erscheinen dann in dieser Liste.",
+ "A night with no rate loaded is not free — it cannot be sold on this plan at all, and taking a booking against it will say so. Leave the box empty and apply to clear a rate back to nothing.": "Eine Nacht ohne geladenen Preis ist nicht kostenlos – sie kann auf diesem Plan gar nicht verkauft werden, und eine Buchung darauf wird das melden. Lassen Sie das Feld leer und übernehmen Sie, um einen Preis zu löschen.",
+ "A nightly rate cannot be negative": "Ein Nachtpreis darf nicht negativ sein",
+ "A nightly rate cannot be negative.": "Ein Nachtpreis darf nicht negativ sein.",
+ "A note needs a date": "Eine Notiz braucht ein Datum",
+ "A note needs something written in it": "Eine Notiz braucht einen Text",
+ "A paid-out may only be recorded against your own open shift": "Eine Auszahlung darf nur in Ihrer eigenen offenen Schicht erfasst werden",
+ "A paid-out must be more than zero": "Eine Auszahlung muss größer als null sein",
+ "A paid-out needs a reason": "Eine Auszahlung braucht einen Grund",
+ "A password needs at least {n} characters.": "Ein Passwort braucht mindestens {n} Zeichen.",
+ "A payment method needs a kind": "Eine Zahlungsart braucht eine Art",
+ "A payment method needs a name": "Eine Zahlungsart braucht einen Namen",
+ "A payment type needs a title": "Eine Zahlungsart braucht einen Titel",
+ "A payment type needs a title.": "Eine Zahlungsart braucht einen Titel.",
+ "A percent discount is more than 0 and at most 100": "Ein prozentualer Rabatt ist größer als 0 und höchstens 100",
+ "A person": "Eine Person",
+ "A person needs a first name": "Eine Person braucht einen Vornamen",
+ "A promotion needs a name": "Ein Angebot braucht einen Namen",
+ "A rate plan needs a code and a name": "Ein Ratenplan braucht einen Code und einen Namen",
+ "A rate plan needs a code and a name.": "Ein Ratenplan braucht einen Code und einen Namen.",
+ "A room line must be for between one and fifty rooms": "Eine Zimmerzeile muss für ein bis fünfzig Zimmer sein",
+ "A room needs a number": "Ein Zimmer braucht eine Nummer",
+ "A room needs a number.": "Ein Zimmer braucht eine Nummer.",
+ "A room type needs a code and a name": "Ein Zimmertyp braucht einen Code und einen Namen",
+ "A room type needs a code and a name.": "Ein Zimmertyp braucht einen Code und einen Namen.",
+ "A season cannot end before it starts": "Eine Saison kann nicht vor ihrem Beginn enden",
+ "A stay over {0} may run at most {1} nights, and this one is {2}.": "Ein Aufenthalt über {0} darf höchstens {1} Nächte dauern, dieser hat {2}.",
+ "A stay over {0} must run at least {1} nights, and this one is {2}.": "Ein Aufenthalt über {0} muss mindestens {1} Nächte dauern, dieser hat {2}.",
+ "A stay rule of zero nights means nothing. Leave it blank to clear it.": "Eine Aufenthaltsregel von null Nächten bedeutet nichts. Leer lassen, um sie zu löschen.",
+ "A tax rate must be between 0 and 100 percent": "Ein Steuersatz muss zwischen 0 und 100 Prozent liegen",
+ "A tax rate must be between 0 and 100 percent.": "Ein Steuersatz muss zwischen 0 und 100 Prozent liegen.",
+ "A tax rate needs a name": "Ein Steuersatz braucht einen Namen",
+ "A tax rate needs a name.": "Ein Steuersatz braucht einen Namen.",
+ "A waitlist entry needs an arrival and a departure date": "Ein Wartelisteneintrag braucht ein An- und ein Abreisedatum",
+ "A waitlist entry needs either a customer or a contact name": "Ein Wartelisteneintrag braucht einen Kunden oder einen Kontaktnamen",
+ "Abbreviation": "Abkürzung",
+ "Accommodation": "Unterkunft",
  "Afghanistan": "Afghanistan",
  "Åland Islands": "Ålandinseln",
  "Albania": "Albanien",

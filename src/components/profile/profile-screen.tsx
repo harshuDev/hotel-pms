@@ -90,7 +90,7 @@ export function ProfileScreen({
     if (next.length < MIN_LENGTH) {
       setPasswordMessage({
         ok: false,
-        text: tr("A password needs at least {mIN_LENGTH} characters.", { mIN_LENGTH: MIN_LENGTH }),
+        text: tr("A password needs at least {n} characters.", { n: MIN_LENGTH }),
       });
       return;
     }
@@ -217,7 +217,7 @@ export function ProfileScreen({
               required
               value={next}
               onChange={(e) => setNext(e.target.value)}
-              placeholder={tr("At least {mIN_LENGTH} characters", { mIN_LENGTH: MIN_LENGTH })}
+              placeholder={tr("At least {n} characters", { n: MIN_LENGTH })}
               className={field}
             />
           </div>
