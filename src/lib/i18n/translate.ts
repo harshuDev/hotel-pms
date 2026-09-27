@@ -80,8 +80,14 @@ function patternsOf(dict: Dictionary): Pattern[] {
         return part.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
       })
       .join("");
+    // A pattern with next to no fixed text ("{0} - {1}") would match almost
+    // anything, so it is left to exact lookup.
+    if (key.replace(/\{\d+\}/g, "").replace(/[^\p{L}]/gu, "").length < 4) continue;
     list.push({ re: new RegExp(`^${source}$`, "s"), key, order });
   }
+  // The most specific first: more fixed text is a stricter match.
+  const fixed = (k: string) => k.replace(/\{\d+\}/g, "").length;
+  list.sort((a, b) => fixed(b.key) - fixed(a.key));
   patternCache.set(dict, list);
   return list;
 }

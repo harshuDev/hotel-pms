@@ -1,3 +1,5 @@
+import { msg } from "@/lib/i18n/translate";
+
 /**
  * Settings -> Connectivity Settings -> Booking Engine Settings (0098).
  *
@@ -33,14 +35,14 @@ export function roomTypeProfileSlug(roomTypeId: string): string {
 }
 
 export const PLACEHOLDERS = [
-  { token: "{{hotel_name}}", label: "Hotel name" },
-  { token: "{{hotel_address}}", label: "Address" },
-  { token: "{{hotel_city}}", label: "City" },
-  { token: "{{hotel_state}}", label: "State / region" },
-  { token: "{{hotel_postal_code}}", label: "Postal code" },
-  { token: "{{hotel_country}}", label: "Country" },
-  { token: "{{hotel_email}}", label: "Email" },
-  { token: "{{hotel_phone}}", label: "Phone" },
+  { token: "{{hotel_name}}", label: msg("Hotel name") },
+  { token: "{{hotel_address}}", label: msg("Address") },
+  { token: "{{hotel_city}}", label: msg("City") },
+  { token: "{{hotel_state}}", label: msg("State / region") },
+  { token: "{{hotel_postal_code}}", label: msg("Postal code") },
+  { token: "{{hotel_country}}", label: msg("Country") },
+  { token: "{{hotel_email}}", label: msg("Email") },
+  { token: "{{hotel_phone}}", label: msg("Phone") },
 ] as const;
 
 export type PlaceholderValues = {

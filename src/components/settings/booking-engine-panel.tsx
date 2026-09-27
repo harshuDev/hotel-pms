@@ -106,7 +106,7 @@ function DropIns({ onPick }: { onPick: (token: string) => void }) {
             onPick(p.token);
           }}
         >
-          {p.label} <span className="text-ink-faint">{p.token}</span>
+          {tr(p.label)} <span className="text-ink-faint">{p.token}</span>
         </MenuItem>
       ))}
     </Menu>

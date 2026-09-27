@@ -5490,9 +5490,13 @@ export type Database = {
       global_search: {
         Args: { p_limit?: number; p_q: string }
         Returns: {
+          booking_count: number
+          check_in: string
+          check_out: string
+          floor: string
           id: string
           kind: string
-          meta: string
+          status: string
           subtitle: string
           title: string
         }[]

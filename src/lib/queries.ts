@@ -13,6 +13,8 @@
  */
 
 import { cache } from "react";
+import { getT } from "@/lib/i18n/server";
+import type { Translator } from "@/lib/i18n/translate";
 import { EMPTY_HOTEL_POLICIES, type HotelPolicies } from "@/lib/hotel-policies";
 import { resolveHotelFeatures, type HotelFeatures } from "@/lib/hotel-features";
 import { DEFAULT_CALENDAR_SETTINGS, type CalendarSettings } from "@/lib/calendar-settings";
@@ -291,13 +293,13 @@ interface BookingRow {
   balance_cents: number;
 }
 
-function toBooking(row: BookingRow): Booking {
+function toBooking(row: BookingRow, tr: Translator): Booking {
   return {
     id: row.booking_id,
     reference: row.reference,
     customerId: row.customer_id,
-    customerName: row.customer_name ?? "Unnamed guest",
-    channelName: row.channel_name,
+    customerName: row.customer_name ?? tr("Unnamed guest"),
+    channelName: tr.message(row.channel_name),
     settlement: row.settlement,
     status: row.status,
     arrivalDate: row.check_in,
@@ -307,7 +309,8 @@ function toBooking(row: BookingRow): Booking {
     bookedAt: row.booked_on,
     nights: row.nights,
     roomCount: row.room_count,
-    roomTypeName: row.room_type_name ?? "Unassigned",
+    // "Mixed" is written by Postgres for a booking across room types.
+    roomTypeName: row.room_type_name ? tr.message(row.room_type_name) : tr("Unassigned"),
     roomNumber: row.room_number,
     adults: row.adults,
     children: row.children,
@@ -320,6 +323,7 @@ function toBooking(row: BookingRow): Booking {
  * are not movements, and the RPC already excludes them. */
 export async function getArrivals(date: string): Promise<Booking[]> {
   const supabase = await createClient();
+  const tr = await getT();
 
   const { data, error } = await supabase.rpc("dashboard_arrivals", {
     p_date: date,
@@ -329,12 +333,13 @@ export async function getArrivals(date: string): Promise<Booking[]> {
     throw new Error(`Failed to load arrivals: ${error.message}`);
   }
 
-  return ((data ?? []) as BookingRow[]).map(toBooking);
+  return ((data ?? []) as BookingRow[]).map((row) => toBooking(row, tr));
 }
 
 /** Guests departing on the business date. */
 export async function getDepartures(date: string): Promise<Booking[]> {
   const supabase = await createClient();
+  const tr = await getT();
 
   const { data, error } = await supabase.rpc("dashboard_departures", {
     p_date: date,
@@ -344,7 +349,7 @@ export async function getDepartures(date: string): Promise<Booking[]> {
     throw new Error(`Failed to load departures: ${error.message}`);
   }
 
-  return ((data ?? []) as BookingRow[]).map(toBooking);
+  return ((data ?? []) as BookingRow[]).map((row) => toBooking(row, tr));
 }
 
 export const PACE_DAYS = 28;
@@ -473,6 +478,7 @@ export async function getBookings(
   perPage: number;
 }> {
   const supabase = await createClient();
+  const tr = await getT();
 
   const perPage = filters.perPage ?? 25;
   const page = Math.max(1, filters.page ?? 1);
@@ -491,7 +497,7 @@ export async function getBookings(
   const rows = (data ?? []) as (BookingRow & { total_count: number })[];
 
   return {
-    rows: rows.map(toBooking),
+    rows: rows.map((row) => toBooking(row, tr)),
     // count(*) over () on the full filtered set; absent when the page is empty.
     total: rows[0]?.total_count ?? 0,
     page,
@@ -540,6 +546,7 @@ export async function getCustomers(
   perPage: number;
 }> {
   const supabase = await createClient();
+  const tr = await getT();
 
   const perPage = filters.perPage ?? 25;
   const page = Math.max(1, filters.page ?? 1);
@@ -563,7 +570,7 @@ export async function getCustomers(
         id: row.customer_id,
         ref: String(row.customer_number),
         kind: row.kind,
-        name: row.name ?? "Unnamed customer",
+        name: row.name ?? tr("Unnamed customer"),
         nationalIdNumber: row.national_id_number,
         email: row.email,
         phone: row.phone,
@@ -630,6 +637,7 @@ export async function getPaymentMethods(): Promise<PaymentMethod[]> {
 /** Bookings with something still owed, for the payment and recharge pickers. */
 export async function getPayableBookings(limit = 20): Promise<Booking[]> {
   const supabase = await createClient();
+  const tr = await getT();
 
   const { data, error } = await supabase
     .from("booking_totals")
@@ -642,7 +650,7 @@ export async function getPayableBookings(limit = 20): Promise<Booking[]> {
     throw new Error(`Failed to load payable bookings: ${error.message}`);
   }
 
-  return ((data ?? []) as BookingRow[]).map(toBooking);
+  return ((data ?? []) as BookingRow[]).map((row) => toBooking(row, tr));
 }
 
 /**
@@ -654,6 +662,7 @@ export async function getPayableBookings(limit = 20): Promise<Booking[]> {
  */
 export async function getOpenShift(): Promise<Shift | null> {
   const supabase = await createClient();
+  const tr = await getT();
 
   const { data, error } = await supabase.rpc("current_cashier_shift");
 
@@ -704,7 +713,7 @@ export async function getOpenShift(): Promise<Shift | null> {
   ).map((row) => ({
     id: row.payment_id,
     bookingRef: row.booking_reference,
-    guestName: row.guest_name ?? "Unnamed guest",
+    guestName: row.guest_name ?? tr("Unnamed guest"),
     methodId: row.payment_method_id,
     methodName: row.method_name,
     affectsDrawer: row.affects_drawer,
@@ -995,6 +1004,7 @@ export async function getOccupancySummary(
 /** Bookings with money still owed, largest first. */
 export async function getDebtorsReport(): Promise<DebtorRow[]> {
   const supabase = await createClient();
+  const tr = await getT();
 
   const { data, error } = await supabase.rpc("debtors_report");
 
@@ -1020,7 +1030,7 @@ export async function getDebtorsReport(): Promise<DebtorRow[]> {
     kind: row.kind === "meeting_room" ? "meeting_room" : "room",
     bookingId: row.booking_id,
     reference: row.reference,
-    customerName: row.customer_name ?? "Unnamed guest",
+    customerName: row.customer_name ?? tr("Unnamed guest"),
     status: row.status,
     checkIn: row.check_in,
     checkOut: row.check_out,
@@ -1154,6 +1164,7 @@ export async function getPaymentsReport(
   to: string,
 ): Promise<PaymentRow[]> {
   const supabase = await createClient();
+  const tr = await getT();
   const { data, error } = await supabase.rpc("payments_report", {
     p_from: from,
     p_to: to,
@@ -1185,7 +1196,7 @@ export async function getPaymentsReport(
     affectsDrawer: row.affects_drawer,
     bookingId: row.booking_id,
     reference: row.reference,
-    guestName: row.guest_name ?? "Unnamed guest",
+    guestName: row.guest_name ?? tr("Unnamed guest"),
     receivedBy: row.received_by,
     externalReference: row.external_reference,
     isReversal: row.is_reversal,
@@ -1258,6 +1269,7 @@ export async function getExtrasReport(
 /** Departures on one business date and what they left owing. */
 export async function getDailyCheckout(date: string): Promise<CheckoutRow[]> {
   const supabase = await createClient();
+  const tr = await getT();
   const { data, error } = await supabase.rpc("daily_checkout_report", {
     p_date: date,
   });
@@ -1280,7 +1292,7 @@ export async function getDailyCheckout(date: string): Promise<CheckoutRow[]> {
   ).map((row) => ({
     bookingId: row.booking_id,
     reference: row.reference,
-    guestName: row.guest_name ?? "Unnamed guest",
+    guestName: row.guest_name ?? tr("Unnamed guest"),
     roomNumbers: row.room_numbers,
     channelName: row.channel_name,
     checkIn: row.check_in,
@@ -1333,6 +1345,7 @@ export async function getBookingReport(
   to: string,
 ): Promise<BookingProductionRow[]> {
   const supabase = await createClient();
+  const tr = await getT();
   const { data, error } = await supabase.rpc("booking_report", {
     p_from: from,
     p_to: to,
@@ -1359,7 +1372,7 @@ export async function getBookingReport(
   ).map((row) => ({
     bookingId: row.booking_id,
     reference: row.reference,
-    guestName: row.guest_name ?? "Unnamed guest",
+    guestName: row.guest_name ?? tr("Unnamed guest"),
     channelName: row.channel_name,
     channelKind: row.channel_kind,
     status: row.status,
@@ -1380,6 +1393,7 @@ export async function getBookingByChannel(
   to: string,
 ): Promise<ChannelProductionRow[]> {
   const supabase = await createClient();
+  const tr = await getT();
   const { data, error } = await supabase.rpc("booking_report_by_channel", {
     p_from: from,
     p_to: to,
@@ -1397,7 +1411,7 @@ export async function getBookingByChannel(
       value_cents: number;
     }[]
   ).map((row) => ({
-    channelName: row.channel_name,
+    channelName: tr.message(row.channel_name),
     channelKind: row.channel_kind,
     commissionBps: row.commission_bps,
     bookingCount: row.booking_count,
@@ -1448,6 +1462,7 @@ export async function getCancellationReport(
   to: string,
 ): Promise<CancellationRow[]> {
   const supabase = await createClient();
+  const tr = await getT();
   const { data, error } = await supabase.rpc("cancellation_report", {
     p_from: from,
     p_to: to,
@@ -1473,7 +1488,7 @@ export async function getCancellationReport(
   ).map((row) => ({
     bookingId: row.booking_id,
     reference: row.reference,
-    guestName: row.guest_name ?? "Unnamed guest",
+    guestName: row.guest_name ?? tr("Unnamed guest"),
     channelName: row.channel_name,
     status: row.status,
     bookedOn: row.booked_on,
@@ -1493,6 +1508,7 @@ export async function getChannelReport(
   to: string,
 ): Promise<ChannelRevenueRow[]> {
   const supabase = await createClient();
+  const tr = await getT();
   const { data, error } = await supabase.rpc("channel_report", {
     p_from: from,
     p_to: to,
@@ -1511,7 +1527,7 @@ export async function getChannelReport(
       net_revenue_cents: number;
     }[]
   ).map((row) => ({
-    channelName: row.channel_name,
+    channelName: tr.message(row.channel_name),
     channelKind: row.channel_kind,
     commissionBps: row.commission_bps,
     bookingCount: row.booking_count,
@@ -1603,6 +1619,7 @@ export async function getHousekeepingRooms(filters: {
 /** Everyone staying tonight. */
 export async function getInHouseReport(): Promise<InHouseRow[]> {
   const supabase = await createClient();
+  const tr = await getT();
   const { data, error } = await supabase.rpc("in_house_report");
   if (error) throw new Error(`Failed to load the in house report: ${error.message}`);
 
@@ -1626,7 +1643,7 @@ export async function getInHouseReport(): Promise<InHouseRow[]> {
   ).map((row) => ({
     bookingId: row.booking_id,
     reference: row.reference,
-    guestName: row.guest_name ?? "Unnamed guest",
+    guestName: row.guest_name ?? tr("Unnamed guest"),
     roomNumber: row.room_number,
     roomTypeName: row.room_type_name,
     channelName: row.channel_name,
@@ -1923,6 +1940,7 @@ export async function getCalendarBookings(
   includeCanceled = false,
 ): Promise<CalendarBar[]> {
   const supabase = await createClient();
+  const tr = await getT();
 
   const { data, error } = await supabase.rpc("calendar_bookings", {
     p_from: from,
@@ -1956,7 +1974,7 @@ export async function getCalendarBookings(
     bookingId: row.booking_id,
     bookingRoomId: row.booking_room_id,
     reference: row.reference,
-    guestName: row.guest_name,
+    guestName: tr.message(row.guest_name),
     status: row.status,
     roomNumber: row.room_number,
     checkIn: row.check_in,
@@ -2151,6 +2169,7 @@ export async function getBookingDetail(
   bookingId: string,
 ): Promise<BookingDetail | null> {
   const supabase = await createClient();
+  const tr = await getT();
   const { data, error } = await supabase.rpc("booking_detail", {
     p_booking_id: bookingId,
   });
@@ -2199,7 +2218,7 @@ export async function getBookingDetail(
     status: row.status,
     settlement: row.settlement,
     customerId: row.customer_id,
-    customerName: row.customer_name ?? "Unnamed guest",
+    customerName: row.customer_name ?? tr("Unnamed guest"),
     customerEmail: row.customer_email,
     customerPhone: row.customer_phone,
     channelId: row.channel_id,
@@ -3678,6 +3697,7 @@ export async function getFolioReport(
   to: string,
 ): Promise<FolioReportRow[]> {
   const supabase = await createClient();
+  const tr = await getT();
   const { data, error } = await supabase.rpc("folio_report", {
     p_from: from,
     p_to: to,
@@ -3689,8 +3709,8 @@ export async function getFolioReport(
     folioNumber: Number(row.folio_number ?? 0),
     kind: row.kind,
     status: row.status,
-    reference: row.reference,
-    guestName: row.guest_name,
+    reference: tr.message(row.reference),
+    guestName: tr.message(row.guest_name),
     openedAt: row.opened_at,
     closedAt: row.closed_at,
     chargesCents: Number(row.charges_cents ?? 0),
@@ -3705,6 +3725,7 @@ export async function getImmigrationReport(
   to: string,
 ): Promise<ImmigrationRow[]> {
   const supabase = await createClient();
+  const tr = await getT();
   const { data, error } = await supabase.rpc("immigration_report", {
     p_from: from,
     p_to: to,
@@ -3714,7 +3735,7 @@ export async function getImmigrationReport(
   return (data ?? []).map((row) => ({
     bookingId: row.booking_id,
     reference: row.reference,
-    guestName: row.guest_name,
+    guestName: tr.message(row.guest_name),
     roomNumber: row.room_number,
     nationality: row.nationality,
     country: row.country,
@@ -3758,13 +3779,14 @@ export async function getCountryReport(
  */
 export async function getDepositReport(): Promise<DepositRow[]> {
   const supabase = await createClient();
+  const tr = await getT();
   const { data, error } = await supabase.rpc("deposit_report");
   if (error) rethrow(error, "deposit report");
 
   return (data ?? []).map((row) => ({
     bookingId: row.booking_id,
     reference: row.reference,
-    guestName: row.guest_name,
+    guestName: tr.message(row.guest_name),
     status: row.status,
     checkIn: row.check_in,
     checkOut: row.check_out,
@@ -3782,6 +3804,7 @@ export async function getRatePlanReport(
   to: string,
 ): Promise<RatePlanReportRow[]> {
   const supabase = await createClient();
+  const tr = await getT();
   const { data, error } = await supabase.rpc("rate_plan_report", {
     p_from: from,
     p_to: to,
@@ -3790,7 +3813,7 @@ export async function getRatePlanReport(
 
   return (data ?? []).map((row) => ({
     ratePlanId: row.rate_plan_id,
-    planName: row.plan_name,
+    planName: tr.message(row.plan_name),
     isPublic: row.is_public,
     bookings: Number(row.bookings ?? 0),
     roomNights: Number(row.room_nights ?? 0),
@@ -3864,6 +3887,7 @@ export async function getWaitlistReport(
   status: WaitlistStatus | null,
 ): Promise<WaitlistRow[]> {
   const supabase = await createClient();
+  const tr = await getT();
   const { data, error } = await supabase.rpc("booking_waitlist_report", {
     p_from: from,
     p_to: to,
@@ -3875,10 +3899,10 @@ export async function getWaitlistReport(
 
   return (data ?? []).map((row) => ({
     id: row.id,
-    guestName: row.guest_name,
+    guestName: tr.message(row.guest_name),
     contactEmail: row.contact_email,
     contactPhone: row.contact_phone,
-    roomTypeName: row.room_type_name,
+    roomTypeName: tr.message(row.room_type_name),
     checkIn: row.check_in,
     checkOut: row.check_out,
     nights: Number(row.nights ?? 0),
@@ -3960,6 +3984,7 @@ export async function getCalendarRoomBars(
   nights: number = CALENDAR_NIGHTS,
 ): Promise<CalendarRoomBar[]> {
   const supabase = await createClient();
+  const tr = await getT();
   const { data, error } = await supabase.rpc("calendar_room_bars", {
     p_from: from,
     p_nights: nights,
@@ -3972,7 +3997,7 @@ export async function getCalendarRoomBars(
     bookingId: row.booking_id,
     bookingRoomId: row.booking_room_id,
     reference: row.reference,
-    guestName: row.guest_name,
+    guestName: tr.message(row.guest_name),
     status: row.status,
     checkIn: row.check_in,
     checkOut: row.check_out,

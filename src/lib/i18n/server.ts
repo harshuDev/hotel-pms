@@ -1,6 +1,5 @@
 import { cache } from "react";
 import { cookies } from "next/headers";
-import { getCurrentStaffUser } from "@/lib/queries";
 import { makeTranslator, type Dictionary, type Translator } from "@/lib/i18n/translate";
 import {
   DEFAULT_STAFF_LOCALE,
@@ -40,6 +39,9 @@ export const getCookieLocale = cache(async (): Promise<StaffLocale> => {
 });
 
 export const getStaffLocale = cache(async (): Promise<StaffLocale> => {
+  // Imported when called: queries.ts reads the translator for the labels
+  // Postgres falls back to, so a static import would be a cycle.
+  const { getCurrentStaffUser } = await import("@/lib/queries");
   const staff = await getCurrentStaffUser();
   return staff ? staff.locale : getCookieLocale();
 });

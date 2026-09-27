@@ -33,11 +33,9 @@ function hrefFor(hit: SearchHit) {
     case "booking":
       return `/bookings/${hit.id}`;
     case "customer":
-      return `/customers?q=${encodeURIComponent(hit.title)}`;
+      return `/customers?q=${encodeURIComponent(hit.term)}`;
     case "room":
-      return `/reports/housekeeping?q=${encodeURIComponent(
-        hit.title.replace(/^Room\s+/i, ""),
-      )}`;
+      return `/reports/housekeeping?q=${encodeURIComponent(hit.term)}`;
   }
 }
 
