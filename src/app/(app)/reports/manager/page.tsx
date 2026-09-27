@@ -11,8 +11,10 @@ import { reportRange } from "@/lib/reports";
 import { ReportAccessError, getBusinessDate, getManagerReport } from "@/lib/queries";
 import type { ManagerRow } from "@/lib/types";
 import { getPropertyCurrency } from "@/lib/queries";
+import { pageTitle } from "@/lib/i18n/server";
+import { msg } from "@/lib/i18n/translate";
 
-export const metadata = { title: "Manager report" };
+export const generateMetadata = pageTitle(msg("Manager report"));
 
 /**
  * The page a general manager opens first: how full, at what rate, how much was
@@ -100,7 +102,7 @@ export default async function ManagerReportPage({
         minWidth="980px"
         emptyTitle={tr("Nothing happened in this range")}
         emptyHint={tr("Pick a range that covers dates the hotel has traded.")}
-        footLabel={`${nights} night${nights === 1 ? "" : "s"}`}
+        footLabel={tr.plural(nights, "{n} night", "{n} nights")}
         columns={[
           {
             header: tr("Date"),

@@ -14,8 +14,10 @@ import {
   getOccupancySummary,
 } from "@/lib/queries";
 import { getPropertyCurrency } from "@/lib/queries";
+import { pageTitle } from "@/lib/i18n/server";
+import { msg } from "@/lib/i18n/translate";
 
-export const metadata = { title: "Occupancy report" };
+export const generateMetadata = pageTitle(msg("Occupancy report"));
 
 export default async function OccupancyReportPage({
   searchParams,
@@ -75,16 +77,16 @@ export default async function OccupancyReportPage({
               <thead>
                 <tr className="border-b border-line text-left text-ink-faint">
                   {[
-                    "Night",
-                    "Rooms sold",
-                    "Sellable",
-                    "Occupancy",
-                    "Room revenue",
-                    "ADR",
-                    "RevPAR",
+                    msg("Night"),
+                    msg("Rooms sold"),
+                    msg("Sellable"),
+                    msg("Occupancy"),
+                    msg("Room revenue"),
+                    msg("ADR"),
+                    msg("RevPAR"),
                   ].map((c, i) => (
                     <th
-                      key={c}
+                      key={tr(c)}
                       className={cn(
                         "whitespace-nowrap px-3 pb-2.5 text-xxs font-semibold uppercase tracking-[0.1em]",
                         i >= 1 && "text-right",

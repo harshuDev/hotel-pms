@@ -7,8 +7,10 @@ import {
   getRatePlans,
   getRoomTypes,
 } from "@/lib/queries";
+import { pageTitle } from "@/lib/i18n/server";
+import { msg } from "@/lib/i18n/translate";
 
-export const metadata = { title: "Offers" };
+export const generateMetadata = pageTitle(msg("Offers"));
 
 export default async function OffersPage() {
   const tr = await getT();

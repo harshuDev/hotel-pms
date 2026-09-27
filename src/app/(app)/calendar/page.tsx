@@ -42,8 +42,10 @@ import {
 } from "@/lib/queries";
 import { getCalendarSettings, getHotelFeatures, getPropertyCurrency } from "@/lib/queries";
 import { housekeepingMode } from "@/lib/hotel-features";
+import { pageTitle } from "@/lib/i18n/server";
+import { msg } from "@/lib/i18n/translate";
 
-export const metadata = { title: "Calendar" };
+export const generateMetadata = pageTitle(msg("Calendar"));
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -376,7 +378,7 @@ export default async function CalendarPage({
       {openBooking && bookDate && (
         <BookingDialog
           title={tr("Take a booking")}
-          subtitle={`Arriving ${tr.date(bookDate, "EEEE d MMMM yyyy")}`}
+          subtitle={tr("Arriving {date}", { date: tr.date(bookDate, "EEEE d MMMM yyyy") })}
           closeHref={href(from, railW)}
         >
           {/*
@@ -450,7 +452,7 @@ export default async function CalendarPage({
           title={peek.detail.reference}
           subtitle={
             peek.detail.externalReference
-              ? `${peek.detail.channelName ?? "Channel"} booking ${peek.detail.externalReference}`
+              ? tr("{channel} booking {reference}", { channel: peek.detail.channelName ?? tr("Channel"), reference: peek.detail.externalReference })
               : (peek.detail.channelName ?? peek.detail.customerName)
           }
           closeHref={href(from, railW)}

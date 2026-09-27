@@ -5,8 +5,10 @@ import {
   getGuestFields,
   getIdentificationTypes,
 } from "@/lib/queries";
+import { pageTitle } from "@/lib/i18n/server";
+import { msg } from "@/lib/i18n/translate";
 
-export const metadata = { title: "Customers" };
+export const generateMetadata = pageTitle(msg("Customers"));
 
 /** Who Postgres will let create or correct a customer. `save_customer()` checks too. */
 const CAN_EDIT = ["admin", "manager", "front_desk"];

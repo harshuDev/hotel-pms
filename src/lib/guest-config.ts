@@ -1,3 +1,4 @@
+import type { Translator } from "@/lib/i18n/translate";
 import { msg } from "@/lib/i18n/translate";
 /**
  * Settings -> Guest Configuration (0073): identification types, additional
@@ -37,8 +38,8 @@ export interface RegistrationForm {
 }
 
 /** A yes/no value as stored and as read on the card. */
-export function guestFieldDisplay(kind: GuestFieldKind, value: string | undefined): string {
+export function guestFieldDisplay(tr: Translator, kind: GuestFieldKind, value: string | undefined): string {
   if (!value) return "";
-  if (kind === "yes_no") return value === "yes" ? "Yes" : value === "no" ? "No" : value;
+  if (kind === "yes_no") return value === "yes" ? tr("Yes") : value === "no" ? tr("No") : value;
   return value;
 }

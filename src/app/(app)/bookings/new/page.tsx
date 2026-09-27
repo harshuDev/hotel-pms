@@ -11,8 +11,10 @@ import {
   getRatePlans,
   getTaxRates,
 } from "@/lib/queries";
+import { pageTitle } from "@/lib/i18n/server";
+import { msg } from "@/lib/i18n/translate";
 
-export const metadata = { title: "New booking" };
+export const generateMetadata = pageTitle(msg("New booking"));
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 

@@ -1,7 +1,9 @@
 import { getT } from "@/lib/i18n/server";
 import { InventoryPage } from "@/components/inventory/inventory-page";
+import { pageTitle } from "@/lib/i18n/server";
+import { msg } from "@/lib/i18n/translate";
 
-export const metadata = { title: "Rates (Main)" };
+export const generateMetadata = pageTitle(msg("Rates (Main)"));
 
 /**
  * The same rate grid as Rates (All), pinned to the property's default plan.

@@ -11,8 +11,10 @@ import { reportRange } from "@/lib/reports";
 import { ReportAccessError, getBusinessDate, getFolioReport } from "@/lib/queries";
 import type { FolioReportRow } from "@/lib/types";
 import { getPropertyCurrency } from "@/lib/queries";
+import { pageTitle } from "@/lib/i18n/server";
+import { msg } from "@/lib/i18n/translate";
 
-export const metadata = { title: "Folio report" };
+export const generateMetadata = pageTitle(msg("Folio report"));
 
 /**
  * Every folio charged or paid in the range.
@@ -62,7 +64,7 @@ export default async function FolioReportPage({
         <ReportFigure
           label={tr("Outstanding")}
           value={formatMoneyShort(balance, currency)}
-          detail={`Across ${owing} folio${owing === 1 ? "" : "s"}`}
+          detail={tr.plural(owing, "Across {n} folio", "Across {n} folios")}
           emphasis
         />
         <ReportFigure label={tr("Charged")} value={formatMoneyShort(charges, currency)} />
@@ -80,7 +82,7 @@ export default async function FolioReportPage({
         minWidth="900px"
         emptyTitle={tr("No folio was charged or paid in this range")}
         emptyHint={tr("A folio is created on its first charge, so a booking that has taken no money yet has none.")}
-        footLabel={`${rows.length} folio${rows.length === 1 ? "" : "s"}`}
+        footLabel={tr.plural(rows.length, "{n} folio", "{n} folios")}
         columns={[
           {
             header: tr("Folio"),

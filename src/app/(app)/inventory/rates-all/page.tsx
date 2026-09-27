@@ -9,8 +9,10 @@ import {
   getCurrentStaffUser,
   getRatesGrid,
 } from "@/lib/queries";
+import { pageTitle } from "@/lib/i18n/server";
+import { msg } from "@/lib/i18n/translate";
 
-export const metadata = { title: "Rates (All)" };
+export const generateMetadata = pageTitle(msg("Rates (All)"));
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 

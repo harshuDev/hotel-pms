@@ -5,8 +5,10 @@ import { ReportShell } from "@/components/reports/report-shell";
 import { formatMoney } from "@/lib/money";
 import { getDebtorsReport } from "@/lib/queries";
 import { getPropertyCurrency } from "@/lib/queries";
+import { pageTitle } from "@/lib/i18n/server";
+import { msg } from "@/lib/i18n/translate";
 
-export const metadata = { title: "Debtors report" };
+export const generateMetadata = pageTitle(msg("Debtors report"));
 
 export default async function DebtorsReportPage() {
   const tr = await getT();
@@ -31,17 +33,17 @@ export default async function DebtorsReportPage() {
                 <thead>
                   <tr className="border-b border-line text-left text-ink-faint">
                     {[
-                      "Booking",
-                      "Kind",
-                      "Status",
-                      "Last day",
-                      "Overdue",
-                      "Charges",
-                      "Paid",
-                      "Outstanding",
+                      msg("Booking"),
+                      msg("Kind"),
+                      msg("Status"),
+                      msg("Last day"),
+                      msg("Overdue"),
+                      msg("Charges"),
+                      msg("Paid"),
+                      msg("Outstanding"),
                     ].map((c, i) => (
                       <th
-                        key={c}
+                        key={tr(c)}
                         className={cn(
                           "whitespace-nowrap px-3 pb-2.5 text-xxs font-semibold uppercase tracking-[0.1em]",
                           i >= 4 && "text-right",
@@ -87,7 +89,7 @@ export default async function DebtorsReportPage() {
                             : "text-ink-faint",
                         )}
                       >
-                        {r.daysOverdue > 0 ? `${r.daysOverdue}d` : "—"}
+                        {r.daysOverdue > 0 ? tr("{n}d", { n: r.daysOverdue }) : "—"}
                       </td>
                       <td className="tnum whitespace-nowrap px-3 py-3 text-right text-ink-muted">
                         {formatMoney(r.chargesCents, currency)}
@@ -104,7 +106,7 @@ export default async function DebtorsReportPage() {
                 <tfoot>
                   <tr className="border-t border-line-strong">
                     <td colSpan={7} className="px-3 pt-3 text-right font-medium text-ink">
-                      {rows.length} {tr("booking")}{rows.length === 1 ? "" : "s"} {tr("owing")}
+                      {tr.plural(rows.length, "{n} booking owing", "{n} bookings owing")}
                     </td>
                     <td className="tnum whitespace-nowrap px-3 pt-3 text-right font-semibold text-rose-600">
                       {formatMoney(total, currency)}

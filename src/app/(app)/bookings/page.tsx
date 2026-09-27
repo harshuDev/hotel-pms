@@ -5,8 +5,10 @@ import { EmptyState, PageHeader, StatusBadge, cn } from "@/components/ui";
 import { formatDue, formatMoney } from "@/lib/money";
 import { getBookings } from "@/lib/queries";
 import { getPropertyCurrency } from "@/lib/queries";
+import { pageTitle } from "@/lib/i18n/server";
+import { msg } from "@/lib/i18n/translate";
 
-export const metadata = { title: "Bookings" };
+export const generateMetadata = pageTitle(msg("Bookings"));
 
 const STATUSES = [
   "all",
@@ -19,15 +21,15 @@ const STATUSES = [
 ];
 
 const COLS = [
-  "Booking Reference",
-  "Arrival Date",
-  "Booking Date",
-  "Nights",
-  "Amount Of Rooms",
-  "Booking Source",
-  "Status",
-  "Total",
-  "Total Due",
+  msg("Booking Reference"),
+  msg("Arrival Date"),
+  msg("Booking Date"),
+  msg("Nights"),
+  msg("Amount Of Rooms"),
+  msg("Booking Source"),
+  msg("Status"),
+  msg("Total"),
+  msg("Total Due"),
 ];
 
 export default async function BookingsPage({
@@ -122,7 +124,7 @@ export default async function BookingsPage({
                 <tr className="border-b border-line text-left text-ink-faint">
                   {COLS.map((c, i) => (
                     <th
-                      key={c}
+                      key={tr(c)}
                       className={cn(
                         "whitespace-nowrap px-3 pb-2.5 text-xxs font-semibold uppercase tracking-[0.1em]",
                         i >= 7 && "text-right",

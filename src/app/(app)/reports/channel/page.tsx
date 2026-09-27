@@ -10,8 +10,10 @@ import { reportRange } from "@/lib/reports";
 import { getBusinessDate, getChannelReport } from "@/lib/queries";
 import type { ChannelRevenueRow } from "@/lib/types";
 import { getPropertyCurrency } from "@/lib/queries";
+import { pageTitle } from "@/lib/i18n/server";
+import { msg } from "@/lib/i18n/translate";
 
-export const metadata = { title: "Channel report" };
+export const generateMetadata = pageTitle(msg("Channel report"));
 
 export default async function ChannelReportPage({
   searchParams,
@@ -44,7 +46,7 @@ export default async function ChannelReportPage({
         <ReportFigure
           label={tr("Room revenue")}
           value={formatMoneyShort(revenue, currency)}
-          detail={`${roomNights} room night${roomNights === 1 ? "" : "s"}`}
+          detail={tr.plural(roomNights, "{n} room night", "{n} room nights")}
         />
         <ReportFigure
           label={tr("Commission")}
@@ -69,7 +71,7 @@ export default async function ChannelReportPage({
         minWidth="820px"
         emptyTitle={tr("Nothing was stayed in this range")}
         emptyHint={tr("Room nights are counted against the nights stayed, so widen the dates.")}
-        footLabel={`${rows.length} channel${rows.length === 1 ? "" : "s"}`}
+        footLabel={tr.plural(rows.length, "{n} channel", "{n} channels")}
         columns={[
           {
             header: tr("Channel"),

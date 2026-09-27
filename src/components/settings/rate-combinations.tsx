@@ -154,7 +154,7 @@ export function RateCombinations({
       const result = await saveWeekRates({ ratePlanId: plan.id, roomTypeId: type.id, seasonTypeId: season, days });
       if (result.ok) {
         const n = result.data.filled;
-        setNotes({ ...notes, [k]: `${n} night${n === 1 ? "" : "s"} priced` });
+        setNotes({ ...notes, [k]: tr.plural(n, "{n} night priced", "{n} nights priced") });
       }
       return result;
     }, tr("{name} on {name2} saved.", { name: plan.name, name2: type.name }));

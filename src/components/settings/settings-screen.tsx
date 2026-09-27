@@ -372,7 +372,7 @@ export function SettingsScreen({
   /* -- Hotel Policy (0068) ------------------------------------------- */
   const [policies, setPolicies] = useState<HotelPolicies>(hotelPolicies);
   const customField = (key: HotelPolicyKey) => `${key}Custom` as const;
-  const policySummary = hotelPolicySummary({
+  const policySummary = hotelPolicySummary(tr, {
     choice: (key) => policies[key],
     custom: (key) => policies[customField(key)],
     other: policies.otherPolicies,

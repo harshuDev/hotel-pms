@@ -1,4 +1,5 @@
 import { formatMoney } from "@/lib/money";
+import { msg, type Translator } from "@/lib/i18n/translate";
 
 /**
  * Settings -> Inventory -> Cancellation Policy (0093): the reference's form as
@@ -42,8 +43,8 @@ export interface CancellationTerms {
 
 /** "Remaining balance to be paid on" -- PROVISIONAL: the reference's list has not been seen open. */
 export const BALANCE_DUE_OPTIONS: { id: BalanceDue; label: string }[] = [
-  { id: "arrival", label: "arrival" },
-  { id: "departure", label: "departure" },
+  { id: "arrival", label: msg("arrival") },
+  { id: "departure", label: msg("departure") },
 ];
 
 function percent(bps: number): string {
@@ -53,54 +54,57 @@ function percent(bps: number): string {
 }
 
 /** The choices as a guest reads them, one sentence per answered question. */
-export function cancellationPolicySummary(t: CancellationTerms, currency: string): string {
+export function cancellationPolicySummary(t: CancellationTerms, currency: string, tr: Translator): string {
   const out: string[] = [];
 
   switch (t.depositRule) {
     case "none":
-      out.push("No deposit is required.");
+      out.push(tr("No deposit is required."));
       break;
     case "full":
-      out.push("A deposit equal to the total cost is required at the time of booking.");
+      out.push(tr("A deposit equal to the total cost is required at the time of booking."));
       break;
     case "nights":
       if (t.depositNights)
-        out.push(`A ${t.depositNights} night deposit is required at the time of booking.`);
+        out.push(tr.plural(t.depositNights, "A {n} night deposit is required at the time of booking.", "A {n} night deposit is required at the time of booking."));
       break;
     case "percent":
       if (t.depositPercentBps)
-        out.push(`A ${percent(t.depositPercentBps)}% deposit is required at the time of booking.`);
+        out.push(tr("A {percent}% deposit is required at the time of booking.", { percent: percent(t.depositPercentBps) }));
       break;
     case "per_booking":
       if (t.depositAmountCents)
-        out.push(`${formatMoney(t.depositAmountCents, currency)} is required per booking.`);
+        out.push(tr("{amount} is required per booking.", { amount: formatMoney(t.depositAmountCents, currency) }));
       break;
     case "per_room":
       if (t.depositAmountCents)
-        out.push(`${formatMoney(t.depositAmountCents, currency)} is required per room booked.`);
+        out.push(tr("{amount} is required per room booked.", { amount: formatMoney(t.depositAmountCents, currency) }));
       break;
   }
 
-  if (t.refundRule === "non_refundable") out.push("All deposits are non-refundable.");
+  if (t.refundRule === "non_refundable") out.push(tr("All deposits are non-refundable."));
   if (t.refundRule === "until_days" && t.refundDays !== null)
-    out.push(`Deposits are refundable up to ${t.refundDays} days prior to arrival.`);
+    out.push(tr.plural(t.refundDays, "Deposits are refundable up to {n} day prior to arrival.", "Deposits are refundable up to {n} days prior to arrival."));
   if (t.refundRule === "custom" && t.refundCustom?.trim()) out.push(t.refundCustom.trim());
 
-  if (t.balanceDue) out.push(`The remaining balance is to be paid on ${t.balanceDue}.`);
-  if (t.preauthoriseCard) out.push("We have the right to pre-authorise your card prior to arrival.");
+  if (t.balanceDue === "arrival") out.push(tr("The remaining balance is to be paid on arrival."));
+  if (t.balanceDue === "departure") out.push(tr("The remaining balance is to be paid on departure."));
+  if (t.preauthoriseCard) out.push(tr("We have the right to pre-authorise your card prior to arrival."));
   if (t.otherCustom?.trim()) out.push(t.otherCustom.trim());
 
-  if (t.cancelRule === "free_any_time") out.push("Free cancellation at any time.");
+  if (t.cancelRule === "free_any_time") out.push(tr("Free cancellation at any time."));
   if (t.cancelRule === "no_cancellation")
-    out.push("No cancellation or modification can be applied to this booking.");
-  if (t.cancelRule === "free_until" && t.cancelValue !== null && t.cancelUnit)
-    out.push(`Free cancellation up to ${t.cancelValue} ${t.cancelUnit} before arrival.`);
+    out.push(tr("No cancellation or modification can be applied to this booking."));
+  if (t.cancelRule === "free_until" && t.cancelValue !== null && t.cancelUnit === "days")
+    out.push(tr.plural(t.cancelValue, "Free cancellation up to {n} day before arrival.", "Free cancellation up to {n} days before arrival."));
+  if (t.cancelRule === "free_until" && t.cancelValue !== null && t.cancelUnit === "hours")
+    out.push(tr.plural(t.cancelValue, "Free cancellation up to {n} hour before arrival.", "Free cancellation up to {n} hours before arrival."));
   if (t.cancelRule === "custom" && t.cancelCustom?.trim()) out.push(t.cancelCustom.trim());
 
   if (t.noShowRule === "first_night")
-    out.push("In case of no-show or late cancellation the first night will be charged.");
+    out.push(tr("In case of no-show or late cancellation the first night will be charged."));
   if (t.noShowRule === "total")
-    out.push("In case of no-show or late cancellation the total cost will be charged.");
+    out.push(tr("In case of no-show or late cancellation the total cost will be charged."));
   if (t.noShowRule === "custom" && t.noShowCustom?.trim()) out.push(t.noShowCustom.trim());
 
   if (!t.breakfastOmit && t.breakfastCustom?.trim()) out.push(t.breakfastCustom.trim());

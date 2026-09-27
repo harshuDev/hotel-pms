@@ -17,8 +17,10 @@ import {
   getRevenueSeries,
   PACE_DAYS,
 } from "@/lib/queries";
+import { pageTitle } from "@/lib/i18n/server";
+import { msg } from "@/lib/i18n/translate";
 
-export const metadata = { title: "Dashboard" };
+export const generateMetadata = pageTitle(msg("Dashboard"));
 
 export default async function DashboardPage() {
   const tr = await getT();

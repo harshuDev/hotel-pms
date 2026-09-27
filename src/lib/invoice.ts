@@ -1,4 +1,5 @@
 import type { InvoiceLine } from "@/lib/queries";
+import type { Translator } from "@/lib/i18n/translate";
 
 /** One printed line of an invoice. */
 export interface InvoiceRow {
@@ -26,10 +27,13 @@ export interface InvoiceRow {
  */
 export function invoiceRows(
   lines: InvoiceLine[],
-  opts: { showNightsBreakdown: boolean; showRoomNumberForExtras: boolean; soleRoom: string | null },
+  opts: { showNightsBreakdown: boolean; showRoomNumberForExtras: boolean; soleRoom: string | null; tr: Translator },
 ): InvoiceRow[] {
   const isRoomCharge = (l: InvoiceLine) => l.itemType === "room_charge" && l.bookingRoomId !== null;
-  const described = (l: InvoiceLine) => (l.isReversal ? `${l.description} (reversed)` : l.description);
+  const { tr } = opts;
+  // Folio descriptions are written by Postgres in English; `tr.message` reads them in the staff language.
+  const described = (l: InvoiceLine) =>
+    l.isReversal ? tr("{name} (reversed)", { name: tr.message(l.description) }) : tr.message(l.description);
   const rows: InvoiceRow[] = [];
 
   if (opts.showNightsBreakdown) {
@@ -56,7 +60,7 @@ export function invoiceRows(
       rows.push({
         key: k,
         date: dates[0],
-        description: `Accommodation, ${nights} night${nights === 1 ? "" : "s"}`,
+        description: tr.plural(nights, "Accommodation, {n} night", "Accommodation, {n} nights"),
         room: ls.find((l) => l.roomNumber)?.roomNumber ?? null,
         // Column sums of posted integer cents, as the reports' totals are.
         netCents: ls.reduce((s, l) => s + l.netCents, 0),

@@ -17,8 +17,10 @@ import {
 } from "@/lib/queries";
 import type { PaymentMethodTotal, PaymentRow } from "@/lib/types";
 import { getPropertyCurrency } from "@/lib/queries";
+import { pageTitle } from "@/lib/i18n/server";
+import { msg } from "@/lib/i18n/translate";
 
-export const metadata = { title: "Payments report" };
+export const generateMetadata = pageTitle(msg("Payments report"));
 
 export default async function PaymentsReportPage({
   searchParams,
@@ -91,7 +93,7 @@ export default async function PaymentsReportPage({
           minWidth="560px"
           emptyTitle={tr("No payments in this range")}
           emptyHint={tr("Widen the dates, or take a payment on the cashier screen.")}
-          footLabel={`${totals.length} method${totals.length === 1 ? "" : "s"}`}
+          footLabel={tr.plural(totals.length, "{n} method", "{n} methods")}
           columns={[
             {
               header: tr("Method"),

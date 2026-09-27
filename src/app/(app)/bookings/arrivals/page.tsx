@@ -3,8 +3,10 @@ import { format, parseISO } from "date-fns";
 import { PageHeader } from "@/components/ui";
 import { BookingList } from "@/components/bookings/booking-list";
 import { getArrivals, getBusinessDate } from "@/lib/queries";
+import { pageTitle } from "@/lib/i18n/server";
+import { msg } from "@/lib/i18n/translate";
 
-export const metadata = { title: "Arrivals" };
+export const generateMetadata = pageTitle(msg("Arrivals"));
 
 export default async function ArrivalsPage() {
   const tr = await getT();

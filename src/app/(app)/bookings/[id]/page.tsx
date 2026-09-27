@@ -18,8 +18,10 @@ import {
   getExtrasCatalog,
   getEmailTemplates,
 } from "@/lib/queries";
+import { pageTitle } from "@/lib/i18n/server";
+import { msg } from "@/lib/i18n/translate";
 
-export const metadata = { title: "Booking" };
+export const generateMetadata = pageTitle(msg("Booking"));
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 

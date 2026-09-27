@@ -10,8 +10,10 @@ import { ReportTable } from "@/components/reports/report-table";
 import { formatMoney, formatMoneyShort } from "@/lib/money";
 import { getBusinessDate, getInHouseReport } from "@/lib/queries";
 import { getPropertyCurrency } from "@/lib/queries";
+import { pageTitle } from "@/lib/i18n/server";
+import { msg } from "@/lib/i18n/translate";
 
-export const metadata = { title: "In house report" };
+export const generateMetadata = pageTitle(msg("In house report"));
 
 export default async function InHouseReportPage() {
   const tr = await getT();
@@ -59,7 +61,7 @@ export default async function InHouseReportPage() {
         minWidth="900px"
         emptyTitle={tr("Nobody is in house tonight")}
         emptyHint={tr("Guests appear here once they are checked in against the open business date.")}
-        footLabel={`${rows.length} room${rows.length === 1 ? "" : "s"}`}
+        footLabel={tr.plural(rows.length, "{n} room", "{n} rooms")}
         columns={[
           {
             header: tr("Room"),

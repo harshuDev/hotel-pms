@@ -11,8 +11,10 @@ import { reportRange } from "@/lib/reports";
 import { ReportAccessError, getBusinessDate, getCountryReport } from "@/lib/queries";
 import type { CountryRow } from "@/lib/types";
 import { getPropertyCurrency } from "@/lib/queries";
+import { pageTitle } from "@/lib/i18n/server";
+import { msg } from "@/lib/i18n/translate";
 
-export const metadata = { title: "Country report" };
+export const generateMetadata = pageTitle(msg("Country report"));
 
 /**
  * Where the hotel's guests come from.
@@ -74,7 +76,7 @@ export default async function CountryReportPage({
           <ReportFigure
             label={tr("Biggest market")}
             value={tr(countryName(top.country))}
-            detail={`${top.roomNights} night${top.roomNights === 1 ? "" : "s"}`}
+            detail={tr.plural(top.roomNights, "{n} night", "{n} nights")}
           />
         )}
         <ReportFigure label={tr("Room nights")} value={String(nights)} />
@@ -91,7 +93,7 @@ export default async function CountryReportPage({
         minWidth="720px"
         emptyTitle={tr("No nights were stayed in this range")}
         emptyHint={tr("Pick a range that covers dates guests have stayed.")}
-        footLabel={`${rows.length} row${rows.length === 1 ? "" : "s"}`}
+        footLabel={tr.plural(rows.length, "{n} row", "{n} rows")}
         columns={[
           {
             header: tr("Country"),

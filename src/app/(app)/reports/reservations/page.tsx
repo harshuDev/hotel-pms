@@ -12,8 +12,10 @@ import { reportRange } from "@/lib/reports";
 import { getBusinessDate, getReservationsReport } from "@/lib/queries";
 import type { ReservationsRow } from "@/lib/types";
 import { getPropertyCurrency } from "@/lib/queries";
+import { pageTitle } from "@/lib/i18n/server";
+import { msg } from "@/lib/i18n/translate";
 
-export const metadata = { title: "Reservations report" };
+export const generateMetadata = pageTitle(msg("Reservations report"));
 
 /** Forward-looking by default: the question is what is coming, not what went. */
 const FORWARD_DAYS = 28;
@@ -64,7 +66,7 @@ export default async function ReservationsReportPage({
         <ReportFigure
           label={tr("Rooms")}
           value={String(rooms)}
-          detail={`${roomNights} room night${roomNights === 1 ? "" : "s"}`}
+          detail={tr.plural(roomNights, "{n} room night", "{n} room nights")}
         />
         <ReportFigure label={tr("Guests")} value={String(guests)} detail={tr("Adults and children")} />
         <ReportFigure
@@ -72,7 +74,7 @@ export default async function ReservationsReportPage({
           value={formatMoneyShort(value, currency)}
           detail={
             busiest && busiest.roomCount > 0
-              ? `Busiest ${tr.date(busiest.arrivalDate, "EEE d MMM")}`
+              ? tr("Busiest {date}", { date: tr.date(busiest.arrivalDate, "EEE d MMM") })
               : undefined
           }
           emphasis
@@ -85,7 +87,7 @@ export default async function ReservationsReportPage({
         minWidth="800px"
         emptyTitle={tr("No days in this range")}
         emptyHint={tr("Widen the dates, or check that the range runs forwards.")}
-        footLabel={`${rows.length} day${rows.length === 1 ? "" : "s"}`}
+        footLabel={tr.plural(rows.length, "{n} day", "{n} days")}
         columns={[
           {
             header: tr("Arrival"),

@@ -2236,7 +2236,7 @@ export async function previewInvoiceTemplate(input: {
     view = await loadInvoice(data.booking_id);
     if (!view) return { ok: false, error: tr("No folio {n} on this property", { n: typed }) };
   }
-  const rendered = await renderInvoiceTemplate(input.liquid, input.css, invoiceLiquidData(view));
+  const rendered = await renderInvoiceTemplate(input.liquid, input.css, invoiceLiquidData(view, await getT()));
   if (!rendered.ok) return { ok: false, error: rendered.error };
   return { ok: true, data: { html: rendered.html, css: rendered.css } };
 }

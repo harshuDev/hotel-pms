@@ -2,8 +2,10 @@ import { getT } from "@/lib/i18n/server";
 import { PageHeader } from "@/components/ui";
 import { BookingList } from "@/components/bookings/booking-list";
 import { getBookings } from "@/lib/queries";
+import { pageTitle } from "@/lib/i18n/server";
+import { msg } from "@/lib/i18n/translate";
 
-export const metadata = { title: "In house" };
+export const generateMetadata = pageTitle(msg("In house"));
 
 export default async function InHousePage() {
   const tr = await getT();

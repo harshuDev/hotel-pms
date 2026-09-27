@@ -6,8 +6,10 @@ import { formatMoney } from "@/lib/money";
 import { getDocumentTemplate } from "@/lib/queries";
 import { invoiceDay, invoiceLiquidData, loadInvoice } from "@/lib/invoice-data";
 import { renderInvoiceTemplate } from "@/lib/document-template";
+import { pageTitle } from "@/lib/i18n/server";
+import { msg } from "@/lib/i18n/translate";
 
-export const metadata = { title: "Invoice" };
+export const generateMetadata = pageTitle(msg("Invoice"));
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -56,7 +58,7 @@ export default async function InvoicePage({
 
   const rendered =
     template?.isActive && template.liquid.trim() !== ""
-      ? await renderInvoiceTemplate(template.liquid, template.css, invoiceLiquidData(v))
+      ? await renderInvoiceTemplate(template.liquid, template.css, invoiceLiquidData(v, tr))
       : null;
 
   const toolbar = (
@@ -83,7 +85,7 @@ export default async function InvoicePage({
   }
 
   const money = (cents: number) => formatMoney(cents, v.currency);
-  const day = invoiceDay;
+  const day = (d: string) => invoiceDay(tr, d);
   const vat = v.vatRegistered;
 
   const th = "px-2 py-2 text-left text-[11.5px] font-semibold uppercase tracking-[0.08em] text-ink-faint";
@@ -94,7 +96,7 @@ export default async function InvoicePage({
       {toolbar}
       {rendered && !rendered.ok && (
         <p role="alert" className="mb-3 rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-[12.5px] text-rose-800 print:hidden">
-          {tr("The folio template could not be rendered:")}{" "}{rendered.error}{tr(". This is the built-in layout.")}
+          {tr("The folio template could not be rendered: {error}. This is the built-in layout.", { error: rendered.error })}
         </p>
       )}
 

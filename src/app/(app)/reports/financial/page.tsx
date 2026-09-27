@@ -16,8 +16,10 @@ import {
 } from "@/lib/queries";
 import type { FinancialRow } from "@/lib/types";
 import { getPropertyCurrency } from "@/lib/queries";
+import { pageTitle } from "@/lib/i18n/server";
+import { msg } from "@/lib/i18n/translate";
 
-export const metadata = { title: "Financial report" };
+export const generateMetadata = pageTitle(msg("Financial report"));
 
 export default async function FinancialReportPage({
   searchParams,
@@ -89,7 +91,7 @@ export default async function FinancialReportPage({
         minWidth="880px"
         emptyTitle={tr("No days in this range")}
         emptyHint={tr("Widen the dates, or check that the range runs forwards.")}
-        footLabel={`${rows.length} day${rows.length === 1 ? "" : "s"}`}
+        footLabel={tr.plural(rows.length, "{n} day", "{n} days")}
         columns={[
           {
             header: tr("Business date"),

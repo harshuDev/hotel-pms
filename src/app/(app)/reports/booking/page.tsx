@@ -16,8 +16,10 @@ import {
 } from "@/lib/queries";
 import type { BookingProductionRow, ChannelProductionRow } from "@/lib/types";
 import { getPropertyCurrency } from "@/lib/queries";
+import { pageTitle } from "@/lib/i18n/server";
+import { msg } from "@/lib/i18n/translate";
 
-export const metadata = { title: "Booking report" };
+export const generateMetadata = pageTitle(msg("Booking report"));
 
 export default async function BookingReportPage({
   searchParams,
@@ -74,7 +76,7 @@ export default async function BookingReportPage({
           minWidth="620px"
           emptyTitle={tr("No bookings were taken in this range")}
           emptyHint={tr("Widen the dates, or take a booking.")}
-          footLabel={`${byChannel.length} channel${byChannel.length === 1 ? "" : "s"}`}
+          footLabel={tr.plural(byChannel.length, "{n} channel", "{n} channels")}
           columns={[
             {
               header: tr("Channel"),
@@ -123,7 +125,7 @@ export default async function BookingReportPage({
         minWidth="900px"
         emptyTitle={tr("No bookings were taken in this range")}
         emptyHint={tr("Widen the dates, or take a booking.")}
-        footLabel={`${rows.length} booking${rows.length === 1 ? "" : "s"}`}
+        footLabel={tr.plural(rows.length, "{n} booking", "{n} bookings")}
         columns={[
           {
             header: tr("Booked"),

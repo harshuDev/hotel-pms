@@ -88,7 +88,7 @@ export function Movements({
                   {b.customerName}
                 </p>
                 <p className="text-xxs text-ink-faint">
-                  {b.typeLine ?? `${b.roomTypeName} · ${tr("{n}n", { n: b.nights })} · ${b.channelName}`}
+                  {b.typeLine ?? `${b.roomTypeName} · ${tr("{n}n", { n: b.nights })} · ${tr.message(b.channelName)}`}
                 </p>
               </div>
               <div className="text-right">

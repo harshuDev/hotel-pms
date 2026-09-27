@@ -15,8 +15,10 @@ import {
   getImmigrationReport,
 } from "@/lib/queries";
 import type { ImmigrationRow } from "@/lib/types";
+import { pageTitle } from "@/lib/i18n/server";
+import { msg } from "@/lib/i18n/translate";
 
-export const metadata = { title: "Immigration report" };
+export const generateMetadata = pageTitle(msg("Immigration report"));
 
 /**
  * The return a hotel files with the police or the border force.
@@ -97,7 +99,7 @@ export default async function ImmigrationReportPage({
         minWidth="1040px"
         emptyTitle={tr("Nobody stayed in this range")}
         emptyHint={tr("The return covers nights actually slept, so cancellations and no-shows never appear.")}
-        footLabel={`${rows.length} stay${rows.length === 1 ? "" : "s"}`}
+        footLabel={tr.plural(rows.length, "{n} stay", "{n} stays")}
         columns={[
           {
             header: "",

@@ -59,3 +59,12 @@ export async function getCookieT(): Promise<Translator> {
   const locale = await getCookieLocale();
   return makeTranslator(locale, await getStaffDictionary(locale));
 }
+
+/**
+ * A page's tab title in the staff member's language. Pages export
+ * `generateMetadata = pageTitle("Dashboard")` in place of a static
+ * `metadata`, and the (app) layout still adds the hotel's name.
+ */
+export function pageTitle(text: string) {
+  return async (): Promise<{ title: string }> => ({ title: (await getT())(text) });
+}

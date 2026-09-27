@@ -12,8 +12,10 @@ import { reportRange } from "@/lib/reports";
 import { getBusinessDate, getCancellationReport } from "@/lib/queries";
 import type { CancellationRow } from "@/lib/types";
 import { getPropertyCurrency } from "@/lib/queries";
+import { pageTitle } from "@/lib/i18n/server";
+import { msg } from "@/lib/i18n/translate";
 
-export const metadata = { title: "Cancellation report" };
+export const generateMetadata = pageTitle(msg("Cancellation report"));
 
 export default async function CancellationReportPage({
   searchParams,
@@ -44,7 +46,7 @@ export default async function CancellationReportPage({
           value={String(rows.length)}
           detail={
             noShows > 0
-              ? `${noShows} no show${noShows === 1 ? "" : "s"}`
+              ? tr.plural(noShows, "{n} no show", "{n} no shows")
               : tr("No no-shows")
           }
         />
@@ -63,7 +65,7 @@ export default async function CancellationReportPage({
         minWidth="920px"
         emptyTitle={tr("Nothing was cancelled for these arrival dates")}
         emptyHint={tr("Cancellations and no-shows appear here against the date they were due to arrive.")}
-        footLabel={`${rows.length} booking${rows.length === 1 ? "" : "s"}`}
+        footLabel={tr.plural(rows.length, "{n} booking", "{n} bookings")}
         columns={[
           {
             header: tr("Arrival"),

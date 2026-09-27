@@ -99,7 +99,7 @@ export default function ResetPasswordPage() {
         name: "invalid",
         reason:
           failure ??
-          "This page needs the link from the reset email. Ask for a new one below.",
+          tr("This page needs the link from the reset email. Ask for a new one below."),
       });
     }
 

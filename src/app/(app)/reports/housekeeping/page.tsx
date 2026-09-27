@@ -20,16 +20,18 @@ import type {
   HousekeepingRoom,
   RoomState,
 } from "@/lib/types";
+import { pageTitle } from "@/lib/i18n/server";
+import { msg } from "@/lib/i18n/translate";
 
-export const metadata = { title: "Housekeeping report" };
+export const generateMetadata = pageTitle(msg("Housekeeping report"));
 
 const STATES: { value: RoomState; label: string; dot: string }[] = [
-  { value: "vacant_dirty", label: "To clean", dot: "bg-rose-500" },
-  { value: "due_out", label: "Due out", dot: "bg-warn" },
-  { value: "occupied", label: "Occupied", dot: "bg-chrome-700" },
-  { value: "arriving", label: "Arriving", dot: "bg-brass" },
-  { value: "vacant_clean", label: "Ready", dot: "bg-emerald-500" },
-  { value: "ooo", label: "Out of order", dot: "bg-slate-400" },
+  { value: "vacant_dirty", label: msg("To clean"), dot: "bg-rose-500" },
+  { value: "due_out", label: msg("Due out"), dot: "bg-warn" },
+  { value: "occupied", label: msg("Occupied"), dot: "bg-chrome-700" },
+  { value: "arriving", label: msg("Arriving"), dot: "bg-brass" },
+  { value: "vacant_clean", label: msg("Ready"), dot: "bg-emerald-500" },
+  { value: "ooo", label: msg("Out of order"), dot: "bg-slate-400" },
 ];
 
 function isRoomState(value: string | undefined): value is RoomState {
@@ -63,7 +65,7 @@ export default async function HousekeepingReportPage({
   if (!features.housekeeping) {
     return (
       <ReportShell title={tr("Housekeeping")}>
-        <ReportFeatureOff feature="Enable Housekeeping Feature" />
+        <ReportFeatureOff feature={msg("Enable Housekeeping Feature")} />
       </ReportShell>
     );
   }
@@ -110,7 +112,7 @@ export default async function HousekeepingReportPage({
         <ReportFigure
           label={tr("Rooms")}
           value={String(roomCount)}
-          detail={`Across ${floors.length} floor${floors.length === 1 ? "" : "s"}`}
+          detail={tr.plural(floors.length, "Across {n} floor", "Across {n} floors")}
         />
         <ReportFigure
           label={tr("Ready to sell")}
@@ -130,7 +132,7 @@ export default async function HousekeepingReportPage({
           minWidth="640px"
           emptyTitle={tr("No rooms are set up")}
           emptyHint={tr("Add rooms before housekeeping has anything to work from.")}
-          footLabel={`${floors.length} floor${floors.length === 1 ? "" : "s"}`}
+          footLabel={tr.plural(floors.length, "{n} floor", "{n} floors")}
           columns={[
             {
               header: tr("Floor"),
@@ -231,7 +233,7 @@ export default async function HousekeepingReportPage({
             )}
           >
             <span className={cn("h-1.5 w-1.5 rounded-full", s.dot)} />
-            {s.label}
+            {tr(s.label)}
           </Link>
         ))}
         {floor !== null && (
@@ -252,8 +254,8 @@ export default async function HousekeepingReportPage({
         emptyHint={tr("Clear the state or floor filter to see the whole house.")}
         footLabel={
           rooms.totalCount > HOUSEKEEPING_PAGE_SIZE
-            ? `${rooms.rooms.length} of ${rooms.totalCount} rooms`
-            : `${rooms.totalCount} room${rooms.totalCount === 1 ? "" : "s"}`
+            ? tr("{shown} of {total} rooms", { shown: rooms.rooms.length, total: rooms.totalCount })
+            : tr.plural(rooms.totalCount, "{n} room", "{n} rooms")
         }
         columns={[
           {
@@ -280,7 +282,7 @@ export default async function HousekeepingReportPage({
               return (
                 <span className="flex items-center gap-1.5 text-ink-muted">
                   <span className={cn("h-1.5 w-1.5 rounded-full", s?.dot ?? "bg-line")} />
-                  {s?.label ?? r.state}
+                  {s ? tr(s.label) : r.state}
                 </span>
               );
             },

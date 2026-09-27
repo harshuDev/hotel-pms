@@ -10,21 +10,23 @@ import { reportRange } from "@/lib/reports";
 import { ReportAccessError, getBusinessDate, getExtrasReport } from "@/lib/queries";
 import type { ExtrasRow, FolioItemType } from "@/lib/types";
 import { getPropertyCurrency } from "@/lib/queries";
+import { pageTitle } from "@/lib/i18n/server";
+import { msg } from "@/lib/i18n/translate";
 
-export const metadata = { title: "Extras report" };
+export const generateMetadata = pageTitle(msg("Extras report"));
 
 /** The folio item types a guest sees on a bill, in plain words. */
 const ITEM_LABELS: Record<FolioItemType, string> = {
-  room_charge: "Room",
-  tax: "Tax",
-  food_beverage: "Food and drink",
-  laundry: "Laundry",
-  minibar: "Minibar",
-  transport: "Transport",
-  miscellaneous: "Miscellaneous",
-  discount: "Discount",
-  adjustment: "Adjustment",
-  reversal: "Reversal",
+  room_charge: msg("Room"),
+  tax: msg("Tax"),
+  food_beverage: msg("Food and drink"),
+  laundry: msg("Laundry"),
+  minibar: msg("Minibar"),
+  transport: msg("Transport"),
+  miscellaneous: msg("Miscellaneous"),
+  discount: msg("Discount"),
+  adjustment: msg("Adjustment"),
+  reversal: msg("Reversal"),
 };
 
 export default async function ExtrasReportPage({
@@ -75,12 +77,12 @@ export default async function ExtrasReportPage({
         <ReportFigure
           label={tr("Charges")}
           value={String(items)}
-          detail={`Across ${rows.length} type${rows.length === 1 ? "" : "s"}`}
+          detail={tr.plural(rows.length, "Across {n} type", "Across {n} types")}
         />
         {best && (
           <ReportFigure
             label={tr("Biggest earner")}
-            value={ITEM_LABELS[best.itemType]}
+            value={tr(ITEM_LABELS[best.itemType])}
             detail={formatMoney(best.netCents, currency)}
           />
         )}
@@ -92,12 +94,12 @@ export default async function ExtrasReportPage({
         minWidth="660px"
         emptyTitle={tr("Nothing but rooms was charged in this range")}
         emptyHint={tr("Minibar, laundry and food charges posted to a folio appear here.")}
-        footLabel={`${rows.length} type${rows.length === 1 ? "" : "s"}`}
+        footLabel={tr.plural(rows.length, "{n} type", "{n} types")}
         columns={[
           {
             header: tr("Type"),
             cell: (r) => (
-              <span className="font-medium text-ink">{ITEM_LABELS[r.itemType]}</span>
+              <span className="font-medium text-ink">{tr(ITEM_LABELS[r.itemType])}</span>
             ),
           },
           {

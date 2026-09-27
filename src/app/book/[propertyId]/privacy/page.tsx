@@ -1,6 +1,8 @@
 import { BookingEngineDocument } from "@/components/book/booking-engine-document";
+import { pageTitle } from "@/lib/i18n/server";
+import { msg } from "@/lib/i18n/translate";
 
-export const metadata = { title: "Privacy Policy" };
+export const generateMetadata = pageTitle(msg("Privacy Policy"));
 
 export default async function Page({
   params,

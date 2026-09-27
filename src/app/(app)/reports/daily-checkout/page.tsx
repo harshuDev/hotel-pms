@@ -14,8 +14,10 @@ import {
 } from "@/lib/queries";
 import type { CheckoutRow } from "@/lib/types";
 import { getPropertyCurrency } from "@/lib/queries";
+import { pageTitle } from "@/lib/i18n/server";
+import { msg } from "@/lib/i18n/translate";
 
-export const metadata = { title: "Daily checkout" };
+export const generateMetadata = pageTitle(msg("Daily checkout"));
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -74,7 +76,7 @@ export default async function DailyCheckoutPage({
           detail={
             owing === 0
               ? tr("Every folio settled")
-              : `${owing} booking${owing === 1 ? "" : "s"} still owing`
+              : tr.plural(owing, "{n} booking still owing", "{n} bookings still owing")
           }
           emphasis
         />
@@ -86,7 +88,7 @@ export default async function DailyCheckoutPage({
         minWidth="860px"
         emptyTitle={tr("Nobody is due out on this date")}
         emptyHint={tr("Pick another business date, or check the arrivals and departures lists.")}
-        footLabel={`${rows.length} departure${rows.length === 1 ? "" : "s"}`}
+        footLabel={tr.plural(rows.length, "{n} departure", "{n} departures")}
         columns={[
           {
             header: tr("Booking"),

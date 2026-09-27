@@ -1,3 +1,4 @@
+import type { Translator } from "@/lib/i18n/translate";
 import { msg } from "@/lib/i18n/translate";
 /**
  * Hotel Content -> Hotel Policy (0068), cloned from the client's reference.
@@ -115,7 +116,7 @@ function withStop(text: string): string {
  * guest would read, assembled from what is on the page -- so it follows the
  * form as it is edited rather than what was last saved.
  */
-export function hotelPolicySummary(p: {
+export function hotelPolicySummary(tr: Translator, p: {
   choice: (key: HotelPolicyKey) => string;
   custom: (key: HotelPolicyKey) => string | null;
   other: string | null;
@@ -130,7 +131,7 @@ export function hotelPolicySummary(p: {
       continue;
     }
     const option = section.options.find((o) => o.id === choice);
-    if (option) parts.push(withStop(option.label));
+    if (option) parts.push(withStop(tr(option.label)));
   }
   const other = p.other?.trim();
   if (other) parts.push(withStop(other));

@@ -11,8 +11,10 @@ import {
   getWaitlistReport,
 } from "@/lib/queries";
 import type { WaitlistRow, WaitlistStatus } from "@/lib/types";
+import { pageTitle } from "@/lib/i18n/server";
+import { msg } from "@/lib/i18n/translate";
 
-export const metadata = { title: "Booking waitlist report" };
+export const generateMetadata = pageTitle(msg("Booking waitlist report"));
 
 const STATUSES: WaitlistStatus[] = [
   "waiting",

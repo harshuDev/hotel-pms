@@ -9,13 +9,15 @@ import {
 import { reportRange } from "@/lib/reports";
 import { getBusinessDate, getMealReport } from "@/lib/queries";
 import type { MealType } from "@/lib/types";
+import { pageTitle } from "@/lib/i18n/server";
+import { msg } from "@/lib/i18n/translate";
 
-export const metadata = { title: "Meal report" };
+export const generateMetadata = pageTitle(msg("Meal report"));
 
 const MEAL_LABEL: Record<MealType, string> = {
-  breakfast: "Breakfast",
-  lunch: "Lunch",
-  dinner: "Dinner",
+  breakfast: msg("Breakfast"),
+  lunch: msg("Lunch"),
+  dinner: msg("Dinner"),
 };
 
 const MEAL_ORDER: MealType[] = ["breakfast", "lunch", "dinner"];
@@ -59,7 +61,7 @@ export default async function MealReportPage({
           {totals.map((t, i) => (
             <ReportFigure
               key={t.meal}
-              label={MEAL_LABEL[t.meal]}
+              label={tr(MEAL_LABEL[t.meal])}
               value={String(t.covers)}
               detail={tr("covers in this range")}
               emphasis={i === 0}
@@ -79,9 +81,9 @@ export default async function MealReportPage({
             <table className="w-full min-w-[640px] text-[13px]">
               <thead>
                 <tr className="border-b border-line text-left text-ink-faint">
-                  {["Day", "Meal", "Adults", "Children", "Covers"].map((c, i) => (
+                  {[msg("Day"), msg("Meal"), msg("Adults"), msg("Children"), msg("Covers")].map((c, i) => (
                     <th
-                      key={c}
+                      key={tr(c)}
                       className={cn(
                         "whitespace-nowrap px-3 pb-2.5 text-xxs font-semibold uppercase tracking-[0.1em]",
                         i >= 2 && "text-right",
@@ -104,7 +106,7 @@ export default async function MealReportPage({
                             : ""}
                         </td>
                         <td className="px-3 py-2.5 text-ink-muted">
-                          {MEAL_LABEL[meal]}
+                          {tr(MEAL_LABEL[meal])}
                         </td>
                         <td className="tnum px-3 py-2.5 text-right text-ink-muted">
                           {row.adultCovers}

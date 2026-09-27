@@ -15,7 +15,10 @@ import Link from "next/link";
  * the page an unauthenticated stranger reaches on a bad URL, where there is no
  * property to read.
  */
-export const metadata = { title: "Page not found" };
+export async function generateMetadata() {
+  const tr = await getCookieT();
+  return { title: tr("Page not found") };
+}
 
 export default async function NotFound() {
   // Cookie only: this page deliberately makes no database query.

@@ -7,8 +7,10 @@ import { formatMoney, formatMoneyShort } from "@/lib/money";
 import { ReportAccessError, getDepositReport } from "@/lib/queries";
 import type { DepositRow } from "@/lib/types";
 import { getPropertyCurrency } from "@/lib/queries";
+import { pageTitle } from "@/lib/i18n/server";
+import { msg } from "@/lib/i18n/translate";
 
-export const metadata = { title: "Deposit report" };
+export const generateMetadata = pageTitle(msg("Deposit report"));
 
 /**
  * Money the hotel is holding against stays that have not happened.
@@ -51,7 +53,7 @@ export default async function DepositReportPage() {
         <ReportFigure
           label={tr("Held")}
           value={formatMoneyShort(held, currency)}
-          detail={`Across ${rows.length} booking${rows.length === 1 ? "" : "s"}`}
+          detail={tr.plural(rows.length, "Across {n} booking", "Across {n} bookings")}
           emphasis
         />
         <ReportFigure
@@ -72,7 +74,7 @@ export default async function DepositReportPage() {
         minWidth="900px"
         emptyTitle={tr("No deposits are being held")}
         emptyHint={tr("A booking appears here once a payment is taken against it and before the guest checks in.")}
-        footLabel={`${rows.length} booking${rows.length === 1 ? "" : "s"}`}
+        footLabel={tr.plural(rows.length, "{n} booking", "{n} bookings")}
         columns={[
           {
             header: tr("Reference"),
@@ -124,7 +126,7 @@ export default async function DepositReportPage() {
               >
                 {r.daysToArrival < 0
                   ? tr("{abs}d ago", { abs: Math.abs(r.daysToArrival) })
-                  : `${r.daysToArrival}d`}
+                  : tr("{n}d", { n: r.daysToArrival })}
               </span>
             ),
           },

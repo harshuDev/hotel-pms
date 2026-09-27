@@ -9,8 +9,10 @@ import {
   getInventoryGrid,
   getRatePlans,
 } from "@/lib/queries";
+import { pageTitle } from "@/lib/i18n/server";
+import { msg } from "@/lib/i18n/translate";
 
-export const metadata = { title: "Inventory" };
+export const generateMetadata = pageTitle(msg("Inventory"));
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 

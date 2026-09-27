@@ -6,8 +6,10 @@ import { reportRange } from "@/lib/reports";
 import { ReportAccessError, getBusinessDate, getRatePlanReport } from "@/lib/queries";
 import type { RatePlanReportRow } from "@/lib/types";
 import { getPropertyCurrency } from "@/lib/queries";
+import { pageTitle } from "@/lib/i18n/server";
+import { msg } from "@/lib/i18n/translate";
 
-export const metadata = { title: "Rate plan report" };
+export const generateMetadata = pageTitle(msg("Rate plan report"));
 
 /**
  * Which rate plans are actually selling, and at what average.
@@ -60,14 +62,14 @@ export default async function RatePlanReportPage({
         <ReportFigure
           label={tr("Room nights")}
           value={String(nights)}
-          detail={`Across ${rows.length} plan${rows.length === 1 ? "" : "s"}`}
+          detail={tr.plural(rows.length, "Across {n} plan", "Across {n} plans")}
           emphasis
         />
         {top && (
           <ReportFigure
             label={tr("Best seller")}
             value={top.planName}
-            detail={`${top.roomNights} night${top.roomNights === 1 ? "" : "s"}`}
+            detail={tr.plural(top.roomNights, "{n} night", "{n} nights")}
           />
         )}
         <ReportFigure label={tr("ADR")} value={formatMoneyShort(adr, currency)} detail={tr("Net of discount")} />
@@ -84,7 +86,7 @@ export default async function RatePlanReportPage({
         minWidth="860px"
         emptyTitle={tr("Nothing sold in this range")}
         emptyHint={tr("Pick a range that covers dates guests have stayed.")}
-        footLabel={`${rows.length} plan${rows.length === 1 ? "" : "s"}`}
+        footLabel={tr.plural(rows.length, "{n} plan", "{n} plans")}
         columns={[
           {
             header: tr("Plan"),

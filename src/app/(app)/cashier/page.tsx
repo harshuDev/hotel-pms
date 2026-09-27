@@ -7,8 +7,10 @@ import {
   getPaymentMethods,
   getSuggestedOpeningFloat,
 } from "@/lib/queries";
+import { pageTitle } from "@/lib/i18n/server";
+import { msg } from "@/lib/i18n/translate";
 
-export const metadata = { title: "Cashier" };
+export const generateMetadata = pageTitle(msg("Cashier"));
 
 export default async function CashierPage() {
   const [shift, methods, payable, businessDate, suggestedFloat, canSeeExpected] =

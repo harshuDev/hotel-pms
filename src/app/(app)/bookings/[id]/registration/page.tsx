@@ -14,8 +14,10 @@ import {
   getPropertySettings,
   getRegistrationForm,
 } from "@/lib/queries";
+import { pageTitle } from "@/lib/i18n/server";
+import { msg } from "@/lib/i18n/translate";
 
-export const metadata = { title: "Registration card" };
+export const generateMetadata = pageTitle(msg("Registration card"));
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -116,9 +118,11 @@ export default async function RegistrationCardPage({
             <Line label={tr("Nights")} value={detail.nights} />
             <Line
               label={tr("Guests")}
-              value={`${detail.adults} adult${detail.adults === 1 ? "" : "s"}${
-                detail.children > 0 ? `, ${detail.children} child${detail.children === 1 ? "" : "ren"}` : ""
-              }`}
+              value={
+                detail.children > 0
+                  ? `${tr.plural(detail.adults, "{n} adult", "{n} adults")}, ${tr.plural(detail.children, "{n} child", "{n} children")}`
+                  : tr.plural(detail.adults, "{n} adult", "{n} adults")
+              }
             />
             <Line
               label={liveRooms.length === 1 ? tr("Room") : tr("Rooms")}
@@ -142,7 +146,7 @@ export default async function RegistrationCardPage({
             <Line label={tr("Email")} value={g?.email || detail.customerEmail} />
             <Line label={tr("Phone")} value={g?.phone || detail.customerPhone} />
             {fields.map((f) => (
-              <Line key={f.id} label={f.label} value={guestFieldDisplay(f.kind, g?.customFields[f.id])} />
+              <Line key={f.id} label={f.label} value={guestFieldDisplay(tr, f.kind, g?.customFields[f.id])} />
             ))}
           </div>
         </section>

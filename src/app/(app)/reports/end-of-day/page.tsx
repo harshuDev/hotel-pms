@@ -7,8 +7,10 @@ import { formatMoney, formatMoneyShort } from "@/lib/money";
 import { ReportAccessError, getBusinessDate, getEndOfDayReport } from "@/lib/queries";
 import type { EndOfDayRow } from "@/lib/types";
 import { getPropertyCurrency } from "@/lib/queries";
+import { pageTitle } from "@/lib/i18n/server";
+import { msg } from "@/lib/i18n/translate";
 
-export const metadata = { title: "End of day report" };
+export const generateMetadata = pageTitle(msg("End of day report"));
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -87,7 +89,7 @@ export default async function EndOfDayReportPage({
             />
             <ReportFigure
               label={tr("Day")}
-              value={row.dateStatus === "closed" ? "Closed" : "Open"}
+              value={row.dateStatus === "closed" ? tr("Closed") : tr("Open")}
               detail={
                 row.closedAt
                   ? `by ${row.closedBy ?? "somebody"} at ${format(parseISO(row.closedAt), "HH:mm")}`

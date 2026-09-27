@@ -7,8 +7,10 @@ import { ReportAccessError, getAccountingReport, getBusinessDate } from "@/lib/q
 import type { AccountingRow } from "@/lib/types";
 import { getAccountingSettings, getHotelFeatures, getPropertyCurrency } from "@/lib/queries";
 import type { AccountingCategory } from "@/lib/finance-profiles";
+import { pageTitle } from "@/lib/i18n/server";
+import { msg } from "@/lib/i18n/translate";
 
-export const metadata = { title: "Accounting report" };
+export const generateMetadata = pageTitle(msg("Accounting report"));
 
 /**
  * What a bookkeeper posts: revenue by category with its tax separated, and the
@@ -34,7 +36,7 @@ export default async function AccountingReportPage({
   if (!(await getHotelFeatures()).accounting_report) {
     return (
       <ReportShell title={tr("Accounting")}>
-        <ReportFeatureOff feature="Enable Accounting Report" />
+        <ReportFeatureOff feature={msg("Enable Accounting Report")} />
       </ReportShell>
     );
   }
@@ -126,7 +128,7 @@ export default async function AccountingReportPage({
           minWidth="780px"
           emptyTitle={tr("Nothing was earned in this range")}
           emptyHint={tr("Revenue posts on the night audit, so a range with no closed days shows nothing.")}
-          footLabel={`${revenue.length} categor${revenue.length === 1 ? "y" : "ies"}`}
+          footLabel={tr.plural(revenue.length, "{n} category", "{n} categories")}
           columns={[
             {
               header: tr("Category"),
@@ -174,7 +176,7 @@ export default async function AccountingReportPage({
           minWidth="780px"
           emptyTitle={tr("Nothing was collected in this range")}
           emptyHint={tr("Payments are dated to the business date they were taken on.")}
-          footLabel={`${receipts.length} method${receipts.length === 1 ? "" : "s"}`}
+          footLabel={tr.plural(receipts.length, "{n} method", "{n} methods")}
           columns={[
             {
               header: tr("Method"),

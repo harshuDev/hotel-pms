@@ -1,4 +1,3 @@
-import { format, parseISO } from "date-fns";
 import { countryName } from "@/lib/countries";
 import { formatMoney } from "@/lib/money";
 import {
@@ -12,6 +11,8 @@ import {
   getPropertySettings,
 } from "@/lib/queries";
 import { invoiceRows, type InvoiceRow } from "@/lib/invoice";
+import { getT } from "@/lib/i18n/server";
+import type { Translator } from "@/lib/i18n/translate";
 
 /*
  * ONE INVOICE, TWO LAYOUTS. The printable invoice (0080) is either the
@@ -52,7 +53,7 @@ export async function loadInvoice(bookingId: string): Promise<InvoiceView | null
   const detail = await getBookingDetail(bookingId);
   if (!detail) return null;
 
-  const [lines, folio, rooms, property, settings, currency, today] = await Promise.all([
+  const [lines, folio, rooms, property, settings, currency, today, tr] = await Promise.all([
     getBookingInvoiceLines(bookingId),
     getBookingFolioLines(bookingId),
     getBookingRoomLines(bookingId),
@@ -60,6 +61,7 @@ export async function loadInvoice(bookingId: string): Promise<InvoiceView | null
     getInvoiceSettings(),
     getPropertyCurrency(),
     getBusinessDate(),
+    getT(),
   ]);
 
   /* Who the invoice is from: the override where it is set, else the hotel. */
@@ -67,14 +69,14 @@ export async function loadInvoice(bookingId: string): Promise<InvoiceView | null
     settings.address || settings.city || settings.region || settings.postcode || settings.country;
   const issuerAddress = (
     overridden
-      ? [settings.address, settings.city, settings.region, settings.postcode, countryName(settings.country)]
+      ? [settings.address, settings.city, settings.region, settings.postcode, settings.country ? tr(countryName(settings.country)) : null]
       : [
           property.addressLine1,
           property.addressLine2,
           property.city,
           property.region,
           property.postcode,
-          countryName(property.country),
+          property.country ? tr(countryName(property.country)) : null,
         ]
   )
     .filter((x) => x && String(x).trim() !== "")
@@ -88,6 +90,7 @@ export async function loadInvoice(bookingId: string): Promise<InvoiceView | null
     showNightsBreakdown: settings.showNightsBreakdown,
     showRoomNumberForExtras: settings.showRoomNumberForExtras,
     soleRoom,
+    tr,
   });
 
   return {
@@ -121,7 +124,7 @@ export async function loadInvoice(bookingId: string): Promise<InvoiceView | null
       .map((p) => ({
         key: p.lineId,
         date: p.businessDate,
-        description: p.description,
+        description: tr.message(p.description),
         amountCents: p.amountCents,
         reversed: p.isReversal,
       })),
@@ -131,7 +134,7 @@ export async function loadInvoice(bookingId: string): Promise<InvoiceView | null
   };
 }
 
-export const invoiceDay = (d: string) => format(parseISO(d), "d MMM yyyy");
+export const invoiceDay = (tr: Translator, d: string) => tr.date(d, "d MMM yyyy");
 
 /**
  * The variables a Liquid template sees. Money arrives FORMATTED, in the
@@ -140,7 +143,7 @@ export const invoiceDay = (d: string) => format(parseISO(d), "d MMM yyyy");
  * becomes a currency string. Dates arrive formatted beside their ISO form.
  * Keys are snake_case, as Liquid templates conventionally are.
  */
-export function invoiceLiquidData(v: InvoiceView) {
+export function invoiceLiquidData(v: InvoiceView, tr: Translator) {
   const money = (cents: number) => formatMoney(cents, v.currency);
   return {
     hotel: {
@@ -154,7 +157,7 @@ export function invoiceLiquidData(v: InvoiceView) {
     invoice: {
       number: v.invoiceNumber ?? "",
       reference: v.reference,
-      date: invoiceDay(v.date),
+      date: invoiceDay(tr, v.date),
       date_iso: v.date,
       vat_registered: v.vatRegistered,
       show_room: v.showRoom,
@@ -163,14 +166,14 @@ export function invoiceLiquidData(v: InvoiceView) {
     },
     guest: { name: v.guest.name, email: v.guest.email ?? "", phone: v.guest.phone ?? "" },
     stay: {
-      check_in: invoiceDay(v.checkIn),
-      check_out: invoiceDay(v.checkOut),
+      check_in: invoiceDay(tr, v.checkIn),
+      check_out: invoiceDay(tr, v.checkOut),
       check_in_iso: v.checkIn,
       check_out_iso: v.checkOut,
       rooms: v.roomsLabel,
     },
     lines: v.rows.map((r) => ({
-      date: invoiceDay(r.date),
+      date: invoiceDay(tr, r.date),
       date_iso: r.date,
       description: r.description,
       room: r.room ?? "",
@@ -182,7 +185,7 @@ export function invoiceLiquidData(v: InvoiceView) {
       amount_cents: r.grossCents,
     })),
     payments: v.payments.map((p) => ({
-      date: invoiceDay(p.date),
+      date: invoiceDay(tr, p.date),
       date_iso: p.date,
       description: p.description,
       amount: money(p.amountCents),

@@ -175,7 +175,7 @@ export function CancellationPolicyPanel({
     setDraft((d) => (d ? { ...d, [key]: value } : d));
   }
 
-  const summary = draft ? cancellationPolicySummary(termsOf(draft), currency) : "";
+  const summary = draft ? cancellationPolicySummary(termsOf(draft), currency, tr) : "";
 
   function save(d: Draft) {
     run(async () => {
@@ -184,7 +184,7 @@ export function CancellationPolicyPanel({
         name: d.name,
         terms: termsOf(d),
         isDefault: d.isDefault,
-        summary: cancellationPolicySummary(termsOf(d), currency),
+        summary: cancellationPolicySummary(termsOf(d), currency, tr),
       });
       if (result.ok) setDraft(null);
       return result;
@@ -374,7 +374,7 @@ export function CancellationPolicyPanel({
                   className="rounded border border-line bg-white px-1.5 py-0.5 text-[12.5px] text-ink">
                   <option value="" />
                   {BALANCE_DUE_OPTIONS.map((o) => (
-                    <option key={o.id} value={o.id}>{o.label}</option>
+                    <option key={o.id} value={o.id}>{tr(o.label)}</option>
                   ))}
                 </select>
               </label>
