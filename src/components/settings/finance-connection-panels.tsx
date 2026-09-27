@@ -293,7 +293,7 @@ export function AccountingSystemsPanel({
       const result = await saveAccountingSystem(d);
       if (result.ok) setDraft(null);
       return result;
-    }, `${d.provider ? accountingSystemLabel(d.provider) : "Accounting system"} saved.`);
+    }, tr("{name} saved.", { name: d.provider ? accountingSystemLabel(d.provider) : tr("Accounting system") }));
   }
 
   return (

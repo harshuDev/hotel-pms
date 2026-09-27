@@ -142,7 +142,7 @@ export function IdentificationTypesPanel({
       const result = await saveIdentificationType(d);
       if (result.ok) setDraft(null);
       return result;
-    }, d.id ? "Identification type saved." : "Identification type added.");
+    }, d.id ? tr("Identification type saved.") : tr("Identification type added."));
   }
 
   function editorRow() {
@@ -278,7 +278,9 @@ export function GuestDetailsPanel({
     if (
       removed.length > 0 &&
       !confirm(
-        `Remove ${removed.map((f) => f.label).join(", ")}? Values already entered on guests will no longer show.`,
+        tr("Remove {names}? Values already entered on guests will no longer show.", {
+          names: removed.map((f) => f.label).join(", "),
+        }),
       )
     ) {
       return;
@@ -318,7 +320,7 @@ export function GuestDetailsPanel({
               >
                 {GUEST_FIELD_KINDS.map((k) => (
                   <option key={k.id} value={k.id}>
-                    {k.label}
+                    {tr(k.label)}
                   </option>
                 ))}
               </select>
@@ -326,7 +328,7 @@ export function GuestDetailsPanel({
                 <button
                   type="button"
                   title={tr("Remove")}
-                  aria-label={`Remove ${r.label || `field ${i + 1}`}`}
+                  aria-label={r.label ? tr("Remove {name}", { name: r.label }) : tr("Remove field {n}", { n: i + 1 })}
                   onClick={() => setRows(rows.filter((x) => x.key !== r.key))}
                   className={cn(iconButton, "text-[16px] font-bold leading-none")}
                 >

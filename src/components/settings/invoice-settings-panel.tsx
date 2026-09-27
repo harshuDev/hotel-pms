@@ -1,6 +1,7 @@
 "use client";
 
 import { useT } from "@/components/i18n";
+import { msg } from "@/lib/i18n/translate";
 import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { cn } from "@/components/ui";
@@ -139,11 +140,11 @@ export function InvoiceSettingsPanel({
   async function upload(file: File) {
     setLogoError(null);
     if (!LOGO_TYPES.includes(file.type)) {
-      setLogoError("That file is not a picture. Use a JPEG, PNG or WebP.");
+      setLogoError(tr("That file is not a picture. Use a JPEG, PNG or WebP."));
       return;
     }
     if (file.size > LOGO_MAX_BYTES) {
-      setLogoError("That picture is over 2MB. Save it smaller and try again.");
+      setLogoError(tr("That picture is over 2MB. Save it smaller and try again."));
       return;
     }
     setUploading(true);
@@ -198,9 +199,9 @@ export function InvoiceSettingsPanel({
           <div className="space-y-3">
             {(
               [
-                ["showRoomNumberForExtras", "Show room number for extras"],
-                ["showNightsBreakdown", "Show nights breakdown"],
-                ["vatRegistered", "Are you VAT Registered"],
+                ["showRoomNumberForExtras", msg("Show room number for extras")],
+                ["showNightsBreakdown", msg("Show nights breakdown")],
+                ["vatRegistered", msg("Are you VAT Registered")],
               ] as const
             ).map(([key, label]) => (
               <label key={key} className="flex items-center gap-2.5 text-[14px] text-ink">
@@ -211,7 +212,7 @@ export function InvoiceSettingsPanel({
                   onChange={(e) => set({ [key]: e.target.checked })}
                   className="h-[18px] w-[18px] accent-brass"
                 />
-                {label}
+                {tr(label)}
               </label>
             ))}
           </div>
@@ -451,7 +452,7 @@ export function InvoiceSettingsPanel({
           >
             {ROUND_LOGIC.map((o) => (
               <option key={o.id} value={o.id}>
-                {o.label}
+                {tr(o.label)}
               </option>
             ))}
           </select>
@@ -467,7 +468,7 @@ export function InvoiceSettingsPanel({
           >
             {ROUND_TO.map((o) => (
               <option key={o.id} value={o.id}>
-                {o.label}
+                {tr(o.label)}
               </option>
             ))}
           </select>

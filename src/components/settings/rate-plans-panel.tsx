@@ -125,7 +125,7 @@ export function RatePlansPanel({
   const [draft, setDraft] = useState<Draft | null>(null);
 
   const policyName = (id: string | null) =>
-    cancellationPolicies.find((c) => c.id === id)?.name ?? "Not set";
+    cancellationPolicies.find((c) => c.id === id)?.name ?? tr("Not set");
   const defaultPolicyId = cancellationPolicies.find((c) => c.isDefault)?.id ?? "";
 
   const rows = useMemo(() => {
@@ -139,7 +139,7 @@ export function RatePlansPanel({
     if (sortBy) {
       const names = new Map(cancellationPolicies.map((c) => [c.id, c.name]));
       const key = (p: RatePlan) =>
-        sortBy === "title" ? p.name : (names.get(p.cancellationPolicyId ?? "") ?? "Not set");
+        sortBy === "title" ? p.name : (names.get(p.cancellationPolicyId ?? "") ?? tr("Not set"));
       list.sort((a, b) => key(a).localeCompare(key(b)) * (desc ? -1 : 1));
     }
     return list;
@@ -187,7 +187,7 @@ export function RatePlansPanel({
       }
       setDraft(null);
       return { ok: true };
-    }, d.id ? "Rate plan saved." : "Rate plan created.");
+    }, d.id ? tr("Rate plan saved.") : tr("Rate plan created."));
   }
 
   return (
@@ -338,7 +338,11 @@ export function RatePlansPanel({
                 }}
               >
                 <h4 className="border-b border-line pb-1 text-[16px] text-ink">
-                  {draft.id ? `Edit ${draft.name || "rate plan"}` : tr("Add New Rate Plan")}
+                  {draft.id
+                    ? draft.name
+                      ? tr("Edit {name}", { name: draft.name })
+                      : tr("Edit rate plan")
+                    : tr("Add New Rate Plan")}
                 </h4>
                 <div className="mt-4 grid gap-4 sm:grid-cols-4">
                   <label className={label}>

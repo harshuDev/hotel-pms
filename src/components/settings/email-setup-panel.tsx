@@ -104,6 +104,7 @@ function EmailChips({
   onChange: (next: string[]) => void;
   canEdit: boolean;
 }) {
+  const tr = useT();
   const [draft, setDraft] = useState("");
   function add() {
     const next = draft.trim().toLowerCase();
@@ -121,7 +122,7 @@ function EmailChips({
             {canEdit && (
               <button
                 type="button"
-                aria-label={tr("Remove {e}", { e: e })}
+                aria-label={tr("Remove {email}", { email: e })}
                 onClick={() => onChange(emails.filter((x) => x !== e))}
                 className="grid h-5 w-5 place-items-center rounded-full text-ink-muted hover:bg-white hover:text-ink"
               >
@@ -325,7 +326,7 @@ export function EmailSetupPanel({
       const result = await saveEmailTemplate(d);
       if (result.ok) setTpl(null);
       return result;
-    }, d.id ? "Email template saved." : "Email template added.");
+    }, d.id ? tr("Email template saved.") : tr("Email template added."));
   }
 
   function templateEditor() {
@@ -407,7 +408,7 @@ export function EmailSetupPanel({
         onSave={() => {
           const bad = CONFIRMATION_COLORS.find((c) => !isHex(colors[c.id]));
           if (bad) {
-            run(async () => ({ ok: false, error: `${bad.label} must be a colour like #003580.` }), "");
+            run(async () => ({ ok: false, error: tr("{name} must be a colour like #003580.", { name: tr(bad.label) }) }), "");
             return;
           }
           run(
@@ -461,7 +462,7 @@ export function EmailSetupPanel({
               {CONFIRMATION_COLORS.map((c) => (
                 <div key={c.id} className="grid items-end gap-3 sm:grid-cols-2 sm:gap-6">
                   <div>
-                    <label htmlFor={`color-${c.id}`} className={tiny}>{c.label}</label>
+                    <label htmlFor={`color-${c.id}`} className={tiny}>{tr(c.label)}</label>
                     <input
                       id={`color-${c.id}`}
                       value={colors[c.id]}
@@ -472,7 +473,7 @@ export function EmailSetupPanel({
                   </div>
                   <input
                     type="color"
-                    aria-label={tr("{name} picker", { name: c.label })}
+                    aria-label={tr("{label} picker", { label: tr(c.label) })}
                     value={isHex(colors[c.id]) ? colors[c.id] : c.fallback}
                     disabled={disabled}
                     onChange={(e) => setColors({ ...colors, [c.id]: e.target.value })}
