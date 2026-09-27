@@ -312,6 +312,8 @@ export function SettingsScreen({
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
+  /* Which season's rates the Seasons screen shows (0108); null is the Default Season. */
+  const [seasonRatesFor, setSeasonRatesFor] = useState<string | null>(null);
 
   function run(fn: () => Promise<{ ok: boolean; error?: string }>, done: string) {
     setMessage(null);
@@ -1090,9 +1092,12 @@ export function SettingsScreen({
           // Keyed on the saved order and set, so the drag order re-seeds
           // after a type is added, deleted or reordered elsewhere.
           key={roomTypes.map((t) => `${t.id}:${t.sortOrder}`).join("|")}
+          propertyId={property.id}
           roomTypes={roomTypes}
           virtualRoomTypes={virtualRoomTypes}
           facilities={facilities}
+          accountingCategories={accountingSettings.categories}
+          accommodationDefaultId={accountingSettings.defaults?.accommodationId ?? null}
           editRoomTypeId={editRoomTypeId}
           canEdit={canEdit}
           pending={pending}
@@ -1206,13 +1211,41 @@ export function SettingsScreen({
 
       {/* Payment methods ----------------------------------------------- */}
       {tab === "seasons" && (
-        <SeasonsPanel
-          types={seasons}
-          businessDate={businessDate}
-          canEdit={canEdit}
-          pending={pending}
-          run={run}
-        />
+        <div className="space-y-6">
+          <SeasonsPanel
+            types={seasons}
+            businessDate={businessDate}
+            onRates={(id) => {
+              setSeasonRatesFor(id);
+              requestAnimationFrame(() =>
+                document.getElementById("season-rates")?.scrollIntoView({ behavior: "smooth", block: "start" }),
+              );
+            }}
+            canEdit={canEdit}
+            pending={pending}
+            run={run}
+          />
+          {/*
+            A season's rates, on the season's own screen (0108): the client
+            asked to "put rate in the Season". The same grid as Rate Plans,
+            opened on the season whose price button was pressed -- keyed on
+            it, because the grid seeds its season once per mount.
+          */}
+          <div id="season-rates" className="scroll-mt-28">
+            <RateCombinations
+              key={seasonRatesFor ?? "default"}
+              initialSeasonId={seasonRatesFor}
+              ratePlans={ratePlans.filter((p) => p.isActive)}
+              roomTypes={roomTypes}
+              seasons={seasons.filter((x) => x.kind === "season")}
+              cancellationPolicies={cancellationPolicies}
+              weekRates={weekRates}
+              canEdit={canEdit}
+              pending={pending}
+              run={run}
+            />
+          </div>
+        </div>
       )}
 
       {tab === "rate-plans" && (

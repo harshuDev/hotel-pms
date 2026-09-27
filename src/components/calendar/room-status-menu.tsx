@@ -45,7 +45,8 @@ import type { HousekeepingChoice, RoomStatus } from "@/lib/types";
  *
  * WHICH ROWS APPEAR DEPENDS ON THE ROOM, and the menu says nothing about the
  * ones it leaves out. A vacant room gets the four cleaning states; an
- * occupied room gets Do not disturb. There are no greyed rows and no sentence
+ * occupied room gets Inspected, Clean, Dirty and Do not disturb (0108) --
+ * its cleanliness is the `service_due` flag, since its status is `occupied`. There are no greyed rows and no sentence
  * explaining why something is unavailable -- a control that is not offered
  * needs no explanation, and both the disabled rows and the prose were things
  * the client has now objected to twice.
@@ -92,6 +93,7 @@ export function RoomStatusMenu({
   status,
   isInspected,
   doNotDisturb,
+  serviceDue,
   dotClass,
   label,
 }: {
@@ -100,6 +102,8 @@ export function RoomStatusMenu({
   status: RoomStatus;
   isInspected: boolean;
   doNotDisturb: boolean;
+  /** Occupied and waiting for its stay-over clean (0108). */
+  serviceDue: boolean;
   /** The dot's colour, decided by the board so the two cannot drift. */
   dotClass: string;
   label: string;
@@ -114,7 +118,7 @@ export function RoomStatusMenu({
   const [pos, setPos] = useState<{ left: number; top: number } | null>(null);
 
   const MENU_W = 192; // w-48
-  const MENU_MAX_H = 200; // four plain rows, or one, plus room for an error
+  const MENU_MAX_H = 200; // four plain rows plus room for an error
 
   /*
    * Measured from the dot, because a portalled menu has no parent to be
@@ -171,9 +175,19 @@ export function RoomStatusMenu({
     });
   }
 
-  /* The current point on the scale, so the menu can mark it. */
+  /*
+   * The current point on the scale, so the menu can mark it. An occupied room
+   * (0108) is dirty while its service is due, inspected once signed off, and
+   * otherwise clean -- it was clean when the guest was checked into it.
+   */
   const current: HousekeepingChoice | null =
-    status === "vacant_clean"
+    status === "occupied"
+      ? serviceDue
+        ? "dirty"
+        : isInspected
+          ? "inspected"
+          : "clean"
+      : status === "vacant_clean"
       ? isInspected
         ? "inspected"
         : "clean"
@@ -239,12 +253,47 @@ export function RoomStatusMenu({
                 for why a control is dead is not needed when the control is
                 simply not offered.
 
-                So a vacant room gets the cleaning states, an occupied room
-                gets Do not disturb, and neither is told about the other.
-                Postgres enforces the same split, so nothing here is the only
-                thing standing between a bad write and the database.
+                So a vacant room gets the four cleaning states. An occupied
+                room (0108) gets Inspected, Clean and Dirty -- it is cleaned
+                too, which the client asked for -- plus Do not disturb, and
+                not Broken, which would take a room with a guest in it off
+                sale. Postgres enforces the same split, so nothing here is the
+                only thing standing between a bad write and the database.
               */}
-              {status === "occupied" ? (
+              {(status === "occupied"
+                ? CHOICES.filter((c) => c.choice !== "broken")
+                : CHOICES
+              ).map((c) => (
+                <button
+                  key={c.choice}
+                  type="button"
+                  disabled={pending}
+                  onClick={() =>
+                    run(() =>
+                      setRoomHousekeeping({ roomId, choice: c.choice }),
+                    )
+                  }
+                  className={cn(
+                    "flex w-full items-center gap-2 px-3 py-1.5 text-left text-[13px] transition",
+                    c.choice === current
+                      ? "cursor-default text-ink-faint"
+                      : "text-ink hover:bg-shell",
+                    pending && "opacity-50",
+                  )}
+                >
+                  <span
+                    className={cn("h-2 w-2 shrink-0 rounded-full", c.dot)}
+                  />
+                  <span className="min-w-0 flex-1 truncate">{tr(c.label)}</span>
+                  {c.choice === current && (
+                    <span className="shrink-0 text-xxs text-ink-faint">
+                      {tr("now")}
+                    </span>
+                  )}
+                </button>
+              ))}
+
+              {status === "occupied" && (
                 <button
                   type="button"
                   disabled={pending}
@@ -252,7 +301,7 @@ export function RoomStatusMenu({
                     run(() => setRoomDoNotDisturb(roomId, !doNotDisturb))
                   }
                   className={cn(
-                    "flex w-full items-center gap-2 px-3 py-1.5 text-left text-[13px] transition",
+                    "flex w-full items-center gap-2 border-t border-line px-3 py-1.5 text-left text-[13px] transition",
                     "text-ink hover:bg-shell",
                     pending && "opacity-50",
                   )}
@@ -265,36 +314,6 @@ export function RoomStatusMenu({
                     <span className="shrink-0 text-xxs text-warn-deep">{tr("on")}</span>
                   )}
                 </button>
-              ) : (
-                CHOICES.map((c) => (
-                  <button
-                    key={c.choice}
-                    type="button"
-                    disabled={pending}
-                    onClick={() =>
-                      run(() =>
-                        setRoomHousekeeping({ roomId, choice: c.choice }),
-                      )
-                    }
-                    className={cn(
-                      "flex w-full items-center gap-2 px-3 py-1.5 text-left text-[13px] transition",
-                      c.choice === current
-                        ? "cursor-default text-ink-faint"
-                        : "text-ink hover:bg-shell",
-                      pending && "opacity-50",
-                    )}
-                  >
-                    <span
-                      className={cn("h-2 w-2 shrink-0 rounded-full", c.dot)}
-                    />
-                    <span className="min-w-0 flex-1 truncate">{tr(c.label)}</span>
-                    {c.choice === current && (
-                      <span className="shrink-0 text-xxs text-ink-faint">
-                        {tr("now")}
-                      </span>
-                    )}
-                  </button>
-                ))
               )}
 
               {error && (

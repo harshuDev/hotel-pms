@@ -1,15 +1,17 @@
 import { getT } from "@/lib/i18n/server";
-import { format, parseISO, subDays } from "date-fns";
+import { addDays, format, parseISO, subDays } from "date-fns";
 import { HouseBoard } from "@/components/dashboard/house-board";
 import { HouseStrip } from "@/components/dashboard/house-strip";
 import { LiveFeed } from "@/components/dashboard/live-feed";
 import { Movements } from "@/components/dashboard/movements";
 import { Pace } from "@/components/dashboard/pace";
 import { CloseDay } from "@/components/dashboard/close-day";
+import { ChannelMix } from "@/components/dashboard/channel-mix";
 import {
   getActivity,
   getArrivals,
   getBusinessDate,
+  getChannelReport,
   getCurrentStaffUser,
   getDepartures,
   getHouseSummary,
@@ -34,9 +36,12 @@ export default async function DashboardPage() {
     "yyyy-MM-dd",
   );
 
+  // The channel mix covers the same 28 nights the pace chart forecasts.
+  const channelTo = format(addDays(parseISO(today), PACE_DAYS - 1), "yyyy-MM-dd");
+
   // No room list here: the house board renders from counts and loads rooms
   // only when it is expanded.
-  const [activity, arrivals, departures, occupancy, revenue, house] =
+  const [activity, arrivals, departures, occupancy, revenue, house, channels] =
     await Promise.all([
       getActivity(),
       getArrivals(today),
@@ -44,6 +49,7 @@ export default async function DashboardPage() {
       getOccupancyForecast(today),
       getRevenueSeries(revenueFrom),
       getHouseSummary(),
+      getChannelReport(today, channelTo),
     ]);
 
   const staff = await getCurrentStaffUser();
@@ -82,6 +88,7 @@ export default async function DashboardPage() {
             departures={departures}
             canMoveGuests={canMoveGuests}
           />
+          <ChannelMix rows={channels} from={today} to={channelTo} />
           <LiveFeed items={activity} />
         </div>
       </div>

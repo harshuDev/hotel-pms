@@ -83,7 +83,6 @@ export interface Booking {
   children: number;
   totalCents: number;
   balanceCents: number;
-  typeLine?: string;
 }
 
 export interface ActivityItem {
@@ -997,6 +996,18 @@ export interface RoomTypeSetting {
   description: string | null;
   /** The guest-facing name on the booking page (0091); null reads as `name`. */
   displayName: string | null;
+  /** Booked room lines on this type (0108): a booked type cannot be deleted. */
+  bookedCount: number;
+  /** The ledger account its room revenue posts to (0108); null is the accommodation default. */
+  accountingCategoryId: string | null;
+  /** The type's own photographs (0108), in order, shown first on the guest page. */
+  photos: RoomTypePhoto[];
+}
+
+export interface RoomTypePhoto {
+  id: string;
+  path: string;
+  url: string;
 }
 
 /** A second name a parent room type is sold under (0091). Stored, not sold. */
@@ -1239,6 +1250,20 @@ export interface AccountingRow {
   netCents: number;
   taxCents: number;
   grossCents: number;
+  /** Set on a room revenue line split by room type (0108). */
+  roomTypeName?: string | null;
+  /** That room type's own ledger account; null is the accommodation default. */
+  accountingCategoryId?: string | null;
+}
+
+/** Room revenue by room type (0108), the room_charge line of the Accounting report split. */
+export interface AccountingRoomRevenueRow {
+  roomTypeId: string | null;
+  roomTypeName: string | null;
+  accountingCategoryId: string | null;
+  netCents: number;
+  taxCents: number;
+  grossCents: number;
 }
 
 /** One date as the night audit left it. */
@@ -1317,6 +1342,8 @@ export interface CalendarRoom {
   isInspected: boolean;
   /** The guest has asked not to be disturbed. Only ever true while occupied. */
   doNotDisturb: boolean;
+  /** Occupied and waiting for its stay-over clean (0108). Only ever true while occupied. */
+  serviceDue: boolean;
   sortOrder: number;
   /** Room Setup's colour (0091): marks the room number in the rail. */
   color: string | null;

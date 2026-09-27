@@ -69,6 +69,16 @@ function PencilIcon() {
   );
 }
 
+function TagIcon() {
+  return (
+    <svg viewBox="0 0 16 16" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="1.6"
+      strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M2 2h6l6 6-6 6-6-6z" />
+      <circle cx="5.5" cy="5.5" r="1.1" />
+    </svg>
+  );
+}
+
 function BinIcon() {
   return (
     <svg viewBox="0 0 16 16" className="h-3.5 w-3.5 fill-rose-700" aria-hidden="true">
@@ -84,12 +94,15 @@ type EditDraft = { id: string; kind: "season" | "event"; name: string; color: st
 export function SeasonsPanel({
   types,
   businessDate,
+  onRates,
   canEdit,
   pending,
   run,
 }: {
   types: SeasonType[];
   businessDate: string;
+  /** Opens the season's rates below (0108); null is the Default Season. */
+  onRates?: (seasonTypeId: string | null) => void;
   canEdit: boolean;
   pending: boolean;
   run: Run;
@@ -167,6 +180,12 @@ export function SeasonsPanel({
               <span className="min-w-0 flex-1 truncate text-[12px] font-bold uppercase text-ink">{t.name}</span>
               {canEdit && (
                 <span className="flex shrink-0">
+                  {t.kind === "season" && onRates && (
+                    <button type="button" aria-label={tr("Rates for {name}", { name: t.name })} title={tr("Rates for {name}", { name: t.name })}
+                      className={icon} onClick={() => onRates(t.id)}>
+                      <TagIcon />
+                    </button>
+                  )}
                   <button type="button" aria-label={tr("Add dates to {name}", { name: t.name })} className={icon}
                     onClick={() => setRange({ typeId: t.id, name: t.name, from: "", to: "" })}>
                     <PlusIcon />
@@ -267,7 +286,13 @@ export function SeasonsPanel({
           <div className="mt-4">
             <div className="flex items-center gap-1.5">
               <span className="h-3 w-3 shrink-0 rounded-sm" style={{ backgroundColor: DEFAULT_GREY }} />
-              <span className="text-[12px] font-bold text-ink">{tr("Default Season")}</span>
+              <span className="min-w-0 flex-1 text-[12px] font-bold text-ink">{tr("Default Season")}</span>
+              {canEdit && onRates && (
+                <button type="button" aria-label={tr("Rates for {name}", { name: tr("Default Season") })} title={tr("Rates for {name}", { name: tr("Default Season") })}
+                  className={icon} onClick={() => onRates(null)}>
+                  <TagIcon />
+                </button>
+              )}
             </div>
             {defaultRanges.map((r) => (
               <p key={r.from} className="tnum text-[11.5px] text-ink">

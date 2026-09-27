@@ -79,6 +79,7 @@ export function RateCombinations({
   seasons,
   cancellationPolicies,
   weekRates,
+  initialSeasonId = null,
   canEdit,
   pending,
   run,
@@ -90,13 +91,22 @@ export function RateCombinations({
   seasons: SeasonType[];
   cancellationPolicies: CancellationPolicy[];
   weekRates: WeekRate[];
+  /** The season to open on -- the Seasons screen's price button (0108). Null is the Default Season. */
+  initialSeasonId?: string | null;
   canEdit: boolean;
   pending: boolean;
   run: Run;
 }) {
   const tr = useT();
   const currency = useCurrency();
-  const [season, setSeason] = useState<string | null>(null);
+  const [season, setSeason] = useState<string | null>(initialSeasonId);
+  /*
+   * FILL ONLY BY DEFAULT, the client's rule for this grid. Ticked, the rate
+   * replaces the one already on the season's nights (0108) -- without it a
+   * season on a hotel priced a year ahead changes nothing. Stay rules stay
+   * fill-only either way.
+   */
+  const [replaceRates, setReplaceRates] = useState(false);
   const [typeIds, setTypeIds] = useState<string[]>(roomTypes.map((t) => t.id));
   const [planIds, setPlanIds] = useState<string[]>(ratePlans.map((p) => p.id));
   const [drafts, setDrafts] = useState<Record<string, DayDraft[]>>({});
@@ -151,7 +161,7 @@ export function RateCombinations({
     }
     const k = key(plan.id, type.id);
     run(async () => {
-      const result = await saveWeekRates({ ratePlanId: plan.id, roomTypeId: type.id, seasonTypeId: season, days });
+      const result = await saveWeekRates({ ratePlanId: plan.id, roomTypeId: type.id, seasonTypeId: season, days, replaceRates });
       if (result.ok) {
         const n = result.data.filled;
         setNotes({ ...notes, [k]: tr.plural(n, "{n} night priced", "{n} nights priced") });
@@ -229,6 +239,12 @@ export function RateCombinations({
           </div>
         </div>
       </div>
+
+      <label className="mt-3 flex items-center gap-2 text-[12.5px] text-ink">
+        <input type="checkbox" className="h-4 w-4 accent-brass" checked={replaceRates}
+          onChange={(e) => setReplaceRates(e.target.checked)} />
+        {tr("Replace prices already on these nights")}
+      </label>
 
       <h3 className="mt-6 border-b border-line pb-1 text-[14px] text-ink">{tr("Room Rate Combinations")}</h3>
       {shownTypes.length === 0 || shownPlans.length === 0 ? (

@@ -836,15 +836,25 @@ const ROOM_STATUS_DOT: Record<RoomStatus, string> = {
 function roomDot(room: CalendarRoom) {
   if (room.roomStatus === "vacant_clean" && room.isInspected)
     return "bg-emerald-500 ring-1 ring-emerald-200";
-  if (room.roomStatus === "occupied" && room.doNotDisturb) return "bg-warn";
+  if (room.roomStatus === "occupied") {
+    // Do not disturb first: nobody goes in, whatever the room needs.
+    if (room.doNotDisturb) return "bg-warn";
+    // An occupied room is cleaned too (0108): dirty and inspected take the
+    // same colours they take on a vacant room, so the dot means one thing.
+    if (room.serviceDue) return "bg-rose-400";
+    if (room.isInspected) return "bg-emerald-500 ring-1 ring-emerald-200";
+  }
   return ROOM_STATUS_DOT[room.roomStatus];
 }
 
 function roomDotLabel(room: CalendarRoom) {
   if (room.roomStatus === "vacant_clean" && room.isInspected)
     return msg("Ready for a guest, inspected");
-  if (room.roomStatus === "occupied" && room.doNotDisturb)
-    return msg("Occupied, do not disturb");
+  if (room.roomStatus === "occupied") {
+    if (room.doNotDisturb) return msg("Occupied, do not disturb");
+    if (room.serviceDue) return msg("Occupied, needs cleaning");
+    if (room.isInspected) return msg("Occupied, inspected");
+  }
   return ROOM_STATUS_LABEL[room.roomStatus];
 }
 
@@ -1535,6 +1545,7 @@ export async function CalendarBoard({
                             status={room.roomStatus}
                             isInspected={room.isInspected}
                             doNotDisturb={room.doNotDisturb}
+                            serviceDue={room.serviceDue}
                             dotClass={roomDot(room)}
                             label={tr(roomDotLabel(room))}
                           />

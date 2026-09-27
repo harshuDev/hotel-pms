@@ -319,6 +319,9 @@
  "{name}, {name2}, {value} rate": {
   "kind": "text"
  },
+ "{name}, picture {n}": {
+  "kind": "text"
+ },
  "{nights} from {date}, {rooms}. No room has been assigned yet — that happens at check-in.": {
   "kind": "text"
  },
@@ -680,6 +683,12 @@
  "A room needs a number.": {
   "kind": "text"
  },
+ "A room of {0} has a booking against it, so the rooms cannot be deleted. Move that room to another type first.": {
+  "kind": "db"
+ },
+ "A room type holds at most 12 pictures. Remove one first.": {
+  "kind": "text"
+ },
  "A room type needs a code and a name": {
   "kind": "db"
  },
@@ -897,6 +906,9 @@
   "kind": "text"
  },
  "Add one to take a percentage or an amount off, or to give a night free on a longer stay.": {
+  "kind": "text"
+ },
+ "Add pictures of {name}": {
   "kind": "text"
  },
  "Add Reaction": {
@@ -1292,6 +1304,9 @@
  "Availability did not load": {
   "kind": "text"
  },
+ "Available Facilities": {
+  "kind": "text"
+ },
  "Available online": {
   "kind": "text"
  },
@@ -1522,6 +1537,12 @@
   "kind": "text"
  },
  "Booking changed.": {
+  "kind": "text"
+ },
+ "Booking channel": {
+  "kind": "text"
+ },
+ "Booking channels": {
   "kind": "text"
  },
  "Booking confirmation": {
@@ -2664,6 +2685,9 @@
  "Default": {
   "kind": "text"
  },
+ "Default ({name})": {
+  "kind": "text"
+ },
  "Default Accounting Categories": {
   "kind": "text"
  },
@@ -2711,6 +2735,10 @@
  },
  "Delete {name} and all its dates?": {
   "kind": "text"
+ },
+ "Delete {name} and its {n} rooms? Their prices and restrictions go with them.": {
+  "kind": "plural",
+  "one": "Delete {name} and its {n} room? Its prices and restrictions go with it."
  },
  "Delete {name}, {date} - {date2}?": {
   "kind": "text"
@@ -4725,6 +4753,9 @@
  "Next": {
   "kind": "text"
  },
+ "Next {n} nights": {
+  "kind": "text"
+ },
  "Next month": {
   "kind": "text"
  },
@@ -4887,6 +4918,9 @@
  },
  "No name recorded": {
   "kind": "db"
+ },
+ "No nights booked in the next four weeks.": {
+  "kind": "text"
  },
  "No nights in this range": {
   "kind": "text"
@@ -5083,6 +5117,9 @@
  "None yet. Add the terms your rates are sold under.": {
   "kind": "text"
  },
+ "None yet. Add them under Room Type Facilities.": {
+  "kind": "text"
+ },
  "None yet. Generate one to use the API.": {
   "kind": "text"
  },
@@ -5253,6 +5290,12 @@
   "kind": "text"
  },
  "Occupied, do not disturb": {
+  "kind": "text"
+ },
+ "Occupied, inspected": {
+  "kind": "text"
+ },
+ "Occupied, needs cleaning": {
   "kind": "text"
  },
  "Of nights have no country": {
@@ -5960,6 +6003,9 @@
  "Picture": {
   "kind": "text"
  },
+ "Pictures": {
+  "kind": "text"
+ },
  "Pitcairn": {
   "kind": "country",
   "code": "PN"
@@ -6187,6 +6233,9 @@
  "Rates are created and renamed under Settings → Rate plans.": {
   "kind": "text"
  },
+ "Rates for {name}": {
+  "kind": "text"
+ },
  "Rates, settings, the night audit and the drawer total": {
   "kind": "text"
  },
@@ -6301,6 +6350,9 @@
  "Remove logo": {
   "kind": "text"
  },
+ "Remove picture {n}": {
+  "kind": "text"
+ },
  "Remove the picture": {
   "kind": "text"
  },
@@ -6311,6 +6363,9 @@
   "kind": "text"
  },
  "Replace both editors with the default template?": {
+  "kind": "text"
+ },
+ "Replace prices already on these nights": {
   "kind": "text"
  },
  "Replace the API key? The current one stops working at once.": {
@@ -6468,13 +6523,13 @@
  "Room {0} has a booking assigned from {1}. Move it to another room first.": {
   "kind": "db"
  },
- "Room {0} has a guest in it. Check them out before changing its housekeeping state": {
-  "kind": "db"
- },
  "Room {0} has a guest in it. Check them out before disabling it.": {
   "kind": "db"
  },
  "Room {0} has a guest in it. Check them out rather than changing the room.": {
+  "kind": "db"
+ },
+ "Room {0} has a guest in it. Move the guest or check them out before marking it broken.": {
   "kind": "db"
  },
  "Room {0} has no guest in it, so there is nobody to disturb": {
@@ -7530,6 +7585,9 @@
  "That file does not belong to this room": {
   "kind": "db"
  },
+ "That file does not belong to this room type": {
+  "kind": "db"
+ },
  "That file is empty": {
   "kind": "db"
  },
@@ -7621,6 +7679,9 @@
   "kind": "db"
  },
  "That payment type is not on this property": {
+  "kind": "db"
+ },
+ "That picture is not on this property": {
   "kind": "db"
  },
  "That picture is over 2MB. Save it smaller and try again.": {
