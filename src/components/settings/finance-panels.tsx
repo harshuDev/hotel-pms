@@ -1,6 +1,7 @@
 "use client";
 
 import { useT } from "@/components/i18n";
+import { msg } from "@/lib/i18n/translate";
 import { useState } from "react";
 import { cn } from "@/components/ui";
 import {
@@ -115,13 +116,13 @@ export function Dialog({
  * UPI is in the enum from before and is not offered.
  */
 const PAYMENT_KINDS: { value: PaymentMethodKind; label: string }[] = [
-  { value: "cash", label: "Cash" },
-  { value: "card", label: "Card" },
-  { value: "bank_transfer", label: "Bank transfer" },
-  { value: "ota_prepaid", label: "Prepaid to the channel" },
-  { value: "virtual_card", label: "Virtual card" },
-  { value: "complimentary", label: "Complimentary" },
-  { value: "other", label: "Other" },
+  { value: "cash", label: msg("Cash") },
+  { value: "card", label: msg("Card") },
+  { value: "bank_transfer", label: msg("Bank transfer") },
+  { value: "ota_prepaid", label: msg("Prepaid to the channel") },
+  { value: "virtual_card", label: msg("Virtual card") },
+  { value: "complimentary", label: msg("Complimentary") },
+  { value: "other", label: msg("Other") },
 ];
 
 type PaymentDraft = {
@@ -277,7 +278,7 @@ export function PaymentTypesPanel({
             <p className="text-[13px] text-ink">
               <span className={label}>{tr("Kind")}</span>
               <span className="mt-1 block">
-                {PAYMENT_KINDS.find((k) => k.value === draft.kind)?.label ?? draft.kind}
+                {tr(PAYMENT_KINDS.find((k) => k.value === draft.kind)?.label ?? draft.kind)}
               </span>
             </p>
           ) : (
@@ -290,7 +291,7 @@ export function PaymentTypesPanel({
               >
                 {PAYMENT_KINDS.map((k) => (
                   <option key={k.value} value={k.value}>
-                    {k.label}
+                    {tr(k.label)}
                   </option>
                 ))}
               </select>

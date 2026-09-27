@@ -1,6 +1,7 @@
 "use client";
 
 import { useT } from "@/components/i18n";
+import { msg } from "@/lib/i18n/translate";
 import { Fragment, useMemo, useState } from "react";
 import { cn } from "@/components/ui";
 import { formatMoney, formatMoneyInput } from "@/lib/money";
@@ -149,7 +150,7 @@ export function ExtrasPanel({
       });
       if (result.ok) setCat(null);
       return result;
-    }, draft.id ? "Extra category saved." : "Extra category added.");
+    }, draft.id ? tr("Extra category saved.") : tr("Extra category added."));
   }
 
   function categoryEditor() {
@@ -242,7 +243,7 @@ export function ExtrasPanel({
       });
       if (result.ok) setEx(null);
       return result;
-    }, draft.id ? "Extra saved." : "Extra added.");
+    }, draft.id ? tr("Extra saved.") : tr("Extra added."));
   }
 
   const head =
@@ -362,10 +363,10 @@ export function ExtrasPanel({
           <table className="w-full min-w-[46rem] text-[13.5px]">
             <thead>
               <tr className="bg-shell">
-                {["Title", "Category", "Is Meal", "Price", "Taxes", "Accounting Category"].map(
+                {[msg("Title"), msg("Category"), msg("Is Meal"), msg("Price"), msg("Taxes"), msg("Accounting Category")].map(
                   (h) => (
                     <th key={h} className={head}>
-                      <span className="block border-r border-line pr-4">{h}</span>
+                      <span className="block border-r border-line pr-4">{tr(h)}</span>
                     </th>
                   ),
                 )}
@@ -618,7 +619,7 @@ export function ExtrasPanel({
               const result = await mergeExtraCategory({ sourceId: source.id, targetId });
               if (result.ok) setMergingCat(null);
               return result;
-            }, `${source.title} merged into ${target?.title ?? "the chosen category"}.`);
+            }, target ? tr("{name} merged into {target}.", { name: source.title, target: target.title }) : tr("{name} merged.", { name: source.title }));
           }}
         />
       )}
@@ -637,7 +638,7 @@ export function ExtrasPanel({
               const result = await mergeExtra({ sourceId: source.id, targetId });
               if (result.ok) setMerging(null);
               return result;
-            }, `${source.title} merged into ${target?.title ?? "the chosen extra"}.`);
+            }, target ? tr("{name} merged into {target}.", { name: source.title, target: target.title }) : tr("{name} merged.", { name: source.title }));
           }}
         />
       )}

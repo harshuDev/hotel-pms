@@ -149,7 +149,7 @@ export function TemplatesPanel({
           </div>
           {help && (
             <div className="absolute right-4 top-12 z-20 w-[min(26rem,calc(100vw-3rem))] rounded-md border border-line bg-white p-3 text-[12px] shadow-card">
-              <p className="mb-2 font-mono text-ink">{tr("{{ guest.name }}  {% for line in lines %}")}</p>
+              <p className="mb-2 font-mono text-ink">{"{{ guest.name }}  {% for line in lines %}"}</p>
               <dl className="space-y-1.5">
                 {TEMPLATE_VARIABLES.map((g) => (
                   <div key={g.name}>

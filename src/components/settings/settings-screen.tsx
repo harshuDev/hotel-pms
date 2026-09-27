@@ -1,6 +1,7 @@
 "use client";
 
 import { useT } from "@/components/i18n";
+import { msg } from "@/lib/i18n/translate";
 import { useEffect, useState, useTransition } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
@@ -112,11 +113,11 @@ export type { SettingsTab } from "@/lib/settings-tabs";
 
 
 const ROLES: { value: StaffRole; label: string; note: string }[] = [
-  { value: "admin", label: "Administrator", note: "Everything, including staff" },
-  { value: "manager", label: "Manager", note: "Rates, settings, the night audit, the drawer total" },
-  { value: "front_desk", label: "Front desk", note: "Bookings, check-in and out, payments" },
-  { value: "cashier", label: "Cashier", note: "Payments and the drawer" },
-  { value: "housekeeping", label: "Housekeeping", note: "Room status, and no money at all" },
+  { value: "admin", label: msg("Administrator"), note: msg("Everything, including staff") },
+  { value: "manager", label: msg("Manager"), note: msg("Rates, settings, the night audit, the drawer total") },
+  { value: "front_desk", label: msg("Front desk"), note: msg("Bookings, check-in and out, payments") },
+  { value: "cashier", label: msg("Cashier"), note: msg("Payments and the drawer") },
+  { value: "housekeeping", label: msg("Housekeeping"), note: msg("Room status, and no money at all") },
 ];
 
 const label =
@@ -317,7 +318,7 @@ export function SettingsScreen({
     startTransition(async () => {
       const result = await fn();
       if (!result.ok) {
-        setMessage({ ok: false, text: result.error ?? "That did not work." });
+        setMessage({ ok: false, text: result.error ?? tr("That did not work.") });
         return;
       }
       setMessage({ ok: true, text: done });
@@ -1259,12 +1260,12 @@ export function SettingsScreen({
           <table className="w-full text-[13px]">
             <thead>
               <tr className="border-b border-line text-left text-ink-faint">
-                {["Name", "Role", "", ""].map((c, i) => (
+                {[msg("Name"), msg("Role"), "", ""].map((c, i) => (
                   <th
                     key={c || i}
                     className="whitespace-nowrap px-3 pb-2.5 text-xxs font-semibold uppercase tracking-[0.1em]"
                   >
-                    {c}
+                    {c && tr(c)}
                   </th>
                 ))}
               </tr>
@@ -1328,7 +1329,10 @@ function StaffRow({
           {isMe && <span className="ml-1.5 text-xxs font-normal text-ink-faint">{tr("you")}</span>}
         </td>
         <td className="px-3 py-2.5 text-ink-muted">
-          {ROLES.find((r) => r.value === staff.role)?.label ?? staff.role}
+          {(() => {
+            const label = ROLES.find((r) => r.value === staff.role)?.label;
+            return label ? tr(label) : staff.role;
+          })()}
         </td>
         <td className="px-3 py-2.5 text-xxs text-ink-faint">
           {staff.isActive ? "" : tr("no access")}
@@ -1365,11 +1369,14 @@ function StaffRow({
           aria-label={tr("Role")}
         >
           {ROLES.map((r) => (
-            <option key={r.value} value={r.value}>{r.label}</option>
+            <option key={r.value} value={r.value}>{tr(r.label)}</option>
           ))}
         </select>
         <span className="mt-1 block text-xxs text-ink-faint">
-          {ROLES.find((r) => r.value === role)?.note}
+          {(() => {
+            const note = ROLES.find((r) => r.value === role)?.note;
+            return note ? tr(note) : null;
+          })()}
         </span>
       </td>
       <td className="px-3 py-2.5">

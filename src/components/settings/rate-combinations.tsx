@@ -32,7 +32,8 @@ import { saveWeekRates } from "@/lib/actions/settings";
 
 type Run = (fn: () => Promise<{ ok: boolean; error?: string }>, done: string) => void;
 
-const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+/** Monday first, as the reference's grid is; `tr.weekday` counts from Sunday. */
+const WEEKDAY_OF = [1, 2, 3, 4, 5, 6, 0];
 
 type DayDraft = {
   rate: string;
@@ -47,7 +48,7 @@ type DayDraft = {
 const EMPTY: DayDraft = { rate: "", mst: "", msa: "", mxs: "", cta: false, ctd: false, ss: false };
 
 function draftsFor(rates: WeekRate[], plan: string, type: string, season: string | null): DayDraft[] {
-  return DAYS.map((_, i) => {
+  return WEEKDAY_OF.map((_, i) => {
     const w = rates.find(
       (r) => r.ratePlanId === plan && r.roomTypeId === type && r.seasonTypeId === season && r.weekday === i + 1,
     );
@@ -122,11 +123,11 @@ export function RateCombinations({
         try {
           rateCents = parseMoney(d.rate);
         } catch {
-          setNotes({ ...notes, [key(plan.id, type.id)]: `${DAYS[i]}: write the rate as a number.` });
+          setNotes({ ...notes, [key(plan.id, type.id)]: tr("{day}: write the rate as a number.", { day: tr.weekday(WEEKDAY_OF[i]) }) });
           return;
         }
         if (rateCents < 0) {
-          setNotes({ ...notes, [key(plan.id, type.id)]: `${DAYS[i]}: a rate cannot be negative.` });
+          setNotes({ ...notes, [key(plan.id, type.id)]: tr("{day}: a rate cannot be negative.", { day: tr.weekday(WEEKDAY_OF[i]) }) });
           return;
         }
       }
@@ -134,7 +135,7 @@ export function RateCombinations({
       const msa = nights(d.msa);
       const mxs = nights(d.mxs);
       if (mst === "bad" || msa === "bad" || mxs === "bad") {
-        setNotes({ ...notes, [key(plan.id, type.id)]: `${DAYS[i]}: a stay rule is a number of nights, 1 to 365.` });
+        setNotes({ ...notes, [key(plan.id, type.id)]: tr("{day}: a stay rule is a number of nights, 1 to 365.", { day: tr.weekday(WEEKDAY_OF[i]) }) });
         return;
       }
       days.push({
@@ -161,7 +162,7 @@ export function RateCombinations({
 
   const shownTypes = roomTypes.filter((t) => typeIds.includes(t.id));
   const shownPlans = ratePlans.filter((p) => planIds.includes(p.id));
-  const policyName = (id: string | null) => cancellationPolicies.find((c) => c.id === id)?.name ?? "No policy";
+  const policyName = (id: string | null) => cancellationPolicies.find((c) => c.id === id)?.name ?? tr("No policy");
 
   function Chips({
     all,
@@ -238,9 +239,9 @@ export function RateCombinations({
             <thead>
               <tr>
                 <th className="px-2 py-2 text-left align-bottom text-[12px] font-semibold text-ink">{tr("Room types")}</th>
-                {DAYS.map((d) => (
+                {WEEKDAY_OF.map((d) => (
                   <th key={d} className="px-1 py-2 text-center font-normal text-ink-muted">
-                    <span className="block text-[12px] font-semibold text-ink">{d}</span>
+                    <span className="block text-[12px] font-semibold text-ink">{tr.weekday(d)}</span>
                     <span className="block">{tr("Rate")}</span>
                     <span className="block text-[9.5px]">{tr("MST MSA MXS")}</span>
                     <span className="block text-[9.5px]">{tr("CTA CTD SS")}</span>
@@ -263,8 +264,9 @@ export function RateCombinations({
                         <td className="px-2 py-2">
                           <p className="text-[12.5px] font-semibold text-ink">{p.name}</p>
                           <p className="text-[11px] text-ink-muted">
-                            {tr("Sleeps")}{" "}{t.baseOccupancy}
-                            {t.maxOccupancy > t.baseOccupancy ? ` + ${t.maxOccupancy - t.baseOccupancy}` : ""}
+                            {t.maxOccupancy > t.baseOccupancy
+                              ? tr("Sleeps {n} + {extra}", { n: t.baseOccupancy, extra: t.maxOccupancy - t.baseOccupancy })
+                              : tr("Sleeps {n}", { n: t.baseOccupancy })}
                           </p>
                           <p className="text-[11px] text-ink-muted">
                             {policyName(p.cancellationPolicyId)}, {currency}
@@ -272,24 +274,24 @@ export function RateCombinations({
                         </td>
                         {row.map((d, i) => (
                           <td key={i} className="px-1 py-2 text-center">
-                            <input aria-label={tr("{name}, {name2}, {value} rate", { name: p.name, name2: t.name, value: DAYS[i] })} inputMode="decimal"
+                            <input aria-label={tr("{name}, {name2}, {value} rate", { name: p.name, name2: t.name, value: tr.weekday(WEEKDAY_OF[i]) })} inputMode="decimal"
                               value={d.rate} readOnly={!canEdit}
                               onChange={(e) => setDay(p.id, t.id, i, { rate: e.target.value })}
                               className="tnum w-[4.6rem] rounded border border-line bg-white px-1 py-0.5 text-center text-[12px] text-ink outline-none focus:border-brass" />
                             <span className="mt-1 flex justify-center gap-0.5">
-                              <input aria-label={tr("{value} min stay through", { value: DAYS[i] })} inputMode="numeric" value={d.mst} readOnly={!canEdit}
+                              <input aria-label={tr("{value} min stay through", { value: tr.weekday(WEEKDAY_OF[i]) })} inputMode="numeric" value={d.mst} readOnly={!canEdit}
                                 onChange={(e) => setDay(p.id, t.id, i, { mst: e.target.value })} className={small} />
-                              <input aria-label={tr("{value} min stay arrival", { value: DAYS[i] })} inputMode="numeric" value={d.msa} readOnly={!canEdit}
+                              <input aria-label={tr("{value} min stay arrival", { value: tr.weekday(WEEKDAY_OF[i]) })} inputMode="numeric" value={d.msa} readOnly={!canEdit}
                                 onChange={(e) => setDay(p.id, t.id, i, { msa: e.target.value })} className={small} />
-                              <input aria-label={tr("{value} max stay", { value: DAYS[i] })} inputMode="numeric" value={d.mxs} readOnly={!canEdit}
+                              <input aria-label={tr("{value} max stay", { value: tr.weekday(WEEKDAY_OF[i]) })} inputMode="numeric" value={d.mxs} readOnly={!canEdit}
                                 onChange={(e) => setDay(p.id, t.id, i, { mxs: e.target.value })} className={small} />
                             </span>
                             <span className="mt-1 flex justify-center gap-2.5">
-                              <input type="checkbox" aria-label={tr("{value} closed to arrival", { value: DAYS[i] })} checked={d.cta} readOnly={!canEdit}
+                              <input type="checkbox" aria-label={tr("{value} closed to arrival", { value: tr.weekday(WEEKDAY_OF[i]) })} checked={d.cta} readOnly={!canEdit}
                                 onChange={(e) => canEdit && setDay(p.id, t.id, i, { cta: e.target.checked })} className="h-3 w-3 accent-brass" />
-                              <input type="checkbox" aria-label={tr("{value} closed to departure", { value: DAYS[i] })} checked={d.ctd} readOnly={!canEdit}
+                              <input type="checkbox" aria-label={tr("{value} closed to departure", { value: tr.weekday(WEEKDAY_OF[i]) })} checked={d.ctd} readOnly={!canEdit}
                                 onChange={(e) => canEdit && setDay(p.id, t.id, i, { ctd: e.target.checked })} className="h-3 w-3 accent-brass" />
-                              <input type="checkbox" aria-label={tr("{value} stop sell", { value: DAYS[i] })} checked={d.ss} readOnly={!canEdit}
+                              <input type="checkbox" aria-label={tr("{value} stop sell", { value: tr.weekday(WEEKDAY_OF[i]) })} checked={d.ss} readOnly={!canEdit}
                                 onChange={(e) => canEdit && setDay(p.id, t.id, i, { ss: e.target.checked })} className="h-3 w-3 accent-brass" />
                             </span>
                           </td>

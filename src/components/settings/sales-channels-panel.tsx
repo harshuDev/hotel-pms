@@ -1,6 +1,7 @@
 "use client";
 
 import { useT } from "@/components/i18n";
+import { msg } from "@/lib/i18n/translate";
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/components/ui";
 import { Dialog, EditIcon } from "@/components/settings/finance-panels";
@@ -24,11 +25,11 @@ type Run = (fn: () => Promise<{ ok: boolean; error?: string }>, done: string) =>
 type Filter = "active" | "all" | "draft";
 
 const KINDS: { value: ChannelKind; label: string }[] = [
-  { value: "direct", label: "Direct" },
-  { value: "ota", label: "OTA" },
-  { value: "wholesaler", label: "Wholesaler" },
-  { value: "gds", label: "GDS" },
-  { value: "offline", label: "Offline" },
+  { value: "direct", label: msg("Direct") },
+  { value: "ota", label: msg("OTA") },
+  { value: "wholesaler", label: msg("Wholesaler") },
+  { value: "gds", label: msg("GDS") },
+  { value: "offline", label: msg("Offline") },
 ];
 
 type Draft = {
@@ -170,7 +171,7 @@ export function SalesChannelsPanel({
   function openMerge() {
     setNote(null);
     if (picked.length < 2) {
-      setNote("Tick two or more sales channels to merge them into one.");
+      setNote(tr("Tick two or more sales channels to merge them into one."));
       return;
     }
     setMerging(picked[0].id);
@@ -301,13 +302,13 @@ export function SalesChannelsPanel({
                 onChange={(e) => setDraft({ ...draft, code: e.target.value.toUpperCase() })} className={line} />
               <div className="flex items-center gap-5 text-[13px] text-ink" role="radiogroup" aria-label={tr("Status")}>
                 {[
-                  { v: true, l: "Active" },
-                  { v: false, l: "Draft" },
+                  { v: true, l: msg("Active") },
+                  { v: false, l: msg("Draft") },
                 ].map((o) => (
                   <label key={o.l} className="flex items-center gap-1.5">
                     <input type="radio" name="sc-status" className="h-4 w-4 accent-brass"
                       checked={draft.isActive === o.v} onChange={() => setDraft({ ...draft, isActive: o.v })} />
-                    {o.l}
+                    {tr(o.l)}
                   </label>
                 ))}
               </div>
@@ -318,7 +319,7 @@ export function SalesChannelsPanel({
                   <select value={draft.kind} onChange={(e) => setDraft({ ...draft, kind: e.target.value as ChannelKind })}
                     className={cn(line, "cursor-pointer")}>
                     {KINDS.map((k) => (
-                      <option key={k.value} value={k.value}>{k.label}</option>
+                      <option key={k.value} value={k.value}>{tr(k.label)}</option>
                     ))}
                   </select>
                 </label>
@@ -373,7 +374,7 @@ export function SalesChannelsPanel({
                       setSelected([]);
                     }
                     return result;
-                  }, `Merged into ${keep?.name ?? "the channel kept"}.`);
+                  }, keep ? tr("Merged into {name}.", { name: keep.name }) : tr("Merged into the channel kept."));
                 }}
               >
                 {tr("Merge")}

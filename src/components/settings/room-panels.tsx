@@ -299,7 +299,7 @@ export function RoomTypesPanel({
             }}
           >
             <h4 className="border-b border-line pb-1 text-[16px] text-ink">
-              {draft.id ? `Edit ${draft.name || "room type"}` : tr("Add Room Type")}
+              {draft.id ? (draft.name ? tr("Edit {name}", { name: draft.name }) : tr("Edit room type")) : tr("Add Room Type")}
             </h4>
             <div className="mt-4 grid gap-4 sm:grid-cols-4">
               <label className={label}>
@@ -630,7 +630,7 @@ export function RoomSetupPanel({
       }
       setDraft(null);
       return { ok: true };
-    }, `Room ${d.number.trim() || ""} saved.`);
+    }, tr("Room {number} saved.", { number: d.number.trim() }));
   }
 
   const current = draft?.id ? rooms.rows.find((r) => r.id === draft.id) ?? null : null;
@@ -884,7 +884,7 @@ export function RoomSetupPanel({
                 const result = await saveKeyCodeSetting(on);
                 if (!result.ok) setKeyCode(!on);
                 return result;
-              }, on ? "Booking room id is the key code." : "Key codes are set per room.");
+              }, on ? tr("Booking room id is the key code.") : tr("Key codes are set per room."));
             }}
             className="h-[18px] w-[18px] accent-brass"
           />

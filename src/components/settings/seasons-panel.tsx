@@ -1,6 +1,7 @@
 "use client";
 
 import { useT } from "@/components/i18n";
+import type { Translator } from "@/lib/i18n/translate";
 import { useMemo, useState } from "react";
 import { addDays, format, getDay, getDaysInMonth, parseISO } from "date-fns";
 import { cn } from "@/components/ui";
@@ -46,7 +47,7 @@ function iso(y: number, m: number, d: number): string {
   return `${y}-${String(m + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
 }
 
-function day(d: string): string {
+function day(tr: Translator, d: string): string {
   return tr.date(d, "dd MMM yyyy");
 }
 
@@ -151,7 +152,7 @@ export function SeasonsPanel({
       }
       setAdd(null);
       return { ok: true };
-    }, `${d.name.trim() || (d.kind === "event" ? "Event" : "Season")} added.`);
+    }, tr("{name} added.", { name: d.name.trim() || (d.kind === "event" ? tr("Event") : tr("Season")) }));
   }
 
   function list(title: string, items: SeasonType[]) {
@@ -187,13 +188,13 @@ export function SeasonsPanel({
             {t.ranges.map((r) => (
               <div key={r.id} className="flex items-center justify-between gap-2">
                 <span className="tnum text-[11.5px] text-ink">
-                  {day(r.startsOn)} - {day(r.endsOn)}
+                  {day(tr, r.startsOn)} - {day(tr, r.endsOn)}
                 </span>
                 {canEdit && (
-                  <button type="button" aria-label={tr("Delete {name} {date} to {date2}", { name: t.name, date: day(r.startsOn), date2: day(r.endsOn) })}
+                  <button type="button" aria-label={tr("Delete {name} {date} to {date2}", { name: t.name, date: day(tr, r.startsOn), date2: day(tr, r.endsOn) })}
                     className={icon}
                     onClick={() => {
-                      if (!confirm(tr("Delete {name}, {date} - {date2}?", { name: t.name, date: day(r.startsOn), date2: day(r.endsOn) }))) return;
+                      if (!confirm(tr("Delete {name}, {date} - {date2}?", { name: t.name, date: day(tr, r.startsOn), date2: day(tr, r.endsOn) }))) return;
                       run(() => deleteSeason(r.id), tr("Dates deleted."));
                     }}>
                     <BinIcon />
@@ -236,7 +237,7 @@ export function SeasonsPanel({
                       return (
                         <span
                           key={key}
-                          title={[s?.name ?? "Default Season", e?.name].filter(Boolean).join(" · ")}
+                          title={[s?.name ?? tr("Default Season"), e?.name].filter(Boolean).join(" · ")}
                           className="tnum py-[3px] text-[11px]"
                           style={{
                             backgroundColor: bg,
@@ -262,7 +263,7 @@ export function SeasonsPanel({
               {tr("Add season or event")}
             </button>
           )}
-          {list("Seasons", seasons)}
+          {list(tr("Seasons"), seasons)}
           <div className="mt-4">
             <div className="flex items-center gap-1.5">
               <span className="h-3 w-3 shrink-0 rounded-sm" style={{ backgroundColor: DEFAULT_GREY }} />
@@ -270,11 +271,11 @@ export function SeasonsPanel({
             </div>
             {defaultRanges.map((r) => (
               <p key={r.from} className="tnum text-[11.5px] text-ink">
-                {day(r.from)} - {day(r.to)}
+                {day(tr, r.from)} - {day(tr, r.to)}
               </p>
             ))}
           </div>
-          {list("Events", events)}
+          {list(tr("Events"), events)}
         </aside>
       </section>
 
@@ -364,7 +365,7 @@ export function SeasonsPanel({
 
       {edit && (
         <Dialog
-          title={`Edit ${edit.kind === "event" ? "event" : "season"}`}
+          title={edit.kind === "event" ? tr("Edit event") : tr("Edit season")}
           onClose={() => setEdit(null)}
           footer={
             <>
