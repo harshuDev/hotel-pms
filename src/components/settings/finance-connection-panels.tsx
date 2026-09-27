@@ -127,7 +127,7 @@ export function PaymentGatewaysPanel({
       const result = await savePaymentGateway(d);
       if (result.ok) setDraft(null);
       return result;
-    }, `${d.title.trim() || "Gateway"} saved.`);
+    }, tr("{name} saved.", { name: d.title.trim() || tr("Gateway") }));
   }
 
   return (

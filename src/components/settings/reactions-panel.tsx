@@ -1,6 +1,7 @@
 "use client";
 
 import { useT } from "@/components/i18n";
+import type { Translator } from "@/lib/i18n/translate";
 import { useState } from "react";
 import { cn } from "@/components/ui";
 import { EditIcon } from "@/components/settings/finance-panels";
@@ -84,7 +85,7 @@ function newDraft(): Draft {
   };
 }
 
-function fromReaction(r: Reaction, copy = false): Draft {
+function fromReaction(r: Reaction, tr: Translator, copy = false): Draft {
   const conditions = toDraftGroup(r.conditions);
   if (conditions.items.length === 0) conditions.items.push(emptyCondition());
   return {
@@ -155,8 +156,8 @@ function ConditionRow({
   const numeric = spec?.kind === "number";
   const ops = CONDITION_OPS.filter((o) => !o.numeric || numeric);
   const choices: Option[] | null =
-    spec?.kind === "status" ? [...BOOKING_STATUS_CHOICES]
-    : spec?.kind === "settlement" ? [...SETTLEMENT_CHOICES]
+    spec?.kind === "status" ? BOOKING_STATUS_CHOICES.map((o) => ({ id: o.id, label: tr(o.label) }))
+    : spec?.kind === "settlement" ? SETTLEMENT_CHOICES.map((o) => ({ id: o.id, label: tr(o.label) }))
     : spec?.kind === "country" ? countriesIn(tr).map((k) => ({ id: k.code, label: k.name }))
     : spec?.kind === "channel" || spec?.kind === "room_type" || spec?.kind === "rate_plan" ? lists[spec.kind]
     : null;
@@ -175,11 +176,11 @@ function ConditionRow({
         }}
       >
         <option value="" />
-        {CONDITION_FIELDS.map((f) => <option key={f.id} value={f.id}>{f.label}</option>)}
+        {CONDITION_FIELDS.map((f) => <option key={f.id} value={f.id}>{tr(f.label)}</option>)}
       </select>
       <select aria-label={tr("Comparison")} value={c.op} className={cn(field, "col-span-2 sm:col-span-1")}
         onChange={(e) => onChange({ ...c, op: e.target.value })}>
-        {ops.map((o) => <option key={o.id} value={o.id}>{o.label}</option>)}
+        {ops.map((o) => <option key={o.id} value={o.id}>{tr(o.label)}</option>)}
       </select>
       {choices ? (
         <select aria-label={tr("Value")} value={c.value} className={field}
@@ -306,7 +307,7 @@ export function ReactionsPanel({
       });
       if (result.ok) setDraft(null);
       return result;
-    }, `${d.title.trim() || "Reaction"} saved.`);
+    }, tr("{name} saved.", { name: d.title.trim() || tr("Reaction") }));
   }
 
   const form = draft && (
@@ -329,13 +330,13 @@ export function ReactionsPanel({
               // A new reaction takes the task's own wording until somebody writes theirs.
               set({
                 task: e.target.value,
-                title: draft.title || task?.label || "",
-                description: draft.description || task?.description || "",
+                title: draft.title || (task ? tr(task.label) : ""),
+                description: draft.description || (task ? tr(task.description) : ""),
               });
             }}
           >
             <option value="" />
-            {REACTION_TASKS.map((t) => <option key={t.id} value={t.id}>{t.label}</option>)}
+            {REACTION_TASKS.map((t) => <option key={t.id} value={t.id}>{tr(t.label)}</option>)}
           </select>
         </div>
         <div className="grid gap-1 sm:grid-cols-[12rem_1fr] sm:gap-4">
@@ -373,7 +374,7 @@ export function ReactionsPanel({
                   onChange={(e) => set({ events: draft.events.map((x, j) => (j === i ? { ...x, event: e.target.value } : x)) })}>
                   <option value="" />
                   {REACTION_EVENTS.filter((o) => !taken.has(o.id)).map((o) => (
-                    <option key={o.id} value={o.id}>{o.label}</option>
+                    <option key={o.id} value={o.id}>{tr(o.label)}</option>
                   ))}
                 </select>
                 <span className="hidden sm:block" />
@@ -449,7 +450,7 @@ export function ReactionsPanel({
                     </td>
                     <td className="px-2 py-2">
                       <ul className="list-disc pl-5 text-ink">
-                        {r.events.map((e) => <li key={e}>{reactionEventLabel(e)}</li>)}
+                        {r.events.map((e) => <li key={e}>{tr(reactionEventLabel(e))}</li>)}
                       </ul>
                     </td>
                     <td className="px-2 py-2 text-center">
@@ -459,11 +460,11 @@ export function ReactionsPanel({
                       {canEdit && (
                         <span className="flex justify-end">
                           <button type="button" aria-label={tr("Copy {name}", { name: r.title })} className={iconBtn}
-                            onClick={() => setDraft(fromReaction(r, true))}>
+                            onClick={() => setDraft(fromReaction(r, tr, true))}>
                             <CopyIcon />
                           </button>
                           <button type="button" aria-label={tr("Edit {name}", { name: r.title })} className={iconBtn}
-                            onClick={() => setDraft(fromReaction(r))}>
+                            onClick={() => setDraft(fromReaction(r, tr))}>
                             <EditIcon />
                           </button>
                           <button type="button" aria-label={tr("Delete {name}", { name: r.title })} className={iconBtn}
@@ -498,7 +499,7 @@ export function ReactionsPanel({
                 const on = reactions.filter((r) => r.events.includes(ev.id));
                 return (
                   <tr key={ev.id} className="border-b border-line">
-                    <td className="px-2 py-2 text-ink">{ev.label}</td>
+                    <td className="px-2 py-2 text-ink">{tr(ev.label)}</td>
                     <td className="px-2 py-2">
                       {on.length === 0 ? (
                         <span className="text-ink-faint">—</span>

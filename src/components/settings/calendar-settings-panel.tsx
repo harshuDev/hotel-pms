@@ -70,7 +70,7 @@ export function CalendarSettingsPanel({
             return (
               <div key={c.id} className="mt-5">
                 <label htmlFor={`cal-${c.id}`} className="block text-[11.5px] text-ink-muted">
-                  {c.label}
+                  {tr(c.label)}
                 </label>
                 <div className="mt-1 grid grid-cols-2 gap-4 sm:gap-7">
                   <input
@@ -95,7 +95,7 @@ export function CalendarSettingsPanel({
                     */}
                     <input
                       type="color"
-                      aria-label={tr("Pick the {lowerCase}", { lowerCase: c.label.toLowerCase() })}
+                      aria-label={tr("Pick the colour: {setting}", { setting: tr(c.label) })}
                       value={valid ? value.trim().toLowerCase() : c.default}
                       disabled={!canEdit}
                       onChange={(e) => setValues({ ...values, [c.id]: e.target.value })}
@@ -117,7 +117,7 @@ export function CalendarSettingsPanel({
                   onChange={(e) => setValues({ ...values, [s.id]: e.target.checked })}
                   className="h-[18px] w-[18px] accent-brass"
                 />
-                {s.label}
+                {tr(s.label)}
               </label>
             ))}
           </div>

@@ -170,7 +170,7 @@ export function DiscountsPanel({
       const result = await saveDiscount({ id: d.id, title: d.title, kind: d.kind, percentBps, amountCents });
       if (result.ok) setDraft(null);
       return result;
-    }, `${d.title.trim() || "Discount"} saved.`);
+    }, tr("{name} saved.", { name: d.title.trim() || tr("Discount") }));
   }
 
   return (

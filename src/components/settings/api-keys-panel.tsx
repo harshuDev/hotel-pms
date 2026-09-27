@@ -159,7 +159,7 @@ export function DeveloperKeysPanel({
       <section className={cn(card, "px-4 py-5 sm:px-6")}>
         <p className="text-center text-[13px] text-ink">
           {tr("Endpoint:")}{" "}
-          <span className="break-all font-semibold">{origin ? tr("{origin}/api/public/v1/{propertyId}/", { origin: origin, propertyId: propertyId }) : ""}</span>
+          <span className="break-all font-semibold">{origin ? `${origin}/api/public/v1/${propertyId}/` : ""}</span>
         </p>
         <div className="mt-3 overflow-x-auto">
           <table className="w-full min-w-[40rem] text-[12.5px]">
@@ -264,7 +264,7 @@ export function DeveloperKeysPanel({
                 setName("");
               }
               return result;
-            }, `${n || "Developer key"} added.`);
+            }, tr("{name} added.", { name: n || tr("Developer key") }));
           }}
         >
           <input

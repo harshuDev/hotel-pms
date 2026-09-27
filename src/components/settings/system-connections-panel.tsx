@@ -84,12 +84,12 @@ export function SystemConnectionsPanel({
       });
       if (result.ok) setDraft(null);
       return result;
-    }, tr("{name} saved.", { name: d.name.trim() || systemProvider(category, d.provider).label }));
+    }, tr("{name} saved.", { name: d.name.trim() || tr(systemProvider(category, d.provider).label) }));
   }
 
   return (
     <div className="max-w-6xl space-y-2">
-      <h2 className="border-b border-line pb-1 text-[24px] text-ink">{SYSTEM_CATEGORIES[category].title}</h2>
+      <h2 className="border-b border-line pb-1 text-[24px] text-ink">{tr(SYSTEM_CATEGORIES[category].title)}</h2>
       <section className={cn(card, "px-4 py-5 sm:px-6")}>
         {systems.length === 0 ? (
           <div className="flex flex-col items-center py-8 text-ink-faint">
@@ -113,7 +113,7 @@ export function SystemConnectionsPanel({
               {systems.map((s) => (
                 <tr key={s.id} className={cn("border-b border-line", draft?.id === s.id && "bg-shell/70")}>
                   <td className="px-2 py-1.5 text-ink">{s.name}</td>
-                  <td className="px-2 py-1.5 text-ink-muted">{systemProvider(category, s.provider).label}</td>
+                  <td className="px-2 py-1.5 text-ink-muted">{tr(systemProvider(category, s.provider).label)}</td>
                   <td className="px-2 py-1.5 text-ink">{s.isActive ? tr("Yes") : tr("No")}</td>
                   <td className="py-0.5">
                     {canEdit && (
@@ -163,16 +163,16 @@ export function SystemConnectionsPanel({
               save(draft);
             }}
           >
-            <h3 className="border-b border-line pb-1 text-[15px] text-ink">{labels.label}</h3>
+            <h3 className="border-b border-line pb-1 text-[15px] text-ink">{tr(labels.label)}</h3>
             <Row label={tr("Name")} htmlFor="kl-name">
               <input id="kl-name" value={draft.name} maxLength={80} autoFocus
                 onChange={(e) => setDraft({ ...draft, name: e.target.value })} className={field} />
             </Row>
-            <Row label={labels.account} htmlFor="kl-account">
+            <Row label={tr(labels.account)} htmlFor="kl-account">
               <input id="kl-account" value={draft.accountId} maxLength={200} autoComplete="off"
                 onChange={(e) => setDraft({ ...draft, accountId: e.target.value })} className={field} />
             </Row>
-            <Row label={labels.secret} htmlFor="kl-secret">
+            <Row label={tr(labels.secret)} htmlFor="kl-secret">
               <input id="kl-secret" type="password" value={draft.secret} maxLength={500} autoComplete="new-password"
                 placeholder={draft.hasSecret ? tr("Saved") : ""}
                 onChange={(e) => setDraft({ ...draft, secret: e.target.value })} className={field} />
@@ -201,7 +201,7 @@ export function SystemConnectionsPanel({
                     setDraft({ id: null, provider: p.id, name: p.label, isActive: false, accountId: "", secret: "", hasSecret: false });
                   }}
                 >
-                  {p.label}
+                  {tr(p.label)}
                 </MenuItem>
               ))}
             </Menu>

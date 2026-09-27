@@ -375,7 +375,7 @@ export function SeasonsPanel({
                     const result = await saveSeasonType({ id: edit.id, kind: edit.kind, name: edit.name, color: edit.color });
                     if (result.ok) setEdit(null);
                     return result;
-                  }, `${edit.name.trim() || "Season"} saved.`)
+                  }, tr("{name} saved.", { name: edit.name.trim() || tr("Season") }))
                 }>
                 {tr("Save")}
               </button>

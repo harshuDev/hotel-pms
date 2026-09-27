@@ -512,7 +512,7 @@ export function ExtrasPanel({
             >
               {PAGE_SIZES.map((n) => (
                 <option key={n} value={n}>
-                  {n} {tr("/ page")}
+                  {tr("{n} / page", { n })}
                 </option>
               ))}
             </select>

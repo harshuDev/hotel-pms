@@ -177,7 +177,7 @@ export function RoomTypesPanel({
       }
       setDraft(null);
       return { ok: true };
-    }, `${d.name.trim() || "Room type"} saved.`);
+    }, tr("{name} saved.", { name: d.name.trim() || tr("Room type") }));
   }
 
   return (
@@ -478,7 +478,7 @@ export function RoomTypesPanel({
                 });
                 if (result.ok) setVirtual(null);
                 return result;
-              }, `${virtual.displayName.trim() || "Virtual room type"} saved.`);
+              }, tr("{name} saved.", { name: virtual.displayName.trim() || tr("Virtual room type") }));
             }}
           >
             <h4 className="border-b border-line pb-1 text-[16px] text-ink">

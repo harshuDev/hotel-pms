@@ -98,8 +98,11 @@ export default async function EndOfDayReportPage({
 
           {row.shiftsOpen > 0 && (
             <div className="mb-4 rounded-lg border border-warn/40 bg-warn-wash px-4 py-3 text-[13px] text-warn-deep">
-              {row.shiftsOpen} {tr("cashier shift")}
-              {row.shiftsOpen === 1 ? tr(" is") : tr("s are")} {tr("still open on this date. The night audit refuses to close a day while one is, so the figures below can still move.")}
+              {tr.plural(
+                row.shiftsOpen,
+                "{n} cashier shift is still open on this date. The night audit refuses to close a day while one is, so the figures below can still move.",
+                "{n} cashier shifts are still open on this date. The night audit refuses to close a day while one is, so the figures below can still move.",
+              )}
             </div>
           )}
 

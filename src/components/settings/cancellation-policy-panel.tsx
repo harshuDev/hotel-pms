@@ -188,7 +188,7 @@ export function CancellationPolicyPanel({
       });
       if (result.ok) setDraft(null);
       return result;
-    }, `${d.name.trim() || "Cancellation policy"} saved.`);
+    }, tr("{name} saved.", { name: d.name.trim() || tr("Cancellation policy") }));
   }
 
   function radio<K extends "depositRule" | "refundRule" | "cancelRule" | "noShowRule">(

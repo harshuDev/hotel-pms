@@ -1,4 +1,5 @@
 import { msg } from "@/lib/i18n/translate";
+
 /**
  * Settings -> Communications & Notifications -> Hotel Emails Preferences
  * (0074), in the client's reference's order and wording.
@@ -13,46 +14,46 @@ import { msg } from "@/lib/i18n/translate";
 export const EMAIL_PREFERENCES = [
   {
     id: "channel_booking_confirmation",
-    name: "Channel - Booking Confirmation",
+    name: msg("Channel - Booking Confirmation"),
     description: msg("Send email when system receives booking via channel"),
   },
   {
     id: "channel_booking_modification",
-    name: "Channel - Booking Modification",
+    name: msg("Channel - Booking Modification"),
     description: msg("Send email when system receives booking modification via channel"),
   },
   {
     id: "pre_arrival",
-    name: "Pre-Arrival Email",
+    name: msg("Pre-Arrival Email"),
     description:
       msg("Send email each day; include pdf with guest registration forms and folios for arriving guests"),
   },
   {
     id: "channel_booking_cancellation",
-    name: "Channel - Booking Cancellation",
+    name: msg("Channel - Booking Cancellation"),
     description: msg("Send email when system receives a booking cancellation via channel"),
   },
   {
     id: "channel_missing_booking_cancellation",
-    name: "Channel - Missing Booking Cancellation",
+    name: msg("Channel - Missing Booking Cancellation"),
     description:
       msg("Send email when system receives a booking cancellation via channel, but corresponding booking doesn't exist in system"),
   },
   {
     id: "channel_missing_booking_modification",
-    name: "Channel - Missing Booking Modification",
+    name: msg("Channel - Missing Booking Modification"),
     description:
       msg("Send email when system receives booking modification via channel, but corresponding booking doesn't exist in system"),
   },
   {
     id: "channel_overbooking",
-    name: "Channel - Overbooking Notification",
+    name: msg("Channel - Overbooking Notification"),
     description:
       msg("Send email when system receives booking that cannot be allocated. Possible reasons: 1. Overbooking. 2. There is space in calendar, but it split over several rooms of that type, needs manual intervention."),
   },
   {
     id: "channel_rate_mapping_error",
-    name: "Channel - Rate Mapping Error",
+    name: msg("Channel - Rate Mapping Error"),
     description:
       msg("Send email when system receives booking with room rate / room type combination that is not configured for sync or improperly configured"),
   },

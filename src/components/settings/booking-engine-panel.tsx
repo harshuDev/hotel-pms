@@ -190,7 +190,7 @@ export function BookingEnginePanel({
       });
       if (result.ok) setDraft(null);
       return result;
-    }, `${d.title.trim() || "Profile"} saved.`);
+    }, tr("{name} saved.", { name: d.title.trim() || tr("Profile") }));
   }
 
   function saveTexts() {

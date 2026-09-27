@@ -73,7 +73,7 @@ function ColorField({ label, value, onChange }: { label: string; value: string; 
           onChange={(e) => onChange(e.target.value.trim())} className={line} />
       </label>
       <label className="block">
-        <span className="sr-only">{label} {tr("picker")}</span>
+        <span className="sr-only">{tr("{label} picker", { label })}</span>
         <input
           type="color"
           value={valid ? value.toLowerCase() : "#000000"}

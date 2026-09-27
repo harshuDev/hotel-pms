@@ -1,6 +1,7 @@
 "use client";
 
 import { useT } from "@/components/i18n";
+import { msg } from "@/lib/i18n/translate";
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { cn } from "@/components/ui";
@@ -19,9 +20,9 @@ import type { RoomStatus } from "@/lib/types";
  * Postgres refuses it too.
  */
 const CHOICES: { value: RoomStatus; label: string; tone: string }[] = [
-  { value: "vacant_clean", label: "Clean", tone: "hover:bg-emerald-50 hover:text-emerald-800" },
-  { value: "vacant_dirty", label: "Dirty", tone: "hover:bg-rose-50 hover:text-rose-700" },
-  { value: "ooo", label: "Out of order", tone: "hover:bg-slate-100 hover:text-slate-700" },
+  { value: "vacant_clean", label: msg("Clean"), tone: "hover:bg-emerald-50 hover:text-emerald-800" },
+  { value: "vacant_dirty", label: msg("Dirty"), tone: "hover:bg-rose-50 hover:text-rose-700" },
+  { value: "ooo", label: msg("Out of order"), tone: "hover:bg-slate-100 hover:text-slate-700" },
 ];
 
 export function RoomStatusAction({
@@ -67,7 +68,7 @@ export function RoomStatusAction({
             c.tone,
           )}
         >
-          {c.label}
+          {tr(c.label)}
         </button>
       ))}
       {error && <span className="text-xxs text-rose-700">{error}</span>}

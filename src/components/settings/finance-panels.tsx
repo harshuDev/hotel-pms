@@ -159,7 +159,7 @@ export function PaymentTypesPanel({
       });
       if (result.ok) setDraft(null);
       return result;
-    }, `${d.title.trim() || "Payment type"} saved.`);
+    }, tr("{name} saved.", { name: d.title.trim() || tr("Payment type") }));
   }
 
   return (
@@ -377,7 +377,7 @@ export function TaxesPanel({
       });
       if (result.ok) setDraft(null);
       return result;
-    }, `${d.name.trim() || "Tax"} saved.`);
+    }, tr("{name} saved.", { name: d.name.trim() || tr("Tax") }));
   }
 
   return (

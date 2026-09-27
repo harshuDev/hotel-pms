@@ -42,6 +42,7 @@ function CodeEditor({
   onChange: (v: string) => void;
   readOnly: boolean;
 }) {
+  const tr = useT();
   const [full, setFull] = useState(false);
   const gutter = useRef<HTMLDivElement>(null);
   const lines = value.split("\n").length;

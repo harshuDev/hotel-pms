@@ -50,7 +50,7 @@ export function FacilitiesPanel({
       const result = await saveFacility(d);
       if (result.ok) setDraft(null);
       return result;
-    }, d.id ? "Facility saved." : "Facility added.");
+    }, d.id ? tr("Facility saved.") : tr("Facility added."));
   }
 
   function editorRow() {

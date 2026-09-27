@@ -139,12 +139,12 @@ export function EmailPreferencesPanel({
             <tbody>
               {EMAIL_PREFERENCES.map((p) => (
                 <tr key={p.id} className="border-b border-line">
-                  <td className="py-3 pr-4 text-ink">{p.name}</td>
-                  <td className="py-3 pr-4 text-ink">{p.description}</td>
+                  <td className="py-3 pr-4 text-ink">{tr(p.name)}</td>
+                  <td className="py-3 pr-4 text-ink">{tr(p.description)}</td>
                   <td className="py-3 text-center">
                     <input
                       type="checkbox"
-                      aria-label={tr("{name} active", { name: p.name })}
+                      aria-label={tr("{name} active", { name: tr(p.name) })}
                       checked={prefs[p.id]}
                       disabled={!canEdit}
                       onChange={(e) => setPrefs({ ...prefs, [p.id]: e.target.checked })}

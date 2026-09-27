@@ -164,7 +164,7 @@ export function SalesChannelsPanel({
       });
       if (result.ok) setDraft(null);
       return result;
-    }, `${d.name.trim() || "Sales channel"} saved.`);
+    }, tr("{name} saved.", { name: d.name.trim() || tr("Sales channel") }));
   }
 
   function openMerge() {

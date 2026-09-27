@@ -74,7 +74,7 @@ export function AccountingCategoriesPanel({
       const result = await saveAccountingCategory(d);
       if (result.ok) setDraft(null);
       return result;
-    }, `${d.name.trim() || "Accounting category"} saved.`);
+    }, tr("{name} saved.", { name: d.name.trim() || tr("Accounting category") }));
   }
 
   function remove(c: AccountingCategory) {

@@ -59,7 +59,7 @@ export function HotelFeaturesPanel({
               {HOTEL_FEATURES.map((f) => (
                 <tr key={f.id} className="border-b border-line last:border-b-0">
                   <td className="py-3 pr-4 text-ink">
-                    <label htmlFor={`feature-${f.id}`}>{f.label}</label>
+                    <label htmlFor={`feature-${f.id}`}>{tr(f.label)}</label>
                   </td>
                   <td className="py-3 text-center">
                     <input

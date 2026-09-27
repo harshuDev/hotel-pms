@@ -201,7 +201,7 @@ export default async function InvoicePage({
             <div key={p.key} className="flex justify-between py-0.5 text-ink-muted">
               <span>
                 {p.description}
-                {p.reversed ? tr(" (reversed)") : ""}, {day(p.date)}
+                {p.reversed ? ` (${tr("reversed")})` : ""}, {day(p.date)}
               </span>
               <span className="tnum">{money(p.amountCents)}</span>
             </div>

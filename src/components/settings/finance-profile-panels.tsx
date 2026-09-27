@@ -1,6 +1,7 @@
 "use client";
 
 import { useT } from "@/components/i18n";
+import { msg } from "@/lib/i18n/translate";
 import { useState } from "react";
 import { cn } from "@/components/ui";
 import { EditIcon, TrashIcon } from "@/components/settings/finance-panels";
@@ -90,7 +91,7 @@ export function PosProfilesPanel({
       const result = await savePosProfile(d);
       if (result.ok) setDraft(null);
       return result;
-    }, `${d.posType ? posTypeLabel(d.posType) : "Pos"} profile saved.`);
+    }, tr("{name} profile saved.", { name: d.posType ? tr(posTypeLabel(d.posType)) : tr("Pos") }));
   }
 
   return (
@@ -109,14 +110,14 @@ export function PosProfilesPanel({
           <tbody>
             {profiles.map((p) => (
               <tr key={p.id} className="border-b border-line even:bg-shell/70">
-                <td className="px-4 py-2 text-ink">{posTypeLabel(p.posType)}</td>
+                <td className="px-4 py-2 text-ink">{tr(posTypeLabel(p.posType))}</td>
                 <td className="px-4 py-2">{p.isEnabled ? <Tick label={tr("Enabled")} /> : null}</td>
                 <td className="px-2 py-1">
                   {canEdit && (
                     <span className="flex justify-end">
                       <button
                         type="button"
-                        aria-label={tr("Edit {posTypeLabel}", { posTypeLabel: posTypeLabel(p.posType) })}
+                        aria-label={tr("Edit {name}", { name: tr(posTypeLabel(p.posType)) })}
                         className={iconButton}
                         onClick={() => setDraft({ id: p.id, posType: p.posType, isEnabled: p.isEnabled })}
                       >
@@ -124,11 +125,11 @@ export function PosProfilesPanel({
                       </button>
                       <button
                         type="button"
-                        aria-label={tr("Delete {posTypeLabel}", { posTypeLabel: posTypeLabel(p.posType) })}
+                        aria-label={tr("Delete {name}", { name: tr(posTypeLabel(p.posType)) })}
                         className={iconButton}
                         onClick={() => {
-                          if (!confirm(tr("Delete the {posTypeLabel} profile?", { posTypeLabel: posTypeLabel(p.posType) }))) return;
-                          run(() => deletePosProfile(p.id), tr("{posTypeLabel} profile deleted.", { posTypeLabel: posTypeLabel(p.posType) }));
+                          if (!confirm(tr("Delete the {name} profile?", { name: tr(posTypeLabel(p.posType)) }))) return;
+                          run(() => deletePosProfile(p.id), tr("{name} profile deleted.", { name: tr(posTypeLabel(p.posType)) }));
                         }}
                       >
                         <TrashIcon />
@@ -156,7 +157,7 @@ export function PosProfilesPanel({
                 <option value="">{tr("Type")}</option>
                 {free.map((t) => (
                   <option key={t.id} value={t.id} className="text-ink">
-                    {t.label}
+                    {tr(t.label)}
                   </option>
                 ))}
               </select>
@@ -209,7 +210,7 @@ export function PosProfilesPanel({
 type CurrencyDraft = { id: string | null; currency: string; rateKind: CurrencyRateKind; rate: string };
 
 function rateLabel(p: CurrencyProfile, base: string) {
-  if (p.rateKind === "live" || p.fixedRateMicros === null) return "Live Exchange";
+  if (p.rateKind === "live" || p.fixedRateMicros === null) return msg("Live Exchange");
   return `1 ${p.currency} = ${formatRateMicros(p.fixedRateMicros)} ${base}`;
 }
 
@@ -286,7 +287,7 @@ export function CurrenciesPanel({
                 <tr key={p.id} className="border-b border-line">
                   <td className="px-1 py-2 text-ink">{p.currency}</td>
                   <td className="px-1 py-2" />
-                  <td className="px-1 py-2 text-ink">{rateLabel(p, defaultCurrency)}</td>
+                  <td className="px-1 py-2 text-ink">{tr.message(rateLabel(p, defaultCurrency))}</td>
                   <td className="py-1">
                     {canEdit && (
                       <span className="flex justify-end">

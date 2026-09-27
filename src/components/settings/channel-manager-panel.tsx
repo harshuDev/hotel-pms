@@ -5,7 +5,6 @@ import { useState } from "react";
 import { cn } from "@/components/ui";
 import { Menu, MenuItem } from "@/components/menu";
 import { EditIcon } from "@/components/settings/finance-panels";
-import { formatStampInProperty } from "@/lib/dates";
 import {
   CHANNEL_MANAGERS,
   DAYS_TO_SYNC,
@@ -280,12 +279,12 @@ export function ChannelManagerPanel({
                   <tr key={c.id} className={cn("border-b border-line", draft?.id === c.id && "bg-shell/70")}>
                     <td className="px-1.5 py-1.5 text-ink">
                       {c.connectionName}
-                      <span className="ml-2 text-[11.5px] text-ink-muted">{channelManagerLabel(c.provider)}</span>
+                      <span className="ml-2 text-[11.5px] text-ink-muted">{tr(channelManagerLabel(c.provider))}</span>
                     </td>
                     <td className="px-1.5 py-1.5 text-ink">{c.isActive ? tr("Yes") : tr("No")}</td>
                     <td className="px-1.5 py-1.5 text-ink">{c.isSynced ? tr("Yes") : tr("No")}</td>
                     <td className="tnum px-1.5 py-1.5 text-ink">
-                      {c.syncedAt ? formatStampInProperty(c.syncedAt, timezone) : "—"}
+                      {c.syncedAt ? tr.stamp(c.syncedAt, timezone) : "—"}
                     </td>
                     <td className="py-0.5">
                       {canEdit && (

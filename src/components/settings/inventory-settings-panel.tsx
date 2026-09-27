@@ -188,7 +188,7 @@ export function InventorySettingsPanel({
           {INVENTORY_VISIBILITY.map((v) => (
             <Tick
               key={v.field}
-              label={v.label}
+              label={tr(v.label)}
               checked={visibility[v.field]}
               disabled={!canEdit}
               onChange={(checked) => setVisibility({ ...visibility, [v.field]: checked })}
