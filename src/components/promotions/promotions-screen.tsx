@@ -1,6 +1,7 @@
 "use client";
 
 import { useT } from "@/components/i18n";
+import { msg, type Translator } from "@/lib/i18n/translate";
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { format, parseISO } from "date-fns";
@@ -10,31 +11,24 @@ import { savePromotion } from "@/lib/actions/promotions";
 import type { Promotion, PromotionKind, RatePlan } from "@/lib/types";
 import { useCurrency } from "@/components/currency";
 
-const DOW = [
-  { value: 1, label: "Mon" },
-  { value: 2, label: "Tue" },
-  { value: 3, label: "Wed" },
-  { value: 4, label: "Thu" },
-  { value: 5, label: "Fri" },
-  { value: 6, label: "Sat" },
-  { value: 0, label: "Sun" },
-];
+/** Monday first; the names come from `tr.weekday()`. */
+const DOW = [1, 2, 3, 4, 5, 6, 0].map((value) => ({ value }));
 
 const KINDS: { value: PromotionKind; label: string; hint: string }[] = [
   {
     value: "percent_off",
-    label: "Percentage off",
-    hint: "Comes off every night the offer covers.",
+    label: msg("Percentage off"),
+    hint: msg("Comes off every night the offer covers."),
   },
   {
     value: "amount_off",
-    label: "Amount off a night",
-    hint: "A fixed sum off each night, never more than the night costs.",
+    label: msg("Amount off a night"),
+    hint: msg("A fixed sum off each night, never more than the night costs."),
   },
   {
     value: "free_nights",
-    label: "Stay N, pay M",
-    hint: "The cheapest qualifying nights go to zero. Stay 3 pay 2 gives one free night in every three.",
+    label: msg("Stay N, pay M"),
+    hint: msg("The cheapest qualifying nights go to zero. Stay 3 pay 2 gives one free night in every three."),
   },
 ];
 
@@ -42,55 +36,6 @@ const label =
   "mb-1 block text-xxs font-semibold uppercase tracking-[0.1em] text-ink-faint";
 const field =
   "w-full rounded-md border border-line px-3 py-2 text-[13px] text-ink focus:border-brass focus:outline-none focus:ring-1 focus:ring-brass";
-
-/** What a promotion takes off, as a phrase rather than a column of nulls. */
-function describe(p: Promotion, currency: string) {
-  switch (p.kind) {
-    case "percent_off":
-      return `${((p.percentBps ?? 0) / 100).toFixed(
-        (p.percentBps ?? 0) % 100 === 0 ? 0 : 2,
-      )}% off`;
-    case "amount_off":
-      return `${formatMoney(p.amountOffCents ?? 0, currency)} off a night`;
-    case "free_nights":
-      return `Stay ${(p.paidNights ?? 0) + (p.freeNights ?? 0)}, pay ${p.paidNights ?? 0}`;
-  }
-}
-
-/** The conditions, in the order a person would read them out. */
-function conditions(p: Promotion): string[] {
-  const out: string[] = [];
-  if (p.minNights && p.maxNights) out.push(`${p.minNights}–${p.maxNights} nights`);
-  else if (p.minNights) out.push(`${p.minNights}+ nights`);
-  else if (p.maxNights) out.push(`up to ${p.maxNights} nights`);
-
-  if (p.minAdvanceDays) out.push(`booked ${p.minAdvanceDays}+ days ahead`);
-  if (p.maxAdvanceDays !== null && p.maxAdvanceDays !== undefined)
-    out.push(`booked within ${p.maxAdvanceDays} days`);
-
-  if (p.arrivalDaysOfWeek && p.arrivalDaysOfWeek.length > 0) {
-    out.push(
-      `arriving ${p.arrivalDaysOfWeek
-        .map((d) => DOW.find((x) => x.value === d)?.label ?? d)
-        .join(", ")}`,
-    );
-  }
-  if (p.stayFrom || p.stayTo) {
-    out.push(
-      `nights ${p.stayFrom ? tr.date(p.stayFrom, "d MMM") : "any"} to ${
-        p.stayTo ? tr.date(p.stayTo, "d MMM") : "any"
-      }`,
-    );
-  }
-  if (p.sellFrom || p.sellTo) {
-    out.push(
-      `sold ${p.sellFrom ? tr.date(p.sellFrom, "d MMM") : "any"} to ${
-        p.sellTo ? tr.date(p.sellTo, "d MMM") : "any"
-      }`,
-    );
-  }
-  return out;
-}
 
 const EMPTY = {
   id: null as string | null,
@@ -124,11 +69,10 @@ const EMPTY = {
 /**
  * The headline figure on a card, short enough to sit in the artwork band.
  *
- * `describe()` above writes the same thing as a sentence for the form; this is
- * the poster version. Two renderings of one fact, because a card and a
- * paragraph do not want the same words.
+ * The poster version of what the offer takes off; the line under the name
+ * (`scopeLine()`) says it as a phrase.
  */
-function headline(p: Promotion, currency: string) {
+function headline(p: Promotion, currency: string, tr: Translator) {
   switch (p.kind) {
     case "percent_off": {
       const pct = (p.percentBps ?? 0) / 100;
@@ -137,19 +81,22 @@ function headline(p: Promotion, currency: string) {
     case "amount_off":
       return formatMoney(p.amountOffCents ?? 0, currency);
     case "free_nights":
-      return `${p.freeNights ?? 0} free`;
+      return tr("{n} free", { n: p.freeNights ?? 0 });
   }
 }
 
 /** The line under the name: what comes off, and what it comes off. */
-function scopeLine(p: Promotion, currency: string) {
+function scopeLine(p: Promotion, currency: string, tr: Translator) {
   const off =
     p.kind === "percent_off"
-      ? `${((p.percentBps ?? 0) / 100).toFixed(1)}% Discount`
+      ? tr("{pct}% Discount", { pct: ((p.percentBps ?? 0) / 100).toFixed(1) })
       : p.kind === "amount_off"
-        ? `${formatMoney(p.amountOffCents ?? 0, currency)} Discount`
-        : `Stay ${(p.paidNights ?? 0) + (p.freeNights ?? 0)}, pay ${p.paidNights ?? 0}`;
-  return `${off}, ${p.roomTypeNames ?? "All Rooms"}`;
+        ? tr("{amount} Discount", { amount: formatMoney(p.amountOffCents ?? 0, currency) })
+        : tr("Stay {stay}, pay {pay}", {
+            stay: (p.paidNights ?? 0) + (p.freeNights ?? 0),
+            pay: p.paidNights ?? 0,
+          });
+  return `${off}, ${p.roomTypeNames ?? tr("All Rooms")}`;
 }
 
 /**
@@ -167,7 +114,7 @@ function DayBoxes({ days }: { days: number[] | null }) {
   return (
     <span className="flex gap-[3px]" title={
       days && days.length > 0
-        ? `Arrivals on ${days.map((d) => DOW.find((x) => x.value === d)?.label ?? d).join(", ")}`
+        ? tr("Arrivals on {days}", { days: days.map((d) => tr.weekday(d)).join(", ") })
         : tr("Arrivals any day")
     }>
       {DOW.map((d) => {
@@ -188,13 +135,11 @@ function DayBoxes({ days }: { days: number[] | null }) {
 }
 
 /** The stay window, as the reference prints it: "04 Apr - 30 Jun". */
-function dateRange(p: Promotion) {
+function dateRange(p: Promotion, tr: Translator) {
   const from = p.stayFrom ?? p.sellFrom;
   const to = p.stayTo ?? p.sellTo;
-  if (!from && !to) return "Any dates";
-  return `${from ? tr.date(from, "dd MMM") : "Any"} - ${
-    to ? tr.date(to, "dd MMM") : "Any"
-  }`;
+  if (!from && !to) return tr("Any dates");
+  return `${from ? tr.date(from, "dd MMM") : tr("Any")} - ${to ? tr.date(to, "dd MMM") : tr("Any")}`;
 }
 
 /**
@@ -215,6 +160,7 @@ const TINTS = [
 ];
 
 function Artwork({ offer, muted }: { offer: Promotion; muted: boolean }) {
+  const tr = useT();
   const currency = useCurrency();
   // Deterministic: the same offer keeps the same tint across renders and
   // reloads, which a random pick would not.
@@ -231,7 +177,7 @@ function Artwork({ offer, muted }: { offer: Promotion; muted: boolean }) {
       )}
     >
       <span className="font-display text-3xl font-semibold tracking-tightest text-white">
-        {headline(offer, currency)}
+        {headline(offer, currency, tr)}
       </span>
     </div>
   );
@@ -264,7 +210,7 @@ function OfferCard({
           <p className="truncate font-display text-[13px] font-semibold uppercase tracking-[0.04em] text-ink">
             {offer.name}
           </p>
-          <p className="mt-0.5 truncate text-xs text-ink-muted">{scopeLine(offer, currency)}</p>
+          <p className="mt-0.5 truncate text-xs text-ink-muted">{scopeLine(offer, currency, tr)}</p>
         </div>
 
         <DayBoxes days={offer.arrivalDaysOfWeek} />
@@ -285,7 +231,7 @@ function OfferCard({
             the cards in a row at different heights.
           */}
           <span className="tnum truncate whitespace-nowrap">
-            {offer.bookingsTaken} {tr("booking")}{offer.bookingsTaken === 1 ? "" : "s"}
+            {tr.plural(offer.bookingsTaken, "{n} booking", "{n} bookings")}
             {offer.discountGivenCents > 0 &&
               ` · ${formatMoney(offer.discountGivenCents, currency)}`}
           </span>
@@ -293,7 +239,7 @@ function OfferCard({
 
         <div className="mt-auto flex items-end justify-between gap-2 pt-1">
           <span className="tnum text-xs font-semibold text-ink">
-            {dateRange(offer)}
+            {dateRange(offer, tr)}
           </span>
           {canEdit && (
             <button
@@ -434,14 +380,14 @@ export function PromotionsScreen({
       try {
         amountCents = parseMoney(form.amount);
       } catch {
-        setMessage({ ok: false, text: "That is not an amount. Try 25 or 25.50." });
+        setMessage({ ok: false, text: tr("That is not an amount. Try 25 or 25.50.") });
         return;
       }
     }
 
     const percent = form.percent.trim() === "" ? null : Number(form.percent);
     if (form.kind === "percent_off" && (percent === null || Number.isNaN(percent))) {
-      setMessage({ ok: false, text: "Enter a percentage, like 15." });
+      setMessage({ ok: false, text: tr("Enter a percentage, like 15.") });
       return;
     }
 
@@ -562,12 +508,12 @@ export function PromotionsScreen({
                         : "border-line text-ink-muted hover:bg-shell hover:text-ink",
                     )}
                   >
-                    {k.label}
+                    {tr(k.label)}
                   </button>
                 ))}
               </div>
               <p className="mt-1.5 text-xs text-ink-faint">
-                {KINDS.find((k) => k.value === form.kind)?.hint}
+                {tr(KINDS.find((k) => k.value === form.kind)?.hint ?? "")}
               </p>
             </div>
 
@@ -694,7 +640,7 @@ export function PromotionsScreen({
                         : "border-line text-ink-muted hover:bg-shell hover:text-ink",
                     )}
                   >
-                    {d.label}
+                    {tr.weekday(d.value)}
                   </button>
                 ))}
               </div>

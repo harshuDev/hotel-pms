@@ -153,7 +153,7 @@ export function MeetingRoomsScreen({
 
     const guests = Number(newBooking.guestCount);
     if (!Number.isSafeInteger(guests) || guests < 1) {
-      setMessage({ ok: false, text: "How many people is it for?" });
+      setMessage({ ok: false, text: tr("How many people is it for?") });
       return;
     }
 
@@ -183,7 +183,7 @@ export function MeetingRoomsScreen({
     startTransition(async () => {
       const result = await fn();
       if (!result.ok) {
-        setMessage({ ok: false, text: result.error ?? "That did not work." });
+        setMessage({ ok: false, text: result.error ?? tr("That did not work.") });
         return;
       }
       setMessage({ ok: true, text: done });
@@ -280,7 +280,7 @@ export function MeetingRoomsScreen({
                       </span>
                       {room.capacity !== null && (
                         <span className="tnum ml-1.5 text-xxs text-ink-faint">
-                          {tr("seats")}{" "}{room.capacity}
+                          {tr("seats {n}", { n: room.capacity })}
                         </span>
                       )}
                     </td>
@@ -315,9 +315,13 @@ export function MeetingRoomsScreen({
                         <td
                           key={d}
                           className="border-t border-line px-1 py-1.5 text-center"
-                          title={`${cell?.eventName} · ${cell?.guestCount} people${
-                            cell?.customerName ? ` · ${cell.customerName}` : ""
-                          }`}
+                          title={[
+                            cell?.eventName,
+                            tr.plural(cell?.guestCount ?? 0, "{n} person", "{n} people"),
+                            cell?.customerName,
+                          ]
+                            .filter(Boolean)
+                            .join(" · ")}
                         >
                           <Link
                             href={href(from, cell?.bookingId)}
@@ -403,7 +407,7 @@ export function MeetingRoomsScreen({
               />
               {newBooking.capacity !== null && (
                 <p className="mt-1 text-xxs text-ink-faint">
-                  {tr("Seats")}{" "}{newBooking.capacity}.
+                  {tr("Seats {n}.", { n: newBooking.capacity })}
                 </p>
               )}
             </div>
@@ -508,10 +512,12 @@ export function MeetingRoomsScreen({
             <div>
               <p className={label}>{tr("When")}</p>
               <p className="text-[13px] text-ink">
-                {tr.date(booking.startsOn, "EEE d MMM")} {tr("to")}{" "}
-                {tr.date(booking.endsOn, "EEE d MMM")}
+                {tr("{from} to {to}", {
+                  from: tr.date(booking.startsOn, "EEE d MMM"),
+                  to: tr.date(booking.endsOn, "EEE d MMM"),
+                })}
                 <span className="ml-1.5 text-xxs text-ink-faint">
-                  {booking.days} {tr("day")}{booking.days === 1 ? "" : "s"}
+                  {tr.plural(booking.days, "{n} day", "{n} days")}
                 </span>
               </p>
             </div>
@@ -581,7 +587,7 @@ export function MeetingRoomsScreen({
                       try {
                         cents = parseMoney(charge);
                       } catch {
-                        setMessage({ ok: false, text: "That is not an amount. Try 450 or 450.50." });
+                        setMessage({ ok: false, text: tr("That is not an amount. Try 450 or 450.50.") });
                         return;
                       }
                       run(
@@ -631,7 +637,9 @@ export function MeetingRoomsScreen({
                 </div>
                 {booking.balanceCents > 0 && (
                   <p className="mt-1.5 text-xs leading-relaxed text-warn-deep">
-                    {tr("This booking still owes")}{" "}{formatMoney(booking.balanceCents, currency)}{tr(". Cancelling frees the room but does not write that off.")}
+                    {tr("This booking still owes {amount}. Cancelling frees the room but does not write that off.", {
+                      amount: formatMoney(booking.balanceCents, currency),
+                    })}
                   </p>
                 )}
               </div>
@@ -639,8 +647,10 @@ export function MeetingRoomsScreen({
           )}
 
           <p className="text-xs text-ink-faint">
-            {tr("Booked by")}{" "}{booking.bookedBy ?? tr("someone")} {tr("on")}{" "}
-            {tr.date(booking.createdAt, "d MMM yyyy")}.
+            {tr("Booked by {name} on {date}.", {
+              name: booking.bookedBy ?? tr("someone"),
+              date: tr.date(booking.createdAt, "d MMM yyyy"),
+            })}
           </p>
         </Sheet>
       )}
