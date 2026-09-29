@@ -717,54 +717,83 @@ function ExtraRow({
   railCell: string;
 }) {
   const { placed, lanes } = packLanes(bars, dates);
-  const rowH = rowHeight(lanes, false);
+
+  /*
+    PINNED, ONE LANE HIGH -- MORE CANCELLATIONS GO DOWN, NOT UP.
+
+    The band sits below every room row, which is fine at four rooms and
+    useless at 120: the client once cancelled a booking and reported it was
+    not going into Cancelled at all -- it was, a hundred and twenty rows down.
+    So it is pinned to the foot of the scroller while it has bars (sticky
+    rather than moved: it keeps its place under the rooms).
+
+    But pinned whole, every extra lane of cancellations raised it by a lane
+    and covered another room row: "when we don't have cancellation we can see
+    five rooms, when we have cancellation four ... if we have six we end up
+    seeing one room. The cancellation have to go down, not up." So only the
+    FIRST lane is pinned; the others follow it in the flow, below, where the
+    board scrolls down to them. The pinned band never grows, however many
+    are cancelled, and the count in the rail says how many there are.
+  */
+  const rest = pinned ? placed.filter((p) => p.lane > 0).map((p) => ({ ...p, lane: p.lane - 1 })) : [];
+  const head = pinned ? placed.filter((p) => p.lane === 0) : placed;
+  const headLanes = pinned ? 1 : lanes;
 
   return (
-    <div
-      className={cn(
-        "flex items-stretch",
-        /*
-          PINNED TO THE FOOT OF THE SCROLLER when it has something in it.
-
-          The Cancelled band sits below every room row, which is fine at four
-          rooms and useless at 120: the client cancelled a booking, looked at
-          the board, and reported that cancelling "cancel mein ja hi nhi rha
-          hai" -- it is not going into Cancelled at all. It was. It was a
-          hundred and twenty rows down, past every room in the hotel.
-          `calendar_bookings(..., true)` was returning all three cancelled
-          bookings correctly the whole time, which was checked against the
-          hosted database before anything here was touched.
-
-          Sticky rather than moved to the top: the band belongs under the
-          rooms, and pinning keeps its place in the document while putting it
-          where somebody can see it. Only when it HAS bars -- an empty band
-          pinned across the foot of the board would cost a row of height to
-          say nothing.
-        */
-        pinned && "sticky bottom-0 z-20 shadow-[0_-6px_12px_-8px_rgba(0,0,0,0.45)]",
-      )}
-    >
+    <>
       <div
-        className={cn(railCell, "flex items-center px-3 py-2")}
-        style={{ width: railW }}
+        className={cn(
+          "flex items-stretch",
+          pinned && "sticky bottom-0 z-20 shadow-[0_-6px_12px_-8px_rgba(0,0,0,0.45)]",
+        )}
       >
-        <div className="text-[12.5px] font-bold uppercase tracking-[0.06em] text-white/80">
-          {label}
+        <div
+          className={cn(railCell, "flex flex-col justify-center px-3 py-2")}
+          style={{ width: railW }}
+        >
+          <div className="text-[12.5px] font-bold uppercase tracking-[0.06em] text-white/80">
+            {label}
+          </div>
+          {bars.length > 0 && (
+            <div className="tnum text-[10.5px] text-white/50">{bars.length}</div>
+          )}
+        </div>
+        {/*
+          z-0 makes the grid its own stacking context, so the Restore control
+          (z-20 inside it) slides under the rail's z-10 when a cancelled bar
+          scrolls left, instead of drawing over the room numbers.
+        */}
+        <div
+          className="relative z-0 border-b border-board-line"
+          style={{ width: gridW, minHeight: rowHeight(headLanes, false) }}
+        >
+          <DayCells dates={dates} businessDate={businessDate} withFoot={false} />
+          <Bars
+            placed={head}
+            backHref={backHref}
+            bookingHref={bookingHref}
+            canRestore={canRestore}
+          />
         </div>
       </div>
-      <div
-        className="relative border-b border-board-line"
-        style={{ width: gridW, minHeight: rowH }}
-      >
-        <DayCells dates={dates} businessDate={businessDate} withFoot={false} />
-        <Bars
-          placed={placed}
-          backHref={backHref}
-          bookingHref={bookingHref}
-          canRestore={canRestore}
-        />
-      </div>
-    </div>
+      {rest.length > 0 && (
+        <div className="flex items-stretch">
+          <div className={cn(railCell, "px-3 py-2")} style={{ width: railW }} aria-hidden />
+          <div
+            className="relative z-0 border-b border-board-line"
+            style={{ width: gridW, minHeight: rowHeight(lanes - 1, false) }}
+          >
+            <DayCells dates={dates} businessDate={businessDate} withFoot={false} />
+            <Bars
+              placed={rest}
+              backHref={backHref}
+              bookingHref={bookingHref}
+              canRestore={canRestore}
+            />
+          </div>
+        </div>
+      )}
+    </>
   );
 }
 
