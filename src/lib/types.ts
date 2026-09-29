@@ -1454,6 +1454,8 @@ export interface CalendarRoomBar {
   isCompany: boolean;
   /** Live rooms on the booking; more than one is a group. */
   roomCount: number;
+  /** Set by the calendar page when the guest is still in after departure (0111). */
+  dueOut?: string | null;
 }
 
 /**

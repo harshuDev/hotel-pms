@@ -193,6 +193,13 @@ interface BoardBar {
   paymentState?: BookingPaymentState;
   isCompany?: boolean;
   roomCount?: number;
+  /**
+   * Set when the guest is still checked in after their departure date (0111):
+   * the real departure, while `checkOut` is moved on to the day after the
+   * business date so the bar covers today. Without it the room reads as empty
+   * on the board while Postgres, rightly, refuses to put anybody else in it.
+   */
+  dueOut?: string | null;
 }
 
 /**
@@ -364,7 +371,9 @@ async function Bars({
                 from: tr.date(bar.checkIn, "d MMM"),
                 to: tr.date(bar.checkOut, "d MMM"),
               }),
-              tr(STATUS_LABEL[bar.status]),
+              bar.dueOut
+                ? tr("Overdue: due out {date}", { date: tr.date(bar.dueOut, "d MMM") })
+                : tr(STATUS_LABEL[bar.status]),
               tr.plural(bar.guests, "{n} guest", "{n} guests"),
               bar.ratePlanName,
               bar.roomNumber ? tr("room {n}", { n: bar.roomNumber }) : null,
@@ -460,8 +469,8 @@ async function Bars({
                   such fallback, so it stays.
                 */}
                 {cols >= 2 && (
-                  <span className={cn("shrink-0 font-semibold", tone.text)}>
-                    {tr(STATUS_LABEL[bar.status])}
+                  <span className={cn("shrink-0 font-semibold", bar.dueOut ? "text-rose-600" : tone.text)}>
+                    {bar.dueOut ? tr("Overdue") : tr(STATUS_LABEL[bar.status])}
                   </span>
                 )}
                 {cols >= 2 && (
@@ -870,8 +879,12 @@ function roomDot(room: CalendarRoom) {
     if (room.doNotDisturb) return "bg-warn";
     // An occupied room is cleaned too (0108): dirty and inspected take the
     // same colours they take on a vacant room, so the dot means one thing.
-    if (room.serviceDue) return "bg-rose-400";
-    if (room.isInspected) return "bg-emerald-500 ring-1 ring-emerald-200";
+    // THE FILL STAYS "OCCUPIED" and the cleaning state is the ring (0111).
+    // Drawn solid, an occupied room signed off looked exactly like a vacant
+    // one ready to sell, and the client read rooms with guests still in them
+    // as empty.
+    if (room.serviceDue) return "bg-white/35 ring-2 ring-rose-400";
+    if (room.isInspected) return "bg-white/35 ring-2 ring-emerald-400";
   }
   return ROOM_STATUS_DOT[room.roomStatus];
 }

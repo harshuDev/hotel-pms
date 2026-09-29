@@ -6003,6 +6003,9 @@
  "Overdue": {
   "kind": "text"
  },
+ "Overdue: due out {date}": {
+  "kind": "text"
+ },
  "Owed by the house": {
   "kind": "text"
  },
@@ -6850,6 +6853,9 @@
   "kind": "db"
  },
  "Room {0} status changed from {1} to {2}": {
+  "kind": "db"
+ },
+ "Room {0} still has {1} ({2}) checked in, due out {3}. Check them out first.": {
   "kind": "db"
  },
  "room {n}": {
