@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0110` are
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0111` are
 applied to the hosted database.
 
 Working on real data: dashboard (house board, movements, pace, activity feed),
@@ -985,6 +985,29 @@ showed the Reservation Centric calendar and asked for it by name.
         type when 0062 was applied.
       - The overlap check is untouched, so an upgraded room cannot be sold to
         somebody else either — tested.
+  - **A GUEST STILL CHECKED IN AFTER THEIR DEPARTURE IS SHOWN, NOT HIDDEN
+    (0111).** The client reported rooms 101-108 "empty" and the picker
+    refusing them as occupied. They were occupied: ten bookings were still
+    checked in days past departure, and nobody had checked them out. A bar
+    ended on its departure date, so the room read as empty from then on.
+    - The calendar page moves an overdue in-house bar's end to the day after
+      the business date and sets `dueOut`; the bar says "Overdue" in rose and
+      its tooltip the real departure. `calendar_room_bars()` returns a
+      checked-in line however far back its departure, or one more than the
+      lookback overdue would vanish.
+    - `assign_room()` names who is in an occupied room: "Room 101 still has
+      Juan Test (BK-000005) checked in, due out 23 Sep 2026. Check them out
+      first."
+    - `dashboard_departures()` on the business date also lists every guest
+      still checked in whose departure has passed, so the dashboard is where
+      they are found and checked out.
+    - **An occupied room's rail dot keeps the occupied fill**; its cleaning
+      state is a RING (emerald inspected, rose needs cleaning). Drawn solid, an
+      occupied room signed off looked exactly like a vacant one ready to sell.
+    - **Nothing checks a guest out automatically, and the audit is unchanged**
+      -- whether a guest left is the desk's call (open decision 11). Worth
+      knowing: availability counts nights, so an overdue guest's room is
+      counted free for tonight until they are checked out.
   - **`assign_room()` only demands a clean room for a stay that has already
     started** (0053). It used to demand `vacant_clean` always, which was right
     while check-in was the only caller and wrong the moment the front desk
