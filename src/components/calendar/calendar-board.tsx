@@ -74,6 +74,12 @@ const COL_W = 118;
  */
 const HEAD_H = 74;
 const SEASON_H = 24;
+/**
+ * One lane of events under the season strip (0113). Events may overlap a
+ * season and each other, so they never share the season's strip: each gets a
+ * lane, packed so that events on different dates reuse one.
+ */
+const EVENT_H = 16;
 /** Two lines and a value badge, like the reference's. */
 const BAR_H = 44;
 const BAR_GAP = 4;
@@ -1112,6 +1118,36 @@ export async function CalendarBoard({
   const opensOn = todayIdx > 0 ? businessDate : dates[0];
 
   /*
+   * SEASONS FILL THE STRIP; EVENTS GET LANES UNDER IT (0113).
+   *
+   * Each range becomes columns on this window -- ends_on is inclusive, so the
+   * segment covers that day too. Events are packed greedily into lanes so
+   * that two on different dates share one, and the band grows by a lane only
+   * when events genuinely overlap. "Show seasons in calendar" covers both.
+   */
+  const segments = look.showSeasons
+    ? seasons
+        .map((s) => ({
+          ...s,
+          startIdx: Math.max(0, differenceInCalendarDays(parseISO(s.startsOn), first)),
+          endIdx: Math.min(dates.length, differenceInCalendarDays(parseISO(s.endsOn), first) + 1),
+        }))
+        .filter((s) => s.endIdx > s.startIdx)
+    : [];
+  const seasonSegments = segments.filter((s) => s.kind === "season");
+  const laneEnds: number[] = [];
+  const eventSegments = segments
+    .filter((s) => s.kind === "event")
+    .sort((a, b) => a.startIdx - b.startIdx || b.endIdx - a.endIdx)
+    .map((s) => {
+      let lane = laneEnds.findIndex((end) => end <= s.startIdx);
+      if (lane === -1) lane = laneEnds.length;
+      laneEnds[lane] = s.endIdx;
+      return { ...s, lane };
+    });
+  const bandH = SEASON_H + laneEnds.length * EVENT_H;
+
+  /*
    * THE ROOM PICKER'S LIST, BUILT ONCE FOR THE WHOLE BOARD.
    *
    * Every bar that can be placed gets this same array by reference, so the
@@ -1382,9 +1418,18 @@ export async function CalendarBoard({
           {/* Season band, frozen directly under the header */}
           <div
             className="sticky z-20 flex"
-            style={{ top: HEAD_H, height: SEASON_H }}
+            style={{ top: HEAD_H, height: bandH }}
           >
-            <div className={cn(railCell, "z-30")} style={{ width: railW }} />
+            <div className={cn(railCell, "z-30 flex flex-col")} style={{ width: railW }}>
+              {laneEnds.length > 0 && (
+                <span
+                  className="mt-auto px-3 text-xxs font-semibold uppercase tracking-[0.14em] text-white/70"
+                  style={{ lineHeight: `${EVENT_H}px`, marginBottom: (laneEnds.length - 1) * EVENT_H }}
+                >
+                  {tr("Events")}
+                </span>
+              )}
+            </div>
             <div
               className="relative border-b border-board-line bg-board"
               style={{ width: gridW }}
@@ -1395,25 +1440,38 @@ export async function CalendarBoard({
                 moving them into the date header would put them over the
                 first column's date.
               */}
-              {look.showSeasons && seasons.map((s) => {
-                const startIdx = Math.max(
-                  0,
-                  differenceInCalendarDays(parseISO(s.startsOn), first),
-                );
-                // ends_on is inclusive, so the band covers that day too.
-                const endIdx = Math.min(
-                  dates.length,
-                  differenceInCalendarDays(parseISO(s.endsOn), first) + 1,
-                );
-                if (endIdx <= startIdx) return null;
+              {eventSegments.map((s) => (
+                <div
+                  key={s.id}
+                  title={`${s.name} · ${tr.date(s.startsOn, "d MMM")} – ${tr.date(s.endsOn, "d MMM")}`}
+                  className="absolute flex items-center border-t border-white/60"
+                  style={{
+                    top: SEASON_H + s.lane * EVENT_H,
+                    height: EVENT_H,
+                    left: s.startIdx * COL_W,
+                    width: (s.endIdx - s.startIdx) * COL_W,
+                    backgroundColor: s.color,
+                    color: inkOn(s.color),
+                  }}
+                >
+                  <span
+                    className="sticky truncate whitespace-nowrap px-2 text-[10px] font-semibold"
+                    style={{ left: railW + 4 }}
+                  >
+                    {s.name}
+                  </span>
+                </div>
+              ))}
+              {seasonSegments.map(({ startIdx, endIdx, ...s }) => {
                 return (
                   <div
                     key={s.id}
                     // No `overflow-hidden` here: it would become the sticky
                     // containing block for the label below and pin it in place,
                     // which is exactly the bug this is meant to avoid.
-                    className="absolute inset-y-0 flex items-center bg-board-season"
+                    className="absolute top-0 flex items-center bg-board-season"
                     style={{
+                      height: SEASON_H,
                       left: startIdx * COL_W,
                       width: (endIdx - startIdx) * COL_W,
                       // The season's own colour (0095), set in Seasons and

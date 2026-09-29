@@ -2139,7 +2139,10 @@ export async function getSeasonSettings(): Promise<SeasonType[]> {
   }));
 }
 
-/** The seasons touching a calendar window. They label the board, nothing more. */
+/**
+ * The seasons and events touching a calendar window (events since 0113).
+ * They label the board, nothing more.
+ */
 export async function getCalendarSeasons(
   from: string,
   days: number = CALENDAR_NIGHTS,
@@ -2161,6 +2164,7 @@ export async function getCalendarSeasons(
     startsOn: row.starts_on,
     endsOn: row.ends_on,
     color: row.color,
+    kind: row.kind === "event" ? "event" : "season",
   }));
 }
 

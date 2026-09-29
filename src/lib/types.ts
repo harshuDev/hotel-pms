@@ -328,6 +328,11 @@ export interface CalendarSeason {
   endsOn: string;
   /** The season's own colour (0095), "#rrggbb": the calendar band's fill. */
   color: string;
+  /**
+   * A season fills the band; an event (0113) is drawn in a lane under it,
+   * since events may overlap a season and each other.
+   */
+  kind: "season" | "event";
 }
 
 /**
