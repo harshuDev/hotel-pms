@@ -43,7 +43,6 @@ import { InventorySettingsPanel } from "@/components/settings/inventory-settings
 import { RoomSetupPanel, RoomTypesPanel } from "@/components/settings/room-panels";
 import { CancellationPolicyPanel } from "@/components/settings/cancellation-policy-panel";
 import { RatePlansPanel } from "@/components/settings/rate-plans-panel";
-import { RateCombinations } from "@/components/settings/rate-combinations";
 import { ChannelManagerPanel } from "@/components/settings/channel-manager-panel";
 import { BookingEnginePanel } from "@/components/settings/booking-engine-panel";
 import { SalesChannelsPanel } from "@/components/settings/sales-channels-panel";
@@ -200,6 +199,7 @@ export function SettingsScreen({
   paymentMethods,
   staff,
   editRoomTypeId,
+  openSeasonId,
   meId,
   canEdit,
   isAdmin,
@@ -306,6 +306,8 @@ export function SettingsScreen({
   paymentMethods: PaymentMethodSetting[];
   /** A room type to open for editing on arrival, from the calendar's rail. */
   editRoomTypeId: string | null;
+  /** The season a rate plan's prices open on, from the Seasons screen (0110). */
+  openSeasonId: string | null;
   staff: StaffSetting[];
   meId: string | null;
   canEdit: boolean;
@@ -315,8 +317,6 @@ export function SettingsScreen({
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
-  /* Which season's rates the Seasons screen shows (0108); null is the Default Season. */
-  const [seasonRatesFor, setSeasonRatesFor] = useState<string | null>(null);
 
   function run(fn: () => Promise<{ ok: boolean; error?: string }>, done: string) {
     setMessage(null);
@@ -1218,43 +1218,26 @@ export function SettingsScreen({
           <SeasonsPanel
             types={seasons}
             businessDate={businessDate}
+            // A season's prices are set in its rate plan's form, on that
+            // season (0110) -- the reference's place for them. The main
+            // rate opens; the form's season picker is already on this one.
             onRates={(id) => {
-              setSeasonRatesFor(id);
-              requestAnimationFrame(() =>
-                document.getElementById("season-rates")?.scrollIntoView({ behavior: "smooth", block: "start" }),
-              );
+              const main = ratePlans.find((p) => p.isDefault && p.isActive) ?? ratePlans.find((p) => p.isActive);
+              if (!main) return;
+              router.push(`/settings?tab=rate-plans&edit=${main.id}&season=${id ?? "default"}`);
             }}
             canEdit={canEdit}
             pending={pending}
             run={run}
           />
-          {/*
-            A season's rates, on the season's own screen (0108): the client
-            asked to "put rate in the Season". The same grid as Rate Plans,
-            opened on the season whose price button was pressed -- keyed on
-            it, because the grid seeds its season once per mount.
-          */}
-          <div id="season-rates" className="scroll-mt-28">
-            <RateCombinations
-              key={seasonRatesFor ?? "default"}
-              initialSeasonId={seasonRatesFor}
-              ratePlans={ratePlans.filter((p) => p.isActive)}
-              roomTypes={roomTypes}
-              seasons={seasons.filter((x) => x.kind === "season")}
-              cancellationPolicies={cancellationPolicies}
-              weekRates={weekRates}
-              coverage={rateCoverage}
-              canEdit={canEdit}
-              pending={pending}
-              run={run}
-            />
-          </div>
         </div>
       )}
 
       {tab === "rate-plans" && (
         <div className="space-y-6">
           <RatePlansPanel
+            // Keyed on the plan asked for, so arriving from Seasons opens it.
+            key={`${editRoomTypeId ?? ""}|${openSeasonId ?? ""}`}
             ratePlans={ratePlans}
             cancellationPolicies={cancellationPolicies}
             roomTypes={roomTypes}
@@ -1262,17 +1245,10 @@ export function SettingsScreen({
             accountingCategories={accountingSettings.categories}
             channels={channels}
             coverage={rateCoverage}
-            canEdit={canEdit}
-            pending={pending}
-            run={run}
-          />
-          <RateCombinations
-            ratePlans={ratePlans.filter((p) => p.isActive)}
-            roomTypes={roomTypes}
-            seasons={seasons.filter((s) => s.kind === "season")}
-            cancellationPolicies={cancellationPolicies}
+            seasons={seasons}
             weekRates={weekRates}
-            coverage={rateCoverage}
+            openPlanId={editRoomTypeId}
+            openSeasonId={openSeasonId}
             canEdit={canEdit}
             pending={pending}
             run={run}

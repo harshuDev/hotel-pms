@@ -143,6 +143,9 @@
  "{0} seats {1}, and this is for {2}. Pick a bigger room or reduce the count.": {
   "kind": "db"
  },
+ "{0} sleeps at most {1}, so it has no price for {2} adults.": {
+  "kind": "db"
+ },
  "{0} still holds {1} extra{2}. Move or delete them first": {
   "kind": "db"
  },
@@ -203,13 +206,13 @@
  "{currency} saved.": {
   "kind": "text"
  },
- "{day}: a rate cannot be negative.": {
+ "{date} cleared.": {
+  "kind": "text"
+ },
+ "{date} set to {amount}.": {
   "kind": "text"
  },
  "{day}: a stay rule is a number of nights, 1 to 365.": {
-  "kind": "text"
- },
- "{day}: write the rate as a number.": {
   "kind": "text"
  },
  "{field} set on {n} room-nights.": {
@@ -321,9 +324,6 @@
   "kind": "plural",
   "one": "{n} night priced"
  },
- "{n} nights priced, {from} to {to}": {
-  "kind": "text"
- },
  "{n} no shows": {
   "kind": "plural",
   "one": "{n} no show"
@@ -349,13 +349,9 @@
   "kind": "plural",
   "one": "{n} plan"
  },
- "{n} rates": {
+ "{n} rates selected.": {
   "kind": "plural",
-  "one": "{n} rate"
- },
- "{n} rates selected. Leave the box empty to clear the price and take them off sale.": {
-  "kind": "plural",
-  "one": "{n} rate selected. Leave the box empty to clear the price and take it off sale."
+  "one": "{n} rate selected."
  },
  "{n} records": {
   "kind": "plural",
@@ -401,6 +397,9 @@
   "kind": "text"
  },
  "{name} (copy)": {
+  "kind": "text"
+ },
+ "{name} (Max Occ. {n})": {
   "kind": "text"
  },
  "{name} (reversed)": {
@@ -454,9 +453,6 @@
  "{name} on {name2} is worth nothing again, so nothing is posted for it.": {
   "kind": "text"
  },
- "{name} on {name2} saved.": {
-  "kind": "text"
- },
  "{name} policy": {
   "kind": "text"
  },
@@ -469,10 +465,22 @@
  "{name} saved.": {
   "kind": "text"
  },
- "{name}, {name2}, {value} rate": {
+ "{name}, {day}": {
+  "kind": "text"
+ },
+ "{name}, {day}: fill the price for {n} adults first. It is the room's standard price.": {
+  "kind": "text"
+ },
+ "{name}, {day}: write the price as a number, such as 120 or 99.50.": {
+  "kind": "text"
+ },
+ "{name}, {n} adults, {day}": {
   "kind": "text"
  },
  "{name}, picture {n}": {
+  "kind": "text"
+ },
+ "{name}: {error}": {
   "kind": "text"
  },
  "{nights} from {date}, {rooms}. No room has been assigned yet — that happens at check-in.": {
@@ -496,7 +504,10 @@
  "{pending} still pending": {
   "kind": "text"
  },
- "{plan} is not loaded on {type} for {date}, so it cannot be sold": {
+ "{plan}, {type}, {date}": {
+  "kind": "text"
+ },
+ "{plan}, {type}, {n} adults, {date}": {
   "kind": "text"
  },
  "{qty} × {what} charged.": {
@@ -530,24 +541,6 @@
   "kind": "text"
  },
  "{unassigned} with no room assigned": {
-  "kind": "text"
- },
- "{value} closed to arrival": {
-  "kind": "text"
- },
- "{value} closed to departure": {
-  "kind": "text"
- },
- "{value} max stay": {
-  "kind": "text"
- },
- "{value} min stay arrival": {
-  "kind": "text"
- },
- "{value} min stay through": {
-  "kind": "text"
- },
- "{value} stop sell": {
   "kind": "text"
  },
  "{value}% of rack": {
@@ -692,9 +685,6 @@
  "A customer is needed before any money can be charged.": {
   "kind": "text"
  },
- "A dash means no rate is loaded for that rate on that room type, which is not the same as free — a booking against it is refused. That is also how a room type is taken off a rate: clear the price rather than looking for a switch.": {
-  "kind": "text"
- },
  "A deposit equal to the total cost is required at the time of booking": {
   "kind": "text"
  },
@@ -726,9 +716,6 @@
   "kind": "text"
  },
  "A guest already staying can stay through a closed date; only arrivals are refused.": {
-  "kind": "text"
- },
- "A hotel usually has several, like Room Only, Bed and Breakfast and Non-refundable.": {
   "kind": "text"
  },
  "A location needs both a latitude and a longitude": {
@@ -816,6 +803,9 @@
   "kind": "text"
  },
  "A person needs a first name": {
+  "kind": "db"
+ },
+ "A price per occupancy is a whole amount for 1 to {0} adults": {
   "kind": "db"
  },
  "A promotion needs a name": {
@@ -1230,6 +1220,9 @@
  "All methods": {
   "kind": "text"
  },
+ "All occupancies": {
+  "kind": "text"
+ },
  "all plans": {
   "kind": "text"
  },
@@ -1469,7 +1462,13 @@
   "kind": "country",
   "code": "AT"
  },
+ "Auth session missing!": {
+  "kind": "text"
+ },
  "Automatic": {
+  "kind": "text"
+ },
+ "Automatic Calculation": {
   "kind": "text"
  },
  "Availability": {
@@ -2283,9 +2282,6 @@
  "Choose at least one other sales channel to merge in": {
   "kind": "db"
  },
- "Choose at least one room type and one rate category.": {
-  "kind": "text"
- },
  "Choose category": {
   "kind": "text"
  },
@@ -2310,6 +2306,9 @@
  "Choose how each condition compares": {
   "kind": "db"
  },
+ "Choose how many adults this price is for": {
+  "kind": "db"
+ },
  "Choose how many days to sync": {
   "kind": "db"
  },
@@ -2321,6 +2320,9 @@
  },
  "Choose permissions from the list": {
   "kind": "db"
+ },
+ "Choose Room Type to fill rates": {
+  "kind": "text"
  },
  "Choose season or event": {
   "kind": "db"
@@ -2463,13 +2465,13 @@
   "kind": "text"
  },
  "Closed To Arrival": {
-  "kind": "db"
+  "kind": "text"
  },
  "Closed to departure": {
   "kind": "text"
  },
  "Closed To Departure": {
-  "kind": "db"
+  "kind": "text"
  },
  "Closes the room type on every rate plan at once, which is what makes it different from Stop sell.": {
   "kind": "text"
@@ -2627,6 +2629,15 @@
  "Copy it now — it will not be shown again.": {
   "kind": "text"
  },
+ "Copy Monday to every day": {
+  "kind": "text"
+ },
+ "Copy Monday to every day for {name}": {
+  "kind": "text"
+ },
+ "Copy Monday to every day for {name}, {n} adults": {
+  "kind": "text"
+ },
  "Correspondence": {
   "kind": "text"
  },
@@ -2718,9 +2729,6 @@
   "code": "HR"
  },
  "CSS Editor": {
-  "kind": "text"
- },
- "CTA CTD SS": {
   "kind": "text"
  },
  "Cuba": {
@@ -2875,6 +2883,9 @@
   "kind": "text"
  },
  "Decrease by amount": {
+  "kind": "text"
+ },
+ "Decrease Per Adult": {
   "kind": "text"
  },
  "default": {
@@ -3249,6 +3260,12 @@
  "Email address": {
   "kind": "text"
  },
+ "Email link is invalid or has expired": {
+  "kind": "text"
+ },
+ "Email not confirmed": {
+  "kind": "text"
+ },
  "Email preference {0} must be on or off": {
   "kind": "db"
  },
@@ -3256,6 +3273,12 @@
   "kind": "text"
  },
  "Email preferences saved.": {
+  "kind": "text"
+ },
+ "email rate limit exceeded": {
+  "kind": "text"
+ },
+ "Email rate limit exceeded": {
   "kind": "text"
  },
  "Email Setup": {
@@ -3542,9 +3565,6 @@
  "Filter by type": {
   "kind": "text"
  },
- "Filters": {
-  "kind": "text"
- },
  "Finances": {
   "kind": "text"
  },
@@ -3634,6 +3654,9 @@
   "kind": "text"
  },
  "Footer Template": {
+  "kind": "text"
+ },
+ "For security purposes, you can only request this after {0} seconds.": {
   "kind": "text"
  },
  "forecast": {
@@ -3817,6 +3840,9 @@
   "kind": "text"
  },
  "Give the run lowest first.": {
+  "kind": "text"
+ },
+ "Go": {
   "kind": "text"
  },
  "Go to a date": {
@@ -4178,10 +4204,10 @@
  "Increase by amount": {
   "kind": "text"
  },
- "Increase/Decrease per Adult": {
+ "Increase Per Adult": {
   "kind": "text"
  },
- "Increase/Decrease per Child": {
+ "Increase Per Child": {
   "kind": "text"
  },
  "India": {
@@ -4202,6 +4228,9 @@
   "kind": "text"
  },
  "Internet Access": {
+  "kind": "text"
+ },
+ "Invalid login credentials": {
   "kind": "text"
  },
  "Invalid manual charge values": {
@@ -4670,6 +4699,9 @@
  "Max nights": {
   "kind": "text"
  },
+ "Max Occ. {n}": {
+  "kind": "text"
+ },
  "Max stay": {
   "kind": "text"
  },
@@ -4866,9 +4898,6 @@
   "kind": "country",
   "code": "MZ"
  },
- "MST MSA MXS": {
-  "kind": "text"
- },
  "Multi-property bookings:": {
   "kind": "text"
  },
@@ -4980,6 +5009,9 @@
  "New password": {
   "kind": "text"
  },
+ "New password should be different from the old password.": {
+  "kind": "text"
+ },
  "New payment type": {
   "kind": "text"
  },
@@ -4994,6 +5026,9 @@
   "code": "NZ"
  },
  "Next": {
+  "kind": "text"
+ },
+ "Next {n} days": {
   "kind": "text"
  },
  "Next {n} nights": {
@@ -5193,9 +5228,6 @@
   "kind": "text"
  },
  "No plan — type the rate": {
-  "kind": "text"
- },
- "No policy": {
   "kind": "text"
  },
  "No rate is loaded for {0} on this plan. Load one, or give a rate for the booking.": {
@@ -6055,6 +6087,9 @@
  "Password changed.": {
   "kind": "text"
  },
+ "Password should be at least 6 characters.": {
+  "kind": "text"
+ },
  "Past the free window": {
   "kind": "text"
  },
@@ -6339,6 +6374,9 @@
  "Previous": {
   "kind": "text"
  },
+ "Previous {n} days": {
+  "kind": "text"
+ },
  "Previous month": {
   "kind": "text"
  },
@@ -6434,10 +6472,7 @@
  "Rate categories": {
   "kind": "text"
  },
- "Rate Categories": {
-  "kind": "text"
- },
- "rate category": {
+ "Rate Category Restrictions": {
   "kind": "text"
  },
  "Rate CVS configuration": {
@@ -6483,9 +6518,6 @@
   "kind": "text"
  },
  "Rates (Main)": {
-  "kind": "text"
- },
- "Rates are created and renamed under Settings → Rate plans.": {
   "kind": "text"
  },
  "Rates for {name}": {
@@ -6701,6 +6733,9 @@
  "Restoring…": {
   "kind": "text"
  },
+ "Restriction": {
+  "kind": "text"
+ },
  "Retired": {
   "kind": "text"
  },
@@ -6893,9 +6928,6 @@
   "kind": "text"
  },
  "Room Price And Nights Text Color": {
-  "kind": "text"
- },
- "Room Rate Combinations": {
   "kind": "text"
  },
  "Room restored, and the house is oversold for those nights.": {
@@ -7244,7 +7276,7 @@
  "Set a new password": {
   "kind": "text"
  },
- "Set a price": {
+ "Set a price on many days": {
   "kind": "text"
  },
  "Set as hotel timezone": {
@@ -7329,9 +7361,6 @@
  "Show Closed To Departure": {
   "kind": "text"
  },
- "Show derived and calculated rates": {
-  "kind": "text"
- },
  "Show Expired Rates": {
   "kind": "text"
  },
@@ -7402,12 +7431,6 @@
   "kind": "text"
  },
  "Sleeps {baseOccupancy}, at most {maxOccupancy}": {
-  "kind": "text"
- },
- "Sleeps {n}": {
-  "kind": "text"
- },
- "Sleeps {n} + {extra}": {
   "kind": "text"
  },
  "Slovakia": {
@@ -7507,6 +7530,9 @@
   "kind": "text"
  },
  "Staff notes": {
+  "kind": "text"
+ },
+ "Standard price": {
   "kind": "text"
  },
  "State": {
@@ -8419,6 +8445,9 @@
  "This is the default policy. Make another policy the default instead.": {
   "kind": "db"
  },
+ "This link has to be opened in the browser that asked for it. Open it there, or ask for a new link here.": {
+  "kind": "text"
+ },
  "This page needs the link from the reset email. Ask for a new one below.": {
   "kind": "text"
  },
@@ -8512,6 +8541,9 @@
   "kind": "country",
   "code": "TK"
  },
+ "Token has expired or is invalid": {
+  "kind": "text"
+ },
  "Tonga": {
   "kind": "country",
   "code": "TO"
@@ -8576,6 +8608,9 @@
  "Type it once more": {
   "kind": "text"
  },
+ "Type the price for {n} adults": {
+  "kind": "text"
+ },
  "Type:": {
   "kind": "text"
  },
@@ -8586,6 +8621,9 @@
  "Ukraine": {
   "kind": "country",
   "code": "UA"
+ },
+ "Unable to validate email address: invalid format": {
+  "kind": "text"
  },
  "Unassigned": {
   "kind": "text"
@@ -8912,9 +8950,6 @@
  "Write the amount as a number above 0, with up to two decimals.": {
   "kind": "text"
  },
- "Write the amounts per adult and per child as numbers, such as 15 or -10.": {
-  "kind": "text"
- },
  "Write the children policy, or pick one of the listed options": {
   "kind": "db"
  },
@@ -8943,6 +8978,12 @@
   "kind": "db"
  },
  "Write the fixed rate, above zero.": {
+  "kind": "text"
+ },
+ "Write the increases and the decrease as amounts of zero or more": {
+  "kind": "db"
+ },
+ "Write the increases and the decrease as amounts, such as 50 or 12.50.": {
   "kind": "text"
  },
  "Write the internet policy, or pick one of the listed options": {

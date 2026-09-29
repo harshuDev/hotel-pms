@@ -4,6 +4,7 @@ import { useT } from "@/components/i18n";
 import { FormEvent, useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
+import { authErrorText } from "@/lib/auth-messages";
 
 export default function ForgotPasswordPage() {
   const tr = useT();
@@ -33,7 +34,7 @@ export default function ForgotPasswordPage() {
     // belongs to an account, and neither does the message below, because a
     // sign-in page that answers that question answers it for anyone who asks.
     if (error) {
-      setError(error.message);
+      setError(authErrorText(tr, error));
       return;
     }
 

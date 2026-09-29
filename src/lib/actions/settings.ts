@@ -2055,9 +2055,10 @@ export async function setRatePlanTerms(input: {
   derivedKind: "percent" | "amount" | null;
   derivedPercentBps: number | null;
   derivedAmountCents: number | null;
-  occupancyPricing: "single" | "per_person";
+  occupancyPricing: "single" | "per_occupancy" | "per_person";
   adultAdjustCents: number | null;
   childAdjustCents: number | null;
+  adultDecreaseCents: number | null;
   taxRateId: string | null;
   accountingCategoryId: string | null;
   channelIds: string[];
@@ -2080,6 +2081,7 @@ export async function setRatePlanTerms(input: {
     p_occupancy_pricing: input.occupancyPricing,
     p_adult_adjust_cents: input.adultAdjustCents,
     p_child_adjust_cents: input.childAdjustCents,
+    p_adult_decrease_cents: input.adultDecreaseCents,
     p_tax_rate_id: input.taxRateId,
     p_accounting_category_id: input.accountingCategoryId,
     p_channel_ids: input.channelIds,
@@ -2149,9 +2151,10 @@ export async function deleteCancellationPolicy(id: string): Promise<ActionResult
 
 /**
  * One week of a rate plan on one room type, for a season or the Default
- * Season (0096). Stores the template and FILLS nights that have no value yet
- * -- the client's rule; nothing priced by hand is overwritten. Returns how
- * many nights got a price.
+ * Season (0096). Stores the template and writes it onto the nights. A SEASON
+ * replaces the price on its own dates (0110); the Default Season fills only
+ * empty nights unless `replaceRates`. Restrictions only ever fill. Returns
+ * how many nights got or changed a price.
  */
 export async function saveWeekRates(input: {
   ratePlanId: string;
@@ -2166,6 +2169,8 @@ export async function saveWeekRates(input: {
     closedToArrival: boolean;
     closedToDeparture: boolean;
     stopSell: boolean;
+    /** Adults to pence for the occupancies other than the standard price (0110). */
+    occupancyRates?: Record<string, number> | null;
   }[];
   /** Replace the rate already on these nights, not only fill empty ones (0108). */
   replaceRates?: boolean;
@@ -2186,6 +2191,7 @@ export async function saveWeekRates(input: {
       closed_to_arrival: d.closedToArrival,
       closed_to_departure: d.closedToDeparture,
       stop_sell: d.stopSell,
+      occupancy_rates: d.occupancyRates ?? null,
     })),
   });
   if (error) return { ok: false, error: await localised(error.message) };
