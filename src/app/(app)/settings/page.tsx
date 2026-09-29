@@ -55,7 +55,7 @@ export const generateMetadata = pageTitle(msg("Settings"));
 export default async function SettingsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ tab?: string; q?: string; page?: string; edit?: string; season?: string }>;
+  searchParams: Promise<{ tab?: string; q?: string; page?: string; edit?: string; season?: string; rates?: string }>;
 }) {
   const sp = await searchParams;
   const tab = isSettingsTab(sp.tab) ? sp.tab : DEFAULT_SETTINGS_TAB;
@@ -65,6 +65,10 @@ export default async function SettingsPage({
   const editRoomTypeId = sp.edit?.trim() || null;
   // The Seasons screen links here with a plan and a season to price (0110).
   const openSeasonId = sp.season?.trim() && sp.season.trim() !== "default" ? sp.season.trim() : null;
+  // Seasons' price button opens Room Rate Combinations over the screen:
+  // `?rates=<season id>`, or `default` for the Default Season. Absent is closed.
+  const ratesParam = tab === "seasons" ? sp.rates?.trim() : undefined;
+  const ratesSeason = !ratesParam ? undefined : ratesParam === "default" ? null : ratesParam;
 
   const [
     property,
@@ -183,6 +187,7 @@ export default async function SettingsPage({
         cancellationPolicies={cancellationPolicies}
         editRoomTypeId={editRoomTypeId}
         openSeasonId={openSeasonId}
+        ratesSeason={ratesSeason}
         paymentMethods={paymentMethods}
         staff={staff}
         meId={me?.id ?? null}

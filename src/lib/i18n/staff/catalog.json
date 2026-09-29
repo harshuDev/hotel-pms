@@ -369,6 +369,10 @@
   "kind": "plural",
   "one": "{n} room night"
  },
+ "{n} room rate combinations saved.": {
+  "kind": "plural",
+  "one": "{n} room rate combination saved."
+ },
  "{n} room types selected.": {
   "kind": "plural",
   "one": "{n} room type selected."
@@ -477,6 +481,12 @@
   "kind": "text"
  },
  "{name}, {day}": {
+  "kind": "text"
+ },
+ "{name}, {day}: {what}": {
+  "kind": "text"
+ },
+ "{name}, {day}: a stay rule is a number of nights, 1 to 365.": {
   "kind": "text"
  },
  "{name}, {day}: fill the price for {n} adults first. It is the room's standard price.": {
@@ -1060,6 +1070,9 @@
   "kind": "text"
  },
  "Add New Rate Plan": {
+  "kind": "text"
+ },
+ "Add New Room Rate Combination": {
   "kind": "text"
  },
  "Add new sales channel": {
@@ -2751,6 +2764,12 @@
  "CSS Editor": {
   "kind": "text"
  },
+ "CTA": {
+  "kind": "text"
+ },
+ "CTD": {
+  "kind": "text"
+ },
  "Cuba": {
   "kind": "country",
   "code": "CU"
@@ -3465,6 +3484,9 @@
  "Every folio with a balance appears here, for room bookings and meeting rooms alike.": {
   "kind": "text"
  },
+ "Every night no season covers": {
+  "kind": "text"
+ },
  "Every room is assigned.": {
   "kind": "text"
  },
@@ -3595,6 +3617,9 @@
   "kind": "text"
  },
  "Filter by type": {
+  "kind": "text"
+ },
+ "Filters": {
   "kind": "text"
  },
  "Finances": {
@@ -4933,10 +4958,19 @@
   "kind": "country",
   "code": "MZ"
  },
+ "MSA": {
+  "kind": "text"
+ },
+ "MST": {
+  "kind": "text"
+ },
  "Multi-property bookings:": {
   "kind": "text"
  },
  "Multi-room inventory table": {
+  "kind": "text"
+ },
+ "MXS": {
   "kind": "text"
  },
  "Myanmar": {
@@ -5280,6 +5314,9 @@
  "No room matches “{roomQuery}”.": {
   "kind": "text"
  },
+ "No room rate combinations yet. Add one.": {
+  "kind": "text"
+ },
  "No room types are set up": {
   "kind": "text"
  },
@@ -5476,6 +5513,9 @@
  "Not default": {
   "kind": "text"
  },
+ "Not on the guest booking page": {
+  "kind": "text"
+ },
  "Not priced": {
   "kind": "text"
  },
@@ -5519,6 +5559,9 @@
   "kind": "text"
  },
  "Nothing happened in this range": {
+  "kind": "text"
+ },
+ "Nothing has changed.": {
   "kind": "text"
  },
  "Nothing has left the drawer this shift.": {
@@ -5649,6 +5692,9 @@
   "kind": "text"
  },
  "On the books, 28 ahead": {
+  "kind": "text"
+ },
+ "On the guest booking page": {
   "kind": "text"
  },
  "On top of the rate": {
@@ -6510,6 +6556,15 @@
  "Rate categories": {
   "kind": "text"
  },
+ "Rate Categories": {
+  "kind": "text"
+ },
+ "rate category": {
+  "kind": "text"
+ },
+ "Rate category": {
+  "kind": "text"
+ },
  "Rate Category Restrictions": {
   "kind": "text"
  },
@@ -6736,6 +6791,9 @@
   "kind": "text"
  },
  "Reset": {
+  "kind": "text"
+ },
+ "Reset Changes": {
   "kind": "text"
  },
  "Reset links expire after an hour and work only once, so an older email in the same thread will not do. Asking for a new one takes a moment.": {
@@ -6971,6 +7029,12 @@
  "Room Price And Nights Text Color": {
   "kind": "text"
  },
+ "Room Rate Combinations": {
+  "kind": "text"
+ },
+ "Room Rate Combinations for {name}": {
+  "kind": "text"
+ },
  "Room restored, and the house is oversold for those nights.": {
   "kind": "text"
  },
@@ -7135,6 +7199,9 @@
   "kind": "text"
  },
  "Save changes": {
+  "kind": "text"
+ },
+ "Save Changes": {
   "kind": "text"
  },
  "Save customer": {
@@ -7402,6 +7469,9 @@
  "Show Closed To Departure": {
   "kind": "text"
  },
+ "Show derived and calculated rates": {
+  "kind": "text"
+ },
  "Show Expired Rates": {
   "kind": "text"
  },
@@ -7421,6 +7491,9 @@
   "kind": "text"
  },
  "Show Min Stay Through": {
+  "kind": "text"
+ },
+ "Show Multi Occupancy Rates": {
   "kind": "text"
  },
  "Show nights breakdown": {
@@ -7563,6 +7636,9 @@
  "Sri Lanka": {
   "kind": "country",
   "code": "LK"
+ },
+ "SS": {
+  "kind": "text"
  },
  "Staff": {
   "kind": "text"

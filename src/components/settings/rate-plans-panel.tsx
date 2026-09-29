@@ -16,6 +16,7 @@ import type {
   WeekRate,
 } from "@/lib/types";
 import { PlanRates, type PlanRatesHandle } from "@/components/settings/plan-rates";
+import { RateCombinations } from "@/components/settings/rate-combinations";
 import type { AccountingCategory } from "@/lib/finance-profiles";
 import { formatPercentBps, parsePercentBps } from "@/lib/finance-profiles";
 import { formatMoneyInput, parseMoney } from "@/lib/money";
@@ -867,6 +868,31 @@ export function RatePlansPanel({
             </div>
           </div>
         </div>
+      </section>
+
+      {/*
+        Room Rate Combinations under the list, as the client's reference has
+        it -- every room type with each plan under it for one season. The
+        same weekly template the plan's form edits, seen across plans.
+      */}
+      <section className="rounded border border-line bg-white p-4 shadow-card sm:p-10">
+        <RateCombinations
+          ratePlans={ratePlans}
+          roomTypes={roomTypes}
+          seasons={seasons}
+          cancellationPolicies={cancellationPolicies}
+          weekRates={weekRates}
+          coverage={coverage}
+          onEditPlan={(id) => {
+            const plan = ratePlans.find((p) => p.id === id);
+            if (!plan) return;
+            open(plan);
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          }}
+          canEdit={canEdit}
+          pending={pending}
+          run={run}
+        />
       </section>
     </div>
   );
