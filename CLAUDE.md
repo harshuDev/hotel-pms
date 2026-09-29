@@ -785,6 +785,18 @@ showed the Reservation Centric calendar and asked for it by name.
       cost a row of height to say nothing.
     - It is rendered AFTER the filler element, because `sticky bottom-0` has
       nothing to stick against while a flex-grow sibling sits below it.
+    - **ONLY ITS FIRST LANE IS PINNED; MORE CANCELLATIONS GO DOWN, NOT UP.**
+      Pinned whole, every extra lane raised the band and covered another
+      room row. The client: "when we don't have cancellation we can see five
+      rooms, when we have cancellation four ... six cancellations and we end
+      up seeing one room. The cancellation have to go down, not up." Lane one
+      is `sticky bottom-0`; the other lanes follow it in the flow, below,
+      where the board scrolls down to them. The rail shows the count. Do not
+      pin the whole band again.
+    - Its grid cells are `relative z-0`: the Restore control is `z-20`, and
+      without its own stacking context it drew over the rail's `z-10` when a
+      cancelled bar scrolled left -- the same trap as the top nav and the
+      room menu.
 - **"Unassigned" is a third band, and it is not Holding.** Holding is "nobody
   has confirmed this booking". Unassigned is "confirmed, but no room picked
   yet" — which is every booking between being taken and being checked in,
