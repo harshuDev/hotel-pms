@@ -57,6 +57,8 @@ import type { BookingWidget } from "@/lib/booking-widgets";
 import type { BookingEngineProfile, BookingEngineTexts } from "@/lib/booking-engine";
 import type { ChannelManager } from "@/lib/channel-managers";
 import { SeasonsPanel } from "@/components/settings/seasons-panel";
+import { RateCombinations } from "@/components/settings/rate-combinations";
+import { BookingDialog } from "@/components/calendar/booking-dialog";
 import { DiscountsPanel } from "@/components/settings/discounts-panel";
 import type { InventorySettings } from "@/lib/inventory-settings";
 import type { EmailSetup, EmailTemplate, HotelEmailSettings } from "@/lib/email-preferences";
@@ -200,6 +202,7 @@ export function SettingsScreen({
   staff,
   editRoomTypeId,
   openSeasonId,
+  ratesSeason,
   meId,
   canEdit,
   isAdmin,
@@ -308,6 +311,8 @@ export function SettingsScreen({
   editRoomTypeId: string | null;
   /** The season a rate plan's prices open on, from the Seasons screen (0110). */
   openSeasonId: string | null;
+  /** Room Rate Combinations open over Seasons: a season id, null for the Default Season, undefined closed. */
+  ratesSeason?: string | null;
   staff: StaffSetting[];
   meId: string | null;
   canEdit: boolean;
@@ -1218,18 +1223,50 @@ export function SettingsScreen({
           <SeasonsPanel
             types={seasons}
             businessDate={businessDate}
-            // A season's prices are set in its rate plan's form, on that
-            // season (0110) -- the reference's place for them. The main
-            // rate opens; the form's season picker is already on this one.
-            onRates={(id) => {
-              const main = ratePlans.find((p) => p.isDefault && p.isActive) ?? ratePlans.find((p) => p.isActive);
-              if (!main) return;
-              router.push(`/settings?tab=rate-plans&edit=${main.id}&season=${id ?? "default"}`);
-            }}
+            // The price button opens Room Rate Combinations for the season
+            // OVER this screen, as the reference does, rather than moving to
+            // Rate Plans -- the client asked for the popup by name.
+            onRates={(id) => router.push(`/settings?tab=seasons&rates=${id ?? "default"}`)}
             canEdit={canEdit}
             pending={pending}
             run={run}
           />
+          {ratesSeason !== undefined && (() => {
+            const s = ratesSeason === null ? null : seasons.find((x) => x.id === ratesSeason);
+            if (ratesSeason !== null && !s) return null;
+            const name = s ? s.name : tr("Default Season");
+            return (
+              <BookingDialog
+                side
+                wide
+                title={tr("Room Rate Combinations for {name}", { name })}
+                subtitle={s
+                  ? s.ranges.map((r) => `${tr.date(r.startsOn, "dd MMM yyyy")} - ${tr.date(r.endsOn, "dd MMM yyyy")}`).join(" · ")
+                  : tr("Every night no season covers")}
+                closeHref="/settings?tab=seasons"
+                closeLabel={tr("Close")}
+              >
+                <div className="rounded border border-line bg-white p-4 sm:p-6">
+                <RateCombinations
+                  // A different season is a different set of drafts.
+                  key={ratesSeason ?? "default"}
+                  ratePlans={ratePlans}
+                  roomTypes={roomTypes}
+                  seasons={seasons}
+                  cancellationPolicies={cancellationPolicies}
+                  weekRates={weekRates}
+                  coverage={rateCoverage}
+                  initialSeasonId={ratesSeason}
+                  lockSeason
+                  onEditPlan={(id) => router.push(`/settings?tab=rate-plans&edit=${id}&season=${ratesSeason ?? "default"}`)}
+                  canEdit={canEdit}
+                  pending={pending}
+                  run={run}
+                />
+                </div>
+              </BookingDialog>
+            );
+          })()}
         </div>
       )}
 

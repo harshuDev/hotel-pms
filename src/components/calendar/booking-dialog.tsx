@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useT } from "@/components/i18n";
+import { cn } from "@/components/ui";
 
 /**
  * The panel that opens over the board when a date is clicked.
@@ -28,6 +29,7 @@ export function BookingDialog({
   closeHref,
   closeLabel,
   side = false,
+  wide = false,
   meta,
   children,
 }: {
@@ -51,6 +53,8 @@ export function BookingDialog({
    * reservation, which carries a room table and a folio, earns the panel.
    */
   side?: boolean;
+  /** A wider panel, for Settings' Room Rate Combinations (a week across every room type). */
+  wide?: boolean;
   /**
    * The figures the reference puts along the top of its panel -- Grand Total,
    * Due, Paid. Passed in rather than worked out here, because this frame is
@@ -131,7 +135,12 @@ export function BookingDialog({
                 scrolls -- `max-h` on the body would work until the header
                 wrapped on a narrow screen and pushed the total off the end.
               */
-              "flex h-full w-full flex-col overflow-hidden border-l border-line bg-shell shadow-lift sm:max-w-3xl lg:max-w-5xl"
+              cn(
+                "flex h-full w-full flex-col overflow-hidden border-l border-line bg-shell shadow-lift sm:max-w-3xl",
+                // A week of prices across every room type is wider than a
+                // reservation; the reference's panel leaves only a sliver.
+                wide ? "lg:max-w-[88rem]" : "lg:max-w-5xl",
+              )
             : "my-4 w-full max-w-4xl overflow-hidden rounded-lg border border-line bg-shell shadow-lift"
         }
       >

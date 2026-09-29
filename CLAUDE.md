@@ -1338,10 +1338,37 @@ client: "Need to add Booking Channel in the Dashboard".
       across the week. Below: "Rate Category Restrictions" -- MST, MSA, MXS,
       CTA, CTD, SS as rows with ">>", one set for the plan, written to every
       room type in the grid. ONE Save stores the terms and then the week.
-      **The separate "Room Rate Combinations" grid under the list is GONE**,
-      and so is its copy on the Seasons screen: the client could not see how
-      a season linked to "all this stuff down here". Do not bring back a
-      second rate editor beside the form.
+      - **ROOM RATE COMBINATIONS IS BACK, UNDER THE LIST AND AS THE SEASONS
+        POPUP. This reverses what this file said**, that the grid was gone
+        for good: 0110 removed it when the client could not see how a
+        season linked to it; this round they sent their reference's Rate
+        Plans page and its Seasons popup and asked for both, "with all the
+        information showing in the screenshot".
+        `rate-combinations.tsx`: Filters (Season, Room types, Rate
+        Categories as chips), "Show Multi Occupancy Rates", then per room
+        type -- with "Show derived and calculated rates" -- each plan: name,
+        adults and children, a star on the main rate, an eye (crossed when
+        not on the guest page), "policy, currency", ⋮ (opens the plan's
+        form), ">>" (copies Monday's whole cell across the week), and per
+        weekday the Rate, MST MSA MXS and CTA CTD SS. "Add New Room Rate
+        Combination", Reset Changes, Save Changes.
+        - **It is the SAME weekly template as the plan's form, seen across
+          plans** -- `rate_plan_week_rates`, saved per (plan, room type) by
+          `save_week_rates()` with the form's rules. Not a second price
+          list. Restrictions are per room type here; the form writes one
+          set to every type -- both are the same columns.
+        - **A pairing shows when it is in use** (priced from the business
+          date, or given a week in any season) or when "Add New Room Rate
+          Combination" adds it -- still no link table.
+        - Occupancy rows: a per-occupancy plan types each; a per-person plan
+          shows them grey. Saving a per-person row sends back the stored
+          occupancy prices untouched. A derived plan never sends a rate.
+        - **The Seasons screen's tag opens it as a right-hand panel**,
+          `?tab=seasons&rates=<season id|default>` (URL state like the
+          calendar's dialogs), in `BookingDialog` with `side wide`, season
+          fixed, titled "Room Rate Combinations for <season>" with the
+          season's dates under it. It no longer navigates to Rate Plans --
+          the client: "vo na lejakr ek popup aa jaye".
       - The three occupancy modes: One Price For All Occupancies is one row
         (`single`); unticked, every row is typed (`per_occupancy`, 0110);
         with Automatic Calculation (`per_person`) the radio picks the row you
@@ -1370,8 +1397,10 @@ client: "Need to add Booking Channel in the Dashboard".
       - **A restriction cleared by hand in Inventory is empty again, so the
         next Save fills it back in.** Tell the client if they clear rules
         night by night and then re-save the week.
-      - The Seasons screen's "Rates" button opens the main plan's form on that
-        season (`?tab=rate-plans&edit=<plan>&season=<id|default>`).
+      - The Seasons screen's "Rates" button opens Room Rate Combinations
+        for that season in a panel over the screen (see above); a row's ⋮
+        there opens that plan's form on the season
+        (`?tab=rate-plans&edit=<plan>&season=<id|default>`).
       - A derived plan's rows show the parent's week, adjusted, read-only;
         its restrictions stay its own.
   - **THE RATE PLAN FORM CARRIES THE REFERENCE'S TERMS (0109)**, saved by
