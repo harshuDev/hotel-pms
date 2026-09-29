@@ -127,6 +127,9 @@
  "{n} guests": {
   "other": "{n} tamu"
  },
+ "{n} guests are still checked in after their departure.": {
+  "other": "{n} tamu masih check-in setelah tanggal keluar mereka."
+ },
  "{n} methods": {
   "other": "{n} metode"
  },
@@ -496,6 +499,7 @@
  "An extra needs a title.": "Ekstra memerlukan judul.",
  "An identification type needs a title": "Jenis identitas memerlukan judul",
  "An identification type needs a title.": "Jenis identitas memerlukan judul.",
+ "and {n} more": "dan {n} lainnya",
  "Andorra": "Andorra",
  "Angola": "Angola",
  "Anguilla": "Anguilla",
@@ -1098,6 +1102,7 @@
  "Drop the logo here, or click to choose it": "Letakkan logo di sini, atau klik untuk memilih",
  "Due": "Jatuh tempo",
  "Due out": "Akan check-out",
+ "due out {date}": "keluar {date}",
  "Due out that day": "Check-out hari itu",
  "Due out today": "Check-out hari ini",
  "Due out tomorrow": "Check-out besok",
@@ -2849,6 +2854,7 @@
  "Tokelau": "Tokelau",
  "Token has expired or is invalid": "Tautan sudah kedaluwarsa atau tidak valid",
  "Tonga": "Tonga",
+ "Tonight is not charged to them unless their stay is extended.": "Malam ini tidak ditagihkan kepada mereka kecuali masa inap diperpanjang.",
  "Total": "Total",
  "Total Due": "Total Tagihan",
  "Total revenue": "Total pendapatan",

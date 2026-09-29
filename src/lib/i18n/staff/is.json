@@ -142,6 +142,10 @@
   "one": "{n} gestur",
   "other": "{n} gestir"
  },
+ "{n} guests are still checked in after their departure.": {
+  "one": "{n} gestur er enn innritaður eftir brottför.",
+  "other": "{n} gestir eru enn innritaðir eftir brottför."
+ },
  "{n} methods": {
   "one": "{n} greiðslumáti",
   "other": "{n} greiðslumátar"
@@ -534,6 +538,7 @@
  "An extra needs a title.": "Aukaþjónusta þarf titil.",
  "An identification type needs a title": "Skilríkjategund þarf titil",
  "An identification type needs a title.": "Skilríkjategund þarf titil.",
+ "and {n} more": "og {n} til viðbótar",
  "Andorra": "Andorra",
  "Angola": "Angóla",
  "Anguilla": "Angvilla",
@@ -1139,6 +1144,7 @@
  "Drop the logo here, or click to choose it": "Slepptu merkinu hér, eða smelltu til að velja það",
  "Due": "Gjaldfallið",
  "Due out": "Fer í dag",
+ "due out {date}": "brottför {date}",
  "Due out that day": "Fer þann dag",
  "Due out today": "Fer í dag",
  "Due out tomorrow": "Fer á morgun",
@@ -2893,6 +2899,7 @@
  "Tokelau": "Tókelá",
  "Token has expired or is invalid": "Hlekkurinn er útrunninn eða ógildur",
  "Tonga": "Tonga",
+ "Tonight is not charged to them unless their stay is extended.": "Nóttin í kvöld er ekki rukkuð nema dvölin sé framlengd.",
  "Total": "Samtals",
  "Total Due": "Samtals til greiðslu",
  "Total revenue": "Heildartekjur",

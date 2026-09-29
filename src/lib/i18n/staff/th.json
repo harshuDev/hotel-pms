@@ -127,6 +127,9 @@
  "{n} guests": {
   "other": "แขก {n} คน"
  },
+ "{n} guests are still checked in after their departure.": {
+  "other": "มีแขก {n} คนที่ยังเช็กอินอยู่หลังวันออก"
+ },
  "{n} methods": {
   "other": "{n} วิธี"
  },
@@ -496,6 +499,7 @@
  "An extra needs a title.": "รายการเสริมต้องมีชื่อ",
  "An identification type needs a title": "ประเภทเอกสารระบุตัวตนต้องมีชื่อ",
  "An identification type needs a title.": "ประเภทเอกสารระบุตัวตนต้องมีชื่อ",
+ "and {n} more": "และอีก {n} รายการ",
  "Andorra": "อันดอร์รา",
  "Angola": "แองโกลา",
  "Anguilla": "แองกวิลลา",
@@ -1098,6 +1102,7 @@
  "Drop the logo here, or click to choose it": "วางโลโก้ที่นี่ หรือคลิกเพื่อเลือก",
  "Due": "ค้างชำระ",
  "Due out": "ครบกำหนดออก",
+ "due out {date}": "กำหนดออก {date}",
  "Due out that day": "ครบกำหนดออกวันนั้น",
  "Due out today": "ครบกำหนดออกวันนี้",
  "Due out tomorrow": "ครบกำหนดออกพรุ่งนี้",
@@ -2849,6 +2854,7 @@
  "Tokelau": "โตเกเลา",
  "Token has expired or is invalid": "ลิงก์หมดอายุหรือไม่ถูกต้อง",
  "Tonga": "ตองกา",
+ "Tonight is not charged to them unless their stay is extended.": "คืนนี้จะไม่ถูกเรียกเก็บเงิน เว้นแต่จะขยายการเข้าพัก",
  "Total": "รวม",
  "Total Due": "ยอดที่ต้องชำระทั้งหมด",
  "Total revenue": "รายได้รวม",

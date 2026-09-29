@@ -142,6 +142,10 @@
   "one": "{n} client",
   "other": "{n} clients"
  },
+ "{n} guests are still checked in after their departure.": {
+  "one": "{n} client est encore enregistré après son départ.",
+  "other": "{n} clients sont encore enregistrés après leur départ."
+ },
  "{n} methods": {
   "one": "{n} moyen",
   "other": "{n} moyens"
@@ -534,6 +538,7 @@
  "An extra needs a title.": "Un extra nécessite un titre.",
  "An identification type needs a title": "Un type de pièce d’identité nécessite un titre",
  "An identification type needs a title.": "Un type de pièce d’identité nécessite un titre.",
+ "and {n} more": "et {n} de plus",
  "Andorra": "Andorre",
  "Angola": "Angola",
  "Anguilla": "Anguilla",
@@ -1140,6 +1145,7 @@
  "Drop the logo here, or click to choose it": "Déposez le logo ici, ou cliquez pour le choisir",
  "Due": "Dû",
  "Due out": "Départ prévu",
+ "due out {date}": "départ le {date}",
  "Due out that day": "Départ prévu ce jour-là",
  "Due out today": "Départ prévu aujourd’hui",
  "Due out tomorrow": "Départ prévu demain",
@@ -2894,6 +2900,7 @@
  "Tokelau": "Tokelau",
  "Token has expired or is invalid": "Le lien a expiré ou n’est pas valide",
  "Tonga": "Tonga",
+ "Tonight is not charged to them unless their stay is extended.": "Cette nuit ne leur est pas facturée, sauf si le séjour est prolongé.",
  "Total": "Total",
  "Total Due": "Total dû",
  "Total revenue": "Chiffre d’affaires total",

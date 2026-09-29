@@ -67,7 +67,22 @@ export default async function DashboardPage() {
             {tr("business day open")}
           </p>
         </div>
-        {canCloseDay && <CloseDay businessDate={today} />}
+        {canCloseDay && (
+          <CloseDay
+            businessDate={today}
+            // Departures on the business date include overdue guests (0111);
+            // those still in are the ones closing the day leaves unbilled.
+            stillIn={departures
+              .filter((b) => b.status === "checked_in" && b.departureDate <= today)
+              .map((b) => ({
+                bookingId: b.id,
+                reference: b.reference,
+                guestName: b.customerName,
+                roomNumber: b.roomNumber,
+                departureDate: b.departureDate,
+              }))}
+          />
+        )}
       </div>
 
       <HouseStrip s={house} />
