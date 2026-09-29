@@ -96,6 +96,8 @@ import type {
   CalendarSeason,
   SeasonType,
   WeekRate,
+  OccupancyGridCell,
+  RoomTypeOccupancy,
   RoomTypeStatus,
   BookingAttachment,
   BookingEmail,
@@ -1797,7 +1799,7 @@ async function loadRatePlans(includeRetired: boolean): Promise<RatePlan[]> {
   let query = supabase
     .from("rate_plans")
     .select(
-      "id, code, name, description, is_default, is_active, is_public, cancellation_policy_id, rate_plan_meals(meal, value_cents), min_days_advance, max_days_advance, min_adults, max_adults, min_children, max_children, valid_from, valid_to, parent_rate_plan_id, derived_kind, derived_percent_bps, derived_amount_cents, occupancy_pricing, adult_adjust_cents, child_adjust_cents, tax_rate_id, accounting_category_id, rate_plan_channels(channel_id)",
+      "id, code, name, description, is_default, is_active, is_public, cancellation_policy_id, rate_plan_meals(meal, value_cents), min_days_advance, max_days_advance, min_adults, max_adults, min_children, max_children, valid_from, valid_to, parent_rate_plan_id, derived_kind, derived_percent_bps, derived_amount_cents, occupancy_pricing, adult_adjust_cents, child_adjust_cents, adult_decrease_cents, tax_rate_id, accounting_category_id, rate_plan_channels(channel_id)",
     );
   if (!includeRetired) query = query.eq("is_active", true);
   const { data, error } = await query
@@ -1835,6 +1837,7 @@ async function loadRatePlans(includeRetired: boolean): Promise<RatePlan[]> {
       occupancy_pricing: string;
       adult_adjust_cents: number | null;
       child_adjust_cents: number | null;
+      adult_decrease_cents: number | null;
       tax_rate_id: string | null;
       accounting_category_id: string | null;
       rate_plan_channels: { channel_id: string }[];
@@ -1868,9 +1871,13 @@ async function loadRatePlans(includeRetired: boolean): Promise<RatePlan[]> {
     derivedKind: row.derived_kind === "percent" || row.derived_kind === "amount" ? row.derived_kind : null,
     derivedPercentBps: row.derived_percent_bps,
     derivedAmountCents: row.derived_amount_cents === null ? null : Number(row.derived_amount_cents),
-    occupancyPricing: row.occupancy_pricing === "per_person" ? "per_person" : "single",
+    occupancyPricing:
+      row.occupancy_pricing === "per_person" || row.occupancy_pricing === "per_occupancy"
+        ? row.occupancy_pricing
+        : "single",
     adultAdjustCents: row.adult_adjust_cents === null ? null : Number(row.adult_adjust_cents),
     childAdjustCents: row.child_adjust_cents === null ? null : Number(row.child_adjust_cents),
+    adultDecreaseCents: row.adult_decrease_cents === null ? null : Number(row.adult_decrease_cents),
     taxRateId: row.tax_rate_id,
     accountingCategoryId: row.accounting_category_id,
     channelIds: (row.rate_plan_channels ?? []).map((c) => c.channel_id),
@@ -2076,13 +2083,13 @@ export async function getRoomStatusByType(): Promise<RoomTypeStatus[]> {
   }));
 }
 
-/** Every stored weekday template (0096), for Room Rate Combinations. A handful per plan and type. */
+/** Every stored weekday template (0096), for the Rates grid in a rate plan's form. A handful per plan and type. */
 export async function getWeekRates(): Promise<WeekRate[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("rate_plan_week_rates")
     .select(
-      "rate_plan_id, room_type_id, season_type_id, weekday, rate_cents, min_stay_through, min_stay_arrival, max_stay, closed_to_arrival, closed_to_departure, stop_sell",
+      "rate_plan_id, room_type_id, season_type_id, weekday, rate_cents, min_stay_through, min_stay_arrival, max_stay, closed_to_arrival, closed_to_departure, stop_sell, occupancy_rates",
     );
   if (error) throw new Error(`Failed to load the weekly rates: ${error.message}`);
   return (data ?? []).map((r) => ({
@@ -2097,6 +2104,14 @@ export async function getWeekRates(): Promise<WeekRate[]> {
     closedToArrival: r.closed_to_arrival,
     closedToDeparture: r.closed_to_departure,
     stopSell: r.stop_sell,
+    occupancyRates:
+      r.occupancy_rates && typeof r.occupancy_rates === "object" && !Array.isArray(r.occupancy_rates)
+        ? Object.fromEntries(
+            Object.entries(r.occupancy_rates as Record<string, unknown>)
+              .filter(([, v]) => typeof v === "number")
+              .map(([k, v]) => [k, v as number]),
+          )
+        : null,
   }));
 }
 
@@ -4144,6 +4159,37 @@ export async function getRatesGrid(
     // Null is "not loaded", which is not zero and not free. Kept as null all
     // the way to the cell so the screen can say so.
     rateCents: row.rate_cents === null ? null : Number(row.rate_cents),
+  }));
+}
+
+/** Per-occupancy prices set night by night (0110), for the Rates grid. */
+export async function getOccupancyGrid(
+  from: string,
+  days: number = INVENTORY_NIGHTS,
+): Promise<OccupancyGridCell[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("inventory_occupancy_grid", { p_from: from, p_days: days });
+  if (error) throw new Error(`Failed to load the occupancy prices: ${error.message}`);
+  return (data ?? []).map((row) => ({
+    ratePlanId: row.rate_plan_id,
+    roomTypeId: row.room_type_id,
+    date: row.stay_date,
+    adults: row.adults,
+    rateCents: Number(row.rate_cents),
+  }));
+}
+
+/** How many each room type sleeps, for the occupancy rows of the Rates grid. */
+export async function getRoomTypeOccupancies(): Promise<RoomTypeOccupancy[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("room_types")
+    .select("id, base_occupancy, max_occupancy");
+  if (error) throw new Error(`Failed to load the room types: ${error.message}`);
+  return (data ?? []).map((r) => ({
+    id: r.id,
+    baseOccupancy: r.base_occupancy,
+    maxOccupancy: r.max_occupancy,
   }));
 }
 

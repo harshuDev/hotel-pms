@@ -3374,6 +3374,61 @@ export type Database = {
           },
         ]
       }
+      rate_plan_occupancy_days: {
+        Row: {
+          adults: number
+          property_id: string
+          rate_cents: number
+          rate_plan_id: string
+          room_type_id: string
+          stay_date: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          adults: number
+          property_id: string
+          rate_cents: number
+          rate_plan_id: string
+          room_type_id: string
+          stay_date: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          adults?: number
+          property_id?: string
+          rate_cents?: number
+          rate_plan_id?: string
+          room_type_id?: string
+          stay_date?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rate_plan_occupancy_days_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rate_plan_occupancy_days_rate_plan_id_fkey"
+            columns: ["rate_plan_id"]
+            isOneToOne: false
+            referencedRelation: "rate_plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rate_plan_occupancy_days_room_type_id_fkey"
+            columns: ["room_type_id"]
+            isOneToOne: false
+            referencedRelation: "room_types"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       rate_plan_week_rates: {
         Row: {
           closed_to_arrival: boolean
@@ -3382,6 +3437,7 @@ export type Database = {
           max_stay: number | null
           min_stay_arrival: number | null
           min_stay_through: number | null
+          occupancy_rates: Json | null
           property_id: string
           rate_cents: number | null
           rate_plan_id: string
@@ -3399,6 +3455,7 @@ export type Database = {
           max_stay?: number | null
           min_stay_arrival?: number | null
           min_stay_through?: number | null
+          occupancy_rates?: Json | null
           property_id: string
           rate_cents?: number | null
           rate_plan_id: string
@@ -3416,6 +3473,7 @@ export type Database = {
           max_stay?: number | null
           min_stay_arrival?: number | null
           min_stay_through?: number | null
+          occupancy_rates?: Json | null
           property_id?: string
           rate_cents?: number | null
           rate_plan_id?: string
@@ -3461,6 +3519,7 @@ export type Database = {
         Row: {
           accounting_category_id: string | null
           adult_adjust_cents: number | null
+          adult_decrease_cents: number | null
           cancellation_policy_id: string | null
           child_adjust_cents: number | null
           code: string
@@ -3492,6 +3551,7 @@ export type Database = {
         Insert: {
           accounting_category_id?: string | null
           adult_adjust_cents?: number | null
+          adult_decrease_cents?: number | null
           cancellation_policy_id?: string | null
           child_adjust_cents?: number | null
           code: string
@@ -3523,6 +3583,7 @@ export type Database = {
         Update: {
           accounting_category_id?: string | null
           adult_adjust_cents?: number | null
+          adult_decrease_cents?: number | null
           cancellation_policy_id?: string | null
           child_adjust_cents?: number | null
           code?: string
@@ -5836,6 +5897,16 @@ export type Database = {
         Args: { p_from: string; p_rate_plan_id: string; p_to: string }
         Returns: string
       }
+      inventory_occupancy_grid: {
+        Args: { p_days: number; p_from: string }
+        Returns: {
+          adults: number
+          rate_cents: number
+          rate_plan_id: string
+          room_type_id: string
+          stay_date: string
+        }[]
+      }
       inventory_rates_grid: {
         Args: { p_days?: number; p_from: string }
         Returns: {
@@ -6261,6 +6332,17 @@ export type Database = {
           p_kind: string
           p_parent_cents: number
           p_percent_bps: number
+        }
+        Returns: number
+      }
+      rate_plan_night_rate: {
+        Args: {
+          p_adults: number
+          p_base_cents: number
+          p_children: number
+          p_rate_plan_id: string
+          p_room_type_id: string
+          p_stay_date: string
         }
         Returns: number
       }
@@ -7060,6 +7142,18 @@ export type Database = {
         }
         Returns: number
       }
+      set_occupancy_rates: {
+        Args: {
+          p_adults?: number
+          p_days_of_week?: number[]
+          p_from: string
+          p_rate_cents?: number
+          p_rate_plan_id: string
+          p_room_type_ids: string[]
+          p_to: string
+        }
+        Returns: number
+      }
       set_rate_plan_cancellation_policy: {
         Args: { p_cancellation_policy_id?: string; p_rate_plan_id: string }
         Returns: undefined
@@ -7087,6 +7181,7 @@ export type Database = {
         Args: {
           p_accounting_category_id?: string
           p_adult_adjust_cents?: number
+          p_adult_decrease_cents?: number
           p_channel_ids?: string[]
           p_child_adjust_cents?: number
           p_derived_amount_cents?: number

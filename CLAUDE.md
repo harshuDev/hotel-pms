@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0109` are
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0110` are
 applied to the hosted database.
 
 Working on real data: dashboard (house board, movements, pace, activity feed),
@@ -249,6 +249,8 @@ Each read is a Postgres view or RPC, never aggregation in the client:
 | `getCalendarNotes(from, n)`         | `calendar_notes_for(from, n)`      |
 | `getSeasonSettings()`               | `season_types` with their `seasons` ranges (0095) |
 | `getWeekRates()`                    | `rate_plan_week_rates` (0096)     |
+| `getOccupancyGrid(from, n)`         | `inventory_occupancy_grid(from, n)` (0110) |
+| `getRoomTypeOccupancies()`          | `room_types` base and max occupancy |
 | `getRoomStatusByType()` (unused)    | `room_status_by_type()`            |
 | `getOccupancyReport(from, to)`      | `occupancy_report(from, to)`      |
 | `getDebtorsReport()`                | `debtors_report()`                |
@@ -1228,6 +1230,24 @@ client: "Need to add Booking Channel in the Dashboard".
     selection by plan and calls `set_rates()` once per plan — each its own
     transaction, exactly as applying to several room types already was. It
     routes through `applyInventory()` so the validation stays in one place.
+  - **EVERY NIGHT IS TYPED INTO ITS OWN CELL (0110).** The client, twice in
+    one evening: "Hotels have to be able to change the rates per day ... it is
+    very important to have the rates PER DAY", and in a Loom: "the OTAs don't
+    receive per year ... we do per day". The prices were always stored per
+    night; what was missing was a way to change ONE night -- every cell was
+    read-only and the bulk panel was the only editor. A cell now saves on
+    Enter or when focus leaves it (`set_rates()` over a one-day range), past
+    nights stay read-only, and ‹ Previous / Today / Next › with a date field
+    page the 28 nights. The bulk panel stays for ranges.
+  - **A plan that prices by occupancy draws a row per number of adults**
+    under its standard row (the room type's base occupancy). An empty cell
+    shows, faint, what that party pays anyway; typing sets that night's own
+    price for them (`set_occupancy_rates()`), clearing puts them back. The
+    bulk panel takes an Occupancy too.
+  - **Rates (Main) is this screen pinned to the main plan** (0110), through
+    `RatesPage` in `rates-page.tsx`, which both routes render. It used to be
+    the shared nine-screen grid, which could do neither of the two things
+    above.
 - **Rate plans are created and corrected in Settings** (`?tab=rate-plans`),
   through `save_rate_plan()`. Until 0054 a plan could be created — from a
   corner of the Inventory screen — and never renamed, retired or reordered,
@@ -1250,48 +1270,51 @@ client: "Need to add Booking Channel in the Dashboard".
     takes the default policy by trigger (0093).
     - "Show Special Offer Rates" is not copied: offers here reduce a stay,
       they do not create rate plans, so there would be nothing to show.
-    - **THE WEEKLY RATE GRID IS BUILT (0096), AND IT ONLY FILLS.** "Room
-      Rate Combinations" (`rate-combinations.tsx`, under the list): Season
-      (Default Season or one of the seasons), Room types and Rate Categories
-      as removable chips, then per room type a row per plan -- sleeps,
-      policy and currency -- with a Monday-to-Sunday rate, MST/MSA/MXS and
-      CTA/CTD/SS, and a Save per row.
+    - **THE PLAN'S PRICES ARE IN ITS OWN FORM (0110)**, as the reference
+      has them -- the client sent a Loom of it and asked for "the way we have
+      it here". `plan-rates.tsx`, under Pricing: Season (Default Season or a
+      season), Affected Room Types as chips (those priced on the plan, else
+      all), then per room type "(Max Occ. n)" and a row per number of adults
+      up to it, Monday to Sunday, each row with a ">>" that copies Monday
+      across the week. Below: "Rate Category Restrictions" -- MST, MSA, MXS,
+      CTA, CTD, SS as rows with ">>", one set for the plan, written to every
+      room type in the grid. ONE Save stores the terms and then the week.
+      **The separate "Room Rate Combinations" grid under the list is GONE**,
+      and so is its copy on the Seasons screen: the client could not see how
+      a season linked to "all this stuff down here". Do not bring back a
+      second rate editor beside the form.
+      - The three occupancy modes: One Price For All Occupancies is one row
+        (`single`); unticked, every row is typed (`per_occupancy`, 0110);
+        with Automatic Calculation (`per_person`) the radio picks the row you
+        type in and the rest are worked out, grey, from Increase Per Adult,
+        Decrease Per Adult (0110) and Increase Per Child. The base-occupancy
+        row is always `rate_cents`; the others go to the template's
+        `occupancy_rates` jsonb and then onto the nights'
+        `rate_plan_occupancy_days`. Automatic from the base row stores none
+        and lets Postgres work them out; from another row it stores what is
+        shown. "Decrease Per Child" is not copied: base children is none, so
+        it could never apply.
       - `rate_plan_week_rates` stores the template; `save_week_rates()`
-        stores it and then writes it onto the nights. **THE CLIENT'S RULE:
-        "Only fill nights that have no price yet."** A night's rate is set
-        only where it has none, a min or max stay only where none is set, and
-        CTA, CTD and stop sell are only ever switched ON -- an unticked box
-        removes nothing. Nothing priced or restricted in Inventory is ever
-        overwritten; Inventory stays the way to change a night that has a
-        value. Save reports how many nights it priced.
-      - **EXCEPT THE RATE, WHEN ASKED (0108).** "Replace prices already on
-        these nights", a tickbox above the grid, makes a row's Save overwrite
-        `rate_cents` on the season's nights as well as fill the empty ones.
-        The client asked to "put rate in the season", and on the hosted
-        property every night was already priced to 2027-09-18, so fill-only
-        changed nothing and read as broken. **The restrictions stay
-        fill-only either way** -- the tickbox names prices and does only
-        that. Save then reports nights set or changed.
-      - **The grid is also on Settings -> Seasons and Events** (0108), under
-        the year calendar: "Rates for <season>" on each season and on the
-        Default Season opens it on that season. It is the same
-        `RateCombinations` keyed on the season chosen, not a second editor.
+        writes it onto the nights. **A SEASON REPLACES THE PRICE ON ITS OWN
+        DATES (0110)** -- that is what a season is for, and fill-only made it
+        change nothing on a property already priced: "Season does not work".
+        **The Default Season still only fills empty nights** unless "Replace
+        prices already on these nights" is ticked, so re-saving the year never
+        wipes a night priced by hand. **Restrictions only ever fill**: a
+        min or max stay only where none is set, CTA/CTD/SS only switched ON.
+      - **Dates added to a season later get its prices** (0110):
+        `add_season_range()` re-applies the season's saved week. Before,
+        they kept whatever they had.
       - **Which nights:** from the open business date on. A season: its own
         ranges, up to two years out. The Default Season: the next 365 nights
         that no season covers. `inventory_guard()` does the role check.
       - **A restriction cleared by hand in Inventory is empty again, so the
-        next Save of that row fills it back in.** That is what "fill" means
-        for a rule whose absence is null; tell the client if they clear rules
+        next Save fills it back in.** Tell the client if they clear rules
         night by night and then re-save the week.
-      - **"Show derived and calculated rates" is built (0109)**: off, derived
-        plans are hidden; on, their rows show the rate worked out from the
-        parent's row (read-only -- Postgres recomputes it on every write) and
-        their restrictions stay editable. Each row also says how many nights
-        that combination has priced from the business date, or "Not priced"
-        (`rate_plan_coverage()`).
-      - Not copied: "Show Multi Occupancy Rates" (a plan prices per person by
-        its own two adjustments, not by a grid per occupancy), and each row's
-        menu and arrow, whose actions have not been seen.
+      - The Seasons screen's "Rates" button opens the main plan's form on that
+        season (`?tab=rate-plans&edit=<plan>&season=<id|default>`).
+      - A derived plan's rows show the parent's week, adjusted, read-only;
+        its restrictions stay its own.
   - **THE RATE PLAN FORM CARRIES THE REFERENCE'S TERMS (0109)**, saved by
     `set_rate_plan_terms()` -- one function taking the whole set, its own for
     the overload reason -- plus meals through `set_rate_plan_meals()`. Every
@@ -1327,10 +1350,18 @@ client: "Need to add Booking Channel in the Dashboard".
       (`rate_plan_rederive()`); removing it leaves the prices as the plan's
       own. A parent cannot be deleted while a plan is derived from it.
       Restrictions are never derived -- each plan keeps its own.
-    - **Occupancy pricing**: "One Price For All Occupancies", or per person:
-      the loaded price is for the room type's BASE occupancy in adults; each
-      adult above or below moves it by the adult amount, each child adds the
-      child amount, floored at zero (`rate_plan_occupancy_rate()`). Applied
+    - **Occupancy pricing**: "One Price For All Occupancies", a price per
+      number of adults (`per_occupancy`, 0110), or per person: the loaded
+      price is for the room type's BASE occupancy in adults; each adult above
+      it adds the increase, each below takes off the decrease (0110; null
+      decrease uses the increase), each child adds the child amount, floored
+      at zero (`rate_plan_occupancy_rate()`).
+      **`rate_plan_night_rate()` is the one place a night is priced for a
+      party (0110)**: that night's own price for that many adults in
+      `rate_plan_occupancy_days` if there is one (a derived plan reads its
+      parent's and adjusts it; a single-price plan ignores them), else the
+      rule above. The standard price must still be loaded for a night to
+      sell. Applied
       wherever a night is priced from the plan -- `create_booking()` per room
       line's party, `create_public_booking()`, and `public_room_types()`,
       which takes the party now. A hand-typed room rate is never adjusted.
@@ -1354,7 +1385,7 @@ client: "Need to add Booking Channel in the Dashboard".
       type exactly when that pair has prices loaded -- the rule this file
       already gives for the Rates grid, and why there is still no
       `rate_plan_room_types` table. The form lists each type with its priced
-      nights (`rate_plan_coverage()`); prices go on in Room Rate Combinations.
+      nights (`rate_plan_coverage()`); since 0110 the form's Rates grid picks which types it prices.
     - **Not built: "Sell With Extras."** Nothing sells an extra with a rate,
       and inventing what it should post would be a money rule nobody asked
       for.
@@ -1451,7 +1482,7 @@ client: "Need to add Booking Channel in the Dashboard".
     switch any more (the reference has none); `is_active` stays true and the
     column is kept for the guest page's join.
   - **"Rates (Main)" and "Rates (All)" are the same field.** Main pins the
-    property's default plan and hides the switcher; All lets you pick. Two
+    property's default plan; All shows every plan. Two
     entries for one field is not duplication — changing the main rate is most
     of what anyone does here, and making them choose the plan first every time
     is a click that is always the same click. `?plan=` is ignored on Main

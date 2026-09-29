@@ -1,7 +1,7 @@
 "use client";
 
 import { useT } from "@/components/i18n";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { cn } from "@/components/ui";
 import { useCurrency } from "@/components/currency";
 import type {
@@ -11,8 +11,11 @@ import type {
   RatePlan,
   RatePlanCoverage,
   RoomTypeSetting,
+  SeasonType,
   TaxRateSetting,
+  WeekRate,
 } from "@/lib/types";
+import { PlanRates, type PlanRatesHandle } from "@/components/settings/plan-rates";
 import type { AccountingCategory } from "@/lib/finance-profiles";
 import { formatPercentBps, parsePercentBps } from "@/lib/finance-profiles";
 import { formatMoneyInput, parseMoney } from "@/lib/money";
@@ -21,6 +24,7 @@ import {
   saveRatePlan,
   setRatePlanCancellationPolicy,
   setRatePlanTerms,
+  saveWeekRates,
 } from "@/lib/actions/settings";
 import { setRatePlanMeals } from "@/lib/actions/inventory";
 
@@ -39,10 +43,14 @@ import { setRatePlanMeals } from "@/lib/actions/inventory";
  * THE FORM CARRIES THE REFERENCE'S RATE PLAN TERMS (0109): meals, booking
  * conditions, a derived rate, occupancy pricing, the tax and ledger account,
  * and the channels. Every one is enforced or applied in Postgres
- * (`set_rate_plan_terms()`); none is a stored wish. "Affected room types" is
- * read, not set: a plan is sold on a room type exactly when that pair has
- * prices loaded, which is done in Room Rate Combinations below.
- * "Sell with extras" is not copied -- nothing sells an extra with a rate.
+ * (`set_rate_plan_terms()`); none is a stored wish.
+ *
+ * THE PLAN'S PRICES ARE IN ITS FORM (0110), as the reference has them and as
+ * the client asked in a Loom: season, affected room types, a row per number
+ * of adults, ">>" to copy Monday across, and the restrictions as their own
+ * rows -- `PlanRates`. One Save stores the terms and then the week, which is
+ * written onto the nights. "Sell with extras" is not copied -- nothing sells
+ * an extra with a rate.
  */
 
 type Run = (fn: () => Promise<{ ok: boolean; error?: string }>, done: string) => void;
@@ -74,7 +82,10 @@ type Draft = {
   relation: Relation;
   adjustment: string;
   singlePrice: boolean;
+  /** "Automatic Calculation": the other occupancies worked out per person. */
+  automatic: boolean;
   perAdult: string;
+  decreaseAdult: string;
   perChild: string;
   taxRateId: string;
   accountingCategoryId: string;
@@ -127,7 +138,14 @@ function draftOf(p: RatePlan | null, defaultPolicyId: string): Draft {
           ? formatPercentBps(Math.abs(pct))
           : "",
     singlePrice: (p?.occupancyPricing ?? "single") === "single",
+    automatic: p?.occupancyPricing === "per_person",
     perAdult: p?.adultAdjustCents != null ? formatMoneyInput(p.adultAdjustCents) : "",
+    decreaseAdult:
+      p?.adultDecreaseCents != null
+        ? formatMoneyInput(p.adultDecreaseCents)
+        : p?.adultAdjustCents != null
+          ? formatMoneyInput(p.adultAdjustCents)
+          : "",
     perChild: p?.childAdjustCents != null ? formatMoneyInput(p.childAdjustCents) : "",
     taxRateId: p?.taxRateId ?? "",
     accountingCategoryId: p?.accountingCategoryId ?? "",
@@ -207,6 +225,10 @@ export function RatePlansPanel({
   accountingCategories,
   channels,
   coverage,
+  seasons,
+  weekRates,
+  openPlanId = null,
+  openSeasonId = null,
   canEdit,
   pending,
   run,
@@ -219,19 +241,29 @@ export function RatePlansPanel({
   accountingCategories: AccountingCategory[];
   channels: ChannelSetting[];
   coverage: RatePlanCoverage[];
+  seasons: SeasonType[];
+  weekRates: WeekRate[];
+  /** Open this plan's form on arrival -- the Seasons screen's price button (0110). */
+  openPlanId?: string | null;
+  /** The season its prices open on; null is the Default Season. */
+  openSeasonId?: string | null;
   canEdit: boolean;
   pending: boolean;
   run: Run;
 }) {
   const tr = useT();
   const currency = useCurrency();
+  const ratesRef = useRef<PlanRatesHandle>(null);
   const [showExpired, setShowExpired] = useState(false);
   const [sortBy, setSortBy] = useState<"title" | "policy" | null>(null);
   const [desc, setDesc] = useState(false);
   const [search, setSearch] = useState<string | null>(null);
   const [policyFilter, setPolicyFilter] = useState<string | null>(null);
   const [filterOpen, setFilterOpen] = useState(false);
-  const [draft, setDraft] = useState<Draft | null>(null);
+  const [draft, setDraft] = useState<Draft | null>(() => {
+    const p = openPlanId ? ratePlans.find((x) => x.id === openPlanId) : undefined;
+    return p && canEdit ? draftOf(p, cancellationPolicies.find((c) => c.isDefault)?.id ?? "") : null;
+  });
 
   const policyName = (id: string | null) =>
     cancellationPolicies.find((c) => c.id === id)?.name ?? tr("Not set");
@@ -306,12 +338,17 @@ export function RatePlansPanel({
     }
     let adultAdjustCents: number | null = null;
     let childAdjustCents: number | null = null;
-    if (!d.singlePrice) {
+    let adultDecreaseCents: number | null = null;
+    if (!d.singlePrice && d.automatic) {
       try {
         adultAdjustCents = d.perAdult.trim() === "" ? 0 : parseMoney(d.perAdult);
+        adultDecreaseCents = d.decreaseAdult.trim() === "" ? 0 : parseMoney(d.decreaseAdult);
         childAdjustCents = d.perChild.trim() === "" ? 0 : parseMoney(d.perChild);
       } catch {
-        return tr("Write the amounts per adult and per child as numbers, such as 15 or -10.");
+        return tr("Write the increases and the decrease as amounts, such as 50 or 12.50.");
+      }
+      if (adultAdjustCents < 0 || adultDecreaseCents < 0 || childAdjustCents < 0) {
+        return tr("Write the increases and the decrease as amounts, such as 50 or 12.50.");
       }
     }
     return {
@@ -327,9 +364,10 @@ export function RatePlansPanel({
       derivedKind,
       derivedPercentBps,
       derivedAmountCents,
-      occupancyPricing: d.singlePrice ? "single" : "per_person",
+      occupancyPricing: d.singlePrice ? "single" : d.automatic ? "per_person" : "per_occupancy",
       adultAdjustCents,
       childAdjustCents,
+      adultDecreaseCents,
       taxRateId: d.taxRateId || null,
       accountingCategoryId: d.accountingCategoryId || null,
       channelIds: d.allChannels ? [] : d.channelIds,
@@ -342,6 +380,13 @@ export function RatePlansPanel({
     const terms = termsOf(d);
     if (typeof terms === "string") {
       setFormError(terms);
+      return;
+    }
+    // The prices are checked before anything is saved, so a typo in the
+    // grid never leaves the terms saved and the week not.
+    const week = ratesRef.current?.collect() ?? null;
+    if (typeof week === "string") {
+      setFormError(week);
       return;
     }
     setFormError(null);
@@ -368,7 +413,26 @@ export function RatePlansPanel({
         const meals = await setRatePlanMeals({ ratePlanId: saved.data.id, meals: d.meals });
         if (!meals.ok) return meals;
       }
-      setDraft(null);
+      if (week) {
+        for (const row of week.rows) {
+          const result = await saveWeekRates({
+            ratePlanId: saved.data.id,
+            roomTypeId: row.roomTypeId,
+            seasonTypeId: week.seasonTypeId,
+            days: row.days,
+            replaceRates: week.replaceRates,
+          });
+          if (!result.ok) {
+            return { ok: false, error: tr("{name}: {error}", { name: row.roomTypeName, error: result.error }) };
+          }
+        }
+      }
+      // A new plan stays open, so its prices can be put in straight away.
+      setDraft(
+        d.id
+          ? null
+          : { ...d, id: saved.data.id, wasPolicyId: d.cancellationPolicyId, wasMeals: d.meals },
+      );
       return { ok: true };
     }, d.id ? tr("Rate plan saved.") : tr("Rate plan created."));
   }
@@ -654,19 +718,65 @@ export function RatePlansPanel({
                   {tr("One Price For All Occupancies")}
                 </label>
                 {!draft.singlePrice && (
-                  <div className="mt-2 grid gap-4 sm:grid-cols-4">
-                    <label className={label}>
-                      {tr("Increase/Decrease per Adult")}
-                      <input inputMode="decimal" value={draft.perAdult} placeholder="0.00" className={cn(field, "tnum")}
-                        onChange={(e) => setDraft({ ...draft, perAdult: e.target.value })} />
+                  <div className="mt-2 grid items-end gap-4 sm:grid-cols-4">
+                    <label className="flex items-center gap-2 pb-2 text-[13.5px] text-ink">
+                      <input type="checkbox" className="h-4 w-4 accent-brass" checked={draft.automatic}
+                        onChange={(e) => setDraft({ ...draft, automatic: e.target.checked })} />
+                      {tr("Automatic Calculation")}
                     </label>
-                    <label className={label}>
-                      {tr("Increase/Decrease per Child")}
-                      <input inputMode="decimal" value={draft.perChild} placeholder="0.00" className={cn(field, "tnum")}
-                        onChange={(e) => setDraft({ ...draft, perChild: e.target.value })} />
-                    </label>
+                    {draft.automatic && (
+                      <>
+                        <label className={label}>
+                          {tr("Increase Per Adult")}
+                          <input inputMode="decimal" value={draft.perAdult} placeholder="0.00" className={cn(field, "tnum")}
+                            onChange={(e) => setDraft({ ...draft, perAdult: e.target.value })} />
+                        </label>
+                        <label className={label}>
+                          {tr("Decrease Per Adult")}
+                          <input inputMode="decimal" value={draft.decreaseAdult} placeholder="0.00" className={cn(field, "tnum")}
+                            onChange={(e) => setDraft({ ...draft, decreaseAdult: e.target.value })} />
+                        </label>
+                        <label className={label}>
+                          {tr("Increase Per Child")}
+                          <input inputMode="decimal" value={draft.perChild} placeholder="0.00" className={cn(field, "tnum")}
+                            onChange={(e) => setDraft({ ...draft, perChild: e.target.value })} />
+                        </label>
+                      </>
+                    )}
                   </div>
                 )}
+
+                {draft.id && (() => {
+                  const plan = ratePlans.find((p) => p.id === draft.id);
+                  if (!plan) return null;
+                  const cents = (s: string) => {
+                    try {
+                      return s.trim() === "" ? 0 : Math.max(0, parseMoney(s));
+                    } catch {
+                      return 0;
+                    }
+                  };
+                  return (
+                    <>
+                      <h5 className={section}>{tr("Rates")}</h5>
+                      <PlanRates
+                        key={`${plan.id}|${openSeasonId ?? ""}`}
+                        ref={ratesRef}
+                        plan={plan}
+                        mode={draft.singlePrice ? "single" : draft.automatic ? "per_person" : "per_occupancy"}
+                        increaseAdultCents={cents(draft.perAdult)}
+                        decreaseAdultCents={cents(draft.decreaseAdult)}
+                        parent={ratePlans.find((p) => p.id === plan.parentRatePlanId) ?? null}
+                        roomTypes={roomTypes}
+                        seasons={seasons}
+                        weekRates={weekRates}
+                        coverage={coverage}
+                        initialSeasonId={plan.id === openPlanId ? openSeasonId : null}
+                        canEdit={canEdit}
+                      />
+                    </>
+                  );
+                })()}
 
                 <h5 className={section}>{tr("Taxes and accounting")}</h5>
                 <div className="mt-2 grid gap-4 sm:grid-cols-4">
@@ -717,31 +827,6 @@ export function RatePlansPanel({
                       </label>
                     ))}
                   </div>
-                )}
-
-                {draft.id && (
-                  <>
-                    <h5 className={section}>{tr("Affected Room Types")}</h5>
-                    <ul className="mt-2 grid gap-x-10 gap-y-1 text-[13px] sm:grid-cols-2">
-                      {roomTypes.map((t) => {
-                        const c = coverage.find((x) => x.ratePlanId === draft.id && x.roomTypeId === t.id);
-                        return (
-                          <li key={t.id} className="flex justify-between gap-3 border-b border-line py-1">
-                            <span className="text-ink">{t.displayName ?? t.name}</span>
-                            <span className={cn("tnum", c ? "text-ink-muted" : "text-ink-faint")}>
-                              {c
-                                ? tr("{n} nights priced, {from} to {to}", {
-                                    n: c.pricedNights,
-                                    from: tr.date(c.firstNight, "d MMM yyyy"),
-                                    to: tr.date(c.lastNight, "d MMM yyyy"),
-                                  })
-                                : tr("Not priced")}
-                            </span>
-                          </li>
-                        );
-                      })}
-                    </ul>
-                  </>
                 )}
 
                 <div className="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-[13.5px] text-ink">

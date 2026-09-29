@@ -332,9 +332,11 @@ export interface CalendarSeason {
 
 /**
  * One weekday of a rate plan's week on one room type, for a season or the
- * Default Season (null) -- Settings -> Rate Plans -> Room Rate Combinations
+ * Default Season (null) -- the Rates grid in a rate plan's form (0110)
  * (0096). Saving it FILLS nights that have no value yet; it never overwrites.
  */
+export type OccupancyPricing = "single" | "per_occupancy" | "per_person";
+
 export interface WeekRate {
   ratePlanId: string;
   roomTypeId: string;
@@ -348,6 +350,8 @@ export interface WeekRate {
   closedToArrival: boolean;
   closedToDeparture: boolean;
   stopSell: boolean;
+  /** Adults to pence for the other occupancies (0110); null when none were sent. */
+  occupancyRates: Record<string, number> | null;
 }
 
 /**
@@ -684,9 +688,12 @@ export interface RatePlan {
   derivedPercentBps: number | null;
   derivedAmountCents: number | null;
   /** One price for every occupancy, or adjusted per adult and child. */
-  occupancyPricing: "single" | "per_person";
+  /** One price, a price typed per number of adults, or worked out per person (0110). */
+  occupancyPricing: OccupancyPricing;
   adultAdjustCents: number | null;
   childAdjustCents: number | null;
+  /** Taken off per adult below the base occupancy; null uses the adult amount (0110). */
+  adultDecreaseCents: number | null;
   /** The tax the plan is sold with, and its own ledger account. */
   taxRateId: string | null;
   accountingCategoryId: string | null;
@@ -1469,6 +1476,21 @@ export type BookingPaymentState = "unpaid" | "partial" | "paid";
  * absence of a price is the link between plans and room types rather than a
  * second table somebody has to remember to fill in.
  */
+/** A per-occupancy price on one night (0110). */
+export interface OccupancyGridCell {
+  ratePlanId: string;
+  roomTypeId: string;
+  date: string;
+  adults: number;
+  rateCents: number;
+}
+
+export interface RoomTypeOccupancy {
+  id: string;
+  baseOccupancy: number;
+  maxOccupancy: number;
+}
+
 export interface RatesGridCell {
   ratePlanId: string;
   ratePlanCode: string;
