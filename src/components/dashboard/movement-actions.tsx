@@ -59,6 +59,7 @@ export function CheckInAction({ booking }: { booking: Booking }) {
   const [options, setOptions] = useState<Record<string, AvailableRoom[]>>({});
   const [chosen, setChosen] = useState<Record<string, string>>({});
   const [error, setError] = useState("");
+  const [late, setLate] = useState(false);
 
   useEffect(() => {
     if (!open) return;
@@ -89,7 +90,7 @@ export function CheckInAction({ booking }: { booking: Booking }) {
   const ready =
     slots !== null && unassigned.every((s) => chosen[s.bookingRoomId]);
 
-  const submit = () => {
+  const submit = (moveArrival = false) => {
     setError("");
     startTransition(async () => {
       for (const slot of unassigned) {
@@ -100,8 +101,11 @@ export function CheckInAction({ booking }: { booking: Booking }) {
         if (!assigned.ok) return setError(assigned.error);
       }
 
-      const result = await checkIn(booking.id);
-      if (!result.ok) return setError(result.error);
+      const result = await checkIn(booking.id, moveArrival);
+      if (!result.ok) {
+        setLate(result.block === "late");
+        return setError(result.error);
+      }
 
       setOpen(false);
       router.refresh();
@@ -110,7 +114,14 @@ export function CheckInAction({ booking }: { booking: Booking }) {
 
   return (
     <>
-      <button onClick={() => setOpen(true)} className={rowButton}>
+      <button
+        onClick={() => {
+          setOpen(true);
+          setError("");
+          setLate(false);
+        }}
+        className={rowButton}
+      >
         {tr("Check in")}
       </button>
 
@@ -173,20 +184,30 @@ export function CheckInAction({ booking }: { booking: Booking }) {
 
           {error && <p className="text-xs text-rose-600">{error}</p>}
 
-          <div className="flex justify-end gap-2">
+          <div className="flex flex-wrap justify-end gap-2">
             <button
               onClick={() => setOpen(false)}
               className="rounded border border-line px-4 py-2 text-sm hover:bg-shell"
             >
               {tr("Cancel")}
             </button>
-            <button
-              onClick={submit}
-              disabled={pending || !ready}
-              className="rounded bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-50"
-            >
-              {pending ? tr("Checking in…") : tr("Check in")}
-            </button>
+            {late ? (
+              <button
+                onClick={() => submit(true)}
+                disabled={pending}
+                className="rounded bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-50"
+              >
+                {pending ? tr("Checking in…") : tr("Move the arrival to today and check in")}
+              </button>
+            ) : (
+              <button
+                onClick={() => submit()}
+                disabled={pending || !ready}
+                className="rounded bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-50"
+              >
+                {pending ? tr("Checking in…") : tr("Check in")}
+              </button>
+            )}
           </div>
         </Sheet>
       )}

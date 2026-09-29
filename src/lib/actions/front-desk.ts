@@ -98,16 +98,32 @@ export async function assignRoom(
   return { ok: true, data: null };
 }
 
-export async function checkIn(bookingId: string): Promise<ActionResult> {
+/**
+ * `moveArrival` is a deliberate second call, like `allowOverbook`: the first
+ * attempt on a late arrival is refused with HP004, and only then is the desk
+ * offered to move the arrival to today (0112).
+ */
+export async function checkIn(
+  bookingId: string,
+  moveArrival = false,
+): Promise<ActionResult & { block?: "late" }> {
   const supabase = await createClient();
   const { error } = await supabase.rpc("check_in_booking", {
     p_booking_id: bookingId,
+    p_move_arrival: moveArrival,
   });
 
-  if (error) return { ok: false, error: await localisedAs("The check-in did not go through", error.message) };
+  if (error) {
+    return {
+      ok: false,
+      error: await localisedAs("The check-in did not go through", error.message),
+      block: error.code === "HP004" ? "late" : undefined,
+    };
+  }
 
   revalidatePath("/dashboard");
   revalidatePath("/bookings");
+  revalidatePath("/calendar");
   return { ok: true, data: null };
 }
 

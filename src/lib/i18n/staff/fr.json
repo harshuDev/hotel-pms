@@ -91,6 +91,10 @@
   "one": "{n} réservation",
   "other": "{n} réservations"
  },
+ "{n} bookings due to arrive have not checked in.": {
+  "one": "{n} réservation attendue n'est pas enregistrée.",
+  "other": "{n} réservations attendues ne sont pas enregistrées."
+ },
  "{n} bookings owing": {
   "one": "{n} réservation impayée",
   "other": "{n} réservations impayées"
@@ -663,6 +667,8 @@
  "Booking {0} is not cancelled, so there is nothing to restore": "La réservation {0} n’est pas annulée, il n’y a donc rien à restaurer",
  "Booking {0} marked no show": "Réservation {0} marquée no-show",
  "Booking {0} still needs {1} room(s) assigned": "La réservation {0} a encore besoin de {1} chambre(s) attribuée(s)",
+ "Booking {0} was due to arrive on {1}. Move the arrival to today to check the guest in.": "La réservation {0} devait arriver le {1}. Déplacez l'arrivée à aujourd'hui pour enregistrer le client.",
+ "Booking {0} was due to leave on {1}, so it cannot be checked in. Change its dates first.": "La réservation {0} devait partir le {1} et ne peut donc pas être enregistrée. Modifiez d'abord ses dates.",
  "Booking {reference} taken": "Réservation {reference} prise",
  "Booking cancelled — the room is free again.": "Réservation annulée — la chambre est de nouveau libre.",
  "Booking cancelled.": "Réservation annulée.",
@@ -1149,6 +1155,7 @@
  "Due out that day": "Départ prévu ce jour-là",
  "Due out today": "Départ prévu aujourd’hui",
  "Due out tomorrow": "Départ prévu demain",
+ "Due to arrive {date}": "Arrivée prévue le {date}",
  "Each room line needs a whole number of rooms.": "Chaque ligne de chambres nécessite un nombre entier de chambres.",
  "Earlier": "Plus tôt",
  "Earlier dates": "Dates précédentes",
@@ -1699,6 +1706,7 @@
  "Montserrat": "Montserrat",
  "Morocco": "Maroc",
  "Move {name}. Use the arrow keys.": "Déplacer {name}. Utilisez les flèches.",
+ "Move the arrival to today and check in": "Avancer l'arrivée à aujourd'hui et enregistrer",
  "Move to": "Déplacer vers",
  "Move to another room": "Déplacer vers une autre chambre",
  "Movements": "Mouvements",
@@ -2842,6 +2850,7 @@
  "The terms text can be at most 2000 characters": "Le texte des conditions peut compter au plus 2000 caractères",
  "The two new passwords do not match.": "Les deux nouveaux mots de passe ne correspondent pas.",
  "The two passwords do not match.": "Les deux mots de passe ne correspondent pas.",
+ "Their rooms stay held until each is checked in, moved or marked no show.": "Leurs chambres restent bloquées jusqu'à ce que chacune soit enregistrée, déplacée ou marquée no show.",
  "There are already {0} unconfirmed bookings on this email. The hotel will be in touch about those first.": "Il y a déjà {0} réservations non confirmées avec cet e-mail. L’hôtel vous contactera d’abord à leur sujet.",
  "There are no rate plans yet, so there is nothing to price.": "Il n’y a pas encore de plan tarifaire, il n’y a donc rien à tarifer.",
  "There is already {0} called {1}": "Il existe déjà une saison ou un événement nommé {1}",

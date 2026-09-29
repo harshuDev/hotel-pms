@@ -26,12 +26,20 @@ export type StillInGuest = {
   departureDate: string;
 };
 
+export type NotArrivedBooking = {
+  bookingId: string;
+  reference: string;
+  guestName: string;
+  arrivalDate: string;
+};
+
 /** How many of the overdue guests the dialog names before "and n more". */
 const NAMED = 5;
 
 export function CloseDay({
   businessDate,
   stillIn,
+  notArrived,
 }: {
   businessDate: string;
   /**
@@ -41,6 +49,12 @@ export function CloseDay({
    * day is closed rather than letting them sit in their rooms unbilled.
    */
   stillIn: StillInGuest[];
+  /**
+   * Bookings due today or earlier that nobody has checked in (0112). Nothing
+   * marks them no-show (open decision 11), so they hold their rooms until a
+   * person checks them in, moves them or marks them.
+   */
+  notArrived: NotArrivedBooking[];
 }) {
   const tr = useT();
   const currency = useCurrency();
@@ -163,6 +177,39 @@ export function CloseDay({
                         ))}
                         {stillIn.length > NAMED && (
                           <li>{tr("and {n} more", { n: stillIn.length - NAMED })}</li>
+                        )}
+                      </ul>
+                    </div>
+                  )}
+
+                  {notArrived.length > 0 && (
+                    <div role="alert" className="rounded-md border border-warn/40 bg-warn-wash px-3 py-2.5 text-xs text-warn-deep">
+                      <p className="font-semibold">
+                        {tr.plural(
+                          notArrived.length,
+                          "{n} booking due to arrive has not checked in.",
+                          "{n} bookings due to arrive have not checked in.",
+                        )}
+                      </p>
+                      <p className="mt-0.5">
+                        {tr("Their rooms stay held until each is checked in, moved or marked no show.")}
+                      </p>
+                      <ul className="mt-2 space-y-1">
+                        {notArrived.slice(0, NAMED).map((g) => (
+                          <li key={g.bookingId}>
+                            <Link
+                              href={`/bookings/${g.bookingId}`}
+                              className="underline decoration-warn/50 underline-offset-2 hover:decoration-warn-deep"
+                            >
+                              {g.reference}
+                            </Link>{" "}
+                            {g.guestName}
+                            {" · "}
+                            {tr("Due to arrive {date}", { date: tr.date(g.arrivalDate, "d MMM") })}
+                          </li>
+                        ))}
+                        {notArrived.length > NAMED && (
+                          <li>{tr("and {n} more", { n: notArrived.length - NAMED })}</li>
                         )}
                       </ul>
                     </div>

@@ -5288,7 +5288,7 @@ export type Database = {
         Returns: string
       }
       check_in_booking: {
-        Args: { p_booking_id: string }
+        Args: { p_booking_id: string; p_move_arrival?: boolean }
         Returns: {
           rooms_occupied: number
         }[]

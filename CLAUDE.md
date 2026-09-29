@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0111` are
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0112` are
 applied to the hosted database.
 
 Working on real data: dashboard (house board, movements, pace, activity feed),
@@ -1597,6 +1597,29 @@ client: "Need to add Booking Channel in the Dashboard".
   (`BK-000123`). A channel's reference goes in `external_reference`.
 - No room is assigned when a booking is taken. `assign_room()` does that, at
   check-in.
+- **CHECK-IN AND CHECK-OUT GUARD THE ROOM, NOT ONLY THE DATES (0112).** An
+  audit of the hosted property found BK-000010 checked in to four rooms that
+  still held guests past their departure, and checking it out then marked
+  those rooms vacant with the other guests still in them.
+  - **`check_in_booking()` refuses a room another booking is still checked in
+    to**, naming the guest and their departure, the same words
+    `assign_room()` uses. The overlap check compares booked dates, and an
+    overdue guest has none left, so it could never catch this.
+  - **`check_out_booking()` dirties a room only when nobody else is checked in
+    to it.** 0112 also put the four rooms left reading vacant back to
+    `occupied` -- the one data repair, touching only rooms in that state.
+  - **A PAST ARRIVAL IS REFUSED (HP004) AND THE OVERRIDE MOVES IT TO TODAY.**
+    The audit charges only the night it closes, so checking in against an
+    arrival days ago left every earlier night unbilled for ever (BK-000016,
+    BK-000017), and somebody posted BK-000011's and 012's first night by hand
+    as miscellaneous. The check-in dialog then offers "Move the arrival to
+    today and check in" -- `p_move_arrival`, a deliberate second ask like
+    `p_allow_overbook` -- which goes through `update_booking()`, so the
+    nights and the activity log are the ones every date change has. A stay
+    whose departure has passed as well is refused outright.
+  - **Worth knowing**: a guest who really did arrive days ago and was never
+    checked in cannot have those nights charged through this. That is rare,
+    and charging past nights is a money decision to ask about, not to guess.
 - **The booking screen is SEVEN tabs: Rooms, Extras, Guests, Folio,
   Attachments, Email, History.** It was five. Attachments and Email landed in
   0063, when the client asked for full parity with their reference — "Copy
@@ -3465,9 +3488,12 @@ than proceeding.
       now stays `confirmed` and holds its rooms, night after night, until
       somebody deals with it. It is never billed — `close_business_date()`
       posts only nights whose status is `checked_in` — but the room reads as
-      sold and cannot be resold. **An overdue-arrivals list is the answer and
-      is not built.** Without one the front desk has no prompt, and the failure
-      is silent: rooms quietly unsellable with nobody told.
+      sold and cannot be resold. **The overdue-arrivals list is built (0112)**:
+      `dashboard_arrivals()` on the business date also returns every pending
+      or confirmed booking whose arrival has passed, the Arrivals tab marks
+      each "Overdue", and "Close the day" warns about every booking due today
+      or earlier that is not checked in -- a warning, never a refusal, and
+      nothing is marked no-show for anybody.
     - **`close_business_date()` lost two return columns** with the sweep,
       `no_shows_marked` and `no_show_fees_cents`. Dropped rather than left
       returning zero, so the regenerated types made every call site a compile
