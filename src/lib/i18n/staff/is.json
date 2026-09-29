@@ -91,6 +91,10 @@
   "one": "{n} bókun",
   "other": "{n} bókanir"
  },
+ "{n} bookings due to arrive have not checked in.": {
+  "one": "{n} bókun sem átti að koma hefur ekki verið innrituð.",
+  "other": "{n} bókanir sem áttu að koma hafa ekki verið innritaðar."
+ },
  "{n} bookings owing": {
   "one": "{n} bókun með skuld",
   "other": "{n} bókanir með skuld"
@@ -663,6 +667,8 @@
  "Booking {0} is not cancelled, so there is nothing to restore": "Bókun {0} er ekki afbókuð, svo það er ekkert að endurheimta",
  "Booking {0} marked no show": "Bókun {0} merkt sem mætti ekki",
  "Booking {0} still needs {1} room(s) assigned": "Bókun {0} þarf enn {1} úthlutað(a) herbergi",
+ "Booking {0} was due to arrive on {1}. Move the arrival to today to check the guest in.": "Bókun {0} átti að koma {1}. Færðu komuna til dagsins í dag til að innrita gestinn.",
+ "Booking {0} was due to leave on {1}, so it cannot be checked in. Change its dates first.": "Bókun {0} átti að fara {1} og því er ekki hægt að innrita hana. Breyttu dagsetningunum fyrst.",
  "Booking {reference} taken": "Bókun {reference} tekin",
  "Booking cancelled — the room is free again.": "Bókun afbókuð — herbergið er aftur laust.",
  "Booking cancelled.": "Bókun afbókuð.",
@@ -1148,6 +1154,7 @@
  "Due out that day": "Fer þann dag",
  "Due out today": "Fer í dag",
  "Due out tomorrow": "Fer á morgun",
+ "Due to arrive {date}": "Koma áætluð {date}",
  "Each room line needs a whole number of rooms.": "Hver herbergjalína þarf heila tölu herbergja.",
  "Earlier": "Fyrr",
  "Earlier dates": "Fyrri dagsetningar",
@@ -1698,6 +1705,7 @@
  "Montserrat": "Montserrat",
  "Morocco": "Marokkó",
  "Move {name}. Use the arrow keys.": "Færa {name}. Notaðu örvatakkana.",
+ "Move the arrival to today and check in": "Færa komu til dagsins í dag og innrita",
  "Move to": "Færa í",
  "Move to another room": "Færa í annað herbergi",
  "Movements": "Hreyfingar",
@@ -2841,6 +2849,7 @@
  "The terms text can be at most 2000 characters": "Texti skilmála má vera í mesta lagi 2000 stafir",
  "The two new passwords do not match.": "Nýju lykilorðin tvö stemma ekki.",
  "The two passwords do not match.": "Lykilorðin tvö stemma ekki.",
+ "Their rooms stay held until each is checked in, moved or marked no show.": "Herbergin þeirra haldast frátekin þar til hver bókun er innrituð, færð eða merkt sem mætti ekki.",
  "There are already {0} unconfirmed bookings on this email. The hotel will be in touch about those first.": "Það eru þegar {0} óstaðfestar bókanir á þetta netfang. Hótelið hefur fyrst samband vegna þeirra.",
  "There are no rate plans yet, so there is nothing to price.": "Engar verðáætlanir eru enn til, svo það er ekkert að verðleggja.",
  "There is already {0} called {1}": "Það er þegar til tímabil eða viðburður sem heitir {1}",

@@ -81,6 +81,20 @@ export default async function DashboardPage() {
                 roomNumber: b.roomNumber,
                 departureDate: b.departureDate,
               }))}
+            // Arrivals on the business date include bookings whose arrival has
+            // passed (0112); any not yet checked in still hold their rooms.
+            notArrived={arrivals
+              .filter(
+                (b) =>
+                  (b.status === "pending" || b.status === "confirmed") &&
+                  b.arrivalDate <= today,
+              )
+              .map((b) => ({
+                bookingId: b.id,
+                reference: b.reference,
+                guestName: b.customerName,
+                arrivalDate: b.arrivalDate,
+              }))}
           />
         )}
       </div>
@@ -102,6 +116,7 @@ export default async function DashboardPage() {
             arrivals={arrivals}
             departures={departures}
             canMoveGuests={canMoveGuests}
+            today={today}
           />
           <ChannelMix rows={channels} from={today} to={channelTo} />
           <LiveFeed items={activity} />

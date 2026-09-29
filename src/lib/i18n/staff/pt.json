@@ -91,6 +91,10 @@
   "one": "{n} reserva",
   "other": "{n} reservas"
  },
+ "{n} bookings due to arrive have not checked in.": {
+  "one": "{n} reserva com chegada prevista não fez o check-in.",
+  "other": "{n} reservas com chegada prevista não fizeram o check-in."
+ },
  "{n} bookings owing": {
   "one": "{n} reserva em dívida",
   "other": "{n} reservas em dívida"
@@ -663,6 +667,8 @@
  "Booking {0} is not cancelled, so there is nothing to restore": "A reserva {0} não está cancelada, por isso não há nada a restaurar",
  "Booking {0} marked no show": "Reserva {0} marcada como não comparência",
  "Booking {0} still needs {1} room(s) assigned": "A reserva {0} ainda precisa de {1} quarto(s) atribuído(s)",
+ "Booking {0} was due to arrive on {1}. Move the arrival to today to check the guest in.": "A reserva {0} devia chegar a {1}. Mova a chegada para hoje para fazer o check-in do hóspede.",
+ "Booking {0} was due to leave on {1}, so it cannot be checked in. Change its dates first.": "A reserva {0} devia sair a {1}, por isso não pode fazer o check-in. Altere primeiro as datas.",
  "Booking {reference} taken": "Reserva {reference} registada",
  "Booking cancelled — the room is free again.": "Reserva cancelada — o quarto está novamente livre.",
  "Booking cancelled.": "Reserva cancelada.",
@@ -1149,6 +1155,7 @@
  "Due out that day": "Saída prevista nesse dia",
  "Due out today": "Saída prevista hoje",
  "Due out tomorrow": "Saída prevista amanhã",
+ "Due to arrive {date}": "Chegada prevista a {date}",
  "Each room line needs a whole number of rooms.": "Cada linha de quartos precisa de um número inteiro de quartos.",
  "Earlier": "Antes",
  "Earlier dates": "Datas anteriores",
@@ -1699,6 +1706,7 @@
  "Montserrat": "Montserrat",
  "Morocco": "Marrocos",
  "Move {name}. Use the arrow keys.": "Mover {name}. Use as setas.",
+ "Move the arrival to today and check in": "Mover a chegada para hoje e fazer o check-in",
  "Move to": "Mover para",
  "Move to another room": "Mover para outro quarto",
  "Movements": "Movimentos",
@@ -2842,6 +2850,7 @@
  "The terms text can be at most 2000 characters": "O texto dos termos pode ter no máximo 2000 caracteres",
  "The two new passwords do not match.": "As duas novas palavras-passe não coincidem.",
  "The two passwords do not match.": "As duas palavras-passe não coincidem.",
+ "Their rooms stay held until each is checked in, moved or marked no show.": "Os seus quartos continuam retidos até cada uma fazer o check-in, ser movida ou marcada como no show.",
  "There are already {0} unconfirmed bookings on this email. The hotel will be in touch about those first.": "Já existem {0} reservas por confirmar com este email. O hotel entrará primeiro em contacto sobre essas.",
  "There are no rate plans yet, so there is nothing to price.": "Ainda não há planos tarifários, por isso não há nada a que dar preço.",
  "There is already {0} called {1}": "Já existe uma época ou evento chamado {1}",

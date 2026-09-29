@@ -88,6 +88,9 @@
  "{n} bookings": {
   "other": "{n} การจอง"
  },
+ "{n} bookings due to arrive have not checked in.": {
+  "other": "มีการจอง {n} รายการที่ถึงกำหนดเข้าพักแต่ยังไม่ได้เช็กอิน"
+ },
  "{n} bookings owing": {
   "other": "{n} การจองที่ค้างชำระ"
  },
@@ -624,6 +627,8 @@
  "Booking {0} is not cancelled, so there is nothing to restore": "การจอง {0} ไม่ได้ถูกยกเลิก จึงไม่มีอะไรให้กู้คืน",
  "Booking {0} marked no show": "ทำเครื่องหมายการจอง {0} ว่าไม่มาเข้าพัก",
  "Booking {0} still needs {1} room(s) assigned": "การจอง {0} ยังต้องจัดห้องอีก {1} ห้อง",
+ "Booking {0} was due to arrive on {1}. Move the arrival to today to check the guest in.": "การจอง {0} มีกำหนดเข้าพักวันที่ {1} เลื่อนวันเข้าพักเป็นวันนี้เพื่อเช็กอินแขก",
+ "Booking {0} was due to leave on {1}, so it cannot be checked in. Change its dates first.": "การจอง {0} มีกำหนดออกวันที่ {1} จึงเช็กอินไม่ได้ เปลี่ยนวันที่ก่อน",
  "Booking {reference} taken": "รับการจอง {reference} แล้ว",
  "Booking cancelled — the room is free again.": "ยกเลิกการจองแล้ว — ห้องว่างอีกครั้ง",
  "Booking cancelled.": "ยกเลิกการจองแล้ว",
@@ -1106,6 +1111,7 @@
  "Due out that day": "ครบกำหนดออกวันนั้น",
  "Due out today": "ครบกำหนดออกวันนี้",
  "Due out tomorrow": "ครบกำหนดออกพรุ่งนี้",
+ "Due to arrive {date}": "กำหนดเข้าพัก {date}",
  "Each room line needs a whole number of rooms.": "แต่ละรายการห้องต้องเป็นจำนวนห้องเต็ม",
  "Earlier": "ก่อนหน้า",
  "Earlier dates": "วันที่ก่อนหน้า",
@@ -1654,6 +1660,7 @@
  "Montserrat": "มอนต์เซอร์รัต",
  "Morocco": "โมร็อกโก",
  "Move {name}. Use the arrow keys.": "ย้าย {name} ใช้ปุ่มลูกศร",
+ "Move the arrival to today and check in": "เลื่อนวันเข้าพักเป็นวันนี้และเช็กอิน",
  "Move to": "ย้ายไป",
  "Move to another room": "ย้ายไปห้องอื่น",
  "Movements": "ความเคลื่อนไหว",
@@ -2796,6 +2803,7 @@
  "The terms text can be at most 2000 characters": "ข้อความเงื่อนไขยาวได้ไม่เกิน 2000 ตัวอักษร",
  "The two new passwords do not match.": "รหัสผ่านใหม่ทั้งสองไม่ตรงกัน",
  "The two passwords do not match.": "รหัสผ่านทั้งสองไม่ตรงกัน",
+ "Their rooms stay held until each is checked in, moved or marked no show.": "ห้องพักจะยังถูกกันไว้จนกว่าแต่ละรายการจะเช็กอิน ย้าย หรือทำเครื่องหมายว่าไม่มาพัก",
  "There are already {0} unconfirmed bookings on this email. The hotel will be in touch about those first.": "อีเมลนี้มีการจองที่ยังไม่ยืนยัน {0} รายการแล้ว โรงแรมจะติดต่อเรื่องการจองเหล่านั้นก่อน",
  "There are no rate plans yet, so there is nothing to price.": "ยังไม่มีแผนราคา จึงไม่มีอะไรให้กำหนดราคา",
  "There is already {0} called {1}": "มีฤดูกาลหรืออีเวนต์ชื่อ {1} อยู่แล้ว",

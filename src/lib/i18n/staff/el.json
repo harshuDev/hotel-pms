@@ -91,6 +91,10 @@
   "one": "{n} κράτηση",
   "other": "{n} κρατήσεις"
  },
+ "{n} bookings due to arrive have not checked in.": {
+  "one": "{n} κράτηση με αναμενόμενη άφιξη δεν έχει κάνει check-in.",
+  "other": "{n} κρατήσεις με αναμενόμενη άφιξη δεν έχουν κάνει check-in."
+ },
  "{n} bookings owing": {
   "one": "{n} κράτηση με οφειλή",
   "other": "{n} κρατήσεις με οφειλή"
@@ -663,6 +667,8 @@
  "Booking {0} is not cancelled, so there is nothing to restore": "Η κράτηση {0} δεν είναι ακυρωμένη, οπότε δεν υπάρχει τίποτα για επαναφορά",
  "Booking {0} marked no show": "Η κράτηση {0} σημειώθηκε ως μη εμφάνιση",
  "Booking {0} still needs {1} room(s) assigned": "Η κράτηση {0} χρειάζεται ακόμη {1} ανατεθειμένο(α) δωμάτιο(α)",
+ "Booking {0} was due to arrive on {1}. Move the arrival to today to check the guest in.": "Η κράτηση {0} είχε άφιξη στις {1}. Μεταφέρετε την άφιξη σε σήμερα για να κάνετε check-in τον επισκέπτη.",
+ "Booking {0} was due to leave on {1}, so it cannot be checked in. Change its dates first.": "Η κράτηση {0} είχε αναχώρηση στις {1}, οπότε δεν μπορεί να γίνει check-in. Αλλάξτε πρώτα τις ημερομηνίες της.",
  "Booking {reference} taken": "Η κράτηση {reference} καταχωρίστηκε",
  "Booking cancelled — the room is free again.": "Η κράτηση ακυρώθηκε — το δωμάτιο είναι ξανά ελεύθερο.",
  "Booking cancelled.": "Η κράτηση ακυρώθηκε.",
@@ -1148,6 +1154,7 @@
  "Due out that day": "Αναχωρεί εκείνη την ημέρα",
  "Due out today": "Αναχωρεί σήμερα",
  "Due out tomorrow": "Αναχωρεί αύριο",
+ "Due to arrive {date}": "Αναμενόμενη άφιξη {date}",
  "Each room line needs a whole number of rooms.": "Κάθε γραμμή δωματίων χρειάζεται ακέραιο αριθμό δωματίων.",
  "Earlier": "Νωρίτερα",
  "Earlier dates": "Προηγούμενες ημερομηνίες",
@@ -1698,6 +1705,7 @@
  "Montserrat": "Μονσεράτ",
  "Morocco": "Μαρόκο",
  "Move {name}. Use the arrow keys.": "Μετακίνηση {name}. Χρησιμοποιήστε τα βελάκια.",
+ "Move the arrival to today and check in": "Μεταφορά της άφιξης σε σήμερα και check-in",
  "Move to": "Μετακίνηση σε",
  "Move to another room": "Μετακίνηση σε άλλο δωμάτιο",
  "Movements": "Κινήσεις",
@@ -2841,6 +2849,7 @@
  "The terms text can be at most 2000 characters": "Το κείμενο των όρων μπορεί να έχει έως 2000 χαρακτήρες",
  "The two new passwords do not match.": "Οι δύο νέοι κωδικοί δεν ταιριάζουν.",
  "The two passwords do not match.": "Οι δύο κωδικοί δεν ταιριάζουν.",
+ "Their rooms stay held until each is checked in, moved or marked no show.": "Τα δωμάτιά τους παραμένουν δεσμευμένα μέχρι κάθε κράτηση να γίνει check-in, να μετακινηθεί ή να σημειωθεί ως no show.",
  "There are already {0} unconfirmed bookings on this email. The hotel will be in touch about those first.": "Υπάρχουν ήδη {0} ανεπιβεβαίωτες κρατήσεις με αυτό το email. Το ξενοδοχείο θα επικοινωνήσει πρώτα για αυτές.",
  "There are no rate plans yet, so there is nothing to price.": "Δεν υπάρχουν ακόμη πλάνα τιμών, οπότε δεν υπάρχει κάτι για τιμολόγηση.",
  "There is already {0} called {1}": "Υπάρχει ήδη σεζόν ή εκδήλωση με το όνομα {1}",

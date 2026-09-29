@@ -2,6 +2,7 @@
 
 import { useT } from "@/components/i18n";
 import { useState } from "react";
+import Link from "next/link";
 import { Card, EmptyState, cn } from "@/components/ui";
 import { formatMoney } from "@/lib/money";
 import {
@@ -17,10 +18,13 @@ export function Movements({
   arrivals,
   departures,
   canMoveGuests,
+  today,
 }: {
   arrivals: Booking[];
   departures: Booking[];
   canMoveGuests: boolean;
+  /** The business date. Both lists also carry bookings overdue against it. */
+  today: string;
 }) {
   const tr = useT();
   const currency = useCurrency();
@@ -68,7 +72,18 @@ export function Movements({
         />
       ) : (
         <ul className="divide-y divide-line">
-          {rows.map((b) => (
+          {rows.map((b) => {
+            // An arrival that never came, or a guest still in after their
+            // departure (0111, 0112). Both lists keep them until someone acts.
+            const overdueDate =
+              tab === "arrivals"
+                ? (b.status === "pending" || b.status === "confirmed") && b.arrivalDate < today
+                  ? b.arrivalDate
+                  : null
+                : b.status === "checked_in" && b.departureDate < today
+                  ? b.departureDate
+                  : null;
+            return (
             <li
               key={b.id}
               className="flex items-center gap-3 px-5 py-2.5 hover:bg-shell"
@@ -84,8 +99,21 @@ export function Movements({
                 {b.roomNumber ?? "—"}
               </span>
               <div className="min-w-0 flex-1">
-                <p className="truncate text-[13px] font-medium text-ink">
-                  {b.customerName}
+                <p className="flex min-w-0 items-center gap-1.5 text-[13px] font-medium text-ink">
+                  <span className="truncate">{b.customerName}</span>
+                  {overdueDate && (
+                    <Link
+                      href={`/bookings/${b.id}`}
+                      title={
+                        tab === "arrivals"
+                          ? tr("Due to arrive {date}", { date: tr.date(overdueDate, "d MMM") })
+                          : tr("due out {date}", { date: tr.date(overdueDate, "d MMM") })
+                      }
+                      className="shrink-0 rounded bg-rose-50 px-1.5 py-px text-xxs font-semibold text-rose-600 hover:bg-rose-100"
+                    >
+                      {tr("Overdue")}
+                    </Link>
+                  )}
                 </p>
                 <p className="flex min-w-0 items-center gap-1.5 text-xxs text-ink-faint">
                   <span className="truncate">
@@ -124,7 +152,8 @@ export function Movements({
                 tab === "departures" &&
                 b.status === "checked_in" && <CheckOutAction booking={b} />}
             </li>
-          ))}
+            );
+          })}
         </ul>
       )}
     </Card>

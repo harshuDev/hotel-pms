@@ -94,6 +94,11 @@
   "few": "{n} rezervări",
   "other": "{n} de rezervări"
  },
+ "{n} bookings due to arrive have not checked in.": {
+  "one": "{n} rezervare cu sosire prevăzută nu a făcut check-in.",
+  "few": "{n} rezervări cu sosire prevăzută nu au făcut check-in.",
+  "other": "{n} de rezervări cu sosire prevăzută nu au făcut check-in."
+ },
  "{n} bookings owing": {
   "one": "{n} rezervare cu restanță",
   "few": "{n} rezervări cu restanță",
@@ -702,6 +707,8 @@
  "Booking {0} is not cancelled, so there is nothing to restore": "Rezervarea {0} nu este anulată, deci nu e nimic de restaurat",
  "Booking {0} marked no show": "Rezervarea {0} marcată ca neprezentare",
  "Booking {0} still needs {1} room(s) assigned": "Rezervarea {0} mai are nevoie de {1} cameră(e) alocată(e)",
+ "Booking {0} was due to arrive on {1}. Move the arrival to today to check the guest in.": "Rezervarea {0} trebuia să sosească pe {1}. Mutați sosirea pe azi pentru a face check-in oaspetelui.",
+ "Booking {0} was due to leave on {1}, so it cannot be checked in. Change its dates first.": "Rezervarea {0} trebuia să plece pe {1}, deci nu poate face check-in. Schimbați mai întâi datele.",
  "Booking {reference} taken": "Rezervarea {reference} preluată",
  "Booking cancelled — the room is free again.": "Rezervare anulată — camera este din nou liberă.",
  "Booking cancelled.": "Rezervare anulată.",
@@ -1190,6 +1197,7 @@
  "Due out that day": "Plecare în acea zi",
  "Due out today": "Plecare azi",
  "Due out tomorrow": "Plecare mâine",
+ "Due to arrive {date}": "Sosire prevăzută pe {date}",
  "Each room line needs a whole number of rooms.": "Fiecare linie de camere are nevoie de un număr întreg de camere.",
  "Earlier": "Mai devreme",
  "Earlier dates": "Date anterioare",
@@ -1742,6 +1750,7 @@
  "Montserrat": "Montserrat",
  "Morocco": "Maroc",
  "Move {name}. Use the arrow keys.": "Mută {name}. Folosiți tastele săgeți.",
+ "Move the arrival to today and check in": "Mută sosirea pe azi și fă check-in",
  "Move to": "Mută în",
  "Move to another room": "Mută în altă cameră",
  "Movements": "Mișcări",
@@ -2886,6 +2895,7 @@
  "The terms text can be at most 2000 characters": "Textul termenilor poate avea cel mult 2000 de caractere",
  "The two new passwords do not match.": "Cele două parole noi nu se potrivesc.",
  "The two passwords do not match.": "Cele două parole nu se potrivesc.",
+ "Their rooms stay held until each is checked in, moved or marked no show.": "Camerele lor rămân blocate până când fiecare face check-in, este mutată sau marcată no show.",
  "There are already {0} unconfirmed bookings on this email. The hotel will be in touch about those first.": "Există deja {0} rezervări neconfirmate pe acest e-mail. Hotelul vă va contacta mai întâi despre acestea.",
  "There are no rate plans yet, so there is nothing to price.": "Nu există încă planuri tarifare, deci nu este nimic de stabilit ca preț.",
  "There is already {0} called {1}": "Există deja un sezon sau eveniment numit {1}",

@@ -97,6 +97,12 @@
   "few": "{n} rezervacije",
   "other": "{n} rezervacij"
  },
+ "{n} bookings due to arrive have not checked in.": {
+  "one": "{n} rezervacija s predvidenim prihodom še ni prijavljena.",
+  "two": "{n} rezervaciji s predvidenim prihodom še nista prijavljeni.",
+  "few": "{n} rezervacije s predvidenim prihodom še niso prijavljene.",
+  "other": "{n} rezervacij s predvidenim prihodom še ni prijavljenih."
+ },
  "{n} bookings owing": {
   "one": "{n} rezervacija z dolgom",
   "two": "{n} rezervaciji z dolgom",
@@ -741,6 +747,8 @@
  "Booking {0} is not cancelled, so there is nothing to restore": "Rezervacija {0} ni odpovedana, zato ni ničesar za obnoviti",
  "Booking {0} marked no show": "Rezervacija {0} označena kot neprihod",
  "Booking {0} still needs {1} room(s) assigned": "Rezervacija {0} še potrebuje {1} dodeljenih sob",
+ "Booking {0} was due to arrive on {1}. Move the arrival to today to check the guest in.": "Rezervacija {0} bi morala prispeti {1}. Premaknite prihod na danes, da prijavite gosta.",
+ "Booking {0} was due to leave on {1}, so it cannot be checked in. Change its dates first.": "Rezervacija {0} bi morala oditi {1}, zato je ni mogoče prijaviti. Najprej spremenite datume.",
  "Booking {reference} taken": "Rezervacija {reference} sprejeta",
  "Booking cancelled — the room is free again.": "Rezervacija odpovedana — soba je spet prosta.",
  "Booking cancelled.": "Rezervacija odpovedana.",
@@ -1232,6 +1240,7 @@
  "Due out that day": "Odhod ta dan",
  "Due out today": "Odhod danes",
  "Due out tomorrow": "Odhod jutri",
+ "Due to arrive {date}": "Prihod predviden {date}",
  "Each room line needs a whole number of rooms.": "Vsaka vrstica sob potrebuje celo število sob.",
  "Earlier": "Prej",
  "Earlier dates": "Prejšnji datumi",
@@ -1786,6 +1795,7 @@
  "Montserrat": "Montserrat",
  "Morocco": "Maroko",
  "Move {name}. Use the arrow keys.": "Premakni {name}. Uporabite puščične tipke.",
+ "Move the arrival to today and check in": "Premakni prihod na danes in prijavi",
  "Move to": "Premakni v",
  "Move to another room": "Premakni v drugo sobo",
  "Movements": "Premiki",
@@ -2931,6 +2941,7 @@
  "The terms text can be at most 2000 characters": "Besedilo pogojev ima lahko največ 2000 znakov",
  "The two new passwords do not match.": "Novi gesli se ne ujemata.",
  "The two passwords do not match.": "Gesli se ne ujemata.",
+ "Their rooms stay held until each is checked in, moved or marked no show.": "Njihove sobe ostanejo zadržane, dokler vsaka ni prijavljena, premaknjena ali označena kot no show.",
  "There are already {0} unconfirmed bookings on this email. The hotel will be in touch about those first.": "Za ta e-poštni naslov je že {0} nepotrjenih rezervacij. Hotel se bo najprej oglasil glede teh.",
  "There are no rate plans yet, so there is nothing to price.": "Cenovnih načrtov še ni, zato ni ničesar za določanje cen.",
  "There is already {0} called {1}": "Sezona ali dogodek z imenom {1} že obstaja",
