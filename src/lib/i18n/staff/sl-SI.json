@@ -172,6 +172,12 @@
   "few": "{n} gostje",
   "other": "{n} gostov"
  },
+ "{n} guests are still checked in after their departure.": {
+  "one": "{n} gost je po datumu odhoda še prijavljen.",
+  "two": "{n} gosta sta po datumu odhoda še prijavljena.",
+  "few": "{n} gostje so po datumu odhoda še prijavljeni.",
+  "other": "{n} gostov je po datumu odhoda še prijavljenih."
+ },
  "{n} methods": {
   "one": "{n} način",
   "two": "{n} načina",
@@ -610,6 +616,7 @@
  "An extra needs a title.": "Dodatek potrebuje naslov.",
  "An identification type needs a title": "Vrsta osebnega dokumenta potrebuje naslov",
  "An identification type needs a title.": "Vrsta osebnega dokumenta potrebuje naslov.",
+ "and {n} more": "in še {n}",
  "Andorra": "Andora",
  "Angola": "Angola",
  "Anguilla": "Angvila",
@@ -1221,6 +1228,7 @@
  "Drop the logo here, or click to choose it": "Spustite logotip sem ali kliknite, da ga izberete",
  "Due": "Za plačilo",
  "Due out": "Odhod",
+ "due out {date}": "odhod {date}",
  "Due out that day": "Odhod ta dan",
  "Due out today": "Odhod danes",
  "Due out tomorrow": "Odhod jutri",
@@ -2981,6 +2989,7 @@
  "Tokelau": "Tokelav",
  "Token has expired or is invalid": "Povezava je potekla ali je neveljavna",
  "Tonga": "Tonga",
+ "Tonight is not charged to them unless their stay is extended.": "Današnja noč jim ni zaračunana, razen če se bivanje podaljša.",
  "Total": "Skupaj",
  "Total Due": "Skupaj za plačilo",
  "Total revenue": "Skupni prihodki",

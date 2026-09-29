@@ -3,6 +3,7 @@
 import { useT } from "@/components/i18n";
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { format, parseISO } from "date-fns";
 import { cn } from "@/components/ui";
 import { formatMoney } from "@/lib/money";
@@ -17,7 +18,30 @@ import { useCurrency } from "@/components/currency";
  * RPC refuses everyone else regardless, so this is a courtesy rather than the
  * gate.
  */
-export function CloseDay({ businessDate }: { businessDate: string }) {
+export type StillInGuest = {
+  bookingId: string;
+  reference: string;
+  guestName: string;
+  roomNumber: string | null;
+  departureDate: string;
+};
+
+/** How many of the overdue guests the dialog names before "and n more". */
+const NAMED = 5;
+
+export function CloseDay({
+  businessDate,
+  stillIn,
+}: {
+  businessDate: string;
+  /**
+   * Guests still checked in whose departure is today or earlier. Closing the
+   * day does not check them out and does not charge them for tonight -- they
+   * have no night after their departure -- so the dialog says so before the
+   * day is closed rather than letting them sit in their rooms unbilled.
+   */
+  stillIn: StillInGuest[];
+}) {
   const tr = useT();
   const currency = useCurrency();
   const router = useRouter();
@@ -109,6 +133,40 @@ export function CloseDay({ businessDate }: { businessDate: string }) {
                   <p className="text-sm leading-relaxed text-ink-muted">
                     {tr("This posts tonight’s room charge for every guest in house, closes {day}, and opens the next day. It cannot be undone.", { day })}
                   </p>
+
+                  {stillIn.length > 0 && (
+                    <div role="alert" className="rounded-md border border-warn/40 bg-warn-wash px-3 py-2.5 text-xs text-warn-deep">
+                      <p className="font-semibold">
+                        {tr.plural(
+                          stillIn.length,
+                          "{n} guest is still checked in after their departure.",
+                          "{n} guests are still checked in after their departure.",
+                        )}
+                      </p>
+                      <p className="mt-0.5">
+                        {tr("Tonight is not charged to them unless their stay is extended.")}
+                      </p>
+                      <ul className="mt-2 space-y-1">
+                        {stillIn.slice(0, NAMED).map((g) => (
+                          <li key={g.bookingId}>
+                            <Link
+                              href={`/bookings/${g.bookingId}`}
+                              className="underline decoration-warn/50 underline-offset-2 hover:decoration-warn-deep"
+                            >
+                              {g.reference}
+                            </Link>{" "}
+                            {g.guestName}
+                            {g.roomNumber ? ` · ${tr("room {n}", { n: g.roomNumber })}` : ""}
+                            {" · "}
+                            {tr("due out {date}", { date: tr.date(g.departureDate, "d MMM") })}
+                          </li>
+                        ))}
+                        {stillIn.length > NAMED && (
+                          <li>{tr("and {n} more", { n: stillIn.length - NAMED })}</li>
+                        )}
+                      </ul>
+                    </div>
+                  )}
 
                   {error && (
                     <p className="rounded-md border border-rose-200 bg-rose-50 px-3 py-2.5 text-xs text-rose-700">

@@ -157,6 +157,11 @@
   "few": "{n} oaspeți",
   "other": "{n} de oaspeți"
  },
+ "{n} guests are still checked in after their departure.": {
+  "one": "{n} oaspete este încă cazat după data plecării.",
+  "few": "{n} oaspeți sunt încă cazați după data plecării.",
+  "other": "{n} de oaspeți sunt încă cazați după data plecării."
+ },
  "{n} methods": {
   "one": "{n} metodă",
   "few": "{n} metode",
@@ -572,6 +577,7 @@
  "An extra needs a title.": "Un extra are nevoie de un titlu.",
  "An identification type needs a title": "Un tip de act de identitate are nevoie de un titlu",
  "An identification type needs a title.": "Un tip de act de identitate are nevoie de un titlu.",
+ "and {n} more": "și încă {n}",
  "Andorra": "Andorra",
  "Angola": "Angola",
  "Anguilla": "Anguilla",
@@ -1180,6 +1186,7 @@
  "Drop the logo here, or click to choose it": "Trageți logoul aici sau faceți clic pentru a-l alege",
  "Due": "De plată",
  "Due out": "Plecare azi",
+ "due out {date}": "plecare {date}",
  "Due out that day": "Plecare în acea zi",
  "Due out today": "Plecare azi",
  "Due out tomorrow": "Plecare mâine",
@@ -2937,6 +2944,7 @@
  "Tokelau": "Tokelau",
  "Token has expired or is invalid": "Linkul a expirat sau este invalid",
  "Tonga": "Tonga",
+ "Tonight is not charged to them unless their stay is extended.": "Noaptea aceasta nu le este taxată decât dacă sejurul este prelungit.",
  "Total": "Total",
  "Total Due": "Total de plată",
  "Total revenue": "Venituri totale",

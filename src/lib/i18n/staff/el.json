@@ -142,6 +142,10 @@
   "one": "{n} επισκέπτης",
   "other": "{n} επισκέπτες"
  },
+ "{n} guests are still checked in after their departure.": {
+  "one": "{n} επισκέπτης είναι ακόμη σε check-in μετά την αναχώρησή του.",
+  "other": "{n} επισκέπτες είναι ακόμη σε check-in μετά την αναχώρησή τους."
+ },
  "{n} methods": {
   "one": "{n} μέθοδος",
   "other": "{n} μέθοδοι"
@@ -534,6 +538,7 @@
  "An extra needs a title.": "Ένα έξτρα χρειάζεται τίτλο.",
  "An identification type needs a title": "Ένας τύπος εγγράφου ταυτοποίησης χρειάζεται τίτλο",
  "An identification type needs a title.": "Ένας τύπος εγγράφου ταυτοποίησης χρειάζεται τίτλο.",
+ "and {n} more": "και {n} ακόμη",
  "Andorra": "Ανδόρα",
  "Angola": "Αγκόλα",
  "Anguilla": "Ανγκουίλα",
@@ -1139,6 +1144,7 @@
  "Drop the logo here, or click to choose it": "Αφήστε εδώ το λογότυπο ή κάντε κλικ για επιλογή",
  "Due": "Οφειλή",
  "Due out": "Αναχωρεί",
+ "due out {date}": "αναχώρηση {date}",
  "Due out that day": "Αναχωρεί εκείνη την ημέρα",
  "Due out today": "Αναχωρεί σήμερα",
  "Due out tomorrow": "Αναχωρεί αύριο",
@@ -2893,6 +2899,7 @@
  "Tokelau": "Τοκελάου",
  "Token has expired or is invalid": "Ο σύνδεσμος έχει λήξει ή δεν είναι έγκυρος",
  "Tonga": "Τόνγκα",
+ "Tonight is not charged to them unless their stay is extended.": "Η αποψινή νύχτα δεν τους χρεώνεται, εκτός αν παραταθεί η διαμονή.",
  "Total": "Σύνολο",
  "Total Due": "Συνολικό οφειλόμενο",
  "Total revenue": "Συνολικά έσοδα",

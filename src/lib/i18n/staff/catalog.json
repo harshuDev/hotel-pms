@@ -308,6 +308,10 @@
   "kind": "plural",
   "one": "{n} guest"
  },
+ "{n} guests are still checked in after their departure.": {
+  "kind": "plural",
+  "one": "{n} guest is still checked in after their departure."
+ },
  "{n} methods": {
   "kind": "plural",
   "one": "{n} method"
@@ -1303,6 +1307,9 @@
   "kind": "db"
  },
  "An identification type needs a title.": {
+  "kind": "text"
+ },
+ "and {n} more": {
   "kind": "text"
  },
  "Andorra": {
@@ -3153,6 +3160,9 @@
   "kind": "text"
  },
  "Due out": {
+  "kind": "text"
+ },
+ "due out {date}": {
   "kind": "text"
  },
  "Due out that day": {
@@ -8553,6 +8563,9 @@
  "Tonga": {
   "kind": "country",
   "code": "TO"
+ },
+ "Tonight is not charged to them unless their stay is extended.": {
+  "kind": "text"
  },
  "Total": {
   "kind": "text"

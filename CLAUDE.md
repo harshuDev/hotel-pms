@@ -1004,10 +1004,19 @@ showed the Reservation Centric calendar and asked for it by name.
     - **An occupied room's rail dot keeps the occupied fill**; its cleaning
       state is a RING (emerald inspected, rose needs cleaning). Drawn solid, an
       occupied room signed off looked exactly like a vacant one ready to sell.
-    - **Nothing checks a guest out automatically, and the audit is unchanged**
+    - **Nothing checks a guest out automatically, and the audit still closes**
       -- whether a guest left is the desk's call (open decision 11). Worth
       knowing: availability counts nights, so an overdue guest's room is
       counted free for tonight until they are checked out.
+    - **"Close the day" WARNS about them** (`close-day.tsx`, fed by the
+      dashboard's departures): every guest still checked in whose departure is
+      the business date or earlier, the first five named with a link to the
+      booking, and one clause -- tonight is not charged to them unless the
+      stay is extended, which is true because the audit charges only nights
+      dated the day being closed and they have none. A warning and not a
+      refusal: a guest leaving late is ordinary, and the client asked for the
+      audit to make no decisions about guests. One row per BOOKING, so a group
+      counts once.
   - **`assign_room()` only demands a clean room for a stay that has already
     started** (0053). It used to demand `vacant_clean` always, which was right
     while check-in was the only caller and wrong the moment the front desk
