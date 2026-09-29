@@ -425,6 +425,9 @@
  "{name} dates added.": {
   "kind": "text"
  },
+ "{name} dates saved.": {
+  "kind": "text"
+ },
  "{name} deleted.": {
   "kind": "text"
  },
@@ -3209,6 +3212,9 @@
  "Edit {name}": {
   "kind": "text"
  },
+ "Edit {name} {date} to {date2}": {
+  "kind": "text"
+ },
  "Edit Accounting System": {
   "kind": "text"
  },
@@ -3216,6 +3222,9 @@
   "kind": "text"
  },
  "Edit customer": {
+  "kind": "text"
+ },
+ "Edit dates of {name}": {
   "kind": "text"
  },
  "Edit Discount": {
@@ -8515,6 +8524,9 @@
  },
  "This screen is switched off.": {
   "kind": "text"
+ },
+ "Those dates are not on this property": {
+  "kind": "db"
  },
  "Through the drawer": {
   "kind": "text"

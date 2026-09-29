@@ -5144,6 +5144,7 @@ export type Database = {
           color: string
           ends_on: string
           id: string
+          kind: string
           name: string
           starts_on: string
         }[]
@@ -7358,6 +7359,10 @@ export type Database = {
           p_name: string
           p_permissions: string[]
         }
+        Returns: undefined
+      }
+      update_season_range: {
+        Args: { p_ends_on: string; p_id: string; p_starts_on: string }
         Returns: undefined
       }
     }

@@ -1952,6 +1952,31 @@ export async function addSeasonRange(input: {
 }
 
 /**
+ * Moves one range's dates in place (0113). Postgres refuses a season range
+ * overlapping another season, by name, and applies the season's saved week
+ * rates to the new dates.
+ */
+export async function updateSeasonRange(input: {
+  id: string;
+  startsOn: string;
+  endsOn: string;
+}): Promise<ActionResult<null>> {
+  if (!input.startsOn || !input.endsOn) {
+    return { ok: false, error: await localised("Choose the start and the end.") };
+  }
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("update_season_range", {
+    p_id: input.id,
+    p_starts_on: input.startsOn,
+    p_ends_on: input.endsOn,
+  });
+  if (error) return { ok: false, error: await localised(error.message) };
+  revalidateSettings();
+  revalidatePath("/calendar");
+  return { ok: true, data: null };
+}
+
+/**
  * One date range of a season or event (0095). Unlike a room, a room type or a
  * tax rate, it really is deleted.
  * Nothing points at one — it is a label over dates — so removing it loses no

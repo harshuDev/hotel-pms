@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0112` are
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0113` are
 applied to the hosted database.
 
 Working on real data: dashboard (house board, movements, pace, activity feed),
@@ -245,7 +245,7 @@ Each read is a Postgres view or RPC, never aggregation in the client:
 | `getOpenShift()`                    | `current_cashier_shift()`         |
 | `getCalendarAvailability(from, n)`  | `calendar_availability(from, n)`  |
 | `getCalendarBookings(from, n, cap)` | `calendar_bookings(from, n, cap)`  |
-| `getCalendarSeasons(from, n)`       | `calendar_seasons(from, n)`        |
+| `getCalendarSeasons(from, n)`       | `calendar_seasons(from, n)` -- seasons and events (0113) |
 | `getCalendarNotes(from, n)`         | `calendar_notes_for(from, n)`      |
 | `getSeasonSettings()`               | `season_types` with their `seasons` ranges (0095) |
 | `getWeekRates()`                    | `rate_plan_week_rates` (0096)     |
@@ -729,10 +729,25 @@ showed the Reservation Centric calendar and asked for it by name.
     range.
     - **The no-overlap constraint now applies to seasons only**
       (`where kind = 'season'`): a day is in one season, which is what this
-      band and the Default Season need. Events may overlap anything, so the
-      calendar band draws seasons only -- `calendar_seasons()` returns
-      seasons, with their colour, which fills the band (`inkOn()` picks the
-      text colour).
+      band and the Default Season need. Events may overlap anything.
+      `calendar_seasons()` returns seasons and, as of 0113, events, each with
+      its colour and `kind`; a season fills the band (`inkOn()` picks the text
+      colour).
+    - **EVENTS ARE ON THE PMS CALENDAR AS OF 0113**, at the client's request
+      that a season or event be visible over its dates. They never share the
+      season strip: each event is a `EVENT_H` lane under it, in its own colour
+      with its name sticky at the left edge, packed greedily so events on
+      different dates share a lane and the band only grows when events really
+      overlap. The rail says "Events" beside the lanes. The band's height is
+      `SEASON_H` plus the lanes -- nothing else is offset against it, and the
+      chevrons stay on the season strip. "Show seasons in calendar" covers
+      both.
+    - **A RANGE'S DATES ARE EDITED IN PLACE (0113)**: a pencil on each range
+      opens the same From/To dialog as "+", and `update_season_range()` moves
+      it with `add_season_range()`'s checks -- the overlap test not counting
+      the range itself -- and applies the season's saved week rates to the
+      new dates. Nights the range no longer covers keep their prices, exactly
+      as deleting a range leaves them.
     - **The Default Season is not a row**: every day no season covers,
       computed in the panel from the first season year to the last.
     - `add_season_range()` names the season an overlap hits rather than
