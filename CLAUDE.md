@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0114` are
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0115` are
 applied to the hosted database.
 
 Working on real data: dashboard (house board, movements, pace, activity feed),
@@ -1425,6 +1425,35 @@ client: "Need to add Booking Channel in the Dashboard".
         (`?tab=rate-plans&edit=<plan>&season=<id|default>`).
       - A derived plan's rows show the parent's week, adjusted, read-only;
         its restrictions stay its own.
+  - **THE RATE PLAN FORM IS A POPUP, THE REFERENCE'S (0115).** The pencil
+    (and "Add New Rate Plan", and ⋮ in Room Rate Combinations) opens it over
+    the list -- `PlanPopup` in `rate-plans-panel.tsx`, portalled to `<body>`
+    for the stacking-context reason. Laid out as theirs, labels on the left
+    ending in colons, "*" on Title, Meal Type, Cancellation Policy, Currency
+    and Attached Taxes: Title | Meal Type, Cancellation Policy | Currency,
+    Description, Min | Max Days Advance, "Active at specific date range"
+    (From | To), Max Adults | Max Children, Derived Rate (Parent Rate,
+    Relation, Amount), One Price For All Occupancies, the prices and "Rate
+    Category Restrictions", Sell With Extras, Attached Taxes, Accounting
+    Category, "Only For Channels (Hide on IBE)" and "Save as default rate".
+    Every dropdown is `FilterSelect`.
+    - **MEAL TYPE IS ONE OF THE REFERENCE'S EIGHT** (`rate_plans.meal_plan`,
+      `src/lib/meal-plans.ts`): Room only, Bed and breakfast, Bed only, Half
+      board, Full board, All inclusive, Custom Meal Plan, Self Catering.
+      `set_rate_plan_meal_plan()` writes `rate_plan_meals` from it -- none,
+      breakfast, breakfast + dinner, all three -- and only Custom takes the
+      ticked meals, so the choice and the meals (which the meal report and
+      the audit's meal split read) never disagree; a kept meal keeps its
+      value. Existing plans took the choice their meals said.
+    - **The code is not on the form** (the reference has none): a new plan is
+      given the title's initials, unique on the property; an edit keeps its
+      code. **Min Adults / Min Children are drawn only when a plan already has
+      one**, so a rule set before is never hidden while enforced.
+    - **Attached Taxes takes ONE tax.** The reference's shows two chips
+      (City Tax, IVA); a night carries one tax figure and a folio item one
+      rate, so several taxes on a rate is a change to how every night is
+      taxed and posted -- to be asked for. "Save without taxes" is not
+      copied: what it does has not been seen.
   - **THE RATE PLAN FORM CARRIES THE REFERENCE'S TERMS (0109)**, saved by
     `set_rate_plan_terms()` -- one function taking the whole set, its own for
     the overload reason -- plus meals through `set_rate_plan_meals()`. Every
@@ -1496,9 +1525,13 @@ client: "Need to add Booking Channel in the Dashboard".
       already gives for the Rates grid, and why there is still no
       `rate_plan_room_types` table. The form lists each type with its priced
       nights (`rate_plan_coverage()`); since 0110 the form's Rates grid picks which types it prices.
-    - **Not built: "Sell With Extras."** Nothing sells an extra with a rate,
-      and inventing what it should post would be a money rule nobody asked
-      for.
+    - **"SELL WITH EXTRAS" IS STORED, NOT CHARGED (0115)**:
+      `rate_plan_extras`, the catalog extras sold with the rate, set by
+      `set_rate_plan_extras()` (the whole set). Nothing posts an extra because
+      of a rate -- when that would post (at booking, per night, at check-in)
+      and at what price is a money rule to be asked for. A deleted extra
+      comes off every plan; `merge_extra()` hands the merged-away extra's
+      plans to the one kept.
     - **The guest page re-quotes on the details step**: the party is chosen
       there, after the price was shown, so a change asks
       `searchPublicStay()` again (newest reply wins) and the summary shows
