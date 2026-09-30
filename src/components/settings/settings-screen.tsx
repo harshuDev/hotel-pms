@@ -1281,6 +1281,7 @@ export function SettingsScreen({
             taxRates={taxRates}
             accountingCategories={accountingSettings.categories}
             channels={channels}
+            extrasCatalog={extrasCatalog}
             coverage={rateCoverage}
             seasons={seasons}
             weekRates={weekRates}

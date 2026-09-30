@@ -46,6 +46,7 @@ import type {
   PosProfile,
 } from "@/lib/finance-profiles";
 import type { ExtraItemType, ExtrasCatalog } from "@/lib/extras";
+import { isMealPlan } from "@/lib/meal-plans";
 import type { Facility, FacilityIcon } from "@/lib/facilities";
 import type {
   GuestField,
@@ -1799,7 +1800,7 @@ async function loadRatePlans(includeRetired: boolean): Promise<RatePlan[]> {
   let query = supabase
     .from("rate_plans")
     .select(
-      "id, code, name, description, is_default, is_active, is_public, cancellation_policy_id, rate_plan_meals(meal, value_cents), min_days_advance, max_days_advance, min_adults, max_adults, min_children, max_children, valid_from, valid_to, parent_rate_plan_id, derived_kind, derived_percent_bps, derived_amount_cents, occupancy_pricing, adult_adjust_cents, child_adjust_cents, adult_decrease_cents, tax_rate_id, accounting_category_id, rate_plan_channels(channel_id)",
+      "id, code, name, description, is_default, is_active, is_public, cancellation_policy_id, rate_plan_meals(meal, value_cents), min_days_advance, max_days_advance, min_adults, max_adults, min_children, max_children, valid_from, valid_to, parent_rate_plan_id, derived_kind, derived_percent_bps, derived_amount_cents, occupancy_pricing, adult_adjust_cents, child_adjust_cents, adult_decrease_cents, tax_rate_id, accounting_category_id, rate_plan_channels(channel_id), meal_plan, rate_plan_extras(extra_id)",
     );
   if (!includeRetired) query = query.eq("is_active", true);
   const { data, error } = await query
@@ -1841,6 +1842,8 @@ async function loadRatePlans(includeRetired: boolean): Promise<RatePlan[]> {
       tax_rate_id: string | null;
       accounting_category_id: string | null;
       rate_plan_channels: { channel_id: string }[];
+      meal_plan: string;
+      rate_plan_extras: { extra_id: string }[];
     }[]
   ).map((row) => ({
     id: row.id,
@@ -1881,6 +1884,8 @@ async function loadRatePlans(includeRetired: boolean): Promise<RatePlan[]> {
     taxRateId: row.tax_rate_id,
     accountingCategoryId: row.accounting_category_id,
     channelIds: (row.rate_plan_channels ?? []).map((c) => c.channel_id),
+    mealPlan: isMealPlan(row.meal_plan) ? row.meal_plan : "custom",
+    extraIds: (row.rate_plan_extras ?? []).map((x) => x.extra_id),
   }));
 }
 

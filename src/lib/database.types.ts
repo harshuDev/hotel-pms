@@ -3335,6 +3335,49 @@ export type Database = {
           },
         ]
       }
+      rate_plan_extras: {
+        Row: {
+          created_at: string
+          extra_id: string
+          property_id: string
+          rate_plan_id: string
+        }
+        Insert: {
+          created_at?: string
+          extra_id: string
+          property_id: string
+          rate_plan_id: string
+        }
+        Update: {
+          created_at?: string
+          extra_id?: string
+          property_id?: string
+          rate_plan_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rate_plan_extras_extra_id_fkey"
+            columns: ["extra_id"]
+            isOneToOne: false
+            referencedRelation: "extras"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rate_plan_extras_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rate_plan_extras_rate_plan_id_fkey"
+            columns: ["rate_plan_id"]
+            isOneToOne: false
+            referencedRelation: "rate_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       rate_plan_meals: {
         Row: {
           created_at: string
@@ -3535,6 +3578,7 @@ export type Database = {
           max_adults: number | null
           max_children: number | null
           max_days_advance: number | null
+          meal_plan: string
           min_adults: number | null
           min_children: number | null
           min_days_advance: number | null
@@ -3567,6 +3611,7 @@ export type Database = {
           max_adults?: number | null
           max_children?: number | null
           max_days_advance?: number | null
+          meal_plan?: string
           min_adults?: number | null
           min_children?: number | null
           min_days_advance?: number | null
@@ -3599,6 +3644,7 @@ export type Database = {
           max_adults?: number | null
           max_children?: number | null
           max_days_advance?: number | null
+          meal_plan?: string
           min_adults?: number | null
           min_children?: number | null
           min_days_advance?: number | null
@@ -7157,6 +7203,18 @@ export type Database = {
       }
       set_rate_plan_cancellation_policy: {
         Args: { p_cancellation_policy_id?: string; p_rate_plan_id: string }
+        Returns: undefined
+      }
+      set_rate_plan_extras: {
+        Args: { p_extra_ids: string[]; p_rate_plan_id: string }
+        Returns: undefined
+      }
+      set_rate_plan_meal_plan: {
+        Args: {
+          p_meal_plan: string
+          p_meals?: Database["public"]["Enums"]["meal_type"][]
+          p_rate_plan_id: string
+        }
         Returns: undefined
       }
       set_rate_plan_meal_value: {

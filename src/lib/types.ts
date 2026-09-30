@@ -1,5 +1,6 @@
 import type { StaffLocale } from "@/lib/i18n/staff-locales";
 import type { CancellationTerms } from "@/lib/cancellation-policy";
+import type { MealPlan } from "@/lib/meal-plans";
 export type BookingStatus =
   | "pending"
   | "confirmed"
@@ -663,6 +664,8 @@ export interface RatePlan {
   isActive: boolean;
   /** Whether a guest with no session may see and book this plan. */
   isPublic: boolean;
+  /** The reference's Meal Type (0115); `meals` is what it means. */
+  mealPlan: MealPlan;
   /** The meals this plan includes. The set is the board type. */
   meals: MealType[];
   /**
@@ -704,6 +707,8 @@ export interface RatePlan {
   accountingCategoryId: string | null;
   /** The channels it may be sold through; empty is every channel. */
   channelIds: string[];
+  /** Sell With Extras (0115): catalog extras sold with the rate. Stored, not charged. */
+  extraIds: string[];
 }
 
 /** Which room types a plan has prices loaded on, from the business date (0109). */

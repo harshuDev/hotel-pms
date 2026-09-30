@@ -1,7 +1,8 @@
 "use client";
 
 import { useT } from "@/components/i18n";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { cn } from "@/components/ui";
 import { useCurrency } from "@/components/currency";
 import type {
@@ -27,7 +28,10 @@ import {
   setRatePlanTerms,
   saveWeekRates,
 } from "@/lib/actions/settings";
-import { setRatePlanMeals } from "@/lib/actions/inventory";
+import { setRatePlanExtras, setRatePlanMealPlan } from "@/lib/actions/inventory";
+import { FilterSelect } from "@/components/settings/filter-select";
+import type { ExtrasCatalog } from "@/lib/extras";
+import { MEAL_PLANS, MEAL_PLAN_LABEL, type MealPlan } from "@/lib/meal-plans";
 
 /*
  * Settings -> Inventory -> Rate Plans, cloned from the client's reference's
@@ -50,8 +54,17 @@ import { setRatePlanMeals } from "@/lib/actions/inventory";
  * the client asked in a Loom: season, affected room types, a row per number
  * of adults, ">>" to copy Monday across, and the restrictions as their own
  * rows -- `PlanRates`. One Save stores the terms and then the week, which is
- * written onto the nights. "Sell with extras" is not copied -- nothing sells
- * an extra with a rate.
+ * written onto the nights.
+ *
+ * THE FORM IS A POPUP, THE REFERENCE'S (0115): the pencil opens it over the
+ * list, laid out as theirs -- Title and Meal Type, Cancellation Policy and
+ * Currency, the advance days, "Active at specific date range", Max Adults and
+ * Max Children, Derived Rate, One Price For All Occupancies, the prices and
+ * restrictions, Sell With Extras, Attached Taxes, Accounting Category, "Only
+ * For Channels (Hide on IBE)" and "Save as default rate". Meal Type is one of
+ * the reference's eight (`rate_plans.meal_plan`); Sell With Extras is stored,
+ * not charged. The code is not on the form -- the reference has none -- so a
+ * new plan is given one from its title.
  */
 
 type Run = (fn: () => Promise<{ ok: boolean; error?: string }>, done: string) => void;
@@ -68,8 +81,16 @@ type Draft = {
   cancellationPolicyId: string;
   /** What the policy was when the form opened, so only a change is sent. */
   wasPolicyId: string;
+  mealPlan: MealPlan;
+  wasMealPlan: MealPlan;
   meals: MealType[];
   wasMeals: MealType[];
+  extraIds: string[];
+  wasExtraIds: string[];
+  /** "Active at specific date range". */
+  dated: boolean;
+  /** The minimums are not on the reference's form; drawn only when a plan has one. */
+  showMinimums: boolean;
   minDaysAdvance: string;
   maxDaysAdvance: string;
   minAdults: string;
@@ -90,7 +111,7 @@ type Draft = {
   perChild: string;
   taxRateId: string;
   accountingCategoryId: string;
-  allChannels: boolean;
+  /** None is every channel. */
   channelIds: string[];
 };
 
@@ -100,6 +121,21 @@ const MEALS: MealType[] = ["breakfast", "lunch", "dinner"];
 function count(s: string): number | null | "bad" {
   if (s.trim() === "") return null;
   return /^\s*\d{1,4}\s*$/.test(s) ? Number(s) : "bad";
+}
+
+/** A new plan's code, from its title: the initials, unique on the property. */
+function codeFor(title: string, taken: string[]): string {
+  const initials = title
+    .split(/[^A-Za-z0-9]+/)
+    .filter(Boolean)
+    .map((w) => w[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 6);
+  const base = initials || "RATE";
+  const used = new Set(taken.map((c) => c.toUpperCase()));
+  if (!used.has(base)) return base;
+  for (let n = 2; ; n += 1) if (!used.has(`${base}${n}`)) return `${base}${n}`;
 }
 
 function draftOf(p: RatePlan | null, defaultPolicyId: string): Draft {
@@ -116,8 +152,14 @@ function draftOf(p: RatePlan | null, defaultPolicyId: string): Draft {
     isActive: p?.isActive ?? true,
     cancellationPolicyId: policy,
     wasPolicyId: p ? policy : "",
+    mealPlan: p?.mealPlan ?? "room_only",
+    wasMealPlan: p?.mealPlan ?? "room_only",
     meals: p?.meals ?? [],
     wasMeals: p?.meals ?? [],
+    extraIds: p?.extraIds ?? [],
+    wasExtraIds: p?.extraIds ?? [],
+    dated: !!(p?.validFrom || p?.validTo),
+    showMinimums: (p?.minAdults ?? null) !== null || (p?.minChildren ?? null) !== null,
     minDaysAdvance: n(p?.minDaysAdvance ?? null),
     maxDaysAdvance: n(p?.maxDaysAdvance ?? null),
     minAdults: n(p?.minAdults ?? null),
@@ -150,7 +192,6 @@ function draftOf(p: RatePlan | null, defaultPolicyId: string): Draft {
     perChild: p?.childAdjustCents != null ? formatMoneyInput(p.childAdjustCents) : "",
     taxRateId: p?.taxRateId ?? "",
     accountingCategoryId: p?.accountingCategoryId ?? "",
-    allChannels: (p?.channelIds.length ?? 0) === 0,
     channelIds: p?.channelIds ?? [],
   };
 }
@@ -208,6 +249,75 @@ function BinIcon() {
   );
 }
 
+/*
+ * The reference's rate plan popup: a centred panel over the list. Portalled to
+ * <body>, because the Settings page sits under the sticky top nav's stacking
+ * context -- the trap the calendar's room menu documents. Escape closes it;
+ * a FilterSelect that is open takes its own Escape first.
+ */
+function PlanPopup({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) {
+  const tr = useT();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  useEffect(() => {
+    function onKey(event: KeyboardEvent) {
+      if (event.key === "Escape") onClose();
+    }
+    document.addEventListener("keydown", onKey);
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = previous;
+    };
+  }, [onClose]);
+  if (!mounted) return null;
+  return createPortal(
+    <div
+      className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-chrome-900/50 p-3 sm:p-6"
+      onMouseDown={(event) => {
+        if (event.target === event.currentTarget) onClose();
+      }}
+    >
+      <div role="dialog" aria-modal="true" aria-labelledby="rate-plan-popup-title"
+        className="my-2 w-full max-w-6xl rounded-lg border border-line bg-white shadow-lift">
+        <div className="flex items-center gap-4 rounded-t-lg bg-chrome-800 px-4 py-3 sm:px-6">
+          <h2 id="rate-plan-popup-title" className="min-w-0 flex-1 truncate font-display text-[15px] font-semibold tracking-tightest text-white">
+            {title}
+          </h2>
+          <button type="button" onClick={onClose} aria-label={tr("Close")}
+            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-white/15 text-white transition hover:bg-white/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white">
+            <svg viewBox="0 0 16 16" aria-hidden className="h-3.5 w-3.5 fill-current">
+              <path d="M4.3 3 3 4.3 6.7 8 3 11.7 4.3 13 8 9.3l3.7 3.7 1.3-1.3L9.3 8 13 4.3 11.7 3 8 6.7z" />
+            </svg>
+          </button>
+        </div>
+        <div className="p-4 sm:p-6">{children}</div>
+      </div>
+    </div>,
+    document.body,
+  );
+}
+
+/** A label, the reference's way: on the left, ending in a colon, "*" when required. */
+function Row({ label, required, htmlFor, children, wide }: {
+  label: string;
+  required?: boolean;
+  htmlFor?: string;
+  children: React.ReactNode;
+  wide?: boolean;
+}) {
+  return (
+    <div className={cn("grid items-start gap-1 sm:grid-cols-[10.5rem_1fr] sm:gap-3", wide && "lg:col-span-2")}>
+      <label htmlFor={htmlFor} className="pt-2.5 text-[13px] text-ink-muted sm:text-right">
+        {required && <span className="text-rose-600">* </span>}
+        {label}:
+      </label>
+      <div className="min-w-0">{children}</div>
+    </div>
+  );
+}
+
 function TickCircle() {
   const tr = useT();
   return (
@@ -225,6 +335,7 @@ export function RatePlansPanel({
   taxRates,
   accountingCategories,
   channels,
+  extrasCatalog,
   coverage,
   seasons,
   weekRates,
@@ -241,6 +352,8 @@ export function RatePlansPanel({
   taxRates: TaxRateSetting[];
   accountingCategories: AccountingCategory[];
   channels: ChannelSetting[];
+  /** Sell With Extras picks from the catalog (0115). */
+  extrasCatalog: ExtrasCatalog;
   coverage: RatePlanCoverage[];
   seasons: SeasonType[];
   weekRates: WeekRate[];
@@ -359,8 +472,8 @@ export function RatePlansPanel({
       maxAdults: nums.maxAdults as number | null,
       minChildren: nums.minChildren as number | null,
       maxChildren: nums.maxChildren as number | null,
-      validFrom: d.validFrom || null,
-      validTo: d.validTo || null,
+      validFrom: d.dated ? d.validFrom || null : null,
+      validTo: d.dated ? d.validTo || null : null,
       parentRatePlanId: d.derived ? d.parentRatePlanId : null,
       derivedKind,
       derivedPercentBps,
@@ -371,7 +484,7 @@ export function RatePlansPanel({
       adultDecreaseCents,
       taxRateId: d.taxRateId || null,
       accountingCategoryId: d.accountingCategoryId || null,
-      channelIds: d.allChannels ? [] : d.channelIds,
+      channelIds: d.channelIds,
     };
   }
 
@@ -394,7 +507,7 @@ export function RatePlansPanel({
     run(async () => {
       const saved = await saveRatePlan({
         id: d.id,
-        code: d.code,
+        code: d.id ? d.code : codeFor(d.name, ratePlans.map((p) => p.code)),
         name: d.name,
         description: d.description,
         isDefault: d.isDefault,
@@ -410,9 +523,16 @@ export function RatePlansPanel({
       }
       const setTerms = await setRatePlanTerms({ ratePlanId: saved.data.id, ...terms });
       if (!setTerms.ok) return setTerms;
-      if ([...d.meals].sort().join() !== [...d.wasMeals].sort().join()) {
-        const meals = await setRatePlanMeals({ ratePlanId: saved.data.id, meals: d.meals });
+      if (
+        d.mealPlan !== d.wasMealPlan ||
+        (d.mealPlan === "custom" && [...d.meals].sort().join() !== [...d.wasMeals].sort().join())
+      ) {
+        const meals = await setRatePlanMealPlan({ ratePlanId: saved.data.id, mealPlan: d.mealPlan, meals: d.meals });
         if (!meals.ok) return meals;
+      }
+      if ([...d.extraIds].sort().join() !== [...d.wasExtraIds].sort().join()) {
+        const extras = await setRatePlanExtras({ ratePlanId: saved.data.id, extraIds: d.extraIds });
+        if (!extras.ok) return extras;
       }
       if (week) {
         for (const row of week.rows) {
@@ -432,10 +552,284 @@ export function RatePlansPanel({
       setDraft(
         d.id
           ? null
-          : { ...d, id: saved.data.id, wasPolicyId: d.cancellationPolicyId, wasMeals: d.meals },
+          : {
+              ...d,
+              id: saved.data.id,
+              wasPolicyId: d.cancellationPolicyId,
+              wasMealPlan: d.mealPlan,
+              wasMeals: d.meals,
+              wasExtraIds: d.extraIds,
+            },
       );
       return { ok: true };
     }, d.id ? tr("Rate plan saved.") : tr("Rate plan created."));
+  }
+
+  const fieldR = "w-full rounded border border-line bg-white px-3 py-2 text-[14px] text-ink focus:border-brass focus:outline-none focus:ring-1 focus:ring-brass";
+  const tick = "flex items-center gap-2 text-[13.5px] text-ink";
+  const activeExtras = [...extrasCatalog.extras].sort((a, b) => a.title.localeCompare(b.title));
+
+  function form(draft: Draft) {
+    const set = (patch: Partial<Draft>) => setDraft({ ...draft, ...patch });
+    const numberField = (k: "minDaysAdvance" | "maxDaysAdvance" | "minAdults" | "maxAdults" | "minChildren" | "maxChildren", l: string) => (
+      <Row label={l} htmlFor={`rp-${k}`}>
+        <input id={`rp-${k}`} inputMode="numeric" value={draft[k]} placeholder={l} className={cn(fieldR, "tnum")}
+          onChange={(e) => set({ [k]: e.target.value } as Partial<Draft>)} />
+      </Row>
+    );
+    return (
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          save(draft);
+        }}
+      >
+        <div className="grid gap-x-8 gap-y-4 lg:grid-cols-2">
+          <Row label={tr("Title")} required htmlFor="rp-title">
+            <input id="rp-title" autoFocus value={draft.name} className={fieldR}
+              onChange={(e) => set({ name: e.target.value })} />
+          </Row>
+          <Row label={tr("Meal Type")} required>
+            <FilterSelect
+              label={tr("Meal Type")}
+              value={[draft.mealPlan]}
+              options={MEAL_PLANS.map((m) => ({ id: m, name: tr(MEAL_PLAN_LABEL[m]) }))}
+              onChange={(ids) => ids[0] && set({ mealPlan: ids[0] as MealPlan })}
+            />
+            {draft.mealPlan === "custom" && (
+              <div className="mt-2 flex flex-wrap gap-x-5 gap-y-1">
+                {MEALS.map((m) => (
+                  <label key={m} className={tick}>
+                    <input type="checkbox" className="h-4 w-4 accent-brass" checked={draft.meals.includes(m)}
+                      onChange={(e) =>
+                        set({ meals: e.target.checked ? [...draft.meals, m] : draft.meals.filter((x) => x !== m) })
+                      } />
+                    {m === "breakfast" ? tr("Breakfast") : m === "lunch" ? tr("Lunch") : tr("Dinner")}
+                  </label>
+                ))}
+              </div>
+            )}
+          </Row>
+          <Row label={tr("Cancellation Policy")} required>
+            <FilterSelect
+              label={tr("Cancellation Policy")}
+              value={[draft.cancellationPolicyId || "none"]}
+              options={[
+                ...cancellationPolicies.map((c) => ({ id: c.id, name: c.name })),
+                { id: "none", name: tr("Not set") },
+              ]}
+              onChange={(ids) => set({ cancellationPolicyId: ids[0] === "none" ? "" : (ids[0] ?? "") })}
+            />
+          </Row>
+          <Row label={tr("Currency")} required>
+            <p className="rounded border border-line bg-shell px-3 py-2 text-[14px] text-ink-muted">{currency}</p>
+          </Row>
+          <Row label={tr("Description")} htmlFor="rp-description" wide>
+            <input id="rp-description" value={draft.description} className={fieldR}
+              onChange={(e) => set({ description: e.target.value })} />
+          </Row>
+          {numberField("minDaysAdvance", tr("Min Days Advance"))}
+          {numberField("maxDaysAdvance", tr("Max Days Advance"))}
+        </div>
+
+        <label className={cn(tick, "mt-5")}>
+          <input type="checkbox" className="h-4 w-4 accent-brass" checked={draft.dated}
+            onChange={(e) => set({ dated: e.target.checked })} />
+          {tr("Active at specific date range")}
+        </label>
+        {draft.dated && (
+          <div className="mt-3 grid gap-x-8 gap-y-4 lg:grid-cols-2">
+            <Row label={tr("From")} htmlFor="rp-from">
+              <input id="rp-from" type="date" value={draft.validFrom} className={fieldR}
+                onChange={(e) => set({ validFrom: e.target.value })} />
+            </Row>
+            <Row label={tr("To")} htmlFor="rp-to">
+              <input id="rp-to" type="date" value={draft.validTo} className={fieldR}
+                onChange={(e) => set({ validTo: e.target.value })} />
+            </Row>
+          </div>
+        )}
+
+        <div className="mt-5 grid gap-x-8 gap-y-4 lg:grid-cols-2">
+          {numberField("maxAdults", tr("Max Adults"))}
+          {numberField("maxChildren", tr("Max Children"))}
+          {draft.showMinimums && numberField("minAdults", tr("Min Adults"))}
+          {draft.showMinimums && numberField("minChildren", tr("Min Children"))}
+        </div>
+
+        <label className={cn(tick, "mt-5")}>
+          <input type="checkbox" className="h-4 w-4 accent-brass" checked={draft.derived}
+            onChange={(e) => set({ derived: e.target.checked })} />
+          {tr("Derived Rate")}
+        </label>
+        {draft.derived && (
+          <div className="mt-3 grid gap-x-8 gap-y-4 lg:grid-cols-3">
+            <Row label={tr("Parent Rate")}>
+              <FilterSelect
+                label={tr("Parent Rate")}
+                value={draft.parentRatePlanId ? [draft.parentRatePlanId] : []}
+                options={ratePlans
+                  .filter((p) => p.id !== draft.id && !p.parentRatePlanId)
+                  .map((p) => ({ id: p.id, name: p.name }))}
+                onChange={(ids) => set({ parentRatePlanId: ids[0] ?? "" })}
+              />
+            </Row>
+            <Row label={tr("Relation")}>
+              <FilterSelect
+                label={tr("Relation")}
+                value={[draft.relation]}
+                options={[
+                  { id: "down_percent", name: tr("Decrease by %") },
+                  { id: "up_percent", name: tr("Increase by %") },
+                  { id: "down_amount", name: tr("Decrease by amount") },
+                  { id: "up_amount", name: tr("Increase by amount") },
+                ]}
+                onChange={(ids) => ids[0] && set({ relation: ids[0] as Relation })}
+              />
+            </Row>
+            <Row label={tr("Amount")} htmlFor="rp-amount">
+              <input id="rp-amount" inputMode="decimal" value={draft.adjustment} className={cn(fieldR, "tnum")}
+                placeholder={draft.relation.endsWith("percent") ? "10" : "10.00"}
+                onChange={(e) => set({ adjustment: e.target.value })} />
+            </Row>
+          </div>
+        )}
+
+        <label className={cn(tick, "mt-5")}>
+          <input type="checkbox" className="h-4 w-4 accent-brass" checked={draft.singlePrice}
+            onChange={(e) => set({ singlePrice: e.target.checked })} />
+          {tr("One Price For All Occupancies")}
+        </label>
+        {!draft.singlePrice && (
+          <div className="mt-3 grid items-end gap-4 sm:grid-cols-4">
+            <label className={cn(tick, "pb-2")}>
+              <input type="checkbox" className="h-4 w-4 accent-brass" checked={draft.automatic}
+                onChange={(e) => set({ automatic: e.target.checked })} />
+              {tr("Automatic Calculation")}
+            </label>
+            {draft.automatic && (
+              <>
+                <label className={label}>
+                  {tr("Increase Per Adult")}
+                  <input inputMode="decimal" value={draft.perAdult} placeholder="0.00" className={cn(field, "tnum")}
+                    onChange={(e) => set({ perAdult: e.target.value })} />
+                </label>
+                <label className={label}>
+                  {tr("Decrease Per Adult")}
+                  <input inputMode="decimal" value={draft.decreaseAdult} placeholder="0.00" className={cn(field, "tnum")}
+                    onChange={(e) => set({ decreaseAdult: e.target.value })} />
+                </label>
+                <label className={label}>
+                  {tr("Increase Per Child")}
+                  <input inputMode="decimal" value={draft.perChild} placeholder="0.00" className={cn(field, "tnum")}
+                    onChange={(e) => set({ perChild: e.target.value })} />
+                </label>
+              </>
+            )}
+          </div>
+        )}
+
+        {draft.id && (() => {
+          const plan = ratePlans.find((p) => p.id === draft.id);
+          if (!plan) return null;
+          const cents = (v: string) => {
+            try {
+              return v.trim() === "" ? 0 : Math.max(0, parseMoney(v));
+            } catch {
+              return 0;
+            }
+          };
+          return (
+            <>
+              <h5 className={section}>{tr("Rates")}</h5>
+              <PlanRates
+                key={`${plan.id}|${openSeasonId ?? ""}`}
+                ref={ratesRef}
+                plan={plan}
+                mode={draft.singlePrice ? "single" : draft.automatic ? "per_person" : "per_occupancy"}
+                increaseAdultCents={cents(draft.perAdult)}
+                decreaseAdultCents={cents(draft.decreaseAdult)}
+                parent={ratePlans.find((p) => p.id === plan.parentRatePlanId) ?? null}
+                roomTypes={roomTypes}
+                seasons={seasons}
+                weekRates={weekRates}
+                coverage={coverage}
+                initialSeasonId={plan.id === openPlanId ? openSeasonId : null}
+                canEdit={canEdit}
+              />
+            </>
+          );
+        })()}
+
+        <div className="mt-6 grid gap-y-4">
+          <Row label={tr("Sell With Extras")}>
+            <FilterSelect
+              multi
+              label={tr("Sell With Extras")}
+              value={draft.extraIds}
+              options={activeExtras.map((x) => ({ id: x.id, name: x.title }))}
+              onChange={(ids) => set({ extraIds: ids })}
+            />
+          </Row>
+          <Row label={tr("Attached Taxes")} required>
+            <FilterSelect
+              label={tr("Attached Taxes")}
+              value={[draft.taxRateId || "none"]}
+              options={[
+                ...taxRates
+                  .filter((t) => t.isActive || t.id === draft.taxRateId)
+                  .map((t) => ({ id: t.id, name: t.name })),
+                { id: "none", name: tr("No tax") },
+              ]}
+              onChange={(ids) => set({ taxRateId: ids[0] === "none" ? "" : (ids[0] ?? "") })}
+            />
+          </Row>
+          <Row label={tr("Accounting Category")}>
+            <FilterSelect
+              label={tr("Accounting Category")}
+              value={[draft.accountingCategoryId || "none"]}
+              options={[
+                ...accountingCategories.map((c) => ({ id: c.id, name: c.name })),
+                { id: "none", name: tr("The room type's") },
+              ]}
+              onChange={(ids) => set({ accountingCategoryId: ids[0] === "none" ? "" : (ids[0] ?? "") })}
+            />
+          </Row>
+          <Row label={tr("Only For Channels (Hide on IBE)")}>
+            <FilterSelect
+              multi
+              label={tr("Only For Channels (Hide on IBE)")}
+              value={draft.channelIds}
+              options={channels.map((c) => ({ id: c.id, name: c.name }))}
+              onChange={(ids) => set({ channelIds: ids })}
+            />
+          </Row>
+        </div>
+
+        <div className="mt-5 flex flex-wrap gap-x-6 gap-y-2 sm:pl-[11.25rem]">
+          <label className={tick}>
+            <input type="checkbox" checked={draft.isDefault} className="h-4 w-4 accent-brass"
+              onChange={(e) => set({ isDefault: e.target.checked })} />
+            {tr("Save as default rate")}
+          </label>
+          <label className={tick}>
+            <input type="checkbox" checked={draft.isActive} className="h-4 w-4 accent-brass"
+              onChange={(e) => set({ isActive: e.target.checked })} />
+            {tr("Still selling")}
+          </label>
+        </div>
+
+        {formError && <p role="alert" className="mt-4 text-[12.5px] text-rose-700">{formError}</p>}
+        <div className="mt-6 flex justify-end gap-3 border-t border-line pt-4">
+          <button type="button" className={secondary} onClick={() => { setFormError(null); setDraft(null); }}>
+            {tr("Cancel")}
+          </button>
+          <button type="submit" className={primary} disabled={pending}>
+            {tr("Save")}
+          </button>
+        </div>
+      </form>
+    );
   }
 
   return (
@@ -582,278 +976,6 @@ export function RatePlansPanel({
               </table>
             </div>
 
-            {draft && (
-              <form
-                className="mt-4 rounded border border-line p-4"
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  save(draft);
-                }}
-              >
-                <h4 className="border-b border-line pb-1 text-[16px] text-ink">
-                  {draft.id
-                    ? draft.name
-                      ? tr("Edit {name}", { name: draft.name })
-                      : tr("Edit rate plan")
-                    : tr("Add New Rate Plan")}
-                </h4>
-                <div className="mt-4 grid gap-4 sm:grid-cols-4">
-                  <label className={label}>
-                    {tr("Code")}
-                    <input value={draft.code} placeholder={tr("BB")} className={cn(field, "uppercase")}
-                      onChange={(e) => setDraft({ ...draft, code: e.target.value })} />
-                  </label>
-                  <label className={cn(label, "sm:col-span-3")}>
-                    {tr("Title")}
-                    <input autoFocus value={draft.name} placeholder={tr("Bed and Breakfast")} className={field}
-                      onChange={(e) => setDraft({ ...draft, name: e.target.value })} />
-                  </label>
-                  <label className={cn(label, "sm:col-span-2")}>
-                    {tr("Description")}
-                    <input value={draft.description} placeholder={tr("What a guest gets on this rate")} className={field}
-                      onChange={(e) => setDraft({ ...draft, description: e.target.value })} />
-                  </label>
-                  <label className={label}>
-                    {tr("Cancellation Policy")}
-                    <select value={draft.cancellationPolicyId} className={field}
-                      onChange={(e) => setDraft({ ...draft, cancellationPolicyId: e.target.value })}>
-                      <option value="">{tr("Not set")}</option>
-                      {cancellationPolicies.map((c) => (
-                        <option key={c.id} value={c.id}>{c.name}</option>
-                      ))}
-                    </select>
-                  </label>
-                  <div className={label}>
-                    {tr("Currency")}
-                    <p className="mt-1 py-2 text-[14px] text-ink">{currency}</p>
-                  </div>
-                </div>
-
-                <fieldset className="mt-4">
-                  <legend className={label}>{tr("Meal Type")}</legend>
-                  <div className="mt-1 flex flex-wrap gap-x-6 gap-y-2 text-[13.5px] text-ink">
-                    {MEALS.map((m) => (
-                      <label key={m} className="flex items-center gap-2">
-                        <input type="checkbox" className="h-4 w-4 accent-brass" checked={draft.meals.includes(m)}
-                          onChange={(e) =>
-                            setDraft({
-                              ...draft,
-                              meals: e.target.checked ? [...draft.meals, m] : draft.meals.filter((x) => x !== m),
-                            })
-                          } />
-                        {m === "breakfast" ? tr("Breakfast") : m === "lunch" ? tr("Lunch") : tr("Dinner")}
-                      </label>
-                    ))}
-                  </div>
-                </fieldset>
-
-                <h5 className={section}>{tr("Booking conditions")}</h5>
-                <div className="mt-2 grid gap-4 sm:grid-cols-4">
-                  {([
-                    ["minDaysAdvance", tr("Minimum Days Advance")],
-                    ["maxDaysAdvance", tr("Maximum Days Advance")],
-                    ["minAdults", tr("Minimum Adults")],
-                    ["maxAdults", tr("Maximum Adults")],
-                    ["minChildren", tr("Minimum Children")],
-                    ["maxChildren", tr("Maximum Children")],
-                  ] as const).map(([k, l]) => (
-                    <label key={k} className={label}>
-                      {l}
-                      <input inputMode="numeric" value={draft[k]} className={cn(field, "tnum")}
-                        onChange={(e) => setDraft({ ...draft, [k]: e.target.value })} />
-                    </label>
-                  ))}
-                  <label className={label}>
-                    {tr("Active from")}
-                    <input type="date" value={draft.validFrom} className={field}
-                      onChange={(e) => setDraft({ ...draft, validFrom: e.target.value })} />
-                  </label>
-                  <label className={label}>
-                    {tr("Active to")}
-                    <input type="date" value={draft.validTo} className={field}
-                      onChange={(e) => setDraft({ ...draft, validTo: e.target.value })} />
-                  </label>
-                </div>
-
-                <h5 className={section}>{tr("Pricing")}</h5>
-                <label className="mt-2 flex items-center gap-2 text-[13.5px] text-ink">
-                  <input type="checkbox" className="h-4 w-4 accent-brass" checked={draft.derived}
-                    onChange={(e) => setDraft({ ...draft, derived: e.target.checked })} />
-                  {tr("Derived Rate")}
-                </label>
-                {draft.derived && (
-                  <div className="mt-2 grid gap-4 sm:grid-cols-4">
-                    <label className={cn(label, "sm:col-span-2")}>
-                      {tr("Parent Rate")}
-                      <select value={draft.parentRatePlanId} className={field}
-                        onChange={(e) => setDraft({ ...draft, parentRatePlanId: e.target.value })}>
-                        <option value="">{tr("Choose…")}</option>
-                        {ratePlans
-                          .filter((p) => p.id !== draft.id && !p.parentRatePlanId)
-                          .map((p) => (
-                            <option key={p.id} value={p.id}>{p.name}</option>
-                          ))}
-                      </select>
-                    </label>
-                    <label className={label}>
-                      {tr("Relation")}
-                      <select value={draft.relation} className={field}
-                        onChange={(e) => setDraft({ ...draft, relation: e.target.value as Relation })}>
-                        <option value="down_percent">{tr("Decrease by %")}</option>
-                        <option value="up_percent">{tr("Increase by %")}</option>
-                        <option value="down_amount">{tr("Decrease by amount")}</option>
-                        <option value="up_amount">{tr("Increase by amount")}</option>
-                      </select>
-                    </label>
-                    <label className={label}>
-                      {tr("Adjustment")}
-                      <input inputMode="decimal" value={draft.adjustment} className={cn(field, "tnum")}
-                        placeholder={draft.relation.endsWith("percent") ? "10" : "10.00"}
-                        onChange={(e) => setDraft({ ...draft, adjustment: e.target.value })} />
-                    </label>
-                  </div>
-                )}
-                <label className="mt-3 flex items-center gap-2 text-[13.5px] text-ink">
-                  <input type="checkbox" className="h-4 w-4 accent-brass" checked={draft.singlePrice}
-                    onChange={(e) => setDraft({ ...draft, singlePrice: e.target.checked })} />
-                  {tr("One Price For All Occupancies")}
-                </label>
-                {!draft.singlePrice && (
-                  <div className="mt-2 grid items-end gap-4 sm:grid-cols-4">
-                    <label className="flex items-center gap-2 pb-2 text-[13.5px] text-ink">
-                      <input type="checkbox" className="h-4 w-4 accent-brass" checked={draft.automatic}
-                        onChange={(e) => setDraft({ ...draft, automatic: e.target.checked })} />
-                      {tr("Automatic Calculation")}
-                    </label>
-                    {draft.automatic && (
-                      <>
-                        <label className={label}>
-                          {tr("Increase Per Adult")}
-                          <input inputMode="decimal" value={draft.perAdult} placeholder="0.00" className={cn(field, "tnum")}
-                            onChange={(e) => setDraft({ ...draft, perAdult: e.target.value })} />
-                        </label>
-                        <label className={label}>
-                          {tr("Decrease Per Adult")}
-                          <input inputMode="decimal" value={draft.decreaseAdult} placeholder="0.00" className={cn(field, "tnum")}
-                            onChange={(e) => setDraft({ ...draft, decreaseAdult: e.target.value })} />
-                        </label>
-                        <label className={label}>
-                          {tr("Increase Per Child")}
-                          <input inputMode="decimal" value={draft.perChild} placeholder="0.00" className={cn(field, "tnum")}
-                            onChange={(e) => setDraft({ ...draft, perChild: e.target.value })} />
-                        </label>
-                      </>
-                    )}
-                  </div>
-                )}
-
-                {draft.id && (() => {
-                  const plan = ratePlans.find((p) => p.id === draft.id);
-                  if (!plan) return null;
-                  const cents = (s: string) => {
-                    try {
-                      return s.trim() === "" ? 0 : Math.max(0, parseMoney(s));
-                    } catch {
-                      return 0;
-                    }
-                  };
-                  return (
-                    <>
-                      <h5 className={section}>{tr("Rates")}</h5>
-                      <PlanRates
-                        key={`${plan.id}|${openSeasonId ?? ""}`}
-                        ref={ratesRef}
-                        plan={plan}
-                        mode={draft.singlePrice ? "single" : draft.automatic ? "per_person" : "per_occupancy"}
-                        increaseAdultCents={cents(draft.perAdult)}
-                        decreaseAdultCents={cents(draft.decreaseAdult)}
-                        parent={ratePlans.find((p) => p.id === plan.parentRatePlanId) ?? null}
-                        roomTypes={roomTypes}
-                        seasons={seasons}
-                        weekRates={weekRates}
-                        coverage={coverage}
-                        initialSeasonId={plan.id === openPlanId ? openSeasonId : null}
-                        canEdit={canEdit}
-                      />
-                    </>
-                  );
-                })()}
-
-                <h5 className={section}>{tr("Taxes and accounting")}</h5>
-                <div className="mt-2 grid gap-4 sm:grid-cols-4">
-                  <label className={cn(label, "sm:col-span-2")}>
-                    {tr("Attached Taxes")}
-                    <select value={draft.taxRateId} className={field}
-                      onChange={(e) => setDraft({ ...draft, taxRateId: e.target.value })}>
-                      <option value="">{tr("No tax")}</option>
-                      {taxRates
-                        .filter((t) => t.isActive || t.id === draft.taxRateId)
-                        .map((t) => (
-                          <option key={t.id} value={t.id}>{t.name}</option>
-                        ))}
-                    </select>
-                  </label>
-                  <label className={cn(label, "sm:col-span-2")}>
-                    {tr("Accounting Category")}
-                    <select value={draft.accountingCategoryId} className={field}
-                      onChange={(e) => setDraft({ ...draft, accountingCategoryId: e.target.value })}>
-                      <option value="">{tr("The room type's")}</option>
-                      {accountingCategories.map((c) => (
-                        <option key={c.id} value={c.id}>{c.name}</option>
-                      ))}
-                    </select>
-                  </label>
-                </div>
-
-                <h5 className={section}>{tr("Channels")}</h5>
-                <label className="mt-2 flex items-center gap-2 text-[13.5px] text-ink">
-                  <input type="checkbox" className="h-4 w-4 accent-brass" checked={draft.allChannels}
-                    onChange={(e) => setDraft({ ...draft, allChannels: e.target.checked })} />
-                  {tr("All channels")}
-                </label>
-                {!draft.allChannels && (
-                  <div className="mt-2 flex flex-wrap gap-x-6 gap-y-2 text-[13.5px] text-ink">
-                    {channels.map((c) => (
-                      <label key={c.id} className="flex items-center gap-2">
-                        <input type="checkbox" className="h-4 w-4 accent-brass" checked={draft.channelIds.includes(c.id)}
-                          onChange={(e) =>
-                            setDraft({
-                              ...draft,
-                              channelIds: e.target.checked
-                                ? [...draft.channelIds, c.id]
-                                : draft.channelIds.filter((x) => x !== c.id),
-                            })
-                          } />
-                        {c.name}
-                      </label>
-                    ))}
-                  </div>
-                )}
-
-                <div className="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-[13.5px] text-ink">
-                  <label className="flex items-center gap-2">
-                    <input type="checkbox" checked={draft.isDefault} className="h-4 w-4 accent-brass"
-                      onChange={(e) => setDraft({ ...draft, isDefault: e.target.checked })} />
-                    {tr("Main rate")}
-                  </label>
-                  <label className="flex items-center gap-2">
-                    <input type="checkbox" checked={draft.isActive} className="h-4 w-4 accent-brass"
-                      onChange={(e) => setDraft({ ...draft, isActive: e.target.checked })} />
-                    {tr("Still selling")}
-                  </label>
-                </div>
-                {formError && <p role="alert" className="mt-3 text-[12.5px] text-rose-700">{formError}</p>}
-                <div className="mt-5 flex justify-end gap-3">
-                  <button type="button" className={secondary} onClick={() => setDraft(null)}>
-                    {tr("Cancel")}
-                  </button>
-                  <button type="submit" className={primary} disabled={pending}>
-                    {tr("Save")}
-                  </button>
-                </div>
-              </form>
-            )}
-
             <div className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-2">
               {canEdit && (
                 <button type="button" className={primary} onClick={() => open(null)}>
@@ -869,6 +991,18 @@ export function RatePlansPanel({
           </div>
         </div>
       </section>
+
+      {draft && (
+        <PlanPopup
+          title={draft.id ? (draft.name ? tr("Edit {name}", { name: draft.name }) : tr("Edit rate plan")) : tr("Add New Rate Plan")}
+          onClose={() => {
+            setFormError(null);
+            setDraft(null);
+          }}
+        >
+          {form(draft)}
+        </PlanPopup>
+      )}
 
       {/*
         Room Rate Combinations under the list, as the client's reference has
@@ -887,7 +1021,6 @@ export function RatePlansPanel({
             const plan = ratePlans.find((p) => p.id === id);
             if (!plan) return;
             open(plan);
-            window.scrollTo({ top: 0, behavior: "smooth" });
           }}
           canEdit={canEdit}
           pending={pending}

@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import type { ActionResult } from "@/lib/actions/cashier";
 import type { RpcName } from "@/lib/supabase/database";
 import type { InventoryField, MealType } from "@/lib/types";
+import type { MealPlan } from "@/lib/meal-plans";
 
 /**
  * Inventory writes.
@@ -209,6 +210,46 @@ export async function setRatePlanMeals(input: {
   revalidatePath("/inventory", "layout");
   revalidatePath("/reports/meal");
   return { ok: true, data: { count: Number(data ?? 0) } };
+}
+
+/**
+ * The rate's Meal Type (0115): one of the reference's eight. Postgres turns it
+ * into the meals it means, so the choice and `rate_plan_meals` never disagree;
+ * `meals` is read only for Custom Meal Plan.
+ */
+export async function setRatePlanMealPlan(input: {
+  ratePlanId: string;
+  mealPlan: MealPlan;
+  meals: MealType[];
+}): Promise<ActionResult<null>> {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("set_rate_plan_meal_plan", {
+    p_rate_plan_id: input.ratePlanId,
+    p_meal_plan: input.mealPlan,
+    p_meals: input.mealPlan === "custom" ? input.meals : null,
+  });
+  if (error) return { ok: false, error: await localised(error.message) };
+  revalidatePath("/inventory", "layout");
+  revalidatePath("/reports/meal");
+  return { ok: true, data: null };
+}
+
+/**
+ * Sell With Extras (0115): the whole set of catalog extras sold with the rate.
+ * Stored; nothing posts an extra because of it.
+ */
+export async function setRatePlanExtras(input: {
+  ratePlanId: string;
+  extraIds: string[];
+}): Promise<ActionResult<null>> {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("set_rate_plan_extras", {
+    p_rate_plan_id: input.ratePlanId,
+    p_extra_ids: input.extraIds,
+  });
+  if (error) return { ok: false, error: await localised(error.message) };
+  revalidatePath("/settings");
+  return { ok: true, data: null };
 }
 
 /**
