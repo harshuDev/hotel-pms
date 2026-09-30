@@ -4,6 +4,7 @@ import {
   getBookingDetail,
   getBookingFolioLines,
   getBookingInvoiceLines,
+  getBookingInvoiceTaxes,
   getBookingRoomLines,
   getBusinessDate,
   getInvoiceSettings,
@@ -42,6 +43,8 @@ export interface InvoiceView {
   vatRegistered: boolean;
   netCents: number;
   taxCents: number;
+  /** The tax total split by tax (0117): "VAT 20%", "City tax 3%". */
+  taxes: { name: string; cents: number }[];
   totalCents: number;
   payments: { key: string; date: string; description: string; amountCents: number; reversed: boolean }[];
   balanceCents: number;
@@ -53,8 +56,9 @@ export async function loadInvoice(bookingId: string): Promise<InvoiceView | null
   const detail = await getBookingDetail(bookingId);
   if (!detail) return null;
 
-  const [lines, folio, rooms, property, settings, currency, today, tr] = await Promise.all([
+  const [lines, taxes, folio, rooms, property, settings, currency, today, tr] = await Promise.all([
     getBookingInvoiceLines(bookingId),
+    getBookingInvoiceTaxes(bookingId),
     getBookingFolioLines(bookingId),
     getBookingRoomLines(bookingId),
     getPropertySettings(),
@@ -116,6 +120,7 @@ export async function loadInvoice(bookingId: string): Promise<InvoiceView | null
     // Column sums of posted integer cents, as the reports' totals are.
     netCents: rows.reduce((s, r) => s + r.netCents, 0),
     taxCents: rows.reduce((s, r) => s + r.taxCents, 0),
+    taxes: taxes.map((t) => ({ name: t.name ?? tr("Tax"), cents: t.taxCents })),
     // Total and balance are the booking's own figures -- the ones the Folio
     // tab shows -- so the printout cannot disagree with the screen.
     totalCents: detail.chargesCents,
@@ -184,6 +189,7 @@ export function invoiceLiquidData(v: InvoiceView, tr: Translator) {
       tax_cents: r.taxCents,
       amount_cents: r.grossCents,
     })),
+    taxes: v.taxes.map((t) => ({ name: t.name, amount: money(t.cents), amount_cents: t.cents })),
     payments: v.payments.map((p) => ({
       date: invoiceDay(tr, p.date),
       date_iso: p.date,

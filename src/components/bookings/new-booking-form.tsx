@@ -20,6 +20,7 @@ import type {
 } from "@/lib/types";
 import type { BookingBlock } from "@/lib/actions/bookings";
 import { useCurrency } from "@/components/currency";
+import { FilterSelect } from "@/components/settings/filter-select";
 
 interface Line {
   /** Local key, so two lines of the same room type stay distinct while editing. */
@@ -130,19 +131,24 @@ export function NewBookingForm({
    * carry zero tax, against roughly £616 of VAT that should have been on them.
    *
    * `taxRates` is already filtered to the active rates, so the first is the
-   * one this hotel charges. "No tax" stays in the list, because a zero-rated
-   * booking is a real thing -- it is now something you choose rather than
-   * something you get by not noticing.
+   * one this hotel charges. Unticking every tax is still allowed, because a
+   * zero-rated booking is a real thing -- it is now something you choose
+   * rather than something you get by not noticing.
    */
   /*
    * A plan sold with a tax of its own (0109) seeds that tax instead, here and
    * whenever the plan is changed. Still a choice: the field stays editable.
    */
-  const planTax = (planId: string) => {
-    const id = ratePlans.find((p) => p.id === planId)?.taxRateId ?? null;
-    return id && taxRates.some((t) => t.id === id) ? id : null;
-  };
-  const [taxRateId, setTaxRateId] = useState(planTax(ratePlanId) ?? taxRates[0]?.id ?? "");
+  const planTaxes = (planId: string) =>
+    (ratePlans.find((p) => p.id === planId)?.taxRateIds ?? []).filter((id) =>
+      taxRates.some((t) => t.id === id),
+    );
+  /* Several at once since 0116 -- a hotel charging VAT and a city tax on the
+   * same night picks both. None ticked is a zero-rated booking. */
+  const [taxRateIds, setTaxRateIds] = useState<string[]>(() => {
+    const fromPlan = planTaxes(ratePlanId);
+    return fromPlan.length ? fromPlan : taxRates.slice(0, 1).map((t) => t.id);
+  });
   const [adults, setAdults] = useState(2);
   const [children, setChildren] = useState(0);
   const [guestNotes, setGuestNotes] = useState("");
@@ -368,7 +374,7 @@ export function NewBookingForm({
           : children,
         status,
         settlement,
-        taxRateId: taxRateId || null,
+        taxRateIds,
         guestNotes,
         internalNotes,
         externalReference,
@@ -872,8 +878,8 @@ export function NewBookingForm({
               value={ratePlanId}
               onChange={(e) => {
                 setRatePlanId(e.target.value);
-                const tax = planTax(e.target.value);
-                if (tax) setTaxRateId(tax);
+                const taxes = planTaxes(e.target.value);
+                if (taxes.length) setTaxRateIds(taxes);
               }}
               className={field}
             >
@@ -935,22 +941,15 @@ export function NewBookingForm({
             </select>
           </div>
           <div>
-            <label htmlFor="tax" className={label}>
-              {tr("Tax rate")}
-            </label>
-            <select
-              id="tax"
-              value={taxRateId}
-              onChange={(e) => setTaxRateId(e.target.value)}
-              className={field}
-            >
-              <option value="">{tr("No tax")}</option>
-              {taxRates.map((t) => (
-                <option key={t.id} value={t.id}>
-                  {t.name}
-                </option>
-              ))}
-            </select>
+            <span className={label}>{tr("Taxes")}</span>
+            <FilterSelect
+              multi
+              maxChips={2}
+              label={tr("Taxes")}
+              value={taxRateIds}
+              options={taxRates.map((t) => ({ id: t.id, name: t.name }))}
+              onChange={setTaxRateIds}
+            />
           </div>
           <div>
             {/*

@@ -469,6 +469,75 @@ export type Database = {
           },
         ]
       }
+      booking_extra_postings: {
+        Row: {
+          booking_room_id: string
+          created_at: string
+          event: string
+          extra_id: string | null
+          folio_item_id: string
+          id: string
+          property_id: string
+          stay_date: string | null
+        }
+        Insert: {
+          booking_room_id: string
+          created_at?: string
+          event: string
+          extra_id?: string | null
+          folio_item_id: string
+          id?: string
+          property_id: string
+          stay_date?: string | null
+        }
+        Update: {
+          booking_room_id?: string
+          created_at?: string
+          event?: string
+          extra_id?: string | null
+          folio_item_id?: string
+          id?: string
+          property_id?: string
+          stay_date?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "booking_extra_postings_booking_room_id_fkey"
+            columns: ["booking_room_id"]
+            isOneToOne: false
+            referencedRelation: "booking_rooms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "booking_extra_postings_extra_id_fkey"
+            columns: ["extra_id"]
+            isOneToOne: false
+            referencedRelation: "extras"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "booking_extra_postings_folio_item_id_fkey"
+            columns: ["folio_item_id"]
+            isOneToOne: false
+            referencedRelation: "folio_item_lines"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "booking_extra_postings_folio_item_id_fkey"
+            columns: ["folio_item_id"]
+            isOneToOne: false
+            referencedRelation: "folio_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "booking_extra_postings_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       booking_room_nights: {
         Row: {
           booking_room_id: string
@@ -479,6 +548,7 @@ export type Database = {
           room_rate_cents: number
           status: Database["public"]["Enums"]["booking_status"]
           stay_date: string
+          tax_breakdown: Json | null
           tax_cents: number
           updated_at: string
         }
@@ -491,6 +561,7 @@ export type Database = {
           room_rate_cents?: number
           status?: Database["public"]["Enums"]["booking_status"]
           stay_date: string
+          tax_breakdown?: Json | null
           tax_cents?: number
           updated_at?: string
         }
@@ -503,6 +574,7 @@ export type Database = {
           room_rate_cents?: number
           status?: Database["public"]["Enums"]["booking_status"]
           stay_date?: string
+          tax_breakdown?: Json | null
           tax_cents?: number
           updated_at?: string
         }
@@ -1921,6 +1993,7 @@ export type Database = {
           signed_net_amount_cents: number | null
           signed_tax_amount_cents: number | null
           tax_amount_cents: number
+          tax_breakdown: Json | null
           tax_rate_id: string | null
           unit_amount_cents: number
         }
@@ -1944,6 +2017,7 @@ export type Database = {
           signed_net_amount_cents?: number | null
           signed_tax_amount_cents?: number | null
           tax_amount_cents?: number
+          tax_breakdown?: Json | null
           tax_rate_id?: string | null
           unit_amount_cents: number
         }
@@ -1967,6 +2041,7 @@ export type Database = {
           signed_net_amount_cents?: number | null
           signed_tax_amount_cents?: number | null
           tax_amount_cents?: number
+          tax_breakdown?: Json | null
           tax_rate_id?: string | null
           unit_amount_cents?: number
         }
@@ -3337,21 +3412,39 @@ export type Database = {
       }
       rate_plan_extras: {
         Row: {
+          charge_on: string | null
           created_at: string
           extra_id: string
+          frequency: string
+          per_unit: string
+          posting: string
+          price_cents: number | null
           property_id: string
+          quantity: number
           rate_plan_id: string
         }
         Insert: {
+          charge_on?: string | null
           created_at?: string
           extra_id: string
+          frequency?: string
+          per_unit?: string
+          posting?: string
+          price_cents?: number | null
           property_id: string
+          quantity?: number
           rate_plan_id: string
         }
         Update: {
+          charge_on?: string | null
           created_at?: string
           extra_id?: string
+          frequency?: string
+          per_unit?: string
+          posting?: string
+          price_cents?: number | null
           property_id?: string
+          quantity?: number
           rate_plan_id?: string
         }
         Relationships: [
@@ -3472,6 +3565,52 @@ export type Database = {
           },
         ]
       }
+      rate_plan_taxes: {
+        Row: {
+          created_at: string
+          property_id: string
+          rate_plan_id: string
+          sort_order: number
+          tax_rate_id: string
+        }
+        Insert: {
+          created_at?: string
+          property_id: string
+          rate_plan_id: string
+          sort_order?: number
+          tax_rate_id: string
+        }
+        Update: {
+          created_at?: string
+          property_id?: string
+          rate_plan_id?: string
+          sort_order?: number
+          tax_rate_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rate_plan_taxes_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rate_plan_taxes_rate_plan_id_fkey"
+            columns: ["rate_plan_id"]
+            isOneToOne: false
+            referencedRelation: "rate_plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rate_plan_taxes_tax_rate_id_fkey"
+            columns: ["tax_rate_id"]
+            isOneToOne: false
+            referencedRelation: "tax_rates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       rate_plan_week_rates: {
         Row: {
           closed_to_arrival: boolean
@@ -3587,7 +3726,6 @@ export type Database = {
           parent_rate_plan_id: string | null
           property_id: string
           sort_order: number
-          tax_rate_id: string | null
           updated_at: string
           valid_from: string | null
           valid_to: string | null
@@ -3620,7 +3758,6 @@ export type Database = {
           parent_rate_plan_id?: string | null
           property_id: string
           sort_order?: number
-          tax_rate_id?: string | null
           updated_at?: string
           valid_from?: string | null
           valid_to?: string | null
@@ -3653,7 +3790,6 @@ export type Database = {
           parent_rate_plan_id?: string | null
           property_id?: string
           sort_order?: number
-          tax_rate_id?: string | null
           updated_at?: string
           valid_from?: string | null
           valid_to?: string | null
@@ -3685,13 +3821,6 @@ export type Database = {
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "properties"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "rate_plans_tax_rate_id_fkey"
-            columns: ["tax_rate_id"]
-            isOneToOne: false
-            referencedRelation: "tax_rates"
             referencedColumns: ["id"]
           },
         ]
@@ -4953,6 +5082,15 @@ export type Database = {
           tax_cents: number
         }[]
       }
+      booking_invoice_taxes: {
+        Args: { p_booking_id: string }
+        Returns: {
+          name: string
+          rate_bps: number
+          tax_cents: number
+          tax_rate_id: string
+        }[]
+      }
       booking_nights: {
         Args: { p_booking_id: string }
         Returns: {
@@ -5402,7 +5540,7 @@ export type Database = {
           p_rooms: Json
           p_settlement?: Database["public"]["Enums"]["booking_settlement"]
           p_status?: Database["public"]["Enums"]["booking_status"]
-          p_tax_rate_id?: string
+          p_tax_rate_ids?: string[]
         }
         Returns: {
           booking_id: string
@@ -6171,6 +6309,10 @@ export type Database = {
         }
         Returns: string
       }
+      post_rate_plan_extras: {
+        Args: { p_booking_room_id: string; p_date?: string; p_event: string }
+        Returns: number
+      }
       post_room_charge: {
         Args: {
           p_booking_room_night_id: string
@@ -6379,6 +6521,15 @@ export type Database = {
           p_kind: string
           p_parent_cents: number
           p_percent_bps: number
+        }
+        Returns: number
+      }
+      rate_plan_extra_units: {
+        Args: {
+          p_adults: number
+          p_children: number
+          p_per_unit: string
+          p_quantity: number
         }
         Returns: number
       }
@@ -7106,7 +7257,7 @@ export type Database = {
           p_booking_room_id: string
           p_from?: string
           p_rate_cents: number
-          p_tax_rate_id?: string
+          p_tax_rate_ids?: string[]
           p_to?: string
         }
         Returns: number
@@ -7206,7 +7357,7 @@ export type Database = {
         Returns: undefined
       }
       set_rate_plan_extras: {
-        Args: { p_extra_ids: string[]; p_rate_plan_id: string }
+        Args: { p_extras: Json; p_rate_plan_id: string }
         Returns: undefined
       }
       set_rate_plan_meal_plan: {
@@ -7255,7 +7406,7 @@ export type Database = {
           p_occupancy_pricing?: string
           p_parent_rate_plan_id?: string
           p_rate_plan_id: string
-          p_tax_rate_id?: string
+          p_tax_rate_ids?: string[]
           p_valid_from?: string
           p_valid_to?: string
         }
@@ -7386,6 +7537,20 @@ export type Database = {
           p_tax_rate_id: string
         }
         Returns: {
+          gross_cents: number
+          net_cents: number
+          tax_cents: number
+        }[]
+      }
+      tax_split_multi: {
+        Args: {
+          p_amount_cents: number
+          p_property_id: string
+          p_refuse_retired?: boolean
+          p_tax_rate_ids: string[]
+        }
+        Returns: {
+          breakdown: Json
           gross_cents: number
           net_cents: number
           tax_cents: number

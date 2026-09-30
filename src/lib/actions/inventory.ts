@@ -7,6 +7,7 @@ import type { ActionResult } from "@/lib/actions/cashier";
 import type { RpcName } from "@/lib/supabase/database";
 import type { InventoryField, MealType } from "@/lib/types";
 import type { MealPlan } from "@/lib/meal-plans";
+import type { RatePlanExtra } from "@/lib/rate-plan-extras";
 
 /**
  * Inventory writes.
@@ -235,17 +236,35 @@ export async function setRatePlanMealPlan(input: {
 }
 
 /**
- * Sell With Extras (0115): the whole set of catalog extras sold with the rate.
- * Stored; nothing posts an extra because of it.
+ * Sell With Extras (0115): the whole set of catalog extras sold with the rate,
+ * each with how it is charged (0118) -- added to the bill at check-in, each
+ * night or at check-out, or included in the rate and split out of the room
+ * charge.
  */
 export async function setRatePlanExtras(input: {
   ratePlanId: string;
-  extraIds: string[];
+  extras: RatePlanExtra[];
 }): Promise<ActionResult<null>> {
+  for (const x of input.extras) {
+    if (!Number.isSafeInteger(x.quantity) || x.quantity < 1 || x.quantity > 99) {
+      return { ok: false, error: await localised("The quantity must be between 1 and 99") };
+    }
+    if (x.priceCents !== null && (!Number.isSafeInteger(x.priceCents) || x.priceCents < 0)) {
+      return { ok: false, error: await localised("A price cannot be negative") };
+    }
+  }
   const supabase = await createClient();
   const { error } = await supabase.rpc("set_rate_plan_extras", {
     p_rate_plan_id: input.ratePlanId,
-    p_extra_ids: input.extraIds,
+    p_extras: input.extras.map((x) => ({
+      extra_id: x.extraId,
+      posting: x.posting,
+      frequency: x.posting === "added" && x.chargeOn === "each_night" ? "per_night" : x.frequency,
+      per_unit: x.perUnit,
+      quantity: x.quantity,
+      price_cents: x.priceCents,
+      charge_on: x.posting === "added" ? x.chargeOn ?? "each_night" : null,
+    })),
   });
   if (error) return { ok: false, error: await localised(error.message) };
   revalidatePath("/settings");

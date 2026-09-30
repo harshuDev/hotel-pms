@@ -2084,7 +2084,7 @@ export async function setRatePlanTerms(input: {
   adultAdjustCents: number | null;
   childAdjustCents: number | null;
   adultDecreaseCents: number | null;
-  taxRateId: string | null;
+  taxRateIds: string[];
   accountingCategoryId: string | null;
   channelIds: string[];
 }): Promise<ActionResult<{ rederived: number }>> {
@@ -2107,7 +2107,7 @@ export async function setRatePlanTerms(input: {
     p_adult_adjust_cents: input.adultAdjustCents,
     p_child_adjust_cents: input.childAdjustCents,
     p_adult_decrease_cents: input.adultDecreaseCents,
-    p_tax_rate_id: input.taxRateId,
+    p_tax_rate_ids: input.taxRateIds,
     p_accounting_category_id: input.accountingCategoryId,
     p_channel_ids: input.channelIds,
   });
@@ -2346,6 +2346,7 @@ function sampleInvoice(currency: string, today: string, tr: Translator): Invoice
     vatRegistered: true,
     netCents: 10500,
     taxCents: 2100,
+    taxes: [{ name: tr("VAT"), cents: 2100 }],
     totalCents: 12600,
     payments: [{ key: "p", date: today, description: tr("Card"), amountCents: 5000, reversed: false }],
     balanceCents: 7600,

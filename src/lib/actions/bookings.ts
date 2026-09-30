@@ -45,7 +45,8 @@ export interface NewBooking {
   children: number;
   status: Extract<BookingStatus, "pending" | "confirmed">;
   settlement: Settlement;
-  taxRateId: string | null;
+  /** Every tax on the stay (0116); empty is none. */
+  taxRateIds: string[];
   guestNotes: string;
   internalNotes: string;
   externalReference: string;
@@ -140,7 +141,7 @@ export async function createBooking(
     p_children: input.children,
     p_status: input.status,
     p_settlement: input.settlement,
-    p_tax_rate_id: input.taxRateId,
+    p_tax_rate_ids: input.taxRateIds,
     p_guest_notes: input.guestNotes || null,
     p_internal_notes: input.internalNotes || null,
     p_external_reference: input.externalReference || null,

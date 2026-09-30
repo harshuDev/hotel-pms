@@ -32,6 +32,23 @@ import { setRatePlanExtras, setRatePlanMealPlan } from "@/lib/actions/inventory"
 import { FilterSelect } from "@/components/settings/filter-select";
 import type { ExtrasCatalog } from "@/lib/extras";
 import { MEAL_PLANS, MEAL_PLAN_LABEL, type MealPlan } from "@/lib/meal-plans";
+import {
+  EXTRA_CHARGE_ONS,
+  EXTRA_CHARGE_ON_LABEL,
+  EXTRA_FREQUENCIES,
+  EXTRA_FREQUENCY_LABEL,
+  EXTRA_PER_UNITS,
+  EXTRA_PER_UNIT_LABEL,
+  EXTRA_POSTINGS,
+  EXTRA_POSTING_LABEL,
+  defaultRatePlanExtra,
+  sameRatePlanExtras,
+  type ExtraChargeOn,
+  type ExtraFrequency,
+  type ExtraPerUnit,
+  type ExtraPosting,
+  type RatePlanExtra,
+} from "@/lib/rate-plan-extras";
 
 /*
  * Settings -> Inventory -> Rate Plans, cloned from the client's reference's
@@ -85,8 +102,9 @@ type Draft = {
   wasMealPlan: MealPlan;
   meals: MealType[];
   wasMeals: MealType[];
-  extraIds: string[];
-  wasExtraIds: string[];
+  /** Sell With Extras with their terms (0118); the price as typed, blank is the catalog's. */
+  extras: ExtraDraft[];
+  wasExtras: RatePlanExtra[];
   /** "Active at specific date range". */
   dated: boolean;
   /** The minimums are not on the reference's form; drawn only when a plan has one. */
@@ -109,7 +127,8 @@ type Draft = {
   perAdult: string;
   decreaseAdult: string;
   perChild: string;
-  taxRateId: string;
+  /** In the order chosen; none is no tax. */
+  taxRateIds: string[];
   accountingCategoryId: string;
   /** None is every channel. */
   channelIds: string[];
@@ -186,10 +205,10 @@ function newPlanFor(d: Draft): RatePlan {
     adultAdjustCents: null,
     childAdjustCents: null,
     adultDecreaseCents: null,
-    taxRateId: d.taxRateId || null,
+    taxRateIds: d.taxRateIds,
     accountingCategoryId: d.accountingCategoryId || null,
     channelIds: d.channelIds,
-    extraIds: d.extraIds,
+    extras: [],
   };
 }
 
@@ -211,8 +230,8 @@ function draftOf(p: RatePlan | null, defaultPolicyId: string): Draft {
     wasMealPlan: p?.mealPlan ?? "room_only",
     meals: p?.meals ?? [],
     wasMeals: p?.meals ?? [],
-    extraIds: p?.extraIds ?? [],
-    wasExtraIds: p?.extraIds ?? [],
+    extras: (p?.extras ?? []).map(extraDraftOf),
+    wasExtras: p?.extras ?? [],
     dated: !!(p?.validFrom || p?.validTo),
     showMinimums: (p?.minAdults ?? null) !== null || (p?.minChildren ?? null) !== null,
     minDaysAdvance: n(p?.minDaysAdvance ?? null),
@@ -245,7 +264,7 @@ function draftOf(p: RatePlan | null, defaultPolicyId: string): Draft {
           ? formatMoneyInput(p.adultAdjustCents)
           : "",
     perChild: p?.childAdjustCents != null ? formatMoneyInput(p.childAdjustCents) : "",
-    taxRateId: p?.taxRateId ?? "",
+    taxRateIds: p?.taxRateIds ?? [],
     accountingCategoryId: p?.accountingCategoryId ?? "",
     channelIds: p?.channelIds ?? [],
   };
@@ -355,6 +374,162 @@ function PlanPopup({ title, onClose, children }: { title: string; onClose: () =>
 }
 
 /** A label, the reference's way: on the left, ending in a colon, "*" when required. */
+type ExtraDraft = Omit<RatePlanExtra, "priceCents"> & { price: string };
+
+const extraDraftOf = (x: RatePlanExtra): ExtraDraft => {
+  const { priceCents, ...rest } = x;
+  return { ...rest, price: priceCents === null ? "" : formatMoneyInput(priceCents) };
+};
+
+/*
+ * How each extra sold with the rate is charged (0118) -- one row per extra,
+ * so every hotel sets its own: added to the bill or included in the rate,
+ * per night or per stay, per room or per person, how many, at what price,
+ * and when an added one posts.
+ */
+function ExtrasTerms({
+  extras,
+  catalog,
+  onChange,
+}: {
+  extras: ExtraDraft[];
+  catalog: ExtrasCatalog;
+  onChange: (extras: ExtraDraft[]) => void;
+}) {
+  const tr = useT();
+  const currency = useCurrency();
+  const cell =
+    "w-full rounded border border-line bg-white px-2 py-1.5 text-[13px] text-ink focus:border-brass focus:outline-none focus:ring-1 focus:ring-brass";
+  const th = "px-2 pb-1.5 text-left text-[11px] font-semibold uppercase tracking-[0.06em] text-ink-faint";
+  const update = (i: number, patch: Partial<ExtraDraft>) =>
+    onChange(
+      extras.map((x, j) => {
+        if (j !== i) return x;
+        const next = { ...x, ...patch };
+        if (next.posting === "included") next.chargeOn = null;
+        else if (next.chargeOn === null) next.chargeOn = "each_night";
+        if (next.posting === "added" && next.chargeOn === "each_night") next.frequency = "per_night";
+        return next;
+      }),
+    );
+  return (
+    <div className="mt-2 overflow-x-auto rounded border border-line bg-shell/60 p-2">
+      <table className="w-full min-w-[46rem] text-[13px]">
+        <thead>
+          <tr>
+            <th className={th}>{tr("Extra")}</th>
+            <th className={th}>{tr("Charged")}</th>
+            <th className={th}>{tr("When")}</th>
+            <th className={th}>{tr("Frequency")}</th>
+            <th className={th}>{tr("Per")}</th>
+            <th className={`${th} w-16`}>{tr("Qty")}</th>
+            <th className={`${th} w-28`}>{tr("Price")}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {extras.map((x, i) => {
+            const extra = catalog.extras.find((e) => e.id === x.extraId);
+            const name = extra?.title ?? "";
+            return (
+              <tr key={x.extraId} className="align-top">
+                <td className="px-2 py-1 pt-2.5 font-medium text-ink">{name}</td>
+                <td className="px-1 py-1">
+                  <select
+                    aria-label={tr("How {name} is charged", { name })}
+                    className={cell}
+                    value={x.posting}
+                    onChange={(e) => update(i, { posting: e.target.value as ExtraPosting })}
+                  >
+                    {EXTRA_POSTINGS.map((v) => (
+                      <option key={v} value={v}>
+                        {tr(EXTRA_POSTING_LABEL[v])}
+                      </option>
+                    ))}
+                  </select>
+                </td>
+                <td className="px-1 py-1">
+                  {x.posting === "added" ? (
+                    <select
+                      aria-label={tr("When {name} is charged", { name })}
+                      className={cell}
+                      value={x.chargeOn ?? "each_night"}
+                      onChange={(e) => update(i, { chargeOn: e.target.value as ExtraChargeOn })}
+                    >
+                      {EXTRA_CHARGE_ONS.map((v) => (
+                        <option key={v} value={v}>
+                          {tr(EXTRA_CHARGE_ON_LABEL[v])}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <p className="px-1 pt-1.5 text-ink-muted">{tr("With the room charge")}</p>
+                  )}
+                </td>
+                <td className="px-1 py-1">
+                  {x.posting === "added" && x.chargeOn === "each_night" ? (
+                    <p className="px-1 pt-1.5 text-ink-muted">{tr(EXTRA_FREQUENCY_LABEL.per_night)}</p>
+                  ) : (
+                    <select
+                      aria-label={tr("How often {name} is charged", { name })}
+                      className={cell}
+                      value={x.frequency}
+                      onChange={(e) => update(i, { frequency: e.target.value as ExtraFrequency })}
+                    >
+                      {EXTRA_FREQUENCIES.map((v) => (
+                        <option key={v} value={v}>
+                          {tr(EXTRA_FREQUENCY_LABEL[v])}
+                        </option>
+                      ))}
+                    </select>
+                  )}
+                </td>
+                <td className="px-1 py-1">
+                  <select
+                    aria-label={tr("What {name} is counted by", { name })}
+                    className={cell}
+                    value={x.perUnit}
+                    onChange={(e) => update(i, { perUnit: e.target.value as ExtraPerUnit })}
+                  >
+                    {EXTRA_PER_UNITS.map((v) => (
+                      <option key={v} value={v}>
+                        {tr(EXTRA_PER_UNIT_LABEL[v])}
+                      </option>
+                    ))}
+                  </select>
+                </td>
+                <td className="px-1 py-1">
+                  <input
+                    type="number"
+                    min={1}
+                    max={99}
+                    aria-label={tr("Quantity of {name}", { name })}
+                    className={`${cell} tnum`}
+                    value={x.quantity}
+                    onChange={(e) =>
+                      update(i, { quantity: Math.min(99, Math.max(1, Math.trunc(Number(e.target.value) || 1))) })
+                    }
+                  />
+                </td>
+                <td className="px-1 py-1">
+                  <input
+                    inputMode="decimal"
+                    aria-label={tr("Price of {name}", { name })}
+                    className={`${cell} tnum`}
+                    value={x.price}
+                    placeholder={extra ? formatMoneyInput(extra.priceCents) : ""}
+                    onChange={(e) => update(i, { price: e.target.value })}
+                  />
+                  <p className="px-1 pt-0.5 text-[11px] text-ink-faint">{currency}</p>
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
 function Row({ label, required, htmlFor, children, wide }: {
   label: string;
   required?: boolean;
@@ -467,7 +642,7 @@ export function RatePlansPanel({
     const d = draftOf(p, defaultPolicyId);
     // A new plan starts on the hotel's default tax -- the top of Tax
     // Information, as the booking form seeds it -- not on "No tax".
-    if (!p) d.taxRateId = taxRates.find((t) => t.isActive)?.id ?? "";
+    if (!p) d.taxRateIds = taxRates.filter((t) => t.isActive).slice(0, 1).map((t) => t.id);
     setDraft(d);
   }
 
@@ -541,7 +716,7 @@ export function RatePlansPanel({
       adultAdjustCents,
       childAdjustCents,
       adultDecreaseCents,
-      taxRateId: d.taxRateId || null,
+      taxRateIds: d.taxRateIds,
       accountingCategoryId: d.accountingCategoryId || null,
       channelIds: d.channelIds,
     };
@@ -561,6 +736,31 @@ export function RatePlansPanel({
     if (typeof week === "string") {
       setFormError(week);
       return;
+    }
+    const extras: RatePlanExtra[] = [];
+    for (const x of d.extras) {
+      let priceCents: number | null = null;
+      if (x.price.trim() !== "") {
+        try {
+          priceCents = parseMoney(x.price);
+        } catch {
+          priceCents = -1;
+        }
+        if (priceCents < 0) {
+          const title = extrasCatalog.extras.find((e) => e.id === x.extraId)?.title ?? "";
+          setFormError(tr("The price of {name} is not an amount", { name: title }));
+          return;
+        }
+      }
+      extras.push({
+        extraId: x.extraId,
+        posting: x.posting,
+        frequency: x.frequency,
+        perUnit: x.perUnit,
+        quantity: x.quantity,
+        priceCents,
+        chargeOn: x.chargeOn,
+      });
     }
     setFormError(null);
     run(async () => {
@@ -589,9 +789,9 @@ export function RatePlansPanel({
         const meals = await setRatePlanMealPlan({ ratePlanId: saved.data.id, mealPlan: d.mealPlan, meals: d.meals });
         if (!meals.ok) return meals;
       }
-      if ([...d.extraIds].sort().join() !== [...d.wasExtraIds].sort().join()) {
-        const extras = await setRatePlanExtras({ ratePlanId: saved.data.id, extraIds: d.extraIds });
-        if (!extras.ok) return extras;
+      if (!sameRatePlanExtras(extras, d.wasExtras)) {
+        const set = await setRatePlanExtras({ ratePlanId: saved.data.id, extras });
+        if (!set.ok) return set;
       }
       if (week) {
         for (const row of week.rows) {
@@ -817,22 +1017,34 @@ export function RatePlansPanel({
             <FilterSelect
               multi
               label={tr("Sell With Extras")}
-              value={draft.extraIds}
+              value={draft.extras.map((x) => x.extraId)}
               options={activeExtras.map((x) => ({ id: x.id, name: x.title }))}
-              onChange={(ids) => set({ extraIds: ids })}
+              onChange={(ids) =>
+                set({
+                  extras: ids.map(
+                    (id) =>
+                      draft.extras.find((x) => x.extraId === id) ?? extraDraftOf(defaultRatePlanExtra(id)),
+                  ),
+                })
+              }
             />
+            {draft.extras.length > 0 && (
+              <ExtrasTerms
+                extras={draft.extras}
+                catalog={extrasCatalog}
+                onChange={(extras) => set({ extras })}
+              />
+            )}
           </Row>
           <Row label={tr("Attached Taxes")} required>
             <FilterSelect
+              multi
               label={tr("Attached Taxes")}
-              value={[draft.taxRateId || "none"]}
-              options={[
-                ...taxRates
-                  .filter((t) => t.isActive || t.id === draft.taxRateId)
-                  .map((t) => ({ id: t.id, name: t.name })),
-                { id: "none", name: tr("No tax") },
-              ]}
-              onChange={(ids) => set({ taxRateId: ids[0] === "none" ? "" : (ids[0] ?? "") })}
+              value={draft.taxRateIds}
+              options={taxRates
+                .filter((t) => t.isActive || draft.taxRateIds.includes(t.id))
+                .map((t) => ({ id: t.id, name: t.name }))}
+              onChange={(ids) => set({ taxRateIds: ids })}
             />
           </Row>
           <Row label={tr("Accounting Category")}>

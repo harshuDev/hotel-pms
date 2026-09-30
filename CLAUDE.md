@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0115` are
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0119` are
 applied to the hosted database.
 
 Working on real data: dashboard (house board, movements, pace, activity feed),
@@ -301,6 +301,7 @@ Each read is a Postgres view or RPC, never aggregation in the client:
 | `getDocumentTemplate("folio")`      | `document_templates` (0105)       |
 | `getMealReport(from, to)`           | `meal_report(from, to)`           |
 | `getAccountingRoomRevenue(from, to)` | `accounting_room_revenue(from, to)` (0108) |
+| `getBookingInvoiceTaxes(id)`       | `booking_invoice_taxes(id)` (0117) |
 
 **Two signatures carry the room-count rule.** The client operates properties
 with up to ~1,800 rooms, so no query may return every room and no screen may
@@ -1456,11 +1457,12 @@ client: "Need to add Booking Channel in the Dashboard".
       given the title's initials, unique on the property; an edit keeps its
       code. **Min Adults / Min Children are drawn only when a plan already has
       one**, so a rule set before is never hidden while enforced.
-    - **Attached Taxes takes ONE tax.** The reference's shows two chips
-      (City Tax, IVA); a night carries one tax figure and a folio item one
-      rate, so several taxes on a rate is a change to how every night is
-      taxed and posted -- to be asked for. "Save without taxes" is not
-      copied: what it does has not been seen.
+    - **ATTACHED TAXES TAKES SEVERAL (0116). This reverses what this file
+      said**, that it took one: the client asked for it -- "there could be an
+      option where client can put two taxes at the same time" -- as the
+      reference's two chips (City Tax, IVA) show. See "A night can carry
+      several taxes" under the booking notes. None ticked is a tax-free rate.
+      "Save without taxes" is not copied: what it does has not been seen.
   - **THE RATE PLAN FORM CARRIES THE REFERENCE'S TERMS (0109)**, saved by
     `set_rate_plan_terms()` -- one function taking the whole set, its own for
     the overload reason -- plus meals through `set_rate_plan_meals()`. Every
@@ -1514,13 +1516,14 @@ client: "Need to add Booking Channel in the Dashboard".
       **Known gap**: a percent-off offer is computed on the loaded price, not
       the per-person one (`promotion_night_discounts()` reads
       `rate_plan_days`), so on a per-person plan it discounts the base part.
-    - **Attached tax**: `rate_plans.tax_rate_id`. The staff form seeds its tax
-      field with the plan's when the plan is picked (still editable). The
-      GUEST PAGE NOW CHARGES TAX: `create_public_booking()` splits each night
-      with the plan's tax through `tax_split_for()` (apply_tax_rate() without
-      `current_property_id()`), and the quote adds exclusive tax. **Until
-      0109 every guest-page booking carried zero tax** -- worth telling the
-      client, and a plan with no tax set still books tax-free online.
+    - **Attached taxes**: `rate_plan_taxes`, in the order chosen (0116; it
+      was `rate_plans.tax_rate_id`, moved across and dropped). The staff form
+      seeds its taxes with the plan's when the plan is picked (still
+      editable). The GUEST PAGE CHARGES THEM: `create_public_booking()` splits
+      each night with the plan's whole set through `tax_split_multi()`, and
+      the quote adds exclusive tax. **Until 0109 every guest-page booking
+      carried zero tax** -- worth telling the client, and a plan with no tax
+      set still books tax-free online.
     - **Accounting category**: `rate_plans.accounting_category_id`, ahead of
       the room type's, ahead of the accommodation default, in the Accounting
       report's room split (`accounting_room_revenue()` names the plan beside
@@ -1532,13 +1535,47 @@ client: "Need to add Booking Channel in the Dashboard".
       already gives for the Rates grid, and why there is still no
       `rate_plan_room_types` table. The form lists each type with its priced
       nights (`rate_plan_coverage()`); since 0110 the form's Rates grid picks which types it prices.
-    - **"SELL WITH EXTRAS" IS STORED, NOT CHARGED (0115)**:
-      `rate_plan_extras`, the catalog extras sold with the rate, set by
-      `set_rate_plan_extras()` (the whole set). Nothing posts an extra because
-      of a rate -- when that would post (at booking, per night, at check-in)
-      and at what price is a money rule to be asked for. A deleted extra
-      comes off every plan; `merge_extra()` hands the merged-away extra's
-      plans to the one kept.
+    - **"SELL WITH EXTRAS" IS CHARGED, THE WAY EACH HOTEL CHOOSES (0118).
+      This reverses what this file said**, that it was stored and not
+      charged. The client: "Sell with extras depend on client where he wants
+      to charge ... whatever they choose ... system should be flexible."
+      `rate_plan_extras` (0115) carries the terms per extra, set in a row per
+      extra under the Sell With Extras field (`ExtrasTerms` in
+      `rate-plans-panel.tsx`, `src/lib/rate-plan-extras.ts`) and saved whole by
+      `set_rate_plan_extras(plan, jsonb)`:
+      - **Charged**: *Added to the bill* -- its own folio line through
+        `post_charge()`, with the extra's own tax (else its category's), so
+        append-only, reversal and the drawer rules are every charge's -- or
+        *Included in the rate*, split out of the night's room charge in
+        `post_room_charge()`, exactly as a priced meal is: the guest pays the
+        same and the revenue lands in the extra's report bucket.
+      - **When** (added only): *At check-in* (`check_in_booking()`), *Each
+        night* (the night audit, with the room charge) or *At check-out*
+        (`check_out_booking()`, before the balance it returns is read).
+      - **Frequency** per night or per stay; **Per** room, person, adult or
+        child -- the ROOM LINE's own party, so a group is charged room by
+        room; **Qty** 1-99; **Price** blank is the catalog price when it
+        posts. A per-night extra charged at check-in or check-out is charged
+        for every live night at once; *Each night* is per night by
+        definition. A per-stay included extra comes out of the room's first
+        night.
+      - **Nothing posts twice**: `booking_extra_postings` records every added
+        posting (unique per room line, extra and event, or night), and
+        `post_rate_plan_extras()` -- granted to nobody -- skips one already
+        there. Reversing the charge on the folio is how a hotel takes one
+        back; it is not re-posted.
+      - **Included lines share every tax on the night by net**, per tax, the
+        pennies to accommodation, so the lines add up to what one room line
+        would have been. What a rate includes (meals plus included extras) is
+        REFUSED if worth more than the night, as meals always were -- and
+        since 0119 the audit's refusal names the booking.
+      - **The terms are read when the charge posts**, like meal values:
+        changing a plan's extras changes what stays not yet posted are
+        charged. **Not done**: the guest page's quote does not add an extra
+        charged on top, so a guest booking online is not shown it -- worth
+        asking the client whether it should be. A deleted extra comes off
+        every plan; `merge_extra()` hands the merged-away extra's plans, with
+        their terms, to the one kept.
     - **The guest page re-quotes on the details step**: the party is chosen
       there, after the price was shown, so a change asks
       `searchPublicStay()` again (newest reply wins) and the summary shows
@@ -1659,8 +1696,31 @@ client: "Need to add Booking Channel in the Dashboard".
   **That was not theoretical**: sixteen of the nineteen bookings on the hosted
   property carry zero tax, against roughly £616 of VAT that belonged on them.
   `getTaxRates()` is already filtered to the active rates, so the first is the
-  one this hotel charges. "No tax" stays in the list — a zero-rated booking is
-  a real thing — but it is chosen rather than fallen into.
+  one this hotel charges. Unticking every tax is still allowed — a zero-rated
+  booking is a real thing — but it is chosen rather than fallen into.
+- **A NIGHT CAN CARRY SEVERAL TAXES (0116)** — VAT and a city tax on the same
+  night. The booking form's Taxes is a multi-select seeded from the plan's.
+  - **`tax_split_multi(property, rates[], amount)` is the one place a set of
+    rates is applied.** Inclusive rates come out of the amount together (net
+    = amount / (1 + their sum)), shared between them by size; exclusive rates
+    go on the net. Every rate is on the net -- no tax on tax. With one rate it
+    is `apply_tax_rate()` to the penny (tested).
+  - **The per-tax split is kept**: `booking_room_nights.tax_breakdown` and
+    `folio_items.tax_breakdown`, `{tax_rate_id: cents}`. `tax_cents` and
+    `tax_amount_cents` stay the TOTAL, so every report, balance and screen
+    reads what it read before. Postings and reversals carry the breakdown;
+    the meal and included-extra split shares it.
+  - **The printed invoice lists each tax** (`booking_invoice_taxes()`, 0117;
+    Liquid `taxes[]`), summed from the breakdowns and adding up to the tax
+    total exactly; a charge posted before 0116 goes to the rate it names, or
+    to an unnamed "Tax".
+  - **A tax is in use, frozen and undeletable** once a posted charge carries
+    it in its breakdown or a plan carries it. Room charges never set
+    `folio_items.tax_rate_id`, so before 0116 a room charge never froze its
+    rate at all.
+  - **Pricing an extension's nights** (`set_booking_room_rate()` with no
+    taxes named, 0117) uses the taxes the room's other nights carry. They
+    used to come in tax-free whatever the rest of the stay was charged.
   - **The sixteen existing ones are NOT fixed by this.** They have no tax rate
     against them and `folio_items` is append-only, so putting VAT on them is
     reversing and reposting each folio deliberately. It has not been done and

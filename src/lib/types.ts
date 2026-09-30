@@ -1,6 +1,7 @@
 import type { StaffLocale } from "@/lib/i18n/staff-locales";
 import type { CancellationTerms } from "@/lib/cancellation-policy";
 import type { MealPlan } from "@/lib/meal-plans";
+import type { RatePlanExtra } from "@/lib/rate-plan-extras";
 export type BookingStatus =
   | "pending"
   | "confirmed"
@@ -702,13 +703,13 @@ export interface RatePlan {
   childAdjustCents: number | null;
   /** Taken off per adult below the base occupancy; null uses the adult amount (0110). */
   adultDecreaseCents: number | null;
-  /** The tax the plan is sold with, and its own ledger account. */
-  taxRateId: string | null;
+  /** The taxes the plan is sold with, in order (0116: several), and its own ledger account. */
+  taxRateIds: string[];
   accountingCategoryId: string | null;
   /** The channels it may be sold through; empty is every channel. */
   channelIds: string[];
-  /** Sell With Extras (0115): catalog extras sold with the rate. Stored, not charged. */
-  extraIds: string[];
+  /** Sell With Extras (0115): catalog extras sold with the rate, and how each is charged (0118). */
+  extras: RatePlanExtra[];
 }
 
 /** Which room types a plan has prices loaded on, from the business date (0109). */

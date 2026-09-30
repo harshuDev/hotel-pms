@@ -66,6 +66,7 @@ import {
 
 import { createClient } from "@/lib/supabase/server";
 import { nullableArg } from "@/lib/supabase/database";
+import { ratePlanExtraFromRow } from "@/lib/rate-plan-extras";
 
 import type {
   ActivityItem,
@@ -1800,7 +1801,7 @@ async function loadRatePlans(includeRetired: boolean): Promise<RatePlan[]> {
   let query = supabase
     .from("rate_plans")
     .select(
-      "id, code, name, description, is_default, is_active, is_public, cancellation_policy_id, rate_plan_meals(meal, value_cents), min_days_advance, max_days_advance, min_adults, max_adults, min_children, max_children, valid_from, valid_to, parent_rate_plan_id, derived_kind, derived_percent_bps, derived_amount_cents, occupancy_pricing, adult_adjust_cents, child_adjust_cents, adult_decrease_cents, tax_rate_id, accounting_category_id, rate_plan_channels(channel_id), meal_plan, rate_plan_extras(extra_id)",
+      "id, code, name, description, is_default, is_active, is_public, cancellation_policy_id, rate_plan_meals(meal, value_cents), min_days_advance, max_days_advance, min_adults, max_adults, min_children, max_children, valid_from, valid_to, parent_rate_plan_id, derived_kind, derived_percent_bps, derived_amount_cents, occupancy_pricing, adult_adjust_cents, child_adjust_cents, adult_decrease_cents, rate_plan_taxes(tax_rate_id, sort_order), accounting_category_id, rate_plan_channels(channel_id), meal_plan, rate_plan_extras(extra_id, posting, frequency, per_unit, quantity, price_cents, charge_on)",
     );
   if (!includeRetired) query = query.eq("is_active", true);
   const { data, error } = await query
@@ -1839,11 +1840,19 @@ async function loadRatePlans(includeRetired: boolean): Promise<RatePlan[]> {
       adult_adjust_cents: number | null;
       child_adjust_cents: number | null;
       adult_decrease_cents: number | null;
-      tax_rate_id: string | null;
+      rate_plan_taxes: { tax_rate_id: string; sort_order: number }[];
       accounting_category_id: string | null;
       rate_plan_channels: { channel_id: string }[];
       meal_plan: string;
-      rate_plan_extras: { extra_id: string }[];
+      rate_plan_extras: {
+        extra_id: string;
+        posting: string;
+        frequency: string;
+        per_unit: string;
+        quantity: number;
+        price_cents: number | null;
+        charge_on: string | null;
+      }[];
     }[]
   ).map((row) => ({
     id: row.id,
@@ -1881,11 +1890,13 @@ async function loadRatePlans(includeRetired: boolean): Promise<RatePlan[]> {
     adultAdjustCents: row.adult_adjust_cents === null ? null : Number(row.adult_adjust_cents),
     childAdjustCents: row.child_adjust_cents === null ? null : Number(row.child_adjust_cents),
     adultDecreaseCents: row.adult_decrease_cents === null ? null : Number(row.adult_decrease_cents),
-    taxRateId: row.tax_rate_id,
+    taxRateIds: [...(row.rate_plan_taxes ?? [])]
+      .sort((a, b) => a.sort_order - b.sort_order)
+      .map((t) => t.tax_rate_id),
     accountingCategoryId: row.accounting_category_id,
     channelIds: (row.rate_plan_channels ?? []).map((c) => c.channel_id),
     mealPlan: isMealPlan(row.meal_plan) ? row.meal_plan : "custom",
-    extraIds: (row.rate_plan_extras ?? []).map((x) => x.extra_id),
+    extras: (row.rate_plan_extras ?? []).map(ratePlanExtraFromRow),
   }));
 }
 
@@ -3287,6 +3298,25 @@ export async function getBookingInvoiceLines(bookingId: string): Promise<Invoice
     bookingRoomId: r.booking_room_id,
     roomNumber: r.room_number,
     stayDate: r.stay_date,
+  }));
+}
+
+/**
+ * Each tax on a booking's folio and what it came to (0117), from the per-tax
+ * split postings carry since 0116. Sums to the invoice's tax total exactly; a
+ * charge posted before 0116 with no rate named comes back unnamed.
+ */
+export async function getBookingInvoiceTaxes(
+  bookingId: string,
+): Promise<{ taxRateId: string | null; name: string | null; rateBps: number | null; taxCents: number }[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("booking_invoice_taxes", { p_booking_id: bookingId });
+  if (error) throw new Error(`Failed to load the invoice taxes: ${error.message}`);
+  return (data ?? []).map((r) => ({
+    taxRateId: r.tax_rate_id,
+    name: r.name,
+    rateBps: r.rate_bps,
+    taxCents: Number(r.tax_cents ?? 0),
   }));
 }
 

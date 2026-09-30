@@ -85,7 +85,7 @@ export async function setBookingRoomRate(input: {
     p_rate_cents: input.rateCents,
     p_from: input.from ?? null,
     p_to: input.to ?? null,
-    p_tax_rate_id: null,
+    p_tax_rate_ids: null,
   });
 
   if (error) return { ok: false, error: await localised(error.message) };
