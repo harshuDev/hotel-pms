@@ -182,7 +182,7 @@ export function SeasonsPanel({
               <span className="min-w-0 flex-1 truncate text-[12px] font-bold uppercase text-ink">{t.name}</span>
               {canEdit && (
                 <span className="flex shrink-0">
-                  {t.kind === "season" && onRates && (
+                  {onRates && (
                     <button type="button" aria-label={tr("Rates for {name}", { name: t.name })} title={tr("Rates for {name}", { name: t.name })}
                       className={icon} onClick={() => onRates(t.id)}>
                       <TagIcon />

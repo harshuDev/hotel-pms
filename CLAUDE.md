@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0113` are
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0114` are
 applied to the hosted database.
 
 Working on real data: dashboard (house board, movements, pace, activity feed),
@@ -755,6 +755,17 @@ showed the Reservation Centric calendar and asked for it by name.
       its first range; if the range is refused the type is taken back.
     - The kind is fixed once made -- turning a season into an event would
       lift the no-overlap rule from ranges already checked against it.
+    - **AN EVENT CAN BE PRICED, AS OF 0114**, like a season: a week of rates
+      per plan and room type (`save_week_rates()` takes its id), written onto
+      the event's own ranges, always replacing. **An event wins its nights**:
+      a season or the Default Season saved later leaves out every night
+      covered by an event priced for the same plan and room type, so
+      re-saving a season can never put the season's price back under an
+      event. An event with no week for that pairing wins nothing. Adding or
+      moving an event's range re-applies its week, as for a season. The
+      Seasons screen's price tag is on events too. Nights an event range
+      stops covering keep the event's price until something re-saves them --
+      the same rule as a season's.
   - The band's label is `sticky` inside its segment so it rides the left edge
     of what is on screen. Do not put `overflow-hidden` on that segment: it
     becomes the sticky containing block and pins the label, which is the bug
@@ -1345,13 +1356,24 @@ client: "Need to add Booking Channel in the Dashboard".
         Plans page and its Seasons popup and asked for both, "with all the
         information showing in the screenshot".
         `rate-combinations.tsx`: Filters (Season, Room types, Rate
-        Categories as chips), "Show Multi Occupancy Rates", then per room
+        Categories), "Show Multi Occupancy Rates", then per room
         type -- with "Show derived and calculated rates" -- each plan: name,
         adults and children, a star on the main rate, an eye (crossed when
         not on the guest page), "policy, currency", ⋮ (opens the plan's
         form), ">>" (copies Monday's whole cell across the week), and per
         weekday the Rate, MST MSA MXS and CTA CTD SS. "Add New Room Rate
         Combination", Reset Changes, Save Changes.
+        - **THE THREE FILTERS ARE THE REFERENCE'S DROPDOWNS**
+          (`filter-select.tsx`, `FilterSelect`): a field that opens a list of
+          EVERY option with the chosen ones ticked. Room types and Rate
+          Categories are multi-select -- a chip with × per choice on one
+          line, "+n …" past three, a click in the list toggles and it stays
+          open. Season is single: seasons, then events (tagged "Event"), then
+          the Default Season, each with its colour. The plan form's Season
+          and Affected Room Types use the same component. It stops Escape
+          from reaching the Seasons popup, which closes on Escape. It used to
+          be a native select offering only what was NOT chosen, which the
+          client read as "ours contains only" a few options.
         - **It is the SAME weekly template as the plan's form, seen across
           plans** -- `rate_plan_week_rates`, saved per (plan, room type) by
           `save_week_rates()` with the form's rules. Not a second price

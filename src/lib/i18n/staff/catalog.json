@@ -976,9 +976,6 @@
  "Add": {
   "kind": "text"
  },
- "Add {what}": {
-  "kind": "text"
- },
  "Add a customer without taking a booking": {
   "kind": "text"
  },
@@ -1133,9 +1130,6 @@
   "kind": "text"
  },
  "Add Virtual Room Type": {
-  "kind": "text"
- },
- "Add…": {
   "kind": "text"
  },
  "Added {0} to the waitlist for {1} to {2}": {
@@ -2287,6 +2281,9 @@
  },
  "Choose a room": {
   "kind": "text"
+ },
+ "Choose a season, an event or the Default Season": {
+  "kind": "db"
  },
  "Choose a season, or the Default Season": {
   "kind": "db"
@@ -6559,9 +6556,6 @@
  "Rate Categories": {
   "kind": "text"
  },
- "rate category": {
-  "kind": "text"
- },
  "Rate category": {
   "kind": "text"
  },
@@ -7051,9 +7045,6 @@
   "kind": "text"
  },
  "Room status, and no money at all": {
-  "kind": "text"
- },
- "room type": {
   "kind": "text"
  },
  "Room type": {

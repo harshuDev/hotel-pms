@@ -14,6 +14,7 @@ import type {
   WeekRate,
 } from "@/lib/types";
 import { saveWeekRates } from "@/lib/actions/settings";
+import { FilterSelect, type FilterOption } from "./filter-select";
 
 /*
  * ROOM RATE COMBINATIONS, cloned from the client's reference (this round).
@@ -203,7 +204,13 @@ export function RateCombinations({
   const tr = useT();
   const currency = useCurrency();
   const plans = ratePlans.filter((p) => p.isActive);
-  const seasonList = seasons.filter((s) => s.kind === "season");
+  // Seasons, then events, then the Default Season -- the reference's list.
+  // Events price their own nights as of 0114.
+  const seasonOptions: FilterOption[] = [
+    ...seasons.filter((s) => s.kind === "season").map((s) => ({ id: s.id, name: s.name, color: s.color })),
+    ...seasons.filter((s) => s.kind === "event").map((s) => ({ id: s.id, name: s.name, color: s.color, tag: tr("Event") })),
+    { id: "default", name: tr("Default Season") },
+  ];
 
   const [season, setSeason] = useState<string | null>(initialSeasonId);
   const [typeIds, setTypeIds] = useState<string[]>(roomTypes.map((t) => t.id));
@@ -368,35 +375,6 @@ export function RateCombinations({
     }, tr.plural(rows.length, "{n} room rate combination saved.", "{n} room rate combinations saved."));
   }
 
-  function Chips({ all, chosen, set, what }: {
-    all: { id: string; name: string }[];
-    chosen: string[];
-    set: (ids: string[]) => void;
-    what: string;
-  }) {
-    const rest = all.filter((a) => !chosen.includes(a.id));
-    return (
-      <div className="mt-1 flex min-h-[38px] flex-wrap items-center gap-1 rounded border border-line bg-white px-1.5 py-1">
-        {all.filter((a) => chosen.includes(a.id)).map((a) => (
-          <span key={a.id} className="flex items-center gap-1 rounded bg-shell px-2 py-0.5 text-[13px] text-ink">
-            {a.name}
-            <button type="button" aria-label={tr("Remove {name}", { name: a.name })} className="text-ink-faint hover:text-ink"
-              onClick={() => set(chosen.filter((c) => c !== a.id))}>
-              ×
-            </button>
-          </span>
-        ))}
-        {rest.length > 0 && (
-          <select aria-label={tr("Add {what}", { what })} value="" onChange={(e) => e.target.value && set([...chosen, e.target.value])}
-            className="min-w-[5rem] flex-1 border-0 bg-transparent text-[12.5px] text-ink-muted outline-none">
-            <option value="">{tr("Add…")}</option>
-            {rest.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}
-          </select>
-        )}
-      </div>
-    );
-  }
-
   const shownTypes = roomTypes.filter((t) => typeIds.includes(t.id));
   const plansFor = (t: RoomTypeSetting) =>
     plans.filter((p) => planIds.includes(p.id) && inUse(p.id, t.id) && (!p.parentRatePlanId || derivedOn[t.id]));
@@ -410,31 +388,33 @@ export function RateCombinations({
         <h3 className="shrink-0 text-[17px] text-ink">{tr("Filters")}</h3>
         <span className="h-px flex-1 bg-line" />
       </div>
-      <div className="grid gap-4 lg:grid-cols-[14rem_1fr_1fr]">
+      <div className="grid gap-4 lg:grid-cols-[17rem_1fr_1fr]">
         {lockSeason ? (
           <div className="text-[12px] text-ink-muted">
             {tr("Season")}
-            <p className="mt-1 rounded border border-line bg-shell px-3 py-2 text-[14px] text-ink-muted">
-              {season === null ? tr("Default Season") : (seasonList.find((s) => s.id === season)?.name ?? "")}
+            <p className="mt-1 flex items-center gap-2 rounded border border-line bg-shell px-3 py-2 text-[14px] text-ink-muted">
+              {seasonOptions.find((o) => o.id === seasonKey)?.color && (
+                <span className="h-3 w-3 shrink-0 rounded-sm" style={{ backgroundColor: seasonOptions.find((o) => o.id === seasonKey)?.color }} />
+              )}
+              {seasonOptions.find((o) => o.id === seasonKey)?.name ?? ""}
             </p>
           </div>
         ) : (
-          <label className="block text-[12px] text-ink-muted">
+          <div className="text-[12px] text-ink-muted">
             {tr("Season")}
-            <select value={season ?? ""} onChange={(e) => setSeason(e.target.value || null)}
-              className="mt-1 w-full rounded border border-line bg-white px-3 py-2 text-[14px] text-ink">
-              <option value="">{tr("Default Season")}</option>
-              {seasonList.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
-            </select>
-          </label>
+            <FilterSelect label={tr("Season")} options={seasonOptions} value={[seasonKey]}
+              onChange={(ids) => setSeason(ids[0] === "default" ? null : (ids[0] ?? null))} />
+          </div>
         )}
         <div className="text-[12px] text-ink-muted">
           {tr("Room types")}
-          {Chips({ all: roomTypes.map((t) => ({ id: t.id, name: typeName(t) })), chosen: typeIds, set: setTypeIds, what: tr("room type") })}
+          <FilterSelect multi label={tr("Room types")} value={typeIds} onChange={setTypeIds}
+            options={roomTypes.map((t) => ({ id: t.id, name: typeName(t) }))} />
         </div>
         <div className="text-[12px] text-ink-muted">
           {tr("Rate Categories")}
-          {Chips({ all: plans.map((p) => ({ id: p.id, name: p.name })), chosen: planIds, set: setPlanIds, what: tr("rate category") })}
+          <FilterSelect multi label={tr("Rate Categories")} value={planIds} onChange={setPlanIds}
+            options={plans.map((p) => ({ id: p.id, name: p.name }))} />
         </div>
       </div>
 
