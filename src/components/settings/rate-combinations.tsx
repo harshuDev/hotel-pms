@@ -388,9 +388,9 @@ export function RateCombinations({
         <h3 className="shrink-0 text-[17px] text-ink">{tr("Filters")}</h3>
         <span className="h-px flex-1 bg-line" />
       </div>
-      <div className="grid gap-4 lg:grid-cols-[17rem_1fr_1fr]">
+      <div className="grid gap-4 lg:grid-cols-[17rem_minmax(0,1fr)_minmax(0,1fr)]">
         {lockSeason ? (
-          <div className="text-[12px] text-ink-muted">
+          <div className="min-w-0 text-[12px] text-ink-muted">
             {tr("Season")}
             <p className="mt-1 flex items-center gap-2 rounded border border-line bg-shell px-3 py-2 text-[14px] text-ink-muted">
               {seasonOptions.find((o) => o.id === seasonKey)?.color && (
@@ -400,18 +400,18 @@ export function RateCombinations({
             </p>
           </div>
         ) : (
-          <div className="text-[12px] text-ink-muted">
+          <div className="min-w-0 text-[12px] text-ink-muted">
             {tr("Season")}
             <FilterSelect label={tr("Season")} options={seasonOptions} value={[seasonKey]}
               onChange={(ids) => setSeason(ids[0] === "default" ? null : (ids[0] ?? null))} />
           </div>
         )}
-        <div className="text-[12px] text-ink-muted">
+        <div className="min-w-0 text-[12px] text-ink-muted">
           {tr("Room types")}
           <FilterSelect multi label={tr("Room types")} value={typeIds} onChange={setTypeIds}
             options={roomTypes.map((t) => ({ id: t.id, name: typeName(t) }))} />
         </div>
-        <div className="text-[12px] text-ink-muted">
+        <div className="min-w-0 text-[12px] text-ink-muted">
           {tr("Rate Categories")}
           <FilterSelect multi label={tr("Rate Categories")} value={planIds} onChange={setPlanIds}
             options={plans.map((p) => ({ id: p.id, name: p.name }))} />
