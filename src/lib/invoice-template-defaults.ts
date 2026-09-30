@@ -65,7 +65,11 @@ export const DEFAULT_FOLIO_LIQUID = `<div class="invoice">
   <section class="totals">
     {% if invoice.vat_registered %}
     <div class="row muted"><span>Net</span><span>{{ totals.net }}</span></div>
+    {% for t in taxes %}
+    <div class="row muted"><span>{{ t.name }}</span><span>{{ t.amount }}</span></div>
+    {% else %}
     <div class="row muted"><span>VAT</span><span>{{ totals.tax }}</span></div>
+    {% endfor %}
     {% endif %}
     <div class="row total"><span>Total</span><span>{{ totals.total }}</span></div>
     {% if payments.size > 0 %}<p class="label">Paid</p>{% endif %}
@@ -116,6 +120,7 @@ export const TEMPLATE_VARIABLES: { name: string; items: string[] }[] = [
     name: "lines[]",
     items: ["date", "date_iso", "description", "room", "net", "tax", "amount", "net_cents", "tax_cents", "amount_cents"],
   },
+  { name: "taxes[]", items: ["name", "amount", "amount_cents"] },
   { name: "payments[]", items: ["date", "date_iso", "description", "amount", "amount_cents", "reversed"] },
   {
     name: "totals",

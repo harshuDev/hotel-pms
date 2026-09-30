@@ -35,6 +35,12 @@
  "{0} has been sold, so it stays on the record. Untick Still selling instead.": {
   "kind": "db"
  },
+ "{0} included in the rate for {1}": {
+  "kind": "db"
+ },
+ "{0} is a tax of the rate plan {1}. Change that first, or untick Active to retire it.": {
+  "kind": "db"
+ },
  "{0} is already added": {
   "kind": "db"
  },
@@ -53,6 +59,9 @@
  "{0} is append-only": {
   "kind": "db"
  },
+ "{0} is charged each night, so it is priced per night": {
+  "kind": "db"
+ },
  "{0} is closed out on {1}.": {
   "kind": "db"
  },
@@ -69,6 +78,9 @@
   "kind": "db"
  },
  "{0} is derived from {1}. Stop deriving it first.": {
+  "kind": "db"
+ },
+ "{0} is in the list twice": {
   "kind": "db"
  },
  "{0} is itself derived from another plan. Derive from a plan with its own prices.": {
@@ -120,9 +132,6 @@
   "kind": "db"
  },
  "{0} is the parent of a virtual room type. Delete that first.": {
-  "kind": "db"
- },
- "{0} is the tax of the rate plan {1}. Change that first, or untick Active to retire it.": {
   "kind": "db"
  },
  "{0} must be a colour like #74c971": {
@@ -826,6 +835,9 @@
  "A person needs a first name": {
   "kind": "db"
  },
+ "A price cannot be negative": {
+  "kind": "text"
+ },
  "A price per occupancy is a whole amount for 1 to {0} adults": {
   "kind": "db"
  },
@@ -1131,6 +1143,9 @@
  },
  "Added {0} to the waitlist for {1} to {2}": {
   "kind": "db"
+ },
+ "Added to the bill": {
+  "kind": "text"
  },
  "Added to the waitlist.": {
   "kind": "text"
@@ -1454,6 +1469,12 @@
  "Associated Customer": {
   "kind": "text"
  },
+ "At check-in": {
+  "kind": "text"
+ },
+ "At check-out": {
+  "kind": "text"
+ },
  "At least {n} characters": {
   "kind": "text"
  },
@@ -1685,6 +1706,9 @@
  "Booking {0} has no open folio, so its room charge for {1} cannot be posted": {
   "kind": "db"
  },
+ "Booking {0} has no open folio, so the extras sold with its rate cannot be charged": {
+  "kind": "db"
+ },
  "Booking {0} is {1}, not pending": {
   "kind": "db"
  },
@@ -1722,6 +1746,9 @@
   "kind": "db"
  },
  "Booking {0} was due to leave on {1}, so it cannot be checked in. Change its dates first.": {
+  "kind": "db"
+ },
+ "Booking {0}: {1}": {
   "kind": "db"
  },
  "Booking {reference} taken": {
@@ -3203,6 +3230,9 @@
  "Due to arrive {date}": {
   "kind": "text"
  },
+ "Each night": {
+  "kind": "text"
+ },
  "Each room line needs a whole number of rooms.": {
   "kind": "text"
  },
@@ -3776,6 +3806,9 @@
   "kind": "country",
   "code": "TF"
  },
+ "Frequency": {
+  "kind": "text"
+ },
  "From": {
   "kind": "text"
  },
@@ -4139,6 +4172,9 @@
  "Housekeeping Systems": {
   "kind": "text"
  },
+ "How {name} is charged": {
+  "kind": "text"
+ },
  "How do you handle deposits?": {
   "kind": "text"
  },
@@ -4149,6 +4185,9 @@
   "kind": "text"
  },
  "How many people is it for?": {
+  "kind": "text"
+ },
+ "How often {name} is charged": {
   "kind": "text"
  },
  "Hungary": {
@@ -6246,10 +6285,31 @@
  "People": {
   "kind": "text"
  },
+ "Per": {
+  "kind": "text"
+ },
+ "Per adult": {
+  "kind": "text"
+ },
+ "Per child": {
+  "kind": "text"
+ },
+ "Per night": {
+  "kind": "text"
+ },
+ "Per person": {
+  "kind": "text"
+ },
+ "Per room": {
+  "kind": "text"
+ },
  "Per room available": {
   "kind": "text"
  },
  "Per room sold": {
+  "kind": "text"
+ },
+ "Per stay": {
   "kind": "text"
  },
  "Percent": {
@@ -6476,6 +6536,9 @@
  "Price": {
   "kind": "text"
  },
+ "Price of {name}": {
+  "kind": "text"
+ },
  "Primary color": {
   "kind": "text"
  },
@@ -6535,7 +6598,13 @@
   "kind": "country",
   "code": "QA"
  },
+ "Qty": {
+  "kind": "text"
+ },
  "Quantity": {
+  "kind": "text"
+ },
+ "Quantity of {name}": {
   "kind": "text"
  },
  "QuickBooks Online": {
@@ -7838,9 +7907,6 @@
  "Tax Information": {
   "kind": "text"
  },
- "Tax rate": {
-  "kind": "text"
- },
  "Tax rate {0} is retired and cannot be applied to a new charge": {
   "kind": "db"
  },
@@ -8301,6 +8367,9 @@
  "The extra to merge into no longer exists": {
   "kind": "db"
  },
+ "The extras must be a list": {
+  "kind": "db"
+ },
  "The feed was not marked read": {
   "kind": "text"
  },
@@ -8373,9 +8442,6 @@
  "The maximum occupancy cannot be below the base.": {
   "kind": "text"
  },
- "The meals on this rate are priced at {0} but the night is worth {1}. Correct the meal values in Inventory.": {
-  "kind": "db"
- },
  "The minimum days in advance is more than the maximum": {
   "kind": "db"
  },
@@ -8412,6 +8478,12 @@
  "The price is a number, like 24 or 24.50.": {
   "kind": "text"
  },
+ "The price of {0} cannot be negative": {
+  "kind": "db"
+ },
+ "The price of {name} is not an amount": {
+  "kind": "text"
+ },
  "The property needs a check-in time, like 15:00": {
   "kind": "db"
  },
@@ -8434,6 +8506,12 @@
   "kind": "text"
  },
  "The quantity must be at least 1": {
+  "kind": "db"
+ },
+ "The quantity must be between 1 and 99": {
+  "kind": "text"
+ },
+ "The quantity of {0} must be between 1 and 99": {
   "kind": "db"
  },
  "The rate for {name} is not an amount. Try 120 or 120.50.": {
@@ -8977,6 +9055,9 @@
  "What {lowerCase} on this rate is worth": {
   "kind": "text"
  },
+ "What {name} is counted by": {
+  "kind": "text"
+ },
  "What is your timezone": {
   "kind": "text"
  },
@@ -8992,6 +9073,9 @@
  "What they asked for": {
   "kind": "text"
  },
+ "What this rate includes is priced at {0} but the night is worth {1}. Correct the meal values or the extras sold with the rate.": {
+  "kind": "db"
+ },
  "What those stays are worth": {
   "kind": "text"
  },
@@ -9002,6 +9086,9 @@
   "kind": "text"
  },
  "When": {
+  "kind": "text"
+ },
+ "When {name} is charged": {
   "kind": "text"
  },
  "When a guest asks for dates the hotel cannot sell, add them here rather than losing the enquiry.": {
@@ -9044,6 +9131,9 @@
   "kind": "text"
  },
  "With at least one night": {
+  "kind": "text"
+ },
+ "With the room charge": {
   "kind": "text"
  },
  "Worth nothing": {

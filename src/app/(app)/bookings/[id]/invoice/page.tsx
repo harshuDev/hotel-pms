@@ -186,10 +186,19 @@ export default async function InvoicePage({
                 <span>{tr("Net")}</span>
                 <span className="tnum">{money(v.netCents)}</span>
               </div>
-              <div className="flex justify-between py-0.5 text-ink-muted">
-                <span>{tr("VAT")}</span>
-                <span className="tnum">{money(v.taxCents)}</span>
-              </div>
+              {v.taxes.length > 0 ? (
+                v.taxes.map((t) => (
+                  <div key={t.name} className="flex justify-between py-0.5 text-ink-muted">
+                    <span>{t.name}</span>
+                    <span className="tnum">{money(t.cents)}</span>
+                  </div>
+                ))
+              ) : (
+                <div className="flex justify-between py-0.5 text-ink-muted">
+                  <span>{tr("VAT")}</span>
+                  <span className="tnum">{money(v.taxCents)}</span>
+                </div>
+              )}
             </>
           )}
           <div className="flex justify-between border-t border-line py-1 font-semibold text-ink">
