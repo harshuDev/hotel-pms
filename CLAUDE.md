@@ -1437,6 +1437,13 @@ client: "Need to add Booking Channel in the Dashboard".
     Category Restrictions", Sell With Extras, Attached Taxes, Accounting
     Category, "Only For Channels (Hide on IBE)" and "Save as default rate".
     Every dropdown is `FilterSelect`.
+    - **A NEW PLAN IS PRICED IN THE SAME FORM**, as the reference's is: the
+      prices and restrictions are there from the start (the grid runs on
+      `newPlanFor(draft)`, an unsaved plan with id "new" that nothing is
+      stored against), and ONE Save creates the plan and then writes its
+      week under the id it was given; the popup then closes, as an edit does.
+      A new plan's tax starts on the hotel's default (the first active rate),
+      not "No tax".
     - **MEAL TYPE IS ONE OF THE REFERENCE'S EIGHT** (`rate_plans.meal_plan`,
       `src/lib/meal-plans.ts`): Room only, Bed and breakfast, Bed only, Half
       board, Full board, All inclusive, Custom Meal Plan, Self Catering.

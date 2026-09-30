@@ -138,6 +138,61 @@ function codeFor(title: string, taken: string[]): string {
   for (let n = 2; ; n += 1) if (!used.has(`${base}${n}`)) return `${base}${n}`;
 }
 
+/**
+ * The plan a NEW draft's price grid runs on before it has an id: nothing is
+ * stored against "new", so the grid starts empty, and a derivation ticked on
+ * the form draws the parent's week adjusted, as it will be once saved.
+ */
+function newPlanFor(d: Draft): RatePlan {
+  const down = d.relation.startsWith("down");
+  let derivedPercentBps: number | null = null;
+  let derivedAmountCents: number | null = null;
+  if (d.derived && d.relation.endsWith("percent")) {
+    const bps = parsePercentBps(d.adjustment);
+    derivedPercentBps = bps === null ? null : down ? -bps : bps;
+  } else if (d.derived) {
+    try {
+      const c = parseMoney(d.adjustment);
+      derivedAmountCents = down ? -c : c;
+    } catch {
+      derivedAmountCents = null;
+    }
+  }
+  return {
+    id: "new",
+    code: "",
+    name: d.name,
+    description: null,
+    isDefault: d.isDefault,
+    isActive: true,
+    isPublic: false,
+    mealPlan: d.mealPlan,
+    meals: d.meals,
+    mealValues: {},
+    cancellationPolicyId: d.cancellationPolicyId || null,
+    minDaysAdvance: null,
+    maxDaysAdvance: null,
+    minAdults: null,
+    maxAdults: null,
+    minChildren: null,
+    maxChildren: null,
+    validFrom: null,
+    validTo: null,
+    parentRatePlanId: d.derived && d.parentRatePlanId ? d.parentRatePlanId : null,
+    derivedKind: d.derived ? (d.relation.endsWith("percent") ? "percent" : "amount") : null,
+    derivedPercentBps,
+    derivedAmountCents,
+    occupancyPricing: d.singlePrice ? "single" : d.automatic ? "per_person" : "per_occupancy",
+    adultAdjustCents: null,
+    childAdjustCents: null,
+    adultDecreaseCents: null,
+    taxRateId: d.taxRateId || null,
+    accountingCategoryId: d.accountingCategoryId || null,
+    channelIds: d.channelIds,
+    extraIds: d.extraIds,
+  };
+}
+
 function draftOf(p: RatePlan | null, defaultPolicyId: string): Draft {
   const policy = p ? (p.cancellationPolicyId ?? "") : defaultPolicyId;
   const n = (v: number | null) => (v === null ? "" : String(v));
@@ -409,7 +464,11 @@ export function RatePlansPanel({
   }
 
   function open(p: RatePlan | null) {
-    setDraft(draftOf(p, defaultPolicyId));
+    const d = draftOf(p, defaultPolicyId);
+    // A new plan starts on the hotel's default tax -- the top of Tax
+    // Information, as the booking form seeds it -- not on "No tax".
+    if (!p) d.taxRateId = taxRates.find((t) => t.isActive)?.id ?? "";
+    setDraft(d);
   }
 
   const planName = (id: string | null) => ratePlans.find((p) => p.id === id)?.name ?? "";
@@ -548,19 +607,8 @@ export function RatePlansPanel({
           }
         }
       }
-      // A new plan stays open, so its prices can be put in straight away.
-      setDraft(
-        d.id
-          ? null
-          : {
-              ...d,
-              id: saved.data.id,
-              wasPolicyId: d.cancellationPolicyId,
-              wasMealPlan: d.mealPlan,
-              wasMeals: d.meals,
-              wasExtraIds: d.extraIds,
-            },
-      );
+      // The prices went in with the plan, so a new one closes like an edit.
+      setDraft(null);
       return { ok: true };
     }, d.id ? tr("Rate plan saved.") : tr("Rate plan created."));
   }
@@ -729,8 +777,11 @@ export function RatePlansPanel({
           </div>
         )}
 
-        {draft.id && (() => {
-          const plan = ratePlans.find((p) => p.id === draft.id);
+        {(() => {
+          // A new plan is priced in the same form, as the reference's is: the
+          // grid runs on the draft, and one Save creates the plan and then
+          // writes its week under the id it was given.
+          const plan = draft.id ? ratePlans.find((p) => p.id === draft.id) : newPlanFor(draft);
           if (!plan) return null;
           const cents = (v: string) => {
             try {
@@ -743,7 +794,7 @@ export function RatePlansPanel({
             <>
               <h5 className={section}>{tr("Rates")}</h5>
               <PlanRates
-                key={`${plan.id}|${openSeasonId ?? ""}`}
+                key={`${draft.id ?? "new"}|${openSeasonId ?? ""}`}
                 ref={ratesRef}
                 plan={plan}
                 mode={draft.singlePrice ? "single" : draft.automatic ? "per_person" : "per_occupancy"}
