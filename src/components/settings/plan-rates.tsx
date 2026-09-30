@@ -348,13 +348,13 @@ export const PlanRates = forwardRef<
 
   return (
     <div className="mt-2 space-y-4">
-      <div className="grid gap-4 sm:grid-cols-[16rem_1fr]">
-        <div className="text-[12px] text-ink-muted">
+      <div className="grid gap-4 sm:grid-cols-[16rem_minmax(0,1fr)]">
+        <div className="min-w-0 text-[12px] text-ink-muted">
           {tr("Season")}
           <FilterSelect label={tr("Season")} options={seasonOptions} value={[season ?? "default"]}
             onChange={(ids) => setSeason(ids[0] === "default" ? null : (ids[0] ?? null))} />
         </div>
-        <div className="text-[12px] text-ink-muted">
+        <div className="min-w-0 text-[12px] text-ink-muted">
           {tr("Affected Room Types")}
           <FilterSelect multi label={tr("Affected Room Types")} value={typeIds} onChange={setTypeIds}
             options={roomTypes.map((t) => ({ id: t.id, name: t.displayName ?? t.name }))} />

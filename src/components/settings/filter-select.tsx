@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import { useT } from "@/components/i18n";
 import { cn } from "@/components/ui";
 
@@ -40,7 +40,7 @@ export function FilterSelect({
   value: string[];
   onChange: (ids: string[]) => void;
   multi?: boolean;
-  /** Chips drawn before the rest collapse into "+n". */
+  /** At most this many chips; fewer when the field is too narrow for them. */
   maxChips?: number;
 }) {
   const tr = useT();
@@ -52,6 +52,44 @@ export function FilterSelect({
   const listId = useId();
 
   const chosen = options.filter((o) => value.includes(o.id));
+
+  /*
+   * How many chips fit, measured: whole chips up to maxChips, the rest folded
+   * into "+n". Squeezing every chip instead read "COM…", "CO…". A hidden row
+   * of every chosen chip gives their widths; the field's own width, watched,
+   * says how many of them fit beside the "+n" chip.
+   */
+  const rowRef = useRef<HTMLSpanElement>(null);
+  const measureRef = useRef<HTMLSpanElement>(null);
+  const [fit, setFit] = useState(maxChips);
+  const chosenKey = chosen.map((o) => o.id).join();
+  useLayoutEffect(() => {
+    if (!multi) return;
+    const row = rowRef.current;
+    const measure = measureRef.current;
+    if (!row || !measure) return;
+    const compute = () => {
+      const gap = 4;
+      const avail = row.clientWidth;
+      const widths = Array.from(measure.children).map((c) => (c as HTMLElement).offsetWidth);
+      const plusW = widths.pop() ?? 0;
+      const cap = Math.min(maxChips, widths.length);
+      let used = 0;
+      let n = 0;
+      for (let i = 0; i < cap; i++) {
+        const rest = widths.length - (i + 1) > 0 ? gap + plusW : 0;
+        if (used + widths[i] + rest > avail) break;
+        used += widths[i] + gap;
+        n++;
+      }
+      // Always one chip, truncated if it must be, so the field never reads empty.
+      setFit(Math.max(1, n));
+    };
+    compute();
+    const ro = new ResizeObserver(compute);
+    ro.observe(row);
+    return () => ro.disconnect();
+  }, [multi, maxChips, chosenKey]);
 
   useEffect(() => {
     if (!open) return;
@@ -107,11 +145,11 @@ export function FilterSelect({
     if (event.key === "Tab") setOpen(false);
   }
 
-  const shownChips = chosen.slice(0, maxChips);
+  const shownChips = chosen.slice(0, Math.min(maxChips, fit));
   const more = chosen.length - shownChips.length;
 
   return (
-    <div ref={wrapRef} className="relative mt-1" onKeyDown={onKeyDown}>
+    <div ref={wrapRef} className="relative mt-1 w-full min-w-0" onKeyDown={onKeyDown}>
       <div
         className={cn(
           "flex min-h-[38px] cursor-pointer items-center gap-1 rounded border bg-white py-1 pl-1.5 pr-1",
@@ -126,9 +164,18 @@ export function FilterSelect({
         }}
       >
         {multi ? (
-          <span className="flex min-w-0 flex-1 items-center gap-1 overflow-hidden">
-            {shownChips.map((o) => (
-              <span key={o.id} className="flex min-w-0 max-w-[11rem] items-center gap-1 rounded bg-shell px-2 py-0.5 text-[13px] text-ink">
+          <span ref={rowRef} className="relative flex w-0 min-w-0 flex-1 items-center gap-1 overflow-hidden">
+            <span ref={measureRef} aria-hidden className="pointer-events-none invisible absolute left-0 top-0 flex w-max gap-1 whitespace-nowrap">
+              {chosen.map((o) => (
+                <span key={o.id} className="flex max-w-[11rem] shrink-0 items-center gap-1 rounded px-2 py-0.5 text-[13px]">
+                  <span className="truncate">{o.name}</span>
+                  <span>×</span>
+                </span>
+              ))}
+              <span className="shrink-0 rounded px-2 py-0.5 text-[13px]">+{chosen.length} …</span>
+            </span>
+            {shownChips.map((o, i) => (
+              <span key={o.id} className={cn("flex max-w-[11rem] items-center gap-1 rounded bg-shell px-2 py-0.5 text-[13px] text-ink", i === shownChips.length - 1 ? "min-w-0" : "shrink-0")}>
                 <span className="truncate">{o.name}</span>
                 <button
                   type="button"
@@ -145,7 +192,7 @@ export function FilterSelect({
             )}
           </span>
         ) : (
-          <span className="flex min-w-0 flex-1 items-center gap-2 px-1.5 text-[14px] text-ink" onMouseDown={(e) => { e.preventDefault(); if (open) setOpen(false); else openList(); toggleRef.current?.focus(); }}>
+          <span className="flex w-0 min-w-0 flex-1 items-center gap-2 px-1.5 text-[14px] text-ink" onMouseDown={(e) => { e.preventDefault(); if (open) setOpen(false); else openList(); toggleRef.current?.focus(); }}>
             {chosen[0]?.color && <span className="h-3 w-3 shrink-0 rounded-sm" style={{ backgroundColor: chosen[0].color }} />}
             <span className="truncate">{chosen[0]?.name ?? ""}</span>
           </span>
