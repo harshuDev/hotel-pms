@@ -2,7 +2,7 @@
 
 import { useT } from "@/components/i18n";
 import { msg } from "@/lib/i18n/translate";
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -323,10 +323,36 @@ export function SettingsScreen({
   const [pending, startTransition] = useTransition();
   const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
 
+  /*
+   * A confirmation belongs to the screen it was given on. Changing tab only
+   * changes `?tab=`, so this component stays mounted and its state with it --
+   * "Df deleted." from Developer Keys was still showing on Templates. Reset
+   * while rendering rather than in an effect, so the old message never paints
+   * on the new tab even for one frame.
+   */
+  const [messageTab, setMessageTab] = useState(tab);
+  if (messageTab !== tab) {
+    setMessageTab(tab);
+    setMessage(null);
+  }
+
+  // The tab on screen now, for a save that finishes after the reader moved
+  // on: its "saved" is not said on a screen it does not belong to. A failure
+  // still is -- something not saved must never pass silently.
+  const tabRef = useRef(tab);
+  useEffect(() => {
+    tabRef.current = tab;
+  }, [tab]);
+
   function run(fn: () => Promise<{ ok: boolean; error?: string }>, done: string) {
     setMessage(null);
+    const startedOn = tab;
     startTransition(async () => {
       const result = await fn();
+      if (result.ok && tabRef.current !== startedOn) {
+        router.refresh();
+        return;
+      }
       if (!result.ok) {
         setMessage({ ok: false, text: result.error ?? tr("That did not work.") });
         return;
