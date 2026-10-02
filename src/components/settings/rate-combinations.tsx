@@ -13,7 +13,7 @@ import type {
   SeasonType,
   WeekRate,
 } from "@/lib/types";
-import { saveWeekRates } from "@/lib/actions/settings";
+import { removeRateCombination, saveWeekRates } from "@/lib/actions/settings";
 import { FilterSelect, type FilterOption } from "./filter-select";
 
 /*
@@ -143,6 +143,14 @@ function KebabIcon() {
   );
 }
 
+function BinIcon() {
+  return (
+    <svg viewBox="0 0 16 16" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden>
+      <path d="M3 4.5h10M6.5 4.5V3h3v1.5M4.5 4.5l.6 8.5h5.8l.6-8.5" />
+    </svg>
+  );
+}
+
 function FillIcon() {
   return (
     <svg viewBox="0 0 16 16" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.8"
@@ -227,6 +235,8 @@ export function RateCombinations({
   const [drafts, setDrafts] = useState<Record<string, Row>>({});
   const [added, setAdded] = useState<string[]>([]);
   const [adding, setAdding] = useState<{ typeId: string; planId: string } | null>(null);
+  // The pair whose bin was pressed, awaiting its confirmation.
+  const [removing, setRemoving] = useState<string | null>(null);
   const [problem, setProblem] = useState("");
 
   const seasonKey = season ?? "default";
@@ -571,7 +581,43 @@ export function RateCombinations({
                                     <FillIcon />
                                   </button>
                                 )}
+                                {canEdit && !derived && (
+                                  <button type="button" className={cn(iconBtn, "text-rose-600")} title={tr("Remove from this room type")}
+                                    aria-label={tr("Remove {plan} from {type}", { plan: p.name, type: typeName(t) })}
+                                    onClick={() => setRemoving(pairKey(p.id, t.id))}>
+                                    <BinIcon />
+                                  </button>
+                                )}
                               </span>
+                              {removing === pairKey(p.id, t.id) && (
+                                <span className="mt-1 flex w-max flex-col gap-1 rounded border border-rose-200 bg-rose-50 p-2 text-[12px] text-ink">
+                                  {tr("Remove {plan} from {type}?", { plan: p.name, type: typeName(t) })}
+                                  <span className="flex gap-1">
+                                    <button type="button" className="rounded bg-rose-600 px-2 py-0.5 font-semibold text-white disabled:opacity-60"
+                                      disabled={pending}
+                                      onClick={() => {
+                                        const key = pairKey(p.id, t.id);
+                                        setRemoving(null);
+                                        const saved =
+                                          coverage.some((c) => c.ratePlanId === p.id && c.roomTypeId === t.id) ||
+                                          weekRates.some((w) => w.ratePlanId === p.id && w.roomTypeId === t.id);
+                                        setAdded(added.filter((x) => x !== key));
+                                        setDrafts(Object.fromEntries(Object.entries(drafts).filter(([dk]) => !dk.endsWith(`|${key}`))));
+                                        if (!saved) return;
+                                        run(
+                                          () => removeRateCombination({ ratePlanId: p.id, roomTypeId: t.id }),
+                                          tr("{plan} removed from {type}.", { plan: p.name, type: typeName(t) }),
+                                        );
+                                      }}>
+                                      {tr("Remove")}
+                                    </button>
+                                    <button type="button" className="rounded border border-line bg-white px-2 py-0.5"
+                                      onClick={() => setRemoving(null)}>
+                                      {tr("Cancel")}
+                                    </button>
+                                  </span>
+                                </span>
+                              )}
                             </td>
                             {WEEKDAY_OF.map((wd, i) => {
                               const d = r.days[i];

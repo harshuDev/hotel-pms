@@ -176,6 +176,9 @@
  "{amount} in cash": {
   "kind": "text"
  },
+ "{amount} incl. tax": {
+  "kind": "text"
+ },
  "{amount} is required per booking.": {
   "kind": "text"
  },
@@ -535,6 +538,9 @@
   "kind": "text"
  },
  "{pending} still pending": {
+  "kind": "text"
+ },
+ "{plan} removed from {type}.": {
   "kind": "text"
  },
  "{plan}, {type}, {date}": {
@@ -5356,6 +5362,9 @@
  "No rate is loaded for {0} on this plan. Load one, or give a rate for the booking.": {
   "kind": "db"
  },
+ "No rate is loaded for {date} on this plan.": {
+  "kind": "text"
+ },
  "No rate plan matches.": {
   "kind": "text"
  },
@@ -6805,10 +6814,19 @@
  "Remove {names}? Values already entered on guests will no longer show.": {
   "kind": "text"
  },
+ "Remove {plan} from {type}": {
+  "kind": "text"
+ },
+ "Remove {plan} from {type}?": {
+  "kind": "text"
+ },
  "Remove condition": {
   "kind": "text"
  },
  "Remove field {n}": {
+  "kind": "text"
+ },
+ "Remove from this room type": {
   "kind": "text"
  },
  "Remove group": {
