@@ -283,6 +283,21 @@ export function BookingDetailView({
   ).length;
 
   const settled = detail.balanceCents === 0;
+
+  /*
+   * What the stay costs the guest, tax included -- the client: "what is the
+   * total amount they have to pay?" Reservation value is before tax, so it was
+   * never that figure. A column sum over the room lines already on screen,
+   * the live ones only: the same move as the extras total, so it cannot
+   * disagree with the rows under it. Extras charged are not added: meals and
+   * extras included in a rate post as their own folio lines and would count
+   * twice.
+   */
+  const live = rooms.filter((r) => !["canceled", "no_show"].includes(r.status));
+  const stayTotalCents = live.reduce((sum, r) => sum + r.valueCents + r.taxCents, 0);
+  const stayTaxCents = live.reduce((sum, r) => sum + r.taxCents, 0);
+  // Which rate the stay was sold on -- "which rate did I use to book?"
+  const planNames = Array.from(new Set(live.map((r) => r.ratePlanName).filter((n): n is string => !!n)));
   const unpriced = nights.filter((n) => n.roomRateCents === 0);
   const editable = !["canceled", "no_show", "checked_out"].includes(detail.status);
 
@@ -519,6 +534,17 @@ export function BookingDetailView({
             {cancellationTerms?.isMixed && (
               <span className="block text-xxs text-warn-deep">
                 {tr("Rooms differ — strictest shown")}
+              </span>
+            )}
+          </Fact>
+          <Fact name={tr("Rate plan")}>
+            <span>{planNames.length > 0 ? planNames.join(", ") : tr("Not recorded")}</span>
+          </Fact>
+          <Fact name={tr("Total incl. tax")}>
+            <span className="tnum font-medium">{formatMoney(stayTotalCents, currency)}</span>
+            {stayTaxCents > 0 && (
+              <span className="block text-xxs text-ink-faint">
+                {tr("{tax} tax", { tax: formatMoney(stayTaxCents, currency) })}
               </span>
             )}
           </Fact>
@@ -886,6 +912,11 @@ export function BookingDetailView({
                         {room.roomNumber ? tr("Room {n}", { n: room.roomNumber }) : tr("No room assigned")}
                       </span>
                       <span className="ml-2 text-[13px] text-ink-muted">{room.roomTypeName}</span>
+                      {room.ratePlanName && (
+                        <span className="ml-2 rounded bg-shell px-1.5 py-0.5 text-xxs font-medium text-ink-muted">
+                          {room.ratePlanName}
+                        </span>
+                      )}
                       <span className="ml-2 text-xxs text-ink-faint">
                         {tr.plural(room.adults, "{n} adult", "{n} adults")}
                         {room.children > 0 && ` + ${room.children}`}

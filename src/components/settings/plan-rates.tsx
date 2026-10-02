@@ -166,6 +166,12 @@ export const PlanRates = forwardRef<
   });
   const [types, setTypes] = useState<Record<string, TypeDraft>>({});
   const [restr, setRestr] = useState<Record<string, Restrictions & { dirty: boolean }>>({});
+  // Per-occupancy rows added before they hold a price, and rows removed and
+  // not yet saved: "<season>|<type>|<adults>". An empty row is "this party
+  // pays the standard price", so removing a row is clearing it (video 2: "we
+  // want the possibility to delete the one we don't want").
+  const [addedOcc, setAddedOcc] = useState<string[]>([]);
+  const [removedOcc, setRemovedOcc] = useState<string[]>([]);
 
   const derived = !!plan.parentRatePlanId;
   const seasonKey = season ?? "default";
@@ -218,6 +224,24 @@ export const PlanRates = forwardRef<
   }
 
   const typeDraft = (t: RoomTypeSetting) => types[k(t.id)] ?? loadType(t);
+
+  /** The rows a room type draws: every occupancy, or on a per-occupancy plan the standard row and those with a price. */
+  function adultsFor(t: RoomTypeSetting, d: TypeDraft): number[] {
+    const b = baseOf(t);
+    if (mode === "single" || derived) return [b];
+    const all = Array.from({ length: t.maxOccupancy }, (_, x) => x + 1);
+    if (mode === "per_person") return all;
+    return all.filter(
+      (a) => a === b || (d.rows[a] ?? []).some((v) => v.trim() !== "") || addedOcc.includes(`${k(t.id)}|${a}`),
+    );
+  }
+
+  function removeOcc(t: RoomTypeSetting, a: number) {
+    const d = typeDraft(t);
+    setTypes({ ...types, [k(t.id)]: { ...d, rows: { ...d.rows, [a]: EMPTY7() }, dirty: true } });
+    setAddedOcc(addedOcc.filter((x) => x !== `${k(t.id)}|${a}`));
+    setRemovedOcc([...removedOcc, `${k(t.id)}|${a}`]);
+  }
   const restrictions = restr[seasonKey] ?? loadRestrictions();
 
   /** What a row shows: typed, or worked out from the radio row in automatic mode. */
@@ -321,6 +345,12 @@ export const PlanRates = forwardRef<
         }
         rows.push({ roomTypeId: t.id, roomTypeName: name, days });
       }
+      // The Default Season clears a removed party's nightly prices only when it
+      // replaces (save_week_rates()); without it the row would vanish here and
+      // its old price go on being charged.
+      if (rows.length > 0 && season === null && !replaceRates && removedOcc.some((x) => x.startsWith(`${seasonKey}|`))) {
+        return tr("Tick Replace prices already on these nights to take a removed occupancy price off the nights already priced.");
+      }
       return rows.length === 0 ? null : { seasonTypeId: season, replaceRates, rows };
     },
   }));
@@ -388,7 +418,11 @@ export const PlanRates = forwardRef<
               const b = baseOf(t);
               const name = t.displayName ?? t.name;
               const c = coverage.find((x) => x.ratePlanId === plan.id && x.roomTypeId === t.id);
-              const adultsList = mode === "single" || derived ? [b] : Array.from({ length: t.maxOccupancy }, (_, x) => x + 1);
+              const adultsList = adultsFor(t, d);
+              const canAddOcc =
+                canEdit && mode === "per_occupancy" && !derived
+                  ? Array.from({ length: t.maxOccupancy }, (_, x) => x + 1).filter((a) => !adultsList.includes(a))
+                  : [];
               return (
                 <FragmentRows key={t.id}>
                   <tr className="border-b border-line bg-shell/40">
@@ -418,6 +452,13 @@ export const PlanRates = forwardRef<
                             <span className="flex items-center gap-1 text-[12.5px]" aria-label={tr.plural(a, "{n} adult", "{n} adults")}>
                               <PersonIcon />{a}
                               <span className="ml-1 flex items-center gap-0.5 text-ink-faint"><ChildIcon />0</span>
+                              {canEdit && mode === "per_occupancy" && a !== b && (
+                                <button type="button" onClick={() => removeOcc(t, a)} title={tr("Remove")}
+                                  aria-label={tr("Remove the {n} adults price for {name}", { n: a, name })}
+                                  className="ml-1 grid h-5 w-5 place-items-center rounded text-[14px] leading-none text-ink-faint hover:bg-rose-50 hover:text-rose-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-brass">
+                                  ×
+                                </button>
+                              )}
                             </span>
                           )}
                         </span>
@@ -457,6 +498,24 @@ export const PlanRates = forwardRef<
                       })}
                     </tr>
                   ))}
+                  {canAddOcc.length > 0 && (
+                    <tr className="border-b border-line">
+                      <td colSpan={9} className="px-3 py-1.5">
+                        <select value=""
+                          aria-label={tr("Add an occupancy price for {name}", { name })}
+                          onChange={(e) => {
+                            const a = Number(e.target.value);
+                            if (a) setAddedOcc([...addedOcc, `${k(t.id)}|${a}`]);
+                          }}
+                          className="rounded border border-line bg-white px-2 py-1 text-[12px] text-ink-muted hover:border-ink-faint focus:border-brass focus:outline-none focus:ring-1 focus:ring-brass">
+                          <option value="">{tr("+ Occupancy")}</option>
+                          {canAddOcc.map((a) => (
+                            <option key={a} value={a}>{tr.plural(a, "{n} adult", "{n} adults")}</option>
+                          ))}
+                        </select>
+                      </td>
+                    </tr>
+                  )}
                 </FragmentRows>
               );
             })}

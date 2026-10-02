@@ -5105,6 +5105,29 @@ export type Database = {
           tax_cents: number
         }[]
       }
+      booking_quote: {
+        Args: {
+          p_check_in: string
+          p_check_out: string
+          p_promotion_code?: string
+          p_rate_plan_id?: string
+          p_rooms: Json
+          p_tax_rate_ids?: string[]
+        }
+        Returns: {
+          line_gross_cents: number
+          line_no: number
+          missing_date: string
+          nightly_from_cents: number
+          nightly_to_cents: number
+          promotion_name: string
+          room_gross_cents: number
+          room_price_cents: number
+          room_tax_cents: number
+          total_gross_cents: number
+          total_tax_cents: number
+        }[]
+      }
       booking_report: {
         Args: { p_from: string; p_to: string }
         Returns: {
@@ -6606,6 +6629,10 @@ export type Database = {
           p_shift_id?: string
         }
         Returns: string
+      }
+      remove_rate_combination: {
+        Args: { p_rate_plan_id: string; p_room_type_id: string }
+        Returns: number
       }
       require_financial_staff: { Args: never; Returns: undefined }
       require_guest_identity_reports: { Args: never; Returns: undefined }

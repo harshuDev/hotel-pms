@@ -455,13 +455,19 @@ async function Bars({
                   {bar.roomNumber}
                 </span>
               )}
-              {/* "Show channel abbreviation for bookings" (0077). */}
-              {bar.channelCode && (
+              {/*
+                "Show channel abbreviation for bookings" (0077) -- but never
+                at the guest's expense. A one-night bar has about 100px, and
+                "DIRECT" before the name left nothing of the name; the client:
+                "now you see it's direct and I'm not even seeing the name". The
+                channel stays in the tooltip.
+              */}
+              {bar.channelCode && cols >= 2 && (
                 <span className="shrink-0 rounded border border-line px-1 text-xxs font-semibold uppercase text-ink-muted">
                   {bar.channelCode}
                 </span>
               )}
-              <span className="truncate">{bar.guestName}</span>
+              <span className="min-w-0 truncate">{bar.guestName}</span>
             </span>
 
             <span className="flex items-end justify-between gap-1">

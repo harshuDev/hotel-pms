@@ -862,6 +862,8 @@ export interface BookingRoomLine {
   discountCents: number;
   /** Nights already posted to the folio, which can no longer be dropped. */
   nightsCharged: number;
+  /** The rate plan the room was sold on; null for a stay taken before 0037. */
+  ratePlanName: string | null;
 }
 
 export interface BookingNight {

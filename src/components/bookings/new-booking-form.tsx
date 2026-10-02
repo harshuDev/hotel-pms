@@ -1,15 +1,17 @@
 "use client";
 
 import { useT } from "@/components/i18n";
-import { useEffect, useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { addDays, differenceInCalendarDays, format, parseISO } from "date-fns";
 import { cn } from "@/components/ui";
-import { formatMoney, parseMoney } from "@/lib/money";
+import { formatMoney, formatMoneyInput, parseMoney } from "@/lib/money";
 import {
   createBooking,
   loadAvailability,
+  quoteBooking,
   searchCustomers,
+  type BookingQuote,
 } from "@/lib/actions/bookings";
 import type {
   BookableRoomType,
@@ -283,10 +285,57 @@ export function NewBookingForm({
     }
   }
 
-  const total = lines.reduce((sum, l) => {
-    const cents = rateCents(l);
-    return cents === null ? sum : sum + cents * l.quantity * nights;
-  }, 0);
+  /*
+   * WHAT THE BOOKING WILL COST, BEFORE IT IS TAKEN (0121). The client: "when
+   * I choose the rate the rate has to show the price of this rate here
+   * automatically, then I can change it", and "we need to have the grand total
+   * ... the total amount they have to charge". booking_quote() prices every
+   * line exactly as create_booking() will -- the plan's night rate for the
+   * party, the typed rate if there is one, the best offer, the chosen taxes --
+   * so the figures here are the booking's, not the form's guess. Asked again
+   * whenever anything that moves the price changes; only the newest reply is
+   * kept, or a slow early answer would overwrite a later one.
+   */
+  const [quote, setQuote] = useState<BookingQuote | null>(null);
+  const quoteSeq = useRef(0);
+  const quoteKey = JSON.stringify([
+    checkIn,
+    checkOut,
+    ratePlanId,
+    taxRateIds,
+    promotionCode.trim(),
+    lines.map((l) => [l.roomTypeId, l.quantity, rateCents(l), l.adults, l.children]),
+  ]);
+  useEffect(() => {
+    const seq = ++quoteSeq.current;
+    if (nights < 1 || lines.length === 0) {
+      setQuote(null);
+      return;
+    }
+    const timer = setTimeout(() => {
+      quoteBooking({
+        checkIn,
+        checkOut,
+        lines: lines.map((l) => ({
+          roomTypeId: l.roomTypeId,
+          quantity: l.quantity,
+          rateCents: rateCents(l),
+          adults: l.adults,
+          children: l.children,
+        })),
+        ratePlanId: ratePlanId || null,
+        taxRateIds,
+        promotionCode,
+      }).then((result) => {
+        if (seq !== quoteSeq.current) return;
+        setQuote(result.ok ? result.data : null);
+      });
+    }, 250);
+    return () => clearTimeout(timer);
+    // quoteKey carries every input that moves the price.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [quoteKey]);
+  const quoteFor = (index: number) => quote?.lines.find((q) => q.lineNo === index + 1) ?? null;
 
   // The form predicts overselling from what it loaded; Postgres decides it for
   // real, inside the transaction. Either is reason to offer the tickbox.
@@ -600,9 +649,18 @@ export function NewBookingForm({
               </p>
             ) : (
               <div className="space-y-2">
-                {lines.map((line) => {
+                {lines.map((line, index) => {
                   const left = remaining(line.roomTypeId, line.key);
                   const over = line.quantity > left;
+                  const q = quoteFor(index);
+                  // The plan's price for this party, shown where the rate is
+                  // typed: typing over it is how it is changed.
+                  const planPrice =
+                    q && q.nightlyFromCents !== null
+                      ? q.nightlyFromCents === q.nightlyToCents
+                        ? formatMoneyInput(q.nightlyFromCents)
+                        : `${formatMoneyInput(q.nightlyFromCents)}–${formatMoneyInput(q.nightlyToCents ?? q.nightlyFromCents)}`
+                      : null;
                   return (
                     <div
                       key={line.key}
@@ -646,7 +704,7 @@ export function NewBookingForm({
                         <input
                           type="text"
                           inputMode="decimal"
-                          placeholder={ratePlanId ? tr("From the plan") : "0.00"}
+                          placeholder={ratePlanId ? (planPrice ?? tr("From the plan")) : "0.00"}
                           value={line.rate}
                           onChange={(e) => setLine(line.key, { rate: e.target.value })}
                           className={cn(field, "tnum")}
@@ -691,6 +749,22 @@ export function NewBookingForm({
                           {tr("Remove")}
                         </button>
                       </div>
+                      {q && (
+                        <p className="text-xs sm:col-span-6">
+                          {q.missingDate ? (
+                            <span className="text-rose-700">
+                              {tr("No rate is loaded for {date} on this plan.", { date: tr.date(q.missingDate, "EEE d MMM") })}
+                            </span>
+                          ) : (
+                            q.lineGrossCents !== null && (
+                              <span className="tnum text-ink-muted">
+                                {tr("{amount} incl. tax", { amount: formatMoney(q.lineGrossCents, currency) })}
+                                {q.promotionName ? ` · ${q.promotionName}` : ""}
+                              </span>
+                            )
+                          )}
+                        </p>
+                      )}
                       {over && (
                         <p className="text-xs text-rose-700 sm:col-span-6">
                           {tr("Only {n} free for these dates. Reduce the count, change the dates, or tick overbook below.", { n: Math.max(left, 0) })}
@@ -1041,6 +1115,19 @@ export function NewBookingForm({
           </label>
         )}
         <div className="flex flex-wrap items-center justify-between gap-3">
+          {quote && quote.lines.length > 0 && quote.lines.every((q) => !q.missingDate) && (
+            <p className="text-[13px] text-ink-muted">
+              {tr("Total incl. tax")}{" "}
+              <span className="tnum font-display text-[20px] font-semibold tracking-tightest text-ink">
+                {formatMoney(quote.totalGrossCents, currency)}
+              </span>
+              {quote.totalTaxCents > 0 && (
+                <span className="tnum ml-2 text-xxs text-ink-faint">
+                  {tr("{tax} tax", { tax: formatMoney(quote.totalTaxCents, currency) })}
+                </span>
+              )}
+            </p>
+          )}
           <button
             type="button"
             onClick={submit}

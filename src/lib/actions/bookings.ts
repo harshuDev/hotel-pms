@@ -278,3 +278,78 @@ export async function searchCustomers(
 function btrimLength(value: string) {
   return value.trim().length;
 }
+
+export interface BookingQuoteLine {
+  /** 1-based, the order the lines were sent in. */
+  lineNo: number;
+  /** The cheapest and dearest night for one room, before any offer. */
+  nightlyFromCents: number | null;
+  nightlyToCents: number | null;
+  /** One room over the stay: price after the offer, its tax, and what the guest pays. */
+  roomPriceCents: number | null;
+  roomTaxCents: number | null;
+  roomGrossCents: number | null;
+  /** The line's quantity of rooms. */
+  lineGrossCents: number | null;
+  /** The first night with no rate loaded on the plan; create_booking() would refuse it. */
+  missingDate: string | null;
+  promotionName: string | null;
+}
+
+export interface BookingQuote {
+  lines: BookingQuoteLine[];
+  totalTaxCents: number;
+  totalGrossCents: number;
+}
+
+/**
+ * What the booking will cost before it is taken (0121): booking_quote() prices
+ * every line exactly as create_booking() does -- the plan's night rate for the
+ * party or the typed rate, less the best offer, through the chosen taxes -- and
+ * writes nothing. The totals are summed in Postgres.
+ */
+export async function quoteBooking(input: {
+  checkIn: string;
+  checkOut: string;
+  lines: RoomLine[];
+  ratePlanId: string | null;
+  taxRateIds: string[];
+  promotionCode: string;
+}): Promise<ActionResult<BookingQuote>> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("booking_quote", {
+    p_check_in: input.checkIn,
+    p_check_out: input.checkOut,
+    p_rooms: input.lines.map((line) => ({
+      room_type_id: line.roomTypeId,
+      quantity: line.quantity,
+      rate_cents: line.rateCents,
+      adults: line.adults,
+      children: line.children,
+    })),
+    p_rate_plan_id: input.ratePlanId,
+    p_tax_rate_ids: input.taxRateIds,
+    p_promotion_code: input.promotionCode.trim() || null,
+  });
+  if (error) return { ok: false, error: await localised(error.message) };
+  const rows = data ?? [];
+  const n = (v: number | null) => (v === null ? null : Number(v));
+  return {
+    ok: true,
+    data: {
+      lines: rows.map((r) => ({
+        lineNo: r.line_no,
+        nightlyFromCents: n(r.nightly_from_cents),
+        nightlyToCents: n(r.nightly_to_cents),
+        roomPriceCents: n(r.room_price_cents),
+        roomTaxCents: n(r.room_tax_cents),
+        roomGrossCents: n(r.room_gross_cents),
+        lineGrossCents: n(r.line_gross_cents),
+        missingDate: r.missing_date,
+        promotionName: r.promotion_name,
+      })),
+      totalTaxCents: Number(rows[0]?.total_tax_cents ?? 0),
+      totalGrossCents: Number(rows[0]?.total_gross_cents ?? 0),
+    },
+  };
+}

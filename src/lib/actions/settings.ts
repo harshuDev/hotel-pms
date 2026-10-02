@@ -2061,6 +2061,27 @@ export async function saveRatePlan(input: {
 }
 
 /**
+ * Takes a room type off a rate plan (0120): from the business date on, the
+ * pair's prices, restrictions and saved weeks go. Bookings keep their rates.
+ */
+export async function removeRateCombination(input: {
+  ratePlanId: string;
+  roomTypeId: string;
+}): Promise<ActionResult<{ nights: number }>> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase.rpc("remove_rate_combination", {
+    p_rate_plan_id: input.ratePlanId,
+    p_room_type_id: input.roomTypeId,
+  });
+
+  if (error) return { ok: false, error: await localised(error.message) };
+
+  revalidateSettings();
+  return { ok: true, data: { nights: Number(data ?? 0) } };
+}
+
+/**
  * Everything on the rate plan form beyond its name, its tick boxes and its
  * cancellation policy (0109): booking conditions, derivation, occupancy
  * pricing, tax, account and channels, as one set in one transaction. Money

@@ -2340,10 +2340,24 @@ export async function getBookingRoomLines(
   bookingId: string,
 ): Promise<BookingRoomLine[]> {
   const supabase = await createClient();
-  const { data, error } = await supabase.rpc("booking_room_lines", {
-    p_booking_id: bookingId,
-  });
+  // The rate plan each room was sold on (0037), read beside the lines rather
+  // than added to booking_room_lines(): the client asked "which rate did I use
+  // to book?" and the answer was on the row all along.
+  const [{ data, error }, plans] = await Promise.all([
+    supabase.rpc("booking_room_lines", { p_booking_id: bookingId }),
+    supabase
+      .from("booking_rooms")
+      .select("id, rate_plans(name)")
+      .eq("booking_id", bookingId),
+  ]);
   if (error) throw new Error(`Failed to load the rooms: ${error.message}`);
+  if (plans.error) throw new Error(`Failed to load the rooms' rate plans: ${plans.error.message}`);
+  const planByRoom = new Map(
+    ((plans.data ?? []) as unknown as { id: string; rate_plans: { name: string } | null }[]).map((r) => [
+      r.id,
+      r.rate_plans?.name ?? null,
+    ]),
+  );
 
   return (
     (data ?? []) as {
@@ -2381,6 +2395,7 @@ export async function getBookingRoomLines(
     taxCents: row.tax_cents,
     discountCents: row.discount_cents,
     nightsCharged: row.nights_charged,
+    ratePlanName: planByRoom.get(row.booking_room_id) ?? null,
   }));
 }
 

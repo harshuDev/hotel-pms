@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0119` are
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0121` are
 applied to the hosted database.
 
 Working on real data: dashboard (house board, movements, pace, activity feed),
@@ -1383,9 +1383,26 @@ client: "Need to add Booking Channel in the Dashboard".
         - **A pairing shows when it is in use** (priced from the business
           date, or given a week in any season) or when "Add New Room Rate
           Combination" adds it -- still no link table.
+        - **A PAIRING CAN BE REMOVED (0120)**: the bin on a plan row,
+          confirmed inline, calls `remove_rate_combination()`. From the
+          business date on the pair's prices, restrictions and occupancy
+          prices go, and its saved weeks in EVERY season -- or the next
+          season Save would put them back. Bookings keep their own rates.
+          Removing from a parent removes from its derived plans through the
+          push trigger; a derived plan alone is refused by name. A pair added
+          and never saved is just dropped from the screen.
         - Occupancy rows: a per-occupancy plan types each; a per-person plan
           shows them grey. Saving a per-person row sends back the stored
           occupancy prices untouched. A derived plan never sends a rate.
+        - **A per-occupancy row can be REMOVED and ADDED** (× on the row,
+          "+ Occupancy" under it), here and on the plan's form -- the
+          client's "no 1-adult price". A removed party then pays the
+          standard price. Rows show only where a price is held. A season
+          Save clears the removed party's nights; the Default Season only
+          does with "Replace prices" ticked, so Save refuses until it is.
+        - **"Show derived and calculated rates" is per room type** and shows
+          that type's derived plans AND its occupancy rows. It used to show
+          derived plans only, so on a type with none it did nothing.
         - **The Seasons screen's tag opens it as a right-hand panel**,
           `?tab=seasons&rates=<season id|default>` (URL state like the
           calendar's dialogs), in `BookingDialog` with `side wide`, season
@@ -1453,9 +1470,10 @@ client: "Need to add Booking Channel in the Dashboard".
       ticked meals, so the choice and the meals (which the meal report and
       the audit's meal split read) never disagree; a kept meal keeps its
       value. Existing plans took the choice their meals said.
-    - **The code is not on the form** (the reference has none): a new plan is
-      given the title's initials, unique on the property; an edit keeps its
-      code. **Min Adults / Min Children are drawn only when a plan already has
+    - **The code sits beside the Title (0120)**, narrow, upper-cased, 20 at
+      most. Blank is the title's initials, unique on the property, shown as
+      the placeholder. `save_rate_plan()` refuses a code another plan uses by
+      name. **Min Adults / Min Children are drawn only when a plan already has
       one**, so a rule set before is never hidden while enforced.
     - **ATTACHED TAXES TAKES SEVERAL (0116). This reverses what this file
       said**, that it took one: the client asked for it -- "there could be an
@@ -1763,6 +1781,20 @@ client: "Need to add Booking Channel in the Dashboard".
   (`BK-000123`). A channel's reference goes in `external_reference`.
 - No room is assigned when a booking is taken. `assign_room()` does that, at
   check-in.
+- **MOVING AN IN-HOUSE GUEST MOVES THE ROOM STATUS (0121).** `assign_room()`
+  on a checked-in line sets the new room `occupied` and the old one
+  `vacant_dirty`, unless another checked-in line is still in it. It used to
+  change only the line, so room 103 read occupied after its guest moved to
+  127. 0121 also repaired every room whose status disagreed with who was in
+  it.
+- **THE BOOKING FORM QUOTES AS YOU TYPE (0121).** `booking_quote()` prices
+  the form exactly as `create_booking()` will -- `rate_plan_night_rate()` per
+  room line's party, the best offer, `tax_split_multi()` -- and changes
+  nothing. Each room line shows the plan's nightly price as its placeholder
+  (still overridable), its total including tax, or the night with no rate;
+  "Total incl. tax" sits above the button. Debounced, newest reply wins. The
+  booking screen's header carries the rate plan(s) and the total incl. tax,
+  and each room line its plan.
 - **CHECK-IN AND CHECK-OUT GUARD THE ROOM, NOT ONLY THE DATES (0112).** An
   audit of the hosted property found BK-000010 checked in to four rooms that
   still held guests past their departure, and checking it out then marked
