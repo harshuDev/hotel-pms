@@ -74,6 +74,9 @@
  "{0} is derived from {1}, so {2} cannot be derived from another plan.": {
   "kind": "db"
  },
+ "{0} is derived from {1}, so it is sold on every room type {2} is. Remove {3} from {4} instead.": {
+  "kind": "db"
+ },
  "{0} is derived from {1}, so its price follows that plan. Change the price on {2} instead.": {
   "kind": "db"
  },
@@ -570,6 +573,9 @@
  "{sold} sold of {sellable} sellable": {
   "kind": "text"
  },
+ "{tax} tax": {
+  "kind": "text"
+ },
  "{unassigned} with no room assigned": {
   "kind": "text"
  },
@@ -845,6 +851,9 @@
   "kind": "db"
  },
  "A rate plan cannot be derived from itself": {
+  "kind": "db"
+ },
+ "A rate plan code is 20 characters at most": {
   "kind": "db"
  },
  "A rate plan needs a code and a name": {
@@ -6646,6 +6655,9 @@
  "Rate plan": {
   "kind": "text"
  },
+ "Rate plan {0} removed from {1}": {
+  "kind": "db"
+ },
  "Rate plan {name} created.": {
   "kind": "text"
  },
@@ -8316,6 +8328,9 @@
  "The check-out did not go through": {
   "kind": "text"
  },
+ "The code {0} is already used by {1}": {
+  "kind": "db"
+ },
  "The colours must be a set of colours": {
   "kind": "db"
  },
@@ -8762,6 +8777,9 @@
   "kind": "text"
  },
  "Total Due": {
+  "kind": "text"
+ },
+ "Total incl. tax": {
   "kind": "text"
  },
  "Total revenue": {
