@@ -217,6 +217,12 @@ export function RateCombinations({
   const [planIds, setPlanIds] = useState<string[]>(plans.map((p) => p.id));
   const [multi, setMulti] = useState(false);
   const [derivedOn, setDerivedOn] = useState<Record<string, boolean>>({});
+  // Occupancy rows added in this session to a per-occupancy plan, before they
+  // hold a price: "<season>|<plan>|<type>|<adults>".
+  const [addedOcc, setAddedOcc] = useState<string[]>([]);
+  // Rows removed and not yet saved, same keys: the Default Season only clears
+  // a removed party's nightly prices when it replaces (save_week_rates()).
+  const [removedOcc, setRemovedOcc] = useState<string[]>([]);
   const [replaceRates, setReplaceRates] = useState(false);
   const [drafts, setDrafts] = useState<Record<string, Row>>({});
   const [added, setAdded] = useState<string[]>([]);
@@ -261,6 +267,36 @@ export function RateCombinations({
   }
 
   const row = (planId: string, t: RoomTypeSetting) => drafts[k(planId, t.id)] ?? load(planId, t);
+
+  /*
+   * The occupancy rows a plan draws under its standard row (video 2: "we want
+   * the possibility to delete the one we don't want"). A per-person plan's
+   * rows are worked out from the standard price, so all of them show. A
+   * per-occupancy plan shows only the rows that hold a price, plus any added
+   * here -- because an EMPTY row is exactly "this party pays the standard
+   * price" (rate_plan_night_rate() falls back to it), removing a row is
+   * clearing it, and a removed row stays removed after a reload.
+   */
+  function occupancyRows(p: RatePlan, t: RoomTypeSetting, r: Row): number[] {
+    const b = baseOf(t);
+    const all = Array.from({ length: t.maxOccupancy }, (_, x) => x + 1).filter((a) => a !== b);
+    if (p.occupancyPricing === "per_person") return all;
+    return all.filter(
+      (a) => r.days.some((d) => (d.occ[a] ?? "").trim() !== "") || addedOcc.includes(`${k(p.id, t.id)}|${a}`),
+    );
+  }
+
+  function removeOcc(p: RatePlan, t: RoomTypeSetting, a: number) {
+    const r = row(p.id, t);
+    const days = r.days.map((d) => {
+      const occ = { ...d.occ };
+      delete occ[a];
+      return { ...d, occ };
+    });
+    setDrafts({ ...drafts, [k(p.id, t.id)]: { days, dirty: true } });
+    setAddedOcc(addedOcc.filter((x) => x !== `${k(p.id, t.id)}|${a}`));
+    setRemovedOcc([...removedOcc, `${k(p.id, t.id)}|${a}`]);
+  }
 
   function setDay(planId: string, t: RoomTypeSetting, i: number | "all", patch: Partial<Day>) {
     const r = row(planId, t);
@@ -353,6 +389,11 @@ export function RateCombinations({
     const rows = collect();
     if (typeof rows === "string") return setProblem(rows);
     if (rows.length === 0) return setProblem(tr("Nothing has changed."));
+    if (season === null && !replaceRates && removedOcc.some((x) => x.startsWith(`${seasonKey}|`))) {
+      return setProblem(
+        tr("Tick Replace prices already on these nights to take a removed occupancy price off the nights already priced."),
+      );
+    }
     run(async () => {
       for (const r of rows) {
         const result = await saveWeekRates({
@@ -370,6 +411,7 @@ export function RateCombinations({
           delete next[k(r.plan.id, r.type.id)];
           return next;
         });
+        setRemovedOcc((all) => all.filter((x) => !x.startsWith(`${k(r.plan.id, r.type.id)}|`)));
       }
       return { ok: true };
     }, tr.plural(rows.length, "{n} room rate combination saved.", "{n} room rate combinations saved."));
@@ -479,12 +521,22 @@ export function RateCombinations({
                     {rows.map((p) => {
                       const r = row(p.id, t);
                       const derived = !!p.parentRatePlanId;
-                      const occRows = multi && !derived && p.occupancyPricing !== "single"
-                        ? Array.from({ length: t.maxOccupancy }, (_, x) => x + 1).filter((a) => a !== b)
-                        : [];
+                      // The top switch shows every type's occupancy rows; a room
+                      // type's own switch shows its derived plans AND its
+                      // occupancy rows ("derived and calculated rates"). It used
+                      // to show derived plans only, so on a type with none the
+                      // switch moved and nothing appeared.
+                      const showOcc = (multi || !!derivedOn[t.id]) && !derived && p.occupancyPricing !== "single";
+                      const occRows = showOcc ? occupancyRows(p, t, r) : [];
+                      const canAddOcc =
+                        showOcc && canEdit && p.occupancyPricing === "per_occupancy"
+                          ? Array.from({ length: t.maxOccupancy }, (_, x) => x + 1).filter(
+                              (a) => a !== b && !occRows.includes(a),
+                            )
+                          : [];
                       return (
                         <Fragment key={p.id}>
-                          <tr className={cn("align-top", occRows.length === 0 && "border-b border-line")}>
+                          <tr className={cn("align-top", occRows.length === 0 && canAddOcc.length === 0 && "border-b border-line")}>
                             <td className="px-3 py-3">
                               <p className="text-[15px] font-semibold text-ink">{p.name}</p>
                               <p className="mt-0.5 flex items-center gap-1.5 text-[12.5px] text-ink">
@@ -560,6 +612,14 @@ export function RateCombinations({
                                 <span className="flex items-center gap-1.5" aria-label={tr.plural(a, "{n} adult", "{n} adults")}>
                                   <span className="flex items-center gap-0.5"><PersonIcon />{a}</span>
                                   <span className="flex items-center gap-0.5"><ChildIcon />0</span>
+                                  {canEdit && p.occupancyPricing === "per_occupancy" && (
+                                    <button type="button" onClick={() => removeOcc(p, t, a)}
+                                      title={tr("Remove")}
+                                      aria-label={tr("Remove the {n} adults price for {name}", { n: a, name: `${p.name}, ${typeName(t)}` })}
+                                      className="ml-1 grid h-5 w-5 place-items-center rounded text-[14px] leading-none text-ink-faint hover:bg-rose-50 hover:text-rose-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-brass">
+                                      ×
+                                    </button>
+                                  )}
                                 </span>
                               </td>
                               <td />
@@ -580,6 +640,26 @@ export function RateCombinations({
                               })}
                             </tr>
                           ))}
+                          {canAddOcc.length > 0 && (
+                            <tr className="border-b border-line">
+                              <td colSpan={9} className="px-3 pb-2.5">
+                                <select
+                                  value=""
+                                  aria-label={tr("Add an occupancy price for {name}", { name: `${p.name}, ${typeName(t)}` })}
+                                  onChange={(e) => {
+                                    const a = Number(e.target.value);
+                                    if (a) setAddedOcc([...addedOcc, `${k(p.id, t.id)}|${a}`]);
+                                  }}
+                                  className="rounded border border-line bg-white px-2 py-1 text-[12px] text-ink-muted hover:border-ink-faint focus:border-brass focus:outline-none focus:ring-1 focus:ring-brass"
+                                >
+                                  <option value="">{tr("+ Occupancy")}</option>
+                                  {canAddOcc.map((a) => (
+                                    <option key={a} value={a}>{tr.plural(a, "{n} adult", "{n} adults")}</option>
+                                  ))}
+                                </select>
+                              </td>
+                            </tr>
+                          )}
                         </Fragment>
                       );
                     })}
@@ -635,7 +715,7 @@ export function RateCombinations({
           )}
           <div className="flex gap-2">
             <button type="button" className="rounded border border-line bg-white px-4 py-2 text-[13.5px] text-ink hover:bg-shell"
-              onClick={() => { setDrafts({}); setProblem(""); }}>
+              onClick={() => { setDrafts({}); setAddedOcc([]); setRemovedOcc([]); setProblem(""); }}>
               {tr("Reset Changes")}
             </button>
             <button type="button" disabled={pending} onClick={saveAll}

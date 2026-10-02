@@ -630,6 +630,9 @@
  "+ Add Virtual Room Type": {
   "kind": "text"
  },
+ "+ Occupancy": {
+  "kind": "text"
+ },
  "1 Example Street, Example City": {
   "kind": "text"
  },
@@ -1022,6 +1025,9 @@
   "kind": "text"
  },
  "Add an email address": {
+  "kind": "text"
+ },
+ "Add an occupancy price for {name}": {
   "kind": "text"
  },
  "Add at least one room to the booking.": {
@@ -6814,6 +6820,9 @@
  "Remove picture {n}": {
   "kind": "text"
  },
+ "Remove the {n} adults price for {name}": {
+  "kind": "text"
+ },
  "Remove the picture": {
   "kind": "text"
  },
@@ -8707,6 +8716,9 @@
   "kind": "text"
  },
  "Tick at least one rate to apply this to.": {
+  "kind": "text"
+ },
+ "Tick Replace prices already on these nights to take a removed occupancy price off the nights already priced.": {
   "kind": "text"
  },
  "Tick the rates on the left to apply this to.": {
