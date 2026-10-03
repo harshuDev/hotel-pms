@@ -4413,9 +4413,12 @@ export type Database = {
       tax_rates: {
         Row: {
           created_at: string
+          fee_cents: number | null
+          fee_per: string | null
           id: string
           inclusion: Database["public"]["Enums"]["tax_inclusion"]
           is_active: boolean
+          kind: string
           name: string
           property_id: string
           rate_bps: number
@@ -4423,9 +4426,12 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          fee_cents?: number | null
+          fee_per?: string | null
           id?: string
           inclusion?: Database["public"]["Enums"]["tax_inclusion"]
           is_active?: boolean
+          kind?: string
           name: string
           property_id: string
           rate_bps: number
@@ -4433,9 +4439,12 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          fee_cents?: number | null
+          fee_per?: string | null
           id?: string
           inclusion?: Database["public"]["Enums"]["tax_inclusion"]
           is_active?: boolean
+          kind?: string
           name?: string
           property_id?: string
           rate_bps?: number
@@ -7239,9 +7248,12 @@ export type Database = {
       }
       save_tax_rate: {
         Args: {
+          p_fee_cents?: number
+          p_fee_per?: string
           p_id?: string
           p_inclusion: Database["public"]["Enums"]["tax_inclusion"]
           p_is_active?: boolean
+          p_kind?: string
           p_name: string
           p_rate_bps: number
         }
@@ -7548,10 +7560,13 @@ export type Database = {
         Args: never
         Returns: {
           charge_count: number
+          fee_cents: number
+          fee_per: string
           id: string
           in_use: boolean
           inclusion: Database["public"]["Enums"]["tax_inclusion"]
           is_active: boolean
+          kind: string
           name: string
           rate_bps: number
           sort_order: number
@@ -7571,7 +7586,9 @@ export type Database = {
       }
       tax_split_multi: {
         Args: {
+          p_adults?: number
           p_amount_cents: number
+          p_children?: number
           p_property_id: string
           p_refuse_retired?: boolean
           p_tax_rate_ids: string[]

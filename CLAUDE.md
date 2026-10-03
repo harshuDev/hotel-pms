@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0121` are
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0122` are
 applied to the hosted database.
 
 Working on real data: dashboard (house board, movements, pace, activity feed),
