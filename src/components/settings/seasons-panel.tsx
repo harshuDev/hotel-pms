@@ -155,6 +155,19 @@ export function SeasonsPanel({
     return out;
   }, [seasons, year]);
 
+  /* A new season starts on the first day from the business date that no
+     season covers: seeded with the business date itself, Save was refused
+     whenever today already sat inside a season. */
+  const firstFreeDay = useMemo(() => {
+    let cursor = businessDate;
+    for (const r of seasons.flatMap((t) => t.ranges).sort((a, b) => a.startsOn.localeCompare(b.startsOn))) {
+      if (r.startsOn <= cursor && cursor <= r.endsOn) {
+        cursor = format(addDays(parseISO(r.endsOn), 1), "yyyy-MM-dd");
+      }
+    }
+    return cursor;
+  }, [seasons, businessDate]);
+
   function saveAdd(d: AddDraft) {
     run(async () => {
       const made = await saveSeasonType({ id: null, kind: d.kind, name: d.name, color: d.color });
@@ -287,7 +300,7 @@ export function SeasonsPanel({
         <aside className="min-w-0">
           {canEdit && (
             <button type="button" className={primary}
-              onClick={() => setAdd({ kind: "season", name: "", color: "#6b7f99", from: businessDate, to: businessDate })}>
+              onClick={() => setAdd({ kind: "season", name: "", color: "#6b7f99", from: firstFreeDay, to: firstFreeDay })}>
               {tr("Add season or event")}
             </button>
           )}
