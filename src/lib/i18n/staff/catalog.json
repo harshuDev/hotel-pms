@@ -38,6 +38,9 @@
  "{0} included in the rate for {1}": {
   "kind": "db"
  },
+ "{0} is a fee charged per night, so it cannot be the tax on an extra": {
+  "kind": "db"
+ },
  "{0} is a tax of the rate plan {1}. Change that first, or untick Active to retire it.": {
   "kind": "db"
  },
@@ -745,6 +748,12 @@
  "A facility needs a title.": {
   "kind": "text"
  },
+ "A fee is charged per room, per person or per adult": {
+  "kind": "db"
+ },
+ "A fee needs an amount": {
+  "kind": "text"
+ },
  "A fixed discount is more than 0": {
   "kind": "db"
  },
@@ -906,6 +915,9 @@
  },
  "A stay rule of zero nights means nothing. Leave it blank to clear it.": {
   "kind": "text"
+ },
+ "A tax rate is a tax or a fee": {
+  "kind": "db"
  },
  "A tax rate must be between 0 and 100 percent": {
   "kind": "db"
@@ -1340,6 +1352,9 @@
  },
  "An extra category needs a title.": {
   "kind": "text"
+ },
+ "An extra is taxed at this rate, so it cannot become a fee": {
+  "kind": "db"
  },
  "An extra needs a price of zero or more": {
   "kind": "db"
@@ -3643,6 +3658,12 @@
   "code": "FO"
  },
  "Fax Number": {
+  "kind": "text"
+ },
+ "Fee": {
+  "kind": "text"
+ },
+ "Fee: a fixed amount a night": {
   "kind": "text"
  },
  "Field {value} name": {
@@ -6315,6 +6336,9 @@
  "Per adult": {
   "kind": "text"
  },
+ "Per adult per night": {
+  "kind": "text"
+ },
  "Per child": {
   "kind": "text"
  },
@@ -6324,10 +6348,16 @@
  "Per person": {
   "kind": "text"
  },
+ "Per person per night": {
+  "kind": "text"
+ },
  "Per room": {
   "kind": "text"
  },
  "Per room available": {
+  "kind": "text"
+ },
+ "Per room per night": {
   "kind": "text"
  },
  "Per room sold": {
@@ -7948,6 +7978,9 @@
  },
  "Tax rate {0} is retired and cannot be applied to a new charge": {
   "kind": "db"
+ },
+ "Tax: a percentage of the rate": {
+  "kind": "text"
  },
  "Taxes": {
   "kind": "text"

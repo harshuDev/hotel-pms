@@ -149,7 +149,7 @@ export function NewBookingForm({
    * same night picks both. None ticked is a zero-rated booking. */
   const [taxRateIds, setTaxRateIds] = useState<string[]>(() => {
     const fromPlan = planTaxes(ratePlanId);
-    return fromPlan.length ? fromPlan : taxRates.slice(0, 1).map((t) => t.id);
+    return fromPlan.length ? fromPlan : taxRates.filter((t) => t.kind === "tax").slice(0, 1).map((t) => t.id);
   });
   const [adults, setAdults] = useState(2);
   const [children, setChildren] = useState(0);

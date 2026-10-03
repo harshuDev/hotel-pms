@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0121` are
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0122` are
 applied to the hosted database.
 
 Working on real data: dashboard (house board, movements, pace, activity feed),
@@ -3018,9 +3018,29 @@ client: "Need to add Booking Channel in the Dashboard".
       reference says "Always"; ours would be untrue, since a booking carries
       one rate and staff may pick another or none. A new rate goes to the
       foot, by trigger, so adding one never changes the default.
-    - **Type is always "Tax" and the button says "Add tax".** There are no
-      fees in this schema — a fee would need its own posting and its own
-      report bucket — so offering "Fee" would be a choice that does nothing.
+    - **TYPE IS TAX OR FEE (0122). This reverses what this file said**, that
+      there were no fees. The client: the tourism fee "is not a percentage,
+      it is an amount, e.g. 6 euros per night, per room or per person". A fee
+      is a ROW OF `tax_rates` (`kind = 'fee'`, `fee_cents`, `fee_per` room |
+      person | adult; `rate_bps` 0 and exclusive, by check constraint), so
+      everything 0116 built carries it with no second path: Attached Taxes
+      and the booking form pick it, the night's `tax_breakdown` holds it, the
+      folio posts it with the room charge, the invoice lists it by name, and
+      a charged fee is frozen like a rate.
+      - **`tax_split_multi()` takes the party** (`p_adults`, `p_children`,
+        default one adult) and adds `fee_cents` x 1, x adults + children, or
+        x adults -- once a call, and it is called once a night, so a fee is
+        per night. On top, never taxed. The five places a night is priced
+        pass the room line's own party; the guest page's quote uses the
+        party asked about, else the type's base occupancy.
+      - **A fee is never an extra's tax** (a trigger refuses it on extras and
+        categories by name; the pickers leave fees out), and never the
+        booking form's or a new plan's default -- "By default" goes to the
+        first active TAX.
+      - It reports as tax: the tax total, the Accounting report's Tax line
+        and the invoice's per-tax lines all include it. A tourism fee is
+        usually remitted with the taxes, so that is the right bucket; a
+        separate bucket would be a reports change, to be asked for.
     - **The bin is drawn only on a rate nothing uses** (`in_use` from
       `tax_rates_list()`), and `delete_tax_rate()` refuses the rest by name.
       Bookings do not store a tax rate — the nights carry the computed

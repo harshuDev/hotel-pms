@@ -10,7 +10,9 @@ import {
   saveTaxRate,
   setTaxRateOrder,
 } from "@/lib/actions/settings";
-import type { PaymentMethodKind, PaymentMethodSetting, TaxRateSetting } from "@/lib/types";
+import { useCurrency } from "@/components/currency";
+import { formatMoney, formatMoneyInput, parseMoney } from "@/lib/money";
+import type { FeePer, PaymentMethodKind, PaymentMethodSetting, TaxKind, TaxRateSetting } from "@/lib/types";
 
 /*
  * Settings -> Finances, cloned from the client's reference (0079):
@@ -324,6 +326,16 @@ type TaxDraft = {
   isActive: boolean;
   /** Charges posted at it: the rate and its inclusion are settled. */
   frozen: boolean;
+  /** A fee (0122): a fixed amount a night, per room, person or adult. */
+  kind: TaxKind;
+  amount: string;
+  feePer: FeePer;
+};
+
+const FEE_PER_LABEL: Record<FeePer, string> = {
+  room: msg("Per room per night"),
+  person: msg("Per person per night"),
+  adult: msg("Per adult per night"),
 };
 
 /** "20%", "12.5%" -- basis points as a percentage, without trailing zeros. */
@@ -343,14 +355,21 @@ export function TaxesPanel({
   run: Run;
 }) {
   const tr = useT();
+  const currency = useCurrency();
   const [draft, setDraft] = useState<TaxDraft | null>(null);
+  const [problem, setProblem] = useState<string | null>(null);
   const [order, setOrder] = useState<string[]>(taxRates.map((t) => t.id));
   const [dragging, setDragging] = useState<string | null>(null);
 
   const byId = new Map(taxRates.map((t) => [t.id, t]));
   const rows = order.map((id) => byId.get(id)).filter((t): t is TaxRateSetting => Boolean(t));
   // The booking form seeds its tax with the first ACTIVE rate in this order.
-  const defaultId = rows.find((t) => t.isActive)?.id ?? null;
+  // A fee is never that default: it is chosen.
+  const defaultId = rows.find((t) => t.isActive && t.kind === "tax")?.id ?? null;
+  const valueOf = (t: TaxRateSetting) =>
+    t.kind === "fee"
+      ? `${formatMoney(t.feeCents ?? 0, currency)} ${tr(FEE_PER_LABEL[t.feePer ?? "room"]).toLowerCase()}`
+      : percentOf(t.rateBps);
 
   function commit(next: string[]) {
     if (next.join() === order.join()) return;
@@ -368,6 +387,20 @@ export function TaxesPanel({
   }
 
   function save(d: TaxDraft) {
+    let feeCents: number | null = null;
+    if (d.kind === "fee") {
+      try {
+        feeCents = parseMoney(d.amount);
+      } catch {
+        setProblem(tr("A fee needs an amount"));
+        return;
+      }
+      if (feeCents < 0) {
+        setProblem(tr("A fee needs an amount"));
+        return;
+      }
+    }
+    setProblem(null);
     run(async () => {
       const result = await saveTaxRate({
         id: d.id,
@@ -375,6 +408,9 @@ export function TaxesPanel({
         rateBps: Math.round((Number(d.percent) || 0) * 100),
         inclusion: d.inclusion,
         isActive: d.isActive,
+        kind: d.kind,
+        feeCents,
+        feePer: d.kind === "fee" ? d.feePer : null,
       });
       if (result.ok) setDraft(null);
       return result;
@@ -451,8 +487,8 @@ export function TaxesPanel({
                         {t.name}
                       </span>
                     </td>
-                    <td className="px-2 py-1.5">{tr("Tax")}</td>
-                    <td className="tnum px-2 py-1.5">{percentOf(t.rateBps)}</td>
+                    <td className="px-2 py-1.5">{t.kind === "fee" ? tr("Fee") : tr("Tax")}</td>
+                    <td className="tnum px-2 py-1.5">{valueOf(t)}</td>
                     <td className="px-2 py-1.5">
                       {!t.isActive ? tr("Retired") : t.id === defaultId ? tr("By default") : tr("When chosen")}
                     </td>
@@ -471,6 +507,9 @@ export function TaxesPanel({
                                 inclusion: t.inclusion,
                                 isActive: t.isActive,
                                 frozen: t.chargeCount > 0,
+                                kind: t.kind,
+                                amount: t.feeCents === null ? "" : formatMoneyInput(t.feeCents),
+                                feePer: t.feePer ?? "room",
                               })
                             }
                           >
@@ -514,6 +553,9 @@ export function TaxesPanel({
                   inclusion: "inclusive",
                   isActive: true,
                   frozen: false,
+                  kind: "tax",
+                  amount: "",
+                  feePer: "room",
                 })
               }
             >
@@ -526,7 +568,10 @@ export function TaxesPanel({
       {draft && (
         <Dialog
           title={draft.id ? tr("Edit tax") : tr("New tax")}
-          onClose={() => setDraft(null)}
+          onClose={() => {
+            setDraft(null);
+            setProblem(null);
+          }}
           footer={
             <>
               <button type="button" className={secondary} onClick={() => setDraft(null)}>
@@ -548,12 +593,65 @@ export function TaxesPanel({
               className={field}
             />
           </label>
+          {!draft.frozen && (
+            <label className={label}>
+              {tr("Type")}
+              <select
+                value={draft.kind}
+                onChange={(e) => setDraft({ ...draft, kind: e.target.value as TaxKind })}
+                className={field}
+              >
+                <option value="tax">{tr("Tax: a percentage of the rate")}</option>
+                <option value="fee">{tr("Fee: a fixed amount a night")}</option>
+              </select>
+            </label>
+          )}
           {/*
             A rate with charges posted at it is settled: a folio item records
             which rate it used. The figure and the inclusion are shown, not
             offered -- retire it and add a new one.
           */}
-          {draft.frozen ? (
+          {draft.frozen && draft.kind === "fee" ? (
+            <div className="grid grid-cols-2 gap-4 text-[14px] text-ink">
+              <p>
+                <span className={label}>{tr("Type")}</span>
+                <span className="mt-1 block">{tr("Fee")}</span>
+              </p>
+              <p>
+                <span className={label}>{tr("Value")}</span>
+                <span className="tnum mt-1 block">
+                  {formatMoney(parseMoney(draft.amount || "0"), currency)} {tr(FEE_PER_LABEL[draft.feePer]).toLowerCase()}
+                </span>
+              </p>
+              <p className="col-span-2 text-[12.5px] text-ink-muted">
+                {tr("Charges have been posted at this rate, so its value is fixed.")}
+              </p>
+            </div>
+          ) : draft.kind === "fee" ? (
+            <div className="grid grid-cols-2 gap-4">
+              <label className={label}>
+                {tr("Amount")}
+                <input
+                  inputMode="decimal"
+                  value={draft.amount}
+                  onChange={(e) => setDraft({ ...draft, amount: e.target.value })}
+                  className={cn(field, "tnum")}
+                />
+              </label>
+              <label className={label}>
+                {tr("Charged")}
+                <select
+                  value={draft.feePer}
+                  onChange={(e) => setDraft({ ...draft, feePer: e.target.value as FeePer })}
+                  className={field}
+                >
+                  {(Object.keys(FEE_PER_LABEL) as FeePer[]).map((k) => (
+                    <option key={k} value={k}>{tr(FEE_PER_LABEL[k])}</option>
+                  ))}
+                </select>
+              </label>
+            </div>
+          ) : draft.frozen ? (
             <div className="grid grid-cols-2 gap-4 text-[14px] text-ink">
               <p>
                 <span className={label}>{tr("Value")}</span>
@@ -604,6 +702,7 @@ export function TaxesPanel({
             />
             {tr("Active")}
           </label>
+          {problem && <p className="text-[13px] text-rose-700">{problem}</p>}
         </Dialog>
       )}
     </div>
