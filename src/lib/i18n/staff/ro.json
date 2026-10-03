@@ -52,6 +52,7 @@
  "{0} needs at least {1} children in a room.": "{0} necesită cel puțin {1} copii într-o cameră.",
  "{0} records are append-only; create a reversing entry instead": "Înregistrările {0} acceptă doar adăugări; creați în schimb o înregistrare de stornare",
  "{0} seats {1}, and this is for {2}. Pick a bigger room or reduce the count.": "{0} are {1} locuri, iar rezervarea este pentru {2}. Alegeți o sală mai mare sau reduceți numărul.",
+ "{0} sleeps {1} at most, and this room has {2} guests": "{0} are cel mult {1} locuri, iar această cameră are {2} oaspeți",
  "{0} sleeps at most {1}, so it has no price for {2} adults.": "{0} are cel mult {1} locuri, deci nu are preț pentru {2} adulți.",
  "{0} still holds {1} extra{2}. Move or delete them first": "{0} conține încă {1} extra. Mutați-le sau ștergeți-le mai întâi",
  "{0} takes at most {1} adults in a room.": "{0} acceptă cel mult {1} adulți într-o cameră.",

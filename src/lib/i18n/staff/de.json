@@ -52,6 +52,7 @@
  "{0} needs at least {1} children in a room.": "{0} erfordert mindestens {1} Kinder pro Zimmer.",
  "{0} records are append-only; create a reversing entry instead": "{0}-Datensätze können nur ergänzt werden; erstellen Sie stattdessen eine Gegenbuchung",
  "{0} seats {1}, and this is for {2}. Pick a bigger room or reduce the count.": "{0} bietet {1} Plätze, gebucht sind {2}. Wählen Sie einen größeren Raum oder verringern Sie die Anzahl.",
+ "{0} sleeps {1} at most, and this room has {2} guests": "{0} bietet höchstens {1} Personen Platz, und dieses Zimmer hat {2} Gäste",
  "{0} sleeps at most {1}, so it has no price for {2} adults.": "{0} bietet höchstens {1} Personen Platz und hat daher keinen Preis für {2} Erwachsene.",
  "{0} still holds {1} extra{2}. Move or delete them first": "{0} enthält noch {1} Extras. Verschieben oder löschen Sie sie zuerst",
  "{0} takes at most {1} adults in a room.": "{0} erlaubt höchstens {1} Erwachsene pro Zimmer.",

@@ -158,6 +158,9 @@
  "{0} seats {1}, and this is for {2}. Pick a bigger room or reduce the count.": {
   "kind": "db"
  },
+ "{0} sleeps {1} at most, and this room has {2} guests": {
+  "kind": "db"
+ },
  "{0} sleeps at most {1}, so it has no price for {2} adults.": {
   "kind": "db"
  },
