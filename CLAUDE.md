@@ -751,6 +751,10 @@ showed the Reservation Centric calendar and asked for it by name.
       as deleting a range leaves them.
     - **The Default Season is not a row**: every day no season covers,
       computed in the panel from the first season year to the last.
+    - **"Add season or event" starts on the first free day**: the first
+      day from the business date no season covers. It was seeded with the
+      business date itself, so whenever today sat inside a season, typing a
+      name and pressing Save was refused as an overlap.
     - `add_season_range()` names the season an overlap hits rather than
       letting the constraint's raw text through. A new season is its type and
       its first range; if the range is refused the type is taken back.
