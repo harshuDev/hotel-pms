@@ -1704,7 +1704,7 @@ export async function getTaxRates(): Promise<TaxRate[]> {
 
   const { data, error } = await supabase
     .from("tax_rates")
-    .select("id, name, rate_bps, inclusion")
+    .select("id, name, rate_bps, inclusion, kind")
     .eq("is_active", true)
     // The order set on Tax Information (0079). The booking form seeds its tax
     // field with the FIRST of these, so dragging a rate to the top is how a
@@ -1722,12 +1722,14 @@ export async function getTaxRates(): Promise<TaxRate[]> {
       name: string;
       rate_bps: number;
       inclusion: "inclusive" | "exclusive";
+      kind: string;
     }[]
   ).map((row) => ({
     id: row.id,
     name: row.name,
     rateBps: row.rate_bps,
     inclusion: row.inclusion,
+    kind: row.kind === "fee" ? ("fee" as const) : ("tax" as const),
   }));
 }
 
@@ -3580,6 +3582,9 @@ export async function getTaxRateSettings(): Promise<TaxRateSetting[]> {
       charge_count: number;
       sort_order: number;
       in_use: boolean;
+      kind: string;
+      fee_cents: number | null;
+      fee_per: string | null;
     }[]
   ).map((row) => ({
     id: row.id,
@@ -3590,6 +3595,12 @@ export async function getTaxRateSettings(): Promise<TaxRateSetting[]> {
     chargeCount: Number(row.charge_count ?? 0),
     sortOrder: row.sort_order,
     inUse: row.in_use,
+    kind: row.kind === "fee" ? ("fee" as const) : ("tax" as const),
+    feeCents: row.fee_cents === null ? null : Number(row.fee_cents),
+    feePer:
+      row.fee_per === "room" || row.fee_per === "person" || row.fee_per === "adult"
+        ? row.fee_per
+        : null,
   }));
 }
 

@@ -645,11 +645,16 @@ export interface BookableRoomType {
   available: number;
 }
 
+/** A tax is a percentage; a fee (0122) is a fixed amount a night. */
+export type TaxKind = "tax" | "fee";
+export type FeePer = "room" | "person" | "adult";
+
 export interface TaxRate {
   id: string;
   name: string;
   rateBps: number;
   inclusion: "inclusive" | "exclusive";
+  kind: TaxKind;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -1090,6 +1095,10 @@ export interface TaxRateSetting {
   sortOrder: number;
   /** Charged, or set on an extra or a category: then it cannot be deleted. */
   inUse: boolean;
+  kind: TaxKind;
+  /** A fee's amount a night, in pence, and what it is counted per. */
+  feeCents: number | null;
+  feePer: FeePer | null;
 }
 
 export interface ChannelSetting {

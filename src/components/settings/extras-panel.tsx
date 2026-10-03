@@ -133,7 +133,7 @@ export function ExtrasPanel({
   );
   // Retired rates stay choosable only by the row already on one.
   const taxOptions = (current: string) =>
-    taxRates.filter((t) => t.isActive || t.id === current);
+    taxRates.filter((t) => (t.isActive && t.kind === "tax") || t.id === current);
 
   /* -- Categories ------------------------------------------------------- */
   const [cat, setCat] = useState<CategoryDraft | null>(null);

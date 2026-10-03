@@ -642,7 +642,7 @@ export function RatePlansPanel({
     const d = draftOf(p, defaultPolicyId);
     // A new plan starts on the hotel's default tax -- the top of Tax
     // Information, as the booking form seeds it -- not on "No tax".
-    if (!p) d.taxRateIds = taxRates.filter((t) => t.isActive).slice(0, 1).map((t) => t.id);
+    if (!p) d.taxRateIds = taxRates.filter((t) => t.isActive && t.kind === "tax").slice(0, 1).map((t) => t.id);
     setDraft(d);
   }
 

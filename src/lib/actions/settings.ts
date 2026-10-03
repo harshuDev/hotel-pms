@@ -16,6 +16,7 @@ import type { ReactionGroup } from "@/lib/reactions";
 import { renderInvoiceTemplate } from "@/lib/document-template";
 import { invoiceLiquidData, loadInvoice, type InvoiceView } from "@/lib/invoice-data";
 import type { Json } from "@/lib/database.types";
+import type { FeePer, TaxKind } from "@/lib/types";
 import type { HotelPolicies } from "@/lib/hotel-policies";
 import type { ExtraItemType } from "@/lib/extras";
 import type { FacilityIcon } from "@/lib/facilities";
@@ -1844,11 +1845,19 @@ export async function saveTaxRate(input: {
   rateBps: number;
   inclusion: "inclusive" | "exclusive";
   isActive: boolean;
+  /** A fee (0122) is a fixed amount a night, per room, person or adult. */
+  kind: TaxKind;
+  feeCents: number | null;
+  feePer: FeePer | null;
 }): Promise<ActionResult<{ id: string }>> {
   if (input.name.trim() === "") {
     return { ok: false, error: await localised("A tax rate needs a name.") };
   }
-  if (!Number.isSafeInteger(input.rateBps) || input.rateBps < 0 || input.rateBps > 10000) {
+  if (input.kind === "fee") {
+    if (input.feeCents === null || !Number.isSafeInteger(input.feeCents) || input.feeCents < 0) {
+      return { ok: false, error: await localised("A fee needs an amount") };
+    }
+  } else if (!Number.isSafeInteger(input.rateBps) || input.rateBps < 0 || input.rateBps > 10000) {
     return { ok: false, error: await localised("A tax rate must be between 0 and 100 percent.") };
   }
 
@@ -1856,9 +1865,12 @@ export async function saveTaxRate(input: {
   const { data, error } = await supabase.rpc("save_tax_rate", {
     p_id: input.id,
     p_name: input.name,
-    p_rate_bps: input.rateBps,
-    p_inclusion: input.inclusion,
+    p_rate_bps: input.kind === "fee" ? 0 : input.rateBps,
+    p_inclusion: input.kind === "fee" ? "exclusive" : input.inclusion,
     p_is_active: input.isActive,
+    p_kind: input.kind,
+    p_fee_cents: input.kind === "fee" ? input.feeCents : null,
+    p_fee_per: input.kind === "fee" ? input.feePer : null,
   });
 
   if (error) return { ok: false, error: await localised(error.message) };
