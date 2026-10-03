@@ -52,6 +52,7 @@
  "{0} needs at least {1} children in a room.": "{0} zahteva vsaj {1} otrok v sobi.",
  "{0} records are append-only; create a reversing entry instead": "Zapisi {0} dovoljujejo samo dodajanje; namesto tega ustvarite stornacijski vnos",
  "{0} seats {1}, and this is for {2}. Pick a bigger room or reduce the count.": "{0} ima {1} mest, rezervacija pa je za {2}. Izberite večjo dvorano ali zmanjšajte število.",
+ "{0} sleeps {1} at most, and this room has {2} guests": "{0} sprejme največ {1} oseb, ta soba pa ima {2} gostov",
  "{0} sleeps at most {1}, so it has no price for {2} adults.": "{0} sprejme največ {1} oseb, zato nima cene za {2} odraslih.",
  "{0} still holds {1} extra{2}. Move or delete them first": "{0} ima še {1} dodatkov. Najprej jih premaknite ali izbrišite",
  "{0} takes at most {1} adults in a room.": "{0} dovoljuje največ {1} odraslih v sobi.",

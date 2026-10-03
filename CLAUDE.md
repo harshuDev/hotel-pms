@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0122` are
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0123` are
 applied to the hosted database.
 
 Working on real data: dashboard (house board, movements, pace, activity feed),
@@ -1767,6 +1767,13 @@ client: "Need to add Booking Channel in the Dashboard".
   exist to stop. A room line may name its own `rate_cents` instead, which then
   holds for every night. Neither means there is no price, and a booking with no
   price is a bill nobody can settle.
+- **A ROOM HOLDS NO MORE GUESTS THAN ITS TYPE SLEEPS (0123).** The client:
+  "one room should have 1 person; the system allowed 2". The guest page has
+  refused an over-capacity party since 0036, but `create_booking()` took any
+  party. It now refuses a room line whose adults + children exceed the room
+  type's `max_occupancy`, by name, as HP002 -- so "Ignore restrictions" is
+  the deliberate override, like any other commercial rule. Set the limit on
+  the room type (Max Occupancy) or, per plan, Max Adults.
 - **`create_booking()` enforces the inventory**, and says which refusal it is
   with a SQLSTATE rather than message text: `HP001` would oversell, `HP002`
   breaks a stay rule or a closed date. Both can be overridden, by

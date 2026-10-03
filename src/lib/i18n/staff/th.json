@@ -52,6 +52,7 @@
  "{0} needs at least {1} children in a room.": "{0} ต้องมีเด็กอย่างน้อย {1} คนต่อห้อง",
  "{0} records are append-only; create a reversing entry instead": "ระเบียน {0} เพิ่มได้อย่างเดียว ให้สร้างรายการกลับรายการแทน",
  "{0} seats {1}, and this is for {2}. Pick a bigger room or reduce the count.": "{0} รองรับ {1} คน และการจองนี้สำหรับ {2} คน เลือกห้องที่ใหญ่กว่าหรือลดจำนวน",
+ "{0} sleeps {1} at most, and this room has {2} guests": "{0} พักได้สูงสุด {1} คน แต่ห้องนี้มีผู้เข้าพัก {2} คน",
  "{0} sleeps at most {1}, so it has no price for {2} adults.": "{0} รองรับได้สูงสุด {1} คน จึงไม่มีราคาสำหรับผู้ใหญ่ {2} คน",
  "{0} still holds {1} extra{2}. Move or delete them first": "{0} ยังมีรายการเสริม {1} รายการ ย้ายหรือลบก่อน",
  "{0} takes at most {1} adults in a room.": "{0} รับผู้ใหญ่ได้สูงสุด {1} คนต่อห้อง",
