@@ -834,15 +834,8 @@ export function RatePlansPanel({
       >
         <div className="grid gap-x-8 gap-y-4 lg:grid-cols-2">
           <Row label={tr("Title")} required htmlFor="rp-title">
-            <span className="flex gap-2">
-              <input id="rp-title" autoFocus value={draft.name} className={cn(fieldR, "min-w-0 flex-1")}
-                onChange={(e) => set({ name: e.target.value })} />
-              {/* The code (0120): blank on a new plan is the title's initials. */}
-              <input value={draft.code} maxLength={20} className={cn(fieldR, "w-24 uppercase")}
-                aria-label={tr("Code")} title={tr("Code")}
-                placeholder={draft.id ? "" : codeFor(draft.name, ratePlans.map((p) => p.code))}
-                onChange={(e) => set({ code: e.target.value.toUpperCase() })} />
-            </span>
+            <input id="rp-title" autoFocus value={draft.name} className={fieldR}
+              onChange={(e) => set({ name: e.target.value })} />
           </Row>
           <Row label={tr("Meal Type")} required>
             <FilterSelect

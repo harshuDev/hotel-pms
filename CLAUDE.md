@@ -1474,10 +1474,10 @@ client: "Need to add Booking Channel in the Dashboard".
       ticked meals, so the choice and the meals (which the meal report and
       the audit's meal split read) never disagree; a kept meal keeps its
       value. Existing plans took the choice their meals said.
-    - **The code sits beside the Title (0120)**, narrow, upper-cased, 20 at
-      most. Blank is the title's initials, unique on the property, shown as
-      the placeholder. `save_rate_plan()` refuses a code another plan uses by
-      name. **Min Adults / Min Children are drawn only when a plan already has
+    - **The code is NOT on the form** -- 0120 put a box beside the Title and
+      the client had it removed. A new plan is given the title's initials,
+      unique on the property; an edit keeps its code. `save_rate_plan()`
+      still refuses a code another plan uses by name. **Min Adults / Min Children are drawn only when a plan already has
       one**, so a rule set before is never hidden while enforced.
     - **ATTACHED TAXES TAKES SEVERAL (0116). This reverses what this file
       said**, that it took one: the client asked for it -- "there could be an
