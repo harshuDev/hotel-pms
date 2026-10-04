@@ -204,6 +204,8 @@ export function RatesScreen({
     const plan = planById.get(planId);
     const type = typeById.get(typeId);
     if (!plan || !type || plan.occupancyPricing !== "per_person") return base;
+    // A party removed in Room Rate Combinations (0124) pays the standard price.
+    if ((plan.standardOccupancies?.[typeId] ?? []).includes(a)) return base;
     const b = type.baseOccupancy;
     const inc = plan.adultAdjustCents ?? 0;
     const dec = plan.adultDecreaseCents ?? inc;

@@ -86,6 +86,9 @@
  "{0} is derived from {1}. Stop deriving it first.": {
   "kind": "db"
  },
+ "{0} is derived from another rate plan, so its occupancy prices follow that plan": {
+  "kind": "db"
+ },
  "{0} is in the list twice": {
   "kind": "db"
  },
@@ -156,6 +159,9 @@
   "kind": "db"
  },
  "{0} seats {1}, and this is for {2}. Pick a bigger room or reduce the count.": {
+  "kind": "db"
+ },
+ "{0} sleeps {1} at most": {
   "kind": "db"
  },
  "{0} sleeps {1} at most, and this room has {2} guests": {
@@ -6706,6 +6712,12 @@
  "Rate plan {0} removed from {1}": {
   "kind": "db"
  },
+ "Rate plan {0}: the {1} adults price removed on {2}": {
+  "kind": "db"
+ },
+ "Rate plan {0}: the {1} adults price restored on {2}": {
+  "kind": "db"
+ },
  "Rate plan {name} created.": {
   "kind": "text"
  },
@@ -8352,6 +8364,12 @@
  "That would remove your own access. Have another administrator do it.": {
   "kind": "db"
  },
+ "The {n} adults price on {name} is back.": {
+  "kind": "text"
+ },
+ "The {n} adults price on {name} is removed. That party pays the standard price.": {
+  "kind": "text"
+ },
  "The active date range ends before it starts": {
   "kind": "db"
  },
@@ -8551,6 +8569,9 @@
   "kind": "text"
  },
  "The policy is too long": {
+  "kind": "db"
+ },
+ "The price for {0} adults is the standard price on {1}, so it cannot be removed": {
   "kind": "db"
  },
  "The price is a number, like 24 or 24.50.": {

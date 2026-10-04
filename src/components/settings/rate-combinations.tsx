@@ -13,7 +13,7 @@ import type {
   SeasonType,
   WeekRate,
 } from "@/lib/types";
-import { removeRateCombination, saveWeekRates } from "@/lib/actions/settings";
+import { removeRateCombination, saveWeekRates, setStandardOccupancy } from "@/lib/actions/settings";
 import { FilterSelect, type FilterOption } from "./filter-select";
 
 /*
@@ -290,13 +290,28 @@ export function RateCombinations({
   function occupancyRows(p: RatePlan, t: RoomTypeSetting, r: Row): number[] {
     const b = baseOf(t);
     const all = Array.from({ length: t.maxOccupancy }, (_, x) => x + 1).filter((a) => a !== b);
-    if (p.occupancyPricing === "per_person") return all;
+    // A per-person plan's removed rows (0124) pay the standard price.
+    if (p.occupancyPricing === "per_person") return all.filter((a) => !removedOf(p, t).includes(a));
     return all.filter(
       (a) => r.days.some((d) => (d.occ[a] ?? "").trim() !== "") || addedOcc.includes(`${k(p.id, t.id)}|${a}`),
     );
   }
 
+  const removedOf = (p: RatePlan, t: RoomTypeSetting) => p.standardOccupancies[t.id] ?? [];
+
+  /** A per-person row is worked out, not typed, so removing it is stored at once (0124). */
+  function setPerPersonRow(p: RatePlan, t: RoomTypeSetting, a: number, removed: boolean) {
+    const name = `${p.name}, ${typeName(t)}`;
+    run(
+      () => setStandardOccupancy({ ratePlanId: p.id, roomTypeId: t.id, adults: a, removed }),
+      removed
+        ? tr("The {n} adults price on {name} is removed. That party pays the standard price.", { n: a, name })
+        : tr("The {n} adults price on {name} is back.", { n: a, name }),
+    );
+  }
+
   function removeOcc(p: RatePlan, t: RoomTypeSetting, a: number) {
+    if (p.occupancyPricing === "per_person") return setPerPersonRow(p, t, a, true);
     const r = row(p.id, t);
     const days = r.days.map((d) => {
       const occ = { ...d.occ };
@@ -539,7 +554,7 @@ export function RateCombinations({
                       const showOcc = (multi || !!derivedOn[t.id]) && !derived && p.occupancyPricing !== "single";
                       const occRows = showOcc ? occupancyRows(p, t, r) : [];
                       const canAddOcc =
-                        showOcc && canEdit && p.occupancyPricing === "per_occupancy"
+                        showOcc && canEdit && p.occupancyPricing !== "single"
                           ? Array.from({ length: t.maxOccupancy }, (_, x) => x + 1).filter(
                               (a) => a !== b && !occRows.includes(a),
                             )
@@ -658,8 +673,8 @@ export function RateCombinations({
                                 <span className="flex items-center gap-1.5" aria-label={tr.plural(a, "{n} adult", "{n} adults")}>
                                   <span className="flex items-center gap-0.5"><PersonIcon />{a}</span>
                                   <span className="flex items-center gap-0.5"><ChildIcon />0</span>
-                                  {canEdit && p.occupancyPricing === "per_occupancy" && (
-                                    <button type="button" onClick={() => removeOcc(p, t, a)}
+                                  {canEdit && (
+                                    <button type="button" onClick={() => removeOcc(p, t, a)} disabled={pending}
                                       title={tr("Remove")}
                                       aria-label={tr("Remove the {n} adults price for {name}", { n: a, name: `${p.name}, ${typeName(t)}` })}
                                       className="ml-1 grid h-5 w-5 place-items-center rounded text-[14px] leading-none text-ink-faint hover:bg-rose-50 hover:text-rose-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-brass">
@@ -694,7 +709,9 @@ export function RateCombinations({
                                   aria-label={tr("Add an occupancy price for {name}", { name: `${p.name}, ${typeName(t)}` })}
                                   onChange={(e) => {
                                     const a = Number(e.target.value);
-                                    if (a) setAddedOcc([...addedOcc, `${k(p.id, t.id)}|${a}`]);
+                                    if (!a) return;
+                                    if (p.occupancyPricing === "per_person") return setPerPersonRow(p, t, a, false);
+                                    setAddedOcc([...addedOcc, `${k(p.id, t.id)}|${a}`]);
                                   }}
                                   className="rounded border border-line bg-white px-2 py-1 text-[12px] text-ink-muted hover:border-ink-faint focus:border-brass focus:outline-none focus:ring-1 focus:ring-brass"
                                 >
