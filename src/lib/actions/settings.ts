@@ -2076,6 +2076,32 @@ export async function saveRatePlan(input: {
  * Takes a room type off a rate plan (0120): from the business date on, the
  * pair's prices, restrictions and saved weeks go. Bookings keep their rates.
  */
+/**
+ * Removes or restores one occupancy row on a plan priced per person (0124).
+ * A removed party pays the standard price; nothing typed is cleared because
+ * a per-person plan's rows are worked out, not stored.
+ */
+export async function setStandardOccupancy(input: {
+  ratePlanId: string;
+  roomTypeId: string;
+  adults: number;
+  removed: boolean;
+}): Promise<ActionResult<null>> {
+  const supabase = await createClient();
+
+  const { error } = await supabase.rpc("set_rate_plan_standard_occupancy", {
+    p_rate_plan_id: input.ratePlanId,
+    p_room_type_id: input.roomTypeId,
+    p_adults: input.adults,
+    p_standard: input.removed,
+  });
+
+  if (error) return { ok: false, error: await localised(error.message) };
+
+  revalidateSettings();
+  return { ok: true, data: null };
+}
+
 export async function removeRateCombination(input: {
   ratePlanId: string;
   roomTypeId: string;

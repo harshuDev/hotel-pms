@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0123` are
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0124` are
 applied to the hosted database.
 
 Working on real data: dashboard (house board, movements, pace, activity feed),
@@ -1404,6 +1404,16 @@ client: "Need to add Booking Channel in the Dashboard".
           standard price. Rows show only where a price is held. A season
           Save clears the removed party's nights; the Default Season only
           does with "Replace prices" ticked, so Save refuses until it is.
+        - **A PER-PERSON ROW CAN BE REMOVED TOO (0124)** -- the client's "Add
+          a remove option for Guest basis". Its rows are worked out, not
+          typed, so there is nothing to clear: × stores the party in
+          `rate_plans.standard_occupancies` (room type id -> adults) through
+          `set_rate_plan_standard_occupancy()`, at once rather than on Save,
+          and "+ Occupancy" brings it back. `rate_plan_night_rate()` and
+          `rate_plan_occupancy_rate()` then price that party at the standard
+          price, ignoring any stored per-night occupancy price, so every
+          booking path follows. The plan form and the Inventory Rates grid
+          leave a removed row out. Removing the combination clears the list.
         - **"Show derived and calculated rates" is per room type** and shows
           that type's derived plans AND its occupancy rows. It used to show
           derived plans only, so on a type with none it did nothing.

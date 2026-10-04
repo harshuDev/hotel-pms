@@ -1793,6 +1793,16 @@ export async function getRatePlans(): Promise<RatePlan[]> {
  * "Show Expired Rates" brings back the ones no longer selling so one can be
  * put back on sale. Everywhere that SELLS reads getRatePlans() instead.
  */
+/** rate_plans.standard_occupancies (0124): room type id -> adults paying the standard price. */
+function standardOccupanciesOf(v: unknown): Record<string, number[]> {
+  if (!v || typeof v !== "object" || Array.isArray(v)) return {};
+  const out: Record<string, number[]> = {};
+  for (const [typeId, list] of Object.entries(v as Record<string, unknown>)) {
+    if (Array.isArray(list)) out[typeId] = list.filter((a): a is number => typeof a === "number");
+  }
+  return out;
+}
+
 export async function getRatePlanSettings(): Promise<RatePlan[]> {
   return loadRatePlans(true);
 }
@@ -1803,7 +1813,7 @@ async function loadRatePlans(includeRetired: boolean): Promise<RatePlan[]> {
   let query = supabase
     .from("rate_plans")
     .select(
-      "id, code, name, description, is_default, is_active, is_public, cancellation_policy_id, rate_plan_meals(meal, value_cents), min_days_advance, max_days_advance, min_adults, max_adults, min_children, max_children, valid_from, valid_to, parent_rate_plan_id, derived_kind, derived_percent_bps, derived_amount_cents, occupancy_pricing, adult_adjust_cents, child_adjust_cents, adult_decrease_cents, rate_plan_taxes(tax_rate_id, sort_order), accounting_category_id, rate_plan_channels(channel_id), meal_plan, rate_plan_extras(extra_id, posting, frequency, per_unit, quantity, price_cents, charge_on)",
+      "id, code, name, description, is_default, is_active, is_public, cancellation_policy_id, rate_plan_meals(meal, value_cents), min_days_advance, max_days_advance, min_adults, max_adults, min_children, max_children, valid_from, valid_to, parent_rate_plan_id, derived_kind, derived_percent_bps, derived_amount_cents, occupancy_pricing, adult_adjust_cents, child_adjust_cents, adult_decrease_cents, standard_occupancies, rate_plan_taxes(tax_rate_id, sort_order), accounting_category_id, rate_plan_channels(channel_id), meal_plan, rate_plan_extras(extra_id, posting, frequency, per_unit, quantity, price_cents, charge_on)",
     );
   if (!includeRetired) query = query.eq("is_active", true);
   const { data, error } = await query
@@ -1842,6 +1852,7 @@ async function loadRatePlans(includeRetired: boolean): Promise<RatePlan[]> {
       adult_adjust_cents: number | null;
       child_adjust_cents: number | null;
       adult_decrease_cents: number | null;
+      standard_occupancies: unknown;
       rate_plan_taxes: { tax_rate_id: string; sort_order: number }[];
       accounting_category_id: string | null;
       rate_plan_channels: { channel_id: string }[];
@@ -1892,6 +1903,7 @@ async function loadRatePlans(includeRetired: boolean): Promise<RatePlan[]> {
     adultAdjustCents: row.adult_adjust_cents === null ? null : Number(row.adult_adjust_cents),
     childAdjustCents: row.child_adjust_cents === null ? null : Number(row.child_adjust_cents),
     adultDecreaseCents: row.adult_decrease_cents === null ? null : Number(row.adult_decrease_cents),
+    standardOccupancies: standardOccupanciesOf(row.standard_occupancies),
     taxRateIds: [...(row.rate_plan_taxes ?? [])]
       .sort((a, b) => a.sort_order - b.sort_order)
       .map((t) => t.tax_rate_id),

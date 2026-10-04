@@ -230,7 +230,8 @@ export const PlanRates = forwardRef<
     const b = baseOf(t);
     if (mode === "single" || derived) return [b];
     const all = Array.from({ length: t.maxOccupancy }, (_, x) => x + 1);
-    if (mode === "per_person") return all;
+    // Rows removed in Room Rate Combinations (0124) pay the standard price.
+    if (mode === "per_person") return all.filter((a) => a === b || !(plan.standardOccupancies?.[t.id] ?? []).includes(a));
     return all.filter(
       (a) => a === b || (d.rows[a] ?? []).some((v) => v.trim() !== "") || addedOcc.includes(`${k(t.id)}|${a}`),
     );

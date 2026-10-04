@@ -708,6 +708,8 @@ export interface RatePlan {
   childAdjustCents: number | null;
   /** Taken off per adult below the base occupancy; null uses the adult amount (0110). */
   adultDecreaseCents: number | null;
+  /** Per room type, the parties removed on a per-person plan: they pay the standard price (0124). */
+  standardOccupancies: Record<string, number[]>;
   /** The taxes the plan is sold with, in order (0116: several), and its own ledger account. */
   taxRateIds: string[];
   accountingCategoryId: string | null;

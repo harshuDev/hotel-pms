@@ -205,6 +205,7 @@ function newPlanFor(d: Draft): RatePlan {
     adultAdjustCents: null,
     childAdjustCents: null,
     adultDecreaseCents: null,
+    standardOccupancies: {},
     taxRateIds: d.taxRateIds,
     accountingCategoryId: d.accountingCategoryId || null,
     channelIds: d.channelIds,
