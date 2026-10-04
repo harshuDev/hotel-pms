@@ -541,7 +541,7 @@ export function BookingDetailView({
             <span>{planNames.length > 0 ? planNames.join(", ") : tr("Not recorded")}</span>
           </Fact>
           <Fact name={tr("Total incl. tax")}>
-            <span className="tnum font-medium">{formatMoney(stayTotalCents, currency)}</span>
+            <span className="tnum font-bold">{formatMoney(stayTotalCents, currency)}</span>
             {stayTaxCents > 0 && (
               <span className="block text-xxs text-ink-faint">
                 {tr("{tax} tax", { tax: formatMoney(stayTaxCents, currency) })}
