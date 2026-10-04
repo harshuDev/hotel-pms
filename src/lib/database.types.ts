@@ -3726,6 +3726,7 @@ export type Database = {
           parent_rate_plan_id: string | null
           property_id: string
           sort_order: number
+          standard_occupancies: Json
           updated_at: string
           valid_from: string | null
           valid_to: string | null
@@ -3758,6 +3759,7 @@ export type Database = {
           parent_rate_plan_id?: string | null
           property_id: string
           sort_order?: number
+          standard_occupancies?: Json
           updated_at?: string
           valid_from?: string | null
           valid_to?: string | null
@@ -3790,6 +3792,7 @@ export type Database = {
           parent_rate_plan_id?: string | null
           property_id?: string
           sort_order?: number
+          standard_occupancies?: Json
           updated_at?: string
           valid_from?: string | null
           valid_to?: string | null
@@ -6576,6 +6579,14 @@ export type Database = {
         }
         Returns: number
       }
+      rate_plan_occupancy_is_standard: {
+        Args: {
+          p_adults: number
+          p_rate_plan_id: string
+          p_room_type_id: string
+        }
+        Returns: boolean
+      }
       rate_plan_occupancy_rate: {
         Args: {
           p_adults: number
@@ -7425,6 +7436,15 @@ export type Database = {
       set_rate_plan_public: {
         Args: { p_is_public: boolean; p_rate_plan_id: string }
         Returns: boolean
+      }
+      set_rate_plan_standard_occupancy: {
+        Args: {
+          p_adults: number
+          p_rate_plan_id: string
+          p_room_type_id: string
+          p_standard: boolean
+        }
+        Returns: undefined
       }
       set_rate_plan_terms: {
         Args: {
