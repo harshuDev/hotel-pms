@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0124` are
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0125` are
 applied to the hosted database.
 
 Working on real data: dashboard (house board, movements, pace, activity feed),
@@ -52,9 +52,31 @@ SQL, and as of 0031 an individual room and the payment methods can be corrected
 there too. Until a channel exists, no booking can be taken at all: every
 booking must have a source.
 
-The night audit advances the business date one day at a time and posts that
-night's room charges, so it is run once per day rather than caught up
-automatically. Nothing runs it on a schedule: "Close the day" on the dashboard
+The night audit advances the business date one day at a time, so it is run
+once per day rather than caught up automatically.
+
+**ROOM CHARGES POST AT CHECK-OUT, NOT NIGHTLY, as of 0125. This reverses what
+this file said**, that the audit posted each night's room charge. The client:
+"the charges are applied when the guest checks out, it doesn't charge the
+client on the daily basis." Decided with them: for every hotel, not a setting,
+and every night is dated on the CHECK-OUT business date.
+- `check_out_booking()` posts every night slept (stay date before the open
+  business date, `checked_in`) that has no room charge yet, each with its
+  "each night" extras, then the "at check-out" extras, then reads the balance.
+  A night an audit charged before 0125 is never charged twice; an early
+  departure's unslept nights are not charged.
+- `close_business_date()` posts nothing; its two charge columns were dropped.
+- `post_room_charge()` posts on the open business date, any night up to it,
+  never a night not yet reached.
+- **The money reports (Financial, Accounting, End of day, revenue chart) show a
+  stay's room revenue on its departure day.** Occupancy, ADR and RevPAR read
+  `booking_room_nights` and still count each night on its own date. Closed
+  days never change afterwards.
+- **An in-house guest's folio holds no room charges until they leave**, so a
+  payment taken during the stay reads as a credit. The check-out dialog reads
+  `booking_checkout_charges()` and shows the nights about to post and the
+  balance after them, so it never calls an uncharged stay settled.
+- Notes below that say "the audit charges" a night predate 0125. Nothing runs it on a schedule: "Close the day" on the dashboard
 is the only caller, and it refuses while a cashier shift is still open on the
 date being closed.
 
@@ -1582,7 +1604,7 @@ client: "Need to add Booking Channel in the Dashboard".
         `post_room_charge()`, exactly as a priced meal is: the guest pays the
         same and the revenue lands in the extra's report bucket.
       - **When** (added only): *At check-in* (`check_in_booking()`), *Each
-        night* (the night audit, with the room charge) or *At check-out*
+        night* (with the room charge, at check-out since 0125) or *At check-out*
         (`check_out_booking()`, before the balance it returns is read).
       - **Frequency** per night or per stay; **Per** room, person, adult or
         child -- the ROOM LINE's own party, so a group is charged room by

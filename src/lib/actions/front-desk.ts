@@ -127,6 +127,37 @@ export async function checkIn(
   return { ok: true, data: null };
 }
 
+export interface CheckoutCharges {
+  nights: number;
+  roomChargesCents: number;
+  /** The folio balance before the room charges post. */
+  balanceCents: number;
+}
+
+/**
+ * What checking out now would post (0125): room charges are not posted
+ * nightly but at check-out, so the folio balance alone would call an
+ * uncharged stay settled.
+ */
+export async function loadCheckoutCharges(
+  bookingId: string,
+): Promise<ActionResult<CheckoutCharges>> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("booking_checkout_charges", {
+    p_booking_id: bookingId,
+  });
+  if (error) return { ok: false, error: await localisedAs("The room charges could not be read", error.message) };
+  const row = (data ?? [])[0];
+  return {
+    ok: true,
+    data: {
+      nights: row?.nights ?? 0,
+      roomChargesCents: Number(row?.room_charges_cents ?? 0),
+      balanceCents: Number(row?.balance_cents ?? 0),
+    },
+  };
+}
+
 export async function checkOut(
   bookingId: string,
 ): Promise<ActionResult<{ outstandingCents: number }>> {

@@ -8,13 +8,12 @@ import type { ActionResult } from "@/lib/actions/cashier";
 export interface CloseDayResult {
   closedDate: string;
   nextDate: string;
-  roomChargesPosted: number;
-  roomChargesCents: number;
 }
 
 /**
- * Runs the night audit: posts the night's room charges, closes the open
- * business date and opens the next one, all in one transaction.
+ * Runs the night audit: closes the open business date and opens the next one.
+ * It posts no room charges (0125): a stay is charged when the guest checks
+ * out.
  *
  * The RPC is the gate, not this action — it refuses anyone who is not an
  * administrator or manager, and refuses while a cashier shift is still open.
@@ -27,8 +26,8 @@ export interface CloseDayResult {
  * show", which calls the same `cancel_booking(..., p_no_show => true)` the
  * sweep called, so nothing was lost but the automatic trigger.
  *
- * Only nights whose status is `checked_in` are charged, so a guest who never
- * arrived is billed nothing — but their rooms stay held until somebody acts.
+ * A guest who never arrived is billed nothing — but their rooms stay held
+ * until somebody acts.
  */
 export async function closeBusinessDate(): Promise<
   ActionResult<CloseDayResult>
@@ -45,8 +44,6 @@ export async function closeBusinessDate(): Promise<
     (data ?? []) as {
       closed_date: string;
       next_date: string;
-      room_charges_posted: number;
-      room_charges_cents: number;
     }[]
   )[0];
 
@@ -66,8 +63,6 @@ export async function closeBusinessDate(): Promise<
     data: {
       closedDate: row.closed_date,
       nextDate: row.next_date,
-      roomChargesPosted: row.room_charges_posted,
-      roomChargesCents: row.room_charges_cents,
     },
   };
 }
