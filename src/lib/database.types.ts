@@ -396,9 +396,12 @@ export type Database = {
       }
       booking_emails: {
         Row: {
+          attachments: string[]
           body: string
+          body_html: string | null
           booking_id: string
           created_at: string
+          error: string | null
           id: string
           property_id: string
           sent_at: string
@@ -408,9 +411,12 @@ export type Database = {
           to_address: string
         }
         Insert: {
+          attachments?: string[]
           body?: string
+          body_html?: string | null
           booking_id: string
           created_at?: string
+          error?: string | null
           id?: string
           property_id: string
           sent_at?: string
@@ -420,9 +426,12 @@ export type Database = {
           to_address: string
         }
         Update: {
+          attachments?: string[]
           body?: string
+          body_html?: string | null
           booking_id?: string
           created_at?: string
+          error?: string | null
           id?: string
           property_id?: string
           sent_at?: string
@@ -6933,6 +6942,19 @@ export type Database = {
       reaction_conditions_check: {
         Args: { p_depth: number; p_group: Json; p_property: string }
         Returns: number
+      }
+      record_booking_email: {
+        Args: {
+          p_attachments: string[]
+          p_body: string
+          p_body_html: string
+          p_booking_id: string
+          p_error: string
+          p_status: string
+          p_subject: string
+          p_to_address: string
+        }
+        Returns: string
       }
       record_booking_payment: {
         Args: {

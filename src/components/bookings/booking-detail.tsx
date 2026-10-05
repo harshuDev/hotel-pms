@@ -151,6 +151,8 @@ export function BookingDetailView({
   canCharge,
   extrasCatalog,
   emailTemplates,
+  hotelName,
+  mailReady,
   guest,
   cancellationTerms,
   timezone,
@@ -197,6 +199,10 @@ export function BookingDetailView({
   /** Email Setup -> Email Templates (0075), offered on the Email tab. Required,
       like the catalog above, so both frames must pass it. */
   emailTemplates: EmailTemplate[];
+  /** The hotel's name, for the Email tab's default subject and body (0131). */
+  hotelName: string;
+  /** SMTP is set up, so the Email tab sends rather than only records. */
+  mailReady: boolean;
   /** Null when the guest record could not be read; the tab then says so. */
   guest: BookingGuest | null;
   /**
@@ -1427,6 +1433,9 @@ export function BookingDetailView({
       {tab === "email" && (
         <EmailTab
           bookingId={detail.bookingId}
+          reference={detail.reference}
+          hotelName={hotelName}
+          mailReady={mailReady}
           emails={emails}
           defaultTo={guest?.email ?? null}
           timezone={timezone}

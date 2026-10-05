@@ -1,4 +1,5 @@
 import { stripePublishableKey } from "@/lib/stripe";
+import { mailConnected } from "@/lib/mailer";
 import { getT } from "@/lib/i18n/server";
 import { addDays, format, isValid, parseISO, subDays } from "date-fns";
 import { formatMoney } from "@/lib/money";
@@ -532,6 +533,8 @@ export default async function CalendarPage({
             cards={peek.cards}
             paymentRequests={peek.paymentRequests}
             gatewayKey={stripePublishableKey()}
+            hotelName={property.name}
+            mailReady={mailConnected()}
             activity={peek.activity}
             attachments={peek.attachments}
             emails={peek.emails}
