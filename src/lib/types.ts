@@ -123,6 +123,30 @@ export interface BookingPayment {
   isReversed: boolean;
 }
 
+/** A card saved at the payment gateway for a booking (0130). Never the number. */
+export interface BookingCard {
+  id: string;
+  brand: string | null;
+  last4: string | null;
+  expMonth: number | null;
+  expYear: number | null;
+  holderName: string | null;
+  createdAt: string;
+}
+
+/** A payment link sent to the guest (0130). */
+export interface PaymentRequest {
+  id: string;
+  folioId: string | null;
+  amountCents: number;
+  currency: string;
+  url: string;
+  description: string | null;
+  status: "open" | "paid" | "expired" | "canceled";
+  createdAt: string;
+  closedAt: string | null;
+}
+
 export interface ShiftPayment {
   id: string;
   bookingRef: string;

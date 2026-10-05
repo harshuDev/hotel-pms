@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0129` are
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0130` are
 applied to the hosted database.
 
 Working on real data: dashboard (house board, movements, pace, activity feed),
@@ -331,6 +331,8 @@ Each read is a Postgres view or RPC, never aggregation in the client:
 | `getBookingInvoiceTaxes(id)`       | `booking_invoice_taxes(id)` (0117) |
 | `getBookingFolioView(id, folio)`   | `booking_folio(id, folio)` -- the Folio tab, one folio (0129) |
 | `getBookingPayments(id)`           | `booking_payment_rows(id)` -- the Payment tab, with its folio (0129) |
+| `getBookingCards(id)`              | `booking_cards` -- the Card Vault (0130) |
+| `getPaymentRequests(id)`           | `payment_requests` (0130)         |
 
 **Two signatures carry the room-count rule.** The client operates properties
 with up to ~1,800 rooms, so no query may return every room and no screen may
@@ -1679,7 +1681,7 @@ client: "Need to add Booking Channel in the Dashboard".
       the guest page already shows as the policy's wording. So deposits,
       refunds, no-show and breakfast reach the guest in words, untranslated
       like every hotel's own wording. Nothing COLLECTS a deposit or charges a
-      no-show from them -- see "Card capture is not built".
+      no-show from them -- see "Card capture".
     - **One default per property** (partial unique index). A new rate plan
       with no policy takes it, by trigger on `rate_plans`. The default can be
       neither unticked nor deleted; tick another instead.
@@ -1717,12 +1719,11 @@ client: "Need to add Booking Channel in the Dashboard".
     picker. A guest accepting a non-refundable rate without being shown it is
     non-refundable is the one failure this feature exists to prevent. The
     hotel's own wording is NOT translated — only the label around it is.
-  - **NOTHING CHARGES A CARD.** "The hotel can charge the guest card anytime"
-    is a right the policy records, not one this system can exercise: there is
-    no Stripe code and no keys (see "Card capture is not built"). A
-    non-refundable booking means the charge stands and the folio still says
-    what is owed; collecting it is the front desk's job until card capture
-    exists. Do not let the interface imply otherwise.
+  - **NOTHING CHARGES A CARD BY ITSELF.** "The hotel can charge the guest
+    card anytime" is exercised by a person: since 0130 a card saved in the
+    booking's Card Vault can be charged from the Payment tab, once the Stripe
+    keys are set (see "Card capture"). The policy never triggers a charge,
+    and a non-refundable booking still means the folio says what is owed.
   - **A policy CAN be deleted as of 0093, but only one no rate plan uses and
     that is not the default** -- `delete_cancellation_policy()` refuses the
     rest by name. `rate_plans` points at a policy under `on delete restrict`,
@@ -2102,9 +2103,41 @@ client: "Need to add Booking Channel in the Dashboard".
     deposit would otherwise have nowhere to go.
   - `payments.payer_name` and `payments.description` were added for it; set
     once on insert, never edited (`payments_immutable` is untouched).
-  - **NOT copied: Card Vault and "Request payment".** Both are card capture
-    through a gateway, which is not built (see "Card capture is not built"),
-    and no card number may be stored here. They go in with the gateway.
+  - **CARD VAULT AND REQUEST PAYMENT ARE BUILT (0130), through Stripe**, at
+    the client's "Please copy everything". `card-vault.tsx` under the
+    Transactions card; actions in `src/lib/actions/card-vault.ts`; the client
+    in `src/lib/stripe.ts`. See "Card capture" below for the rules.
+    - **Card Vault**: "+ Add card" makes a SetupIntent; the card is typed into
+      Stripe's own `PaymentElement` and saved AT STRIPE; `saveCard()` reads
+      the SetupIntent back from Stripe (never trusting the page) and
+      `add_booking_card()` stores the ids, brand, last four, expiry and name
+      in `booking_cards`. One Stripe customer per guest, reused. "Charge"
+      takes an amount (the folio's due), a description and a folio, charges
+      off-session and posts through `record_gateway_payment()`. Remove
+      deletes the row, then detaches the card at Stripe.
+    - **Request payment** makes a Stripe Checkout link for an amount, kept in
+      `payment_requests` (Waiting, Paid, Expired, Cancelled) with Copy link,
+      Send (a `mailto:` with the link -- no mail provider) and Cancel (expires
+      it at Stripe). The guest lands on `/book/paid` afterwards, which records
+      nothing.
+    - **NO WEBHOOK, SO NO NEW ROUTE.** A paid request is recorded when staff
+      open the Payment tab: `syncPaymentRequests()` asks Stripe about each open
+      request under the staff session and posts what was paid. A payment can
+      therefore reach the folio a little after the guest paid -- it is there
+      the next time anyone opens the booking. A webhook would make it
+      immediate and is the one sanctioned route if the client wants that.
+    - **`record_gateway_payment()` posts at the property's first active CARD
+      payment type** (refused by name with none), never the drawer, on the
+      chosen open folio (else the primary). It is idempotent on Stripe's
+      payment id, held in `payments.authorization_reference` under a unique
+      index, so two people opening the tab, or Charge pressed again after a
+      failure to record, post it once.
+    - **An off-session charge the card's bank wants confirmed (SCA) is
+      refused** with "send them a payment request instead": the guest
+      confirms on Stripe's page.
+    - **Zero-decimal currencies (JPY, KRW...) are refused**: our money is
+      hundredths, Stripe counts those in whole units.
+    - **With no keys the tab says so in one line and draws no controls.**
 
 - **`bookings.external_payload` is empty on every row and nothing fills it.**
   OTA bookings are entered by hand (open decision 2), so the channel's raw
@@ -3742,18 +3775,29 @@ address is not worth a query.
 about to add one, read the user-menu note above first — the client has objected
 to a control that does nothing once already, and was right to.
 
-## Card capture is not built
+## Card capture (0130) -- built on Stripe, live once the keys are set
 
-There is no Stripe code in this repository and no keys in any environment. Card
-capture was scoped — capture the card at booking, charge it later — and then
-deliberately deferred rather than half-built against keys nobody has.
+The Payment tab's Card Vault and Request payment take cards through Stripe,
+built the way this section always said it would be: card details go to Stripe
+from the browser via Elements and a SetupIntent, and never touch this server
+or this database. What is stored is Stripe's ids plus brand, last four, expiry
+and the cardholder's name -- what PCI lets a merchant keep.
 
-When it is built: card details go to Stripe from the browser via Elements and a
-SetupIntent, and never touch this server or this database. What is stored is a
-token. A webhook is the one sanctioned API route, which is what the "no API
-routes except external webhooks" rule already allows for. Do not put a secret
-key in a `NEXT_PUBLIC_` variable, a client component, or anywhere the browser
-can reach.
+- **Keys: `STRIPE_SECRET_KEY` (server only) and
+  `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`**, set in the Vercel project's
+  environment, never in the repository. Without both, `stripeConnected()` is
+  false and the tab says card payments need a Stripe account. Do not put the
+  secret key in a `NEXT_PUBLIC_` variable, a client component, or anywhere
+  the browser can reach. Start with Stripe's TEST keys.
+- **One Stripe account for the deployment, not per property.** A second hotel
+  on its own Stripe account needs its keys per property -- in Vault, like a
+  channel manager's password -- which is to be asked for.
+- **It has not been run against Stripe from here**: no keys exist in this
+  project's environments. It was typechecked and built; the first test is
+  the client's, in test mode.
+- **Nothing charges a card automatically** -- not a non-refundable
+  cancellation, not a no-show. Staff press Charge. The Payment Gateway screen
+  in Settings is still a stored choice; the keys decide.
 
 ## Open decisions — do not silently choose
 

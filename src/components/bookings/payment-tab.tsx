@@ -7,7 +7,8 @@ import { useCurrency } from "@/components/currency";
 import { cn } from "@/components/ui";
 import { formatMoney, parseMoney } from "@/lib/money";
 import { recordBookingPayment } from "@/lib/actions/booking-edit";
-import type { BookingPayment, FolioTabRef, PaymentMethod } from "@/lib/types";
+import { CardVault } from "@/components/bookings/card-vault";
+import type { BookingCard, BookingPayment, FolioTabRef, PaymentMethod, PaymentRequest } from "@/lib/types";
 
 /*
  * The booking's Payment tab (0128), as the reference's: Transactions --
@@ -19,8 +20,8 @@ import type { BookingPayment, FolioTabRef, PaymentMethod } from "@/lib/types";
  * receptionist's own open shift, and it is append-only -- a correction is a
  * reversal, never an edit.
  *
- * The reference's Card Vault and "Request payment" are not here: both need
- * card capture through a payment gateway, which is not built.
+ * The reference's Card Vault and "Request payment" are below it (0130),
+ * through Stripe -- see card-vault.tsx.
  */
 
 const field =
@@ -34,8 +35,13 @@ export function PaymentTab({
   methods,
   folios,
   guestName,
+  guestEmail,
   timezone,
   canCharge,
+  cards,
+  requests,
+  gatewayKey,
+  dueCents,
 }: {
   bookingId: string;
   payments: BookingPayment[];
@@ -43,8 +49,15 @@ export function PaymentTab({
   /** The booking's folios (0129): a payment goes into one of them. */
   folios: FolioTabRef[];
   guestName: string;
+  guestEmail: string | null;
   timezone: string;
   canCharge: boolean;
+  /** The Card Vault and payment requests (0130). */
+  cards: BookingCard[];
+  requests: PaymentRequest[];
+  /** Stripe's publishable key; null when no gateway is connected. */
+  gatewayKey: string | null;
+  dueCents: number;
 }) {
   const tr = useT();
   const currency = useCurrency();
@@ -99,6 +112,7 @@ export function PaymentTab({
   }
 
   return (
+    <>
     <div className="rounded-lg border border-line bg-white p-5 shadow-card">
       <h2 className="mb-3 font-display text-[19px] font-medium tracking-tightest text-ink">{tr("Transactions")}</h2>
 
@@ -215,5 +229,19 @@ export function PaymentTab({
         {tr("Total payments:")} <span className="tnum text-emerald-700">{formatMoney(total, currency)}</span>
       </p>
     </div>
+
+    <CardVault
+      bookingId={bookingId}
+      publishableKey={gatewayKey}
+      cards={cards}
+      requests={requests}
+      folios={folios}
+      dueCents={dueCents}
+      guestName={guestName}
+      guestEmail={guestEmail}
+      timezone={timezone}
+      canCharge={canCharge}
+    />
+    </>
   );
 }

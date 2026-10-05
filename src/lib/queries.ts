@@ -81,6 +81,8 @@ import type {
   TaxKind,
   BookingFolioView,
   BookingPayment,
+  BookingCard,
+  PaymentRequest,
   Channel,
   ChannelSetting,
   Customer,
@@ -2593,6 +2595,48 @@ export async function getBookingPayments(bookingId: string): Promise<BookingPaym
     amountCents: Number(r.amount_cents),
     isReversal: r.is_reversal,
     isReversed: r.is_reversed,
+  }));
+}
+
+/** The booking's Card Vault (0130): what the gateway handed back, never a number. */
+export async function getBookingCards(bookingId: string): Promise<BookingCard[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("booking_cards")
+    .select("id, brand, last4, exp_month, exp_year, holder_name, created_at")
+    .eq("booking_id", bookingId)
+    .order("created_at");
+  if (error) throw new Error(`Failed to load the card vault: ${error.message}`);
+  return (data ?? []).map((c) => ({
+    id: c.id,
+    brand: c.brand,
+    last4: c.last4,
+    expMonth: c.exp_month,
+    expYear: c.exp_year,
+    holderName: c.holder_name,
+    createdAt: c.created_at,
+  }));
+}
+
+/** The booking's payment requests (0130), newest first. */
+export async function getPaymentRequests(bookingId: string): Promise<PaymentRequest[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("payment_requests")
+    .select("id, folio_id, amount_cents, currency, url, description, status, created_at, closed_at")
+    .eq("booking_id", bookingId)
+    .order("created_at", { ascending: false });
+  if (error) throw new Error(`Failed to load the payment requests: ${error.message}`);
+  return (data ?? []).map((r) => ({
+    id: r.id,
+    folioId: r.folio_id,
+    amountCents: Number(r.amount_cents),
+    currency: r.currency.trim(),
+    url: r.url,
+    description: r.description,
+    status: r.status as PaymentRequest["status"],
+    createdAt: r.created_at,
+    closedAt: r.closed_at,
   }));
 }
 
