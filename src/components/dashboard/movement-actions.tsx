@@ -61,7 +61,7 @@ export function CheckInAction({ booking }: { booking: Booking }) {
   const [options, setOptions] = useState<Record<string, AvailableRoom[]>>({});
   const [chosen, setChosen] = useState<Record<string, string>>({});
   const [error, setError] = useState("");
-  const [late, setLate] = useState(false);
+  const [late, setLate] = useState<null | "late" | "departed">(null);
 
   useEffect(() => {
     if (!open) return;
@@ -92,7 +92,7 @@ export function CheckInAction({ booking }: { booking: Booking }) {
   const ready =
     slots !== null && unassigned.every((s) => chosen[s.bookingRoomId]);
 
-  const submit = (moveArrival = false) => {
+  const submit = (how: "ask" | "move" | "booked" = "ask") => {
     setError("");
     startTransition(async () => {
       for (const slot of unassigned) {
@@ -103,9 +103,9 @@ export function CheckInAction({ booking }: { booking: Booking }) {
         if (!assigned.ok) return setError(assigned.error);
       }
 
-      const result = await checkIn(booking.id, moveArrival);
+      const result = await checkIn(booking.id, how);
       if (!result.ok) {
-        setLate(result.block === "late");
+        setLate(result.block ?? null);
         return setError(result.error);
       }
 
@@ -120,7 +120,7 @@ export function CheckInAction({ booking }: { booking: Booking }) {
         onClick={() => {
           setOpen(true);
           setError("");
-          setLate(false);
+          setLate(null);
         }}
         className={rowButton}
       >
@@ -194,13 +194,24 @@ export function CheckInAction({ booking }: { booking: Booking }) {
               {tr("Cancel")}
             </button>
             {late ? (
-              <button
-                onClick={() => submit(true)}
-                disabled={pending}
-                className="rounded bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-50"
-              >
-                {pending ? tr("Checking in…") : tr("Move the arrival to today and check in")}
-              </button>
+              <>
+                {late === "late" && (
+                  <button
+                    onClick={() => submit("move")}
+                    disabled={pending}
+                    className="rounded border border-emerald-600 px-4 py-2 text-sm font-medium text-emerald-700 hover:bg-emerald-50 disabled:opacity-50"
+                  >
+                    {tr("Move the arrival to today and check in")}
+                  </button>
+                )}
+                <button
+                  onClick={() => submit("booked")}
+                  disabled={pending}
+                  className="rounded bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-50"
+                >
+                  {pending ? tr("Checking in…") : tr("Check in on the booked dates")}
+                </button>
+              </>
             ) : (
               <button
                 onClick={() => submit()}

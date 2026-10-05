@@ -99,25 +99,31 @@ export async function assignRoom(
 }
 
 /**
- * `moveArrival` is a deliberate second call, like `allowOverbook`: the first
- * attempt on a late arrival is refused with HP004, and only then is the desk
- * offered to move the arrival to today (0112).
+ * A late arrival is a deliberate second call, like `allowOverbook` (0112,
+ * 0132): the first attempt is refused -- HP004 when the arrival has passed,
+ * HP005 when the departure has too -- and only then is the desk offered to
+ * check the guest in on the booked dates (`booked`; every night is charged
+ * at check-out since 0125) or, while nights remain, to move the arrival to
+ * today (`move`).
  */
 export async function checkIn(
   bookingId: string,
-  moveArrival = false,
-): Promise<ActionResult & { block?: "late" }> {
+  how: "ask" | "move" | "booked" = "ask",
+): Promise<ActionResult & { block?: "late" | "departed" }> {
   const supabase = await createClient();
-  const { error } = await supabase.rpc("check_in_booking", {
-    p_booking_id: bookingId,
-    p_move_arrival: moveArrival,
-  });
+  const { error } =
+    how === "booked"
+      ? await supabase.rpc("check_in_booking_as_booked", { p_booking_id: bookingId })
+      : await supabase.rpc("check_in_booking", {
+          p_booking_id: bookingId,
+          p_move_arrival: how === "move",
+        });
 
   if (error) {
     return {
       ok: false,
       error: await localisedAs("The check-in did not go through", error.message),
-      block: error.code === "HP004" ? "late" : undefined,
+      block: error.code === "HP004" ? "late" : error.code === "HP005" ? "departed" : undefined,
     };
   }
 

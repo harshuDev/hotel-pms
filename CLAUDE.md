@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0131` are
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0132` are
 applied to the hosted database.
 
 Working on real data: dashboard (house board, movements, pace, activity feed),
@@ -1858,18 +1858,33 @@ client: "Need to add Booking Channel in the Dashboard".
   - **`check_out_booking()` dirties a room only when nobody else is checked in
     to it.** 0112 also put the four rooms left reading vacant back to
     `occupied` -- the one data repair, touching only rooms in that state.
-  - **A PAST ARRIVAL IS REFUSED (HP004) AND THE OVERRIDE MOVES IT TO TODAY.**
-    The audit charges only the night it closes, so checking in against an
-    arrival days ago left every earlier night unbilled for ever (BK-000016,
-    BK-000017), and somebody posted BK-000011's and 012's first night by hand
-    as miscellaneous. The check-in dialog then offers "Move the arrival to
-    today and check in" -- `p_move_arrival`, a deliberate second ask like
-    `p_allow_overbook` -- which goes through `update_booking()`, so the
-    nights and the activity log are the ones every date change has. A stay
-    whose departure has passed as well is refused outright.
-  - **Worth knowing**: a guest who really did arrive days ago and was never
-    checked in cannot have those nights charged through this. That is rare,
-    and charging past nights is a money decision to ask about, not to guess.
+  - **A PAST ARRIVAL IS REFUSED FIRST, THEN OFFERED TWO WAYS IN (0112,
+    0132).** `check_in_booking()` refuses an arrival before the business
+    date with HP004 and a departure already reached with HP005; the dialog
+    then offers:
+    - **"Check in on the booked dates"** (`check_in_booking_as_booked()`,
+      0132), always. Since 0125 every night is charged at CHECK-OUT, so a
+      guest checked in late on their own dates is still charged every night
+      they slept -- tested on BK-000047: checked in, its night of 4 Oct went
+      in-house, check-out posted it. A guest checked in after their departure
+      date reads as due out or overdue at once, which is true.
+    - **"Move the arrival to today and check in"** (`p_move_arrival`), only
+      while nights remain (HP004). It goes through `update_booking()`, so the
+      dropped nights and the activity log are the ones every date change has.
+    - **Why 0132 exists**: the client took BK-000047 for the night of 4 Oct at
+      10:54 UTC and the day was closed at 11:05 -- before the guest was
+      checked in -- so the business date became the departure day and 0112
+      refused it outright ("Change its dates first"). 0112's refusal was
+      written for the nightly audit, which charged only the night it closed;
+      0125 removed that reason. Moving the whole stay instead was rejected:
+      `update_booking()` leaves nights a date change adds at no rate.
+    - **The three are one function**: `check_in_booking_core(booking,
+      'refuse' | 'move' | 'keep')`, granted to nobody; `check_in_booking()`
+      and `check_in_booking_as_booked()` are the two ways in.
+    - **Close the day before checking a guest in and this is what happens.**
+      The Close-the-day warning lists every booking due today or earlier and
+      not checked in; it is a warning, not a refusal.
+
 - **The booking screen is SEVEN tabs: Rooms, Extras, Guests, Folio,
   Attachments, Email, History.** It was five. Attachments and Email landed in
   0063, when the client asked for full parity with their reference — "Copy

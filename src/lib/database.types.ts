@@ -5816,6 +5816,18 @@ export type Database = {
           rooms_occupied: number
         }[]
       }
+      check_in_booking_as_booked: {
+        Args: { p_booking_id: string }
+        Returns: {
+          rooms_occupied: number
+        }[]
+      }
+      check_in_booking_core: {
+        Args: { p_booking_id: string; p_past: string }
+        Returns: {
+          rooms_occupied: number
+        }[]
+      }
       check_out_booking: {
         Args: { p_booking_id: string }
         Returns: {
