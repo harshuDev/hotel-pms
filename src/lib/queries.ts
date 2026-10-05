@@ -80,6 +80,7 @@ import type {
   BookingStatus,
   TaxKind,
   BookingFolioView,
+  BookingPayment,
   Channel,
   ChannelSetting,
   Customer,
@@ -2548,6 +2549,25 @@ export async function getBookingFolioView(bookingId: string): Promise<BookingFol
     paidCents: n(v.paid),
     dueCents: n(v.due),
   };
+}
+
+/** The booking's Payment tab (0128). */
+export async function getBookingPayments(bookingId: string): Promise<BookingPayment[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("booking_payments", { p_booking_id: bookingId });
+  if (error) throw new Error(`Failed to load the payments: ${error.message}`);
+  return (data ?? []).map((r) => ({
+    paymentId: r.payment_id,
+    businessDate: r.business_date,
+    paidAt: r.paid_at,
+    method: r.method,
+    payerName: r.payer_name,
+    description: r.description,
+    reference: r.reference,
+    amountCents: Number(r.amount_cents),
+    isReversal: r.is_reversal,
+    isReversed: r.is_reversed,
+  }));
 }
 
 export async function getBookingActivity(

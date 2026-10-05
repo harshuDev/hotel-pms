@@ -2806,10 +2806,12 @@ export type Database = {
           business_date: string
           created_at: string
           currency: string
+          description: string | null
           external_reference: string | null
           folio_id: string
           id: string
           paid_at: string
+          payer_name: string | null
           payment_method_id: string
           property_id: string
           received_by: string | null
@@ -2825,10 +2827,12 @@ export type Database = {
           business_date: string
           created_at?: string
           currency: string
+          description?: string | null
           external_reference?: string | null
           folio_id: string
           id?: string
           paid_at?: string
+          payer_name?: string | null
           payment_method_id: string
           property_id: string
           received_by?: string | null
@@ -2844,10 +2848,12 @@ export type Database = {
           business_date?: string
           created_at?: string
           currency?: string
+          description?: string | null
           external_reference?: string | null
           folio_id?: string
           id?: string
           paid_at?: string
+          payer_name?: string | null
           payment_method_id?: string
           property_id?: string
           received_by?: string | null
@@ -5126,6 +5132,21 @@ export type Database = {
           tax_cents: number
         }[]
       }
+      booking_payments: {
+        Args: { p_booking_id: string }
+        Returns: {
+          amount_cents: number
+          business_date: string
+          description: string
+          is_reversal: boolean
+          is_reversed: boolean
+          method: string
+          paid_at: string
+          payer_name: string
+          payment_id: string
+          reference: string
+        }[]
+      }
       booking_quote: {
         Args: {
           p_check_in: string
@@ -6622,6 +6643,17 @@ export type Database = {
       reaction_conditions_check: {
         Args: { p_depth: number; p_group: Json; p_property: string }
         Returns: number
+      }
+      record_booking_payment: {
+        Args: {
+          p_amount_cents: number
+          p_booking_id: string
+          p_description?: string
+          p_payer_name?: string
+          p_payment_method_id: string
+          p_reference?: string
+        }
+        Returns: string
       }
       record_cash_movement: {
         Args: {

@@ -225,6 +225,37 @@ export async function confirmBooking(
  * The Folio tab's Remove (0127): takes posted charges back by REVERSING them,
  * one reversing row each -- folio_items is append-only, so nothing is deleted.
  */
+/**
+ * "+ Add Manual Transaction" on the Payment tab (0128). The browser sends the
+ * type, the amount in minor units and the words; Postgres finds the folio
+ * (opening it for a first deposit) and the cash shift.
+ */
+export async function recordBookingPayment(input: {
+  bookingId: string;
+  paymentMethodId: string;
+  amountCents: number;
+  payerName: string;
+  description: string;
+  reference: string;
+}): Promise<ActionResult<null>> {
+  if (!Number.isSafeInteger(input.amountCents) || input.amountCents <= 0) {
+    return { ok: false, error: await localised("The amount must be more than zero.") };
+  }
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("record_booking_payment", {
+    p_booking_id: input.bookingId,
+    p_payment_method_id: input.paymentMethodId,
+    p_amount_cents: input.amountCents,
+    p_payer_name: input.payerName,
+    p_description: input.description,
+    p_reference: input.reference,
+  });
+  if (error) return { ok: false, error: await localised(error.message) };
+  revalidateBooking(input.bookingId);
+  revalidatePath("/cashier");
+  return { ok: true, data: null };
+}
+
 export async function reverseFolioCharges(input: {
   bookingId: string;
   folioItemIds: string[];

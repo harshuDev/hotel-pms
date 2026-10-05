@@ -107,6 +107,21 @@ export interface PaymentMethod {
   affectsDrawer: boolean;
 }
 
+/** One row of the booking's Payment tab (0128). */
+export interface BookingPayment {
+  paymentId: string;
+  businessDate: string;
+  paidAt: string;
+  method: string | null;
+  payerName: string | null;
+  description: string | null;
+  reference: string | null;
+  /** Signed: a reversal is negative. */
+  amountCents: number;
+  isReversal: boolean;
+  isReversed: boolean;
+}
+
 export interface ShiftPayment {
   id: string;
   bookingRef: string;

@@ -29,6 +29,8 @@ import {
   getBookingNights,
   getBookingFolioLines,
   getBookingFolioView,
+  getBookingPayments,
+  getPaymentMethods,
   getBookingActivity,
   getBookingAttachments,
   getBookingEmails,
@@ -269,6 +271,8 @@ export default async function CalendarPage({
           nights,
           folio,
           folioView,
+          payments,
+          paymentMethods,
           activity,
           attachments,
           emails,
@@ -283,6 +287,8 @@ export default async function CalendarPage({
             getBookingNights(peekId),
             getBookingFolioLines(peekId),
             getBookingFolioView(peekId),
+            getBookingPayments(peekId),
+            getPaymentMethods(),
             getBookingActivity(peekId),
             // The two tabs the reference carries, added in 0063.
             getBookingAttachments(peekId),
@@ -299,6 +305,8 @@ export default async function CalendarPage({
           nights,
           folio,
           folioView,
+          payments,
+          paymentMethods,
           activity,
           attachments,
           emails,
@@ -510,6 +518,8 @@ export default async function CalendarPage({
             nights={peek.nights}
             folio={peek.folio}
             folioView={peek.folioView}
+            payments={peek.payments}
+            paymentMethods={peek.paymentMethods}
             activity={peek.activity}
             attachments={peek.attachments}
             emails={peek.emails}

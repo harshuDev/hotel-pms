@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0127` are
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0128` are
 applied to the hosted database.
 
 Working on real data: dashboard (house board, movements, pace, activity feed),
@@ -330,6 +330,7 @@ Each read is a Postgres view or RPC, never aggregation in the client:
 | `getAccountingRoomRevenue(from, to)` | `accounting_room_revenue(from, to)` (0108) |
 | `getBookingInvoiceTaxes(id)`       | `booking_invoice_taxes(id)` (0117) |
 | `getBookingFolioView(id)`          | `booking_folio_view(id)` -- the Folio tab (0127) |
+| `getBookingPayments(id)`           | `booking_payments(id)` -- the Payment tab (0128) |
 
 **Two signatures carry the room-count rule.** The client operates properties
 with up to ~1,800 rooms, so no query may return every room and no screen may
@@ -2041,6 +2042,23 @@ client: "Need to add Booking Channel in the Dashboard".
     (no second folio is ever made), Add discount (`post_discount()` posts a
     zero tax split -- see Discounts), Send (no mail provider), PDF (the
     browser's Print saves one), View By, and the folio notes.
+
+- **THE PAYMENT TAB IS THE REFERENCE'S TRANSACTIONS (0128)**, after Folio
+  (`payment-tab.tsx`): Date, Time (the hotel's clock), Type, Payer Name,
+  Description (and the reference), Amount; "+ Add Manual Transaction" (Type,
+  Amount, Payer Name -- seeded with the guest -- Description, Reference) and
+  Total payments.
+  - **`record_booking_payment()` is the Cashier screen's payment taken from
+    the booking**: same folio, same append-only row, same drawer rule -- cash
+    needs the caller's own open shift on the business date, refused by name
+    without one; every other type needs none. **It opens the folio if there
+    is none yet**: since 0125 nothing is charged before check-out, so a
+    deposit would otherwise have nowhere to go.
+  - `payments.payer_name` and `payments.description` were added for it; set
+    once on insert, never edited (`payments_immutable` is untouched).
+  - **NOT copied: Card Vault and "Request payment".** Both are card capture
+    through a gateway, which is not built (see "Card capture is not built"),
+    and no card number may be stored here. They go in with the gateway.
 
 - **`bookings.external_payload` is empty on every row and nothing fills it.**
   OTA bookings are entered by hand (open decision 2), so the channel's raw
