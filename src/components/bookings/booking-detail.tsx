@@ -9,6 +9,7 @@ import { format, parseISO } from "date-fns";
 import { AttachmentsTab } from "@/components/bookings/attachments-tab";
 import { EmailTab } from "@/components/bookings/email-tab";
 import { FolioTab } from "@/components/bookings/folio-tab";
+import { PaymentTab } from "@/components/bookings/payment-tab";
 import { ChargeExtra } from "@/components/bookings/charge-extra";
 import type { ExtrasCatalog } from "@/lib/extras";
 import type { EmailTemplate } from "@/lib/email-preferences";
@@ -26,6 +27,8 @@ import {
 } from "@/lib/actions/booking-edit";
 import type {
   BookingFolioView,
+  BookingPayment,
+  PaymentMethod,
   Booking,
   BookingActivityItem,
   BookingAttachment,
@@ -92,6 +95,8 @@ const TABS = [
   { id: "extras", label: msg("Extras") },
   { id: "guests", label: msg("Guests") },
   { id: "folio", label: msg("Folio") },
+  // The reference's Payment tab (0128): Transactions and a manual payment.
+  { id: "payment", label: msg("Payment") },
   /*
    * ATTACHMENTS AND EMAIL ARE THE REFERENCE'S LAST TWO (0063). The client:
    * "Copy them too, I just want to clone the application." They sit before
@@ -131,6 +136,8 @@ export function BookingDetailView({
   nights,
   folio,
   folioView,
+  payments,
+  paymentMethods,
   activity,
   attachments,
   emails,
@@ -153,6 +160,10 @@ export function BookingDetailView({
   /** The Folio tab (0127), laid out as the reference's. Required, so both
       frames -- the page and the calendar's panel -- must pass it. */
   folioView: BookingFolioView;
+  /** The Payment tab (0128): every payment on the booking, and the active
+      types a manual transaction may use. Required, like folioView. */
+  payments: BookingPayment[];
+  paymentMethods: PaymentMethod[];
   activity: BookingActivityItem[];
   /** Files on the booking (0063). */
   attachments: BookingAttachment[];
@@ -1369,6 +1380,17 @@ export function BookingDetailView({
             guest?.country ? tr(countryName(guest.country)) : null,
             guest?.nationalIdNumber ?? null,
           ].filter((x): x is string => Boolean(x))}
+          timezone={timezone}
+          canCharge={canCharge}
+        />
+      )}
+
+      {tab === "payment" && (
+        <PaymentTab
+          bookingId={detail.bookingId}
+          payments={payments}
+          methods={paymentMethods}
+          guestName={detail.customerName}
           timezone={timezone}
           canCharge={canCharge}
         />

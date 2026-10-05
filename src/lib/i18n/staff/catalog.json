@@ -1108,6 +1108,9 @@
  "Add it": {
   "kind": "text"
  },
+ "Add Manual Transaction": {
+  "kind": "text"
+ },
  "Add new accounting category": {
   "kind": "text"
  },
@@ -2357,6 +2360,9 @@
  "Choose a payment method.": {
   "kind": "text"
  },
+ "Choose a payment type.": {
+  "kind": "text"
+ },
  "Choose a room": {
   "kind": "text"
  },
@@ -2376,6 +2382,9 @@
   "kind": "db"
  },
  "Choose a template from the list": {
+  "kind": "db"
+ },
+ "Choose an active payment type": {
   "kind": "db"
  },
  "Choose an address for multi-property bookings": {
@@ -6156,6 +6165,9 @@
  "Open the guest in Customers and fill in the Identity fields — nationality, a document number and a date of birth.": {
   "kind": "text"
  },
+ "Open your cashier shift before taking a cash payment": {
+  "kind": "db"
+ },
  "Opened": {
   "kind": "text"
  },
@@ -6319,6 +6331,9 @@
   "kind": "text"
  },
  "Payable": {
+  "kind": "text"
+ },
+ "Payer Name": {
   "kind": "text"
  },
  "Payment": {
@@ -7414,6 +7429,9 @@
   "kind": "text"
  },
  "Save offer": {
+  "kind": "text"
+ },
+ "Save payment": {
   "kind": "text"
  },
  "Save Template": {
@@ -8876,6 +8894,9 @@
  "Tick two or more sales channels to merge them into one.": {
   "kind": "text"
  },
+ "Time": {
+  "kind": "text"
+ },
  "Timor-Leste": {
   "kind": "country",
   "code": "TL"
@@ -8934,6 +8955,9 @@
  "Total incl. tax": {
   "kind": "text"
  },
+ "Total payments:": {
+  "kind": "text"
+ },
  "Total revenue": {
   "kind": "text"
  },
@@ -8944,6 +8968,9 @@
   "kind": "text"
  },
  "Touched in this range": {
+  "kind": "text"
+ },
+ "Transactions": {
   "kind": "text"
  },
  "Transport": {
