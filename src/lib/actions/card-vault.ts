@@ -8,6 +8,7 @@ import { localised } from "@/lib/i18n/localised";
 import { getT } from "@/lib/i18n/server";
 import type { ActionResult } from "@/lib/actions/cashier";
 import { stripe, stripeConnected, stripeMessage } from "@/lib/stripe";
+import { nullableArg } from "@/lib/supabase/database";
 
 /*
  * Card Vault and Request payment (0130), through Stripe.
@@ -225,7 +226,8 @@ export async function chargeCard(input: {
 
   const { error } = await ctx.supabase.rpc("record_gateway_payment", {
     p_booking_id: ctx.booking.id,
-    p_folio_id: input.folioId,
+    // Null means the booking's open primary folio.
+    p_folio_id: nullableArg(input.folioId),
     p_amount_cents: intent.amount_received || intent.amount,
     p_gateway_reference: intent.id,
     p_payer_name: input.payerName,
@@ -303,7 +305,8 @@ export async function createPaymentRequest(input: {
 
   const { error } = await ctx.supabase.rpc("add_payment_request", {
     p_booking_id: ctx.booking.id,
-    p_folio_id: input.folioId,
+    // Null means no folio chosen: the payment goes to the open primary.
+    p_folio_id: nullableArg(input.folioId),
     p_amount_cents: input.amountCents,
     p_currency: ctx.currency,
     p_gateway_session_id: session.id,
@@ -375,7 +378,8 @@ export async function syncPaymentRequests(bookingId: string): Promise<ActionResu
       if (!intent || !session.amount_total) continue;
       const { error } = await supabase.rpc("record_gateway_payment", {
         p_booking_id: bookingId,
-        p_folio_id: r.folio_id,
+        // Null means the booking's open primary folio.
+        p_folio_id: nullableArg(r.folio_id),
         p_amount_cents: session.amount_total,
         p_gateway_reference: intent,
         p_payer_name: session.customer_details?.name ?? "",
