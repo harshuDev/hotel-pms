@@ -1,3 +1,4 @@
+import { stripePublishableKey } from "@/lib/stripe";
 import { getT } from "@/lib/i18n/server";
 import { addDays, format, isValid, parseISO, subDays } from "date-fns";
 import { formatMoney } from "@/lib/money";
@@ -30,6 +31,8 @@ import {
   getBookingFolioLines,
   getBookingFolioView,
   getBookingPayments,
+  getBookingCards,
+  getPaymentRequests,
   getPaymentMethods,
   getBookingActivity,
   getBookingAttachments,
@@ -281,6 +284,8 @@ export default async function CalendarPage({
           guest,
           extrasCatalog,
           emailTemplates,
+          cards,
+          paymentRequests,
         ] =
           await Promise.all([
             getBookingRoomLines(peekId),
@@ -298,6 +303,8 @@ export default async function CalendarPage({
             getCustomerForEdit(d.customerId),
             getExtrasCatalog(),
             getEmailTemplates(),
+            getBookingCards(peekId),
+            getPaymentRequests(peekId),
           ]);
         return {
           detail: d,
@@ -315,6 +322,8 @@ export default async function CalendarPage({
           guest,
           extrasCatalog,
           emailTemplates,
+          cards,
+          paymentRequests,
         };
       })()
     : null;
@@ -520,6 +529,9 @@ export default async function CalendarPage({
             folioView={peek.folioView}
             payments={peek.payments}
             paymentMethods={peek.paymentMethods}
+            cards={peek.cards}
+            paymentRequests={peek.paymentRequests}
+            gatewayKey={stripePublishableKey()}
             activity={peek.activity}
             attachments={peek.attachments}
             emails={peek.emails}

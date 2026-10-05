@@ -13,6 +13,9 @@ import type { Locale } from "@/lib/i18n/locales";
  */
 export interface Dict {
   bookARoom: string;
+  /** The page Stripe returns a guest to after paying a payment request (0130). */
+  paymentReceived: string;
+  paymentReceivedHint: string;
   arrival: string;
   departure: string;
   adults: string;
@@ -98,6 +101,8 @@ export interface Dict {
 }
 
 const en: Dict = {
+  paymentReceived: "Payment received",
+  paymentReceivedHint: "Thank you. You can close this page.",
   bookARoom: "Book a room",
   arrival: "Arrival",
   departure: "Departure",
@@ -175,6 +180,8 @@ const en: Dict = {
 };
 
 const de: Dict = {
+  paymentReceived: "Zahlung erhalten",
+  paymentReceivedHint: "Vielen Dank. Sie können diese Seite schließen.",
   bookARoom: "Zimmer buchen", arrival: "Anreise", departure: "Abreise",
   adults: "Erwachsene", children: "Kinder", search: "Freie Zimmer anzeigen",
   searching: "Suche…", availableRooms: "Freie Zimmer", night: "Nacht",
@@ -235,6 +242,8 @@ const de: Dict = {
 };
 
 const fr: Dict = {
+  paymentReceived: "Paiement reçu",
+  paymentReceivedHint: "Merci. Vous pouvez fermer cette page.",
   bookARoom: "Réserver une chambre", arrival: "Arrivée", departure: "Départ",
   adults: "Adultes", children: "Enfants", search: "Voir les chambres disponibles",
   searching: "Recherche…", availableRooms: "Chambres disponibles", night: "nuit",
@@ -295,6 +304,8 @@ const fr: Dict = {
 };
 
 const es: Dict = {
+  paymentReceived: "Pago recibido",
+  paymentReceivedHint: "Gracias. Puede cerrar esta página.",
   bookARoom: "Reservar una habitación", arrival: "Llegada", departure: "Salida",
   adults: "Adultos", children: "Niños", search: "Ver habitaciones disponibles",
   searching: "Buscando…", availableRooms: "Habitaciones disponibles", night: "noche",
@@ -355,6 +366,8 @@ const es: Dict = {
 };
 
 const it: Dict = {
+  paymentReceived: "Pagamento ricevuto",
+  paymentReceivedHint: "Grazie. Può chiudere questa pagina.",
   bookARoom: "Prenota una camera", arrival: "Arrivo", departure: "Partenza",
   adults: "Adulti", children: "Bambini", search: "Vedi camere disponibili",
   searching: "Ricerca…", availableRooms: "Camere disponibili", night: "notte",
@@ -415,6 +428,8 @@ const it: Dict = {
 };
 
 const pt: Dict = {
+  paymentReceived: "Pagamento recebido",
+  paymentReceivedHint: "Obrigado. Pode fechar esta página.",
   bookARoom: "Reservar um quarto", arrival: "Chegada", departure: "Partida",
   adults: "Adultos", children: "Crianças", search: "Ver quartos disponíveis",
   searching: "A procurar…", availableRooms: "Quartos disponíveis", night: "noite",
@@ -475,6 +490,8 @@ const pt: Dict = {
 };
 
 const nl: Dict = {
+  paymentReceived: "Betaling ontvangen",
+  paymentReceivedHint: "Dank u. U kunt deze pagina sluiten.",
   bookARoom: "Een kamer boeken", arrival: "Aankomst", departure: "Vertrek",
   adults: "Volwassenen", children: "Kinderen", search: "Bekijk beschikbare kamers",
   searching: "Zoeken…", availableRooms: "Beschikbare kamers", night: "nacht",
@@ -535,6 +552,8 @@ const nl: Dict = {
 };
 
 const pl: Dict = {
+  paymentReceived: "Płatność otrzymana",
+  paymentReceivedHint: "Dziękujemy. Możesz zamknąć tę stronę.",
   bookARoom: "Zarezerwuj pokój", arrival: "Przyjazd", departure: "Wyjazd",
   adults: "Dorośli", children: "Dzieci", search: "Zobacz wolne pokoje",
   searching: "Szukanie…", availableRooms: "Wolne pokoje", night: "noc",
@@ -595,6 +614,8 @@ const pl: Dict = {
 };
 
 const sv: Dict = {
+  paymentReceived: "Betalning mottagen",
+  paymentReceivedHint: "Tack. Du kan stänga den här sidan.",
   bookARoom: "Boka rum", arrival: "Ankomst", departure: "Avresa",
   adults: "Vuxna", children: "Barn", search: "Visa lediga rum",
   searching: "Söker…", availableRooms: "Lediga rum", night: "natt",
@@ -655,6 +676,8 @@ const sv: Dict = {
 };
 
 const da: Dict = {
+  paymentReceived: "Betaling modtaget",
+  paymentReceivedHint: "Tak. Du kan lukke denne side.",
   bookARoom: "Book et værelse", arrival: "Ankomst", departure: "Afrejse",
   adults: "Voksne", children: "Børn", search: "Se ledige værelser",
   searching: "Søger…", availableRooms: "Ledige værelser", night: "nat",
@@ -715,6 +738,8 @@ const da: Dict = {
 };
 
 const no: Dict = {
+  paymentReceived: "Betaling mottatt",
+  paymentReceivedHint: "Takk. Du kan lukke denne siden.",
   bookARoom: "Bestill rom", arrival: "Ankomst", departure: "Avreise",
   adults: "Voksne", children: "Barn", search: "Se ledige rom",
   searching: "Søker…", availableRooms: "Ledige rom", night: "natt",
@@ -775,6 +800,8 @@ const no: Dict = {
 };
 
 const fi: Dict = {
+  paymentReceived: "Maksu vastaanotettu",
+  paymentReceivedHint: "Kiitos. Voit sulkea tämän sivun.",
   bookARoom: "Varaa huone", arrival: "Saapuminen", departure: "Lähtö",
   adults: "Aikuiset", children: "Lapset", search: "Näytä vapaat huoneet",
   searching: "Haetaan…", availableRooms: "Vapaat huoneet", night: "yö",
@@ -835,6 +862,8 @@ const fi: Dict = {
 };
 
 const cs: Dict = {
+  paymentReceived: "Platba přijata",
+  paymentReceivedHint: "Děkujeme. Tuto stránku můžete zavřít.",
   bookARoom: "Rezervovat pokoj", arrival: "Příjezd", departure: "Odjezd",
   adults: "Dospělí", children: "Děti", search: "Zobrazit volné pokoje",
   searching: "Hledám…", availableRooms: "Volné pokoje", night: "noc",
@@ -895,6 +924,8 @@ const cs: Dict = {
 };
 
 const el: Dict = {
+  paymentReceived: "Η πληρωμή ελήφθη",
+  paymentReceivedHint: "Ευχαριστούμε. Μπορείτε να κλείσετε αυτή τη σελίδα.",
   bookARoom: "Κράτηση δωματίου", arrival: "Άφιξη", departure: "Αναχώρηση",
   adults: "Ενήλικες", children: "Παιδιά", search: "Δείτε διαθέσιμα δωμάτια",
   searching: "Αναζήτηση…", availableRooms: "Διαθέσιμα δωμάτια", night: "νύχτα",
@@ -955,6 +986,8 @@ const el: Dict = {
 };
 
 const ro: Dict = {
+  paymentReceived: "Plată primită",
+  paymentReceivedHint: "Vă mulțumim. Puteți închide această pagină.",
   bookARoom: "Rezervați o cameră", arrival: "Sosire", departure: "Plecare",
   adults: "Adulți", children: "Copii", search: "Vedeți camerele disponibile",
   searching: "Se caută…", availableRooms: "Camere disponibile", night: "noapte",
@@ -1015,6 +1048,8 @@ const ro: Dict = {
 };
 
 const hu: Dict = {
+  paymentReceived: "Fizetés beérkezett",
+  paymentReceivedHint: "Köszönjük. Bezárhatja ezt az oldalt.",
   bookARoom: "Szobafoglalás", arrival: "Érkezés", departure: "Távozás",
   adults: "Felnőttek", children: "Gyermekek", search: "Szabad szobák megtekintése",
   searching: "Keresés…", availableRooms: "Szabad szobák", night: "éjszaka",
@@ -1075,6 +1110,8 @@ const hu: Dict = {
 };
 
 const uk: Dict = {
+  paymentReceived: "Оплату отримано",
+  paymentReceivedHint: "Дякуємо. Можете закрити цю сторінку.",
   bookARoom: "Забронювати номер", arrival: "Заїзд", departure: "Виїзд",
   adults: "Дорослі", children: "Діти", search: "Показати вільні номери",
   searching: "Пошук…", availableRooms: "Вільні номери", night: "ніч",
@@ -1135,6 +1172,8 @@ const uk: Dict = {
 };
 
 const ru: Dict = {
+  paymentReceived: "Оплата получена",
+  paymentReceivedHint: "Спасибо. Можете закрыть эту страницу.",
   bookARoom: "Забронировать номер", arrival: "Заезд", departure: "Выезд",
   adults: "Взрослые", children: "Дети", search: "Показать свободные номера",
   searching: "Поиск…", availableRooms: "Свободные номера", night: "ночь",
@@ -1195,6 +1234,8 @@ const ru: Dict = {
 };
 
 const tr: Dict = {
+  paymentReceived: "Ödeme alındı",
+  paymentReceivedHint: "Teşekkürler. Bu sayfayı kapatabilirsiniz.",
   bookARoom: "Oda rezervasyonu", arrival: "Giriş", departure: "Çıkış",
   adults: "Yetişkin", children: "Çocuk", search: "Uygun odaları gör",
   searching: "Aranıyor…", availableRooms: "Uygun odalar", night: "gece",

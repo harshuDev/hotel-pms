@@ -307,6 +307,93 @@ export type Database = {
           },
         ]
       }
+      booking_cards: {
+        Row: {
+          booking_id: string
+          brand: string | null
+          created_at: string
+          created_by: string | null
+          customer_id: string | null
+          exp_month: number | null
+          exp_year: number | null
+          gateway: string
+          gateway_customer_id: string
+          gateway_payment_method_id: string
+          holder_name: string | null
+          id: string
+          last4: string | null
+          property_id: string
+        }
+        Insert: {
+          booking_id: string
+          brand?: string | null
+          created_at?: string
+          created_by?: string | null
+          customer_id?: string | null
+          exp_month?: number | null
+          exp_year?: number | null
+          gateway?: string
+          gateway_customer_id: string
+          gateway_payment_method_id: string
+          holder_name?: string | null
+          id?: string
+          last4?: string | null
+          property_id: string
+        }
+        Update: {
+          booking_id?: string
+          brand?: string | null
+          created_at?: string
+          created_by?: string | null
+          customer_id?: string | null
+          exp_month?: number | null
+          exp_year?: number | null
+          gateway?: string
+          gateway_customer_id?: string
+          gateway_payment_method_id?: string
+          holder_name?: string | null
+          id?: string
+          last4?: string | null
+          property_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "booking_cards_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "booking_totals"
+            referencedColumns: ["booking_id"]
+          },
+          {
+            foreignKeyName: "booking_cards_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "booking_cards_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customer_stats"
+            referencedColumns: ["customer_id"]
+          },
+          {
+            foreignKeyName: "booking_cards_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "booking_cards_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       booking_emails: {
         Row: {
           body: string
@@ -2821,6 +2908,103 @@ export type Database = {
           },
         ]
       }
+      payment_requests: {
+        Row: {
+          amount_cents: number
+          booking_id: string
+          closed_at: string | null
+          created_at: string
+          created_by: string | null
+          currency: string
+          description: string | null
+          folio_id: string | null
+          gateway: string
+          gateway_session_id: string
+          id: string
+          payment_id: string | null
+          property_id: string
+          status: string
+          url: string
+        }
+        Insert: {
+          amount_cents: number
+          booking_id: string
+          closed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency: string
+          description?: string | null
+          folio_id?: string | null
+          gateway?: string
+          gateway_session_id: string
+          id?: string
+          payment_id?: string | null
+          property_id: string
+          status?: string
+          url: string
+        }
+        Update: {
+          amount_cents?: number
+          booking_id?: string
+          closed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          description?: string | null
+          folio_id?: string | null
+          gateway?: string
+          gateway_session_id?: string
+          id?: string
+          payment_id?: string | null
+          property_id?: string
+          status?: string
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_requests_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "booking_totals"
+            referencedColumns: ["booking_id"]
+          },
+          {
+            foreignKeyName: "payment_requests_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_requests_folio_id_fkey"
+            columns: ["folio_id"]
+            isOneToOne: false
+            referencedRelation: "folio_balances"
+            referencedColumns: ["folio_id"]
+          },
+          {
+            foreignKeyName: "payment_requests_folio_id_fkey"
+            columns: ["folio_id"]
+            isOneToOne: false
+            referencedRelation: "folios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_requests_payment_id_fkey"
+            columns: ["payment_id"]
+            isOneToOne: false
+            referencedRelation: "payments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_requests_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       payments: {
         Row: {
           amount_cents: number
@@ -4823,7 +5007,32 @@ export type Database = {
         }
         Returns: string
       }
+      add_booking_card: {
+        Args: {
+          p_booking_id: string
+          p_brand: string
+          p_exp_month: number
+          p_exp_year: number
+          p_gateway_customer_id: string
+          p_gateway_payment_method_id: string
+          p_holder_name: string
+          p_last4: string
+        }
+        Returns: string
+      }
       add_folio: { Args: { p_booking_id: string }; Returns: string }
+      add_payment_request: {
+        Args: {
+          p_amount_cents: number
+          p_booking_id: string
+          p_currency: string
+          p_description?: string
+          p_folio_id: string
+          p_gateway_session_id: string
+          p_url: string
+        }
+        Returns: string
+      }
       add_room_type_photo: {
         Args: { p_path: string; p_room_type_id: string }
         Returns: string
@@ -5626,6 +5835,10 @@ export type Database = {
       }
       close_folio: {
         Args: { p_cancel?: boolean; p_folio_id: string }
+        Returns: undefined
+      }
+      close_payment_request: {
+        Args: { p_request_id: string; p_status: string }
         Returns: undefined
       }
       confirm_booking: { Args: { p_booking_id: string }; Returns: undefined }
@@ -6755,6 +6968,18 @@ export type Database = {
         }
         Returns: string
       }
+      record_gateway_payment: {
+        Args: {
+          p_amount_cents: number
+          p_booking_id: string
+          p_description?: string
+          p_folio_id: string
+          p_gateway_reference: string
+          p_payer_name?: string
+          p_request_id?: string
+        }
+        Returns: string
+      }
       record_paid_out: {
         Args: {
           p_amount_cents: number
@@ -6778,6 +7003,7 @@ export type Database = {
         }
         Returns: string
       }
+      remove_booking_card: { Args: { p_card_id: string }; Returns: string }
       remove_rate_combination: {
         Args: { p_rate_plan_id: string; p_room_type_id: string }
         Returns: number

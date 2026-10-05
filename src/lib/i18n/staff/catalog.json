@@ -862,6 +862,9 @@
  "A payment method needs a name": {
   "kind": "db"
  },
+ "A payment request is closed as expired or cancelled": {
+  "kind": "db"
+ },
  "A payment type needs a title": {
   "kind": "db"
  },
@@ -1072,6 +1075,9 @@
  "Add Accounting System": {
   "kind": "text"
  },
+ "Add an active card payment type in Settings before taking card payments": {
+  "kind": "db"
+ },
  "Add an email address": {
   "kind": "text"
  },
@@ -1083,6 +1089,9 @@
  },
  "Add at most 500 rooms at a time": {
   "kind": "db"
+ },
+ "Add card": {
+  "kind": "text"
  },
  "Add channel": {
   "kind": "text"
@@ -2139,6 +2148,24 @@
  "Card": {
   "kind": "text"
  },
+ "Card ending {0} added to the card vault": {
+  "kind": "db"
+ },
+ "Card ending {0} removed from the card vault": {
+  "kind": "db"
+ },
+ "Card payments are not available in this currency": {
+  "kind": "text"
+ },
+ "Card payments need a Stripe account connected to this system.": {
+  "kind": "text"
+ },
+ "Card Vault": {
+  "kind": "text"
+ },
+ "Cardholder": {
+  "kind": "text"
+ },
  "Cash": {
   "kind": "text"
  },
@@ -2260,6 +2287,9 @@
   "kind": "text"
  },
  "Charge": {
+  "kind": "text"
+ },
+ "Charge {amount}": {
   "kind": "text"
  },
  "Charge for the room": {
@@ -2773,6 +2803,9 @@
  "Copy it now — it will not be shown again.": {
   "kind": "text"
  },
+ "Copy link": {
+  "kind": "text"
+ },
  "Copy Monday to every day": {
   "kind": "text"
  },
@@ -2872,6 +2905,9 @@
   "kind": "text"
  },
  "Create Payment": {
+  "kind": "text"
+ },
+ "Create payment link": {
   "kind": "text"
  },
  "Create Pos Profile": {
@@ -5404,6 +5440,9 @@
  "No cancellation or modification can be applied to this booking.": {
   "kind": "text"
  },
+ "No card saved for this booking.": {
+  "kind": "text"
+ },
  "No channel": {
   "kind": "db"
  },
@@ -5490,6 +5529,9 @@
  },
  "No open business date for property": {
   "kind": "db"
+ },
+ "No payment requested yet.": {
+  "kind": "text"
  },
  "No payments in this range": {
   "kind": "text"
@@ -6423,8 +6465,17 @@
  "Payment Gateways": {
   "kind": "text"
  },
+ "Payment of {0}.{1} {2} requested": {
+  "kind": "db"
+ },
  "Payment received via {0}": {
   "kind": "db"
+ },
+ "Payment request": {
+  "kind": "text"
+ },
+ "Payment requests": {
+  "kind": "text"
  },
  "Payment reversed via {0}": {
   "kind": "db"
@@ -7024,6 +7075,9 @@
  "Remove the picture": {
   "kind": "text"
  },
+ "Remove this card from the vault? It is deleted at Stripe too.": {
+  "kind": "text"
+ },
  "Remove trigger": {
   "kind": "text"
  },
@@ -7046,6 +7100,9 @@
   "kind": "text"
  },
  "Reports": {
+  "kind": "text"
+ },
+ "Request payment": {
   "kind": "text"
  },
  "Request payment email saved.": {
@@ -7495,6 +7552,9 @@
   "kind": "text"
  },
  "Save as default rate": {
+  "kind": "text"
+ },
+ "Save card": {
   "kind": "text"
  },
  "Save changes": {
@@ -8029,6 +8089,9 @@
  "Strictly no smoking": {
   "kind": "text"
  },
+ "Stripe returned no payment link": {
+  "kind": "text"
+ },
  "Stripe SCA": {
   "kind": "text"
  },
@@ -8223,7 +8286,7 @@
   "kind": "db"
  },
  "That booking does not belong to this property": {
-  "kind": "db"
+  "kind": "text"
  },
  "That booking has no open folio to recharge the paid-out to": {
   "kind": "db"
@@ -8245,6 +8308,12 @@
  },
  "That cannot be negative.": {
   "kind": "text"
+ },
+ "That card is not on this booking": {
+  "kind": "text"
+ },
+ "That card is not on this property": {
+  "kind": "db"
  },
  "That category no longer exists": {
   "kind": "db"
@@ -8411,6 +8480,9 @@
  "That payment method is not on this property": {
   "kind": "db"
  },
+ "That payment request is not on this booking": {
+  "kind": "text"
+ },
  "That payment type is not on this property": {
   "kind": "db"
  },
@@ -8559,6 +8631,18 @@
   "kind": "text"
  },
  "The booking's rooms did not load": {
+  "kind": "text"
+ },
+ "The card was charged ({id}) but the payment was not recorded": {
+  "kind": "text"
+ },
+ "The card was not charged": {
+  "kind": "text"
+ },
+ "The card was not saved at the payment gateway": {
+  "kind": "text"
+ },
+ "The card's bank asks the guest to confirm this payment. Send them a payment request instead.": {
   "kind": "text"
  },
  "The category to merge into no longer exists": {
@@ -8733,6 +8817,9 @@
   "kind": "text"
  },
  "The parent rate plan is not on this property": {
+  "kind": "db"
+ },
+ "The payment gateway did not return a payment reference": {
   "kind": "db"
  },
  "The payment was not recorded": {

@@ -1,3 +1,4 @@
+import { stripePublishableKey } from "@/lib/stripe";
 import { getT } from "@/lib/i18n/server";
 import type { Translator } from "@/lib/i18n/translate";
 import { notFound } from "next/navigation";
@@ -11,6 +12,8 @@ import {
   getBookingFolioLines,
   getBookingFolioView,
   getBookingPayments,
+  getBookingCards,
+  getPaymentRequests,
   getPaymentMethods,
   getBookingNights,
   getBookingRoomLines,
@@ -80,6 +83,8 @@ export default async function BookingPage({
     cancellationTerms,
     extrasCatalog,
     emailTemplates,
+    cards,
+    paymentRequests,
   ] =
     await Promise.all([
       getBookingRoomLines(id),
@@ -109,6 +114,9 @@ export default async function BookingPage({
       // The catalog the Extras tab charges from (0069).
       getExtrasCatalog(),
       getEmailTemplates(),
+      // The Payment tab's Card Vault and payment requests (0130).
+      getBookingCards(id),
+      getPaymentRequests(id),
     ]);
 
   const back = backTarget(sp.back, await getT());
@@ -122,6 +130,9 @@ export default async function BookingPage({
       folioView={folioView}
       payments={payments}
       paymentMethods={paymentMethods}
+      cards={cards}
+      paymentRequests={paymentRequests}
+      gatewayKey={stripePublishableKey()}
       activity={activity}
       attachments={attachments}
       emails={emails}

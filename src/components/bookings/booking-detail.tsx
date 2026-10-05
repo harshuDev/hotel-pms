@@ -28,6 +28,8 @@ import {
 import type {
   BookingFolioView,
   BookingPayment,
+  BookingCard,
+  PaymentRequest,
   PaymentMethod,
   Booking,
   BookingActivityItem,
@@ -138,6 +140,9 @@ export function BookingDetailView({
   folioView,
   payments,
   paymentMethods,
+  cards,
+  paymentRequests,
+  gatewayKey,
   activity,
   attachments,
   emails,
@@ -164,6 +169,11 @@ export function BookingDetailView({
       types a manual transaction may use. Required, like folioView. */
   payments: BookingPayment[];
   paymentMethods: PaymentMethod[];
+  /** The Payment tab's Card Vault and payment requests (0130). Required,
+      like payments; `gatewayKey` is Stripe's publishable key or null. */
+  cards: BookingCard[];
+  paymentRequests: PaymentRequest[];
+  gatewayKey: string | null;
   activity: BookingActivityItem[];
   /** Files on the booking (0063). */
   attachments: BookingAttachment[];
@@ -1394,8 +1404,13 @@ export function BookingDetailView({
           methods={paymentMethods}
           folios={folioView.folios}
           guestName={detail.customerName}
+          guestEmail={guest?.email ?? null}
           timezone={timezone}
           canCharge={canCharge}
+          cards={cards}
+          requests={paymentRequests}
+          gatewayKey={gatewayKey}
+          dueCents={folioView.dueCents}
         />
       )}
 
