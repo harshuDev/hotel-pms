@@ -3875,6 +3875,28 @@ Resend, Brevo, Amazon SES).
   credentials exist in this project's environments. The PDFs were rendered
   and the build passes; the first send is the client's.
 
+## The domain -- app.reservationcentric.com
+
+Production is `https://app.reservationcentric.com`, the client's own domain
+(registered at Namecheap). It used to serve the previous PMS, white-labelled
+on The Booking Factory, whose login was `/client/#/login`.
+
+- **DNS is NOT in Namecheap's domain screen.** The nameservers are
+  "Namecheap Web Hosting DNS" (`dns1/dns2.namecheaphosting.com`), so every
+  record lives in cPanel -> Zone Editor on the client's Stellar Plus hosting.
+  `app` is one CNAME to Vercel; the website (`162.0.232.217`), Google
+  Workspace mail (MX, SPF, DKIM, DMARC) and the rest are untouched. **Never
+  move the nameservers to Vercel** -- it was done once by mistake and took
+  the website and email with it until reverted.
+- **The hosting plan carries the DNS**, so if it lapses the app goes down
+  with the website. Its renewal is the client's to keep on.
+- **Old bookmarks:** `next.config.mjs` redirects `/client` and `/client/*` to
+  `/login`. The `#/login` part never reaches the server, so that covers them.
+- Supabase Auth's Site URL and redirect list name this address; the reset
+  email builds its link from the Site URL.
+- `housekeeping.reservationcentric.com` still points at the old provider and
+  can go once the client has left it.
+
 ## Open decisions — do not silently choose
 
 Assumed below. If an assumption is wrong the schema changes, so raise it rather
