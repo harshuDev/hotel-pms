@@ -4,7 +4,10 @@ import { localised } from "@/lib/i18n/localised";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import type { ActionResult } from "@/lib/actions/cashier";
-import type { Settlement } from "@/lib/types";
+import type { BookingFolioView, Settlement } from "@/lib/types";
+import type { Discount } from "@/lib/finance-profiles";
+import { folioViewFrom } from "@/lib/queries";
+import { nullableArg } from "@/lib/supabase/database";
 
 /**
  * Changing a booking after it has been taken.
@@ -237,23 +240,148 @@ export async function recordBookingPayment(input: {
   payerName: string;
   description: string;
   reference: string;
+  /** The folio to pay into (0129); null is the primary. */
+  folioId: string | null;
 }): Promise<ActionResult<null>> {
   if (!Number.isSafeInteger(input.amountCents) || input.amountCents <= 0) {
     return { ok: false, error: await localised("The amount must be more than zero.") };
   }
   const supabase = await createClient();
-  const { error } = await supabase.rpc("record_booking_payment", {
+  const { error } = await supabase.rpc("record_folio_payment", {
     p_booking_id: input.bookingId,
     p_payment_method_id: input.paymentMethodId,
     p_amount_cents: input.amountCents,
     p_payer_name: input.payerName,
     p_description: input.description,
     p_reference: input.reference,
+    p_folio_id: input.folioId,
   });
   if (error) return { ok: false, error: await localised(error.message) };
   revalidateBooking(input.bookingId);
   revalidatePath("/cashier");
   return { ok: true, data: null };
+}
+
+/* ---------------------------------------------------------------------------
+ * The rest of the reference's folio (0129): several folios, Folio For, notes,
+ * Move To and Add discount. Every figure is Postgres's; these only ask.
+ * ------------------------------------------------------------------------- */
+
+/** One folio of the booking, for the Folio tab's own folio tabs. */
+export async function loadFolioView(
+  bookingId: string,
+  folioId: string,
+): Promise<ActionResult<BookingFolioView>> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("booking_folio", { p_booking_id: bookingId, p_folio_id: folioId });
+  if (error) return { ok: false, error: await localised(error.message) };
+  return { ok: true, data: folioViewFrom(data) };
+}
+
+export async function addFolio(bookingId: string): Promise<ActionResult<{ folioId: string }>> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("add_folio", { p_booking_id: bookingId });
+  if (error) return { ok: false, error: await localised(error.message) };
+  revalidateBooking(bookingId);
+  return { ok: true, data: { folioId: String(data) } };
+}
+
+export async function setFolioCustomer(input: {
+  bookingId: string;
+  folioId: string;
+  customerId: string;
+}): Promise<ActionResult<null>> {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("set_folio_customer", {
+    p_folio_id: input.folioId,
+    p_customer_id: input.customerId,
+  });
+  if (error) return { ok: false, error: await localised(error.message) };
+  revalidateBooking(input.bookingId);
+  return { ok: true, data: null };
+}
+
+export async function setFolioNotes(input: {
+  bookingId: string;
+  folioId: string;
+  notes: string;
+  overlayText: string;
+}): Promise<ActionResult<null>> {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("set_folio_notes", {
+    p_folio_id: input.folioId,
+    p_notes: input.notes,
+    p_overlay_text: input.overlayText,
+  });
+  if (error) return { ok: false, error: await localised(error.message) };
+  revalidateBooking(input.bookingId);
+  return { ok: true, data: null };
+}
+
+/** Move To: a reversal where the charge leaves and the same charge where it lands. */
+export async function moveFolioItems(input: {
+  bookingId: string;
+  targetFolioId: string;
+  folioItemIds: string[];
+  bookingRoomIds: string[];
+}): Promise<ActionResult<{ moved: number }>> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("move_folio_items", {
+    p_target_folio_id: input.targetFolioId,
+    p_item_ids: input.folioItemIds,
+    p_booking_room_ids: input.bookingRoomIds,
+  });
+  if (error) return { ok: false, error: await localised(error.message) };
+  revalidateBooking(input.bookingId);
+  return { ok: true, data: { moved: Number(data ?? 0) } };
+}
+
+/** Add discount: a percentage (bps) or an amount (minor units), never both. */
+export async function applyFolioDiscount(input: {
+  bookingId: string;
+  folioId: string;
+  folioItemIds: string[];
+  bookingRoomIds: string[];
+  percentBps: number | null;
+  amountCents: number | null;
+  description: string;
+}): Promise<ActionResult<{ cents: number }>> {
+  if ((input.percentBps === null) === (input.amountCents === null)) {
+    return { ok: false, error: await localised("Give the discount as a percentage or as an amount") };
+  }
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("apply_folio_discount", {
+    p_folio_id: input.folioId,
+    p_item_ids: input.folioItemIds,
+    p_booking_room_ids: input.bookingRoomIds,
+    // Exactly one is null: the kind of discount not being given.
+    p_percent_bps: nullableArg(input.percentBps),
+    p_amount_cents: nullableArg(input.amountCents),
+    p_description: input.description,
+  });
+  if (error) return { ok: false, error: await localised(error.message) };
+  revalidateBooking(input.bookingId);
+  return { ok: true, data: { cents: Number(data ?? 0) } };
+}
+
+/** The Inventory -> Discounts catalog, offered by Add discount. */
+export async function loadDiscounts(): Promise<ActionResult<Discount[]>> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("discounts")
+    .select("id, title, kind, percent_bps, amount_cents")
+    .order("title");
+  if (error) return { ok: false, error: await localised(error.message) };
+  return {
+    ok: true,
+    data: (data ?? []).map((r) => ({
+      id: r.id,
+      title: r.title,
+      kind: r.kind === "fixed" ? "fixed" : "percent",
+      percentBps: r.percent_bps,
+      amountCents: r.amount_cents === null ? null : Number(r.amount_cents),
+    })),
+  };
 }
 
 export async function reverseFolioCharges(input: {

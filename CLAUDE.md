@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0128` are
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0129` are
 applied to the hosted database.
 
 Working on real data: dashboard (house board, movements, pace, activity feed),
@@ -329,8 +329,8 @@ Each read is a Postgres view or RPC, never aggregation in the client:
 | `getMealReport(from, to)`           | `meal_report(from, to)`           |
 | `getAccountingRoomRevenue(from, to)` | `accounting_room_revenue(from, to)` (0108) |
 | `getBookingInvoiceTaxes(id)`       | `booking_invoice_taxes(id)` (0117) |
-| `getBookingFolioView(id)`          | `booking_folio_view(id)` -- the Folio tab (0127) |
-| `getBookingPayments(id)`           | `booking_payments(id)` -- the Payment tab (0128) |
+| `getBookingFolioView(id, folio)`   | `booking_folio(id, folio)` -- the Folio tab, one folio (0129) |
+| `getBookingPayments(id)`           | `booking_payment_rows(id)` -- the Payment tab, with its folio (0129) |
 
 **Two signatures carry the room-count rule.** The client operates properties
 with up to ~1,800 rooms, so no query may return every room and no screen may
@@ -2038,10 +2038,56 @@ client: "Need to add Booking Channel in the Dashboard".
     line is the stay, changed on the Rooms tab.
   - **Print** opens the invoice with `?print=1`, which opens the print dialog
     on arrival (`PrintOnArrival`).
-  - **Not copied, because nothing is behind them yet**: Add Folio, Move To
-    (no second folio is ever made), Add discount (`post_discount()` posts a
-    zero tax split -- see Discounts), Send (no mail provider), PDF (the
-    browser's Print saves one), View By, and the folio notes.
+  - **THE REST OF THE REFERENCE'S TOOLBAR IS BUILT AS OF 0129**, at the
+    client's request ("copy and make them exactly like in the previous
+    system"). `booking_folio(booking, folio)` reads ONE folio (the primary
+    when none is named) plus the list of them for the tab strip;
+    `booking_folio_view()` (0127) is left in place and read by nothing.
+    - **Add Folio** (`add_folio()`, front office) opens another guest folio
+      on the booking; each folio is a tab, "Folio #n" and who it is for.
+      **Folio For's pencil** bills a folio to another guest or a company
+      (`set_folio_customer()`, customer search, newest reply wins).
+    - **Move To** (`move_folio_items()`) moves ticked extras and ticked
+      ROOMS to another open folio. A posted line is moved the append-only
+      way: a reversal in the source ("Moved to folio #n: ...") and a copy in
+      the target, both on the open business date. A ticked room also moves
+      its nights not yet charged: `booking_rooms.folio_id` routes them, and
+      `check_out_booking()` posts each room's nights to its routed open
+      folio, else the primary. A line carrying a discount is refused by name
+      (the discount row would be left behind).
+    - **One live room charge per night is now a TRIGGER**
+      (`folio_items_one_live_room_charge()`), not the unique index
+      `folio_items_one_room_charge_per_night_idx`: a move needs the reversed
+      charge and its copy to share the night. **The index has to be dropped
+      by hand in the SQL editor** -- the connector refuses any `drop` -- and
+      until it is, moving a CHARGED room fails on it. Extras and uncharged
+      rooms move either way.
+    - **Add discount** (`apply_folio_discount()`, front office): one from
+      Inventory -> Discounts, or Custom (percent or fixed), spread over the
+      ticked lines by value. **This is the first thing that applies a
+      Discount** (see Discounts). A POSTED line gets a `discount` row with
+      the tax split in proportion, breakdown included -- not
+      `post_discount()`'s zero split. A night NOT YET CHARGED is repriced
+      instead (`discount_cents`, tax recomputed through
+      `tax_split_multi()`), so check-out posts it already discounted. One
+      discount per line: `folio_items_one_reversal_per_item_idx` allows one
+      reversing or discounting row per item.
+    - **Send** is a `mailto:` to the guest with the folio in plain words --
+      the desk's own mail program sends it, because this system has no mail
+      provider. **PDF** opens the invoice to print, which is how a browser
+      saves one. Both, and Create Invoice and Print, are still the
+      BOOKING's invoice of posted charges, not the one folio on screen.
+    - **View By** is Type (the reference's layout) or Date (every line by
+      its date). PROVISIONAL: the reference's list was not seen open.
+    - **The folio notes and overlay text** (`folios.notes`,
+      `folios.overlay_text`, `set_folio_notes()`) are the two pencils above
+      the totals. Stored; nothing prints them yet.
+    - A payment goes into a chosen folio from the Payment tab
+      (`record_folio_payment()`; `record_booking_payment()` stays).
+    - **0129 was applied in four parts (0129a-d)** to dodge the connector's
+      `drop` refusal, and 0129d fixed the record-variable trap again
+      (`r` vs a table alias `r`) in `apply_folio_discount()` -- the 0126
+      lesson. Name a record variable `v_row`, never a letter.
 
 - **THE PAYMENT TAB IS THE REFERENCE'S TRANSACTIONS (0128)**, after Folio
   (`payment-tab.tsx`): Date, Time (the hotel's clock), Type, Payer Name,
@@ -2443,7 +2489,7 @@ client: "Need to add Booking Channel in the Dashboard".
         Code, Common Door Name, and the key-code setting (no door-lock
         system). `set_room_setup()` is its own function, not parameters on
         `save_room()` -- the overload trap again.
-  - **INVENTORY -> DISCOUNTS (0090) IS STORED, NOT YET APPLIED.** The
+  - **INVENTORY -> DISCOUNTS (0090) IS APPLIED FROM THE FOLIO TAB (0129).** The
     reference's search box, list (Title sortable, Type filterable, Amount) and
     Add Discount dialog: Title, Amount with a % or currency prefix, Type as
     Percent or Fixed. Each row carries a ringed pencil and a ringed bin, as
@@ -2454,13 +2500,12 @@ client: "Need to add Booking Channel in the Dashboard".
       parsed from the typed string by `parsePercentBps()`; Fixed is
       `amount_cents` in the property's currency. A check constraint makes each
       kind carry exactly its own column, and switching kind drops the other.
-    - **NOTHING TAKES A DISCOUNT OFF A STAY YET.** Applying one is a money
-      change -- to a booking's nights before the audit, or to the folio after
-      it -- and the folio path that exists, `post_discount()` (0003), posts
-      every discount with a zero tax split and nothing in the app calls it.
-      On a VAT-inclusive rate that overstates the tax. Fix that function, or
-      discount the nights instead, when this is wired -- and ask first.
-      Offers (promotions) are still what reduces a stay automatically.
+    - **The Folio tab's "Add discount" applies one** (0129,
+      `apply_folio_discount()`): discount rows with the tax split in
+      proportion on posted lines, repriced nights on lines not yet charged
+      -- the two fixes this note used to ask for. `post_discount()` (0003)
+      still posts a zero tax split and is still called by nothing. Offers
+      (promotions) are still what reduces a stay automatically.
     - Genuinely deleted: nothing points at a discount.
   - **CONNECTIVITY -> CHANNEL MANAGER (0097) IS STORED, NOT YET CONNECTED.**
     The reference's list (Title, Is Active, Is Synced, Synced At) and ADD

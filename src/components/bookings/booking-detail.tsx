@@ -1376,12 +1376,14 @@ export function BookingDetailView({
           bookingId={detail.bookingId}
           view={folioView}
           guestName={detail.customerName}
+          guestEmail={guest?.email ?? null}
           guestDetails={[
             guest?.country ? tr(countryName(guest.country)) : null,
             guest?.nationalIdNumber ?? null,
           ].filter((x): x is string => Boolean(x))}
           timezone={timezone}
           canCharge={canCharge}
+          canEdit={canEdit}
         />
       )}
 
@@ -1390,6 +1392,7 @@ export function BookingDetailView({
           bookingId={detail.bookingId}
           payments={payments}
           methods={paymentMethods}
+          folios={folioView.folios}
           guestName={detail.customerName}
           timezone={timezone}
           canCharge={canCharge}

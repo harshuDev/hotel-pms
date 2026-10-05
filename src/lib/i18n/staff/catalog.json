@@ -11,6 +11,9 @@
  "{0} cancelled: {1}": {
   "kind": "db"
  },
+ "{0} charge(s) moved to folio #{1}": {
+  "kind": "db"
+ },
  "{0} customer record(s) merged into {1}": {
   "kind": "db"
  },
@@ -751,6 +754,9 @@
  "A disabled room is out of order and cannot be sold.": {
   "kind": "text"
  },
+ "A discount must be more than zero": {
+  "kind": "text"
+ },
  "A facility needs a title": {
   "kind": "db"
  },
@@ -865,6 +871,9 @@
  "A percent discount is more than 0 and at most 100": {
   "kind": "db"
  },
+ "A percentage discount is between 0.01 and 100": {
+  "kind": "text"
+ },
  "A person": {
   "kind": "text"
  },
@@ -943,6 +952,9 @@
  "A tax rate needs a name.": {
   "kind": "text"
  },
+ "A ticked line already carries a discount or was reversed, so it cannot be discounted again": {
+  "kind": "db"
+ },
  "A waitlist entry needs an arrival and a departure date": {
   "kind": "db"
  },
@@ -953,6 +965,9 @@
   "kind": "text"
  },
  "Accommodation": {
+  "kind": "text"
+ },
+ "Accommodation is changed on the Rooms tab. Tick extras to remove them.": {
   "kind": "text"
  },
  "Accommodation Sub-total:": {
@@ -1081,6 +1096,9 @@
  "Add dates to {name}": {
   "kind": "text"
  },
+ "Add discount": {
+  "kind": "text"
+ },
  "Add Discount": {
   "kind": "text"
  },
@@ -1091,6 +1109,9 @@
   "kind": "text"
  },
  "Add file": {
+  "kind": "text"
+ },
+ "Add Folio": {
   "kind": "text"
  },
  "Add gateway": {
@@ -1452,6 +1473,9 @@
   "kind": "text"
  },
  "Apply": {
+  "kind": "text"
+ },
+ "Apply discount": {
   "kind": "text"
  },
  "Applying…": {
@@ -2181,6 +2205,9 @@
  "Change the password": {
   "kind": "text"
  },
+ "Change who this folio is for": {
+  "kind": "text"
+ },
  "Changing…": {
   "kind": "text"
  },
@@ -2886,6 +2913,9 @@
  "Current staff user is not permitted to post financial transactions": {
   "kind": "db"
  },
+ "Custom": {
+  "kind": "text"
+ },
  "Custom cancellation policy": {
   "kind": "text"
  },
@@ -3217,6 +3247,9 @@
  },
  "Discount": {
   "kind": "text"
+ },
+ "Discount \"{0}\" of {1}.{2} given on folio #{3}": {
+  "kind": "db"
  },
  "Discount amount must be positive and not exceed original charge": {
   "kind": "db"
@@ -3797,6 +3830,21 @@
  "Folio {n} belongs to a meeting room booking": {
   "kind": "text"
  },
+ "Folio #{0} added": {
+  "kind": "db"
+ },
+ "Folio #{0} is closed, so it cannot be discounted": {
+  "kind": "db"
+ },
+ "Folio #{0} is closed, so it cannot take a payment": {
+  "kind": "db"
+ },
+ "Folio #{0} is closed, so nothing can be moved to it": {
+  "kind": "db"
+ },
+ "Folio #{0} is now for {1}": {
+  "kind": "db"
+ },
  "Folio #{n}": {
   "kind": "text"
  },
@@ -3805,6 +3853,12 @@
  },
  "Folio not found for current property": {
   "kind": "db"
+ },
+ "Folio Notes": {
+  "kind": "text"
+ },
+ "Folio Overlay Text": {
+  "kind": "text"
  },
  "Folio report": {
   "kind": "text"
@@ -4006,6 +4060,9 @@
  },
  "Give the amount the derived rate moves by": {
   "kind": "db"
+ },
+ "Give the discount as a percentage or as an amount": {
+  "kind": "text"
  },
  "Give the event a name.": {
   "kind": "text"
@@ -5083,8 +5140,14 @@
  "Move to": {
   "kind": "text"
  },
+ "Move To": {
+  "kind": "text"
+ },
  "Move to another room": {
   "kind": "text"
+ },
+ "Moved to folio #{0}: {1}": {
+  "kind": "db"
  },
  "Movements": {
   "kind": "text"
@@ -5311,6 +5374,9 @@
  "no access": {
   "kind": "text"
  },
+ "No accommodation on this folio.": {
+  "kind": "text"
+ },
  "No active sales channels.": {
   "kind": "text"
  },
@@ -5480,9 +5546,6 @@
   "kind": "text"
  },
  "No rooms on this booking yet. Add one.": {
-  "kind": "text"
- },
- "No rooms on this booking.": {
   "kind": "text"
  },
  "No show": {
@@ -5898,11 +5961,17 @@
  "Only cash payments may reference a cashier shift": {
   "kind": "db"
  },
+ "Only charges on this booking can be moved between its folios": {
+  "kind": "db"
+ },
  "Only for arrivals on": {
   "kind": "text"
  },
  "Only For Channels (Hide on IBE)": {
   "kind": "text"
+ },
+ "Only front desk, management or an administrator may add a folio": {
+  "kind": "db"
  },
  "Only front desk, management or an administrator may assign a room": {
   "kind": "db"
@@ -5913,10 +5982,16 @@
  "Only front desk, management or an administrator may change a room": {
   "kind": "db"
  },
+ "Only front desk, management or an administrator may change who a folio is for": {
+  "kind": "db"
+ },
  "Only front desk, management or an administrator may check a guest in": {
   "kind": "db"
  },
  "Only front desk, management or an administrator may check a guest out": {
+  "kind": "db"
+ },
+ "Only front desk, management or an administrator may give a discount": {
   "kind": "db"
  },
  "Only front desk, management or an administrator may record correspondence": {
@@ -6388,6 +6463,9 @@
   "kind": "text"
  },
  "Pays at the property": {
+  "kind": "text"
+ },
+ "PDF": {
   "kind": "text"
  },
  "pending": {
@@ -7470,6 +7548,9 @@
  "Search": {
   "kind": "text"
  },
+ "Search a guest or company": {
+  "kind": "text"
+ },
  "Search bookings by reservation id, token or invoice number": {
   "kind": "text"
  },
@@ -7555,6 +7636,9 @@
   "kind": "text"
  },
  "Sellable": {
+  "kind": "text"
+ },
+ "Send": {
   "kind": "text"
  },
  "Send a new link": {
@@ -8246,6 +8330,12 @@
  "That file was not uploaded against this booking": {
   "kind": "db"
  },
+ "That folio is not on this booking": {
+  "kind": "db"
+ },
+ "That folio is not on this property": {
+  "kind": "db"
+ },
  "That gateway is not on this property": {
   "kind": "db"
  },
@@ -8298,6 +8388,9 @@
   "kind": "db"
  },
  "That member of staff is not on this property": {
+  "kind": "db"
+ },
+ "That night already carries a room charge": {
   "kind": "db"
  },
  "That note is not on this property": {
@@ -8527,6 +8620,9 @@
  },
  "The departure date must be after the arrival date.": {
   "kind": "text"
+ },
+ "The discount is more than the ticked lines are worth": {
+  "kind": "db"
  },
  "The email preferences must be a set of switches": {
   "kind": "db"
@@ -8879,6 +8975,15 @@
  "Tick the extras to remove first.": {
   "kind": "text"
  },
+ "Tick the lines to discount": {
+  "kind": "db"
+ },
+ "Tick the lines to discount first.": {
+  "kind": "text"
+ },
+ "Tick the lines to move first.": {
+  "kind": "text"
+ },
  "Tick the rates on the left to apply this to.": {
   "kind": "text"
  },
@@ -9188,6 +9293,9 @@
   "kind": "country",
   "code": "VN"
  },
+ "View By": {
+  "kind": "text"
+ },
  "View rooms ({n})": {
   "kind": "text"
  },
@@ -9440,6 +9548,12 @@
  },
  "Write the title": {
   "kind": "db"
+ },
+ "Write Your Folio Notes": {
+  "kind": "text"
+ },
+ "Write Your Folio Overlay Text": {
+  "kind": "text"
  },
  "Xero": {
   "kind": "text"
