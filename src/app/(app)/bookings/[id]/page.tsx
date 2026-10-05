@@ -9,6 +9,7 @@ import {
   getBookingEmails,
   getBookingDetail,
   getBookingFolioLines,
+  getBookingFolioView,
   getBookingNights,
   getBookingRoomLines,
   getChannels,
@@ -64,6 +65,7 @@ export default async function BookingPage({
     rooms,
     nights,
     folio,
+    folioView,
     activity,
     attachments,
     emails,
@@ -79,6 +81,7 @@ export default async function BookingPage({
       getBookingRoomLines(id),
       getBookingNights(id),
       getBookingFolioLines(id),
+      getBookingFolioView(id),
       getBookingActivity(id),
       // The two tabs the reference carries and this screen gained in 0063.
       getBookingAttachments(id),
@@ -110,6 +113,7 @@ export default async function BookingPage({
       rooms={rooms}
       nights={nights}
       folio={folio}
+      folioView={folioView}
       activity={activity}
       attachments={attachments}
       emails={emails}

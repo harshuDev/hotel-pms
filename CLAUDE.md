@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0126` are
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0127` are
 applied to the hosted database.
 
 Working on real data: dashboard (house board, movements, pace, activity feed),
@@ -329,6 +329,7 @@ Each read is a Postgres view or RPC, never aggregation in the client:
 | `getMealReport(from, to)`           | `meal_report(from, to)`           |
 | `getAccountingRoomRevenue(from, to)` | `accounting_room_revenue(from, to)` (0108) |
 | `getBookingInvoiceTaxes(id)`       | `booking_invoice_taxes(id)` (0117) |
+| `getBookingFolioView(id)`          | `booking_folio_view(id)` -- the Folio tab (0127) |
 
 **Two signatures carry the room-count rule.** The client operates properties
 with up to ~1,800 rooms, so no query may return every room and no screen may
@@ -2013,6 +2014,34 @@ client: "Need to add Booking Channel in the Dashboard".
         storage, so ours shows the five tabs it has. Copying the tab strip
         without the features behind it would be two more controls that do
         nothing.
+- **THE FOLIO TAB IS THE REFERENCE'S FOLIO (0127)** -- the client sent
+  their current system's and asked for it "as it is". `folio-tab.tsx`, over
+  `booking_folio_view()`: the folio's tab (Folio #n and the guest), Remove,
+  Create Invoice and Print; Folio For (name, country, ID) beside Status, No
+  and Date; Accommodation, one line per room -- type (Room: n, rate plan),
+  Count (nights), Net, Taxes, Total -- with "Nights breakdown" and "Tax
+  breakdown" under it and a Total row; Extras the same; Payments, or "no
+  payments yet" and Create Payment (the cashier); then Total, Accommodation
+  Sub-total, Extra Sub-total, each tax as "Name (base): amount", Paid and Due.
+  - **It shows the stay, not only what is posted**, because nothing is posted
+    until check-out (0125). A charged night is read from the folio items
+    posted for it (room charge, any included meals or extras split off it,
+    any reversal); a live night not yet charged from `booking_room_nights`,
+    at the rate check-out will post. So Due is the folio balance plus the
+    nights still to post -- the check-out dialog's figure. Tested against
+    BK-000026: 450.00 total, 50.00 paid, 400.00 due = 300.00 posted + 100.00
+    to post.
+  - **Remove reverses** the ticked extras (`reverse_charge()`, one reversing
+    row each, confirmed inline); with none ticked it says to tick one rather
+    than being disabled. Only posted extras carry a tick: an accommodation
+    line is the stay, changed on the Rooms tab.
+  - **Print** opens the invoice with `?print=1`, which opens the print dialog
+    on arrival (`PrintOnArrival`).
+  - **Not copied, because nothing is behind them yet**: Add Folio, Move To
+    (no second folio is ever made), Add discount (`post_discount()` posts a
+    zero tax split -- see Discounts), Send (no mail provider), PDF (the
+    browser's Print saves one), View By, and the folio notes.
+
 - **`bookings.external_payload` is empty on every row and nothing fills it.**
   OTA bookings are entered by hand (open decision 2), so the channel's raw
   payload never arrives. The screen shows the source, the settlement and

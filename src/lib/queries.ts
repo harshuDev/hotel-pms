@@ -78,6 +78,8 @@ import type {
   BookingNight,
   BookingRoomLine,
   BookingStatus,
+  TaxKind,
+  BookingFolioView,
   Channel,
   ChannelSetting,
   Customer,
@@ -2481,6 +2483,71 @@ export async function getBookingFolioLines(
     amountCents: row.amount_cents,
     itemType: row.item_type,
   }));
+}
+
+/** The Folio tab (0127): the stay as posted, plus nights not yet charged. */
+export async function getBookingFolioView(bookingId: string): Promise<BookingFolioView> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("booking_folio_view", { p_booking_id: bookingId });
+  if (error) throw new Error(`Failed to load the folio: ${error.message}`);
+  // jsonb from Postgres: bigint sums arrive as numbers or numeric strings.
+  const v = (data ?? {}) as Record<string, unknown>;
+  const n = (x: unknown) => Number(x ?? 0);
+  const arr = (x: unknown) => (Array.isArray(x) ? (x as Record<string, unknown>[]) : []);
+  const f = v.folio as Record<string, unknown> | null | undefined;
+  return {
+    folio: f
+      ? { id: String(f.id), number: n(f.number), status: String(f.status), openedAt: String(f.opened_at) }
+      : null,
+    rooms: arr(v.rooms).map((r) => ({
+      bookingRoomId: String(r.booking_room_id),
+      roomType: String(r.room_type ?? ""),
+      roomNumber: (r.room_number as string | null) ?? null,
+      ratePlan: (r.rate_plan as string | null) ?? null,
+      status: r.status as BookingStatus,
+      count: n(r.count),
+      netCents: n(r.net),
+      taxCents: n(r.tax),
+      nights: arr(r.nights).map((x) => ({
+        stayDate: String(x.stay_date),
+        netCents: n(x.net),
+        taxCents: n(x.tax),
+        charged: Boolean(x.charged),
+      })),
+      taxes: arr(r.taxes).map((x) => ({ taxRateId: (x.tax_rate_id as string | null) ?? null, cents: n(x.cents) })),
+    })),
+    extras: arr(v.extras).map((e) => ({
+      folioItemId: String(e.folio_item_id),
+      description: String(e.description ?? ""),
+      quantity: n(e.quantity) || 1,
+      businessDate: String(e.business_date),
+      netCents: n(e.net),
+      taxCents: n(e.tax),
+      totalCents: n(e.total),
+      isReversal: Boolean(e.is_reversal),
+      isReversed: Boolean(e.is_reversed),
+    })),
+    payments: arr(v.payments).map((p) => ({
+      paymentId: String(p.payment_id),
+      businessDate: String(p.business_date),
+      method: (p.method as string | null) ?? null,
+      amountCents: n(p.amount),
+      isReversal: Boolean(p.is_reversal),
+    })),
+    taxes: arr(v.taxes).map((t) => ({
+      taxRateId: (t.tax_rate_id as string | null) ?? null,
+      name: (t.name as string | null) ?? null,
+      kind: (t.kind as TaxKind | null) ?? null,
+      rateBps: t.rate_bps == null ? null : n(t.rate_bps),
+      baseCents: n(t.base),
+      cents: n(t.cents),
+    })),
+    accommodationNetCents: n(v.accommodation_net),
+    extrasNetCents: n(v.extras_net),
+    totalCents: n(v.total),
+    paidCents: n(v.paid),
+    dueCents: n(v.due),
+  };
 }
 
 export async function getBookingActivity(

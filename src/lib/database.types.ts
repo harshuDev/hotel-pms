@@ -5085,6 +5085,7 @@ export type Database = {
           posted_at: string
         }[]
       }
+      booking_folio_view: { Args: { p_booking_id: string }; Returns: Json }
       booking_invoice_lines: {
         Args: { p_booking_id: string }
         Returns: {

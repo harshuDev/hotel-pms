@@ -8,6 +8,7 @@ import Link from "next/link";
 import { format, parseISO } from "date-fns";
 import { AttachmentsTab } from "@/components/bookings/attachments-tab";
 import { EmailTab } from "@/components/bookings/email-tab";
+import { FolioTab } from "@/components/bookings/folio-tab";
 import { ChargeExtra } from "@/components/bookings/charge-extra";
 import type { ExtrasCatalog } from "@/lib/extras";
 import type { EmailTemplate } from "@/lib/email-preferences";
@@ -24,6 +25,7 @@ import {
   updateBooking,
 } from "@/lib/actions/booking-edit";
 import type {
+  BookingFolioView,
   Booking,
   BookingActivityItem,
   BookingAttachment,
@@ -128,6 +130,7 @@ export function BookingDetailView({
   rooms,
   nights,
   folio,
+  folioView,
   activity,
   attachments,
   emails,
@@ -147,6 +150,9 @@ export function BookingDetailView({
   rooms: BookingRoomLine[];
   nights: BookingNight[];
   folio: FolioLine[];
+  /** The Folio tab (0127), laid out as the reference's. Required, so both
+      frames -- the page and the calendar's panel -- must pass it. */
+  folioView: BookingFolioView;
   activity: BookingActivityItem[];
   /** Files on the booking (0063). */
   attachments: BookingAttachment[];
@@ -1353,83 +1359,19 @@ export function BookingDetailView({
         </div>
       )}
 
-      {/* Folio -------------------------------------------------------- */}
+      {/* Folio (0127): the reference's layout. --------------------------- */}
       {tab === "folio" && (
-      <div className="rounded-lg border border-line bg-white p-5 shadow-card">
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="font-display text-[15px] font-semibold tracking-tightest text-ink">
-            {tr("Folio")}
-          </h2>
-          <span className="flex gap-4">
-            {/* The printable invoice Invoice Settings feeds (0080). A new
-                tab, like the registration card, so the calendar's panel is
-                still there afterwards. */}
-            <Link
-              href={`/bookings/${detail.bookingId}/invoice`}
-              target="_blank"
-              className="text-[13px] text-ink-muted underline-offset-2 hover:text-ink hover:underline"
-            >
-              {tr("Print invoice")}
-            </Link>
-            <Link
-              href="/cashier"
-              className="text-[13px] text-ink-muted underline-offset-2 hover:text-ink hover:underline"
-            >
-              {tr("Take a payment")}
-            </Link>
-          </span>
-        </div>
-        {folio.length === 0 ? (
-          <p className="py-6 text-center text-[13px] text-ink-muted">
-            {tr("Nothing posted yet.")}
-          </p>
-        ) : (
-          <table className="w-full text-[13px]">
-            <thead>
-              <tr className="border-b border-line text-left text-ink-faint">
-                {[msg("Business date"), msg("Folio"), msg("What"), msg("Amount")].map((c, i) => (
-                  <th
-                    key={c}
-                    className={cn(
-                      "whitespace-nowrap px-3 pb-2.5 text-xxs font-semibold uppercase tracking-[0.1em]",
-                      i === 3 && "text-right",
-                    )}
-                  >
-                    {c && tr(c)}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-line">
-              {folio.map((l) => (
-                <tr key={l.lineId}>
-                  <td className="whitespace-nowrap px-3 py-2.5 text-ink-muted">
-                    {tr.date(l.businessDate, "d MMM")}
-                  </td>
-                  <td className="tnum px-3 py-2.5 text-ink-faint">{l.folioNumber}</td>
-                  <td className="px-3 py-2.5 text-ink">
-                    {tr.message(l.description)}
-                    <span className="ml-2 text-xxs text-ink-faint">
-                      {l.kind === "payment" ? tr("payment") : tr("charge")}
-                      {l.isReversal && ` · ${tr("reversed")}`}
-                    </span>
-                  </td>
-                  <td
-                    className={cn(
-                      "tnum whitespace-nowrap px-3 py-2.5 text-right font-medium",
-                      l.kind === "payment" ? "text-emerald-700" : "text-ink",
-                      l.isReversal && "text-warn-deep",
-                    )}
-                  >
-                    {formatMoney(l.amountCents, currency)}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
-
+        <FolioTab
+          bookingId={detail.bookingId}
+          view={folioView}
+          guestName={detail.customerName}
+          guestDetails={[
+            guest?.country ? tr(countryName(guest.country)) : null,
+            guest?.nationalIdNumber ?? null,
+          ].filter((x): x is string => Boolean(x))}
+          timezone={timezone}
+          canCharge={canCharge}
+        />
       )}
 
       {/* Activity ----------------------------------------------------- */}

@@ -885,6 +885,62 @@ export interface BookingNight {
   charged: boolean;
 }
 
+/** The booking's Folio tab, laid out as the reference's (0127). */
+export interface FolioViewRoom {
+  bookingRoomId: string;
+  roomType: string;
+  roomNumber: string | null;
+  ratePlan: string | null;
+  status: BookingStatus;
+  count: number;
+  netCents: number;
+  taxCents: number;
+  nights: { stayDate: string; netCents: number; taxCents: number; charged: boolean }[];
+  taxes: { taxRateId: string | null; cents: number }[];
+}
+
+export interface FolioViewExtra {
+  folioItemId: string;
+  description: string;
+  quantity: number;
+  businessDate: string;
+  netCents: number;
+  taxCents: number;
+  totalCents: number;
+  isReversal: boolean;
+  isReversed: boolean;
+}
+
+export interface FolioViewPayment {
+  paymentId: string;
+  businessDate: string;
+  method: string | null;
+  amountCents: number;
+  isReversal: boolean;
+}
+
+export interface FolioViewTax {
+  taxRateId: string | null;
+  name: string | null;
+  kind: TaxKind | null;
+  rateBps: number | null;
+  baseCents: number;
+  cents: number;
+}
+
+export interface BookingFolioView {
+  folio: { id: string; number: number; status: string; openedAt: string } | null;
+  rooms: FolioViewRoom[];
+  extras: FolioViewExtra[];
+  payments: FolioViewPayment[];
+  taxes: FolioViewTax[];
+  accommodationNetCents: number;
+  extrasNetCents: number;
+  totalCents: number;
+  paidCents: number;
+  dueCents: number;
+}
+
 export interface FolioLine {
   lineId: string;
   folioId: string;
