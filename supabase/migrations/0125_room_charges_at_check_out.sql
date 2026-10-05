@@ -312,7 +312,7 @@ declare
   v_br uuid;
   v_today date;
   v_folio uuid;
-  r record;
+  v_n record;
 begin
   if not public.is_front_office_staff() then
     raise exception 'Only front desk, management or an administrator may check a guest out';
@@ -337,7 +337,7 @@ begin
   end if;
 
   -- The stay's room charges (0125), every night slept and not yet charged.
-  for r in
+  for v_n in
     select n.id as night_id, n.booking_room_id, n.stay_date
     from public.booking_room_nights n
     join public.booking_rooms br
@@ -368,8 +368,8 @@ begin
     end if;
 
     begin
-      perform public.post_room_charge(v_folio, r.night_id, v_today);
-      perform public.post_rate_plan_extras(r.booking_room_id, 'each_night', r.stay_date);
+      perform public.post_room_charge(v_folio, v_n.night_id, v_today);
+      perform public.post_rate_plan_extras(v_n.booking_room_id, 'each_night', v_n.stay_date);
     exception when raise_exception then
       raise exception 'Booking %: %', v_booking.reference, sqlerrm;
     end;

@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0125` are
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0126` are
 applied to the hosted database.
 
 Working on real data: dashboard (house board, movements, pace, activity feed),
@@ -68,6 +68,11 @@ and every night is dated on the CHECK-OUT business date.
 - `close_business_date()` posts nothing; its two charge columns were dropped.
 - `post_room_charge()` posts on the open business date, any night up to it,
   never a night not yet reached.
+- **0126 fixed `check_out_booking()` the hour 0125 went live**: its loop
+  record was named `r`, which shadows the `rooms r` alias in the update that
+  dirties the room, so every check-out raised "record r has no field id". A
+  plpgsql loop variable must never share a name with a table alias in the
+  same function.
 - **The money reports (Financial, Accounting, End of day, revenue chart) show a
   stay's room revenue on its departure day.** Occupancy, ADR and RevPAR read
   `booking_room_nights` and still count each night on its own date. Closed

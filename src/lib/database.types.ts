@@ -5016,6 +5016,14 @@ export type Database = {
           policy_name: string
         }[]
       }
+      booking_checkout_charges: {
+        Args: { p_booking_id: string }
+        Returns: {
+          balance_cents: number
+          nights: number
+          room_charges_cents: number
+        }[]
+      }
       booking_detail: {
         Args: { p_booking_id: string }
         Returns: {
@@ -5526,8 +5534,6 @@ export type Database = {
         Returns: {
           closed_date: string
           next_date: string
-          room_charges_cents: number
-          room_charges_posted: number
         }[]
       }
       close_cashier_shift: {
