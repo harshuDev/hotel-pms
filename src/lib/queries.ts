@@ -4453,9 +4453,13 @@ export async function getBookingEmails(
   bookingId: string,
 ): Promise<BookingEmail[]> {
   const supabase = await createClient();
-  const { data, error } = await supabase.rpc("booking_emails_list", {
-    p_booking_id: bookingId,
-  });
+  // The table under RLS rather than booking_emails_list(), which predates
+  // the message as sent, its attachments and the mail server's refusal (0131).
+  const { data, error } = await supabase
+    .from("booking_emails")
+    .select("id, to_address, subject, body, body_html, attachments, error, status, sent_at, sender:staff_users!booking_emails_sent_by_fkey(full_name)")
+    .eq("booking_id", bookingId)
+    .order("sent_at", { ascending: false });
   if (error) throw new Error(`Failed to load the correspondence: ${error.message}`);
 
   return (data ?? []).map((row) => ({
@@ -4463,8 +4467,11 @@ export async function getBookingEmails(
     toAddress: row.to_address,
     subject: row.subject,
     body: row.body,
+    bodyHtml: row.body_html,
+    attachments: row.attachments ?? [],
+    error: row.error,
     status: row.status,
     sentAt: row.sent_at,
-    sentByName: row.sent_by_name,
+    sentByName: (row.sender as { full_name: string } | null)?.full_name ?? null,
   }));
 }

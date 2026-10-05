@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0130` are
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0131` are
 applied to the hosted database.
 
 Working on real data: dashboard (house board, movements, pace, activity feed),
@@ -333,6 +333,7 @@ Each read is a Postgres view or RPC, never aggregation in the client:
 | `getBookingPayments(id)`           | `booking_payment_rows(id)` -- the Payment tab, with its folio (0129) |
 | `getBookingCards(id)`              | `booking_cards` -- the Card Vault (0130) |
 | `getPaymentRequests(id)`           | `payment_requests` (0130)         |
+| `getBookingEmails(id)`             | `booking_emails` incl. the message as sent (0131) |
 
 **Two signatures carry the room-count rule.** The client operates properties
 with up to ~1,800 rooms, so no query may return every room and no screen may
@@ -1896,22 +1897,52 @@ client: "Need to add Booking Channel in the Dashboard".
       booking is a mistake to undo, not history to keep — same reasoning as a
       calendar note or a season. The row goes first and hands back the path,
       so the object is only removed once Postgres has agreed.
-  - **EMAIL IS A RECORD OF CORRESPONDENCE AND DOES NOT SEND.** There is no
-    mail provider in this repository and no API key in any environment, and a
-    Send button that cannot send is the dead control this application keeps
-    refusing to ship — see the user-menu note.
-    - **The control says "Record", not "Send"**, because a control's label
-      matches its result. That is the one thing keeping this tab honest; do
-      not rename it without wiring a provider first.
-    - What a front desk reads that tab for is "what have we already told
-      them", which is what `booking_emails` holds: to, subject, body, when,
-      and by whom.
-    - **No update and no delete policy**, which is the opposite of an
-      attachment and the same as a folio row. A correspondence log somebody
-      can quietly edit is not evidence of anything.
-    - **Wiring a provider later is an action and a key, not a migration.**
-      `sent_at` is already there and `booking_email_status` already carries
-      `sent` and `failed` beside `logged`.
+  - **THE EMAIL TAB SENDS, AS OF 0131** -- the reference's layout, at the
+    client's request ("add a feature for sending mails ... build as it is").
+    This reverses what this note said: that the tab only recorded what was
+    sent elsewhere and its button said "Record". `email-tab.tsx`: "Send email
+    to clients" (Send to, the guest's address filled in); "Edit email
+    content" -- the Basic / Advanced template builder, Email subject, Choose
+    template (Blank Template plus Email Setup's templates), the editor;
+    Attach Invoice, Attach Confirmation, SEND EMAIL; then Correspondence, the
+    log, each row opening the message as sent.
+    - **Basic is `rich-editor.tsx`**: a contentEditable region on the
+      browser's own editing commands (no editor library) with the reference's
+      toolbar -- style, bold, italic, underline, clear, font, size, colour
+      (text and background), lists, paragraph, line height, table, link,
+      picture (a URL), rule, full screen, code view, help -- and DROP IN'S.
+      **Advanced** is the HTML itself beside a live preview in a sandboxed
+      frame.
+    - **DROP IN'S are `{{guest_name}}`-style tokens** (`src/lib/email-drop-ins.ts`,
+      one list for the editor and the server), filled on the server from the
+      booking -- guest, reference, channel reference, dates, nights, party,
+      rooms, total, paid, balance due, the hotel's name, address, phone and
+      email -- every value HTML-escaped. An unknown token is left as typed.
+    - **`sendBookingEmail()` (`src/lib/actions/booking-email.ts`) does the
+      work**: up to ten recipients, checked; the HTML SANITISED with
+      `sanitize-html` (formatting, links, pictures, tables; no script, event
+      handlers, forms or frames); the drop-ins; Email Setup's footer when
+      "Include footer" is on; the attachments; SMTP; and the row through
+      `record_booking_email()` as `sent` or `failed` with the server's error.
+      A failure is kept -- a bounce is correspondence too.
+    - **The attachments are PDFs made on the server** with pdfmake
+      (`src/lib/pdf/`): the invoice from `loadInvoice()` -- the printed
+      invoice's own figures, never recomputed -- and a booking confirmation
+      (rooms, total incl. tax, paid, balance, cancellation policy, Email
+      Setup's confirmation message and check-in notes, the guest's notes).
+      pdfmake and pdfkit are `serverExternalPackages` so they read their own
+      data files. Roboto covers Latin, Greek and Cyrillic, not Thai.
+    - **From** is SMTP_FROM with Email Setup's "From" text as the name;
+      **Reply-To** is Email Setup's reply-to addresses.
+    - **A sent message is shown again only in a sandboxed frame**
+      (`sandbox=""`), on top of the server's sanitising.
+    - **Without SMTP the button reads "Record email"** and logs as before,
+      with one line saying sending is not set up -- the label still matches
+      the result.
+    - Still **no update and no delete** on `booking_emails`.
+    - **Not done**: a sent message is not tracked for opens or bounces after
+      the SMTP server accepted it; Email Setup's other switches (pre-arrival,
+      post-departure, payment request) still send nothing by themselves.
 - **The booking screen's first five tabs are Rooms, Extras, Guests, Folio, History**,
   which are the areas the client's reference PMS organises a reservation into.
   The header above them carries the reference, status, guest, dates, nights,
@@ -2011,11 +2042,8 @@ client: "Need to add Booking Channel in the Dashboard".
       - The panel is a flex COLUMN with the body scrolling, not a `max-h` on
         the body: that held up until the header wrapped on a narrow screen and
         pushed the totals off the end.
-      - **Email and Attachments are NOT built.** The reference's panel carries
-        those two tabs; there is no mail in this codebase and no attachment
-        storage, so ours shows the five tabs it has. Copying the tab strip
-        without the features behind it would be two more controls that do
-        nothing.
+      - The panel carries every tab the page does, Email and Attachments
+        included (0063, sending since 0131).
 - **THE FOLIO TAB IS THE REFERENCE'S FOLIO (0127)** -- the client sent
   their current system's and asked for it "as it is". `folio-tab.tsx`, over
   `booking_folio_view()`: the folio's tab (Folio #n and the guest), Remove,
@@ -2808,11 +2836,12 @@ client: "Need to add Booking Channel in the Dashboard".
   - **COMMUNICATIONS & NOTIFICATIONS IS STORED, NOT YET SENT** (0074, 0075) --
     Hotel Emails Preferences and Email Setup, cloned from the reference, all
     in one row per property, `hotel_email_settings`.
-    - **Nothing in this system sends email.** There is no mail provider and
-      no key in any environment (see the booking Email tab notes). These
-      screens are the same standing as `audit_close_time` before its job: a
-      hotel's choices kept so they are in place the day sending exists. Do
-      not describe them to a client as working notifications.
+    - **Only the booking's Email tab sends (0131)**, by hand, through SMTP --
+      and it reads From, Reply-To, the footer, the confirmation message and
+      the check-in notes from here. Nothing sends by itself: the
+      notification preferences, pre-arrival, post-departure and payment
+      request emails are still choices kept for the day something runs them.
+      Do not describe them to a client as working notifications.
     - **Six of the eight Email preferences are channel-manager events** --
       a booking, change or cancellation ARRIVING from an OTA, a missing
       booking, an overbooking on arrival, a rate-mapping error. None can occur
@@ -3798,6 +3827,25 @@ and the cardholder's name -- what PCI lets a merchant keep.
 - **Nothing charges a card automatically** -- not a non-refundable
   cancellation, not a no-show. Staff press Charge. The Payment Gateway screen
   in Settings is still a stored choice; the keys decide.
+
+## Outgoing email (0131) -- SMTP, live once it is set
+
+The booking's Email tab sends through SMTP (`src/lib/mailer.ts`,
+nodemailer) -- the one thing every mail service speaks: the hotel's own Google
+Workspace or Microsoft 365 mailbox, or a sending service (SendGrid, Postmark,
+Resend, Brevo, Amazon SES).
+
+- **Environment, server only:** `SMTP_HOST`, `SMTP_PORT` (587 when blank; 465
+  means TLS), `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_FROM` (the address mail
+  goes from, which the account must be allowed to send as; `SMTP_USER` when
+  blank). Set in the Vercel project, never in the repository, never
+  `NEXT_PUBLIC_`. Without host, user and password `mailConnected()` is false
+  and the tab records only.
+- **One mail account for the deployment**, like the Stripe keys; per-property
+  credentials would go in Vault, to be asked for.
+- **It has not been run against a mail server from here** -- no SMTP
+  credentials exist in this project's environments. The PDFs were rendered
+  and the build passes; the first send is the client's.
 
 ## Open decisions — do not silently choose
 

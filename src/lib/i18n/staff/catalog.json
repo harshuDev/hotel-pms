@@ -185,6 +185,12 @@
  "{abs}d ago": {
   "kind": "text"
  },
+ "{address} is not an email address": {
+  "kind": "text"
+ },
+ "{adults} adults, {children} children": {
+  "kind": "text"
+ },
  "{amount} Discount": {
   "kind": "text"
  },
@@ -532,6 +538,12 @@
   "kind": "text"
  },
  "{name}: {error}": {
+  "kind": "text"
+ },
+ "{name}: free cancellation until {date}": {
+  "kind": "text"
+ },
+ "{name}: non-refundable": {
   "kind": "text"
  },
  "{nights} from {date}, {rooms}. No room has been assigned yet — that happens at check-in.": {
@@ -1264,6 +1276,9 @@
  "Adults and children": {
   "kind": "text"
  },
+ "Advanced": {
+  "kind": "text"
+ },
  "Affected Room Types": {
   "kind": "text"
  },
@@ -1303,6 +1318,15 @@
  "Algeria": {
   "kind": "country",
   "code": "DZ"
+ },
+ "Align centre": {
+  "kind": "text"
+ },
+ "Align left": {
+  "kind": "text"
+ },
+ "Align right": {
+  "kind": "text"
  },
  "All": {
   "kind": "text"
@@ -1385,6 +1409,9 @@
  },
  "Amount:": {
   "kind": "text"
+ },
+ "An email is recorded as sent or failed": {
+  "kind": "db"
  },
  "An email template needs a title": {
   "kind": "db"
@@ -1571,6 +1598,12 @@
  "At this part you can manage hotel currencies": {
   "kind": "text"
  },
+ "Attach Confirmation": {
+  "kind": "text"
+ },
+ "Attach Invoice": {
+  "kind": "text"
+ },
  "Attached Taxes": {
   "kind": "text"
  },
@@ -1643,6 +1676,9 @@
  "Background color": {
   "kind": "text"
  },
+ "Background colour": {
+  "kind": "text"
+ },
  "Bahamas": {
   "kind": "country",
   "code": "BS"
@@ -1676,6 +1712,9 @@
  "Barbados": {
   "kind": "country",
   "code": "BB"
+ },
+ "Basic": {
+  "kind": "text"
  },
  "Bed and breakfast": {
   "kind": "text"
@@ -1731,6 +1770,12 @@
  "Blank clears": {
   "kind": "text"
  },
+ "Blank Template": {
+  "kind": "text"
+ },
+ "Bold": {
+  "kind": "text"
+ },
  "Bolivia": {
   "kind": "country",
   "code": "BO"
@@ -1758,6 +1803,9 @@
   "kind": "text"
  },
  "Booked by {name} on {date}.": {
+  "kind": "text"
+ },
+ "Booked on": {
   "kind": "text"
  },
  "Booked within (days)": {
@@ -1902,6 +1950,9 @@
   "kind": "db"
  },
  "Booking Notification Email Address": {
+  "kind": "text"
+ },
+ "Booking reference": {
   "kind": "text"
  },
  "Booking Reference": {
@@ -2334,13 +2385,28 @@
  "Check out": {
   "kind": "text"
  },
+ "Check-in": {
+  "kind": "text"
+ },
+ "Check-in date": {
+  "kind": "text"
+ },
  "Check-in from": {
+  "kind": "text"
+ },
+ "Check-in notes": {
   "kind": "text"
  },
  "Check-In Text": {
   "kind": "text"
  },
+ "Check-out": {
+  "kind": "text"
+ },
  "Check-out by": {
+  "kind": "text"
+ },
+ "Check-out date": {
   "kind": "text"
  },
  "Check-Out Text": {
@@ -2504,6 +2570,9 @@
  "Choose SiteMinder or Vertical Booking": {
   "kind": "db"
  },
+ "Choose template": {
+  "kind": "text"
+ },
  "Choose the booking to charge, or untick the box.": {
   "kind": "text"
  },
@@ -2658,6 +2727,9 @@
   "code": "CC"
  },
  "Code": {
+  "kind": "text"
+ },
+ "Code view": {
   "kind": "text"
  },
  "Collected": {
@@ -3423,6 +3495,9 @@
  "Edit Discount": {
   "kind": "text"
  },
+ "Edit email content": {
+  "kind": "text"
+ },
  "Edit event": {
   "kind": "text"
  },
@@ -3482,6 +3557,12 @@
  "Email": {
   "kind": "text"
  },
+ "Email \"{0}\" sent to {1}": {
+  "kind": "db"
+ },
+ "Email \"{0}\" to {1} could not be sent": {
+  "kind": "db"
+ },
  "Email address": {
   "kind": "text"
  },
@@ -3504,6 +3585,15 @@
   "kind": "text"
  },
  "Email rate limit exceeded": {
+  "kind": "text"
+ },
+ "Email recorded.": {
+  "kind": "text"
+ },
+ "Email sending is not set up": {
+  "kind": "text"
+ },
+ "Email sent.": {
   "kind": "text"
  },
  "Email Setup": {
@@ -3766,6 +3856,9 @@
  "Facility title": {
   "kind": "text"
  },
+ "Failed": {
+  "kind": "text"
+ },
  "Falkland Islands": {
   "kind": "country",
   "code": "FK"
@@ -3909,6 +4002,12 @@
   "kind": "text"
  },
  "Folios": {
+  "kind": "text"
+ },
+ "Font family": {
+  "kind": "text"
+ },
+ "Font size": {
   "kind": "text"
  },
  "Food & beverage": {
@@ -4086,13 +4185,13 @@
   "kind": "text"
  },
  "Give a subject": {
-  "kind": "db"
+  "kind": "text"
  },
  "Give each condition a value": {
   "kind": "db"
  },
  "Give the address it went to": {
-  "kind": "db"
+  "kind": "text"
  },
  "Give the amount the derived rate moves by": {
   "kind": "db"
@@ -4191,11 +4290,20 @@
  "Guest Details Settings": {
   "kind": "text"
  },
+ "Guest email": {
+  "kind": "text"
+ },
  "Guest field {0} has a type this system does not know": {
   "kind": "db"
  },
  "Guest field {0} needs a name": {
   "kind": "db"
+ },
+ "Guest first name": {
+  "kind": "text"
+ },
+ "Guest name": {
+  "kind": "text"
  },
  "Guest notes": {
   "kind": "text"
@@ -4249,11 +4357,23 @@
  "Hash code": {
   "kind": "text"
  },
+ "Header 1": {
+  "kind": "text"
+ },
+ "Header 2": {
+  "kind": "text"
+ },
+ "Header 3": {
+  "kind": "text"
+ },
  "Heard Island and McDonald Islands": {
   "kind": "country",
   "code": "HM"
  },
  "Held": {
+  "kind": "text"
+ },
+ "Help": {
   "kind": "text"
  },
  "Here you can add templates for faster communication with your guests": {
@@ -4289,6 +4409,12 @@
   "kind": "country",
   "code": "HK"
  },
+ "Horizontal rule": {
+  "kind": "text"
+ },
+ "Hotel address": {
+  "kind": "text"
+ },
  "Hotel Code:": {
   "kind": "text"
  },
@@ -4299,6 +4425,9 @@
   "kind": "text"
  },
  "Hotel details saved.": {
+  "kind": "text"
+ },
+ "Hotel email": {
   "kind": "text"
  },
  "Hotel Emails Preferences": {
@@ -4320,6 +4449,9 @@
   "kind": "text"
  },
  "Hotel Operations": {
+  "kind": "text"
+ },
+ "Hotel phone": {
   "kind": "text"
  },
  "Hotel Policy": {
@@ -4377,6 +4509,9 @@
   "kind": "text"
  },
  "How often {name} is charged": {
+  "kind": "text"
+ },
+ "HTML": {
   "kind": "text"
  },
  "Hungary": {
@@ -4495,6 +4630,9 @@
  "Increase Per Child": {
   "kind": "text"
  },
+ "Indent": {
+  "kind": "text"
+ },
  "India": {
   "kind": "country",
   "code": "IN"
@@ -4502,6 +4640,9 @@
  "Indonesia": {
   "kind": "country",
   "code": "ID"
+ },
+ "Insert": {
+  "kind": "text"
  },
  "Inspected": {
   "kind": "text"
@@ -4534,6 +4675,9 @@
   "kind": "text"
  },
  "Invoice": {
+  "kind": "text"
+ },
+ "Invoice {reference}": {
   "kind": "text"
  },
  "Invoice logo": {
@@ -4604,6 +4748,9 @@
  "It cannot end before it starts": {
   "kind": "db"
  },
+ "Italic": {
+  "kind": "text"
+ },
  "Italy": {
   "kind": "country",
   "code": "IT"
@@ -4623,6 +4770,9 @@
  "Jordan": {
   "kind": "country",
   "code": "JO"
+ },
+ "Justify": {
+  "kind": "text"
  },
  "Kazakhstan": {
   "kind": "country",
@@ -4816,6 +4966,9 @@
   "code": "LI"
  },
  "Limited On-Site Parking Available": {
+  "kind": "text"
+ },
+ "Line height": {
   "kind": "text"
  },
  "Link": {
@@ -5482,6 +5635,9 @@
  "No draft sales channels.": {
   "kind": "text"
  },
+ "No email sent yet.": {
+  "kind": "text"
+ },
  "No extra matches that search.": {
   "kind": "text"
  },
@@ -5623,6 +5779,9 @@
  "No:": {
   "kind": "text"
  },
+ "No.": {
+  "kind": "text"
+ },
  "No. {n}": {
   "kind": "text"
  },
@@ -5728,6 +5887,9 @@
  "Norfolk Island": {
   "kind": "country",
   "code": "NF"
+ },
+ "Normal": {
+  "kind": "text"
  },
  "North Macedonia": {
   "kind": "country",
@@ -5835,9 +5997,6 @@
   "kind": "text"
  },
  "Nothing out of order": {
-  "kind": "text"
- },
- "Nothing recorded": {
   "kind": "text"
  },
  "Nothing recorded yet.": {
@@ -6040,6 +6199,9 @@
   "kind": "db"
  },
  "Only front desk, management or an administrator may remove a file": {
+  "kind": "db"
+ },
+ "Only front desk, management or an administrator may send email": {
   "kind": "db"
  },
  "Only front desk, manager and admin staff can add to the waitlist": {
@@ -6318,6 +6480,9 @@
  "Order saved.": {
   "kind": "text"
  },
+ "Ordered list": {
+  "kind": "text"
+ },
  "Original charge not found or is already reversed": {
   "kind": "db"
  },
@@ -6340,6 +6505,9 @@
   "kind": "text"
  },
  "Out of order": {
+  "kind": "text"
+ },
+ "Outdent": {
   "kind": "text"
  },
  "Outstanding": {
@@ -6406,6 +6574,9 @@
  "Papua New Guinea": {
   "kind": "country",
   "code": "PG"
+ },
+ "Paragraph": {
+  "kind": "text"
  },
  "Paraguay": {
   "kind": "country",
@@ -6702,6 +6873,9 @@
  "Please add a footer which will be added to all new emails": {
   "kind": "text"
  },
+ "Please choose email template builder": {
+  "kind": "text"
+ },
  "Poland": {
   "kind": "country",
   "code": "PL"
@@ -6859,6 +7033,9 @@
  "QuickBooks Online": {
   "kind": "text"
  },
+ "Quote": {
+  "kind": "text"
+ },
  "Quoted": {
   "kind": "text"
  },
@@ -6976,16 +7153,13 @@
  "recharged to {rechargeBookingRef}": {
   "kind": "text"
  },
- "Record": {
-  "kind": "text"
- },
- "Record an email": {
+ "Record email": {
   "kind": "text"
  },
  "Record paid-out": {
   "kind": "text"
  },
- "Record what you have sent this guest, so the next person knows.": {
+ "Recorded": {
   "kind": "text"
  },
  "Recorded on the booking's staff notes": {
@@ -6998,6 +7172,9 @@
   "kind": "text"
  },
  "Redeem prepayments": {
+  "kind": "text"
+ },
+ "Redo": {
   "kind": "text"
  },
  "Reference": {
@@ -7055,6 +7232,9 @@
   "kind": "text"
  },
  "Remove field {n}": {
+  "kind": "text"
+ },
+ "Remove font style": {
   "kind": "text"
  },
  "Remove from this room type": {
@@ -7704,7 +7884,13 @@
  "Send a new link": {
   "kind": "text"
  },
+ "Send email": {
+  "kind": "text"
+ },
  "Send email each day; include pdf with guest registration forms and folios for arriving guests": {
+  "kind": "text"
+ },
+ "Send email to clients": {
   "kind": "text"
  },
  "Send Email to customer after departure": {
@@ -7740,12 +7926,21 @@
  "Send the link": {
   "kind": "text"
  },
+ "Send to": {
+  "kind": "text"
+ },
+ "Send to ten addresses at most": {
+  "kind": "text"
+ },
  "Sending…": {
   "kind": "text"
  },
  "Senegal": {
   "kind": "country",
   "code": "SN"
+ },
+ "Sent": {
+  "kind": "text"
  },
  "Serbia": {
   "kind": "country",
@@ -8095,7 +8290,7 @@
  "Stripe SCA": {
   "kind": "text"
  },
- "Subject": {
+ "Style": {
   "kind": "text"
  },
  "Sudan": {
@@ -8144,6 +8339,9 @@
   "kind": "text"
  },
  "System Settings": {
+  "kind": "text"
+ },
+ "Table": {
   "kind": "text"
  },
  "Taiwan": {
@@ -8266,6 +8464,9 @@
  "Text color": {
   "kind": "text"
  },
+ "Text colour": {
+  "kind": "text"
+ },
  "Thailand": {
   "kind": "country",
   "code": "TH"
@@ -8295,7 +8496,7 @@
   "kind": "text"
  },
  "That booking is not on this property": {
-  "kind": "db"
+  "kind": "text"
  },
  "That booking source is not available on this property": {
   "kind": "db"
@@ -8621,6 +8822,9 @@
  "The amount must be more than zero.": {
   "kind": "text"
  },
+ "The attachment could not be made": {
+  "kind": "text"
+ },
  "The board starts on {date}. Go to another date.": {
   "kind": "text"
  },
@@ -8711,6 +8915,12 @@
  "The email preferences must be a set of switches": {
   "kind": "db"
  },
+ "The email was not sent": {
+  "kind": "text"
+ },
+ "The email was sent but not recorded": {
+  "kind": "text"
+ },
  "The export could not be built.": {
   "kind": "text"
  },
@@ -8790,6 +9000,9 @@
   "kind": "db"
  },
  "The maximum occupancy cannot be below the base.": {
+  "kind": "text"
+ },
+ "The message is too long": {
   "kind": "text"
  },
  "The minimum days in advance is more than the maximum": {
@@ -9230,6 +9443,12 @@
  "Unassigned": {
   "kind": "text"
  },
+ "Underline": {
+  "kind": "text"
+ },
+ "Undo": {
+  "kind": "text"
+ },
  "United Arab Emirates": {
   "kind": "country",
   "code": "AE"
@@ -9271,6 +9490,9 @@
   "kind": "text"
  },
  "Unnumbered": {
+  "kind": "text"
+ },
+ "Unordered list": {
   "kind": "text"
  },
  "Unpaid": {
@@ -9475,9 +9697,6 @@
   "kind": "text"
  },
  "What was it for": {
-  "kind": "text"
- },
- "What was sent": {
   "kind": "text"
  },
  "When": {
@@ -9692,6 +9911,9 @@
   "kind": "text"
  },
  "you@example.com": {
+  "kind": "text"
+ },
+ "Your booking at {hotel} #{reference}": {
   "kind": "text"
  },
  "Your current timezone is: {zone}.": {

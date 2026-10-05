@@ -1684,6 +1684,12 @@ export interface BookingEmail {
   toAddress: string;
   subject: string;
   body: string;
+  /** The message as sent, sanitised on the server (0131); null when recorded by hand. */
+  bodyHtml: string | null;
+  /** File names of what went with it. */
+  attachments: string[];
+  /** What the mail server said, when it refused. */
+  error: string | null;
   status: BookingEmailStatus;
   sentAt: string;
   sentByName: string | null;

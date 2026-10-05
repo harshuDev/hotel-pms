@@ -1,4 +1,5 @@
 import { stripePublishableKey } from "@/lib/stripe";
+import { mailConnected } from "@/lib/mailer";
 import { getT } from "@/lib/i18n/server";
 import type { Translator } from "@/lib/i18n/translate";
 import { notFound } from "next/navigation";
@@ -133,6 +134,8 @@ export default async function BookingPage({
       cards={cards}
       paymentRequests={paymentRequests}
       gatewayKey={stripePublishableKey()}
+            hotelName={property.name}
+            mailReady={mailConnected()}
       activity={activity}
       attachments={attachments}
       emails={emails}
