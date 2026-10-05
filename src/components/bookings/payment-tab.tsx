@@ -7,7 +7,7 @@ import { useCurrency } from "@/components/currency";
 import { cn } from "@/components/ui";
 import { formatMoney, parseMoney } from "@/lib/money";
 import { recordBookingPayment } from "@/lib/actions/booking-edit";
-import type { BookingPayment, PaymentMethod } from "@/lib/types";
+import type { BookingPayment, FolioTabRef, PaymentMethod } from "@/lib/types";
 
 /*
  * The booking's Payment tab (0128), as the reference's: Transactions --
@@ -32,6 +32,7 @@ export function PaymentTab({
   bookingId,
   payments,
   methods,
+  folios,
   guestName,
   timezone,
   canCharge,
@@ -39,6 +40,8 @@ export function PaymentTab({
   bookingId: string;
   payments: BookingPayment[];
   methods: PaymentMethod[];
+  /** The booking's folios (0129): a payment goes into one of them. */
+  folios: FolioTabRef[];
   guestName: string;
   timezone: string;
   canCharge: boolean;
@@ -53,6 +56,8 @@ export function PaymentTab({
   const [payer, setPayer] = useState(guestName);
   const [description, setDescription] = useState("");
   const [reference, setReference] = useState("");
+  const openFolios = folios.filter((f) => f.status === "open");
+  const [folioId, setFolioId] = useState<string>(openFolios.find((f) => f.isPrimary)?.id ?? openFolios[0]?.id ?? "");
   const [problem, setProblem] = useState("");
 
   const total = payments.reduce((a, p) => a + p.amountCents, 0);
@@ -82,6 +87,7 @@ export function PaymentTab({
         payerName: payer,
         description,
         reference,
+        folioId: folioId || null,
       });
       if (!r.ok) return setProblem(r.error);
       setAdding(false);
@@ -102,6 +108,7 @@ export function PaymentTab({
             <th className={th}>{tr("Date")}</th>
             <th className={th}>{tr("Time")}</th>
             <th className={th}>{tr("Type")}</th>
+            {folios.length > 1 && <th className={th}>{tr("Folio")}</th>}
             <th className={th}>{tr("Payer Name")}</th>
             <th className={th}>{tr("Description")}</th>
             <th className={cn(th, "text-right")}>{tr("Amount")}</th>
@@ -118,6 +125,7 @@ export function PaymentTab({
                   {p.method ?? tr("Payment")}
                   {p.isReversal && <span className="ml-1.5 text-[11px] text-warn-deep">{tr("reversed")}</span>}
                 </td>
+                {folios.length > 1 && <td className={cn(td, "tnum")}>#{p.folioNumber}</td>}
                 <td className={td}>{p.payerName ?? "—"}</td>
                 <td className={td}>
                   {p.description ?? ""}
@@ -165,6 +173,18 @@ export function PaymentTab({
                 {tr("Payer Name")}
                 <input value={payer} maxLength={200} onChange={(e) => setPayer(e.target.value)} className={cn(field, "mt-1")} />
               </label>
+              {openFolios.length > 1 && (
+                <label className="text-[12px] text-ink-muted sm:col-span-3">
+                  {tr("Folio")}
+                  <select value={folioId} onChange={(e) => setFolioId(e.target.value)} className={cn(field, "mt-1 max-w-xs")}>
+                    {openFolios.map((f) => (
+                      <option key={f.id} value={f.id}>
+                        {tr("Folio #{n}", { n: f.number })}{f.customerName ? ` · ${f.customerName}` : ""}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              )}
               <label className="text-[12px] text-ink-muted sm:col-span-2">
                 {tr("Description")}
                 <input value={description} maxLength={500} onChange={(e) => setDescription(e.target.value)} className={cn(field, "mt-1")} />

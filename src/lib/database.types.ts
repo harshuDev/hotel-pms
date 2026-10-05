@@ -604,6 +604,7 @@ export type Database = {
           check_out: string
           children: number
           created_at: string
+          folio_id: string | null
           id: string
           property_id: string
           rate_plan_id: string | null
@@ -620,6 +621,7 @@ export type Database = {
           check_out: string
           children?: number
           created_at?: string
+          folio_id?: string | null
           id?: string
           property_id: string
           rate_plan_id?: string | null
@@ -636,6 +638,7 @@ export type Database = {
           check_out?: string
           children?: number
           created_at?: string
+          folio_id?: string | null
           id?: string
           property_id?: string
           rate_plan_id?: string | null
@@ -658,6 +661,20 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "bookings"
             referencedColumns: ["id", "property_id"]
+          },
+          {
+            foreignKeyName: "booking_rooms_folio_id_fkey"
+            columns: ["folio_id"]
+            isOneToOne: false
+            referencedRelation: "folio_balances"
+            referencedColumns: ["folio_id"]
+          },
+          {
+            foreignKeyName: "booking_rooms_folio_id_fkey"
+            columns: ["folio_id"]
+            isOneToOne: false
+            referencedRelation: "folios"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "booking_rooms_property_id_fkey"
@@ -2129,7 +2146,9 @@ export type Database = {
           id: string
           is_primary: boolean
           kind: Database["public"]["Enums"]["folio_kind"]
+          notes: string | null
           opened_at: string
+          overlay_text: string | null
           property_id: string
           status: Database["public"]["Enums"]["folio_status"]
           updated_at: string
@@ -2144,7 +2163,9 @@ export type Database = {
           id?: string
           is_primary?: boolean
           kind?: Database["public"]["Enums"]["folio_kind"]
+          notes?: string | null
           opened_at?: string
+          overlay_text?: string | null
           property_id: string
           status?: Database["public"]["Enums"]["folio_status"]
           updated_at?: string
@@ -2159,7 +2180,9 @@ export type Database = {
           id?: string
           is_primary?: boolean
           kind?: Database["public"]["Enums"]["folio_kind"]
+          notes?: string | null
           opened_at?: string
+          overlay_text?: string | null
           property_id?: string
           status?: Database["public"]["Enums"]["folio_status"]
           updated_at?: string
@@ -4800,6 +4823,7 @@ export type Database = {
         }
         Returns: string
       }
+      add_folio: { Args: { p_booking_id: string }; Returns: string }
       add_room_type_photo: {
         Args: { p_path: string; p_room_type_id: string }
         Returns: string
@@ -4917,6 +4941,17 @@ export type Database = {
           rooms: number
           rooms_online: number
         }[]
+      }
+      apply_folio_discount: {
+        Args: {
+          p_amount_cents: number
+          p_booking_room_ids: string[]
+          p_description: string
+          p_folio_id: string
+          p_item_ids: string[]
+          p_percent_bps: number
+        }
+        Returns: number
       }
       apply_tax_rate: {
         Args: { p_amount_cents: number; p_tax_rate_id: string }
@@ -5076,6 +5111,10 @@ export type Database = {
           to_address: string
         }[]
       }
+      booking_folio: {
+        Args: { p_booking_id: string; p_folio_id?: string }
+        Returns: Json
+      }
       booking_folio_lines: {
         Args: { p_booking_id: string }
         Returns: {
@@ -5130,6 +5169,22 @@ export type Database = {
           status: Database["public"]["Enums"]["booking_status"]
           stay_date: string
           tax_cents: number
+        }[]
+      }
+      booking_payment_rows: {
+        Args: { p_booking_id: string }
+        Returns: {
+          amount_cents: number
+          business_date: string
+          description: string
+          folio_number: number
+          is_reversal: boolean
+          is_reversed: boolean
+          method: string
+          paid_at: string
+          payer_name: string
+          payment_id: string
+          reference: string
         }[]
       }
       booking_payments: {
@@ -5961,6 +6016,20 @@ export type Database = {
           tax_cents: number
         }[]
       }
+      folio_discount_targets: {
+        Args: {
+          p_booking_room_ids: string[]
+          p_folio_id: string
+          p_item_ids: string[]
+          p_primary_id: string
+        }
+        Returns: {
+          gross: number
+          id: string
+          kind: string
+          ord: number
+        }[]
+      }
       folio_report: {
         Args: { p_from: string; p_to: string }
         Returns: {
@@ -6282,6 +6351,14 @@ export type Database = {
       }
       merge_extra_category: {
         Args: { p_source_id: string; p_target_id: string }
+        Returns: number
+      }
+      move_folio_items: {
+        Args: {
+          p_booking_room_ids: string[]
+          p_item_ids: string[]
+          p_target_folio_id: string
+        }
         Returns: number
       }
       next_booking_reference: { Args: never; Returns: string }
@@ -6663,6 +6740,18 @@ export type Database = {
           p_reason: string
           p_reference?: string
           p_shift_id: string
+        }
+        Returns: string
+      }
+      record_folio_payment: {
+        Args: {
+          p_amount_cents: number
+          p_booking_id: string
+          p_description?: string
+          p_folio_id?: string
+          p_payer_name?: string
+          p_payment_method_id: string
+          p_reference?: string
         }
         Returns: string
       }
@@ -7393,6 +7482,14 @@ export type Database = {
       }
       set_customer_exclude_from_email: {
         Args: { p_id: string; p_value: boolean }
+        Returns: undefined
+      }
+      set_folio_customer: {
+        Args: { p_customer_id: string; p_folio_id: string }
+        Returns: undefined
+      }
+      set_folio_notes: {
+        Args: { p_folio_id: string; p_notes: string; p_overlay_text: string }
         Returns: undefined
       }
       set_invoice_logo: { Args: { p_logo_path: string }; Returns: string }

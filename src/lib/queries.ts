@@ -2486,36 +2486,59 @@ export async function getBookingFolioLines(
   }));
 }
 
-/** The Folio tab (0127): the stay as posted, plus nights not yet charged. */
-export async function getBookingFolioView(bookingId: string): Promise<BookingFolioView> {
+/** The Folio tab (0127, per folio 0129): one folio as posted, plus the nights not yet charged that post to it. */
+export async function getBookingFolioView(bookingId: string, folioId: string | null = null): Promise<BookingFolioView> {
   const supabase = await createClient();
-  const { data, error } = await supabase.rpc("booking_folio_view", { p_booking_id: bookingId });
+  const { data, error } = await supabase.rpc("booking_folio", { p_booking_id: bookingId, p_folio_id: folioId });
   if (error) throw new Error(`Failed to load the folio: ${error.message}`);
-  // jsonb from Postgres: bigint sums arrive as numbers or numeric strings.
+  return folioViewFrom(data);
+}
+
+/** Shapes booking_folio()'s jsonb. bigint sums arrive as numbers or numeric strings. */
+export function folioViewFrom(data: unknown): BookingFolioView {
   const v = (data ?? {}) as Record<string, unknown>;
   const n = (x: unknown) => Number(x ?? 0);
+  const str = (x: unknown) => (x == null ? null : String(x));
   const arr = (x: unknown) => (Array.isArray(x) ? (x as Record<string, unknown>[]) : []);
   const f = v.folio as Record<string, unknown> | null | undefined;
   return {
+    folios: arr(v.folios).map((x) => ({
+      id: String(x.id),
+      number: n(x.number),
+      status: String(x.status),
+      isPrimary: Boolean(x.is_primary),
+      customerName: str(x.customer_name),
+    })),
     folio: f
-      ? { id: String(f.id), number: n(f.number), status: String(f.status), openedAt: String(f.opened_at) }
+      ? {
+          id: String(f.id),
+          number: n(f.number),
+          status: String(f.status),
+          openedAt: String(f.opened_at),
+          isPrimary: Boolean(f.is_primary),
+          notes: str(f.notes),
+          overlayText: str(f.overlay_text),
+          customerId: str(f.customer_id),
+          customerName: str(f.customer_name),
+        }
       : null,
     rooms: arr(v.rooms).map((r) => ({
       bookingRoomId: String(r.booking_room_id),
       roomType: String(r.room_type ?? ""),
-      roomNumber: (r.room_number as string | null) ?? null,
-      ratePlan: (r.rate_plan as string | null) ?? null,
+      roomNumber: str(r.room_number),
+      ratePlan: str(r.rate_plan),
       status: r.status as BookingStatus,
       count: n(r.count),
       netCents: n(r.net),
       taxCents: n(r.tax),
+      discounted: Boolean(r.discounted),
       nights: arr(r.nights).map((x) => ({
         stayDate: String(x.stay_date),
         netCents: n(x.net),
         taxCents: n(x.tax),
         charged: Boolean(x.charged),
       })),
-      taxes: arr(r.taxes).map((x) => ({ taxRateId: (x.tax_rate_id as string | null) ?? null, cents: n(x.cents) })),
+      taxes: arr(r.taxes).map((x) => ({ taxRateId: str(x.tax_rate_id), cents: n(x.cents) })),
     })),
     extras: arr(v.extras).map((e) => ({
       folioItemId: String(e.folio_item_id),
@@ -2526,18 +2549,20 @@ export async function getBookingFolioView(bookingId: string): Promise<BookingFol
       taxCents: n(e.tax),
       totalCents: n(e.total),
       isReversal: Boolean(e.is_reversal),
+      isDiscount: Boolean(e.is_discount),
       isReversed: Boolean(e.is_reversed),
+      isDiscounted: Boolean(e.is_discounted),
     })),
     payments: arr(v.payments).map((p) => ({
       paymentId: String(p.payment_id),
       businessDate: String(p.business_date),
-      method: (p.method as string | null) ?? null,
+      method: str(p.method),
       amountCents: n(p.amount),
       isReversal: Boolean(p.is_reversal),
     })),
     taxes: arr(v.taxes).map((t) => ({
-      taxRateId: (t.tax_rate_id as string | null) ?? null,
-      name: (t.name as string | null) ?? null,
+      taxRateId: str(t.tax_rate_id),
+      name: str(t.name),
       kind: (t.kind as TaxKind | null) ?? null,
       rateBps: t.rate_bps == null ? null : n(t.rate_bps),
       baseCents: n(t.base),
@@ -2554,10 +2579,11 @@ export async function getBookingFolioView(bookingId: string): Promise<BookingFol
 /** The booking's Payment tab (0128). */
 export async function getBookingPayments(bookingId: string): Promise<BookingPayment[]> {
   const supabase = await createClient();
-  const { data, error } = await supabase.rpc("booking_payments", { p_booking_id: bookingId });
+  const { data, error } = await supabase.rpc("booking_payment_rows", { p_booking_id: bookingId });
   if (error) throw new Error(`Failed to load the payments: ${error.message}`);
   return (data ?? []).map((r) => ({
     paymentId: r.payment_id,
+    folioNumber: Number(r.folio_number),
     businessDate: r.business_date,
     paidAt: r.paid_at,
     method: r.method,

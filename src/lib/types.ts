@@ -110,6 +110,7 @@ export interface PaymentMethod {
 /** One row of the booking's Payment tab (0128). */
 export interface BookingPayment {
   paymentId: string;
+  folioNumber: number;
   businessDate: string;
   paidAt: string;
   method: string | null;
@@ -910,6 +911,8 @@ export interface FolioViewRoom {
   count: number;
   netCents: number;
   taxCents: number;
+  /** A discount was given on this room (0129). */
+  discounted: boolean;
   nights: { stayDate: string; netCents: number; taxCents: number; charged: boolean }[];
   taxes: { taxRateId: string | null; cents: number }[];
 }
@@ -923,7 +926,9 @@ export interface FolioViewExtra {
   taxCents: number;
   totalCents: number;
   isReversal: boolean;
+  isDiscount: boolean;
   isReversed: boolean;
+  isDiscounted: boolean;
 }
 
 export interface FolioViewPayment {
@@ -943,8 +948,28 @@ export interface FolioViewTax {
   cents: number;
 }
 
+/** One of the booking's folios, for the tabs (0129). */
+export interface FolioTabRef {
+  id: string;
+  number: number;
+  status: string;
+  isPrimary: boolean;
+  customerName: string | null;
+}
+
 export interface BookingFolioView {
-  folio: { id: string; number: number; status: string; openedAt: string } | null;
+  folios: FolioTabRef[];
+  folio: {
+    id: string;
+    number: number;
+    status: string;
+    openedAt: string;
+    isPrimary: boolean;
+    notes: string | null;
+    overlayText: string | null;
+    customerId: string | null;
+    customerName: string | null;
+  } | null;
   rooms: FolioViewRoom[];
   extras: FolioViewExtra[];
   payments: FolioViewPayment[];
