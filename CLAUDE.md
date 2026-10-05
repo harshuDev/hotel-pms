@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0132` are
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0133` are
 applied to the hosted database.
 
 Working on real data: dashboard (house board, movements, pace, activity feed),
@@ -1053,9 +1053,22 @@ showed the Reservation Centric calendar and asked for it by name.
     refusing them as occupied. They were occupied: ten bookings were still
     checked in days past departure, and nobody had checked them out. A bar
     ended on its departure date, so the room read as empty from then on.
-    - The calendar page moves an overdue in-house bar's end to the day after
-      the business date and sets `dueOut`; the bar says "Overdue" in rose and
-      its tooltip the real departure. `calendar_room_bars()` returns a
+    - The calendar page moves an overdue in-house bar's end to THE BUSINESS
+      DATE (0133) and sets `dueOut`; the bar says "Overdue" in rose and its
+      tooltip the real departure.
+      - **Not the day after.** 0111 ran it a day further, so on business date
+        5 Oct eight overdue bars ran to 6 Oct while the dashboard listed the
+        same guests as leaving today. The client: "it's still showing rooms
+        that have to checkout tomorrow 6th, but it'd check those rooms out
+        today". An overdue guest is due out today, drawn exactly as a guest
+        whose departure is today.
+      - **0133 also makes them `due_out` on the house board**:
+        `room_house_states` found a stay only while `check_out >=` the
+        business date, so an overdue room fell through to plain "occupied",
+        and `house_summary()`'s "n due out" counted departures dated today
+        only. Both now count every checked-in room whose departure is the
+        business date or earlier -- the rooms the Departures tab lists. The
+        housekeeping report reads the same view. `calendar_room_bars()` returns a
       checked-in line however far back its departure, or one more than the
       lookback overdue would vanish.
     - `assign_room()` names who is in an occupied room: "Room 101 still has
