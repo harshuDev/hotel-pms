@@ -1883,10 +1883,16 @@
  "Booking {0} still needs {1} room(s) assigned": {
   "kind": "db"
  },
+ "Booking {0} was due to arrive on {1}. Check the guest in on the booked dates, or move the arrival to today.": {
+  "kind": "db"
+ },
  "Booking {0} was due to arrive on {1}. Move the arrival to today to check the guest in.": {
   "kind": "db"
  },
  "Booking {0} was due to leave on {1}, so it cannot be checked in. Change its dates first.": {
+  "kind": "db"
+ },
+ "Booking {0} was due to leave on {1}. Check the guest in on the booked dates, or change the dates first.": {
   "kind": "db"
  },
  "Booking {0}: {1}": {
@@ -2380,6 +2386,9 @@
   "kind": "text"
  },
  "Check In Notes:": {
+  "kind": "text"
+ },
+ "Check in on the booked dates": {
   "kind": "text"
  },
  "Check out": {
@@ -9481,6 +9490,9 @@
   "kind": "db"
  },
  "Unknown occupancy pricing: {0}": {
+  "kind": "db"
+ },
+ "Unknown way to check in a late arrival": {
   "kind": "db"
  },
  "Unnamed customer": {
