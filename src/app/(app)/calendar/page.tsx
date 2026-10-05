@@ -185,13 +185,15 @@ export default async function CalendarPage({
   // "Show channel abbreviation for bookings" off: the bars simply carry no
   // code, so nothing in the board has to know the setting exists.
   // Still in the room after their departure date (0111): the bar runs on to
-  // cover the business date and says "Overdue", or the room reads as empty.
-  const dayAfterBusiness = format(addDays(parseISO(businessDate), 1), "yyyy-MM-dd");
+  // the business date and says "Overdue", or the room reads as empty. It ends
+  // ON the business date, as every guest due out today does (0133) -- run on
+  // a day further, it read as leaving tomorrow while the dashboard listed the
+  // guest as leaving today.
   for (const raw of roomBars) {
     const shown = look.showChannelAbbreviation ? raw : { ...raw, channelCode: null };
     const bar =
       shown.status === "checked_in" && shown.checkOut < businessDate
-        ? { ...shown, checkOut: dayAfterBusiness, dueOut: shown.checkOut }
+        ? { ...shown, checkOut: businessDate, dueOut: shown.checkOut }
         : shown;
     if (bar.roomId) {
       const list = barsByRoom.get(bar.roomId);
