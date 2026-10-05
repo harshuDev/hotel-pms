@@ -1,7 +1,7 @@
 import { getT } from "@/lib/i18n/server";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { PrintButton } from "@/components/bookings/print-button";
+import { PrintButton, PrintOnArrival } from "@/components/bookings/print-button";
 import { formatMoney } from "@/lib/money";
 import { getDocumentTemplate } from "@/lib/queries";
 import { invoiceDay, invoiceLiquidData, loadInvoice } from "@/lib/invoice-data";
@@ -46,11 +46,14 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export default async function InvoicePage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ print?: string }>;
 }) {
   const tr = await getT();
   const { id } = await params;
+  const autoPrint = (await searchParams).print === "1";
   if (!UUID.test(id)) notFound();
 
   const [v, template] = await Promise.all([loadInvoice(id), getDocumentTemplate("folio")]);
@@ -63,6 +66,7 @@ export default async function InvoicePage({
 
   const toolbar = (
     <div className="mb-4 flex items-center justify-between gap-3 print:hidden">
+      {autoPrint && <PrintOnArrival />}
       <Link
         href={`/bookings/${v.bookingId}`}
         className="text-[13px] text-ink-muted underline-offset-2 hover:text-ink hover:underline"

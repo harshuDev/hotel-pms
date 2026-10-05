@@ -955,6 +955,9 @@
  "Accommodation": {
   "kind": "text"
  },
+ "Accommodation Sub-total:": {
+  "kind": "text"
+ },
  "Accommodation, {n} nights": {
   "kind": "plural",
   "one": "Accommodation, {n} night"
@@ -2226,9 +2229,6 @@
  "ChannexPCI": {
   "kind": "text"
  },
- "charge": {
-  "kind": "text"
- },
  "Charge": {
   "kind": "text"
  },
@@ -2757,6 +2757,9 @@
   "kind": "country",
   "code": "CI"
  },
+ "Count": {
+  "kind": "text"
+ },
  "Count the cash in the drawer and enter the total.": {
   "kind": "text"
  },
@@ -2814,6 +2817,9 @@
  "Create Customer": {
   "kind": "text"
  },
+ "Create Invoice": {
+  "kind": "text"
+ },
  "Create it": {
   "kind": "text"
  },
@@ -2827,6 +2833,9 @@
   "kind": "text"
  },
  "Create one under Settings → Rate plans.": {
+  "kind": "text"
+ },
+ "Create Payment": {
   "kind": "text"
  },
  "Create Pos Profile": {
@@ -2949,6 +2958,9 @@
   "kind": "text"
  },
  "Date of birth": {
+  "kind": "text"
+ },
+ "Date:": {
   "kind": "text"
  },
  "Dates": {
@@ -3285,6 +3297,9 @@
   "kind": "text"
  },
  "Due to arrive {date}": {
+  "kind": "text"
+ },
+ "Due:": {
   "kind": "text"
  },
  "Each night": {
@@ -3637,6 +3652,9 @@
  "Extra saved.": {
   "kind": "text"
  },
+ "Extra Sub-total:": {
+  "kind": "text"
+ },
  "Extras": {
   "kind": "text"
  },
@@ -3768,6 +3786,12 @@
   "kind": "db"
  },
  "Folio {n} belongs to a meeting room booking": {
+  "kind": "text"
+ },
+ "Folio #{n}": {
+  "kind": "text"
+ },
+ "Folio For:": {
   "kind": "text"
  },
  "Folio not found for current property": {
@@ -5241,6 +5265,9 @@
  "Nights and adults are whole numbers": {
   "kind": "db"
  },
+ "Nights breakdown": {
+  "kind": "text"
+ },
  "Nights free": {
   "kind": "text"
  },
@@ -5446,6 +5473,9 @@
  "No rooms on this booking yet. Add one.": {
   "kind": "text"
  },
+ "No rooms on this booking.": {
+  "kind": "text"
+ },
  "No show": {
   "kind": "text"
  },
@@ -5474,6 +5504,9 @@
   "kind": "db"
  },
  "No-shows": {
+  "kind": "text"
+ },
+ "No:": {
   "kind": "text"
  },
  "No. {n}": {
@@ -5688,9 +5721,6 @@
   "kind": "text"
  },
  "Nothing out of order": {
-  "kind": "text"
- },
- "Nothing posted yet.": {
   "kind": "text"
  },
  "Nothing recorded": {
@@ -6225,6 +6255,9 @@
  "Paid-outs this shift": {
   "kind": "text"
  },
+ "Paid:": {
+  "kind": "text"
+ },
  "Pakistan": {
   "kind": "country",
   "code": "PK"
@@ -6288,7 +6321,7 @@
  "Payable": {
   "kind": "text"
  },
- "payment": {
+ "Payment": {
   "kind": "text"
  },
  "Payment amount must be positive": {
@@ -6618,9 +6651,6 @@
   "kind": "text"
  },
  "Print": {
-  "kind": "text"
- },
- "Print invoice": {
   "kind": "text"
  },
  "Priority": {
@@ -7037,6 +7067,10 @@
  "Reversal: {0}": {
   "kind": "db"
  },
+ "Reverse {n} charges? A reversing line is posted for each; nothing is deleted.": {
+  "kind": "plural",
+  "one": "Reverse {n} charge? A reversing line is posted; nothing is deleted."
+ },
  "reversed": {
   "kind": "text"
  },
@@ -7235,6 +7269,9 @@
   "kind": "text"
  },
  "Room types": {
+  "kind": "text"
+ },
+ "Room: {n}": {
   "kind": "text"
  },
  "Rooms": {
@@ -7842,6 +7879,9 @@
  "Status": {
   "kind": "text"
  },
+ "Status:": {
+  "kind": "text"
+ },
  "Stay": {
   "kind": "text"
  },
@@ -7955,9 +7995,6 @@
  "Take a booking arriving {date}": {
   "kind": "text"
  },
- "Take a payment": {
-  "kind": "text"
- },
  "Take another": {
   "kind": "text"
  },
@@ -7999,6 +8036,9 @@
   "kind": "text"
  },
  "Tax": {
+  "kind": "text"
+ },
+ "Tax breakdown": {
   "kind": "text"
  },
  "Tax cannot be applied to a negative amount": {
@@ -8761,6 +8801,9 @@
  "This closes {day} and opens the next day. It cannot be undone.": {
   "kind": "text"
  },
+ "This folio has no payments yet.": {
+  "kind": "text"
+ },
  "This folio still owes {amount}. Checking out does not settle it — take the payment first unless the balance is going to an account.": {
   "kind": "text"
  },
@@ -8813,6 +8856,9 @@
   "kind": "text"
  },
  "Tick Replace prices already on these nights to take a removed occupancy price off the nights already priced.": {
+  "kind": "text"
+ },
+ "Tick the extras to remove first.": {
   "kind": "text"
  },
  "Tick the rates on the left to apply this to.": {
@@ -8892,6 +8938,9 @@
   "kind": "text"
  },
  "Total Revenue": {
+  "kind": "text"
+ },
+ "Total:": {
   "kind": "text"
  },
  "Touched in this range": {

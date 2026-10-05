@@ -28,6 +28,7 @@ import {
   getEmailTemplates,
   getBookingNights,
   getBookingFolioLines,
+  getBookingFolioView,
   getBookingActivity,
   getBookingAttachments,
   getBookingEmails,
@@ -267,6 +268,7 @@ export default async function CalendarPage({
           lines,
           nights,
           folio,
+          folioView,
           activity,
           attachments,
           emails,
@@ -280,6 +282,7 @@ export default async function CalendarPage({
             getBookingRoomLines(peekId),
             getBookingNights(peekId),
             getBookingFolioLines(peekId),
+            getBookingFolioView(peekId),
             getBookingActivity(peekId),
             // The two tabs the reference carries, added in 0063.
             getBookingAttachments(peekId),
@@ -295,6 +298,7 @@ export default async function CalendarPage({
           lines,
           nights,
           folio,
+          folioView,
           activity,
           attachments,
           emails,
@@ -505,6 +509,7 @@ export default async function CalendarPage({
             rooms={peek.lines}
             nights={peek.nights}
             folio={peek.folio}
+            folioView={peek.folioView}
             activity={peek.activity}
             attachments={peek.attachments}
             emails={peek.emails}

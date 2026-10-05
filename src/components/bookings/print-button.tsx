@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { useT } from "@/components/i18n";
 
 /** Prints the page it sits on. Hidden from the printout itself. */
@@ -14,4 +15,13 @@ export function PrintButton({ label }: { label?: string }) {
       {label ?? tr("Print")}
     </button>
   );
+}
+
+/** Opens the print dialog once on arrival -- the Folio tab's Print (0127). */
+export function PrintOnArrival() {
+  useEffect(() => {
+    const t = window.setTimeout(() => window.print(), 300);
+    return () => window.clearTimeout(t);
+  }, []);
+  return null;
 }

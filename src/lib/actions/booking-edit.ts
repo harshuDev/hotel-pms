@@ -221,6 +221,26 @@ export async function confirmBooking(
  * date, the role check and the append-only rules are the ones every other
  * charge already has.
  */
+/**
+ * The Folio tab's Remove (0127): takes posted charges back by REVERSING them,
+ * one reversing row each -- folio_items is append-only, so nothing is deleted.
+ */
+export async function reverseFolioCharges(input: {
+  bookingId: string;
+  folioItemIds: string[];
+}): Promise<ActionResult<null>> {
+  const supabase = await createClient();
+  for (const id of input.folioItemIds) {
+    const { error } = await supabase.rpc("reverse_charge", { p_folio_item_id: id });
+    if (error) {
+      revalidateBooking(input.bookingId);
+      return { ok: false, error: await localised(error.message) };
+    }
+  }
+  revalidateBooking(input.bookingId);
+  return { ok: true, data: null };
+}
+
 export async function chargeExtra(input: {
   bookingId: string;
   extraId: string;
