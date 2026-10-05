@@ -6,12 +6,10 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { format, parseISO } from "date-fns";
 import { cn } from "@/components/ui";
-import { formatMoney } from "@/lib/money";
 import {
   closeBusinessDate,
   type CloseDayResult,
 } from "@/lib/actions/business-date";
-import { useCurrency } from "@/components/currency";
 
 /**
  * The night audit control. Only shown to staff who can actually run it; the
@@ -57,7 +55,6 @@ export function CloseDay({
   notArrived: NotArrivedBooking[];
 }) {
   const tr = useT();
-  const currency = useCurrency();
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [open, setOpen] = useState(false);
@@ -109,18 +106,6 @@ export function CloseDay({
               {done ? (
                 <>
                   <dl className="space-y-2 text-sm">
-                    <div className="flex justify-between border-b border-line pb-2">
-                      <dt className="text-ink-muted">{tr("Room charges posted")}</dt>
-                      <dd className="tnum font-medium">
-                        {done.roomChargesPosted}
-                      </dd>
-                    </div>
-                    <div className="flex justify-between border-b border-line pb-2">
-                      <dt className="text-ink-muted">{tr("Charged")}</dt>
-                      <dd className="tnum font-medium">
-                        {formatMoney(done.roomChargesCents, currency)}
-                      </dd>
-                    </div>
                     <div className="flex justify-between pt-1">
                       <dt className="font-medium">{tr("Business date")}</dt>
                       <dd className="tnum font-semibold text-brass">
@@ -145,7 +130,7 @@ export function CloseDay({
                     and there is nothing to warn anybody about.
                   */}
                   <p className="text-sm leading-relaxed text-ink-muted">
-                    {tr("This posts tonight’s room charge for every guest in house, closes {day}, and opens the next day. It cannot be undone.", { day })}
+                    {tr("This closes {day} and opens the next day. It cannot be undone.", { day })}
                   </p>
 
                   {stillIn.length > 0 && (

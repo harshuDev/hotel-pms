@@ -10,6 +10,8 @@ import {
   checkIn,
   checkOut,
   loadAvailableRooms,
+  loadCheckoutCharges,
+  type CheckoutCharges,
   loadBookingRooms,
   type AvailableRoom,
   type BookingRoomSlot,
@@ -223,8 +225,26 @@ export function CheckOutAction({ booking }: { booking: Booking }) {
   const [pending, startTransition] = useTransition();
   const [open, setOpen] = useState(false);
   const [error, setError] = useState("");
+  const [charges, setCharges] = useState<CheckoutCharges | null>(null);
 
-  const owes = booking.balanceCents > 0;
+  // Room charges post at check-out (0125), so what is owed is the folio plus
+  // the nights about to be charged. Read when the sheet opens.
+  useEffect(() => {
+    if (!open) return;
+    let live = true;
+    setCharges(null);
+    loadCheckoutCharges(booking.id).then((r) => {
+      if (!live) return;
+      if (r.ok) setCharges(r.data);
+      else setError(r.error);
+    });
+    return () => {
+      live = false;
+    };
+  }, [open, booking.id]);
+
+  const owedAfter = charges ? charges.balanceCents + charges.roomChargesCents : booking.balanceCents;
+  const owes = owedAfter > 0;
 
   const submit = () => {
     setError("");
@@ -254,6 +274,21 @@ export function CheckOutAction({ booking }: { booking: Booking }) {
             </p>
           </div>
 
+          {charges && charges.nights > 0 && (
+            <dl className="space-y-1 text-[13px]">
+              <div className="flex justify-between">
+                <dt className="text-ink-muted">
+                  {tr.plural(charges.nights, "Room charge, {n} night", "Room charges, {n} nights")}
+                </dt>
+                <dd className="tnum">{formatMoney(charges.roomChargesCents, currency)}</dd>
+              </div>
+              <div className="flex justify-between border-t border-line pt-1">
+                <dt className="font-medium">{tr("Balance after check-out")}</dt>
+                <dd className="tnum font-bold">{formatMoney(owedAfter, currency)}</dd>
+              </div>
+            </dl>
+          )}
+
           {owes ? (
             <div
               className={cn(
@@ -261,7 +296,7 @@ export function CheckOutAction({ booking }: { booking: Booking }) {
                 "border-warn-light bg-warn-wash text-warn-deep",
               )}
             >
-              {tr("This folio still owes {amount}. Checking out does not settle it — take the payment first unless the balance is going to an account.", { amount: formatMoney(booking.balanceCents, currency) })}
+              {tr("This folio still owes {amount}. Checking out does not settle it — take the payment first unless the balance is going to an account.", { amount: formatMoney(owedAfter, currency) })}
             </div>
           ) : (
             <p className="text-[13px] text-ink-muted">{tr("The folio is settled.")}</p>

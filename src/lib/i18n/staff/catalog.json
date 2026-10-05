@@ -820,6 +820,9 @@
  "A new member of staff is invited in Supabase Auth, and then appears in this list.": {
   "kind": "text"
  },
+ "A night cannot be charged before it is stayed": {
+  "kind": "db"
+ },
  "A night with no rate loaded is not free — it cannot be sold on this plan at all, and taking a booking against it will say so. Leave the box empty and apply to clear a rate back to nothing.": {
   "kind": "text"
  },
@@ -1612,6 +1615,9 @@
  "Balance": {
   "kind": "text"
  },
+ "Balance after check-out": {
+  "kind": "text"
+ },
  "Balance due": {
   "kind": "text"
  },
@@ -1749,6 +1755,9 @@
   "kind": "db"
  },
  "Booking {0} has no open folio, so its room charge for {1} cannot be posted": {
+  "kind": "db"
+ },
+ "Booking {0} has no open folio, so its room charges cannot be posted": {
   "kind": "db"
  },
  "Booking {0} has no open folio, so the extras sold with its rate cannot be charged": {
@@ -1984,6 +1993,9 @@
  },
  "Business date": {
   "kind": "text"
+ },
+ "Business date {0} closed": {
+  "kind": "db"
  },
  "Business date {0} closed, {1} room charge(s) posted": {
   "kind": "db"
@@ -7137,8 +7149,12 @@
  "Room charge must post on its open stay business date": {
   "kind": "db"
  },
- "Room charges posted": {
-  "kind": "text"
+ "Room charge must post on the open business date": {
+  "kind": "db"
+ },
+ "Room charges, {n} nights": {
+  "kind": "plural",
+  "one": "Room charge, {n} night"
  },
  "Room CVS configuration": {
   "kind": "text"
@@ -8628,6 +8644,9 @@
  "The return covers nights actually slept, so cancellations and no-shows never appear.": {
   "kind": "text"
  },
+ "The room charges could not be read": {
+  "kind": "text"
+ },
  "The room list did not load. Check your connection, then try again.": {
   "kind": "text"
  },
@@ -8739,6 +8758,9 @@
  "This booking still owes {amount}. Cancelling frees the room but does not write that off.": {
   "kind": "text"
  },
+ "This closes {day} and opens the next day. It cannot be undone.": {
+  "kind": "text"
+ },
  "This folio still owes {amount}. Checking out does not settle it — take the payment first unless the balance is going to an account.": {
   "kind": "text"
  },
@@ -8752,9 +8774,6 @@
   "kind": "text"
  },
  "This page needs the link from the reset email. Ask for a new one below.": {
-  "kind": "text"
- },
- "This posts tonight’s room charge for every guest in house, closes {day}, and opens the next day. It cannot be undone.": {
   "kind": "text"
  },
  "This property already has a {0} method. Rename that one rather than adding a second.": {
