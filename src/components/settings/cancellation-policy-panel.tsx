@@ -86,7 +86,7 @@ function CrossIcon() {
   );
 }
 
-function draftOf(p: CancellationPolicy | null, total: number): Draft {
+function draftOf(p: CancellationPolicy | null, total: number, currency: string): Draft {
   const t = p?.terms;
   return {
     id: p?.id ?? null,
@@ -95,7 +95,7 @@ function draftOf(p: CancellationPolicy | null, total: number): Draft {
     depositRule: t?.depositRule ?? null,
     depositNights: t?.depositNights != null ? String(t.depositNights) : "",
     depositPercent: t?.depositPercentBps != null ? formatPercentBps(t.depositPercentBps) : "",
-    depositAmount: t?.depositAmountCents != null ? formatMoneyInput(t.depositAmountCents) : "",
+    depositAmount: t?.depositAmountCents != null ? formatMoneyInput(t.depositAmountCents, currency) : "",
     refundRule: t?.refundRule ?? null,
     refundDays: t?.refundDays != null ? String(t.refundDays) : "",
     refundCustom: t?.refundCustom ?? "",
@@ -238,7 +238,7 @@ export function CancellationPolicyPanel({
                           type="button"
                           aria-label={tr("Edit {name}", { name: p.name })}
                           className={iconButton}
-                          onClick={() => setDraft(draftOf(p, policies.length))}
+                          onClick={() => setDraft(draftOf(p, policies.length, currency))}
                         >
                           <EditIcon />
                         </button>
@@ -281,7 +281,7 @@ export function CancellationPolicyPanel({
           <button
             type="button"
             className="mt-3 text-[13px] font-semibold text-brass hover:underline"
-            onClick={() => setDraft(draftOf(null, policies.length))}
+            onClick={() => setDraft(draftOf(null, policies.length, currency))}
           >
             {tr("+ Add Cancellation Policy")}
           </button>

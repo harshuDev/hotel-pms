@@ -658,8 +658,8 @@ export function NewBookingForm({
                   const planPrice =
                     q && q.nightlyFromCents !== null
                       ? q.nightlyFromCents === q.nightlyToCents
-                        ? formatMoneyInput(q.nightlyFromCents)
-                        : `${formatMoneyInput(q.nightlyFromCents)}–${formatMoneyInput(q.nightlyToCents ?? q.nightlyFromCents)}`
+                        ? formatMoneyInput(q.nightlyFromCents, currency)
+                        : `${formatMoneyInput(q.nightlyFromCents, currency)}–${formatMoneyInput(q.nightlyToCents ?? q.nightlyFromCents, currency)}`
                       : null;
                   return (
                     <div
@@ -704,7 +704,7 @@ export function NewBookingForm({
                         <input
                           type="text"
                           inputMode="decimal"
-                          placeholder={ratePlanId ? (planPrice ?? tr("From the plan")) : "0.00"}
+                          placeholder={ratePlanId ? (planPrice ?? tr("From the plan")) : formatMoneyInput(0, currency)}
                           value={line.rate}
                           onChange={(e) => setLine(line.key, { rate: e.target.value })}
                           className={cn(field, "tnum")}

@@ -405,7 +405,7 @@ export function ExtrasPanel({
                                 id: e.id,
                                 categoryId: e.categoryId,
                                 title: e.title,
-                                price: formatMoneyInput(e.priceCents),
+                                price: formatMoneyInput(e.priceCents, currency),
                                 taxRateId: e.taxRateId ?? "",
                                 itemType: e.itemType,
                               })
@@ -556,7 +556,7 @@ export function ExtrasPanel({
                 inputMode="decimal"
                 value={ex.price}
                 onChange={(e) => setEx({ ...ex, price: e.target.value })}
-                placeholder="0.00"
+                placeholder={formatMoneyInput(0, currency)}
                 className={cn(field, "tnum mt-1")}
               />
             </label>

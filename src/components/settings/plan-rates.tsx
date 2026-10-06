@@ -1,6 +1,7 @@
 "use client";
 
 import { forwardRef, useImperativeHandle, useState } from "react";
+import { useCurrency } from "@/components/currency";
 import { useT } from "@/components/i18n";
 import { cn } from "@/components/ui";
 import { formatMoneyInput, parseMoney } from "@/lib/money";
@@ -157,6 +158,7 @@ export const PlanRates = forwardRef<
   ref,
 ) {
   const tr = useT();
+  const currency = useCurrency();
   const [season, setSeason] = useState<string | null>(initialSeasonId);
   const [replaceRates, setReplaceRates] = useState(false);
   // Affected room types: those already priced on this plan, else all.
@@ -190,10 +192,10 @@ export const PlanRates = forwardRef<
     for (let i = 0; i < 7; i++) {
       const w = template(plan.id, t.id, i + 1);
       if (!w) continue;
-      if (w.rateCents !== null) rows[b][i] = formatMoneyInput(w.rateCents);
+      if (w.rateCents !== null) rows[b][i] = formatMoneyInput(w.rateCents, currency);
       for (const [a, cents] of Object.entries(w.occupancyRates ?? {})) {
         const n = Number(a);
-        if (rows[n] && n !== b) rows[n][i] = formatMoneyInput(cents);
+        if (rows[n] && n !== b) rows[n][i] = formatMoneyInput(cents, currency);
       }
     }
     return { rows, radio: b, dirty: false };
@@ -253,7 +255,7 @@ export const PlanRates = forwardRef<
     const cents = adults > d.radio
       ? v + (adults - d.radio) * increaseAdultCents
       : v - (d.radio - adults) * decreaseAdultCents;
-    return { text: formatMoneyInput(Math.max(0, cents)), computed: true };
+    return { text: formatMoneyInput(Math.max(0, cents), currency), computed: true };
   }
 
   function setRow(t: RoomTypeSetting, adults: number, i: number | "all", value: string) {
@@ -480,7 +482,7 @@ export const PlanRates = forwardRef<
                             && x.seasonTypeId === season && x.weekday === i + 1) : undefined;
                           return (
                             <td key={wd} className="tnum px-1 py-1.5 text-center text-ink-muted">
-                              {w?.rateCents != null ? formatMoneyInput(derive(w.rateCents, plan)) : "—"}
+                              {w?.rateCents != null ? formatMoneyInput(derive(w.rateCents, plan), currency) : "—"}
                             </td>
                           );
                         }

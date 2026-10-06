@@ -5,7 +5,7 @@ import { useState, useTransition } from "react";
 import { useT } from "@/components/i18n";
 import { useCurrency } from "@/components/currency";
 import { cn } from "@/components/ui";
-import { formatMoney, parseMoney } from "@/lib/money";
+import { formatMoney, formatMoneyInput, parseMoney } from "@/lib/money";
 import { recordBookingPayment } from "@/lib/actions/booking-edit";
 import { CardVault } from "@/components/bookings/card-vault";
 import type { BookingCard, BookingPayment, FolioTabRef, PaymentMethod, PaymentRequest } from "@/lib/types";
@@ -181,7 +181,7 @@ export function PaymentTab({
               <label className="text-[12px] text-ink-muted">
                 {tr("Amount")}
                 <input inputMode="decimal" value={amount} onChange={(e) => setAmount(e.target.value)}
-                  autoFocus placeholder="0.00" className={cn(field, "tnum mt-1")} />
+                  autoFocus placeholder={formatMoneyInput(0, currency)} className={cn(field, "tnum mt-1")} />
               </label>
               <label className="text-[12px] text-ink-muted">
                 {tr("Payer Name")}

@@ -508,7 +508,7 @@ export function TaxesPanel({
                                 isActive: t.isActive,
                                 frozen: t.chargeCount > 0,
                                 kind: t.kind,
-                                amount: t.feeCents === null ? "" : formatMoneyInput(t.feeCents),
+                                amount: t.feeCents === null ? "" : formatMoneyInput(t.feeCents, currency),
                                 feePer: t.feePer ?? "room",
                               })
                             }

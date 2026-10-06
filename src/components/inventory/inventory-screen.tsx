@@ -387,7 +387,7 @@ export function InventoryScreen({
                               type="text"
                               inputMode="decimal"
                               defaultValue={
-                                value === undefined ? "" : formatMoneyInput(value)
+                                value === undefined ? "" : formatMoneyInput(value, currency)
                               }
                               placeholder={tr("Worth nothing")}
                               disabled={pending}

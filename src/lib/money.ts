@@ -16,6 +16,19 @@
 export const LOCALE = "en-GB";
 
 /**
+ * Currencies with no subunit in daily use, written without decimals: the CFA
+ * francs (Adjana Resort, Senegal, is XOF). They are still STORED in integer
+ * hundredths like every other currency -- this changes how a figure is
+ * written, never what is stored. A figure that is not a whole franc (an
+ * inclusive tax split) is rounded to the franc on screen.
+ */
+const WHOLE_UNIT_CURRENCIES = new Set(["XAF", "XOF"]);
+
+function fractionDigits(currency: string): number {
+  return WHOLE_UNIT_CURRENCIES.has(currency.toUpperCase()) ? 0 : 2;
+}
+
+/**
  * All currency in this app is stored as integer minor units (pence).
  * This is the ONLY place currency becomes a string. Never format inline.
  */
@@ -41,25 +54,27 @@ export function formatMoneyIn(
 ): string {
   assertMinorUnits(cents);
 
+  const digits = fractionDigits(currency);
   return new Intl.NumberFormat(locale, {
     style: "currency",
     currency,
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
+    minimumFractionDigits: digits,
+    maximumFractionDigits: digits,
   }).format(cents / 100);
 }
 
 export function formatMoney(cents: number, currency: string): string {
   assertMinorUnits(cents);
 
+  const digits = fractionDigits(currency);
   return new Intl.NumberFormat(LOCALE, {
     style: "currency",
     currency,
     // "$24.00" for a peso hotel rather than en-GB's "MX$24.00". A screen shows
     // one property's money, so the narrow symbol is never ambiguous on it.
     currencyDisplay: "narrowSymbol",
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
+    minimumFractionDigits: digits,
+    maximumFractionDigits: digits,
   }).format(cents / 100);
 }
 
@@ -94,13 +109,20 @@ export function formatDue(balanceCents: number, currency: string): string {
  * and `cents / 100` in JSX is float arithmetic on money. This stays on
  * integers: whole pounds and the remainder, padded.
  */
-export function formatMoneyInput(cents: number): string {
+export function formatMoneyInput(cents: number, currency: string): string {
   assertMinorUnits(cents);
 
   const negative = cents < 0;
   const abs = Math.abs(cents);
   const whole = Math.trunc(abs / 100);
   const remainder = abs % 100;
+
+  // "25000" for a CFA franc hotel. Only a whole franc drops the decimals: an
+  // input's text goes back through parseMoney(), so rounding here would
+  // change the stored amount the next time the form is saved.
+  if (remainder === 0 && fractionDigits(currency) === 0) {
+    return `${negative ? "-" : ""}${whole}`;
+  }
 
   return `${negative ? "-" : ""}${whole}.${String(remainder).padStart(2, "0")}`;
 }

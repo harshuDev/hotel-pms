@@ -6,7 +6,7 @@ import { Fragment, useEffect, useRef, useState, useTransition } from "react";
 import { useT } from "@/components/i18n";
 import { useCurrency } from "@/components/currency";
 import { cn } from "@/components/ui";
-import { formatMoney, parseMoney } from "@/lib/money";
+import { formatMoney, formatMoneyInput, parseMoney } from "@/lib/money";
 import { parsePercentBps, type Discount } from "@/lib/finance-profiles";
 import {
   addFolio,
@@ -861,7 +861,7 @@ function DiscountPanel({
           <label className="text-ink-muted">
             {tr("Amount")}
             <input inputMode="decimal" value={value} onChange={(e) => setValue(e.target.value)} autoFocus
-              placeholder={kind === "percent" ? "10" : "0.00"} className={cn(field, "tnum mt-1 block w-24")} />
+              placeholder={kind === "percent" ? "10" : formatMoneyInput(0, currency)} className={cn(field, "tnum mt-1 block w-24")} />
           </label>
         </>
       )}

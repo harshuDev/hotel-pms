@@ -259,10 +259,10 @@ export function RateCombinations({
       if (!w) return blankDay();
       const occ: Record<number, string> = {};
       for (const [a, cents] of Object.entries(w.occupancyRates ?? {})) {
-        if (Number(a) !== b) occ[Number(a)] = formatMoneyInput(cents);
+        if (Number(a) !== b) occ[Number(a)] = formatMoneyInput(cents, currency);
       }
       return {
-        rate: w.rateCents === null ? "" : formatMoneyInput(w.rateCents),
+        rate: w.rateCents === null ? "" : formatMoneyInput(w.rateCents, currency),
         mst: w.minStayThrough === null ? "" : String(w.minStayThrough),
         msa: w.minStayArrival === null ? "" : String(w.minStayArrival),
         mxs: w.maxStay === null ? "" : String(w.maxStay),
@@ -342,13 +342,13 @@ export function RateCombinations({
     const up = plan.adultAdjustCents ?? 0;
     const down = plan.adultDecreaseCents ?? up;
     const cents = adults > b ? base + (adults - b) * up : base - (b - adults) * down;
-    return { text: formatMoneyInput(Math.max(0, cents)), computed: true };
+    return { text: formatMoneyInput(Math.max(0, cents), currency), computed: true };
   }
 
   const parentRate = (plan: RatePlan, t: RoomTypeSetting, i: number): string => {
     if (!plan.parentRatePlanId) return "";
     const v = money(row(plan.parentRatePlanId, t).days[i].rate);
-    return typeof v === "number" ? formatMoneyInput(derive(v, plan)) : "";
+    return typeof v === "number" ? formatMoneyInput(derive(v, plan), currency) : "";
   };
 
   function collect(): { plan: RatePlan; type: RoomTypeSetting; days: Parameters<typeof saveWeekRates>[0]["days"] }[] | string {
