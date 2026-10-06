@@ -1243,6 +1243,20 @@ export interface StaffSetting {
   isActive: boolean;
 }
 
+/** One hotel, as the platform team's switcher and Hotel Properties list it (0135). */
+export interface PlatformProperty {
+  id: string;
+  name: string;
+  country: string | null;
+  city: string | null;
+  currency: string;
+  timezone: string;
+  isActive: boolean;
+  roomCount: number;
+  staffCount: number;
+  isCurrent: boolean;
+}
+
 export interface RoomSetting {
   id: string;
   number: string;

@@ -180,11 +180,11 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "activity_log_actor_id_property_id_fkey"
-            columns: ["actor_id", "property_id"]
+            foreignKeyName: "activity_log_actor_id_staff_fkey"
+            columns: ["actor_id"]
             isOneToOne: false
             referencedRelation: "staff_users"
-            referencedColumns: ["id", "property_id"]
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "activity_log_property_id_fkey"
@@ -880,11 +880,11 @@ export type Database = {
             referencedColumns: ["id", "property_id"]
           },
           {
-            foreignKeyName: "booking_waitlist_created_by_property_id_fkey"
-            columns: ["created_by", "property_id"]
+            foreignKeyName: "booking_waitlist_created_by_staff_fkey"
+            columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "staff_users"
-            referencedColumns: ["id", "property_id"]
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "booking_waitlist_customer_id_property_id_fkey"
@@ -1072,11 +1072,11 @@ export type Database = {
             referencedColumns: ["id", "property_id"]
           },
           {
-            foreignKeyName: "bookings_created_by_property_id_fkey"
-            columns: ["created_by", "property_id"]
+            foreignKeyName: "bookings_created_by_staff_fkey"
+            columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "staff_users"
-            referencedColumns: ["id", "property_id"]
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "bookings_customer_id_property_id_fkey"
@@ -1144,18 +1144,18 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "business_dates_closed_by_property_id_fkey"
-            columns: ["closed_by", "property_id"]
+            foreignKeyName: "business_dates_closed_by_staff_fkey"
+            columns: ["closed_by"]
             isOneToOne: false
             referencedRelation: "staff_users"
-            referencedColumns: ["id", "property_id"]
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "business_dates_opened_by_property_id_fkey"
-            columns: ["opened_by", "property_id"]
+            foreignKeyName: "business_dates_opened_by_staff_fkey"
+            columns: ["opened_by"]
             isOneToOne: false
             referencedRelation: "staff_users"
-            referencedColumns: ["id", "property_id"]
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "business_dates_property_id_fkey"
@@ -1450,11 +1450,11 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "cash_movements_approved_by_property_id_fkey"
-            columns: ["approved_by", "property_id"]
+            foreignKeyName: "cash_movements_approved_by_staff_fkey"
+            columns: ["approved_by"]
             isOneToOne: false
             referencedRelation: "staff_users"
-            referencedColumns: ["id", "property_id"]
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "cash_movements_business_date_id_property_id_fkey"
@@ -1464,11 +1464,11 @@ export type Database = {
             referencedColumns: ["id", "property_id"]
           },
           {
-            foreignKeyName: "cash_movements_created_by_property_id_fkey"
-            columns: ["created_by", "property_id"]
+            foreignKeyName: "cash_movements_created_by_staff_fkey"
+            columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "staff_users"
-            referencedColumns: ["id", "property_id"]
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "cash_movements_property_id_fkey"
@@ -1568,11 +1568,11 @@ export type Database = {
             referencedColumns: ["id", "property_id"]
           },
           {
-            foreignKeyName: "cashier_shifts_cashier_id_property_id_fkey"
-            columns: ["cashier_id", "property_id"]
+            foreignKeyName: "cashier_shifts_cashier_id_staff_fkey"
+            columns: ["cashier_id"]
             isOneToOne: false
             referencedRelation: "staff_users"
-            referencedColumns: ["id", "property_id"]
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "cashier_shifts_property_id_fkey"
@@ -2195,11 +2195,11 @@ export type Database = {
             referencedColumns: ["id", "property_id"]
           },
           {
-            foreignKeyName: "folio_items_posted_by_property_id_fkey"
-            columns: ["posted_by", "property_id"]
+            foreignKeyName: "folio_items_posted_by_staff_fkey"
+            columns: ["posted_by"]
             isOneToOne: false
             referencedRelation: "staff_users"
-            referencedColumns: ["id", "property_id"]
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "folio_items_property_id_fkey"
@@ -2747,11 +2747,11 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "meeting_room_bookings_created_by_property_id_fkey"
-            columns: ["created_by", "property_id"]
+            foreignKeyName: "meeting_room_bookings_created_by_staff_fkey"
+            columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "staff_users"
-            referencedColumns: ["id", "property_id"]
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "meeting_room_bookings_customer_id_property_id_fkey"
@@ -3122,11 +3122,11 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "payments_received_by_property_id_fkey"
-            columns: ["received_by", "property_id"]
+            foreignKeyName: "payments_received_by_staff_fkey"
+            columns: ["received_by"]
             isOneToOne: false
             referencedRelation: "staff_users"
-            referencedColumns: ["id", "property_id"]
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "payments_reverses_id_property_id_fkey"
@@ -3150,6 +3150,21 @@ export type Database = {
             referencedColumns: ["id", "property_id"]
           },
         ]
+      }
+      platform_admins: {
+        Row: {
+          created_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       pos_profiles: {
         Row: {
@@ -3344,11 +3359,11 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "promotions_created_by_property_id_fkey"
-            columns: ["created_by", "property_id"]
+            foreignKeyName: "promotions_created_by_staff_fkey"
+            columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "staff_users"
-            referencedColumns: ["id", "property_id"]
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "promotions_property_id_fkey"
@@ -3624,11 +3639,11 @@ export type Database = {
             referencedColumns: ["id", "property_id"]
           },
           {
-            foreignKeyName: "rate_plan_days_updated_by_property_id_fkey"
-            columns: ["updated_by", "property_id"]
+            foreignKeyName: "rate_plan_days_updated_by_staff_fkey"
+            columns: ["updated_by"]
             isOneToOne: false
             referencedRelation: "staff_users"
-            referencedColumns: ["id", "property_id"]
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -4166,11 +4181,11 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "room_status_history_changed_by_property_id_fkey"
-            columns: ["changed_by", "property_id"]
+            foreignKeyName: "room_status_history_changed_by_staff_fkey"
+            columns: ["changed_by"]
             isOneToOne: false
             referencedRelation: "staff_users"
-            referencedColumns: ["id", "property_id"]
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "room_status_history_property_id_fkey"
@@ -4242,11 +4257,11 @@ export type Database = {
             referencedColumns: ["id", "property_id"]
           },
           {
-            foreignKeyName: "room_type_days_updated_by_property_id_fkey"
-            columns: ["updated_by", "property_id"]
+            foreignKeyName: "room_type_days_updated_by_staff_fkey"
+            columns: ["updated_by"]
             isOneToOne: false
             referencedRelation: "staff_users"
-            referencedColumns: ["id", "property_id"]
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -4796,11 +4811,11 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "cashier_shifts_cashier_id_property_id_fkey"
-            columns: ["cashier_id", "property_id"]
+            foreignKeyName: "cashier_shifts_cashier_id_staff_fkey"
+            columns: ["cashier_id"]
             isOneToOne: false
             referencedRelation: "staff_users"
-            referencedColumns: ["id", "property_id"]
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "cashier_shifts_property_id_fkey"
@@ -5051,6 +5066,14 @@ export type Database = {
           p_ends_on: string
           p_season_type_id: string
           p_starts_on: string
+        }
+        Returns: string
+      }
+      add_staff_by_email: {
+        Args: {
+          p_email: string
+          p_full_name: string
+          p_role: Database["public"]["Enums"]["staff_role"]
         }
         Returns: string
       }
@@ -5913,6 +5936,15 @@ export type Database = {
         }
         Returns: string
       }
+      create_property: {
+        Args: {
+          p_country: string
+          p_currency: string
+          p_name: string
+          p_timezone: string
+        }
+        Returns: string
+      }
       create_public_booking: {
         Args: {
           p_adults?: number
@@ -6481,6 +6513,7 @@ export type Database = {
       }
       invoice_settings_row: { Args: never; Returns: string }
       is_front_office_staff: { Args: never; Returns: boolean }
+      is_platform_member: { Args: { p_user: string }; Returns: boolean }
       is_revenue_staff: { Args: never; Returns: boolean }
       known_accounting_systems: { Args: never; Returns: string[] }
       known_locales: { Args: never; Returns: string[] }
@@ -6660,6 +6693,22 @@ export type Database = {
           net_cents: number
           payment_count: number
           reversal_count: number
+        }[]
+      }
+      platform_properties: {
+        Args: never
+        Returns: {
+          city: string
+          country: string
+          created_at: string
+          currency: string
+          id: string
+          is_active: boolean
+          is_current: boolean
+          name: string
+          room_count: number
+          staff_count: number
+          timezone: string
         }[]
       }
       post_charge: {
@@ -7953,6 +8002,15 @@ export type Database = {
         }
         Returns: undefined
       }
+      staff_settings_list: {
+        Args: never
+        Returns: {
+          full_name: string
+          id: string
+          is_active: boolean
+          role: Database["public"]["Enums"]["staff_role"]
+        }[]
+      }
       stay_rule_violation: {
         Args: {
           p_check_in: string
@@ -7972,6 +8030,7 @@ export type Database = {
         }
         Returns: string
       }
+      switch_property: { Args: { p_property_id: string }; Returns: string }
       tax_rates_list: {
         Args: never
         Returns: {

@@ -51,6 +51,7 @@ import { ApiKeyPanel, DeveloperKeysPanel, type DeveloperKey } from "@/components
 import { SystemConnectionsPanel } from "@/components/settings/system-connections-panel";
 import { ReactionsPanel } from "@/components/settings/reactions-panel";
 import { TemplatesPanel } from "@/components/settings/templates-panel";
+import { AddStaffMember, PlatformHotels } from "@/components/settings/platform-panels";
 import type { Reaction } from "@/lib/reactions";
 import type { SystemConnection } from "@/lib/system-connections";
 import type { BookingWidget } from "@/lib/booking-widgets";
@@ -109,6 +110,7 @@ import type {
   StaffRole,
   StaffSetting,
   TaxRateSetting,
+  PlatformProperty,
 } from "@/lib/types";
 
 export type { SettingsTab } from "@/lib/settings-tabs";
@@ -206,6 +208,7 @@ export function SettingsScreen({
   meId,
   canEdit,
   isAdmin,
+  platformProperties,
   timezones,
   hotelPolicies,
   extrasCatalog,
@@ -317,6 +320,8 @@ export function SettingsScreen({
   meId: string | null;
   canEdit: boolean;
   isAdmin: boolean;
+  /** Every hotel, for the platform team only (0135); empty for hotel staff. */
+  platformProperties: PlatformProperty[];
 }) {
   const tr = useT();
   const router = useRouter();
@@ -731,79 +736,88 @@ export function SettingsScreen({
       {/* Hotel Properties ------------------------------------------------ */}
       {tab === "hotel-properties" && (
         /*
-          The reference's Properties list. One row, because a staff login
-          belongs to one property: staff_users.property_id is a single column
-          and every RLS policy keys off it. So there is no Add New Property and
-          no delete — a second property would be one nobody here could open,
-          and every table points at this one under on delete restrict. The
-          pencil opens the three times that used to sit on the Property form.
+          The reference's Properties list. A hotel's own staff see one row:
+          their login belongs to one hotel. The platform team (0135) sees every
+          hotel, opens any of them and adds new ones -- PlatformHotels. There
+          is still no delete: every table points at a property under on delete
+          restrict. The pencil opens the three times that used to sit on the
+          Property form.
         */
         <div className="max-w-5xl space-y-5">
           <h2 className="font-display text-[26px] font-semibold tracking-tightest text-ink">
             {tr("Hotel Properties")}
           </h2>
 
-          <div className="overflow-hidden rounded-lg border border-line bg-white shadow-card">
-            <h3 className="border-b border-line px-6 py-4 text-[16px] text-ink">
-              {tr("Properties list")}
-            </h3>
-            <div className="overflow-x-auto px-6 py-6">
-              <table className="w-full min-w-[34rem] text-[13.5px]">
-                <thead>
-                  <tr className="bg-shell text-left text-ink">
-                    <th className="w-[38%] px-4 py-4 font-normal">
-                      <span className="block border-r border-line">{tr("Property name")}</span>
-                    </th>
-                    <th className="px-4 py-4 font-normal">
-                      <span className="block border-r border-line">{tr("Address")}</span>
-                    </th>
-                    <th className="w-20 px-4 py-4" aria-label={tr("Actions")} />
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr className="border-b border-line">
-                    <td className="px-4 py-5 text-ink">{property.name}</td>
-                    <td className="px-4 py-5 text-ink">
-                      {[
-                        property.postcode,
-                        property.city,
-                        property.region,
-                        property.addressLine1,
-                        property.addressLine2,
-                      ]
-                        .filter((part) => part && part.trim() !== "")
-                        .join(", ") || "—"}
-                    </td>
-                    <td className="px-4 py-5 text-right">
-                      {canEdit && (
-                        <button
-                          type="button"
-                          onClick={() => setEditingTimes(true)}
-                          aria-label={tr("Edit {name}", { name: property.name })}
-                          title={tr("Edit")}
-                          className="rounded p-1 text-ink hover:bg-shell"
-                        >
-                          <svg
-                            viewBox="0 0 24 24"
-                            className="h-[18px] w-[18px]"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="1.8"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            aria-hidden="true"
+          {platformProperties.length > 0 ? (
+            <PlatformHotels
+              properties={platformProperties}
+              timezones={timezones}
+              defaultTimezone={property.timezone}
+              onEditCurrent={canEdit ? () => setEditingTimes(true) : null}
+            />
+          ) : (
+            <div className="overflow-hidden rounded-lg border border-line bg-white shadow-card">
+              <h3 className="border-b border-line px-6 py-4 text-[16px] text-ink">
+                {tr("Properties list")}
+              </h3>
+              <div className="overflow-x-auto px-6 py-6">
+                <table className="w-full min-w-[34rem] text-[13.5px]">
+                  <thead>
+                    <tr className="bg-shell text-left text-ink">
+                      <th className="w-[38%] px-4 py-4 font-normal">
+                        <span className="block border-r border-line">{tr("Property name")}</span>
+                      </th>
+                      <th className="px-4 py-4 font-normal">
+                        <span className="block border-r border-line">{tr("Address")}</span>
+                      </th>
+                      <th className="w-20 px-4 py-4" aria-label={tr("Actions")} />
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr className="border-b border-line">
+                      <td className="px-4 py-5 text-ink">{property.name}</td>
+                      <td className="px-4 py-5 text-ink">
+                        {[
+                          property.postcode,
+                          property.city,
+                          property.region,
+                          property.addressLine1,
+                          property.addressLine2,
+                        ]
+                          .filter((part) => part && part.trim() !== "")
+                          .join(", ") || "—"}
+                      </td>
+                      <td className="px-4 py-5 text-right">
+                        {canEdit && (
+                          <button
+                            type="button"
+                            onClick={() => setEditingTimes(true)}
+                            aria-label={tr("Edit {name}", { name: property.name })}
+                            title={tr("Edit")}
+                            className="rounded p-1 text-ink hover:bg-shell"
                           >
-                            <path d="M4 20h16" />
-                            <path d="M14.5 5.5l3 3L8 18H5v-3z" />
-                          </svg>
-                        </button>
-                      )}
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+                            <svg
+                              viewBox="0 0 24 24"
+                              className="h-[18px] w-[18px]"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="1.8"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              aria-hidden="true"
+                            >
+                              <path d="M4 20h16" />
+                              <path d="M14.5 5.5l3 3L8 18H5v-3z" />
+                            </svg>
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
             </div>
-          </div>
+          )}
 
           {editingTimes && canEdit && (
             <div className={cn(card, "p-6 sm:p-7")}>
@@ -1369,10 +1383,7 @@ export function SettingsScreen({
             </tbody>
           </table>
 
-          <Note>
-            <strong className="font-medium text-ink">{tr("Adding a new login is not here.")}</strong>{" "}
-            {tr("A new member of staff is invited in Supabase Auth, and then appears in this list.")}
-          </Note>
+          {isAdmin && <AddStaffMember roles={ROLES} />}
         </div>
       )}
       </div>
