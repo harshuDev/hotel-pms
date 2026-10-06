@@ -44,6 +44,7 @@ import {
   getSystemConnections,
   getReactions,
   getDocumentTemplate,
+  getPlatformProperties,
   getStaffSettings,
   getTaxRateSettings,
 } from "@/lib/queries";
@@ -162,6 +163,9 @@ export default async function SettingsPage({
     tab === "templates" ? getDocumentTemplate("folio") : Promise.resolve(null),
   ]);
 
+  // Every hotel, for the platform team (0135); empty for a hotel's own staff.
+  const platformProperties = await getPlatformProperties();
+
   /*
    * The timezone list is worked out here, on the server, and handed down: if
    * the browser built its own, Node's ICU and the browser's can list different
@@ -175,6 +179,14 @@ export default async function SettingsPage({
     // where you are and each panel carries its own title.
     <div>
       <SettingsScreen
+        /*
+          Keyed on the hotel: the forms seed their state from the property, so
+          when the platform team switches hotel the screen must start again --
+          otherwise Hotel Details would still hold the last hotel's values, and
+          Save would write them onto the new one.
+        */
+        key={property.id}
+        platformProperties={platformProperties}
         tab={tab}
         property={property}
         roomTypes={roomTypes}

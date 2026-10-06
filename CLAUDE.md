@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0133` are
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0135` are
 applied to the hosted database.
 
 Working on real data: dashboard (house board, movements, pace, activity feed),
@@ -3019,15 +3019,11 @@ client: "Need to add Booking Channel in the Dashboard".
     `save_property_times()`.** Two functions because they are two forms with
     two Save buttons, and each saves only what it shows. `save_property()`
     still exists and is called by nothing.
-  - **Hotel Properties is the reference's Properties list: one row, a pencil,
-    and NO "Add New Property" and NO delete.** A staff login belongs to exactly
-    one property — `staff_users.property_id` is a single column and
-    `current_property_id()`, the root of every RLS policy, reads it. A property
-    added from here would be one nobody could open, and every table points at a
-    property under `on delete restrict`, so the trash can could only ever be
-    refused. Both are the dead control this application does not ship. Adding
-    them means staff belonging to several properties and a property switcher —
-    a change to every policy, to be asked for rather than slipped in.
+  - **Hotel Properties is the reference's Properties list.** A hotel's own
+    staff see one row and a pencil. **The platform team (0135) sees every
+    hotel, with Open and "+ Add New Property"** -- see "The platform team
+    onboards hotels". There is still NO delete: every table points at a
+    property under `on delete restrict`, so a bin could only ever be refused.
     - The pencil opens check-in, check-out and night audit times, which the
       reference's Hotel Details does not carry. The address column is written
       the reference's way round: postcode, city, region, then the street.
@@ -3613,9 +3609,12 @@ client: "Need to add Booking Channel in the Dashboard".
   plan those nights were on. They are labelled rather than dropped, because the
   totals have to tie to the occupancy report and a report that quietly excludes
   a stretch of history is worse than one that admits it.
-- **Creating a login is not in the application.** `staff_users.id` references
-  `auth.users`, so a new member of staff needs an auth account before a row can
-  point at one. Settings manages the staff who already exist — name, role, and
+- **Creating a login is not in the application; linking one is (0135).**
+  `staff_users.id` references `auth.users`, so a new member of staff needs an
+  auth account -- an invitation from Supabase Auth -- before a row can point
+  at one. Settings -> Staff -> "Add staff member" (`add_staff_by_email()`,
+  admins) then puts that login on this hotel with a name and role. Settings
+  manages the staff who already exist — name, role, and
   the `is_active` flag that 0016 made withdraw access everywhere. An
   administrator cannot demote or deactivate themselves, because that locks the
   property out of its own settings.
@@ -3875,6 +3874,46 @@ Resend, Brevo, Amazon SES).
   credentials exist in this project's environments. The PDFs were rendered
   and the build passes; the first send is the client's.
 
+## The platform team onboards hotels (0134-0135)
+
+The client onboards each hotel themselves before the hotel ever logs in:
+"I want to be the one (my support team also) that onboard the hotel ... we
+will send the hotel invitation once we've created the profile and populated
+it with the hotel information."
+
+- **`platform_admins` is the team** (user ids). No policy lets anybody write
+  it: a member is added in the SQL editor
+  (`insert into platform_admins (user_id) values ('<auth user id>')`), so no
+  hotel administrator can make themselves one.
+- **A member keeps ONE `staff_users` row and moves it.** `switch_property()`
+  points it at another hotel (as admin), and `current_property_id()` -- the
+  root of every RLS policy -- follows, so every screen works on that hotel
+  with no policy changed. The top bar's hotel name is a switcher for the team
+  (`property-switcher.tsx`, a native select because the bar is a z-30
+  stacking context); switching lands on the dashboard.
+- **0134 is what lets the row move.** Fifteen columns (`created_by`,
+  `posted_by`, `actor_id`, `cashier_id`...) referenced
+  `staff_users(id, property_id)`, so a member who had posted anything in one
+  hotel could never move. They reference `staff_users(id)` now, same ON
+  DELETE. A row written in hotel A keeps naming the person after they move.
+- **Settings -> Hotel Properties lists every hotel for the team**
+  (`platform_properties()`, empty for anybody else): rooms, staff, Open, and
+  "+ Add New Property" -- name, country, currency, time zone.
+  `create_property()` inserts the hotel (check-in 15:00, check-out 11:00),
+  switches the member into it and opens its first business date on the
+  hotel's own today; the accounting categories come from the existing
+  trigger. Everything else is filled in through Settings as for any hotel.
+  `SettingsScreen` is keyed on the property id so no form carries one hotel's
+  values into another.
+- **The team is invisible to a hotel**: left out of Settings -> Staff
+  (`staff_settings_list()`) and of the staff counts, and the staff_users
+  update, delete and insert policies refuse a platform member, so a hotel
+  admin can neither edit, deactivate, delete nor add one.
+  `add_staff_by_email()` refuses a team member, a login already on this
+  hotel, and one working at another hotel, by name.
+- **Every hotel is in the one Supabase project (London).** Regional pods are
+  the client's open question, not built.
+
 ## The domain -- app.reservationcentric.com
 
 Production is `https://app.reservationcentric.com`, the client's own domain
@@ -4032,8 +4071,10 @@ than proceeding.
 15. **Inviting a new member of staff.** Creating an auth account needs either
     the Supabase dashboard or a server action holding the service-role key.
     The second bypasses RLS, which the brief discourages, so it has not been
-    built. Until it is, a new person is invited in Supabase Auth and then
-    appears in Settings to be named and given a role.
+    built. A new person is invited in Supabase Auth (Authentication -> Users
+    -> Invite user) and then added in Settings -> Staff -> "Add staff member"
+    by email (0135). The invitation needs custom SMTP to reach anyone outside
+    the Supabase team.
 
 16. **Cancellation policy — settled and built (0060, 0092-0093): three
     kinds, per rate plan.** Flexible with a free-cancellation window in days,

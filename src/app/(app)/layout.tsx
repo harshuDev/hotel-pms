@@ -10,6 +10,7 @@ import {
   getCurrentStaffUser,
   getHotelFeatures,
   getInventorySettings,
+  getPlatformProperties,
   getProperty,
 } from "@/lib/queries";
 import { hiddenNavHrefs } from "@/lib/hotel-features";
@@ -77,11 +78,12 @@ export default async function AppLayout({
     );
   }
 
-  const [property, today, features, inventorySettings] = await Promise.all([
+  const [property, today, features, inventorySettings, platformProperties] = await Promise.all([
     getProperty(),
     getBusinessDate(),
     getHotelFeatures(),
     getInventorySettings(),
+    getPlatformProperties(),
   ]);
 
   const businessDate = tr.date(today, "EEE d MMM yyyy");
@@ -100,7 +102,9 @@ export default async function AppLayout({
         />
 
         <TopBar
+          propertyId={property.id}
           propertyName={property.name}
+          platformProperties={platformProperties.map((p) => ({ id: p.id, name: p.name }))}
           businessDate={businessDate}
         />
 

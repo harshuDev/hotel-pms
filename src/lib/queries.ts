@@ -136,6 +136,7 @@ import type {
   RoomTypeSetting,
   VirtualRoomType,
   StaffSetting,
+  PlatformProperty,
   AccountingRow,
   AccountingRoomRevenueRow,
   RatesGridCell,
@@ -3775,28 +3776,43 @@ export async function getTaxRateSettings(): Promise<TaxRateSetting[]> {
 
 export async function getStaffSettings(): Promise<StaffSetting[]> {
   const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("staff_users")
-    .select("id, full_name, role, is_active")
-    .order("is_active", { ascending: false })
-    .order("full_name");
+  // The hotel's own staff; the platform team is left out (0135).
+  const { data, error } = await supabase.rpc("staff_settings_list");
 
   if (error) throw new Error(`Failed to load the staff: ${error.message}`);
 
-  return (
-    (data ?? []) as {
-      id: string;
-      full_name: string;
-      role: StaffRole;
-      is_active: boolean;
-    }[]
-  ).map((row) => ({
+  return (data ?? []).map((row) => ({
     id: row.id,
     fullName: row.full_name,
-    role: row.role,
+    role: row.role as StaffRole,
     isActive: row.is_active,
   }));
 }
+
+/**
+ * Every hotel, for the platform team's switcher and Settings -> Hotel
+ * Properties (0135). Empty for anybody not on the platform team, so a hotel's
+ * own staff never learn another hotel exists.
+ */
+export const getPlatformProperties = cache(async (): Promise<PlatformProperty[]> => {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("platform_properties");
+
+  if (error) throw new Error(`Failed to load the hotels: ${error.message}`);
+
+  return (data ?? []).map((row) => ({
+    id: row.id,
+    name: row.name,
+    country: row.country,
+    city: row.city,
+    currency: row.currency,
+    timezone: row.timezone,
+    isActive: row.is_active,
+    roomCount: Number(row.room_count),
+    staffCount: Number(row.staff_count),
+    isCurrent: row.is_current,
+  }));
+});
 
 const SETTINGS_ROOMS_PER_PAGE = 50;
 

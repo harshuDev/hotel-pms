@@ -2,6 +2,9 @@
  "(Holding area)": {
   "kind": "text"
  },
+ "{0} already works at another hotel": {
+  "kind": "db"
+ },
  "{0} booked for {1}": {
   "kind": "db"
  },
@@ -51,6 +54,9 @@
   "kind": "db"
  },
  "{0} is already booked for {1} from {2} to {3}.": {
+  "kind": "db"
+ },
+ "{0} is already on this hotel's staff": {
   "kind": "db"
  },
  "{0} is already one of the hotel's currencies": {
@@ -111,6 +117,9 @@
   "kind": "db"
  },
  "{0} is on the booking waitlist and cannot be deleted.": {
+  "kind": "db"
+ },
+ "{0} is on the platform team and cannot be added to a hotel": {
   "kind": "db"
  },
  "{0} is set on an extra or an extras category. Change those first, or untick Active to retire it.": {
@@ -651,6 +660,9 @@
  "+ Add Facility": {
   "kind": "text"
  },
+ "+ Add New Property": {
+  "kind": "text"
+ },
  "+ Add Room": {
   "kind": "text"
  },
@@ -799,6 +811,9 @@
  "A guest already staying can stay through a closed date; only arrivals are refused.": {
   "kind": "text"
  },
+ "A hotel needs a name": {
+  "kind": "text"
+ },
  "A location needs both a latitude and a longitude": {
   "kind": "db"
  },
@@ -834,9 +849,6 @@
  },
  "A new booking can only be taken as pending or confirmed": {
   "kind": "db"
- },
- "A new member of staff is invited in Supabase Auth, and then appears in this list.": {
-  "kind": "text"
  },
  "A night cannot be charged before it is stayed": {
   "kind": "db"
@@ -1168,6 +1180,9 @@
  "Add New Profile": {
   "kind": "text"
  },
+ "Add New Property": {
+  "kind": "text"
+ },
  "Add New Rate Plan": {
   "kind": "text"
  },
@@ -1213,6 +1228,9 @@
  "Add Simple Booking": {
   "kind": "text"
  },
+ "Add staff member": {
+  "kind": "text"
+ },
  "Add tax": {
   "kind": "text"
  },
@@ -1241,9 +1259,6 @@
   "kind": "text"
  },
  "Added to the waitlist.": {
-  "kind": "text"
- },
- "Adding a new login is not here.": {
   "kind": "text"
  },
  "Adding…": {
@@ -2495,6 +2510,9 @@
  "Choose a payment type.": {
   "kind": "text"
  },
+ "Choose a role": {
+  "kind": "db"
+ },
  "Choose a room": {
   "kind": "text"
  },
@@ -2605,6 +2623,15 @@
  },
  "Choose the extra to merge into.": {
   "kind": "text"
+ },
+ "Choose the hotel's country": {
+  "kind": "db"
+ },
+ "Choose the hotel's currency": {
+  "kind": "db"
+ },
+ "Choose the hotel's time zone": {
+  "kind": "db"
  },
  "Choose the kind": {
   "kind": "db"
@@ -2994,6 +3021,9 @@
  "Create Pos Profile": {
   "kind": "text"
  },
+ "Create property": {
+  "kind": "text"
+ },
  "Croatia": {
   "kind": "country",
   "code": "HR"
@@ -3022,6 +3052,9 @@
   "kind": "text"
  },
  "current": {
+  "kind": "text"
+ },
+ "Current": {
   "kind": "text"
  },
  "Current password": {
@@ -3709,6 +3742,9 @@
  },
  "Enter the guest's name.": {
   "kind": "text"
+ },
+ "Enter the person's email": {
+  "kind": "db"
  },
  "Enter your password": {
   "kind": "text"
@@ -4419,6 +4455,9 @@
   "code": "HK"
  },
  "Horizontal rule": {
+  "kind": "text"
+ },
+ "Hotel": {
   "kind": "text"
  },
  "Hotel address": {
@@ -6156,6 +6195,9 @@
  "Only a settled folio can be closed": {
   "kind": "db"
  },
+ "Only administrators can add a member of staff": {
+  "kind": "db"
+ },
  "Only administrators can change a member of staff": {
   "kind": "db"
  },
@@ -6404,6 +6446,12 @@
  },
  "Only on these days": {
   "kind": "text"
+ },
+ "Only the platform team can add a hotel": {
+  "kind": "db"
+ },
+ "Only the platform team can move between hotels": {
+  "kind": "db"
  },
  "Only these days": {
   "kind": "text"
@@ -6878,6 +6926,9 @@
  },
  "Plan": {
   "kind": "text"
+ },
+ "Platform team": {
+  "kind": "db"
  },
  "Please add a footer which will be added to all new emails": {
   "kind": "text"
@@ -8330,6 +8381,9 @@
  "Sweeply": {
   "kind": "text"
  },
+ "Switching…": {
+  "kind": "text"
+ },
  "Switzerland": {
   "kind": "country",
   "code": "CH"
@@ -8619,6 +8673,9 @@
   "kind": "db"
  },
  "That guest no longer exists": {
+  "kind": "db"
+ },
+ "That hotel does not exist": {
   "kind": "db"
  },
  "That identification type no longer exists": {
@@ -9176,6 +9233,9 @@
  "There is already a gateway called {0}": {
   "kind": "db"
  },
+ "There is already a hotel called {0}": {
+  "kind": "db"
+ },
  "There is already a payment type called {0}": {
   "kind": "db"
  },
@@ -9198,6 +9258,9 @@
   "kind": "db"
  },
  "There is no live promotion with the code {0}": {
+  "kind": "db"
+ },
+ "There is no login for {0}. Send them an invitation first.": {
   "kind": "db"
  },
  "There is no open business date": {
@@ -9309,6 +9372,9 @@
   "kind": "text"
  },
  "Time": {
+  "kind": "text"
+ },
+ "Time zone": {
   "kind": "text"
  },
  "Timor-Leste": {
