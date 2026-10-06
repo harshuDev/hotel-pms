@@ -139,7 +139,7 @@ export function DiscountsPanel({
             amount:
               d.kind === "percent"
                 ? d.percentBps === null ? "" : formatPercentBps(d.percentBps)
-                : d.amountCents === null ? "" : formatMoneyInput(d.amountCents),
+                : d.amountCents === null ? "" : formatMoneyInput(d.amountCents, currency),
           }
         : { id: null, title: "", kind: "percent", amount: "0" },
     );

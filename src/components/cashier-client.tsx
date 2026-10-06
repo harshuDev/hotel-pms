@@ -364,7 +364,7 @@ function OpenShiftPanel({
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [float, setFloat] = useState(
-    suggestedFloatCents === null ? "" : formatMoneyInput(suggestedFloatCents),
+    suggestedFloatCents === null ? "" : formatMoneyInput(suggestedFloatCents, currency),
   );
   const [error, setError] = useState("");
 
@@ -403,7 +403,7 @@ function OpenShiftPanel({
             setFloat(e.target.value);
             setError("");
           }}
-          placeholder="0.00"
+          placeholder={formatMoneyInput(0, currency)}
           inputMode="decimal"
           autoFocus
           className={cn(inputCls, "tnum text-lg")}
@@ -572,13 +572,13 @@ function PaymentModal({
               setAmount(e.target.value);
               setError("");
             }}
-            placeholder="0.00"
+            placeholder={formatMoneyInput(0, currency)}
             inputMode="decimal"
             className={inputCls}
           />
           {booking && (
             <button
-              onClick={() => setAmount(formatMoneyInput(booking.balanceCents))}
+              onClick={() => setAmount(formatMoneyInput(booking.balanceCents, currency))}
               className="mt-1.5 text-xxs text-brass hover:underline"
             >
               {tr("Use full balance")}
@@ -618,6 +618,7 @@ function PaidOutModal({
   onClose: () => void;
 }) {
   const tr = useT();
+  const currency = useCurrency();
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [amount, setAmount] = useState("");
@@ -668,7 +669,7 @@ function PaidOutModal({
                 setAmount(e.target.value);
                 setError("");
               }}
-              placeholder="0.00"
+              placeholder={formatMoneyInput(0, currency)}
               inputMode="decimal"
               className={inputCls}
             />
@@ -786,6 +787,7 @@ function CloseShiftModal({
   }) => void;
 }) {
   const tr = useT();
+  const currency = useCurrency();
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [counted, setCounted] = useState("");
@@ -831,7 +833,7 @@ function CloseShiftModal({
               setCounted(e.target.value);
               setError("");
             }}
-            placeholder="0.00"
+            placeholder={formatMoneyInput(0, currency)}
             inputMode="decimal"
             autoFocus
             className={cn(inputCls, "tnum text-lg")}

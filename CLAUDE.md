@@ -395,6 +395,14 @@ the component.
     depending on who is logged in is a counting error waiting to happen. The
     guest page still writes numbers in the guest's language, via
     `formatMoneyIn()`.
+  - **XOF and XAF (the CFA francs) are written WITHOUT decimals** -- "F CFA
+    25,000" -- by `fractionDigits()` in money.ts, in `formatMoney`,
+    `formatMoneyIn` and `formatMoneyInput`. They are still STORED in integer
+    hundredths like every currency. A figure that is not a whole franc (an
+    inclusive tax split) is rounded on screen; an input keeps its decimals in
+    that case, because its text goes back through `parseMoney()`.
+    `formatMoneyInput` therefore takes the currency as a required argument
+    too. Adjana Resort (Senegal) is the first XOF hotel.
 
 **Sign convention**
 

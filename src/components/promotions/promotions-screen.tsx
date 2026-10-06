@@ -332,6 +332,7 @@ export function PromotionsScreen({
   canEdit: boolean;
 }) {
   const tr = useT();
+  const currency = useCurrency();
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [form, setForm] = useState<typeof EMPTY | null>(null);
@@ -346,7 +347,7 @@ export function PromotionsScreen({
       description: p.description ?? "",
       kind: p.kind,
       percent: p.percentBps === null ? "" : String(p.percentBps / 100),
-      amount: p.amountOffCents === null ? "" : formatMoneyInput(p.amountOffCents),
+      amount: p.amountOffCents === null ? "" : formatMoneyInput(p.amountOffCents, currency),
       freeNights: String(p.freeNights ?? 1),
       paidNights: String(p.paidNights ?? 2),
       sellFrom: p.sellFrom ?? "",

@@ -7,7 +7,7 @@ import { Elements, PaymentElement, useElements, useStripe } from "@stripe/react-
 import { useT } from "@/components/i18n";
 import { useCurrency } from "@/components/currency";
 import { cn } from "@/components/ui";
-import { formatMoney, parseMoney } from "@/lib/money";
+import { formatMoney, formatMoneyInput, parseMoney } from "@/lib/money";
 import {
   cancelPaymentRequest,
   chargeCard,
@@ -423,7 +423,7 @@ function ChargeForm({
         <label className="text-[12px] text-ink-muted">
           {tr("Amount")}
           <input inputMode="decimal" value={amount} onChange={(e) => setAmount(e.target.value)} autoFocus
-            placeholder="0.00" className={cn(field, "tnum mt-1")} />
+            placeholder={formatMoneyInput(0, currency)} className={cn(field, "tnum mt-1")} />
         </label>
         <label className="text-[12px] text-ink-muted">
           {tr("Description")}
@@ -471,6 +471,7 @@ function Requests({
   canCharge: boolean;
 }) {
   const tr = useT();
+  const currency = useCurrency();
   const router = useRouter();
   const [pending, start] = useTransition();
   const [adding, setAdding] = useState(false);
@@ -579,7 +580,7 @@ function Requests({
             <label className="text-[12px] text-ink-muted">
               {tr("Amount")}
               <input inputMode="decimal" value={amount} onChange={(e) => setAmount(e.target.value)} autoFocus
-                placeholder="0.00" className={cn(field, "tnum mt-1")} />
+                placeholder={formatMoneyInput(0, currency)} className={cn(field, "tnum mt-1")} />
             </label>
             <label className="text-[12px] text-ink-muted">
               {tr("Description")}

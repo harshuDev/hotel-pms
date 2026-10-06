@@ -213,7 +213,7 @@ function newPlanFor(d: Draft): RatePlan {
   };
 }
 
-function draftOf(p: RatePlan | null, defaultPolicyId: string): Draft {
+function draftOf(p: RatePlan | null, defaultPolicyId: string, currency: string): Draft {
   const policy = p ? (p.cancellationPolicyId ?? "") : defaultPolicyId;
   const n = (v: number | null) => (v === null ? "" : String(v));
   const pct = p?.derivedPercentBps ?? null;
@@ -231,7 +231,7 @@ function draftOf(p: RatePlan | null, defaultPolicyId: string): Draft {
     wasMealPlan: p?.mealPlan ?? "room_only",
     meals: p?.meals ?? [],
     wasMeals: p?.meals ?? [],
-    extras: (p?.extras ?? []).map(extraDraftOf),
+    extras: (p?.extras ?? []).map((x) => extraDraftOf(x, currency)),
     wasExtras: p?.extras ?? [],
     dated: !!(p?.validFrom || p?.validTo),
     showMinimums: (p?.minAdults ?? null) !== null || (p?.minChildren ?? null) !== null,
@@ -251,20 +251,20 @@ function draftOf(p: RatePlan | null, defaultPolicyId: string): Draft {
         : (pct ?? -1) < 0 ? "down_percent" : "up_percent",
     adjustment:
       p?.derivedKind === "amount" && amt !== null
-        ? formatMoneyInput(Math.abs(amt))
+        ? formatMoneyInput(Math.abs(amt), currency)
         : p?.derivedKind === "percent" && pct !== null
           ? formatPercentBps(Math.abs(pct))
           : "",
     singlePrice: (p?.occupancyPricing ?? "single") === "single",
     automatic: p?.occupancyPricing === "per_person",
-    perAdult: p?.adultAdjustCents != null ? formatMoneyInput(p.adultAdjustCents) : "",
+    perAdult: p?.adultAdjustCents != null ? formatMoneyInput(p.adultAdjustCents, currency) : "",
     decreaseAdult:
       p?.adultDecreaseCents != null
-        ? formatMoneyInput(p.adultDecreaseCents)
+        ? formatMoneyInput(p.adultDecreaseCents, currency)
         : p?.adultAdjustCents != null
-          ? formatMoneyInput(p.adultAdjustCents)
+          ? formatMoneyInput(p.adultAdjustCents, currency)
           : "",
-    perChild: p?.childAdjustCents != null ? formatMoneyInput(p.childAdjustCents) : "",
+    perChild: p?.childAdjustCents != null ? formatMoneyInput(p.childAdjustCents, currency) : "",
     taxRateIds: p?.taxRateIds ?? [],
     accountingCategoryId: p?.accountingCategoryId ?? "",
     channelIds: p?.channelIds ?? [],
@@ -377,9 +377,9 @@ function PlanPopup({ title, onClose, children }: { title: string; onClose: () =>
 /** A label, the reference's way: on the left, ending in a colon, "*" when required. */
 type ExtraDraft = Omit<RatePlanExtra, "priceCents"> & { price: string };
 
-const extraDraftOf = (x: RatePlanExtra): ExtraDraft => {
+const extraDraftOf = (x: RatePlanExtra, currency: string): ExtraDraft => {
   const { priceCents, ...rest } = x;
-  return { ...rest, price: priceCents === null ? "" : formatMoneyInput(priceCents) };
+  return { ...rest, price: priceCents === null ? "" : formatMoneyInput(priceCents, currency) };
 };
 
 /*
@@ -517,7 +517,7 @@ function ExtrasTerms({
                     aria-label={tr("Price of {name}", { name })}
                     className={`${cell} tnum`}
                     value={x.price}
-                    placeholder={extra ? formatMoneyInput(extra.priceCents) : ""}
+                    placeholder={extra ? formatMoneyInput(extra.priceCents, currency) : ""}
                     onChange={(e) => update(i, { price: e.target.value })}
                   />
                   <p className="px-1 pt-0.5 text-[11px] text-ink-faint">{currency}</p>
@@ -607,7 +607,7 @@ export function RatePlansPanel({
   const [filterOpen, setFilterOpen] = useState(false);
   const [draft, setDraft] = useState<Draft | null>(() => {
     const p = openPlanId ? ratePlans.find((x) => x.id === openPlanId) : undefined;
-    return p && canEdit ? draftOf(p, cancellationPolicies.find((c) => c.isDefault)?.id ?? "") : null;
+    return p && canEdit ? draftOf(p, cancellationPolicies.find((c) => c.isDefault)?.id ?? "", currency) : null;
   });
 
   const policyName = (id: string | null) =>
@@ -640,7 +640,7 @@ export function RatePlansPanel({
   }
 
   function open(p: RatePlan | null) {
-    const d = draftOf(p, defaultPolicyId);
+    const d = draftOf(p, defaultPolicyId, currency);
     // A new plan starts on the hotel's default tax -- the top of Tax
     // Information, as the booking form seeds it -- not on "No tax".
     if (!p) d.taxRateIds = taxRates.filter((t) => t.isActive && t.kind === "tax").slice(0, 1).map((t) => t.id);
@@ -960,17 +960,17 @@ export function RatePlansPanel({
               <>
                 <label className={label}>
                   {tr("Increase Per Adult")}
-                  <input inputMode="decimal" value={draft.perAdult} placeholder="0.00" className={cn(field, "tnum")}
+                  <input inputMode="decimal" value={draft.perAdult} placeholder={formatMoneyInput(0, currency)} className={cn(field, "tnum")}
                     onChange={(e) => set({ perAdult: e.target.value })} />
                 </label>
                 <label className={label}>
                   {tr("Decrease Per Adult")}
-                  <input inputMode="decimal" value={draft.decreaseAdult} placeholder="0.00" className={cn(field, "tnum")}
+                  <input inputMode="decimal" value={draft.decreaseAdult} placeholder={formatMoneyInput(0, currency)} className={cn(field, "tnum")}
                     onChange={(e) => set({ decreaseAdult: e.target.value })} />
                 </label>
                 <label className={label}>
                   {tr("Increase Per Child")}
-                  <input inputMode="decimal" value={draft.perChild} placeholder="0.00" className={cn(field, "tnum")}
+                  <input inputMode="decimal" value={draft.perChild} placeholder={formatMoneyInput(0, currency)} className={cn(field, "tnum")}
                     onChange={(e) => set({ perChild: e.target.value })} />
                 </label>
               </>
@@ -1024,7 +1024,7 @@ export function RatePlansPanel({
                 set({
                   extras: ids.map(
                     (id) =>
-                      draft.extras.find((x) => x.extraId === id) ?? extraDraftOf(defaultRatePlanExtra(id)),
+                      draft.extras.find((x) => x.extraId === id) ?? extraDraftOf(defaultRatePlanExtra(id), currency),
                   ),
                 })
               }

@@ -436,7 +436,7 @@ export function RatesScreen({
                             </td>
                             {dates.map((d) => {
                               const rate = at.get(`${t.roomTypeId}|${p.ratePlanId}|${d}`)?.rateCents ?? null;
-                              const text = rate === null ? "" : formatMoneyInput(rate);
+                              const text = rate === null ? "" : formatMoneyInput(rate, currency);
                               const past = d < businessDate;
                               return (
                                 <td key={d} className="tnum border-t border-line px-1 py-1 text-center">
@@ -468,7 +468,7 @@ export function RatesScreen({
                                 const own = occAt.get(`${t.roomTypeId}|${p.ratePlanId}|${d}|${a}`);
                                 const std = at.get(`${t.roomTypeId}|${p.ratePlanId}|${d}`)?.rateCents ?? null;
                                 const fb = fallback(p.ratePlanId, t.roomTypeId, std, a);
-                                const text = own === undefined ? "" : formatMoneyInput(own);
+                                const text = own === undefined ? "" : formatMoneyInput(own, currency);
                                 const past = d < businessDate;
                                 return (
                                   <td key={d} className="tnum border-t border-line/60 px-1 py-1 text-center">
@@ -477,7 +477,7 @@ export function RatesScreen({
                                         key={text}
                                         initial={text}
                                         faintEmpty
-                                        placeholder={fb === null ? "—" : formatMoneyInput(fb)}
+                                        placeholder={fb === null ? "—" : formatMoneyInput(fb, currency)}
                                         ariaLabel={tr("{plan}, {type}, {n} adults, {date}", {
                                           plan: p.ratePlanName, type: t.roomTypeName, n: a, date: tr.date(d, "d MMM"),
                                         })}
