@@ -67,6 +67,8 @@ export const CURRENCIES: { code: string; symbol: string }[] = [
   { code: "USD", symbol: "$" },
   { code: "UYU", symbol: "$" },
   { code: "VND", symbol: "₫" },
+  { code: "XAF", symbol: "FCFA" },
+  { code: "XOF", symbol: "F CFA" },
   { code: "ZAR", symbol: "R" },
 ];
 
