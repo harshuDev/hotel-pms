@@ -217,12 +217,6 @@
   "few": "{n} noči nimajo cene. Noči, dodane s podaljšanjem, pridejo z ničlo, ker ni bil naveden cenovni načrt — nastavite ceno pred nočno revizijo, sicer bo bivanje zaračunano kot brezplačno.",
   "other": "{n} noči nima cene. Noči, dodane s podaljšanjem, pridejo z ničlo, ker ni bil naveden cenovni načrt — nastavite ceno pred nočno revizijo, sicer bo bivanje zaračunano kot brezplačno."
  },
- "{n} nights priced": {
-  "one": "{n} noč s ceno",
-  "two": "{n} noči s ceno",
-  "few": "{n} noči s ceno",
-  "other": "{n} noči s ceno"
- },
  "{n} no shows": {
   "one": "{n} neprihod",
   "two": "{n} neprihoda",
@@ -646,6 +640,7 @@
  "All methods": "Vsi načini",
  "All occupancies": "Vse zasedenosti",
  "all plans": "vsi načrti",
+ "All rate plans": "Vsi cenovni načrti",
  "All read": "Vse prebrano",
  "All Rooms": "Vse sobe",
  "All states": "Vsa stanja",
@@ -1216,6 +1211,7 @@
  "Czechia": "Češka",
  "Daily checkout": "Dnevni odhodi",
  "Daily Checkout Report": "Poročilo o dnevnih odhodih",
+ "Daily rates": "Dnevne cene",
  "Dashboard": "Nadzorna plošča",
  "Date": "Datum",
  "Date of birth": "Datum rojstva",

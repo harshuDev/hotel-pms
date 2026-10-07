@@ -177,10 +177,6 @@
   "one": "{n} noche no tiene tarifa. Las noches añadidas por una extensión entran a cero porque no se indicó un plan de tarifa: fije una tarifa antes de la auditoría nocturna o la estancia se cobrará como gratuita.",
   "other": "{n} noches no tienen tarifa. Las noches añadidas por una extensión entran a cero porque no se indicó un plan de tarifa: fije una tarifa antes de la auditoría nocturna o la estancia se cobrará como gratuita."
  },
- "{n} nights priced": {
-  "one": "{n} noche con precio",
-  "other": "{n} noches con precio"
- },
  "{n} no shows": {
   "one": "{n} no presentado",
   "other": "{n} no presentados"
@@ -564,6 +560,7 @@
  "All methods": "Todos los métodos",
  "All occupancies": "Todas las ocupaciones",
  "all plans": "todos los planes",
+ "All rate plans": "Todos los planes de tarifa",
  "All read": "Todo leído",
  "All Rooms": "Todas las habitaciones",
  "All states": "Todos los estados",
@@ -1132,6 +1129,7 @@
  "Czechia": "Chequia",
  "Daily checkout": "Salidas del día",
  "Daily Checkout Report": "Informe de salidas del día",
+ "Daily rates": "Tarifas diarias",
  "Dashboard": "Panel",
  "Date": "Fecha",
  "Date of birth": "Fecha de nacimiento",

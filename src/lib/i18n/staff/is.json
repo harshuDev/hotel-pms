@@ -177,10 +177,6 @@
   "one": "{n} nótt hefur ekkert verð. Nætur sem bætast við með framlengingu koma inn á núlli því engin verðáætlun var tilgreind — settu verð áður en næturuppgjörið keyrir, annars verður dvölin gjaldfærð sem ókeypis.",
   "other": "{n} nætur hafa ekkert verð. Nætur sem bætast við með framlengingu koma inn á núlli því engin verðáætlun var tilgreind — settu verð áður en næturuppgjörið keyrir, annars verður dvölin gjaldfærð sem ókeypis."
  },
- "{n} nights priced": {
-  "one": "{n} nótt verðlögð",
-  "other": "{n} nætur verðlagðar"
- },
  "{n} no shows": {
   "one": "{n} mætti ekki",
   "other": "{n} mættu ekki"
@@ -564,6 +560,7 @@
  "All methods": "Allir greiðslumátar",
  "All occupancies": "Öll nýting",
  "all plans": "allar áætlanir",
+ "All rate plans": "Allar verðáætlanir",
  "All read": "Allt lesið",
  "All Rooms": "Öll herbergi",
  "All states": "Allar stöður",
@@ -1132,6 +1129,7 @@
  "Czechia": "Tékkland",
  "Daily checkout": "Daglegar útskráningar",
  "Daily Checkout Report": "Skýrsla um daglegar útskráningar",
+ "Daily rates": "Dagverð",
  "Dashboard": "Stjórnborð",
  "Date": "Dagsetning",
  "Date of birth": "Fæðingardagur",

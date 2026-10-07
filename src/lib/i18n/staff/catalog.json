@@ -373,10 +373,6 @@
   "kind": "plural",
   "one": "{n} night has no rate. Nights added by an extension come in at zero because no rate plan was named — set a rate before the night audit runs, or the stay will be charged as free."
  },
- "{n} nights priced": {
-  "kind": "plural",
-  "one": "{n} night priced"
- },
  "{n} no shows": {
   "kind": "plural",
   "one": "{n} no show"
@@ -1368,6 +1364,9 @@
   "kind": "text"
  },
  "all plans": {
+  "kind": "text"
+ },
+ "All rate plans": {
   "kind": "text"
  },
  "All read": {
@@ -3120,6 +3119,9 @@
   "kind": "text"
  },
  "Daily Checkout Report": {
+  "kind": "text"
+ },
+ "Daily rates": {
   "kind": "text"
  },
  "Dashboard": {

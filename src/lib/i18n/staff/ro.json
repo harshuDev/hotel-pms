@@ -197,11 +197,6 @@
   "few": "{n} nopți nu au tarif. Nopțile adăugate printr-o prelungire intră la zero pentru că nu s-a indicat niciun plan tarifar — setați un tarif înainte de auditul de noapte, altfel sejurul va fi taxat ca gratuit.",
   "other": "{n} de nopți nu au tarif. Nopțile adăugate printr-o prelungire intră la zero pentru că nu s-a indicat niciun plan tarifar — setați un tarif înainte de auditul de noapte, altfel sejurul va fi taxat ca gratuit."
  },
- "{n} nights priced": {
-  "one": "{n} noapte cu preț",
-  "few": "{n} nopți cu preț",
-  "other": "{n} de nopți cu preț"
- },
  "{n} no shows": {
   "one": "{n} neprezentare",
   "few": "{n} neprezentări",
@@ -605,6 +600,7 @@
  "All methods": "Toate metodele",
  "All occupancies": "Toate ocupările",
  "all plans": "toate planurile",
+ "All rate plans": "Toate planurile tarifare",
  "All read": "Toate citite",
  "All Rooms": "Toate camerele",
  "All states": "Toate stările",
@@ -1174,6 +1170,7 @@
  "Czechia": "Cehia",
  "Daily checkout": "Plecări zilnice",
  "Daily Checkout Report": "Raport plecări zilnice",
+ "Daily rates": "Tarife zilnice",
  "Dashboard": "Panou",
  "Date": "Dată",
  "Date of birth": "Data nașterii",
