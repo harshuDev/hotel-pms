@@ -30,6 +30,12 @@ import { FilterSelect, type FilterOption } from "./filter-select";
  *    per adult, shown grey, as the reference does.
  * The room type's base occupancy is always the standard price
  * (`rate_cents`); every other row goes to `occupancy_rates`.
+ *
+ * The radio is the plan's DEFAULT OCCUPANCY for the room type, and it is
+ * stored (0136, `rate_plans.default_occupancies`) -- it used to fall back
+ * to the room type's Sleeps figure on every reopening, and the other rows
+ * were then worked out from that one. Only the radio is remembered: when it
+ * is not on Sleeps, every party's price is stored explicitly, as before.
  */
 
 const WEEKDAY_OF = [1, 2, 3, 4, 5, 6, 0];
@@ -67,6 +73,8 @@ export type PlanRatesPayload = {
       stopSell: boolean;
       occupancyRates: Record<string, number> | null;
     }[];
+    /** The per-person plan's default occupancy for this room type; null on any other plan. */
+    defaultOccupancy: number | null;
   }[];
 };
 
@@ -179,6 +187,11 @@ export const PlanRates = forwardRef<
   const seasonKey = season ?? "default";
   const k = (typeId: string) => `${seasonKey}|${typeId}`;
   const baseOf = (t: RoomTypeSetting) => Math.min(Math.max(t.baseOccupancy, 1), t.maxOccupancy);
+  /** The row the price is typed in: the plan's stored default, else Sleeps. */
+  const defaultOf = (t: RoomTypeSetting) =>
+    mode === "per_person" && !derived
+      ? Math.min(Math.max(plan.defaultOccupancies?.[t.id] ?? baseOf(t), 1), t.maxOccupancy)
+      : baseOf(t);
 
   const template = (planId: string, typeId: string, weekday: number) =>
     weekRates.find(
@@ -198,7 +211,19 @@ export const PlanRates = forwardRef<
         if (rows[n] && n !== b) rows[n][i] = formatMoneyInput(cents, currency);
       }
     }
-    return { rows, radio: b, dirty: false };
+    // A default that is not Sleeps types in its own row; a week saved before
+    // 0136 may hold only the Sleeps price, so its default row is worked out.
+    const radio = defaultOf(t);
+    if (radio !== b) {
+      for (let i = 0; i < 7; i++) {
+        if ((rows[radio][i] ?? "").trim() !== "") continue;
+        const v = money(rows[b][i] ?? "");
+        if (typeof v !== "number") continue;
+        const cents = radio > b ? v + (radio - b) * increaseAdultCents : v - (b - radio) * decreaseAdultCents;
+        rows[radio][i] = formatMoneyInput(Math.max(0, cents), currency);
+      }
+    }
+    return { rows, radio, dirty: false };
   }
 
   function loadRestrictions(): Restrictions & { dirty: boolean } {
@@ -233,7 +258,9 @@ export const PlanRates = forwardRef<
     if (mode === "single" || derived) return [b];
     const all = Array.from({ length: t.maxOccupancy }, (_, x) => x + 1);
     // Rows removed in Room Rate Combinations (0124) pay the standard price.
-    if (mode === "per_person") return all.filter((a) => a === b || !(plan.standardOccupancies?.[t.id] ?? []).includes(a));
+    if (mode === "per_person") {
+      return all.filter((a) => a === b || a === d.radio || !(plan.standardOccupancies?.[t.id] ?? []).includes(a));
+    }
     return all.filter(
       (a) => a === b || (d.rows[a] ?? []).some((v) => v.trim() !== "") || addedOcc.includes(`${k(t.id)}|${a}`),
     );
@@ -346,7 +373,12 @@ export const PlanRates = forwardRef<
             occupancyRates,
           });
         }
-        rows.push({ roomTypeId: t.id, roomTypeName: name, days });
+        rows.push({
+          roomTypeId: t.id,
+          roomTypeName: name,
+          days,
+          defaultOccupancy: mode === "per_person" && !derived ? d.radio : null,
+        });
       }
       // The Default Season clears a removed party's nightly prices only when it
       // replaces (save_week_rates()); without it the row would vanish here and

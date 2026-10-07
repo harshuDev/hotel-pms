@@ -615,6 +615,9 @@
  "{sold} sold of {sellable} sellable": {
   "kind": "text"
  },
+ "{sold} sold of {sellable} sellable. Availability set to {n}.": {
+  "kind": "text"
+ },
  "{tax} tax": {
   "kind": "text"
  },
@@ -730,9 +733,6 @@
  "A category cannot be merged into itself": {
   "kind": "db"
  },
- "A ceiling, never a promise: rooms out of order still come off the top, so the sellable figure can be lower than the allotment but never higher. Leave the box empty to go back to selling every room that exists.": {
-  "kind": "text"
- },
  "A charge must be more than nothing": {
   "kind": "db"
  },
@@ -808,9 +808,6 @@
  "A folio number is digits only": {
   "kind": "text"
  },
- "A guest already staying can stay through a closed date; only arrivals are refused.": {
-  "kind": "text"
- },
  "A hotel needs a name": {
   "kind": "text"
  },
@@ -852,9 +849,6 @@
  },
  "A night cannot be charged before it is stayed": {
   "kind": "db"
- },
- "A night with no rate loaded is not free — it cannot be sold on this plan at all, and taking a booking against it will say so. Leave the box empty and apply to clear a rate back to nothing.": {
-  "kind": "text"
  },
  "A nightly rate cannot be negative": {
   "kind": "db"
@@ -1515,12 +1509,6 @@
   "kind": "text"
  },
  "Applicable": {
-  "kind": "text"
- },
- "Applies only to stays arriving that day, so a guest already in house is unaffected. Leave the box empty to clear the rule.": {
-  "kind": "text"
- },
- "Applies to any stay covering the night, whenever it arrived. Use this to stop one-night bookings eating into a busy weekend. Leave the box empty to clear the rule.": {
   "kind": "text"
  },
  "Apply": {
@@ -2436,9 +2424,6 @@
  "Check-Out Text": {
   "kind": "text"
  },
- "Checked against the departure date, which is not a night stayed. Use it to hold a stay across a peak night rather than losing the room mid-period.": {
-  "kind": "text"
- },
  "Checked In": {
   "kind": "text"
  },
@@ -2750,9 +2735,6 @@
   "kind": "text"
  },
  "Closed To Departure": {
-  "kind": "text"
- },
- "Closes the room type on every rate plan at once, which is what makes it different from Stop sell.": {
   "kind": "text"
  },
  "Closing…": {
@@ -4872,9 +4854,6 @@
   "kind": "text"
  },
  "Keep:": {
-  "kind": "text"
- },
- "Keeps a long low-rate stay from blocking a period you expect to sell at a higher rate. Leave the box empty to clear the rule.": {
   "kind": "text"
  },
  "Kenya": {
@@ -7703,9 +7682,6 @@
  "Rounding options saved.": {
   "kind": "text"
  },
- "Rows are room types, not rooms — a property can run well over a thousand rooms and this grid is the same height whatever the count.": {
-  "kind": "text"
- },
  "Run": {
   "kind": "text"
  },
@@ -8336,9 +8312,6 @@
   "kind": "text"
  },
  "Stopped": {
-  "kind": "text"
- },
- "Stops this rate plan only. Other plans keep selling the same rooms — to close the room type outright, use Close out.": {
   "kind": "text"
  },
  "Strictly no smoking": {
@@ -9019,9 +8992,6 @@
  },
  "The From text can be up to 255 characters": {
   "kind": "db"
- },
- "The Grand Hotel": {
-  "kind": "text"
  },
  "The guest fields must be a list": {
   "kind": "db"
@@ -9738,6 +9708,9 @@
   "kind": "db"
  },
  "Weekend Border Color": {
+  "kind": "text"
+ },
+ "Welcome back": {
   "kind": "text"
  },
  "Western Sahara": {

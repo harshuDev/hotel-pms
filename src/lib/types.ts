@@ -750,6 +750,12 @@ export interface RatePlan {
   adultDecreaseCents: number | null;
   /** Per room type, the parties removed on a per-person plan: they pay the standard price (0124). */
   standardOccupancies: Record<string, number[]>;
+  /**
+   * The plan's default party per room type (0136): the row a per-person
+   * plan's prices are typed in. Absent is the room type's Sleeps figure.
+   * Display only -- `rate_cents` stays the Sleeps price.
+   */
+  defaultOccupancies: Record<string, number>;
   /** The taxes the plan is sold with, in order (0116: several), and its own ledger account. */
   taxRateIds: string[];
   accountingCategoryId: string | null;

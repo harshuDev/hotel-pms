@@ -3943,6 +3943,7 @@ export type Database = {
           child_adjust_cents: number | null
           code: string
           created_at: string
+          default_occupancies: Json
           derived_amount_cents: number | null
           derived_kind: string | null
           derived_percent_bps: number | null
@@ -3976,6 +3977,7 @@ export type Database = {
           child_adjust_cents?: number | null
           code: string
           created_at?: string
+          default_occupancies?: Json
           derived_amount_cents?: number | null
           derived_kind?: string | null
           derived_percent_bps?: number | null
@@ -4009,6 +4011,7 @@ export type Database = {
           child_adjust_cents?: number | null
           code?: string
           created_at?: string
+          default_occupancies?: Json
           derived_amount_cents?: number | null
           derived_kind?: string | null
           derived_percent_bps?: number | null
@@ -7849,6 +7852,14 @@ export type Database = {
       }
       set_rate_plan_cancellation_policy: {
         Args: { p_cancellation_policy_id?: string; p_rate_plan_id: string }
+        Returns: undefined
+      }
+      set_rate_plan_default_occupancy: {
+        Args: {
+          p_adults: number
+          p_rate_plan_id: string
+          p_room_type_id: string
+        }
         Returns: undefined
       }
       set_rate_plan_extras: {

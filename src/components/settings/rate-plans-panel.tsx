@@ -27,6 +27,7 @@ import {
   setRatePlanCancellationPolicy,
   setRatePlanTerms,
   saveWeekRates,
+  setRateDefaultOccupancy,
 } from "@/lib/actions/settings";
 import { setRatePlanExtras, setRatePlanMealPlan } from "@/lib/actions/inventory";
 import { FilterSelect } from "@/components/settings/filter-select";
@@ -206,6 +207,7 @@ function newPlanFor(d: Draft): RatePlan {
     childAdjustCents: null,
     adultDecreaseCents: null,
     standardOccupancies: {},
+    defaultOccupancies: {},
     taxRateIds: d.taxRateIds,
     accountingCategoryId: d.accountingCategoryId || null,
     channelIds: d.channelIds,
@@ -805,6 +807,16 @@ export function RatePlansPanel({
           });
           if (!result.ok) {
             return { ok: false, error: tr("{name}: {error}", { name: row.roomTypeName, error: result.error }) };
+          }
+          if (row.defaultOccupancy !== null) {
+            const def = await setRateDefaultOccupancy({
+              ratePlanId: saved.data.id,
+              roomTypeId: row.roomTypeId,
+              adults: row.defaultOccupancy,
+            });
+            if (!def.ok) {
+              return { ok: false, error: tr("{name}: {error}", { name: row.roomTypeName, error: def.error }) };
+            }
           }
         }
       }
