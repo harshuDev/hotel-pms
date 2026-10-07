@@ -2102,6 +2102,26 @@ export async function setStandardOccupancy(input: {
   return { ok: true, data: null };
 }
 
+/** A per-person plan's default occupancy for a room type (0136): the row its price is typed in. */
+export async function setRateDefaultOccupancy(input: {
+  ratePlanId: string;
+  roomTypeId: string;
+  adults: number;
+}): Promise<ActionResult<null>> {
+  const supabase = await createClient();
+
+  const { error } = await supabase.rpc("set_rate_plan_default_occupancy", {
+    p_rate_plan_id: input.ratePlanId,
+    p_room_type_id: input.roomTypeId,
+    p_adults: input.adults,
+  });
+
+  if (error) return { ok: false, error: await localised(error.message) };
+
+  revalidateSettings();
+  return { ok: true, data: null };
+}
+
 export async function removeRateCombination(input: {
   ratePlanId: string;
   roomTypeId: string;

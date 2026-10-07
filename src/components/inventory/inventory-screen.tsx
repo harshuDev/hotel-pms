@@ -106,15 +106,29 @@ export function InventoryScreen({
   /** The grid cell as the reader of this screen wants to see it. */
   function show(cell: InventoryCell | undefined) {
     if (!cell) return "—";
+    // Availability shows what is left to sell -- the calendar's own figure
+    // (0136), the allotment and close out applied, less what is sold. It
+    // used to show the allotment itself, "All" on every night none was set.
+    if (spec.kind === "count") return String(cell.sellable - cell.sold);
     const raw = spec.read(cell);
     if (spec.kind === "flag") return raw ? tr("Yes") : "";
-    if (raw === null) return spec.kind === "count" ? tr("All") : "—";
+    if (raw === null) return "—";
     if (spec.kind === "money") return formatMoney(raw as number, currency);
     return String(raw);
   }
 
   function tone(cell: InventoryCell | undefined) {
     if (!cell) return "text-ink-faint";
+    if (spec.kind === "count") {
+      const left = cell.sellable - cell.sold;
+      // The calendar's colours: rose oversold, amber none left. A night with
+      // an allotment of its own is shaded, so a set cap is visible.
+      return cn(
+        "font-semibold",
+        left < 0 ? "text-rose-700" : left === 0 ? "text-warn-deep" : "text-ink",
+        cell.allotment !== null && "bg-shell",
+      );
+    }
     const raw = spec.read(cell);
     if (spec.kind === "flag") {
       return raw ? "bg-rose-50 font-semibold text-rose-700" : "text-ink-faint";
@@ -552,9 +566,13 @@ export function InventoryScreen({
                           <td
                             key={d}
                             title={
-                              cell
-                                ? tr("{sold} sold of {sellable} sellable", { sold: cell.sold, sellable: cell.sellable })
-                                : undefined
+                              !cell
+                                ? undefined
+                                : spec.kind === "count" && cell.allotment !== null
+                                  ? tr("{sold} sold of {sellable} sellable. Availability set to {n}.", {
+                                      sold: cell.sold, sellable: cell.sellable, n: cell.allotment,
+                                    })
+                                  : tr("{sold} sold of {sellable} sellable", { sold: cell.sold, sellable: cell.sellable })
                             }
                             className={cn(
                               "tnum whitespace-nowrap border-t border-line px-1 py-2.5 text-center",
@@ -570,9 +588,6 @@ export function InventoryScreen({
                 </tbody>
               </table>
             </div>
-            <p className="mt-3 text-xs leading-relaxed text-ink-faint">
-              {tr(spec.note)} {tr("Rows are room types, not rooms — a property can run well over a thousand rooms and this grid is the same height whatever the count.")}
-            </p>
           </>
         )}
       </div>

@@ -243,6 +243,23 @@ export function RateCombinations({
   const k = (planId: string, typeId: string) => `${seasonKey}|${planId}|${typeId}`;
   const pairKey = (planId: string, typeId: string) => `${planId}|${typeId}`;
   const baseOf = (t: RoomTypeSetting) => Math.min(Math.max(t.baseOccupancy, 1), t.maxOccupancy);
+  /*
+   * The party a plan's main row prices (0136): a per-person plan's stored
+   * default occupancy, else the room type's Sleeps figure. When the two
+   * differ, the main row is the default party's price, every other party is
+   * worked out from it, and saving stores the Sleeps price as `rate_cents`
+   * with every other party explicit -- what the plan's own form saves.
+   */
+  const defaultOf = (p: RatePlan, t: RoomTypeSetting) =>
+    p.occupancyPricing === "per_person" && !p.parentRatePlanId
+      ? Math.min(Math.max(p.defaultOccupancies[t.id] ?? baseOf(t), 1), t.maxOccupancy)
+      : baseOf(t);
+  /** A per-person price for `adults`, worked out from `cents` for `from` adults. */
+  const perPerson = (p: RatePlan, cents: number, from: number, adults: number) => {
+    const up = p.adultAdjustCents ?? 0;
+    const down = p.adultDecreaseCents ?? up;
+    return Math.max(0, adults >= from ? cents + (adults - from) * up : cents - (from - adults) * down);
+  };
   const typeName = (t: RoomTypeSetting) => t.displayName ?? t.name;
 
   const inUse = (planId: string, typeId: string) =>
@@ -252,6 +269,8 @@ export function RateCombinations({
 
   function load(planId: string, t: RoomTypeSetting): Row {
     const b = baseOf(t);
+    const plan = plans.find((x) => x.id === planId);
+    const def = plan ? defaultOf(plan, t) : b;
     const days = WEEKDAY_OF.map((_, i) => {
       const w = weekRates.find(
         (x) => x.ratePlanId === planId && x.roomTypeId === t.id && x.seasonTypeId === season && x.weekday === i + 1,
@@ -261,8 +280,14 @@ export function RateCombinations({
       for (const [a, cents] of Object.entries(w.occupancyRates ?? {})) {
         if (Number(a) !== b) occ[Number(a)] = formatMoneyInput(cents, currency);
       }
+      // The main row is the default party's price; on a plan whose default
+      // is not Sleeps, that is its stored price, else worked out.
+      let mainCents = w.rateCents;
+      if (plan && def !== b && w.rateCents !== null) {
+        mainCents = w.occupancyRates?.[String(def)] ?? perPerson(plan, w.rateCents, b, def);
+      }
       return {
-        rate: w.rateCents === null ? "" : formatMoneyInput(w.rateCents, currency),
+        rate: mainCents === null ? "" : formatMoneyInput(mainCents, currency),
         mst: w.minStayThrough === null ? "" : String(w.minStayThrough),
         msa: w.minStayArrival === null ? "" : String(w.minStayArrival),
         mxs: w.maxStay === null ? "" : String(w.maxStay),
@@ -289,9 +314,11 @@ export function RateCombinations({
    */
   function occupancyRows(p: RatePlan, t: RoomTypeSetting, r: Row): number[] {
     const b = baseOf(t);
-    const all = Array.from({ length: t.maxOccupancy }, (_, x) => x + 1).filter((a) => a !== b);
-    // A per-person plan's removed rows (0124) pay the standard price.
-    if (p.occupancyPricing === "per_person") return all.filter((a) => !removedOf(p, t).includes(a));
+    const def = defaultOf(p, t);
+    const all = Array.from({ length: t.maxOccupancy }, (_, x) => x + 1).filter((a) => a !== def);
+    // A per-person plan's removed rows (0124) pay the standard price; the
+    // Sleeps row is that price, so it always shows.
+    if (p.occupancyPricing === "per_person") return all.filter((a) => a === b || !removedOf(p, t).includes(a));
     return all.filter(
       (a) => r.days.some((d) => (d.occ[a] ?? "").trim() !== "") || addedOcc.includes(`${k(p.id, t.id)}|${a}`),
     );
@@ -335,6 +362,13 @@ export function RateCombinations({
   /** What an occupancy row shows: typed, or worked out per person from the standard price. */
   function occShown(plan: RatePlan, t: RoomTypeSetting, d: Day, adults: number): { text: string; computed: boolean } {
     if (plan.occupancyPricing === "per_occupancy") return { text: d.occ[adults] ?? "", computed: false };
+    const def = defaultOf(plan, t);
+    if (def !== baseOf(t)) {
+      // Every party follows the main row, as in the plan's own form.
+      const main = money(d.rate);
+      if (typeof main !== "number") return { text: "", computed: true };
+      return { text: formatMoneyInput(perPerson(plan, main, def, adults), currency), computed: true };
+    }
     if (d.occ[adults]) return { text: d.occ[adults], computed: true };
     const base = money(d.rate);
     if (typeof base !== "number") return { text: "", computed: true };
@@ -388,7 +422,18 @@ export function RateCombinations({
               }
               occupancyRates = typed;
             } else if (p.occupancyPricing === "per_person") {
-              occupancyRates = d.storedOcc ?? {};
+              const def = defaultOf(p, t);
+              if (def !== b && v !== null) {
+                // The main row is the default party: store the Sleeps price as
+                // the standard and every other party explicitly.
+                rateCents = perPerson(p, v, def, b);
+                occupancyRates = {};
+                for (let a = 1; a <= t.maxOccupancy; a++) {
+                  if (a !== b && !removedOf(p, t).includes(a)) occupancyRates[a] = perPerson(p, v, def, a);
+                }
+              } else {
+                occupancyRates = d.storedOcc ?? {};
+              }
             }
           }
           days.push({
@@ -556,7 +601,7 @@ export function RateCombinations({
                       const canAddOcc =
                         showOcc && canEdit && p.occupancyPricing !== "single"
                           ? Array.from({ length: t.maxOccupancy }, (_, x) => x + 1).filter(
-                              (a) => a !== b && !occRows.includes(a),
+                              (a) => a !== b && a !== defaultOf(p, t) && !occRows.includes(a),
                             )
                           : [];
                       return (
@@ -565,7 +610,7 @@ export function RateCombinations({
                             <td className="px-3 py-3">
                               <p className="text-[15px] font-semibold text-ink">{p.name}</p>
                               <p className="mt-0.5 flex items-center gap-1.5 text-[12.5px] text-ink">
-                                <span className="flex items-center gap-0.5" title={tr.plural(b, "{n} adult", "{n} adults")}><PersonIcon />{b}</span>
+                                <span className="flex items-center gap-0.5" title={tr.plural(defaultOf(p, t), "{n} adult", "{n} adults")}><PersonIcon />{defaultOf(p, t)}</span>
                                 <span className="flex items-center gap-0.5" title={tr.plural(0, "{n} child", "{n} children")}><ChildIcon />0</span>
                                 {p.isDefault && <span title={tr("Main rate")}><StarIcon /></span>}
                                 <span title={p.isPublic ? tr("On the guest booking page") : tr("Not on the guest booking page")}>
@@ -673,7 +718,7 @@ export function RateCombinations({
                                 <span className="flex items-center gap-1.5" aria-label={tr.plural(a, "{n} adult", "{n} adults")}>
                                   <span className="flex items-center gap-0.5"><PersonIcon />{a}</span>
                                   <span className="flex items-center gap-0.5"><ChildIcon />0</span>
-                                  {canEdit && (
+                                  {canEdit && a !== b && (
                                     <button type="button" onClick={() => removeOcc(p, t, a)} disabled={pending}
                                       title={tr("Remove")}
                                       aria-label={tr("Remove the {n} adults price for {name}", { n: a, name: `${p.name}, ${typeName(t)}` })}

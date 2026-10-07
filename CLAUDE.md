@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0135` are
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0136` are
 applied to the hosted database.
 
 Working on real data: dashboard (house board, movements, pace, activity feed),
@@ -189,8 +189,12 @@ current design, not as drift.
      `generateMetadata` in `(app)/layout.tsx` supplies the hotel from
      `properties.name`, so renaming the property in Settings reaches the tab as
      well as the bar. Do not put the hotel's name back into a page. The root
-     layout still names it once, for `/login` and the root redirect, where
-     there is no session and so no property row to read.
+     layout names the PLATFORM, "Reservation Centric", for `/login` and the
+     root redirect, where there is no session and so no property to name.
+   - **`/login` is the client's own brand**: `/public/logo.png` (the full
+     Reservation Centric wordmark) and "Welcome back", at their request -- it
+     used to say "The Grand Hotel", the first demo property, which every
+     onboarded hotel then saw. One login page serves every hotel.
    - `src/components/menu.tsx` is the shared dropdown primitive — hover
      intent, click-outside, Escape, arrow keys. Inventory, Bookings, Reports
      and the user menu all use it. Do not hand-roll another one.
@@ -1372,6 +1376,16 @@ client: "Need to add Booking Channel in the Dashboard".
     shows, faint, what that party pays anyway; typing sets that night's own
     price for them (`set_occupancy_rates()`), clearing puts them back. The
     bulk panel takes an Occupancy too.
+  - **INVENTORY -> AVAILABILITY SHOWS ROOMS LEFT TO SELL (0136)**: sellable
+    (allotment and close out applied) less sold -- the calendar's own figure,
+    in its colours. It showed the allotment itself, "All" on every night
+    none was set, which the client read as the two screens disagreeing. A
+    night with its own allotment is shaded and its tooltip says so; the bulk
+    editor still sets the allotment. **`calendar_availability()` now applies
+    the allotment and close out too** -- it never had, so a cap set in
+    Inventory changed what could be sold and not what the calendar showed.
+    The notes under the nine Inventory grids are gone (`ScreenSpec.note`
+    removed), the last of the explanatory copy.
   - **Rates (Main) is this screen pinned to the main plan** (0110), through
     `RatesPage` in `rates-page.tsx`, which both routes render. It used to be
     the shared nine-screen grid, which could do neither of the two things
@@ -1476,6 +1490,17 @@ client: "Need to add Booking Channel in the Dashboard".
           fixed, titled "Room Rate Combinations for <season>" with the
           season's dates under it. It no longer navigates to Rate Plans --
           the client: "vo na lejakr ek popup aa jaye".
+      - **THE RADIO IS THE PLAN'S DEFAULT OCCUPANCY AND IT IS STORED (0136)**,
+        `rate_plans.default_occupancies` (room type id -> adults, absent =
+        the room type's Sleeps), set by `set_rate_plan_default_occupancy()`
+        when the form saves. The client: "the default occupancy we set when
+        creating a rate isn't respected". It used to fall back to Sleeps on
+        every reopening and the other rows were worked out from that, so
+        saving again repriced every party. Room Rate Combinations shows the
+        default as the plan's adults and its main row. **Display only:**
+        `rate_cents` stays the Sleeps price and every other party is stored
+        explicitly when the default is not Sleeps -- no pricing function
+        changed, and no night already priced changes meaning.
       - The three occupancy modes: One Price For All Occupancies is one row
         (`single`); unticked, every row is typed (`per_occupancy`, 0110);
         with Automatic Calculation (`per_person`) the radio picks the row you

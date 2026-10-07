@@ -44,12 +44,13 @@ export default function LoginPage() {
   return (
     <main className="flex min-h-screen items-center justify-center bg-shell px-5">
       <div className="w-full max-w-sm">
-        <div className="mb-8 text-center">
-          <p className="text-xxs font-semibold uppercase tracking-[0.18em] text-brass">
-            {tr("Hotel Operations")}
-          </p>
-          <h1 className="mt-3 font-display text-[28px] font-semibold tracking-tightest text-ink">
-            {tr("The Grand Hotel")}
+        {/* The client's own brand, not a hotel's: one login page serves every
+            property on the platform, and nobody is signed in yet to say which. */}
+        <div className="mb-8 flex flex-col items-center text-center">
+          {/* eslint-disable-next-line @next/next/no-img-element -- a static file in /public, no loader needed */}
+          <img src="/logo.png" alt="Reservation Centric" width={911} height={160} className="h-auto w-64" />
+          <h1 className="mt-6 font-display text-[26px] font-semibold tracking-tightest text-ink">
+            {tr("Welcome back")}
           </h1>
         </div>
 
