@@ -157,9 +157,6 @@
  "{n} nights have no rate. Nights added by an extension come in at zero because no rate plan was named — set a rate before the night audit runs, or the stay will be charged as free.": {
   "other": "{n} คืนยังไม่มีราคา คืนที่เพิ่มจากการขยายเวลาจะเป็นศูนย์เพราะไม่ได้ระบุแผนราคา — ตั้งราคาก่อนการตรวจสอบกลางคืน มิฉะนั้นการเข้าพักจะถูกคิดเป็นฟรี"
  },
- "{n} nights priced": {
-  "other": "กำหนดราคาแล้ว {n} คืน"
- },
  "{n} no shows": {
   "other": "ไม่มาเข้าพัก {n} ราย"
  },
@@ -523,6 +520,7 @@
  "All methods": "ทุกวิธี",
  "All occupancies": "ทุกจำนวนผู้เข้าพัก",
  "all plans": "ทุกแผน",
+ "All rate plans": "แผนราคาทั้งหมด",
  "All read": "อ่านทั้งหมดแล้ว",
  "All Rooms": "ทุกห้อง",
  "All states": "ทุกสถานะ",
@@ -1090,6 +1088,7 @@
  "Czechia": "เช็ก",
  "Daily checkout": "เช็คเอาท์ประจำวัน",
  "Daily Checkout Report": "รายงานเช็คเอาท์ประจำวัน",
+ "Daily rates": "ราคารายวัน",
  "Dashboard": "แดชบอร์ด",
  "Date": "วันที่",
  "Date of birth": "วันเกิด",

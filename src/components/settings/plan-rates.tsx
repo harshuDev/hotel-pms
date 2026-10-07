@@ -465,9 +465,14 @@ export const PlanRates = forwardRef<
                       <span className="text-[12.5px] font-semibold text-ink">
                         {tr("{name} (Max Occ. {n})", { name, n: t.maxOccupancy })}
                       </span>
-                      <span className={cn("ml-3 text-[11px]", c ? "text-emerald-700" : "text-ink-faint")}>
-                        {c ? tr.plural(c.pricedNights, "{n} night priced", "{n} nights priced") : tr("Not priced")}
-                      </span>
+                      {c && plan.id !== "new" ? (
+                        <a href={`/inventory/rates-all?plan=${plan.id}`} target="_blank" rel="noopener"
+                          className="ml-3 text-[11.5px] font-medium text-brass underline underline-offset-2 hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-brass">
+                          {tr("Daily rates")} ›
+                        </a>
+                      ) : (
+                        <span className="ml-3 text-[11px] text-ink-faint">{tr("Not priced")}</span>
+                      )}
                     </td>
                   </tr>
                   {adultsList.map((a) => (

@@ -104,6 +104,7 @@ export function RatesScreen({
   from,
   businessDate,
   basePath,
+  plan = null,
   derivedFrom,
   canEdit,
 }: {
@@ -117,6 +118,8 @@ export function RatesScreen({
   businessDate: string;
   /** Where the date controls link: Rates (All) or Rates (Main). */
   basePath: string;
+  /** The one plan Rates (All) is narrowed to by ?plan=, kept on every link. */
+  plan?: string | null;
   /**
    * A derived plan's id to its parent's name (0109). Its price follows the
    * parent and set_rates() refuses it, so it is shown and never edited.
@@ -127,6 +130,7 @@ export function RatesScreen({
   const tr = useT();
   const currency = useCurrency();
   const router = useRouter();
+  const planQuery = plan ? `&plan=${plan}` : "";
   const [selected, setSelected] = useState<string[]>([]);
   const [editFrom, setEditFrom] = useState(from);
   const [editTo, setEditTo] = useState(dates[dates.length - 1] ?? from);
@@ -308,19 +312,23 @@ export function RatesScreen({
   return (
     <div className="space-y-3">
       <div className="flex flex-wrap items-center gap-2">
-        <Link href={`${basePath}?from=${shift(-dates.length)}`} className={nav} aria-label={tr("Previous {n} days", { n: dates.length })}>
+        <Link href={`${basePath}?from=${shift(-dates.length)}${planQuery}`} className={nav} aria-label={tr("Previous {n} days", { n: dates.length })}>
           ‹ {tr("Previous")}
         </Link>
-        <Link href={basePath} className={nav}>{tr("Today")}</Link>
-        <Link href={`${basePath}?from=${shift(dates.length)}`} className={nav} aria-label={tr("Next {n} days", { n: dates.length })}>
+        <Link href={plan ? `${basePath}?plan=${plan}` : basePath} className={nav}>{tr("Today")}</Link>
+        <Link href={`${basePath}?from=${shift(dates.length)}${planQuery}`} className={nav} aria-label={tr("Next {n} days", { n: dates.length })}>
           {tr("Next")} ›
         </Link>
         <form action={basePath} className="flex items-center gap-2">
+          {plan && <input type="hidden" name="plan" value={plan} />}
           <label className="sr-only" htmlFor="rates-from">{tr("From")}</label>
           <input id="rates-from" type="date" name="from" defaultValue={from}
             className="rounded-md border border-line bg-white px-2 py-1.5 text-[12.5px] text-ink" />
           <button type="submit" className={nav}>{tr("Go")}</button>
         </form>
+        {plan && (
+          <Link href={`${basePath}?from=${from}`} className={nav}>{tr("All rate plans")}</Link>
+        )}
         {pending && <span className="text-[12px] text-ink-faint">{tr("Saving…")}</span>}
       </div>
 

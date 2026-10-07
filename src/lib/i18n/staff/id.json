@@ -157,9 +157,6 @@
  "{n} nights have no rate. Nights added by an extension come in at zero because no rate plan was named — set a rate before the night audit runs, or the stay will be charged as free.": {
   "other": "{n} malam belum punya tarif. Malam yang ditambahkan lewat perpanjangan masuk dengan nol karena tidak ada paket tarif yang disebut — atur tarif sebelum audit malam berjalan, atau menginap akan ditagih gratis."
  },
- "{n} nights priced": {
-  "other": "{n} malam diberi harga"
- },
  "{n} no shows": {
   "other": "{n} tidak datang"
  },
@@ -523,6 +520,7 @@
  "All methods": "Semua metode",
  "All occupancies": "Semua okupansi",
  "all plans": "semua paket",
+ "All rate plans": "Semua paket tarif",
  "All read": "Semua sudah dibaca",
  "All Rooms": "Semua Kamar",
  "All states": "Semua status",
@@ -1090,6 +1088,7 @@
  "Czechia": "Ceko",
  "Daily checkout": "Check-out harian",
  "Daily Checkout Report": "Laporan Check-out Harian",
+ "Daily rates": "Tarif harian",
  "Dashboard": "Dasbor",
  "Date": "Tanggal",
  "Date of birth": "Tanggal lahir",

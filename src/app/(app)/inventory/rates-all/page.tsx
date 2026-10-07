@@ -13,9 +13,9 @@ export const generateMetadata = pageTitle(msg("Rates (All)"));
 export default async function Page({
   searchParams,
 }: {
-  searchParams: Promise<{ from?: string }>;
+  searchParams: Promise<{ from?: string; plan?: string }>;
 }) {
   const tr = await getT();
   const sp = await searchParams;
-  return <RatesPage title={tr("Rates (All)")} basePath="/inventory/rates-all" mainOnly={false} from={sp.from} />;
+  return <RatesPage title={tr("Rates (All)")} basePath="/inventory/rates-all" mainOnly={false} from={sp.from} plan={sp.plan} />;
 }

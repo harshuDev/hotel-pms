@@ -177,10 +177,6 @@
   "one": "{n} Nacht hat keinen Preis. Durch eine Verlängerung hinzugefügte Nächte kommen mit null herein, weil kein Ratenplan angegeben wurde – setzen Sie einen Preis vor dem Nachtabschluss, sonst wird der Aufenthalt als kostenlos berechnet.",
   "other": "{n} Nächte haben keinen Preis. Durch eine Verlängerung hinzugefügte Nächte kommen mit null herein, weil kein Ratenplan angegeben wurde – setzen Sie einen Preis vor dem Nachtabschluss, sonst wird der Aufenthalt als kostenlos berechnet."
  },
- "{n} nights priced": {
-  "one": "{n} Nacht bepreist",
-  "other": "{n} Nächte bepreist"
- },
  "{n} no shows": {
   "one": "{n} No-Show",
   "other": "{n} No-Shows"
@@ -564,6 +560,7 @@
  "All methods": "Alle Zahlungsarten",
  "All occupancies": "Alle Belegungen",
  "all plans": "alle Pläne",
+ "All rate plans": "Alle Ratenpläne",
  "All read": "Alle gelesen",
  "All Rooms": "Alle Zimmer",
  "All states": "Alle Zustände",
@@ -1132,6 +1129,7 @@
  "Czechia": "Tschechien",
  "Daily checkout": "Tägliche Abreisen",
  "Daily Checkout Report": "Bericht tägliche Abreisen",
+ "Daily rates": "Tagespreise",
  "Dashboard": "Dashboard",
  "Date": "Datum",
  "Date of birth": "Geburtsdatum",

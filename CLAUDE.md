@@ -1386,6 +1386,16 @@ client: "Need to add Booking Channel in the Dashboard".
     Inventory changed what could be sold and not what the calendar showed.
     The notes under the nine Inventory grids are gone (`ScreenSpec.note`
     removed), the last of the explanatory copy.
+  - **PRICES ARE PER NIGHT, AND THE PLAN FORM SAYS SO.** The client read the
+    plan form's "365 nights priced" beside a Mon-Sun row as "rates set per
+    year" and worried about Channex and the OTAs. They never were: every
+    night is its own `rate_plan_days` row (date, room type, plan), which is
+    exactly the per-date ARI a channel manager pushes. The Mon-Sun grid is a
+    template that fills many nights at once. The count is gone; each room
+    type in the form links "Daily rates", which opens Rates (All) in a new
+    tab narrowed to that plan (`?plan=`, kept by the paging links, "All rate
+    plans" clears it). Tested: one night set on El Nito changed that night
+    alone.
   - **Rates (Main) is this screen pinned to the main plan** (0110), through
     `RatesPage` in `rates-page.tsx`, which both routes render. It used to be
     the shared nine-screen grid, which could do neither of the two things

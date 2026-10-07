@@ -24,11 +24,13 @@ export async function RatesPage({
   basePath,
   mainOnly,
   from: fromParam,
+  plan: planParam,
 }: {
   title: string;
   basePath: string;
   mainOnly: boolean;
   from: string | undefined;
+  plan?: string;
 }) {
   const [staff, businessDate] = await Promise.all([getCurrentStaffUser(), getBusinessDate()]);
   const from =
@@ -40,7 +42,14 @@ export async function RatesPage({
     getOccupancyGrid(from, INVENTORY_NIGHTS),
     getRoomTypeOccupancies(),
   ]);
-  const cells = mainOnly ? allCells.filter((c) => c.ratePlanIsDefault) : allCells;
+  // ?plan= narrows Rates (All) to one plan -- the rate plan form's "Daily
+  // rates" link lands here. Ignored on Main, and when it names no plan.
+  const plan = !mainOnly && plans.some((p) => p.id === planParam) ? planParam! : null;
+  const cells = mainOnly
+    ? allCells.filter((c) => c.ratePlanIsDefault)
+    : plan
+      ? allCells.filter((c) => c.ratePlanId === plan)
+      : allCells;
   const derivedFrom = Object.fromEntries(
     plans
       .filter((p) => p.parentRatePlanId)
@@ -62,6 +71,7 @@ export async function RatesPage({
         from={from}
         businessDate={businessDate}
         basePath={basePath}
+        plan={plan}
         derivedFrom={derivedFrom}
         canEdit={staff !== null && ["admin", "manager"].includes(staff.role)}
       />
