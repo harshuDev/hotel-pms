@@ -363,6 +363,21 @@ so the board can say "1 of 9 shown" rather than quietly drawing one.
 If a screen seems to need a shape the query does not return, fix the query, not
 the component.
 
+**`createClient()` in `src/lib/supabase/server.ts` is one client per request,
+and it retries what Supabase turned away unrun.** Settings makes forty-odd
+reads in one `Promise.all`, each throws on error, and one failure is the
+whole page ("Application error ... Digest") -- the client hit it four times
+in a day. Two causes, both seen in the logs on 8 Oct:
+- **One client per read meant one token refresh per read.** Near expiry,
+  forty clients each refreshed the session; Auth answered some with 429 and
+  logged several refreshes for one page load. `cache()` makes it one client,
+  which single-flights the refresh.
+- **The gateway now and then refuses a good token**: 80 requests on one
+  fresh token succeeded and one came back `401 PGRST303` between them.
+  `fetchWithRetry()` retries a 401 PGRST301/303 once for any method (nothing
+  ran), and a network error or 502/503/504 once for GET/HEAD only -- a POST
+  may have run, and an RPC that posts money must never run twice.
+
 ## Non-negotiable rules
 
 **Money**
