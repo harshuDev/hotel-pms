@@ -13,6 +13,7 @@
  */
 
 import { cache } from "react";
+import { readAll } from "@/lib/supabase/read-all";
 import { getT } from "@/lib/i18n/server";
 import type { Translator } from "@/lib/i18n/translate";
 import { EMPTY_HOTEL_POLICIES, type HotelPolicies } from "@/lib/hotel-policies";
@@ -1110,10 +1111,11 @@ export async function getCalendarAvailability(
 ): Promise<AvailabilityCell[]> {
   const supabase = await createClient();
 
-  const { data, error } = await supabase.rpc("calendar_availability", {
-    p_from: from,
-    p_days: days,
-  });
+  // The function's own order (date, type sort, type name) is kept: the board
+  // takes its room-type order from the first night's rows.
+  const { data, error } = await readAll((a, b) =>
+    supabase.rpc("calendar_availability", { p_from: from, p_days: days }).range(a, b),
+  );
 
   if (error) {
     throw new Error(`Failed to load the calendar: ${error.message}`);
@@ -2053,12 +2055,20 @@ export async function getCalendarBookings(
   const supabase = await createClient();
   const tr = await getT();
 
-  const { data, error } = await supabase.rpc("calendar_bookings", {
-    p_from: from,
-    p_days: days,
-    p_max_per_type: maxPerType,
-    p_include_canceled: includeCanceled,
-  });
+  const { data, error } = await readAll((a, b) =>
+    supabase
+      .rpc("calendar_bookings", {
+        p_from: from,
+        p_days: days,
+        p_max_per_type: maxPerType,
+        p_include_canceled: includeCanceled,
+      })
+      .order("room_type_id")
+      .order("check_in")
+      .order("reference")
+      .order("booking_room_id")
+      .range(a, b),
+  );
 
   if (error) {
     throw new Error(`Failed to load the calendar bookings: ${error.message}`);
@@ -2134,11 +2144,15 @@ export async function getRoomStatusByType(): Promise<RoomTypeStatus[]> {
 /** Every stored weekday template (0096), for the Rates grid in a rate plan's form. A handful per plan and type. */
 export async function getWeekRates(): Promise<WeekRate[]> {
   const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("rate_plan_week_rates")
-    .select(
-      "rate_plan_id, room_type_id, season_type_id, weekday, rate_cents, min_stay_through, min_stay_arrival, max_stay, closed_to_arrival, closed_to_departure, stop_sell, occupancy_rates",
-    );
+  const { data, error } = await readAll((from, to) =>
+    supabase
+      .from("rate_plan_week_rates")
+      .select(
+        "rate_plan_id, room_type_id, season_type_id, weekday, rate_cents, min_stay_through, min_stay_arrival, max_stay, closed_to_arrival, closed_to_departure, stop_sell, occupancy_rates",
+      )
+      .order("id")
+      .range(from, to),
+  );
   if (error) throw new Error(`Failed to load the weekly rates: ${error.message}`);
   return (data ?? []).map((r) => ({
     ratePlanId: r.rate_plan_id,
@@ -2230,13 +2244,19 @@ export async function getInventoryGrid(
 ): Promise<InventoryCell[]> {
   const supabase = await createClient();
 
-  const { data, error } = await supabase.rpc("inventory_grid", {
-    // Null is a real argument here: it reads the grid with no plan selected,
-    // which is the room-type half — allotment and close-out — on its own.
-    p_rate_plan_id: nullableArg(ratePlanId),
-    p_from: from,
-    p_days: days,
-  });
+  // Paged in the function's own order (type sort, type name, date), which is
+  // the order the screens draw their room types in.
+  const { data, error } = await readAll((a, b) =>
+    supabase
+      .rpc("inventory_grid", {
+        // Null is a real argument here: it reads the grid with no plan selected,
+        // which is the room-type half — allotment and close-out — on its own.
+        p_rate_plan_id: nullableArg(ratePlanId),
+        p_from: from,
+        p_days: days,
+      })
+      .range(a, b),
+  );
 
   if (error) {
     throw new Error(`Failed to load the inventory: ${error.message}`);
@@ -4300,7 +4320,7 @@ export async function getWaitlistReport(
  */
 export async function getCalendarRooms(): Promise<CalendarRoom[]> {
   const supabase = await createClient();
-  const { data, error } = await supabase.rpc("calendar_rooms");
+  const { data, error } = await readAll((a, b) => supabase.rpc("calendar_rooms").range(a, b));
   if (error) throw new Error(`Failed to load the rooms: ${error.message}`);
 
   return (data ?? []).map((row) => ({
@@ -4354,10 +4374,15 @@ export async function getCalendarRoomBars(
 ): Promise<CalendarRoomBar[]> {
   const supabase = await createClient();
   const tr = await getT();
-  const { data, error } = await supabase.rpc("calendar_room_bars", {
-    p_from: from,
-    p_nights: nights,
-  });
+  // The function's order, with the room line as the tiebreaker a group needs.
+  const { data, error } = await readAll((a, b) =>
+    supabase
+      .rpc("calendar_room_bars", { p_from: from, p_nights: nights })
+      .order("check_in")
+      .order("reference")
+      .order("booking_room_id")
+      .range(a, b),
+  );
   if (error) throw new Error(`Failed to load the calendar: ${error.message}`);
 
   return (data ?? []).map((row) => ({
@@ -4401,10 +4426,19 @@ export async function getRatesGrid(
   days: number = INVENTORY_NIGHTS,
 ): Promise<RatesGridCell[]> {
   const supabase = await createClient();
-  const { data, error } = await supabase.rpc("inventory_rates_grid", {
-    p_from: from,
-    p_days: days,
-  });
+  // The function's order with each id as the tiebreaker, so paging is exact.
+  const { data, error } = await readAll((a, b) =>
+    supabase
+      .rpc("inventory_rates_grid", { p_from: from, p_days: days })
+      .order("room_type_sort")
+      .order("room_type_name")
+      .order("room_type_id")
+      .order("rate_plan_sort")
+      .order("rate_plan_name")
+      .order("rate_plan_id")
+      .order("date")
+      .range(a, b),
+  );
   if (error) throw new Error(`Failed to load the rates: ${error.message}`);
 
   return (data ?? []).map((row) => ({
@@ -4430,7 +4464,9 @@ export async function getOccupancyGrid(
   days: number = INVENTORY_NIGHTS,
 ): Promise<OccupancyGridCell[]> {
   const supabase = await createClient();
-  const { data, error } = await supabase.rpc("inventory_occupancy_grid", { p_from: from, p_days: days });
+  const { data, error } = await readAll((a, b) =>
+    supabase.rpc("inventory_occupancy_grid", { p_from: from, p_days: days }).range(a, b),
+  );
   if (error) throw new Error(`Failed to load the occupancy prices: ${error.message}`);
   return (data ?? []).map((row) => ({
     ratePlanId: row.rate_plan_id,
