@@ -378,6 +378,21 @@ in a day. Two causes, both seen in the logs on 8 Oct:
   ran), and a network error or 502/503/504 once for GET/HEAD only -- a POST
   may have run, and an RPC that posts money must never run twice.
 
+**A READ THAT CAN PASS 1,000 ROWS GOES THROUGH `readAll()`**
+(`src/lib/supabase/read-all.ts`). The API returns at most 1,000 rows a request
+and cuts the rest SILENTLY. Adjana Resort (46 villas, one room type each) hit
+it at once: 1,295 saved weekly prices, so Villa 14's week read blank and a
+price typed into it "would not save" -- it did, and came back blank; 28 x 46
+Rates grid cells; 35 x 46 calendar cells; 366 x 46 on the public API.
+`readAll()` pages by 1,000 until a short page. Paged now: week rates, the
+Rates, Inventory and occupancy grids, the calendar's availability, rooms, bars
+and cancelled bars, and the API's rates and availability. **Paging needs a
+total order**: the grids keep their function's ORDER BY (the screens take the
+room-type order from it), and the bars, the rates grid and the API add a
+unique tiebreaker. A new read whose size is days x room types (or rooms) uses
+it too. If the project's Max rows is ever lowered below 1,000 this breaks
+again.
+
 ## Non-negotiable rules
 
 **Money**
