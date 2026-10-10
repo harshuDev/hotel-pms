@@ -3331,5 +3331,13 @@
  "Your sign-in worked, but it is not linked to an active staff account, so there is nothing to show. Either the account was never set up or it has been deactivated. An administrator can sort it out.": "คุณเข้าสู่ระบบได้ แต่ไม่ได้เชื่อมกับบัญชีพนักงานที่ใช้งานอยู่ จึงไม่มีอะไรแสดง บัญชีอาจไม่เคยตั้งค่าหรือถูกปิดใช้งานแล้ว ผู้ดูแลระบบช่วยแก้ไขได้",
  "Your Terms and Conditions:": "ข้อกำหนดและเงื่อนไขของคุณ:",
  "Zambia": "แซมเบีย",
- "Zimbabwe": "ซิมบับเว"
+ "Zimbabwe": "ซิมบับเว",
+ "{0} is not one of the hotel's currencies. Add it in Settings -> Currencies first.": "{0} ไม่ใช่สกุลเงินของโรงแรม เพิ่มก่อนที่ การตั้งค่า -> สกุลเงิน",
+ "{0} is priced in {1}, so that currency cannot be changed": "{0} ตั้งราคาเป็น {1} จึงเปลี่ยนสกุลเงินนั้นไม่ได้",
+ "{0} is priced in {1}, so that currency cannot be removed": "{0} ตั้งราคาเป็น {1} จึงลบสกุลเงินนั้นไม่ได้",
+ "{0} takes its currency from the rate it is derived from": "{0} ใช้สกุลเงินของเรตที่ใช้เป็นฐาน",
+ "Only managers and administrators can change rates": "เฉพาะผู้จัดการและผู้ดูแลระบบเท่านั้นที่เปลี่ยนเรตได้",
+ "There is no exchange rate for {0} yet. Set a fixed rate for it in Settings -> Currencies.": "ยังไม่มีอัตราแลกเปลี่ยนสำหรับ {0} ตั้งอัตราคงที่ที่ การตั้งค่า -> สกุลเงิน",
+ "There is no live rate for {0} yet, and {1} is priced in it. Keep the fixed rate for now.": "ยังไม่มีอัตราแลกเปลี่ยนสดสำหรับ {0} และ {1} ตั้งราคาเป็นสกุลเงินนี้ ใช้อัตราคงที่ไปก่อน",
+ "These rate plans are priced in {currencies}. Set the rates of one currency at a time.": "แผนราคาเหล่านี้ตั้งราคาเป็น {currencies} ตั้งเรตทีละสกุลเงิน"
 }

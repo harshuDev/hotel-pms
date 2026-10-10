@@ -287,7 +287,15 @@ export function CurrenciesPanel({
                 <tr key={p.id} className="border-b border-line">
                   <td className="px-1 py-2 text-ink">{p.currency}</td>
                   <td className="px-1 py-2" />
-                  <td className="px-1 py-2 text-ink">{tr.message(rateLabel(p, defaultCurrency))}</td>
+                  <td className="px-1 py-2 text-ink">
+                    {tr.message(rateLabel(p, defaultCurrency))}
+                    {/* The live rate in use (0138), to four decimals. */}
+                    {p.rateKind === "live" && p.rateMicros ? (
+                      <span className="tnum text-ink-muted">
+                        {" · "}1 {p.currency} = {formatRateMicros(Math.max(100, Math.round(p.rateMicros / 100) * 100))} {defaultCurrency}
+                      </span>
+                    ) : null}
+                  </td>
                   <td className="py-1">
                     {canEdit && (
                       <span className="flex justify-end">

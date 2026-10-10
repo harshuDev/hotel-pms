@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0137` are
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0138` (as 0138a-f) are
 applied to the hosted database.
 
 Working on real data: dashboard (house board, movements, pace, activity feed),
@@ -319,6 +319,7 @@ Each read is a Postgres view or RPC, never aggregation in the client:
 | `getRoomsForSettings({ q, page })`  | `rooms_for_settings(...)`         |
 | `getPaymentMethodSettings()`        | `payment_methods` incl. retired   |
 | `getAccountingSettings()`           | `accounting_categories` + `accounting_defaults` (0085) |
+| `getCurrencyProfiles()`             | `currency_profiles` + `currency_rates()` -- the rate in use (0138) |
 | `getPaymentGateways()`              | `payment_gateways` (0086)         |
 | `getAccountingSystems()`            | `accounting_systems` (0087)       |
 | `getInventorySettings()`            | `inventory_settings` (0088)       |
@@ -510,7 +511,7 @@ again.
   0100: the four below plus `public_hotel_policies`,
   `public_room_type_facilities`, `public_room_type_content`,
   `public_language_settings` (0078), `public_booking_engine` (0098) and
-  `public_booking_widget` (0100), and since 0137 `public_display_currencies`),
+  `public_booking_widget` (0100), and since 0138 `public_currency_rates`, which replaced 0137's `public_display_currencies`),
   the five public API functions
   (`api_property`, `api_room_types`, `api_rate_plans`, `api_availability`,
   `api_rates`, 0101, useless without a key), the two policy helpers, and the
@@ -2514,26 +2515,66 @@ client: "Need to add Booking Channel in the Dashboard".
       typed string without a float. The default cannot be added as a
       profile, and a profile that later becomes the default in Hotel Details
       is not listed twice.
-    - **PRICES ARE SHOWN IN THEM, NEVER CHARGED IN THEM (0137)** -- the
-      client's choice for Adjana (XOF), who asked for euros: "show EUR next
-      to XOF only". `displayCurrencies()` in `src/lib/finance-profiles.ts`
-      takes each profile's fixed rate, else a LEGAL PEG (XOF/XAF -> EUR at
-      655.957, so a "Live Exchange" EUR row on a CFA hotel is exact), else
-      nothing -- any other live rate needs a feed this project does not have.
-      `convertCents()` / `formatEquivalent()` in money.ts convert with BigInt.
-      - **The rate plan form's Currency is a dropdown** of the hotel's
-        currency and these; choosing EUR puts "≈ €" under every price cell.
-        Prices are still TYPED and STORED in the hotel's currency; the choice
-        is not saved. With no other currency it stays plain text (a menu of
-        one is a dead control).
-      - **Inventory -> Rates**: each cell's tooltip carries the figure.
-      - **The guest booking page** shows "≈ €" beside the From price, each
-        rate's total and the summary total, through
-        `public_display_currencies()` (0137, granted to `anon`: currency,
-        rate kind and fixed rate only).
-      - **Nothing else converts**: bookings, folios, invoices, payments and
-        reports are all in the hotel's one currency. A real EUR price list
-        would be a currency on every booking and payment, to be asked for.
+    - **A RATE PLAN IS PRICED IN ITS OWN CURRENCY; A BOOKING IS STILL IN THE
+      HOTEL'S (0138). This reverses what this file said for 0137**, that
+      prices were only SHOWN in another currency. The client, in a Loom of
+      their reference: a Mexican hotel's plan sent to Booking.com through
+      Channex is priced in US dollars, "because if Booking is supposed to
+      receive US dollars and Channex is sending Mexican pesos, it's going to
+      reject it" -- and "any reservation that came into the system is going
+      to be automatically exchanged to the default currency".
+      - **`rate_plans.currency`** (null = the hotel's) is what the plan's
+        prices are TYPED and STORED in: `rate_plan_days`, occupancy prices,
+        week templates, per-person amounts, a derived amount. A derived plan
+        takes its parent's, by trigger. Sell With Extras prices, meal values,
+        offers and fees stay in the hotel's currency -- they are charged on
+        the folio.
+      - **The booking path converts in ONE place**: `rate_plan_night_rate()`
+        returns the hotel's currency through `rate_plan_to_base()`, so
+        `create_booking()`, `create_public_booking()`, `public_room_types()`
+        and `booking_quote()` changed not a line. `promotion_night_discounts()`
+        converts too, so an offer is worked out on the night as booked.
+        Folios, payments, the cashier and every report keep ONE currency.
+        Tested rolled back: El Nito MXN 1,600 -> USD 87.28 -> quote MXN
+        1,600.06; Adjana 66,900 F CFA -> EUR 101.99 -> quote 66,901 F CFA.
+      - **The rate**: a fixed rate in Settings -> Currencies wins; else the
+        LIVE rate. `exchange_rates` (reference data, no property_id, staff
+        read-only) holds units per euro in millionths, filled every six hours
+        by `refresh_exchange_rates()` under pg_cron through the `http`
+        extension -- open.er-api.com, else frankfurter.dev, both free and
+        keyless; a failure keeps yesterday's rates. XOF/XAF are PEGGED at
+        655.957 (`source = 'peg'`), never overwritten. `currency_per_base()`
+        and `convert_currency_cents()` do the arithmetic in exact numeric,
+        rounded once, half away from zero, to the target's smallest unit
+        (whole francs for XOF/XAF, `currency_minor_step()`).
+      - **`set_rate_plan_currency()`** (its own function, the overload trap)
+        takes the hotel's currency or one in Settings -> Currencies, and
+        CONVERTS every stored price of the plan and its derived plans at
+        today's rate -- 50,000 F CFA becomes EUR 76.22, not EUR 50,000. The
+        form converts its own typed amounts the same way (`convertBetween()`
+        in finance-profiles.ts, BigInt) and remounts the week grid on the new
+        currency; the form saves the currency BEFORE the terms and the week.
+      - **A currency a plan is priced in** cannot be renamed in, removed from
+        (`currency_profiles_in_use_guard` trigger) or switched to a live rate
+        that does not exist yet in Settings -> Currencies, by name.
+      - **Screens**: the plan form's Currency dropdown (the hotel's and every
+        currency with a rate; plain text with one, and on a derived plan);
+        each price shows "≈" the hotel's figure under it when the plan is in
+        another currency. Rates (All/Main), Room Rate Combinations, the
+        Inventory screens and the plans list write each plan in its own
+        currency. **A bulk edit across plans in different currencies is
+        refused** (one typed amount, one currency), in the screen and in
+        `applyRates()`. Settings -> Currencies shows the live rate in use.
+      - **The public API's `rates` carry the plan's currency** -- what a
+        channel manager pushes. `api_rate_plans` is unchanged (its return
+        shape needs a drop).
+      - **"≈" equivalents** (0137, display only) now use the rate in use:
+        `currency_rates()` for staff and `public_currency_rates()` for the
+        guest page, which REPLACES `public_display_currencies()` (anon
+        execute revoked, function left in place). `displayCurrencies()`
+        prefers the rate Postgres hands down, then a fixed rate, then the peg.
+      - **0138 went in as six parts, 0138a-f**: the connector cancelled the
+        whole, and any migration containing a DELETE statement.
   - **ACCOUNTING CATEGORIES (0085) ARE LEDGER ACCOUNTS, AND THE ACCOUNTING
     REPORT READS THEM.** The reference's list (Name, Internal Code, External
     Code, a pencil and a cross, a Create form inside the card) and Default

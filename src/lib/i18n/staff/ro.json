@@ -3427,5 +3427,13 @@
  "Your sign-in worked, but it is not linked to an active staff account, so there is nothing to show. Either the account was never set up or it has been deactivated. An administrator can sort it out.": "Conectarea a funcționat, dar nu este legată de un cont de personal activ, deci nu există nimic de afișat. Fie contul nu a fost configurat niciodată, fie a fost dezactivat. Un administrator poate rezolva.",
  "Your Terms and Conditions:": "Termenii și condițiile dumneavoastră:",
  "Zambia": "Zambia",
- "Zimbabwe": "Zimbabwe"
+ "Zimbabwe": "Zimbabwe",
+ "{0} is not one of the hotel's currencies. Add it in Settings -> Currencies first.": "{0} nu este una dintre monedele hotelului. Adăugați-o mai întâi în Setări -> Monede.",
+ "{0} is priced in {1}, so that currency cannot be changed": "{0} are prețuri în {1}, așa că acea monedă nu poate fi schimbată",
+ "{0} is priced in {1}, so that currency cannot be removed": "{0} are prețuri în {1}, așa că acea monedă nu poate fi eliminată",
+ "{0} takes its currency from the rate it is derived from": "{0} preia moneda tarifului din care este derivat",
+ "Only managers and administrators can change rates": "Doar managerii și administratorii pot modifica tarifele",
+ "There is no exchange rate for {0} yet. Set a fixed rate for it in Settings -> Currencies.": "Încă nu există un curs de schimb pentru {0}. Setați un curs fix în Setări -> Monede.",
+ "There is no live rate for {0} yet, and {1} is priced in it. Keep the fixed rate for now.": "Încă nu există un curs live pentru {0}, iar {1} are prețuri în această monedă. Păstrați deocamdată cursul fix.",
+ "These rate plans are priced in {currencies}. Set the rates of one currency at a time.": "Aceste planuri tarifare au prețuri în {currencies}. Setați tarifele pentru o singură monedă odată."
 }

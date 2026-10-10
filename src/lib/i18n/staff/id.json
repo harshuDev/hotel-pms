@@ -3331,5 +3331,13 @@
  "Your sign-in worked, but it is not linked to an active staff account, so there is nothing to show. Either the account was never set up or it has been deactivated. An administrator can sort it out.": "Anda berhasil masuk, tetapi tidak terhubung ke akun staf yang aktif, jadi tidak ada yang bisa ditampilkan. Akun tersebut belum pernah diatur atau telah dinonaktifkan. Administrator dapat membereskannya.",
  "Your Terms and Conditions:": "Syarat dan Ketentuan Anda:",
  "Zambia": "Zambia",
- "Zimbabwe": "Zimbabwe"
+ "Zimbabwe": "Zimbabwe",
+ "{0} is not one of the hotel's currencies. Add it in Settings -> Currencies first.": "{0} bukan salah satu mata uang hotel. Tambahkan dulu di Pengaturan -> Mata Uang.",
+ "{0} is priced in {1}, so that currency cannot be changed": "{0} diberi harga dalam {1}, jadi mata uang itu tidak dapat diubah",
+ "{0} is priced in {1}, so that currency cannot be removed": "{0} diberi harga dalam {1}, jadi mata uang itu tidak dapat dihapus",
+ "{0} takes its currency from the rate it is derived from": "{0} mengikuti mata uang tarif asalnya",
+ "Only managers and administrators can change rates": "Hanya manajer dan administrator yang dapat mengubah tarif",
+ "There is no exchange rate for {0} yet. Set a fixed rate for it in Settings -> Currencies.": "Belum ada kurs untuk {0}. Tetapkan kurs tetap di Pengaturan -> Mata Uang.",
+ "There is no live rate for {0} yet, and {1} is priced in it. Keep the fixed rate for now.": "Belum ada kurs langsung untuk {0}, dan {1} diberi harga dalam mata uang itu. Pertahankan kurs tetap untuk sementara.",
+ "These rate plans are priced in {currencies}. Set the rates of one currency at a time.": "Paket tarif ini diberi harga dalam {currencies}. Atur tarif satu mata uang sekaligus."
 }

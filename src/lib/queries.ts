@@ -1831,7 +1831,7 @@ async function loadRatePlans(includeRetired: boolean): Promise<RatePlan[]> {
   let query = supabase
     .from("rate_plans")
     .select(
-      "id, code, name, description, is_default, is_active, is_public, cancellation_policy_id, rate_plan_meals(meal, value_cents), min_days_advance, max_days_advance, min_adults, max_adults, min_children, max_children, valid_from, valid_to, parent_rate_plan_id, derived_kind, derived_percent_bps, derived_amount_cents, occupancy_pricing, adult_adjust_cents, child_adjust_cents, adult_decrease_cents, standard_occupancies, default_occupancies, rate_plan_taxes(tax_rate_id, sort_order), accounting_category_id, rate_plan_channels(channel_id), meal_plan, rate_plan_extras(extra_id, posting, frequency, per_unit, quantity, price_cents, charge_on)",
+      "id, code, name, description, is_default, is_active, is_public, cancellation_policy_id, rate_plan_meals(meal, value_cents), min_days_advance, max_days_advance, min_adults, max_adults, min_children, max_children, valid_from, valid_to, parent_rate_plan_id, derived_kind, derived_percent_bps, derived_amount_cents, occupancy_pricing, adult_adjust_cents, child_adjust_cents, adult_decrease_cents, standard_occupancies, default_occupancies, rate_plan_taxes(tax_rate_id, sort_order), accounting_category_id, rate_plan_channels(channel_id), meal_plan, rate_plan_extras(extra_id, posting, frequency, per_unit, quantity, price_cents, charge_on), currency",
     );
   if (!includeRetired) query = query.eq("is_active", true);
   const { data, error } = await query
@@ -1885,6 +1885,7 @@ async function loadRatePlans(includeRetired: boolean): Promise<RatePlan[]> {
         price_cents: number | null;
         charge_on: string | null;
       }[];
+      currency: string | null;
     }[]
   ).map((row) => ({
     id: row.id,
@@ -1931,6 +1932,7 @@ async function loadRatePlans(includeRetired: boolean): Promise<RatePlan[]> {
     channelIds: (row.rate_plan_channels ?? []).map((c) => c.channel_id),
     mealPlan: isMealPlan(row.meal_plan) ? row.meal_plan : "custom",
     extras: (row.rate_plan_extras ?? []).map(ratePlanExtraFromRow),
+    currency: row.currency ? row.currency.trim() : null,
   }));
 }
 
@@ -3174,20 +3176,26 @@ export async function getPosProfiles(): Promise<PosProfile[]> {
   return (data ?? []).map((r) => ({ id: r.id, posType: r.pos_type, isEnabled: r.is_enabled }));
 }
 
-/** Currencies (0083): the additional ones. The default is the property's own. */
+/** Currencies (0083): the additional ones, with the rate in use (0138). The default is the property's own. */
 export async function getCurrencyProfiles(): Promise<CurrencyProfile[]> {
   const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("currency_profiles")
-    .select("id, currency, rate_kind, fixed_rate_micros")
-    .order("created_at");
-  if (error) throw new Error(`Failed to load the currencies: ${error.message}`);
-  return (data ?? []).map((r) => ({
-    id: r.id,
-    currency: r.currency.trim(),
-    rateKind: r.rate_kind === "fixed" ? "fixed" : "live",
-    fixedRateMicros: r.fixed_rate_micros === null ? null : Number(r.fixed_rate_micros),
-  }));
+  const [profiles, rates] = await Promise.all([
+    supabase.from("currency_profiles").select("id, currency, rate_kind, fixed_rate_micros").order("created_at"),
+    supabase.rpc("currency_rates"),
+  ]);
+  if (profiles.error) throw new Error(`Failed to load the currencies: ${profiles.error.message}`);
+  if (rates.error) throw new Error(`Failed to load the exchange rates: ${rates.error.message}`);
+  return (profiles.data ?? []).map((r) => {
+    const rate = (rates.data ?? []).find((x) => x.currency.trim() === r.currency.trim());
+    return {
+      id: r.id,
+      currency: r.currency.trim(),
+      rateKind: r.rate_kind === "fixed" ? "fixed" : "live",
+      fixedRateMicros: r.fixed_rate_micros === null ? null : Number(r.fixed_rate_micros),
+      rateMicros: rate?.rate_micros == null ? null : Number(rate.rate_micros),
+      rateDate: rate?.rate_date ?? null,
+    };
+  });
 }
 
 /**

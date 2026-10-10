@@ -115,12 +115,20 @@ const ROWS: FieldRow[] = [
   },
 ];
 
-export async function InventoryAll({ cells }: { cells: InventoryCell[] }) {
+export async function InventoryAll({
+  cells,
+  planCurrency = null,
+}: {
+  cells: InventoryCell[];
+  /** The plan's own currency when it is not the hotel's (0138). */
+  planCurrency?: string | null;
+}) {
   const tr = await getT();
-  const [currency, inventorySettings] = await Promise.all([
+  const [hotelCurrency, inventorySettings] = await Promise.all([
     getPropertyCurrency(),
     getInventorySettings(),
   ]);
+  const currency = planCurrency ?? hotelCurrency;
   const dates = [...new Set(cells.map((c) => c.date))].sort();
   const types = [...new Map(cells.map((c) => [c.roomTypeId, c])).values()];
   const at = new Map(cells.map((c) => [`${c.roomTypeId}|${c.date}`, c]));

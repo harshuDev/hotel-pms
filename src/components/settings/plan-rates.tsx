@@ -1,11 +1,9 @@
 "use client";
 
 import { forwardRef, useImperativeHandle, useState } from "react";
-import { useCurrency } from "@/components/currency";
 import { useT } from "@/components/i18n";
 import { cn } from "@/components/ui";
-import { formatEquivalent, formatMoneyInput, parseMoney } from "@/lib/money";
-import type { DisplayCurrency } from "@/lib/finance-profiles";
+import { formatMoneyInput, parseMoney } from "@/lib/money";
 import type { OccupancyPricing, RatePlan, RatePlanCoverage, RoomTypeSetting, SeasonType, WeekRate } from "@/lib/types";
 import { FilterSelect, type FilterOption } from "./filter-select";
 
@@ -141,8 +139,8 @@ function FillIcon() {
   );
 }
 
-/** The price as typed, shown in another currency under its cell. Display only. */
-function Equivalent({ text, to }: { text: string; to: DisplayCurrency }) {
+/** The price as typed, shown in the hotel's currency under its cell. Display only. */
+function Equivalent({ text, to }: { text: string; to: (cents: number) => string }) {
   let cents: number | null = null;
   try {
     cents = text.trim() === "" ? null : parseMoney(text);
@@ -151,7 +149,7 @@ function Equivalent({ text, to }: { text: string; to: DisplayCurrency }) {
   }
   return (
     <span className="tnum mt-0.5 block text-center text-[10.5px] text-ink-faint">
-      {cents === null || cents < 0 ? "\u00a0" : formatEquivalent(cents, to.currency, to.rateMicros)}
+      {cents === null || cents < 0 ? "\u00a0" : to(cents)}
     </span>
   );
 }
@@ -175,16 +173,19 @@ export const PlanRates = forwardRef<
     weekRates: WeekRate[];
     coverage: RatePlanCoverage[];
     initialSeasonId: string | null;
-    /** Another currency to SHOW each price in, beside the hotel's own. */
-    showIn?: DisplayCurrency | null;
+    /** The currency the prices are typed in: the plan's, as the form has it (0138). */
+    currency: string;
+    /** A saved price in the currency the form now shows -- the plan's currency changed on the form, not yet saved. */
+    fromSaved?: (cents: number) => number;
+    /** A price as the hotel's currency writes it, shown under each cell when the plan is in another. */
+    equivalent?: ((cents: number) => string) | null;
     canEdit: boolean;
   }
 >(function PlanRates(
-  { plan, mode, increaseAdultCents, decreaseAdultCents, parent, roomTypes, seasons, weekRates, coverage, initialSeasonId, showIn = null, canEdit },
+  { plan, mode, increaseAdultCents, decreaseAdultCents, parent, roomTypes, seasons, weekRates, coverage, initialSeasonId, currency, fromSaved = (c: number) => c, equivalent = null, canEdit },
   ref,
 ) {
   const tr = useT();
-  const currency = useCurrency();
   const [season, setSeason] = useState<string | null>(initialSeasonId);
   const [replaceRates, setReplaceRates] = useState(false);
   // Affected room types: those already priced on this plan, else all.
@@ -223,10 +224,10 @@ export const PlanRates = forwardRef<
     for (let i = 0; i < 7; i++) {
       const w = template(plan.id, t.id, i + 1);
       if (!w) continue;
-      if (w.rateCents !== null) rows[b][i] = formatMoneyInput(w.rateCents, currency);
+      if (w.rateCents !== null) rows[b][i] = formatMoneyInput(fromSaved(w.rateCents), currency);
       for (const [a, cents] of Object.entries(w.occupancyRates ?? {})) {
         const n = Number(a);
-        if (rows[n] && n !== b) rows[n][i] = formatMoneyInput(cents, currency);
+        if (rows[n] && n !== b) rows[n][i] = formatMoneyInput(fromSaved(cents), currency);
       }
     }
     // A default that is not Sleeps types in its own row; a week saved before
@@ -551,7 +552,7 @@ export const PlanRates = forwardRef<
                                 aria-label={tr("{name}, {n} adults, {day}", { name, n: a, day: tr.weekday(wd) })}
                                 onChange={(e) => setRow(t, a, i, e.target.value)} className={cell} />
                             )}
-                            {showIn && <Equivalent text={s.text} to={showIn} />}
+                            {equivalent && <Equivalent text={s.text} to={equivalent} />}
                           </td>
                         );
                       })}

@@ -1,5 +1,6 @@
 "use server";
 import { localised } from "@/lib/i18n/localised";
+import { getT } from "@/lib/i18n/server";
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
@@ -327,6 +328,25 @@ export async function setRatePlanMealValue(input: {
  * the validation lives in one place: a negative rate is refused here the same
  * way it is on the nine single-field screens.
  */
+/**
+ * One typed amount means one currency (0138): a bulk edit across plans
+ * priced in different currencies is refused rather than guessed at.
+ */
+async function oneCurrency(planIds: string[]): Promise<string | null> {
+  if (planIds.length < 2) return null;
+  const supabase = await createClient();
+  const [{ data: plans }, { data: property }] = await Promise.all([
+    supabase.from("rate_plans").select("id, currency").in("id", planIds),
+    supabase.from("properties").select("currency").limit(1).maybeSingle(),
+  ]);
+  const base = (property?.currency ?? "").trim();
+  const currencies = [...new Set((plans ?? []).map((p) => (p.currency ?? base).trim()))];
+  if (currencies.length < 2) return null;
+  return (await getT())("These rate plans are priced in {currencies}. Set the rates of one currency at a time.", {
+    currencies: currencies.join(", "),
+  });
+}
+
 export async function applyRates(edit: {
   pairs: { roomTypeId: string; ratePlanId: string }[];
   from: string;
@@ -345,6 +365,8 @@ export async function applyRates(edit: {
     if (list) list.push(pair.roomTypeId);
     else byPlan.set(pair.ratePlanId, [pair.roomTypeId]);
   }
+  const mixed = await oneCurrency([...byPlan.keys()]);
+  if (mixed) return { ok: false, error: mixed };
 
   let nightsWritten = 0;
   for (const [ratePlanId, roomTypeIds] of byPlan) {
@@ -395,6 +417,8 @@ export async function applyOccupancyRates(edit: {
   for (const pair of edit.pairs) {
     byPlan.set(pair.ratePlanId, [...(byPlan.get(pair.ratePlanId) ?? []), pair.roomTypeId]);
   }
+  const mixed = await oneCurrency([...byPlan.keys()]);
+  if (mixed) return { ok: false, error: mixed };
   const supabase = await createClient();
   let nightsWritten = 0;
   for (const [ratePlanId, roomTypeIds] of byPlan) {

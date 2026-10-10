@@ -65,6 +65,8 @@ export function InventoryScreen({
 }) {
   const tr = useT();
   const currency = useCurrency();
+  // A rate is in its plan's currency (0138); meal values stay the hotel's.
+  const planCurrency = plans.find((p) => p.id === planId)?.currency ?? currency;
   const spec = SCREENS[fieldName];
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -113,7 +115,7 @@ export function InventoryScreen({
     const raw = spec.read(cell);
     if (spec.kind === "flag") return raw ? tr("Yes") : "";
     if (raw === null) return "—";
-    if (spec.kind === "money") return formatMoney(raw as number, currency);
+    if (spec.kind === "money") return formatMoney(raw as number, planCurrency);
     return String(raw);
   }
 

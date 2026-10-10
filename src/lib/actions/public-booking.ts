@@ -104,20 +104,22 @@ export async function getPublicLanguageSettings(propertyId: string): Promise<Lan
 
 /**
  * The other currencies the guest page shows a price in (0137), beside the
- * hotel's own -- Settings -> Currencies, with a legal peg for a live rate.
- * Display only. A failed read shows none rather than taking the page down.
+ * hotel's own -- Settings -> Currencies at the rate in use, live where there
+ * is one (0138). Display only. A failed read shows none rather than taking
+ * the page down.
  */
 export async function getPublicDisplayCurrencies(propertyId: string, base: string): Promise<DisplayCurrency[]> {
   const supabase = await createClient();
-  const { data, error } = await supabase.rpc("public_display_currencies", { p_property_id: propertyId });
+  const { data, error } = await supabase.rpc("public_currency_rates", { p_property_id: propertyId });
   if (error || !data) return [];
   return displayCurrencies(
     base,
     data.map((r, i) => ({
       id: String(i),
       currency: r.currency,
-      rateKind: r.rate_kind === "fixed" ? "fixed" : "live",
-      fixedRateMicros: r.fixed_rate_micros === null ? null : Number(r.fixed_rate_micros),
+      rateKind: "live" as const,
+      fixedRateMicros: null,
+      rateMicros: Number(r.rate_micros),
     })),
   );
 }

@@ -3475,5 +3475,13 @@
  "Your sign-in worked, but it is not linked to an active staff account, so there is nothing to show. Either the account was never set up or it has been deactivated. An administrator can sort it out.": "Prijava je uspela, vendar ni povezana z aktivnim računom osebja, zato ni ničesar za prikaz. Račun ni bil nikoli nastavljen ali pa je bil onemogočen. Skrbnik lahko to uredi.",
  "Your Terms and Conditions:": "Vaši pogoji poslovanja:",
  "Zambia": "Zambija",
- "Zimbabwe": "Zimbabve"
+ "Zimbabwe": "Zimbabve",
+ "{0} is not one of the hotel's currencies. Add it in Settings -> Currencies first.": "{0} ni ena od valut hotela. Najprej jo dodajte v Nastavitve -> Valute.",
+ "{0} is priced in {1}, so that currency cannot be changed": "{0} ima cene v {1}, zato te valute ni mogoče spremeniti",
+ "{0} is priced in {1}, so that currency cannot be removed": "{0} ima cene v {1}, zato te valute ni mogoče odstraniti",
+ "{0} takes its currency from the rate it is derived from": "{0} prevzame valuto cene, iz katere izhaja",
+ "Only managers and administrators can change rates": "Cene lahko spreminjajo samo vodje in skrbniki",
+ "There is no exchange rate for {0} yet. Set a fixed rate for it in Settings -> Currencies.": "Za {0} še ni menjalnega tečaja. Nastavite fiksni tečaj v Nastavitve -> Valute.",
+ "There is no live rate for {0} yet, and {1} is priced in it. Keep the fixed rate for now.": "Za {0} še ni tečaja v živo, {1} pa ima cene v tej valuti. Zaenkrat obdržite fiksni tečaj.",
+ "These rate plans are priced in {currencies}. Set the rates of one currency at a time.": "Ti cenovni načrti imajo cene v {currencies}. Cene nastavite za eno valuto naenkrat."
 }

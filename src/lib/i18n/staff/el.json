@@ -3379,5 +3379,13 @@
  "Your sign-in worked, but it is not linked to an active staff account, so there is nothing to show. Either the account was never set up or it has been deactivated. An administrator can sort it out.": "Η σύνδεση πέτυχε, αλλά δεν συνδέεται με ενεργό λογαριασμό προσωπικού, οπότε δεν υπάρχει κάτι να εμφανιστεί. Είτε ο λογαριασμός δεν ρυθμίστηκε ποτέ είτε έχει απενεργοποιηθεί. Ένας διαχειριστής μπορεί να το τακτοποιήσει.",
  "Your Terms and Conditions:": "Οι όροι και προϋποθέσεις σας:",
  "Zambia": "Ζάμπια",
- "Zimbabwe": "Ζιμπάμπουε"
+ "Zimbabwe": "Ζιμπάμπουε",
+ "{0} is not one of the hotel's currencies. Add it in Settings -> Currencies first.": "Το {0} δεν είναι ένα από τα νομίσματα του ξενοδοχείου. Προσθέστε το πρώτα στις Ρυθμίσεις -> Νομίσματα.",
+ "{0} is priced in {1}, so that currency cannot be changed": "Το {0} τιμολογείται σε {1}, οπότε αυτό το νόμισμα δεν μπορεί να αλλάξει",
+ "{0} is priced in {1}, so that currency cannot be removed": "Το {0} τιμολογείται σε {1}, οπότε αυτό το νόμισμα δεν μπορεί να αφαιρεθεί",
+ "{0} takes its currency from the rate it is derived from": "Το {0} παίρνει το νόμισμα της τιμής από την οποία προέρχεται",
+ "Only managers and administrators can change rates": "Μόνο διευθυντές και διαχειριστές μπορούν να αλλάξουν τιμές",
+ "There is no exchange rate for {0} yet. Set a fixed rate for it in Settings -> Currencies.": "Δεν υπάρχει ακόμη ισοτιμία για το {0}. Ορίστε σταθερή ισοτιμία στις Ρυθμίσεις -> Νομίσματα.",
+ "There is no live rate for {0} yet, and {1} is priced in it. Keep the fixed rate for now.": "Δεν υπάρχει ακόμη τρέχουσα ισοτιμία για το {0} και το {1} τιμολογείται σε αυτό. Κρατήστε προς το παρόν τη σταθερή ισοτιμία.",
+ "These rate plans are priced in {currencies}. Set the rates of one currency at a time.": "Αυτά τα τιμολογιακά πλάνα τιμολογούνται σε {currencies}. Ορίστε τις τιμές για ένα νόμισμα κάθε φορά."
 }

@@ -763,6 +763,11 @@ export interface RatePlan {
   channelIds: string[];
   /** Sell With Extras (0115): catalog extras sold with the rate, and how each is charged (0118). */
   extras: RatePlanExtra[];
+  /**
+   * The currency the plan's prices are typed and stored in (0138); null is
+   * the hotel's own. Bookings convert to the hotel's currency.
+   */
+  currency: string | null;
 }
 
 /** Which room types a plan has prices loaded on, from the business date (0109). */

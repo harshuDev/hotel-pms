@@ -278,7 +278,7 @@ export function RateCombinations({
       if (!w) return blankDay();
       const occ: Record<number, string> = {};
       for (const [a, cents] of Object.entries(w.occupancyRates ?? {})) {
-        if (Number(a) !== b) occ[Number(a)] = formatMoneyInput(cents, currency);
+        if (Number(a) !== b) occ[Number(a)] = formatMoneyInput(cents, plan?.currency ?? currency);
       }
       // The main row is the default party's price; on a plan whose default
       // is not Sleeps, that is its stored price, else worked out.
@@ -287,7 +287,7 @@ export function RateCombinations({
         mainCents = w.occupancyRates?.[String(def)] ?? perPerson(plan, w.rateCents, b, def);
       }
       return {
-        rate: mainCents === null ? "" : formatMoneyInput(mainCents, currency),
+        rate: mainCents === null ? "" : formatMoneyInput(mainCents, plan?.currency ?? currency),
         mst: w.minStayThrough === null ? "" : String(w.minStayThrough),
         msa: w.minStayArrival === null ? "" : String(w.minStayArrival),
         mxs: w.maxStay === null ? "" : String(w.maxStay),
@@ -367,7 +367,7 @@ export function RateCombinations({
       // Every party follows the main row, as in the plan's own form.
       const main = money(d.rate);
       if (typeof main !== "number") return { text: "", computed: true };
-      return { text: formatMoneyInput(perPerson(plan, main, def, adults), currency), computed: true };
+      return { text: formatMoneyInput(perPerson(plan, main, def, adults), plan.currency ?? currency), computed: true };
     }
     if (d.occ[adults]) return { text: d.occ[adults], computed: true };
     const base = money(d.rate);
@@ -376,13 +376,13 @@ export function RateCombinations({
     const up = plan.adultAdjustCents ?? 0;
     const down = plan.adultDecreaseCents ?? up;
     const cents = adults > b ? base + (adults - b) * up : base - (b - adults) * down;
-    return { text: formatMoneyInput(Math.max(0, cents), currency), computed: true };
+    return { text: formatMoneyInput(Math.max(0, cents), plan.currency ?? currency), computed: true };
   }
 
   const parentRate = (plan: RatePlan, t: RoomTypeSetting, i: number): string => {
     if (!plan.parentRatePlanId) return "";
     const v = money(row(plan.parentRatePlanId, t).days[i].rate);
-    return typeof v === "number" ? formatMoneyInput(derive(v, plan), currency) : "";
+    return typeof v === "number" ? formatMoneyInput(derive(v, plan), plan.currency ?? currency) : "";
   };
 
   function collect(): { plan: RatePlan; type: RoomTypeSetting; days: Parameters<typeof saveWeekRates>[0]["days"] }[] | string {
@@ -618,7 +618,7 @@ export function RateCombinations({
                                 </span>
                               </p>
                               <p className="mt-0.5 text-[12.5px] text-ink-muted">
-                                {policyName(p.cancellationPolicyId)}, {currency}
+                                {policyName(p.cancellationPolicyId)}, {p.currency ?? currency}
                               </p>
                               {derived && (
                                 <p className="text-[11.5px] text-ink-muted">
