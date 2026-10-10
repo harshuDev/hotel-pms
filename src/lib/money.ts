@@ -141,3 +141,25 @@ export function parseMoney(input: string): number {
 
   return negative ? -pence : pence;
 }
+
+/**
+ * A figure in another currency, for display beside the hotel's own -- never
+ * stored, posted or charged. `rateMicros` is how many units of the hotel's
+ * currency one unit of the other buys, in millionths (Settings -> Currencies,
+ * or a legal peg); both sides are hundredths. BigInt and rounded half away
+ * from zero, so no float ever touches the figure.
+ */
+export function convertCents(cents: number, rateMicros: number): number {
+  if (!Number.isSafeInteger(cents) || !Number.isSafeInteger(rateMicros) || rateMicros <= 0) return 0;
+  const n = BigInt(cents) * BigInt(1_000_000);
+  const d = BigInt(rateMicros);
+  const neg = n < BigInt(0);
+  const a = neg ? -n : n;
+  const q = (a * BigInt(2) + d) / (BigInt(2) * d);
+  return Number(neg ? -q : q);
+}
+
+/** "≈ €109.06": the hotel's figure shown in another currency. Display only. */
+export function formatEquivalent(cents: number, currency: string, rateMicros: number): string {
+  return `≈ ${formatMoney(convertCents(cents, rateMicros), currency)}`;
+}

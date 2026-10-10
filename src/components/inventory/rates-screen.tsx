@@ -1,12 +1,13 @@
 "use client";
 
 import { useT } from "@/components/i18n";
-import { Fragment, useMemo, useState, useTransition } from "react";
+import { Fragment, createContext, useContext, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { addDays, format, parseISO } from "date-fns";
 import { cn } from "@/components/ui";
-import { formatMoney, formatMoneyInput, parseMoney } from "@/lib/money";
+import { formatEquivalent, formatMoney, formatMoneyInput, parseMoney } from "@/lib/money";
+import type { DisplayCurrency } from "@/lib/finance-profiles";
 import { applyOccupancyRates, applyRates } from "@/lib/actions/inventory";
 import type { OccupancyGridCell, RatePlan, RatesGridCell, RoomTypeOccupancy } from "@/lib/types";
 import { useCurrency } from "@/components/currency";
@@ -47,6 +48,20 @@ const nav =
   "rounded-md border border-line bg-white px-3 py-1.5 text-[12.5px] text-ink hover:bg-shell focus-visible:outline focus-visible:outline-2 focus-visible:outline-brass";
 
 /** A selection is a (room type, rate plan) pair, so it needs a composite key. */
+/** Settings -> Currencies: each typed price is also shown in these, on hover. */
+const ShowIn = createContext<DisplayCurrency[]>([]);
+
+function equivalents(text: string, list: DisplayCurrency[]): string | undefined {
+  if (list.length === 0 || text.trim() === "") return undefined;
+  try {
+    const cents = parseMoney(text);
+    if (cents < 0) return undefined;
+    return list.map((d) => formatEquivalent(cents, d.currency, d.rateMicros)).join(" · ");
+  } catch {
+    return undefined;
+  }
+}
+
 const pairKey = (roomTypeId: string, ratePlanId: string) =>
   `${roomTypeId}|${ratePlanId}`;
 
@@ -70,6 +85,7 @@ function PriceCell({
   faintEmpty?: boolean;
 }) {
   const [text, setText] = useState(initial);
+  const showIn = useContext(ShowIn);
   const commit = () => {
     if (text.trim() !== initial.trim()) onSave(text);
   };
@@ -79,6 +95,7 @@ function PriceCell({
       value={text}
       placeholder={placeholder}
       aria-label={ariaLabel}
+      title={equivalents(text, showIn)}
       onChange={(e) => setText(e.target.value)}
       onBlur={commit}
       onKeyDown={(e) => {
@@ -106,6 +123,7 @@ export function RatesScreen({
   basePath,
   plan = null,
   derivedFrom,
+  showIn = [],
   canEdit,
 }: {
   cells: RatesGridCell[];
@@ -125,6 +143,8 @@ export function RatesScreen({
    * parent and set_rates() refuses it, so it is shown and never edited.
    */
   derivedFrom: Record<string, string>;
+  /** Other currencies a price is also shown in (display only). */
+  showIn?: DisplayCurrency[];
   canEdit: boolean;
 }) {
   const tr = useT();
@@ -310,6 +330,7 @@ export function RatesScreen({
   }
 
   return (
+    <ShowIn.Provider value={showIn}>
     <div className="space-y-3">
       <div className="flex flex-wrap items-center gap-2">
         <Link href={`${basePath}?from=${shift(-dates.length)}${planQuery}`} className={nav} aria-label={tr("Previous {n} days", { n: dates.length })}>
@@ -585,5 +606,6 @@ export function RatesScreen({
         </div>
       )}
     </div>
+    </ShowIn.Provider>
   );
 }

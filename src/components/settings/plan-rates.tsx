@@ -4,7 +4,8 @@ import { forwardRef, useImperativeHandle, useState } from "react";
 import { useCurrency } from "@/components/currency";
 import { useT } from "@/components/i18n";
 import { cn } from "@/components/ui";
-import { formatMoneyInput, parseMoney } from "@/lib/money";
+import { formatEquivalent, formatMoneyInput, parseMoney } from "@/lib/money";
+import type { DisplayCurrency } from "@/lib/finance-profiles";
 import type { OccupancyPricing, RatePlan, RatePlanCoverage, RoomTypeSetting, SeasonType, WeekRate } from "@/lib/types";
 import { FilterSelect, type FilterOption } from "./filter-select";
 
@@ -140,6 +141,21 @@ function FillIcon() {
   );
 }
 
+/** The price as typed, shown in another currency under its cell. Display only. */
+function Equivalent({ text, to }: { text: string; to: DisplayCurrency }) {
+  let cents: number | null = null;
+  try {
+    cents = text.trim() === "" ? null : parseMoney(text);
+  } catch {
+    cents = null;
+  }
+  return (
+    <span className="tnum mt-0.5 block text-center text-[10.5px] text-ink-faint">
+      {cents === null || cents < 0 ? "\u00a0" : formatEquivalent(cents, to.currency, to.rateMicros)}
+    </span>
+  );
+}
+
 const cell =
   "tnum w-full min-w-[4.2rem] rounded border border-line bg-white px-1 py-1 text-center text-[12.5px] text-ink outline-none focus:border-brass focus:ring-1 focus:ring-brass";
 const fillBtn =
@@ -159,10 +175,12 @@ export const PlanRates = forwardRef<
     weekRates: WeekRate[];
     coverage: RatePlanCoverage[];
     initialSeasonId: string | null;
+    /** Another currency to SHOW each price in, beside the hotel's own. */
+    showIn?: DisplayCurrency | null;
     canEdit: boolean;
   }
 >(function PlanRates(
-  { plan, mode, increaseAdultCents, decreaseAdultCents, parent, roomTypes, seasons, weekRates, coverage, initialSeasonId, canEdit },
+  { plan, mode, increaseAdultCents, decreaseAdultCents, parent, roomTypes, seasons, weekRates, coverage, initialSeasonId, showIn = null, canEdit },
   ref,
 ) {
   const tr = useT();
@@ -533,6 +551,7 @@ export const PlanRates = forwardRef<
                                 aria-label={tr("{name}, {n} adults, {day}", { name, n: a, day: tr.weekday(wd) })}
                                 onChange={(e) => setRow(t, a, i, e.target.value)} className={cell} />
                             )}
+                            {showIn && <Equivalent text={s.text} to={showIn} />}
                           </td>
                         );
                       })}

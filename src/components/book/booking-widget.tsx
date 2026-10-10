@@ -3,7 +3,8 @@
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { cn } from "@/components/ui";
-import { formatMoneyIn } from "@/lib/money";
+import { convertCents, formatMoneyIn } from "@/lib/money";
+import type { DisplayCurrency } from "@/lib/finance-profiles";
 import { CURRENCIES } from "@/lib/currencies";
 import { LOCALES, bcp47, type Locale } from "@/lib/i18n/locales";
 import { dictionaryFor, type Dict } from "@/lib/i18n/dictionary";
@@ -128,6 +129,7 @@ export function BookingWidget({
   roomTypeIds,
   hasTerms,
   initialStay,
+  showIn = [],
 }: {
   property: PublicProperty;
   ratePlans: PublicRatePlan[];
@@ -161,12 +163,19 @@ export function BookingWidget({
    * already checked on the server; the page opens on step 2 with them.
    */
   initialStay: { from: string; to: string; adults: number | null; children: number | null } | null;
+  /** Other currencies each price is also shown in (0137). Display only. */
+  showIn?: DisplayCurrency[];
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const t = dictionaryFor(locale);
   const moneyLocale = useMemo(() => bcp47(locale), [locale]);
   const money = (cents: number) => formatMoneyIn(cents, property.currency, moneyLocale);
+  // "≈ €109.00" beside an XOF price. Booked and paid in the hotel's currency.
+  const alsoIn = (cents: number): string | null =>
+    showIn.length === 0
+      ? null
+      : showIn.map((d) => `≈ ${formatMoneyIn(convertCents(cents, d.rateMicros), d.currency, moneyLocale)}`).join(" · ");
   // The reference's "$ (MXN)". From a static list rather than Intl, which
   // writes symbols differently in Node and the browser.
   const symbol = CURRENCIES.find((c) => c.code === property.currency)?.symbol ?? property.currency;
@@ -594,7 +603,7 @@ export function BookingWidget({
                           alt={r.name}
                           badge={
                             from !== null
-                              ? `${t.priceFrom} ${money(from)}`
+                              ? `${t.priceFrom} ${money(from)}${alsoIn(from) ? ` (${alsoIn(from)})` : ""}`
                               : r.available < 1
                                 ? t.soldOut
                                 : t.noPriceLoaded
@@ -706,6 +715,9 @@ export function BookingWidget({
                         {sellable && (
                           <div className="text-right">
                             <p className="tnum text-[20px] font-medium text-ink">{money(o.totalCents as number)}</p>
+                            {alsoIn(o.totalCents as number) && (
+                              <p className="tnum text-[12.5px] text-ink-muted">{alsoIn(o.totalCents as number)}</p>
+                            )}
                             <p className="text-[12px] text-ink-faint">
                               {t.totalForStay} · {room.nights} {room.nights === 1 ? t.night : t.nights}
                             </p>
@@ -834,6 +846,9 @@ export function BookingWidget({
                       <span className="text-[15px] text-ink">{t.total}:</span>
                       <span className="tnum text-[18px] font-semibold text-ink">{money(offer.totalCents)}</span>
                     </div>
+                    {alsoIn(offer.totalCents) && (
+                      <p className="tnum bg-shell px-4 pb-3 text-right text-[12.5px] text-ink-muted">{alsoIn(offer.totalCents)}</p>
+                    )}
                   </section>
                 </aside>
               </div>

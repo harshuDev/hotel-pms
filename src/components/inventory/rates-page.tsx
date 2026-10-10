@@ -1,10 +1,13 @@
 import { isValid, parseISO, format, addDays } from "date-fns";
 import { PageHeader } from "@/components/ui";
+import { displayCurrencies } from "@/lib/finance-profiles";
 import { RatesScreen } from "@/components/inventory/rates-screen";
 import {
   INVENTORY_NIGHTS,
   getBusinessDate,
+  getCurrencyProfiles,
   getCurrentStaffUser,
+  getPropertyCurrency,
   getOccupancyGrid,
   getRatePlans,
   getRatesGrid,
@@ -36,11 +39,13 @@ export async function RatesPage({
   const from =
     fromParam && ISO_DATE.test(fromParam) && isValid(parseISO(fromParam)) ? fromParam : businessDate;
 
-  const [allCells, plans, occupancy, roomTypes] = await Promise.all([
+  const [allCells, plans, occupancy, roomTypes, currency, profiles] = await Promise.all([
     getRatesGrid(from, INVENTORY_NIGHTS),
     getRatePlans(),
     getOccupancyGrid(from, INVENTORY_NIGHTS),
     getRoomTypeOccupancies(),
+    getPropertyCurrency(),
+    getCurrencyProfiles(),
   ]);
   // ?plan= narrows Rates (All) to one plan -- the rate plan form's "Daily
   // rates" link lands here. Ignored on Main, and when it names no plan.
@@ -73,6 +78,7 @@ export async function RatesPage({
         basePath={basePath}
         plan={plan}
         derivedFrom={derivedFrom}
+        showIn={displayCurrencies(currency, profiles)}
         canEdit={staff !== null && ["admin", "manager"].includes(staff.role)}
       />
     </div>
