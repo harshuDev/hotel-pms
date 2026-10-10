@@ -3,6 +3,7 @@ import Link from "next/link";
 import { BookingWidget } from "@/components/book/booking-widget";
 import {
   getPublicBookingEngine,
+  getPublicDisplayCurrencies,
   getPublicHotelPolicies,
   getPublicLanguageSettings,
   getPublicProperty,
@@ -141,12 +142,14 @@ export default async function BookPage({
 
   // What the guest is told about the hotel and its rooms (0071, 0072). The
   // hotel set these, so it knows them; the guest is who needs telling.
-  const [policies, facilities, content, engine] = await Promise.all([
+  const [policies, facilities, content, engine, showIn] = await Promise.all([
     getPublicHotelPolicies(propertyId),
     getPublicRoomTypeFacilities(propertyId),
     getPublicRoomTypeContent(propertyId),
     // Booking Engine Settings (0098): the profile's room types and the terms.
     getPublicBookingEngine(propertyId, profile ?? null),
+    // Settings -> Currencies (0137): prices shown in euros too, display only.
+    getPublicDisplayCurrencies(propertyId, property.currency),
   ]);
 
   return (
@@ -163,6 +166,7 @@ export default async function BookPage({
       weekdayNames={weekdayNames(locale)}
       roomTypeIds={engine.roomTypeIds}
       hasTerms={engine.terms !== null}
+      showIn={showIn}
       initialStay={stayFromWidget(from, to, adults, children, hotelToday(property.timezone))}
     />
   );

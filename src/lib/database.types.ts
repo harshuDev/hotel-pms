@@ -6834,6 +6834,14 @@ export type Database = {
         Args: { p_property_id: string }
         Returns: string
       }
+      public_display_currencies: {
+        Args: { p_property_id: string }
+        Returns: {
+          currency: string
+          fixed_rate_micros: number
+          rate_kind: string
+        }[]
+      }
       public_hotel_policies: {
         Args: { p_property_id: string }
         Returns: {

@@ -17,6 +17,7 @@ import type {
   WeekRate,
 } from "@/lib/types";
 import { PlanRates, type PlanRatesHandle } from "@/components/settings/plan-rates";
+import { displayCurrencies, type CurrencyProfile } from "@/lib/finance-profiles";
 import { RateCombinations } from "@/components/settings/rate-combinations";
 import type { AccountingCategory } from "@/lib/finance-profiles";
 import { formatPercentBps, parsePercentBps } from "@/lib/finance-profiles";
@@ -574,6 +575,7 @@ export function RatePlansPanel({
   weekRates,
   openPlanId = null,
   openSeasonId = null,
+  currencyProfiles = [],
   canEdit,
   pending,
   run,
@@ -594,6 +596,8 @@ export function RatePlansPanel({
   openPlanId?: string | null;
   /** The season its prices open on; null is the Default Season. */
   openSeasonId?: string | null;
+  /** Settings -> Currencies: what the Currency dropdown can SHOW prices in. */
+  currencyProfiles?: CurrencyProfile[];
   canEdit: boolean;
   pending: boolean;
   run: Run;
@@ -601,6 +605,11 @@ export function RatePlansPanel({
   const tr = useT();
   const currency = useCurrency();
   const ratesRef = useRef<PlanRatesHandle>(null);
+  // The Currency dropdown: prices are always typed and stored in the hotel's
+  // currency; choosing another shows each one converted beside it.
+  const shownIn = useMemo(() => displayCurrencies(currency, currencyProfiles), [currency, currencyProfiles]);
+  const [showCurrency, setShowCurrency] = useState(currency);
+  const showIn = shownIn.find((d) => d.currency === showCurrency) ?? null;
   const [showExpired, setShowExpired] = useState(false);
   const [sortBy, setSortBy] = useState<"title" | "policy" | null>(null);
   const [desc, setDesc] = useState(false);
@@ -883,7 +892,16 @@ export function RatePlansPanel({
             />
           </Row>
           <Row label={tr("Currency")} required>
-            <p className="rounded border border-line bg-shell px-3 py-2 text-[14px] text-ink-muted">{currency}</p>
+            {shownIn.length > 0 ? (
+              <FilterSelect
+                label={tr("Currency")}
+                value={[showCurrency]}
+                options={[currency, ...shownIn.map((d) => d.currency)].map((c) => ({ id: c, name: c }))}
+                onChange={(ids) => setShowCurrency(ids[0] ?? currency)}
+              />
+            ) : (
+              <p className="rounded border border-line bg-shell px-3 py-2 text-[14px] text-ink-muted">{currency}</p>
+            )}
           </Row>
           <Row label={tr("Description")} htmlFor="rp-description" wide>
             <input id="rp-description" value={draft.description} className={fieldR}
@@ -1019,6 +1037,7 @@ export function RatePlansPanel({
                 weekRates={weekRates}
                 coverage={coverage}
                 initialSeasonId={plan.id === openPlanId ? openSeasonId : null}
+                showIn={showIn}
                 canEdit={canEdit}
               />
             </>

@@ -1327,6 +1327,7 @@ export function SettingsScreen({
             weekRates={weekRates}
             openPlanId={editRoomTypeId}
             openSeasonId={openSeasonId}
+            currencyProfiles={currencyProfiles}
             canEdit={canEdit}
             pending={pending}
             run={run}

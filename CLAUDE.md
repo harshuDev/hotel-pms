@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0136` are
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0137` are
 applied to the hosted database.
 
 Working on real data: dashboard (house board, movements, pace, activity feed),
@@ -510,7 +510,8 @@ again.
   0100: the four below plus `public_hotel_policies`,
   `public_room_type_facilities`, `public_room_type_content`,
   `public_language_settings` (0078), `public_booking_engine` (0098) and
-  `public_booking_widget` (0100)), the five public API functions
+  `public_booking_widget` (0100), and since 0137 `public_display_currencies`),
+  the five public API functions
   (`api_property`, `api_room_types`, `api_rate_plans`, `api_availability`,
   `api_rates`, 0101, useless without a key), the two policy helpers, and the
   `btree_gist` extension's own internals. Four older functions held it through PUBLIC instead and needed
@@ -2513,11 +2514,26 @@ client: "Need to add Booking Channel in the Dashboard".
       typed string without a float. The default cannot be added as a
       profile, and a profile that later becomes the default in Hotel Details
       is not listed twice.
-    - **Nothing converts money yet**: no currency switcher on the guest page,
-      no foreign-currency invoice (itself a stored Hotel Feature), and "Live
-      Exchange" would need a rate feed this project has neither the network
-      access nor a key for. The natural first reader is a display-only
-      switcher on the guest booking page.
+    - **PRICES ARE SHOWN IN THEM, NEVER CHARGED IN THEM (0137)** -- the
+      client's choice for Adjana (XOF), who asked for euros: "show EUR next
+      to XOF only". `displayCurrencies()` in `src/lib/finance-profiles.ts`
+      takes each profile's fixed rate, else a LEGAL PEG (XOF/XAF -> EUR at
+      655.957, so a "Live Exchange" EUR row on a CFA hotel is exact), else
+      nothing -- any other live rate needs a feed this project does not have.
+      `convertCents()` / `formatEquivalent()` in money.ts convert with BigInt.
+      - **The rate plan form's Currency is a dropdown** of the hotel's
+        currency and these; choosing EUR puts "≈ €" under every price cell.
+        Prices are still TYPED and STORED in the hotel's currency; the choice
+        is not saved. With no other currency it stays plain text (a menu of
+        one is a dead control).
+      - **Inventory -> Rates**: each cell's tooltip carries the figure.
+      - **The guest booking page** shows "≈ €" beside the From price, each
+        rate's total and the summary total, through
+        `public_display_currencies()` (0137, granted to `anon`: currency,
+        rate kind and fixed rate only).
+      - **Nothing else converts**: bookings, folios, invoices, payments and
+        reports are all in the hotel's one currency. A real EUR price list
+        would be a currency on every booking and payment, to be asked for.
   - **ACCOUNTING CATEGORIES (0085) ARE LEDGER ACCOUNTS, AND THE ACCOUNTING
     REPORT READS THEM.** The reference's list (Name, Internal Code, External
     Code, a pencil and a cross, a Create form inside the card) and Default

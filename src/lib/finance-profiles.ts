@@ -168,3 +168,38 @@ export function formatPercentBps(bps: number): string {
   const frac = String(bps % 100).padStart(2, "0");
   return `${whole}.${frac.endsWith("0") ? frac[0] : frac}`;
 }
+
+/** A currency the hotel's prices are also SHOWN in, at a rate in millionths. */
+export interface DisplayCurrency {
+  currency: string;
+  rateMicros: number;
+}
+
+/*
+ * Legal fixed pegs, in millionths of the hotel's currency per unit of the
+ * other: the CFA francs are pegged to the euro by treaty at 655.957, so a
+ * "Live Exchange" EUR profile on an XOF or XAF hotel is that figure exactly.
+ * Any other live rate needs a feed this project does not have, and shows
+ * nothing rather than a guess.
+ */
+const PEGS: Record<string, Record<string, number>> = {
+  XOF: { EUR: 655_957_000 },
+  XAF: { EUR: 655_957_000 },
+};
+
+/**
+ * The hotel's additional currencies (Settings -> Currencies) that a price can
+ * be shown in: a fixed rate as typed, else a legal peg. Display only --
+ * every price is still typed, stored, booked and invoiced in `base`.
+ */
+export function displayCurrencies(base: string, profiles: CurrencyProfile[]): DisplayCurrency[] {
+  const b = base.trim().toUpperCase();
+  const out: DisplayCurrency[] = [];
+  for (const p of profiles) {
+    const c = p.currency.trim().toUpperCase();
+    if (c === b || out.some((d) => d.currency === c)) continue;
+    const rate = p.rateKind === "fixed" && p.fixedRateMicros ? p.fixedRateMicros : PEGS[b]?.[c];
+    if (rate && rate > 0) out.push({ currency: c, rateMicros: rate });
+  }
+  return out;
+}
