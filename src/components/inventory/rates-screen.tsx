@@ -1,13 +1,13 @@
 "use client";
 
 import { useT } from "@/components/i18n";
-import { Fragment, createContext, useContext, useMemo, useState, useTransition } from "react";
+import { Fragment, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { addDays, format, parseISO } from "date-fns";
 import { cn } from "@/components/ui";
 import { formatEquivalent, formatMoney, formatMoneyInput, parseMoney } from "@/lib/money";
-import type { DisplayCurrency } from "@/lib/finance-profiles";
+import { convertBetween, type DisplayCurrency } from "@/lib/finance-profiles";
 import { applyOccupancyRates, applyRates } from "@/lib/actions/inventory";
 import type { OccupancyGridCell, RatePlan, RatesGridCell, RoomTypeOccupancy } from "@/lib/types";
 import { useCurrency } from "@/components/currency";
@@ -48,15 +48,14 @@ const nav =
   "rounded-md border border-line bg-white px-3 py-1.5 text-[12.5px] text-ink hover:bg-shell focus-visible:outline focus-visible:outline-2 focus-visible:outline-brass";
 
 /** A selection is a (room type, rate plan) pair, so it needs a composite key. */
-/** Settings -> Currencies: each typed price is also shown in these, on hover. */
-const ShowIn = createContext<DisplayCurrency[]>([]);
+/** A typed price as it reads in other currencies, on hover (display only). */
+type Equivalents = (cents: number) => string | undefined;
 
-function equivalents(text: string, list: DisplayCurrency[]): string | undefined {
-  if (list.length === 0 || text.trim() === "") return undefined;
+function equivalents(text: string, of: Equivalents | undefined): string | undefined {
+  if (!of || text.trim() === "") return undefined;
   try {
     const cents = parseMoney(text);
-    if (cents < 0) return undefined;
-    return list.map((d) => formatEquivalent(cents, d.currency, d.rateMicros)).join(" · ");
+    return cents < 0 ? undefined : of(cents);
   } catch {
     return undefined;
   }
@@ -77,15 +76,16 @@ function PriceCell({
   ariaLabel,
   onSave,
   faintEmpty,
+  equivalent,
 }: {
   initial: string;
   placeholder: string;
   ariaLabel: string;
   onSave: Save;
   faintEmpty?: boolean;
+  equivalent?: Equivalents;
 }) {
   const [text, setText] = useState(initial);
-  const showIn = useContext(ShowIn);
   const commit = () => {
     if (text.trim() !== initial.trim()) onSave(text);
   };
@@ -95,7 +95,7 @@ function PriceCell({
       value={text}
       placeholder={placeholder}
       aria-label={ariaLabel}
-      title={equivalents(text, showIn)}
+      title={equivalents(text, equivalent)}
       onChange={(e) => setText(e.target.value)}
       onBlur={commit}
       onKeyDown={(e) => {
@@ -143,7 +143,10 @@ export function RatesScreen({
    * parent and set_rates() refuses it, so it is shown and never edited.
    */
   derivedFrom: Record<string, string>;
-  /** Other currencies a price is also shown in (display only). */
+  /**
+   * The hotel's other currencies with the rate in use (display only, and the
+   * "≈" on a plan priced in another currency, 0138).
+   */
   showIn?: DisplayCurrency[];
   canEdit: boolean;
 }) {
@@ -161,6 +164,21 @@ export function RatesScreen({
   const [pending, startTransition] = useTransition();
 
   const planById = useMemo(() => new Map(plans.map((p) => [p.id, p])), [plans]);
+  /** The currency a plan's prices are typed and stored in (0138). */
+  const curOf = (planId: string) => planById.get(planId)?.currency ?? currency;
+  /** On hover: a plan in the hotel's currency shows the others; a plan in another shows the hotel's. */
+  const equivalentFor = (planId: string): Equivalents | undefined => {
+    const pc = curOf(planId);
+    if (pc === currency) {
+      return showIn.length === 0
+        ? undefined
+        : (c) => showIn.map((d) => formatEquivalent(c, d.currency, d.rateMicros)).join(" · ");
+    }
+    return (c) => {
+      const v = convertBetween(c, pc, currency, currency, showIn);
+      return v === null ? undefined : `≈ ${formatMoney(v, currency)}`;
+    };
+  };
   const typeById = useMemo(() => new Map(roomTypes.map((t) => [t.id, t])), [roomTypes]);
 
   // Room types in the order Postgres returned them, each carrying its plans.
@@ -265,7 +283,7 @@ export function RatesScreen({
             ? tr("{date} cleared.", { date: tr.date(what.date, "EEE d MMM") })
             : tr("{date} set to {amount}.", {
                 date: tr.date(what.date, "EEE d MMM"),
-                amount: formatMoney(cents, currency),
+                amount: formatMoney(cents, curOf(what.ratePlanId)),
               }),
       });
       router.refresh();
@@ -294,6 +312,18 @@ export function RatesScreen({
       setMessage({ ok: false, text: tr("That is not an amount. Try 120 or 120.50.") });
       return;
     }
+    // One amount means one currency (0138).
+    const currencies = [...new Set(pairs.map((x) => curOf(x.ratePlanId)))];
+    if (currencies.length > 1) {
+      setMessage({
+        ok: false,
+        text: tr("These rate plans are priced in {currencies}. Set the rates of one currency at a time.", {
+          currencies: currencies.join(", "),
+        }),
+      });
+      return;
+    }
+    const amountCurrency = currencies[0] ?? currency;
     startTransition(async () => {
       const result =
         adults === null
@@ -309,7 +339,7 @@ export function RatesScreen({
           cents === null
             ? tr.plural(result.data.nightsWritten, "Cleared {n} night.", "Cleared {n} nights.")
             : tr.plural(result.data.nightsWritten, "Set {amount} on {n} night.", "Set {amount} on {n} nights.", {
-                amount: formatMoney(cents, currency),
+                amount: formatMoney(cents, amountCurrency),
               }),
       });
       router.refresh();
@@ -330,7 +360,7 @@ export function RatesScreen({
   }
 
   return (
-    <ShowIn.Provider value={showIn}>
+    <>
     <div className="space-y-3">
       <div className="flex flex-wrap items-center gap-2">
         <Link href={`${basePath}?from=${shift(-dates.length)}${planQuery}`} className={nav} aria-label={tr("Previous {n} days", { n: dates.length })}>
@@ -465,7 +495,7 @@ export function RatesScreen({
                             </td>
                             {dates.map((d) => {
                               const rate = at.get(`${t.roomTypeId}|${p.ratePlanId}|${d}`)?.rateCents ?? null;
-                              const text = rate === null ? "" : formatMoneyInput(rate, currency);
+                              const text = rate === null ? "" : formatMoneyInput(rate, curOf(p.ratePlanId));
                               const past = d < businessDate;
                               return (
                                 <td key={d} className="tnum border-t border-line px-1 py-1 text-center">
@@ -478,10 +508,11 @@ export function RatesScreen({
                                         plan: p.ratePlanName, type: t.roomTypeName, date: tr.date(d, "d MMM"),
                                       })}
                                       onSave={(v) => saveDay({ roomTypeId: t.roomTypeId, ratePlanId: p.ratePlanId, date: d, adults: null }, v)}
+                                      equivalent={equivalentFor(p.ratePlanId)}
                                     />
                                   ) : (
                                     <span className={rate === null ? "text-ink-faint" : "text-ink-muted"}>
-                                      {rate === null ? "—" : formatMoney(rate, currency)}
+                                      {rate === null ? "—" : formatMoney(rate, curOf(p.ratePlanId))}
                                     </span>
                                   )}
                                 </td>
@@ -497,7 +528,7 @@ export function RatesScreen({
                                 const own = occAt.get(`${t.roomTypeId}|${p.ratePlanId}|${d}|${a}`);
                                 const std = at.get(`${t.roomTypeId}|${p.ratePlanId}|${d}`)?.rateCents ?? null;
                                 const fb = fallback(p.ratePlanId, t.roomTypeId, std, a);
-                                const text = own === undefined ? "" : formatMoneyInput(own, currency);
+                                const text = own === undefined ? "" : formatMoneyInput(own, curOf(p.ratePlanId));
                                 const past = d < businessDate;
                                 return (
                                   <td key={d} className="tnum border-t border-line/60 px-1 py-1 text-center">
@@ -506,15 +537,16 @@ export function RatesScreen({
                                         key={text}
                                         initial={text}
                                         faintEmpty
-                                        placeholder={fb === null ? "—" : formatMoneyInput(fb, currency)}
+                                        placeholder={fb === null ? "—" : formatMoneyInput(fb, curOf(p.ratePlanId))}
                                         ariaLabel={tr("{plan}, {type}, {n} adults, {date}", {
                                           plan: p.ratePlanName, type: t.roomTypeName, n: a, date: tr.date(d, "d MMM"),
                                         })}
                                         onSave={(v) => saveDay({ roomTypeId: t.roomTypeId, ratePlanId: p.ratePlanId, date: d, adults: a }, v)}
+                                        equivalent={equivalentFor(p.ratePlanId)}
                                       />
                                     ) : (
                                       <span className={own === undefined ? "text-ink-faint" : "text-ink-muted"}>
-                                        {own !== undefined ? formatMoney(own, currency) : fb === null ? "—" : formatMoney(fb, currency)}
+                                        {own !== undefined ? formatMoney(own, curOf(p.ratePlanId)) : fb === null ? "—" : formatMoney(fb, curOf(p.ratePlanId))}
                                       </span>
                                     )}
                                   </td>
@@ -606,6 +638,6 @@ export function RatesScreen({
         </div>
       )}
     </div>
-    </ShowIn.Provider>
+    </>
   );
 }

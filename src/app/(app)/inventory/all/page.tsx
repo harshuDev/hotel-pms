@@ -80,7 +80,7 @@ export default async function Page({
         </div>
       )}
 
-      <InventoryAll cells={cells} />
+      <InventoryAll cells={cells} planCurrency={plans.find((p) => p.id === planId)?.currency ?? null} />
     </div>
   );
 }

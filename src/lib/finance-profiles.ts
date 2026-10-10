@@ -37,6 +37,13 @@ export interface CurrencyProfile {
   rateKind: CurrencyRateKind;
   /** Units of the default currency one unit of this one buys, in millionths. */
   fixedRateMicros: number | null;
+  /**
+   * The rate in use (0138): the fixed rate, else today's live rate, in the
+   * same millionths. Null when there is none yet.
+   */
+  rateMicros?: number | null;
+  /** The day a live rate is from; null for a fixed rate. */
+  rateDate?: string | null;
 }
 
 /**
@@ -177,10 +184,8 @@ export interface DisplayCurrency {
 
 /*
  * Legal fixed pegs, in millionths of the hotel's currency per unit of the
- * other: the CFA francs are pegged to the euro by treaty at 655.957, so a
- * "Live Exchange" EUR profile on an XOF or XAF hotel is that figure exactly.
- * Any other live rate needs a feed this project does not have, and shows
- * nothing rather than a guess.
+ * other: the CFA francs are pegged to the euro by treaty at 655.957. Used
+ * only when Postgres has not handed down the rate in use (0138).
  */
 const PEGS: Record<string, Record<string, number>> = {
   XOF: { EUR: 655_957_000 },
@@ -189,8 +194,8 @@ const PEGS: Record<string, Record<string, number>> = {
 
 /**
  * The hotel's additional currencies (Settings -> Currencies) that a price can
- * be shown in: a fixed rate as typed, else a legal peg. Display only --
- * every price is still typed, stored, booked and invoiced in `base`.
+ * be shown in: the rate in use as Postgres worked it out (fixed, else live),
+ * else a typed fixed rate, else a legal peg.
  */
 export function displayCurrencies(base: string, profiles: CurrencyProfile[]): DisplayCurrency[] {
   const b = base.trim().toUpperCase();
@@ -198,8 +203,46 @@ export function displayCurrencies(base: string, profiles: CurrencyProfile[]): Di
   for (const p of profiles) {
     const c = p.currency.trim().toUpperCase();
     if (c === b || out.some((d) => d.currency === c)) continue;
-    const rate = p.rateKind === "fixed" && p.fixedRateMicros ? p.fixedRateMicros : PEGS[b]?.[c];
+    const rate =
+      p.rateMicros ?? (p.rateKind === "fixed" && p.fixedRateMicros ? p.fixedRateMicros : PEGS[b]?.[c]);
     if (rate && rate > 0) out.push({ currency: c, rateMicros: rate });
   }
   return out;
+}
+
+/** The smallest amount a currency is written in, in hundredths (money.ts, 0138). */
+function minorStep(currency: string): bigint {
+  const c = currency.trim().toUpperCase();
+  return c === "XOF" || c === "XAF" ? BigInt(100) : BigInt(1);
+}
+
+/**
+ * An amount in one of the hotel's currencies, in another, as
+ * `convert_currency_cents()` does it: through the hotel's currency, rounded
+ * once, half away from zero, to the target's smallest unit. `rates` holds
+ * each other currency's rate in use; the hotel's own is one. Null without a
+ * rate. BigInt, so no money passes through a float.
+ */
+export function convertBetween(
+  cents: number,
+  from: string,
+  to: string,
+  base: string,
+  rates: DisplayCurrency[],
+): number | null {
+  const f = from.trim().toUpperCase();
+  const t = to.trim().toUpperCase();
+  if (f === t) return cents;
+  const b = base.trim().toUpperCase();
+  const rateOf = (c: string) => (c === b ? 1_000_000 : (rates.find((d) => d.currency === c)?.rateMicros ?? null));
+  const rf = rateOf(f);
+  const rt = rateOf(t);
+  if (!rf || !rt || !Number.isSafeInteger(cents)) return null;
+  const step = minorStep(t);
+  const n = BigInt(cents) * BigInt(rf);
+  const d = BigInt(rt) * step;
+  const neg = n < BigInt(0);
+  const a = neg ? -n : n;
+  const q = ((a * BigInt(2) + d) / (BigInt(2) * d)) * step;
+  return Number(neg ? -q : q);
 }

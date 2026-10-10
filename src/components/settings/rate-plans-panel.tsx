@@ -17,15 +17,16 @@ import type {
   WeekRate,
 } from "@/lib/types";
 import { PlanRates, type PlanRatesHandle } from "@/components/settings/plan-rates";
-import { displayCurrencies, type CurrencyProfile } from "@/lib/finance-profiles";
+import { convertBetween, displayCurrencies, type CurrencyProfile } from "@/lib/finance-profiles";
 import { RateCombinations } from "@/components/settings/rate-combinations";
 import type { AccountingCategory } from "@/lib/finance-profiles";
 import { formatPercentBps, parsePercentBps } from "@/lib/finance-profiles";
-import { formatMoneyInput, parseMoney } from "@/lib/money";
+import { formatMoney, formatMoneyInput, parseMoney } from "@/lib/money";
 import {
   deleteRatePlan,
   saveRatePlan,
   setRatePlanCancellationPolicy,
+  setRatePlanCurrency,
   setRatePlanTerms,
   saveWeekRates,
   setRateDefaultOccupancy,
@@ -134,6 +135,9 @@ type Draft = {
   accountingCategoryId: string;
   /** None is every channel. */
   channelIds: string[];
+  /** The currency the plan's prices are typed in (0138), and what it was saved as. */
+  currency: string;
+  wasCurrency: string;
 };
 
 const MEALS: MealType[] = ["breakfast", "lunch", "dinner"];
@@ -164,7 +168,7 @@ function codeFor(title: string, taken: string[]): string {
  * stored against "new", so the grid starts empty, and a derivation ticked on
  * the form draws the parent's week adjusted, as it will be once saved.
  */
-function newPlanFor(d: Draft): RatePlan {
+function newPlanFor(d: Draft, hotelCurrency: string): RatePlan {
   const down = d.relation.startsWith("down");
   let derivedPercentBps: number | null = null;
   let derivedAmountCents: number | null = null;
@@ -213,10 +217,14 @@ function newPlanFor(d: Draft): RatePlan {
     accountingCategoryId: d.accountingCategoryId || null,
     channelIds: d.channelIds,
     extras: [],
+    currency: d.currency === hotelCurrency ? null : d.currency,
   };
 }
 
-function draftOf(p: RatePlan | null, defaultPolicyId: string, currency: string): Draft {
+function draftOf(p: RatePlan | null, defaultPolicyId: string, hotelCurrency: string): Draft {
+  // The plan's own amounts are in its currency; Sell With Extras prices are
+  // charged on the folio, so they stay in the hotel's.
+  const currency = p?.currency ?? hotelCurrency;
   const policy = p ? (p.cancellationPolicyId ?? "") : defaultPolicyId;
   const n = (v: number | null) => (v === null ? "" : String(v));
   const pct = p?.derivedPercentBps ?? null;
@@ -234,7 +242,7 @@ function draftOf(p: RatePlan | null, defaultPolicyId: string, currency: string):
     wasMealPlan: p?.mealPlan ?? "room_only",
     meals: p?.meals ?? [],
     wasMeals: p?.meals ?? [],
-    extras: (p?.extras ?? []).map((x) => extraDraftOf(x, currency)),
+    extras: (p?.extras ?? []).map((x) => extraDraftOf(x, hotelCurrency)),
     wasExtras: p?.extras ?? [],
     dated: !!(p?.validFrom || p?.validTo),
     showMinimums: (p?.minAdults ?? null) !== null || (p?.minChildren ?? null) !== null,
@@ -271,6 +279,8 @@ function draftOf(p: RatePlan | null, defaultPolicyId: string, currency: string):
     taxRateIds: p?.taxRateIds ?? [],
     accountingCategoryId: p?.accountingCategoryId ?? "",
     channelIds: p?.channelIds ?? [],
+    currency,
+    wasCurrency: currency,
   };
 }
 
@@ -596,7 +606,7 @@ export function RatePlansPanel({
   openPlanId?: string | null;
   /** The season its prices open on; null is the Default Season. */
   openSeasonId?: string | null;
-  /** Settings -> Currencies: what the Currency dropdown can SHOW prices in. */
+  /** Settings -> Currencies: what a plan can be priced in (0138). */
   currencyProfiles?: CurrencyProfile[];
   canEdit: boolean;
   pending: boolean;
@@ -605,11 +615,11 @@ export function RatePlansPanel({
   const tr = useT();
   const currency = useCurrency();
   const ratesRef = useRef<PlanRatesHandle>(null);
-  // The Currency dropdown: prices are always typed and stored in the hotel's
-  // currency; choosing another shows each one converted beside it.
-  const shownIn = useMemo(() => displayCurrencies(currency, currencyProfiles), [currency, currencyProfiles]);
-  const [showCurrency, setShowCurrency] = useState(currency);
-  const showIn = shownIn.find((d) => d.currency === showCurrency) ?? null;
+  // The Currency dropdown (0138): the hotel's currency and every other one
+  // with a rate in use. A plan's prices are typed and stored in it; bookings
+  // convert to the hotel's currency.
+  const rates = useMemo(() => displayCurrencies(currency, currencyProfiles), [currency, currencyProfiles]);
+  const convert = (cents: number, from: string, to: string) => convertBetween(cents, from, to, currency, rates);
   const [showExpired, setShowExpired] = useState(false);
   const [sortBy, setSortBy] = useState<"title" | "policy" | null>(null);
   const [desc, setDesc] = useState(false);
@@ -792,6 +802,12 @@ export function RatePlansPanel({
         const set = await setRatePlanCancellationPolicy(saved.data.id, d.cancellationPolicyId || null);
         if (!set.ok) return set;
       }
+      // Before the terms and the week, which are typed in the new currency:
+      // Postgres converts what is already stored (0138).
+      if (!d.derived && d.currency !== d.wasCurrency) {
+        const cur = await setRatePlanCurrency(saved.data.id, d.currency);
+        if (!cur.ok) return cur;
+      }
       const setTerms = await setRatePlanTerms({ ratePlanId: saved.data.id, ...terms });
       if (!setTerms.ok) return setTerms;
       if (
@@ -892,16 +908,49 @@ export function RatePlansPanel({
             />
           </Row>
           <Row label={tr("Currency")} required>
-            {shownIn.length > 0 ? (
-              <FilterSelect
-                label={tr("Currency")}
-                value={[showCurrency]}
-                options={[currency, ...shownIn.map((d) => d.currency)].map((c) => ({ id: c, name: c }))}
-                onChange={(ids) => setShowCurrency(ids[0] ?? currency)}
-              />
-            ) : (
-              <p className="rounded border border-line bg-shell px-3 py-2 text-[14px] text-ink-muted">{currency}</p>
-            )}
+            {(() => {
+              // A derived plan is in its parent's currency (0138).
+              const parent = draft.derived ? ratePlans.find((p) => p.id === draft.parentRatePlanId) : undefined;
+              if (parent) {
+                return (
+                  <p className="rounded border border-line bg-shell px-3 py-2 text-[14px] text-ink-muted">
+                    {parent.currency ?? currency}
+                  </p>
+                );
+              }
+              const choices = [...new Set([currency, ...rates.map((d) => d.currency), draft.currency])];
+              if (choices.length < 2) {
+                return <p className="rounded border border-line bg-shell px-3 py-2 text-[14px] text-ink-muted">{draft.currency}</p>;
+              }
+              return (
+                <FilterSelect
+                  label={tr("Currency")}
+                  value={[draft.currency]}
+                  options={choices.map((c) => ({ id: c, name: c }))}
+                  onChange={(ids) => {
+                    const to = ids[0];
+                    if (!to || to === draft.currency) return;
+                    // The amounts on the form keep their value, not their digits.
+                    const again = (text: string) => {
+                      if (text.trim() === "") return text;
+                      try {
+                        const v = convert(parseMoney(text), draft.currency, to);
+                        return v === null ? text : formatMoneyInput(v, to);
+                      } catch {
+                        return text;
+                      }
+                    };
+                    set({
+                      currency: to,
+                      perAdult: again(draft.perAdult),
+                      decreaseAdult: again(draft.decreaseAdult),
+                      perChild: again(draft.perChild),
+                      adjustment: draft.relation.endsWith("amount") ? again(draft.adjustment) : draft.adjustment,
+                    });
+                  }}
+                />
+              );
+            })()}
           </Row>
           <Row label={tr("Description")} htmlFor="rp-description" wide>
             <input id="rp-description" value={draft.description} className={fieldR}
@@ -990,17 +1039,17 @@ export function RatePlansPanel({
               <>
                 <label className={label}>
                   {tr("Increase Per Adult")}
-                  <input inputMode="decimal" value={draft.perAdult} placeholder={formatMoneyInput(0, currency)} className={cn(field, "tnum")}
+                  <input inputMode="decimal" value={draft.perAdult} placeholder={formatMoneyInput(0, draft.currency)} className={cn(field, "tnum")}
                     onChange={(e) => set({ perAdult: e.target.value })} />
                 </label>
                 <label className={label}>
                   {tr("Decrease Per Adult")}
-                  <input inputMode="decimal" value={draft.decreaseAdult} placeholder={formatMoneyInput(0, currency)} className={cn(field, "tnum")}
+                  <input inputMode="decimal" value={draft.decreaseAdult} placeholder={formatMoneyInput(0, draft.currency)} className={cn(field, "tnum")}
                     onChange={(e) => set({ decreaseAdult: e.target.value })} />
                 </label>
                 <label className={label}>
                   {tr("Increase Per Child")}
-                  <input inputMode="decimal" value={draft.perChild} placeholder={formatMoneyInput(0, currency)} className={cn(field, "tnum")}
+                  <input inputMode="decimal" value={draft.perChild} placeholder={formatMoneyInput(0, draft.currency)} className={cn(field, "tnum")}
                     onChange={(e) => set({ perChild: e.target.value })} />
                 </label>
               </>
@@ -1012,8 +1061,12 @@ export function RatePlansPanel({
           // A new plan is priced in the same form, as the reference's is: the
           // grid runs on the draft, and one Save creates the plan and then
           // writes its week under the id it was given.
-          const plan = draft.id ? ratePlans.find((p) => p.id === draft.id) : newPlanFor(draft);
+          const plan = draft.id ? ratePlans.find((p) => p.id === draft.id) : newPlanFor(draft, currency);
           if (!plan) return null;
+          // A derived plan shows its parent's week, in the parent's currency.
+          const parentPlan = ratePlans.find((p) => p.id === plan.parentRatePlanId);
+          const planCurrency = parentPlan ? (parentPlan.currency ?? currency) : draft.currency;
+          const savedCurrency = parentPlan ? planCurrency : (draft.id ? (plan.currency ?? currency) : planCurrency);
           const cents = (v: string) => {
             try {
               return v.trim() === "" ? 0 : Math.max(0, parseMoney(v));
@@ -1025,7 +1078,7 @@ export function RatePlansPanel({
             <>
               <h5 className={section}>{tr("Rates")}</h5>
               <PlanRates
-                key={`${draft.id ?? "new"}|${openSeasonId ?? ""}`}
+                key={`${draft.id ?? "new"}|${openSeasonId ?? ""}|${planCurrency}`}
                 ref={ratesRef}
                 plan={plan}
                 mode={draft.singlePrice ? "single" : draft.automatic ? "per_person" : "per_occupancy"}
@@ -1037,7 +1090,16 @@ export function RatePlansPanel({
                 weekRates={weekRates}
                 coverage={coverage}
                 initialSeasonId={plan.id === openPlanId ? openSeasonId : null}
-                showIn={showIn}
+                currency={planCurrency}
+                fromSaved={(c) => convert(c, savedCurrency, planCurrency) ?? c}
+                equivalent={
+                  planCurrency === currency
+                    ? null
+                    : (c) => {
+                        const v = convert(c, planCurrency, currency);
+                        return v === null ? "\u00a0" : `≈ ${formatMoney(v, currency)}`;
+                      }
+                }
                 canEdit={canEdit}
               />
             </>
@@ -1222,7 +1284,7 @@ export function RatePlansPanel({
                           </span>
                         )}
                       </td>
-                      <td className="px-3 py-3.5 text-ink">{currency}</td>
+                      <td className="px-3 py-3.5 text-ink">{p.currency ?? currency}</td>
                       <td className="bg-shell/40 px-3 py-3.5 text-ink">{policyName(p.cancellationPolicyId)}</td>
                       <td className="px-3 py-3.5">{p.isDefault && <TickCircle />}</td>
                       <td className="px-3 py-2">

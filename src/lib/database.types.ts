@@ -1959,6 +1959,30 @@ export type Database = {
           },
         ]
       }
+      exchange_rates: {
+        Row: {
+          currency: string
+          fetched_at: string
+          per_eur_micros: number
+          rate_date: string | null
+          source: string
+        }
+        Insert: {
+          currency: string
+          fetched_at?: string
+          per_eur_micros: number
+          rate_date?: string | null
+          source: string
+        }
+        Update: {
+          currency?: string
+          fetched_at?: string
+          per_eur_micros?: number
+          rate_date?: string | null
+          source?: string
+        }
+        Relationships: []
+      }
       extra_categories: {
         Row: {
           created_at: string
@@ -3943,6 +3967,7 @@ export type Database = {
           child_adjust_cents: number | null
           code: string
           created_at: string
+          currency: string | null
           default_occupancies: Json
           derived_amount_cents: number | null
           derived_kind: string | null
@@ -3977,6 +4002,7 @@ export type Database = {
           child_adjust_cents?: number | null
           code: string
           created_at?: string
+          currency?: string | null
           default_occupancies?: Json
           derived_amount_cents?: number | null
           derived_kind?: string | null
@@ -4011,6 +4037,7 @@ export type Database = {
           child_adjust_cents?: number | null
           code?: string
           created_at?: string
+          currency?: string | null
           default_occupancies?: Json
           derived_amount_cents?: number | null
           derived_kind?: string | null
@@ -5889,6 +5916,15 @@ export type Database = {
         Returns: undefined
       }
       confirm_booking: { Args: { p_booking_id: string }; Returns: undefined }
+      convert_currency_cents: {
+        Args: {
+          p_cents: number
+          p_from: string
+          p_property_id: string
+          p_to: string
+        }
+        Returns: number
+      }
       country_report: {
         Args: { p_from: string; p_to: string }
         Returns: {
@@ -5986,6 +6022,19 @@ export type Database = {
           p_room_type_id: string
         }
         Returns: number
+      }
+      currency_minor_step: { Args: { p_currency: string }; Returns: number }
+      currency_per_base: {
+        Args: { p_currency: string; p_property_id: string }
+        Returns: number
+      }
+      currency_rates: {
+        Args: never
+        Returns: {
+          currency: string
+          rate_date: string
+          rate_micros: number
+        }[]
       }
       current_cashier_shift: {
         Args: never
@@ -6830,6 +6879,13 @@ export type Database = {
           weekday_names: string
         }[]
       }
+      public_currency_rates: {
+        Args: { p_property_id: string }
+        Returns: {
+          currency: string
+          rate_micros: number
+        }[]
+      }
       public_direct_channel: {
         Args: { p_property_id: string }
         Returns: string
@@ -7011,6 +7067,10 @@ export type Database = {
           room_nights: number
         }[]
       }
+      rate_plan_to_base: {
+        Args: { p_cents: number; p_rate_plan_id: string }
+        Returns: number
+      }
       reaction_conditions_check: {
         Args: { p_depth: number; p_group: Json; p_property: string }
         Returns: number
@@ -7097,6 +7157,7 @@ export type Database = {
         }
         Returns: string
       }
+      refresh_exchange_rates: { Args: never; Returns: number }
       remove_booking_card: { Args: { p_card_id: string }; Returns: string }
       remove_rate_combination: {
         Args: { p_rate_plan_id: string; p_room_type_id: string }
@@ -7860,6 +7921,10 @@ export type Database = {
       }
       set_rate_plan_cancellation_policy: {
         Args: { p_cancellation_policy_id?: string; p_rate_plan_id: string }
+        Returns: undefined
+      }
+      set_rate_plan_currency: {
+        Args: { p_currency: string; p_rate_plan_id: string }
         Returns: undefined
       }
       set_rate_plan_default_occupancy: {

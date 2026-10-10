@@ -3380,5 +3380,13 @@
  "Your sign-in worked, but it is not linked to an active staff account, so there is nothing to show. Either the account was never set up or it has been deactivated. An administrator can sort it out.": "L’accesso è riuscito, ma non è collegato a un account del personale attivo, quindi non c’è nulla da mostrare. L’account non è mai stato configurato oppure è stato disattivato. Un amministratore può risolvere.",
  "Your Terms and Conditions:": "I tuoi termini e condizioni:",
  "Zambia": "Zambia",
- "Zimbabwe": "Zimbabwe"
+ "Zimbabwe": "Zimbabwe",
+ "{0} is not one of the hotel's currencies. Add it in Settings -> Currencies first.": "{0} non è una delle valute dell'hotel. Aggiungila prima in Impostazioni -> Valute.",
+ "{0} is priced in {1}, so that currency cannot be changed": "{0} ha prezzi in {1}, quindi quella valuta non può essere modificata",
+ "{0} is priced in {1}, so that currency cannot be removed": "{0} ha prezzi in {1}, quindi quella valuta non può essere rimossa",
+ "{0} takes its currency from the rate it is derived from": "{0} prende la valuta della tariffa da cui deriva",
+ "Only managers and administrators can change rates": "Solo i manager e gli amministratori possono modificare le tariffe",
+ "There is no exchange rate for {0} yet. Set a fixed rate for it in Settings -> Currencies.": "Non c'è ancora un tasso di cambio per {0}. Imposta un tasso fisso in Impostazioni -> Valute.",
+ "There is no live rate for {0} yet, and {1} is priced in it. Keep the fixed rate for now.": "Non c'è ancora un tasso in tempo reale per {0} e {1} ha prezzi in questa valuta. Mantieni per ora il tasso fisso.",
+ "These rate plans are priced in {currencies}. Set the rates of one currency at a time.": "Questi piani tariffari hanno prezzi in {currencies}. Imposta le tariffe di una valuta alla volta."
 }

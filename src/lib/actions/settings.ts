@@ -2344,6 +2344,27 @@ export async function setRatePlanCancellationPolicy(
   return { ok: true, data: null };
 }
 
+/**
+ * The currency a plan's prices are typed and stored in (0138). Its own action,
+ * like the cancellation policy. Prices already stored are converted at
+ * today's rate by Postgres; bookings stay in the hotel's currency.
+ */
+export async function setRatePlanCurrency(ratePlanId: string, currency: string): Promise<ActionResult<null>> {
+  const supabase = await createClient();
+
+  const { error } = await supabase.rpc("set_rate_plan_currency", {
+    p_rate_plan_id: ratePlanId,
+    p_currency: currency,
+  });
+
+  if (error) return { ok: false, error: await localised(error.message) };
+
+  revalidatePath("/settings");
+  revalidatePath("/inventory", "layout");
+  revalidatePath("/book", "layout");
+  return { ok: true, data: null };
+}
+
 /* -- Other -> Reactions (0104) --------------------------------------------- */
 
 export async function saveReaction(input: {

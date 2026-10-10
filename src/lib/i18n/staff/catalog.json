@@ -107,6 +107,9 @@
  "{0} is not a colour like #003580": {
   "kind": "db"
  },
+ "{0} is not one of the hotel's currencies. Add it in Settings -> Currencies first.": {
+  "kind": "db"
+ },
  "{0} is not sold through {1}.": {
   "kind": "db"
  },
@@ -120,6 +123,12 @@
   "kind": "db"
  },
  "{0} is on the platform team and cannot be added to a hotel": {
+  "kind": "db"
+ },
+ "{0} is priced in {1}, so that currency cannot be changed": {
+  "kind": "db"
+ },
+ "{0} is priced in {1}, so that currency cannot be removed": {
   "kind": "db"
  },
  "{0} is set on an extra or an extras category. Change those first, or untick Active to retire it.": {
@@ -189,6 +198,9 @@
   "kind": "db"
  },
  "{0} takes at most {1} children in a room.": {
+  "kind": "db"
+ },
+ "{0} takes its currency from the rate it is derived from": {
   "kind": "db"
  },
  "{abs}d ago": {
@@ -6302,6 +6314,9 @@
  "Only managers and administrators can change key lock systems": {
   "kind": "db"
  },
+ "Only managers and administrators can change rates": {
+  "kind": "db"
+ },
  "Only managers and administrators can change rates and availability": {
   "kind": "db"
  },
@@ -9229,7 +9244,13 @@
  "There is already an identification type called {0}": {
   "kind": "db"
  },
+ "There is no exchange rate for {0} yet. Set a fixed rate for it in Settings -> Currencies.": {
+  "kind": "db"
+ },
  "There is no live promotion with the code {0}": {
+  "kind": "db"
+ },
+ "There is no live rate for {0} yet, and {1} is priced in it. Keep the fixed rate for now.": {
   "kind": "db"
  },
  "There is no login for {0}. Send them an invitation first.": {
@@ -9240,6 +9261,9 @@
  },
  "There is no open business date to close": {
   "kind": "db"
+ },
+ "These rate plans are priced in {currencies}. Set the rates of one currency at a time.": {
+  "kind": "text"
  },
  "These rooms already exist: {0}": {
   "kind": "db"

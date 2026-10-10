@@ -3379,5 +3379,13 @@
  "Your sign-in worked, but it is not linked to an active staff account, so there is nothing to show. Either the account was never set up or it has been deactivated. An administrator can sort it out.": "Ihre Anmeldung hat funktioniert, ist aber mit keinem aktiven Mitarbeiterkonto verknüpft, daher gibt es nichts anzuzeigen. Entweder wurde das Konto nie eingerichtet oder es wurde deaktiviert. Ein Administrator kann das klären.",
  "Your Terms and Conditions:": "Ihre Allgemeinen Geschäftsbedingungen:",
  "Zambia": "Sambia",
- "Zimbabwe": "Simbabwe"
+ "Zimbabwe": "Simbabwe",
+ "{0} is not one of the hotel's currencies. Add it in Settings -> Currencies first.": "{0} ist keine der Währungen des Hotels. Fügen Sie sie zuerst unter Einstellungen -> Währungen hinzu.",
+ "{0} is priced in {1}, so that currency cannot be changed": "{0} ist in {1} bepreist, daher kann diese Währung nicht geändert werden",
+ "{0} is priced in {1}, so that currency cannot be removed": "{0} ist in {1} bepreist, daher kann diese Währung nicht entfernt werden",
+ "{0} takes its currency from the rate it is derived from": "{0} übernimmt die Währung der Rate, von der sie abgeleitet ist",
+ "Only managers and administrators can change rates": "Nur Manager und Administratoren können Raten ändern",
+ "There is no exchange rate for {0} yet. Set a fixed rate for it in Settings -> Currencies.": "Für {0} gibt es noch keinen Wechselkurs. Legen Sie unter Einstellungen -> Währungen einen festen Kurs fest.",
+ "There is no live rate for {0} yet, and {1} is priced in it. Keep the fixed rate for now.": "Für {0} gibt es noch keinen Live-Kurs, und {1} ist darin bepreist. Behalten Sie vorerst den festen Kurs.",
+ "These rate plans are priced in {currencies}. Set the rates of one currency at a time.": "Diese Ratenpläne sind in {currencies} bepreist. Legen Sie die Raten jeweils für eine Währung fest."
 }

@@ -3379,5 +3379,13 @@
  "Your sign-in worked, but it is not linked to an active staff account, so there is nothing to show. Either the account was never set up or it has been deactivated. An administrator can sort it out.": "Innskráningin tókst en hún er ekki tengd virkum starfsmannaaðgangi, svo það er ekkert að sýna. Annaðhvort var aðgangurinn aldrei settur upp eða hann hefur verið gerður óvirkur. Kerfisstjóri getur lagað það.",
  "Your Terms and Conditions:": "Skilmálarnir þínir:",
  "Zambia": "Sambía",
- "Zimbabwe": "Simbabve"
+ "Zimbabwe": "Simbabve",
+ "{0} is not one of the hotel's currencies. Add it in Settings -> Currencies first.": "{0} er ekki einn af gjaldmiðlum hótelsins. Bættu honum fyrst við í Stillingar -> Gjaldmiðlar.",
+ "{0} is priced in {1}, so that currency cannot be changed": "{0} er verðlagt í {1}, svo ekki er hægt að breyta þeim gjaldmiðli",
+ "{0} is priced in {1}, so that currency cannot be removed": "{0} er verðlagt í {1}, svo ekki er hægt að fjarlægja þann gjaldmiðil",
+ "{0} takes its currency from the rate it is derived from": "{0} tekur gjaldmiðil verðsins sem það er leitt af",
+ "Only managers and administrators can change rates": "Aðeins stjórnendur og kerfisstjórar geta breytt verðum",
+ "There is no exchange rate for {0} yet. Set a fixed rate for it in Settings -> Currencies.": "Ekkert gengi er enn til fyrir {0}. Settu fast gengi í Stillingar -> Gjaldmiðlar.",
+ "There is no live rate for {0} yet, and {1} is priced in it. Keep the fixed rate for now.": "Ekkert lifandi gengi er enn til fyrir {0} og {1} er verðlagt í honum. Haltu föstu gengi í bili.",
+ "These rate plans are priced in {currencies}. Set the rates of one currency at a time.": "Þessar verðáætlanir eru verðlagðar í {currencies}. Settu verð eins gjaldmiðils í einu."
 }
