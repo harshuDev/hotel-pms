@@ -3388,5 +3388,21 @@
  "Only managers and administrators can change rates": "Solo los gerentes y administradores pueden cambiar las tarifas",
  "There is no exchange rate for {0} yet. Set a fixed rate for it in Settings -> Currencies.": "Todavía no hay tipo de cambio para {0}. Fije un tipo fijo en Configuración -> Monedas.",
  "There is no live rate for {0} yet, and {1} is priced in it. Keep the fixed rate for now.": "Todavía no hay tipo de cambio en vivo para {0}, y {1} tiene precios en ella. Mantenga el tipo fijo por ahora.",
- "These rate plans are priced in {currencies}. Set the rates of one currency at a time.": "Estos planes de tarifas tienen precios en {currencies}. Fije las tarifas de una moneda a la vez."
+ "These rate plans are priced in {currencies}. Set the rates of one currency at a time.": "Estos planes de tarifas tienen precios en {currencies}. Fije las tarifas de una moneda a la vez.",
+ "Add the Channex API key first": "Añada primero la clave API de Channex",
+ "API Key:": "Clave API:",
+ "Channex API key": "Clave API de Channex",
+ "Channex Property:": "Propiedad de Channex:",
+ "Channex refused the API key": "Channex rechazó la clave API",
+ "Channex saved.": "Channex guardado.",
+ "Connected · {when}": "Conectado · {when}",
+ "Environment:": "Entorno:",
+ "Is Active:": "Activo:",
+ "Pick Staging or Production": "Elija Staging o Producción",
+ "Production": "Producción",
+ "Staging": "Staging",
+ "Test connection": "Probar conexión",
+ "Testing…": "Probando…",
+ "That is not a Channex property id": "Eso no es un id de propiedad de Channex",
+ "The key sees no Channex properties yet. Create the property in Channex first.": "La clave aún no ve propiedades de Channex. Cree primero la propiedad en Channex."
 }

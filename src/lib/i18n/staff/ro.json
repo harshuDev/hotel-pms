@@ -3435,5 +3435,21 @@
  "Only managers and administrators can change rates": "Doar managerii și administratorii pot modifica tarifele",
  "There is no exchange rate for {0} yet. Set a fixed rate for it in Settings -> Currencies.": "Încă nu există un curs de schimb pentru {0}. Setați un curs fix în Setări -> Monede.",
  "There is no live rate for {0} yet, and {1} is priced in it. Keep the fixed rate for now.": "Încă nu există un curs live pentru {0}, iar {1} are prețuri în această monedă. Păstrați deocamdată cursul fix.",
- "These rate plans are priced in {currencies}. Set the rates of one currency at a time.": "Aceste planuri tarifare au prețuri în {currencies}. Setați tarifele pentru o singură monedă odată."
+ "These rate plans are priced in {currencies}. Set the rates of one currency at a time.": "Aceste planuri tarifare au prețuri în {currencies}. Setați tarifele pentru o singură monedă odată.",
+ "Add the Channex API key first": "Adăugați mai întâi cheia API Channex",
+ "API Key:": "Cheie API:",
+ "Channex API key": "Cheie API Channex",
+ "Channex Property:": "Proprietate Channex:",
+ "Channex refused the API key": "Channex a refuzat cheia API",
+ "Channex saved.": "Channex salvat.",
+ "Connected · {when}": "Conectat · {when}",
+ "Environment:": "Mediu:",
+ "Is Active:": "Activ:",
+ "Pick Staging or Production": "Alegeți Staging sau Producție",
+ "Production": "Producție",
+ "Staging": "Staging",
+ "Test connection": "Testează conexiunea",
+ "Testing…": "Se testează…",
+ "That is not a Channex property id": "Acesta nu este un id de proprietate Channex",
+ "The key sees no Channex properties yet. Create the property in Channex first.": "Cheia nu vede încă nicio proprietate Channex. Creați mai întâi proprietatea în Channex."
 }

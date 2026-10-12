@@ -3339,5 +3339,21 @@
  "Only managers and administrators can change rates": "เฉพาะผู้จัดการและผู้ดูแลระบบเท่านั้นที่เปลี่ยนเรตได้",
  "There is no exchange rate for {0} yet. Set a fixed rate for it in Settings -> Currencies.": "ยังไม่มีอัตราแลกเปลี่ยนสำหรับ {0} ตั้งอัตราคงที่ที่ การตั้งค่า -> สกุลเงิน",
  "There is no live rate for {0} yet, and {1} is priced in it. Keep the fixed rate for now.": "ยังไม่มีอัตราแลกเปลี่ยนสดสำหรับ {0} และ {1} ตั้งราคาเป็นสกุลเงินนี้ ใช้อัตราคงที่ไปก่อน",
- "These rate plans are priced in {currencies}. Set the rates of one currency at a time.": "แผนราคาเหล่านี้ตั้งราคาเป็น {currencies} ตั้งเรตทีละสกุลเงิน"
+ "These rate plans are priced in {currencies}. Set the rates of one currency at a time.": "แผนราคาเหล่านี้ตั้งราคาเป็น {currencies} ตั้งเรตทีละสกุลเงิน",
+ "Add the Channex API key first": "เพิ่มคีย์ API ของ Channex ก่อน",
+ "API Key:": "คีย์ API:",
+ "Channex API key": "คีย์ API ของ Channex",
+ "Channex Property:": "ที่พัก Channex:",
+ "Channex refused the API key": "Channex ปฏิเสธคีย์ API",
+ "Channex saved.": "บันทึก Channex แล้ว",
+ "Connected · {when}": "เชื่อมต่อแล้ว · {when}",
+ "Environment:": "สภาพแวดล้อม:",
+ "Is Active:": "เปิดใช้งาน:",
+ "Pick Staging or Production": "เลือก Staging หรือ Production",
+ "Production": "Production",
+ "Staging": "Staging",
+ "Test connection": "ทดสอบการเชื่อมต่อ",
+ "Testing…": "กำลังทดสอบ…",
+ "That is not a Channex property id": "นี่ไม่ใช่รหัสที่พักของ Channex",
+ "The key sees no Channex properties yet. Create the property in Channex first.": "คีย์ยังไม่เห็นที่พักใน Channex สร้างที่พักใน Channex ก่อน"
 }
