@@ -3387,5 +3387,21 @@
  "Only managers and administrators can change rates": "Nur Manager und Administratoren können Raten ändern",
  "There is no exchange rate for {0} yet. Set a fixed rate for it in Settings -> Currencies.": "Für {0} gibt es noch keinen Wechselkurs. Legen Sie unter Einstellungen -> Währungen einen festen Kurs fest.",
  "There is no live rate for {0} yet, and {1} is priced in it. Keep the fixed rate for now.": "Für {0} gibt es noch keinen Live-Kurs, und {1} ist darin bepreist. Behalten Sie vorerst den festen Kurs.",
- "These rate plans are priced in {currencies}. Set the rates of one currency at a time.": "Diese Ratenpläne sind in {currencies} bepreist. Legen Sie die Raten jeweils für eine Währung fest."
+ "These rate plans are priced in {currencies}. Set the rates of one currency at a time.": "Diese Ratenpläne sind in {currencies} bepreist. Legen Sie die Raten jeweils für eine Währung fest.",
+ "Add the Channex API key first": "Fügen Sie zuerst den Channex-API-Schlüssel hinzu",
+ "API Key:": "API-Schlüssel:",
+ "Channex API key": "Channex-API-Schlüssel",
+ "Channex Property:": "Channex-Unterkunft:",
+ "Channex refused the API key": "Channex hat den API-Schlüssel abgelehnt",
+ "Channex saved.": "Channex gespeichert.",
+ "Connected · {when}": "Verbunden · {when}",
+ "Environment:": "Umgebung:",
+ "Is Active:": "Ist aktiv:",
+ "Pick Staging or Production": "Wählen Sie Staging oder Produktion",
+ "Production": "Produktion",
+ "Staging": "Staging",
+ "Test connection": "Verbindung testen",
+ "Testing…": "Wird getestet…",
+ "That is not a Channex property id": "Das ist keine Channex-Unterkunfts-ID",
+ "The key sees no Channex properties yet. Create the property in Channex first.": "Der Schlüssel sieht noch keine Channex-Unterkünfte. Legen Sie die Unterkunft zuerst in Channex an."
 }

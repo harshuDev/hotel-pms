@@ -38,12 +38,14 @@ import {
   getWeekRates,
   getRatePlanCoverage,
   getChannelManagers,
+  getChannexConnection,
   getBookingEngineSettings,
   getBookingWidgets,
   getApiKeys,
   getSystemConnections,
   getReactions,
   getDocumentTemplate,
+  getIsPlatformMember,
   getPlatformProperties,
   getStaffSettings,
   getTaxRateSettings,
@@ -108,6 +110,7 @@ export default async function SettingsPage({
     weekRates,
     rateCoverage,
     channelManagers,
+    channexConnection,
     bookingEngine,
     bookingWidgets,
     apiKeys,
@@ -151,6 +154,7 @@ export default async function SettingsPage({
     tab === "rate-plans" || tab === "seasons" ? getWeekRates() : Promise.resolve([]),
     tab === "rate-plans" || tab === "seasons" ? getRatePlanCoverage() : Promise.resolve([]),
     tab === "channel-manager" ? getChannelManagers() : Promise.resolve([]),
+    tab === "channel-manager" ? getChannexConnection() : Promise.resolve(null),
     tab === "booking-engine" ? getBookingEngineSettings() : Promise.resolve(null),
     tab === "booking-widget" ? getBookingWidgets() : Promise.resolve([]),
     tab === "api-key" || tab === "developer-keys" ? getApiKeys() : Promise.resolve(null),
@@ -163,8 +167,12 @@ export default async function SettingsPage({
     tab === "templates" ? getDocumentTemplate("folio") : Promise.resolve(null),
   ]);
 
-  // Every hotel, for the platform team (0135); empty for a hotel's own staff.
-  const platformProperties = await getPlatformProperties();
+  // Every hotel for the platform team (0135), a login's granted hotels (0140),
+  // empty for a hotel's own staff.
+  const [platformProperties, isPlatformMember] = await Promise.all([
+    getPlatformProperties(),
+    getIsPlatformMember(),
+  ]);
 
   /*
    * The timezone list is worked out here, on the server, and handed down: if
@@ -187,6 +195,7 @@ export default async function SettingsPage({
         */
         key={property.id}
         platformProperties={platformProperties}
+        isPlatformMember={isPlatformMember}
         tab={tab}
         property={property}
         roomTypes={roomTypes}
@@ -231,6 +240,7 @@ export default async function SettingsPage({
         weekRates={weekRates}
         rateCoverage={rateCoverage}
         channelManagers={channelManagers}
+        channexConnection={channexConnection}
         bookingEngine={bookingEngine}
         bookingWidgets={bookingWidgets}
         apiKeys={apiKeys}

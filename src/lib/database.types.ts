@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.5"
+    PostgrestVersion: "14.17"
   }
   public: {
     Tables: {
@@ -1710,6 +1710,56 @@ export type Database = {
             foreignKeyName: "channels_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      channex_connections: {
+        Row: {
+          api_key_secret_id: string | null
+          channex_property_id: string | null
+          created_at: string
+          environment: string
+          id: string
+          is_active: boolean
+          last_test_message: string | null
+          last_test_ok: boolean | null
+          last_tested_at: string | null
+          property_id: string
+          updated_at: string
+        }
+        Insert: {
+          api_key_secret_id?: string | null
+          channex_property_id?: string | null
+          created_at?: string
+          environment?: string
+          id?: string
+          is_active?: boolean
+          last_test_message?: string | null
+          last_test_ok?: boolean | null
+          last_tested_at?: string | null
+          property_id: string
+          updated_at?: string
+        }
+        Update: {
+          api_key_secret_id?: string | null
+          channex_property_id?: string | null
+          created_at?: string
+          environment?: string
+          id?: string
+          is_active?: boolean
+          last_test_message?: string | null
+          last_test_ok?: boolean | null
+          last_tested_at?: string | null
+          property_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "channex_connections_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: true
             referencedRelation: "properties"
             referencedColumns: ["id"]
           },
@@ -3481,6 +3531,35 @@ export type Database = {
           website?: string | null
         }
         Relationships: []
+      }
+      property_access: {
+        Row: {
+          created_at: string
+          property_id: string
+          role: Database["public"]["Enums"]["staff_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          property_id: string
+          role?: Database["public"]["Enums"]["staff_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          property_id?: string
+          role?: Database["public"]["Enums"]["staff_role"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_access_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       property_policies: {
         Row: {
@@ -5850,6 +5929,7 @@ export type Database = {
           room_revenue_cents: number
         }[]
       }
+      channex_base_url: { Args: { p_environment: string }; Returns: string }
       charge_extra: {
         Args: { p_booking_id: string; p_extra_id: string; p_quantity?: number }
         Returns: string
@@ -7409,6 +7489,15 @@ export type Database = {
         }
         Returns: string
       }
+      save_channex_connection: {
+        Args: {
+          p_api_key: string
+          p_channex_property_id: string
+          p_environment: string
+          p_is_active: boolean
+        }
+        Returns: string
+      }
       save_currency_profile: {
         Args: {
           p_currency: string
@@ -8157,6 +8246,16 @@ export type Database = {
           gross_cents: number
           net_cents: number
           tax_cents: number
+        }[]
+      }
+      test_channex_connection: {
+        Args: never
+        Returns: {
+          channex_property_id: string
+          currency: string
+          message: string
+          ok: boolean
+          title: string
         }[]
       }
       unassign_room: { Args: { p_booking_room_id: string }; Returns: undefined }

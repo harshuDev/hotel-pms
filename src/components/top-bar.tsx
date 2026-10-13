@@ -10,7 +10,7 @@ export async function TopBar({
   propertyId: string;
   propertyName: string;
   businessDate: string;
-  /** Every hotel, for the platform team only (0135); empty for hotel staff. */
+  /** Every hotel for the platform team (0135), a login's granted hotels (0140); empty for hotel staff. */
   platformProperties: { id: string; name: string }[];
 }) {
   const tr = await getT();

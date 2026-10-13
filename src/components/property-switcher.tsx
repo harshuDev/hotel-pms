@@ -7,7 +7,8 @@ import { switchProperty } from "@/lib/actions/platform";
 
 /**
  * The platform team's hotel switcher (0135), in place of the hotel's name in
- * the top bar. Drawn only for the team: a hotel's own staff see the name.
+ * the top bar. Drawn for the team and for a login granted several hotels
+ * (0140); a hotel's own staff see the name.
  *
  * A native select on purpose. The top bar is a sticky z-30 stacking context,
  * so a drawn dropdown inside it would sit under anything on the page at z-40

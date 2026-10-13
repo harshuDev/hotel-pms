@@ -1236,6 +1236,9 @@
  "Add tax": {
   "kind": "text"
  },
+ "Add the Channex API key first": {
+  "kind": "db"
+ },
  "Add the rooms this property lets out — Meeting Room A, the boardroom — and they will appear here with their calendars.": {
   "kind": "text"
  },
@@ -1514,6 +1517,9 @@
   "kind": "text"
  },
  "API key generated.": {
+  "kind": "text"
+ },
+ "API Key:": {
   "kind": "text"
  },
  "Appended to the existing notes; the guest never sees these": {
@@ -2354,6 +2360,18 @@
  "Channel Report": {
   "kind": "text"
  },
+ "Channex API key": {
+  "kind": "db"
+ },
+ "Channex Property:": {
+  "kind": "text"
+ },
+ "Channex refused the API key": {
+  "kind": "db"
+ },
+ "Channex saved.": {
+  "kind": "text"
+ },
  "ChannexPCI": {
   "kind": "text"
  },
@@ -2866,6 +2884,9 @@
  "Congo, Democratic Republic of the": {
   "kind": "country",
   "code": "CD"
+ },
+ "Connected · {when}": {
+  "kind": "text"
  },
  "Connection Name": {
   "kind": "text"
@@ -3743,6 +3764,9 @@
   "kind": "db"
  },
  "Enter your password": {
+  "kind": "text"
+ },
+ "Environment:": {
   "kind": "text"
  },
  "Equatorial Guinea": {
@@ -4758,6 +4782,9 @@
   "code": "IE"
  },
  "Is Active": {
+  "kind": "text"
+ },
+ "Is Active:": {
   "kind": "text"
  },
  "Is Default": {
@@ -6868,6 +6895,9 @@
  "Pick at least one room type.": {
   "kind": "text"
  },
+ "Pick Staging or Production": {
+  "kind": "db"
+ },
  "Pick the accounting system from the list": {
   "kind": "db"
  },
@@ -7034,6 +7064,9 @@
   "kind": "db"
  },
  "Priority is a whole number from 0 to 999.": {
+  "kind": "text"
+ },
+ "Production": {
   "kind": "text"
  },
  "Profile": {
@@ -8271,6 +8304,9 @@
  "Staff notes": {
   "kind": "text"
  },
+ "Staging": {
+  "kind": "text"
+ },
  "Standard price": {
   "kind": "text"
  },
@@ -8511,6 +8547,12 @@
  "Terms Text": {
   "kind": "text"
  },
+ "Test connection": {
+  "kind": "text"
+ },
+ "Testing…": {
+  "kind": "text"
+ },
  "Text": {
   "kind": "text"
  },
@@ -8669,6 +8711,9 @@
   "kind": "db"
  },
  "That identification type no longer exists": {
+  "kind": "db"
+ },
+ "That is not a Channex property id": {
   "kind": "db"
  },
  "That is not a number of children": {
@@ -9032,6 +9077,9 @@
   "kind": "text"
  },
  "The house": {
+  "kind": "text"
+ },
+ "The key sees no Channex properties yet. Create the property in Channex first.": {
   "kind": "text"
  },
  "The last date must not be before the first": {

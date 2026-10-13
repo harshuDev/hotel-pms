@@ -2365,6 +2365,48 @@ export async function setRatePlanCurrency(ratePlanId: string, currency: string):
   return { ok: true, data: null };
 }
 
+/* -- Connectivity -> Channel Manager: Channex (0139) ----------------------- */
+
+/** Saves the hotel's Channex connection. A blank key keeps the saved one; the key goes to Vault. */
+export async function saveChannexConnection(input: {
+  environment: "staging" | "production";
+  apiKey: string;
+  channexPropertyId: string;
+  isActive: boolean;
+}): Promise<ActionResult<null>> {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("save_channex_connection", {
+    p_environment: input.environment,
+    p_api_key: input.apiKey,
+    p_channex_property_id: input.channexPropertyId,
+    p_is_active: input.isActive,
+  });
+  if (error) return { ok: false, error: await localised(error.message) };
+  revalidatePath("/settings");
+  return { ok: true, data: null };
+}
+
+/** Calls Channex with the saved key (from Postgres) and lists the properties it can see. */
+export async function testChannexConnection(): Promise<
+  ActionResult<{ connected: boolean; message: string; properties: { id: string; title: string; currency: string | null }[] }>
+> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("test_channex_connection");
+  if (error) return { ok: false, error: await localised(error.message) };
+  const rows = data ?? [];
+  revalidatePath("/settings");
+  return {
+    ok: true,
+    data: {
+      connected: rows[0]?.ok ?? false,
+      message: await localised(rows[0]?.message ?? ""),
+      properties: rows
+        .filter((r) => r.channex_property_id)
+        .map((r) => ({ id: r.channex_property_id as string, title: r.title ?? "", currency: r.currency })),
+    },
+  };
+}
+
 /* -- Other -> Reactions (0104) --------------------------------------------- */
 
 export async function saveReaction(input: {

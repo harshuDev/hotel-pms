@@ -3387,5 +3387,21 @@
  "Only managers and administrators can change rates": "Μόνο διευθυντές και διαχειριστές μπορούν να αλλάξουν τιμές",
  "There is no exchange rate for {0} yet. Set a fixed rate for it in Settings -> Currencies.": "Δεν υπάρχει ακόμη ισοτιμία για το {0}. Ορίστε σταθερή ισοτιμία στις Ρυθμίσεις -> Νομίσματα.",
  "There is no live rate for {0} yet, and {1} is priced in it. Keep the fixed rate for now.": "Δεν υπάρχει ακόμη τρέχουσα ισοτιμία για το {0} και το {1} τιμολογείται σε αυτό. Κρατήστε προς το παρόν τη σταθερή ισοτιμία.",
- "These rate plans are priced in {currencies}. Set the rates of one currency at a time.": "Αυτά τα τιμολογιακά πλάνα τιμολογούνται σε {currencies}. Ορίστε τις τιμές για ένα νόμισμα κάθε φορά."
+ "These rate plans are priced in {currencies}. Set the rates of one currency at a time.": "Αυτά τα τιμολογιακά πλάνα τιμολογούνται σε {currencies}. Ορίστε τις τιμές για ένα νόμισμα κάθε φορά.",
+ "Add the Channex API key first": "Προσθέστε πρώτα το κλειδί API του Channex",
+ "API Key:": "Κλειδί API:",
+ "Channex API key": "Κλειδί API Channex",
+ "Channex Property:": "Κατάλυμα Channex:",
+ "Channex refused the API key": "Το Channex απέρριψε το κλειδί API",
+ "Channex saved.": "Το Channex αποθηκεύτηκε.",
+ "Connected · {when}": "Συνδέθηκε · {when}",
+ "Environment:": "Περιβάλλον:",
+ "Is Active:": "Ενεργό:",
+ "Pick Staging or Production": "Επιλέξτε Staging ή Παραγωγή",
+ "Production": "Παραγωγή",
+ "Staging": "Staging",
+ "Test connection": "Δοκιμή σύνδεσης",
+ "Testing…": "Γίνεται δοκιμή…",
+ "That is not a Channex property id": "Αυτό δεν είναι αναγνωριστικό καταλύματος Channex",
+ "The key sees no Channex properties yet. Create the property in Channex first.": "Το κλειδί δεν βλέπει ακόμη καταλύματα Channex. Δημιουργήστε πρώτα το κατάλυμα στο Channex."
 }

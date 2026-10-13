@@ -24,14 +24,20 @@ const primary =
 const secondary =
   "rounded-md border border-line px-4 py-2 text-[13px] text-ink-muted hover:bg-shell hover:text-ink";
 
-/** Every hotel, with Open and Add New Property. Drawn only for the platform team. */
+/**
+ * Every hotel, with Open and Add New Property. Drawn for the platform team,
+ * and for a login granted several hotels (0140) -- which sees its own and
+ * cannot add one, so Add New Property is the team's alone.
+ */
 export function PlatformHotels({
   properties,
+  canAdd,
   timezones,
   defaultTimezone,
   onEditCurrent,
 }: {
   properties: PlatformProperty[];
+  canAdd: boolean;
   timezones: string[];
   defaultTimezone: string;
   /** The pencil on the hotel you are in: its check-in, check-out and audit times. */
@@ -77,7 +83,7 @@ export function PlatformHotels({
       <div className="overflow-hidden rounded-lg border border-line bg-white shadow-card">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line px-6 py-4">
           <h3 className="text-[16px] text-ink">{tr("Properties list")}</h3>
-          {!adding && (
+          {canAdd && !adding && (
             <button type="button" onClick={() => setAdding(true)} className={primary}>
               {tr("+ Add New Property")}
             </button>

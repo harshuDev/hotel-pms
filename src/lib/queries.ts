@@ -3289,6 +3289,36 @@ export async function getChannelManagers(): Promise<ChannelManager[]> {
   }));
 }
 
+/** A hotel's Channex connection (0139). The API key is never readable -- only whether one is saved. */
+export type ChannexConnection = {
+  environment: "staging" | "production";
+  hasKey: boolean;
+  channexPropertyId: string | null;
+  isActive: boolean;
+  lastTestedAt: string | null;
+  lastTestOk: boolean | null;
+  lastTestMessage: string | null;
+};
+
+export async function getChannexConnection(): Promise<ChannexConnection | null> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("channex_connections")
+    .select("environment, api_key_secret_id, channex_property_id, is_active, last_tested_at, last_test_ok, last_test_message")
+    .maybeSingle();
+  if (error) throw new Error(`Failed to load the Channex connection: ${error.message}`);
+  if (!data) return null;
+  return {
+    environment: data.environment === "production" ? "production" : "staging",
+    hasKey: data.api_key_secret_id !== null,
+    channexPropertyId: data.channex_property_id,
+    isActive: data.is_active,
+    lastTestedAt: data.last_tested_at,
+    lastTestOk: data.last_test_ok,
+    lastTestMessage: data.last_test_message,
+  };
+}
+
 /** Booking Engine Settings (0098): the profiles, and the privacy policy and terms. */
 export async function getBookingEngineSettings(): Promise<{
   texts: BookingEngineTexts;
@@ -3852,6 +3882,20 @@ export const getPlatformProperties = cache(async (): Promise<PlatformProperty[]>
     staffCount: Number(row.staff_count),
     isCurrent: row.is_current,
   }));
+});
+
+/**
+ * Whether the signed-in login is on the platform team (0135). A login granted
+ * several hotels (0140) also gets the hotel list, but only the team adds one.
+ * platform_admins lets a member read their own row and nobody else's.
+ */
+export const getIsPlatformMember = cache(async (): Promise<boolean> => {
+  const supabase = await createClient();
+  const { data, error } = await supabase.from("platform_admins").select("user_id").limit(1);
+
+  if (error) throw new Error(`Failed to load the platform team: ${error.message}`);
+
+  return (data ?? []).length > 0;
 });
 
 const SETTINGS_ROOMS_PER_PAGE = 50;
