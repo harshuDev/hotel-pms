@@ -1519,9 +1519,6 @@
  "API key generated.": {
   "kind": "text"
  },
- "API Key:": {
-  "kind": "text"
- },
  "Appended to the existing notes; the guest never sees these": {
   "kind": "text"
  },
@@ -2363,14 +2360,8 @@
  "Channex API key": {
   "kind": "db"
  },
- "Channex Property:": {
-  "kind": "text"
- },
  "Channex refused the API key": {
   "kind": "db"
- },
- "Channex saved.": {
-  "kind": "text"
  },
  "ChannexPCI": {
   "kind": "text"
@@ -2884,9 +2875,6 @@
  "Congo, Democratic Republic of the": {
   "kind": "country",
   "code": "CD"
- },
- "Connected · {when}": {
-  "kind": "text"
  },
  "Connection Name": {
   "kind": "text"
@@ -3764,9 +3752,6 @@
   "kind": "db"
  },
  "Enter your password": {
-  "kind": "text"
- },
- "Environment:": {
   "kind": "text"
  },
  "Equatorial Guinea": {
@@ -4782,9 +4767,6 @@
   "code": "IE"
  },
  "Is Active": {
-  "kind": "text"
- },
- "Is Active:": {
   "kind": "text"
  },
  "Is Default": {
@@ -7066,9 +7048,6 @@
  "Priority is a whole number from 0 to 999.": {
   "kind": "text"
  },
- "Production": {
-  "kind": "text"
- },
  "Profile": {
   "kind": "text"
  },
@@ -8304,9 +8283,6 @@
  "Staff notes": {
   "kind": "text"
  },
- "Staging": {
-  "kind": "text"
- },
  "Standard price": {
   "kind": "text"
  },
@@ -8545,12 +8521,6 @@
   "kind": "text"
  },
  "Terms Text": {
-  "kind": "text"
- },
- "Test connection": {
-  "kind": "text"
- },
- "Testing…": {
   "kind": "text"
  },
  "Text": {
@@ -9077,9 +9047,6 @@
   "kind": "text"
  },
  "The house": {
-  "kind": "text"
- },
- "The key sees no Channex properties yet. Create the property in Channex first.": {
   "kind": "text"
  },
  "The last date must not be before the first": {

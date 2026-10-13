@@ -3341,19 +3341,8 @@
  "There is no live rate for {0} yet, and {1} is priced in it. Keep the fixed rate for now.": "Belum ada kurs langsung untuk {0}, dan {1} diberi harga dalam mata uang itu. Pertahankan kurs tetap untuk sementara.",
  "These rate plans are priced in {currencies}. Set the rates of one currency at a time.": "Paket tarif ini diberi harga dalam {currencies}. Atur tarif satu mata uang sekaligus.",
  "Add the Channex API key first": "Tambahkan kunci API Channex terlebih dahulu",
- "API Key:": "Kunci API:",
  "Channex API key": "Kunci API Channex",
- "Channex Property:": "Properti Channex:",
  "Channex refused the API key": "Channex menolak kunci API",
- "Channex saved.": "Channex disimpan.",
- "Connected · {when}": "Terhubung · {when}",
- "Environment:": "Lingkungan:",
- "Is Active:": "Aktif:",
  "Pick Staging or Production": "Pilih Staging atau Produksi",
- "Production": "Produksi",
- "Staging": "Staging",
- "Test connection": "Uji koneksi",
- "Testing…": "Menguji…",
- "That is not a Channex property id": "Itu bukan id properti Channex",
- "The key sees no Channex properties yet. Create the property in Channex first.": "Kunci belum melihat properti Channex. Buat properti di Channex terlebih dahulu."
+ "That is not a Channex property id": "Itu bukan id properti Channex"
 }

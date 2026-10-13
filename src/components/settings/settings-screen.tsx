@@ -44,8 +44,6 @@ import { RoomSetupPanel, RoomTypesPanel } from "@/components/settings/room-panel
 import { CancellationPolicyPanel } from "@/components/settings/cancellation-policy-panel";
 import { RatePlansPanel } from "@/components/settings/rate-plans-panel";
 import { ChannelManagerPanel } from "@/components/settings/channel-manager-panel";
-import { ChannexPanel } from "@/components/settings/channex-panel";
-import type { ChannexConnection } from "@/lib/queries";
 import { BookingEnginePanel } from "@/components/settings/booking-engine-panel";
 import { SalesChannelsPanel } from "@/components/settings/sales-channels-panel";
 import { BookingWidgetPanel } from "@/components/settings/booking-widget-panel";
@@ -238,7 +236,6 @@ export function SettingsScreen({
   weekRates,
   rateCoverage,
   channelManagers,
-  channexConnection,
   bookingEngine,
   bookingWidgets,
   apiKeys,
@@ -293,8 +290,6 @@ export function SettingsScreen({
   rateCoverage: RatePlanCoverage[];
   /** Channel manager connections (0097); loaded only on their tab. */
   channelManagers: ChannelManager[];
-  /** Channex (0139), or null when none is saved. */
-  channexConnection: ChannexConnection | null;
   /** Booking Engine Settings (0098); loaded only on their tab. */
   bookingEngine: { texts: BookingEngineTexts; profiles: BookingEngineProfile[] } | null;
   /** Booking widgets (0100); loaded only on their tab. */
@@ -1177,17 +1172,6 @@ export function SettingsScreen({
       )}
 
       {/* Channels ------------------------------------------------------ */}
-      {tab === "channel-manager" && (
-        <div className="mb-4 max-w-6xl">
-          <ChannexPanel
-            connection={channexConnection}
-            timezone={property.timezone}
-            canEdit={canEdit}
-            pending={pending}
-            run={run}
-          />
-        </div>
-      )}
       {tab === "channel-manager" && (
         <ChannelManagerPanel
           channelManagers={channelManagers}
