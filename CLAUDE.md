@@ -4065,6 +4065,16 @@ it with the hotel information."
   admin can neither edit, deactivate, delete nor add one.
   `add_staff_by_email()` refuses a team member, a login already on this
   hotel, and one working at another hotel, by name.
+- **A LOGIN CAN BE GRANTED SEVERAL HOTELS (0140)** -- a hotel group, such as
+  Leadwise Demo Hotel's login running eight. `property_access` (login,
+  hotel, role), granted in the SQL editor only, like `platform_admins`
+  (`insert into property_access (user_id, property_id, role) values (...)`;
+  grant the login's home hotel too, or it cannot switch back). Such a login
+  gets the same top-bar switcher and Hotel Properties list, showing ONLY its
+  hotels; `switch_property()` moves its one `staff_users` row to a granted
+  hotel as the grant's role, and refuses any other hotel and a deactivated
+  login. Only the team adds a hotel. While it is switched into a hotel it is
+  on that hotel's Staff list, like any member of staff.
 - **Every hotel is in the one Supabase project (London).** Regional pods are
   the client's open question, not built.
 

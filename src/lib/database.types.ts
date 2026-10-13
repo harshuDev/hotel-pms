@@ -3532,6 +3532,35 @@ export type Database = {
         }
         Relationships: []
       }
+      property_access: {
+        Row: {
+          created_at: string
+          property_id: string
+          role: Database["public"]["Enums"]["staff_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          property_id: string
+          role?: Database["public"]["Enums"]["staff_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          property_id?: string
+          role?: Database["public"]["Enums"]["staff_role"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_access_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       property_policies: {
         Row: {
           children: string

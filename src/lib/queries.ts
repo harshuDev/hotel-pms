@@ -3884,6 +3884,20 @@ export const getPlatformProperties = cache(async (): Promise<PlatformProperty[]>
   }));
 });
 
+/**
+ * Whether the signed-in login is on the platform team (0135). A login granted
+ * several hotels (0140) also gets the hotel list, but only the team adds one.
+ * platform_admins lets a member read their own row and nobody else's.
+ */
+export const getIsPlatformMember = cache(async (): Promise<boolean> => {
+  const supabase = await createClient();
+  const { data, error } = await supabase.from("platform_admins").select("user_id").limit(1);
+
+  if (error) throw new Error(`Failed to load the platform team: ${error.message}`);
+
+  return (data ?? []).length > 0;
+});
+
 const SETTINGS_ROOMS_PER_PAGE = 50;
 
 /**

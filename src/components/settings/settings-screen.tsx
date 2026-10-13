@@ -211,6 +211,7 @@ export function SettingsScreen({
   canEdit,
   isAdmin,
   platformProperties,
+  isPlatformMember,
   timezones,
   hotelPolicies,
   extrasCatalog,
@@ -325,8 +326,10 @@ export function SettingsScreen({
   meId: string | null;
   canEdit: boolean;
   isAdmin: boolean;
-  /** Every hotel, for the platform team only (0135); empty for hotel staff. */
+  /** Every hotel for the platform team (0135), a login's granted hotels (0140); empty for hotel staff. */
   platformProperties: PlatformProperty[];
+  /** Only the platform team adds a hotel. */
+  isPlatformMember: boolean;
 }) {
   const tr = useT();
   const router = useRouter();
@@ -756,6 +759,7 @@ export function SettingsScreen({
           {platformProperties.length > 0 ? (
             <PlatformHotels
               properties={platformProperties}
+              canAdd={isPlatformMember}
               timezones={timezones}
               defaultTimezone={property.timezone}
               onEditCurrent={canEdit ? () => setEditingTimes(true) : null}

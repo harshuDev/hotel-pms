@@ -45,6 +45,7 @@ import {
   getSystemConnections,
   getReactions,
   getDocumentTemplate,
+  getIsPlatformMember,
   getPlatformProperties,
   getStaffSettings,
   getTaxRateSettings,
@@ -166,8 +167,12 @@ export default async function SettingsPage({
     tab === "templates" ? getDocumentTemplate("folio") : Promise.resolve(null),
   ]);
 
-  // Every hotel, for the platform team (0135); empty for a hotel's own staff.
-  const platformProperties = await getPlatformProperties();
+  // Every hotel for the platform team (0135), a login's granted hotels (0140),
+  // empty for a hotel's own staff.
+  const [platformProperties, isPlatformMember] = await Promise.all([
+    getPlatformProperties(),
+    getIsPlatformMember(),
+  ]);
 
   /*
    * The timezone list is worked out here, on the server, and handed down: if
@@ -190,6 +195,7 @@ export default async function SettingsPage({
         */
         key={property.id}
         platformProperties={platformProperties}
+        isPlatformMember={isPlatformMember}
         tab={tab}
         property={property}
         roomTypes={roomTypes}
