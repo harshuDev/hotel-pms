@@ -2756,25 +2756,22 @@ client: "Need to add Booking Channel in the Dashboard".
       parses them. **PROVISIONAL:** the Region list (EMEA, APAC, Americas) and
       the Days to sync choices beside 400 -- neither dropdown was seen open.
       Both are in `src/lib/channel-managers.ts` and the 0097 checks.
-  - **CHANNEX IS THE CHANNEL MANAGER BEING INTEGRATED (0139, step one).**
-    The client's own; it feeds Booking.com, Expedia and the rest. A card above
-    the Channel Managers list (`channex-panel.tsx`): Environment (Staging |
-    Production), API Key, Channex Property, Is Active, Save and Test
-    connection. `channex_connections`, one per property.
+  - **CHANNEX IS THE CHANNEL MANAGER BEING INTEGRATED (0139) -- DATABASE
+    ONLY, NO SCREEN YET.** The client's own; it feeds Booking.com, Expedia
+    and the rest. 0139 is applied: `channex_connections` (one per property;
+    environment, the API key's Vault id, the Channex property, the last test),
+    `save_channex_connection()` and `test_channex_connection()`, which calls
+    `GET /properties` from Postgres through the `http` extension (0138) with
+    the `user-api-key` header. **The Settings card was taken back out before
+    release, at the user's request** -- it had reached main inside the
+    Leadwise PR (#139). Nothing in the application reads the table; the card
+    (`channex-panel.tsx`) can be restored from commit `dfdfeda` when the
+    integration is ready to show.
     - **Channex authenticates with an API KEY, never a login.** The client
       once sent a staging username and password in chat; they were not used
       or stored, and were to be changed.
-    - **THE KEY IS WRITE-ONLY IN SUPABASE VAULT**, as a channel manager's
-      password (0097): security definer writes, a SELECT-only table, "Saved"
-      as the placeholder, a blank field keeps it.
-    - **CHANNEX IS CALLED FROM POSTGRES** through the `http` extension (0138):
-      the database reaches staging.channex.io (checked: 401 without a key),
-      the key never leaves the server, and no route is needed. This session's
-      own network policy blocks Channex; that does not matter. Rates and
-      availability out and bookings in will run the same way on pg_cron.
-    - `test_channex_connection()` calls `GET /properties` with the
-      `user-api-key` header, records the result on the row, and returns the
-      properties the key can see, so the hotel is mapped by picking one.
+    - **The key is write-only in Supabase Vault**, as a channel manager's
+      password (0097): security definer writes, a SELECT-only table.
     - **Next, not built**: room type and rate plan mapping (a Channex rate
       plan belongs to ONE room type, so the map is per (plan, room type)
       pair), the ARI push with a sync log, and the booking-revisions feed with

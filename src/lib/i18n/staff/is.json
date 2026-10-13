@@ -3389,19 +3389,8 @@
  "There is no live rate for {0} yet, and {1} is priced in it. Keep the fixed rate for now.": "Ekkert lifandi gengi er enn til fyrir {0} og {1} er verðlagt í honum. Haltu föstu gengi í bili.",
  "These rate plans are priced in {currencies}. Set the rates of one currency at a time.": "Þessar verðáætlanir eru verðlagðar í {currencies}. Settu verð eins gjaldmiðils í einu.",
  "Add the Channex API key first": "Bættu fyrst við API-lykli Channex",
- "API Key:": "API-lykill:",
  "Channex API key": "API-lykill Channex",
- "Channex Property:": "Gististaður í Channex:",
  "Channex refused the API key": "Channex hafnaði API-lyklinum",
- "Channex saved.": "Channex vistað.",
- "Connected · {when}": "Tengt · {when}",
- "Environment:": "Umhverfi:",
- "Is Active:": "Virkt:",
  "Pick Staging or Production": "Veldu Staging eða Production",
- "Production": "Production",
- "Staging": "Staging",
- "Test connection": "Prófa tengingu",
- "Testing…": "Prófar…",
- "That is not a Channex property id": "Þetta er ekki auðkenni gististaðar í Channex",
- "The key sees no Channex properties yet. Create the property in Channex first.": "Lykillinn sér enga gististaði í Channex enn. Stofnaðu gististaðinn fyrst í Channex."
+ "That is not a Channex property id": "Þetta er ekki auðkenni gististaðar í Channex"
 }

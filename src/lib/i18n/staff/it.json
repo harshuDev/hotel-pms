@@ -3390,19 +3390,8 @@
  "There is no live rate for {0} yet, and {1} is priced in it. Keep the fixed rate for now.": "Non c'è ancora un tasso in tempo reale per {0} e {1} ha prezzi in questa valuta. Mantieni per ora il tasso fisso.",
  "These rate plans are priced in {currencies}. Set the rates of one currency at a time.": "Questi piani tariffari hanno prezzi in {currencies}. Imposta le tariffe di una valuta alla volta.",
  "Add the Channex API key first": "Aggiungi prima la chiave API di Channex",
- "API Key:": "Chiave API:",
  "Channex API key": "Chiave API Channex",
- "Channex Property:": "Struttura Channex:",
  "Channex refused the API key": "Channex ha rifiutato la chiave API",
- "Channex saved.": "Channex salvato.",
- "Connected · {when}": "Connesso · {when}",
- "Environment:": "Ambiente:",
- "Is Active:": "Attivo:",
  "Pick Staging or Production": "Scegli Staging o Produzione",
- "Production": "Produzione",
- "Staging": "Staging",
- "Test connection": "Prova connessione",
- "Testing…": "Prova in corso…",
- "That is not a Channex property id": "Questo non è un id di struttura Channex",
- "The key sees no Channex properties yet. Create the property in Channex first.": "La chiave non vede ancora strutture Channex. Crea prima la struttura in Channex."
+ "That is not a Channex property id": "Questo non è un id di struttura Channex"
 }

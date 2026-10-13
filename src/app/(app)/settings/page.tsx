@@ -38,7 +38,6 @@ import {
   getWeekRates,
   getRatePlanCoverage,
   getChannelManagers,
-  getChannexConnection,
   getBookingEngineSettings,
   getBookingWidgets,
   getApiKeys,
@@ -110,7 +109,6 @@ export default async function SettingsPage({
     weekRates,
     rateCoverage,
     channelManagers,
-    channexConnection,
     bookingEngine,
     bookingWidgets,
     apiKeys,
@@ -154,7 +152,6 @@ export default async function SettingsPage({
     tab === "rate-plans" || tab === "seasons" ? getWeekRates() : Promise.resolve([]),
     tab === "rate-plans" || tab === "seasons" ? getRatePlanCoverage() : Promise.resolve([]),
     tab === "channel-manager" ? getChannelManagers() : Promise.resolve([]),
-    tab === "channel-manager" ? getChannexConnection() : Promise.resolve(null),
     tab === "booking-engine" ? getBookingEngineSettings() : Promise.resolve(null),
     tab === "booking-widget" ? getBookingWidgets() : Promise.resolve([]),
     tab === "api-key" || tab === "developer-keys" ? getApiKeys() : Promise.resolve(null),
@@ -240,7 +237,6 @@ export default async function SettingsPage({
         weekRates={weekRates}
         rateCoverage={rateCoverage}
         channelManagers={channelManagers}
-        channexConnection={channexConnection}
         bookingEngine={bookingEngine}
         bookingWidgets={bookingWidgets}
         apiKeys={apiKeys}

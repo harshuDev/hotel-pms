@@ -3485,19 +3485,8 @@
  "There is no live rate for {0} yet, and {1} is priced in it. Keep the fixed rate for now.": "Za {0} še ni tečaja v živo, {1} pa ima cene v tej valuti. Zaenkrat obdržite fiksni tečaj.",
  "These rate plans are priced in {currencies}. Set the rates of one currency at a time.": "Ti cenovni načrti imajo cene v {currencies}. Cene nastavite za eno valuto naenkrat.",
  "Add the Channex API key first": "Najprej dodajte API-ključ Channex",
- "API Key:": "API-ključ:",
  "Channex API key": "API-ključ Channex",
- "Channex Property:": "Nastanitev Channex:",
  "Channex refused the API key": "Channex je zavrnil API-ključ",
- "Channex saved.": "Channex shranjen.",
- "Connected · {when}": "Povezano · {when}",
- "Environment:": "Okolje:",
- "Is Active:": "Aktivno:",
  "Pick Staging or Production": "Izberite Staging ali Produkcija",
- "Production": "Produkcija",
- "Staging": "Staging",
- "Test connection": "Preizkusi povezavo",
- "Testing…": "Preizkušanje…",
- "That is not a Channex property id": "To ni ID nastanitve Channex",
- "The key sees no Channex properties yet. Create the property in Channex first.": "Ključ še ne vidi nobene nastanitve Channex. Najprej ustvarite nastanitev v Channex."
+ "That is not a Channex property id": "To ni ID nastanitve Channex"
 }
