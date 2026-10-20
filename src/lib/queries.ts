@@ -3351,6 +3351,93 @@ export async function getChannelManagers(): Promise<ChannelManager[]> {
   }));
 }
 
+/** A hotel's Channex connection (0139). The API key is never readable -- only whether one is saved. */
+export type ChannexConnection = {
+  environment: "staging" | "production";
+  hasKey: boolean;
+  channexPropertyId: string | null;
+  isActive: boolean;
+  lastTestedAt: string | null;
+  lastTestOk: boolean | null;
+  lastTestMessage: string | null;
+};
+
+/** The platform team's only (0142); the policy returns nothing to anybody else. */
+export async function getChannexConnection(): Promise<ChannexConnection | null> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("channex_connections")
+    .select("environment, api_key_secret_id, channex_property_id, is_active, last_tested_at, last_test_ok, last_test_message")
+    .maybeSingle();
+  if (error) throw new Error(`Failed to load the Channex connection: ${error.message}`);
+  if (!data) return null;
+  return {
+    environment: data.environment === "production" ? "production" : "staging",
+    hasKey: data.api_key_secret_id !== null,
+    channexPropertyId: data.channex_property_id,
+    isActive: data.is_active,
+    lastTestedAt: data.last_tested_at,
+    lastTestOk: data.last_test_ok,
+    lastTestMessage: data.last_test_message,
+  };
+}
+
+/** A room type, or a (rate plan, room type) pair priced from the business date, and its Channex id once created (0142). */
+export type ChannexLink = {
+  kind: "room_type" | "rate_plan";
+  roomTypeId: string;
+  roomTypeName: string;
+  ratePlanId: string | null;
+  ratePlanName: string | null;
+  currency: string | null;
+  channexId: string | null;
+};
+
+export async function getChannexOverview(): Promise<ChannexLink[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("channex_overview");
+  if (error) throw new Error(`Failed to load the Channex links: ${error.message}`);
+  return (data ?? []).map((row) => ({
+    kind: row.kind === "rate_plan" ? "rate_plan" : "room_type",
+    roomTypeId: row.room_type_id,
+    roomTypeName: row.room_type_name,
+    ratePlanId: row.rate_plan_id,
+    ratePlanName: row.rate_plan_name,
+    currency: row.currency,
+    channexId: row.channex_id,
+  }));
+}
+
+export type ChannexSyncEntry = {
+  id: string;
+  kind: "setup" | "ari";
+  ok: boolean;
+  sent: number;
+  failed: number;
+  message: string | null;
+  createdAt: string;
+};
+
+/** The last ten Channex runs on this hotel, setup and pushes, newest first. */
+export async function getChannexSyncLog(): Promise<ChannexSyncEntry[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("channex_sync_log")
+    .select("id, kind, ok, sent, failed, message, created_at")
+    .order("created_at", { ascending: false })
+    .limit(10);
+  if (error) throw new Error(`Failed to load the Channex log: ${error.message}`);
+  return (data ?? []).map((row) => ({
+    id: row.id,
+    kind: row.kind === "setup" ? "setup" : "ari",
+    ok: row.ok,
+    sent: row.sent,
+    failed: row.failed,
+    message: row.message,
+    createdAt: row.created_at,
+  }));
+}
+
 /** Booking Engine Settings (0098): the profiles, and the privacy policy and terms. */
 export async function getBookingEngineSettings(): Promise<{
   texts: BookingEngineTexts;

@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0141` (0138 as 0138a-f) are
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0142` (0138 as 0138a-f, 0142 as 0142a-b) are
 applied to the hosted database.
 
 Working on real data: dashboard (house board, movements, pace, activity feed),
@@ -2756,27 +2756,56 @@ client: "Need to add Booking Channel in the Dashboard".
       parses them. **PROVISIONAL:** the Region list (EMEA, APAC, Americas) and
       the Days to sync choices beside 400 -- neither dropdown was seen open.
       Both are in `src/lib/channel-managers.ts` and the 0097 checks.
-  - **CHANNEX IS THE CHANNEL MANAGER BEING INTEGRATED (0139) -- DATABASE
-    ONLY, NO SCREEN YET.** The client's own; it feeds Booking.com, Expedia
-    and the rest. 0139 is applied: `channex_connections` (one per property;
-    environment, the API key's Vault id, the Channex property, the last test),
-    `save_channex_connection()` and `test_channex_connection()`, which calls
-    `GET /properties` from Postgres through the `http` extension (0138) with
-    the `user-api-key` header. **The Settings card was taken back out before
-    release, at the user's request** -- it had reached main inside the
-    Leadwise PR (#139). Nothing in the application reads the table; the card
-    (`channex-panel.tsx`) can be restored from commit `dfdfeda` when the
-    integration is ready to show.
+  - **CHANNEX IS THE CHANNEL MANAGER BEING INTEGRATED (0139, 0142) -- THE
+    PLATFORM TEAM'S ONLY.** The client's own; it feeds Booking.com, Expedia
+    and the rest. Decided with the client: only the team sets a hotel up, the
+    PMS CREATES Channex's structure, and the PMS is the source of rates and
+    availability. The card (`channex-panel.tsx`) sits above the Channel
+    Managers list and is drawn only for `platform_admins`; every function
+    refuses anybody else ("Only the platform team can set up Channex") and
+    the Channex tables are readable by the team only.
     - **Channex authenticates with an API KEY, never a login.** The client
       once sent a staging username and password in chat; they were not used
-      or stored, and were to be changed.
-    - **The key is write-only in Supabase Vault**, as a channel manager's
-      password (0097): security definer writes, a SELECT-only table.
-    - **Next, not built**: room type and rate plan mapping (a Channex rate
-      plan belongs to ONE room type, so the map is per (plan, room type)
-      pair), the ARI push with a sync log, and the booking-revisions feed with
-      acknowledgement only after the booking is saved (idempotent on the
-      revision id), converting to the hotel's currency (0138).
+      or stored, and were to be changed. The key is write-only in Supabase
+      Vault, as a channel manager's password (0097).
+    - **CHANNEX IS CALLED FROM POSTGRES** through the `http` extension (0138),
+      all through `channex_call()` (granted to nobody), so the key never
+      leaves the server and no route is needed. This session's own network
+      policy blocks Channex; the database reaches it.
+    - **Create in Channex** (`channex_setup()`): the Channex property (unless
+      one was picked after Test connection), a Channex room type per room
+      type (title, enabled room count, max and base occupancy), and a Channex
+      rate plan per (rate plan, room type) pair priced from the business date
+      -- a Channex rate plan belongs to ONE room type -- in the PLAN'S OWN
+      CURRENCY (0138), per room, manual. Each link is kept in
+      `channex_room_type_map` / `channex_rate_plan_map`; running it again
+      creates only what is missing.
+    - **Push** (`channex_push_ari()`): availability per room type (rooms left
+      to sell, the calendar's figure, never below zero) and, per linked plan,
+      the night's rate as a decimal string (whole units for XOF/XAF) with
+      min stay arrival/through (1 when unset), max stay (0 when unset), CTA,
+      CTD and stop sell. **A night with no rate goes as stop sell**; so does
+      a retired plan. 365 nights from the business date.
+      - **Only what changed is sent**: `channex_ari_changes()` compares with
+        `channex_ari_sent` (the last value Channex accepted per id and night)
+        and joins consecutive equal nights into ranges, 500 a request. "Push
+        everything" resends all. Tested rolled back on Reservation Centric:
+        365 nights became 4 availability and 12 rate ranges, and nothing once
+        sent.
+      - **Is Active = keep Channex up to date**: pg_cron `channex-ari-push`
+        runs `channex_push_all()` every 15 minutes for active connections;
+        one hotel's failure never stops the next. Every run is written to
+        `channex_sync_log`, shown as "Recent runs".
+    - **Links and sent values carry the Channex property id**, so pointing a
+      hotel at another Channex property starts clean with nothing deleted --
+      the connector refuses DELETE in a migration, which also shaped this.
+    - **Not built yet**: bookings IN from the booking-revisions feed
+      (acknowledged only after the booking is saved, idempotent on the
+      revision id, converted to the hotel's currency); per-occupancy prices
+      (only the primary occupancy's rate goes); updating a Channex room
+      type's room count after it was created. **Nothing has been sent to
+      Channex yet**: no key is saved on any hotel. The request shapes follow
+      Channex's API and are first proven when the key is entered.
   - **CONNECTIVITY -> SALES CHANNELS (0099) IS `channels`, the booking
     sources** -- it replaced the Booking Sources screen, not a second list
     beside it (`sales-channels-panel.tsx`). The reference's Active | All |

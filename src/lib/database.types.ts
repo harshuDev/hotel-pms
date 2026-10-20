@@ -1715,6 +1715,44 @@ export type Database = {
           },
         ]
       }
+      channex_ari_sent: {
+        Row: {
+          channex_id: string
+          channex_property_id: string
+          kind: string
+          property_id: string
+          sent_at: string
+          stay_date: string
+          value: Json
+        }
+        Insert: {
+          channex_id: string
+          channex_property_id: string
+          kind: string
+          property_id: string
+          sent_at?: string
+          stay_date: string
+          value: Json
+        }
+        Update: {
+          channex_id?: string
+          channex_property_id?: string
+          kind?: string
+          property_id?: string
+          sent_at?: string
+          stay_date?: string
+          value?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "channex_ari_sent_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       channex_connections: {
         Row: {
           api_key_secret_id: string | null
@@ -1760,6 +1798,138 @@ export type Database = {
             foreignKeyName: "channex_connections_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: true
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      channex_rate_plan_map: {
+        Row: {
+          channex_property_id: string
+          channex_rate_plan_id: string
+          created_at: string
+          property_id: string
+          rate_plan_id: string
+          room_type_id: string
+        }
+        Insert: {
+          channex_property_id: string
+          channex_rate_plan_id: string
+          created_at?: string
+          property_id: string
+          rate_plan_id: string
+          room_type_id: string
+        }
+        Update: {
+          channex_property_id?: string
+          channex_rate_plan_id?: string
+          created_at?: string
+          property_id?: string
+          rate_plan_id?: string
+          room_type_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "channex_rate_plan_map_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "channex_rate_plan_map_rate_plan_id_fkey"
+            columns: ["rate_plan_id"]
+            isOneToOne: false
+            referencedRelation: "rate_plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "channex_rate_plan_map_room_type_id_fkey"
+            columns: ["room_type_id"]
+            isOneToOne: false
+            referencedRelation: "room_types"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      channex_room_type_map: {
+        Row: {
+          channex_property_id: string
+          channex_room_type_id: string
+          created_at: string
+          property_id: string
+          room_type_id: string
+        }
+        Insert: {
+          channex_property_id: string
+          channex_room_type_id: string
+          created_at?: string
+          property_id: string
+          room_type_id: string
+        }
+        Update: {
+          channex_property_id?: string
+          channex_room_type_id?: string
+          created_at?: string
+          property_id?: string
+          room_type_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "channex_room_type_map_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "channex_room_type_map_room_type_id_fkey"
+            columns: ["room_type_id"]
+            isOneToOne: false
+            referencedRelation: "room_types"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      channex_sync_log: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          failed: number
+          id: string
+          kind: string
+          message: string | null
+          ok: boolean
+          property_id: string
+          sent: number
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          failed?: number
+          id?: string
+          kind: string
+          message?: string | null
+          ok: boolean
+          property_id: string
+          sent?: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          failed?: number
+          id?: string
+          kind?: string
+          message?: string | null
+          ok?: boolean
+          property_id?: string
+          sent?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "channex_sync_log_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
             referencedRelation: "properties"
             referencedColumns: ["id"]
           },
@@ -5950,7 +6120,77 @@ export type Database = {
           room_revenue_cents: number
         }[]
       }
+      channex_ari_changes: {
+        Args: { p_full: boolean; p_property: string }
+        Returns: {
+          channex_id: string
+          date_from: string
+          date_to: string
+          kind: string
+          value: Json
+        }[]
+      }
       channex_base_url: { Args: { p_environment: string }; Returns: string }
+      channex_call: {
+        Args: {
+          p_body?: Json
+          p_method: string
+          p_path: string
+          p_property: string
+        }
+        Returns: {
+          body: Json
+          status: number
+        }[]
+      }
+      channex_error_text: {
+        Args: { p_body: Json; p_status: number }
+        Returns: string
+      }
+      channex_overview: {
+        Args: never
+        Returns: {
+          channex_id: string
+          currency: string
+          kind: string
+          rate_plan_id: string
+          rate_plan_name: string
+          room_type_id: string
+          room_type_name: string
+        }[]
+      }
+      channex_push_all: { Args: never; Returns: number }
+      channex_push_ari: {
+        Args: { p_full?: boolean }
+        Returns: {
+          detail: string
+          kind: string
+          sent: number
+          succeeded: boolean
+        }[]
+      }
+      channex_push_ari_for: {
+        Args: { p_actor: string; p_full: boolean; p_property: string }
+        Returns: {
+          detail: string
+          kind: string
+          sent: number
+          succeeded: boolean
+        }[]
+      }
+      channex_rate_text: {
+        Args: { p_cents: number; p_currency: string }
+        Returns: string
+      }
+      channex_setup: {
+        Args: never
+        Returns: {
+          detail: string
+          label: string
+          step: string
+          succeeded: boolean
+        }[]
+      }
       charge_extra: {
         Args: { p_booking_id: string; p_extra_id: string; p_quantity?: number }
         Returns: string

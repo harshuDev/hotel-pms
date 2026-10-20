@@ -3355,5 +3355,38 @@
  "Only managers and administrators can see the shift history": "Hanya manajer dan administrator yang dapat melihat riwayat shift",
  "Paid-outs": "Pengeluaran kas",
  "Shift history": "Riwayat shift",
- "View": "Lihat"
+ "View": "Lihat",
+ "API Key:": "Kunci API:",
+ "Channex Property:": "Properti Channex:",
+ "Channex saved.": "Channex disimpan.",
+ "Connected · {when}": "Terhubung · {when}",
+ "Environment:": "Lingkungan:",
+ "Is Active:": "Aktif:",
+ "Production": "Produksi",
+ "Staging": "Staging",
+ "Test connection": "Uji koneksi",
+ "{created} created, {failed} refused by Channex.": "{created} dibuat, {failed} ditolak oleh Channex.",
+ "{n} date ranges sent to Channex.": {
+  "other": "{n} rentang tanggal dikirim ke Channex."
+ },
+ "{n} items created in Channex.": {
+  "other": "{n} item dibuat di Channex."
+ },
+ "{sent} sent": "{sent} terkirim",
+ "{sent} sent, {failed} failed": "{sent} terkirim, {failed} gagal",
+ "Channex is up to date.": "Channex sudah terbaru.",
+ "Create a new one": "Buat yang baru",
+ "Create in Channex": "Buat di Channex",
+ "Create the hotel in Channex first": "Buat hotel di Channex terlebih dahulu",
+ "Created": "Dibuat",
+ "Not in Channex": "Tidak ada di Channex",
+ "Only the platform team can set up Channex": "Hanya tim platform yang dapat menyiapkan Channex",
+ "Push": "Kirim",
+ "Push everything": "Kirim semua",
+ "Push rates and availability": "Kirim tarif dan ketersediaan",
+ "Recent runs": "Proses terbaru",
+ "Room types and rate plans": "Tipe kamar dan paket tarif",
+ "Setup": "Penyiapan",
+ "The key sees no Channex properties yet.": "Kunci belum melihat properti Channex.",
+ "Working…": "Sedang diproses…"
 }
