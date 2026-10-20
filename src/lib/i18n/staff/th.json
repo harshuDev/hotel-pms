@@ -3344,5 +3344,16 @@
  "Channex API key": "คีย์ API ของ Channex",
  "Channex refused the API key": "Channex ปฏิเสธคีย์ API",
  "Pick Staging or Production": "เลือก Staging หรือ Production",
- "That is not a Channex property id": "นี่ไม่ใช่รหัสที่พักของ Channex"
+ "That is not a Channex property id": "นี่ไม่ใช่รหัสที่พักของ Channex",
+ "{amount} by other methods": "{amount} ด้วยวิธีอื่น",
+ "Cash payments": "การชำระเงินสด",
+ "Closing notes": "บันทึกตอนปิดกะ",
+ "Hide": "ซ่อน",
+ "No closed shifts yet.": "ยังไม่มีกะที่ปิดแล้ว",
+ "No payments were taken on this shift.": "ไม่มีการรับชำระเงินในกะนี้",
+ "Nothing left the drawer on this shift.": "ไม่มีเงินออกจากลิ้นชักในกะนี้",
+ "Only managers and administrators can see the shift history": "เฉพาะผู้จัดการและผู้ดูแลระบบเท่านั้นที่ดูประวัติกะได้",
+ "Paid-outs": "จ่ายเงินออก",
+ "Shift history": "ประวัติกะ",
+ "View": "ดู"
 }

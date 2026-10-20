@@ -94,6 +94,7 @@ import type {
   PaymentMethod,
   Shift,
   ShiftPayment,
+  ShiftHistoryRow,
   StaffRole,
   StaffUser,
   OccupancyRow,
@@ -696,9 +697,34 @@ export async function getOpenShift(): Promise<Shift | null> {
 
   if (!header) return null;
 
+  const { payments, paidOuts } = await getShiftLines(header.shift_id);
+
+  return {
+    id: header.shift_id,
+    userName: header.cashier_name,
+    businessDate: header.business_date,
+    openedAt: header.opened_at,
+    openingFloatCents: header.opening_balance_cents,
+    status: header.status,
+    payments,
+    paidOuts,
+  };
+}
+
+/**
+ * The payments and paid-outs of one shift, open or closed. The same two reads
+ * the open shift's screen has always made, so a closed shift's detail in the
+ * history lists exactly what its cashier saw while it was open.
+ */
+export async function getShiftLines(
+  shiftId: string,
+): Promise<{ payments: ShiftPayment[]; paidOuts: PaidOut[] }> {
+  const supabase = await createClient();
+  const tr = await getT();
+
   const [paymentsResult, paidOutsResult] = await Promise.all([
-    supabase.rpc("cashier_shift_payments", { p_shift_id: header.shift_id }),
-    supabase.rpc("cashier_shift_paid_outs", { p_shift_id: header.shift_id }),
+    supabase.rpc("cashier_shift_payments", { p_shift_id: shiftId }),
+    supabase.rpc("cashier_shift_paid_outs", { p_shift_id: shiftId }),
   ]);
 
   if (paymentsResult.error) {
@@ -755,15 +781,51 @@ export async function getOpenShift(): Promise<Shift | null> {
     createdAt: row.created_at,
   }));
 
+  return { payments, paidOuts };
+}
+
+export const SHIFT_HISTORY_PER_PAGE = 20;
+
+/**
+ * Closed cashier shifts, newest close first, paged in Postgres (0141).
+ * Managers and administrators only -- the caller checks getCanSeeDrawerTotal()
+ * first, and cashier_shift_history() refuses anybody else regardless.
+ */
+export async function getShiftHistory(
+  page: number,
+): Promise<{ rows: ShiftHistoryRow[]; total: number }> {
+  const supabase = await createClient();
+  const tr = await getT();
+
+  const { data, error } = await supabase.rpc("cashier_shift_history", {
+    p_limit: SHIFT_HISTORY_PER_PAGE,
+    p_offset: (Math.max(page, 1) - 1) * SHIFT_HISTORY_PER_PAGE,
+  });
+
+  if (error) {
+    throw new Error(`Failed to load the shift history: ${error.message}`);
+  }
+
+  const rows = data ?? [];
   return {
-    id: header.shift_id,
-    userName: header.cashier_name,
-    businessDate: header.business_date,
-    openedAt: header.opened_at,
-    openingFloatCents: header.opening_balance_cents,
-    status: header.status,
-    payments,
-    paidOuts,
+    total: Number(rows[0]?.total_count ?? 0),
+    rows: rows.map((row) => ({
+      id: row.shift_id,
+      cashierName: row.cashier_name ?? tr("Unknown"),
+      businessDate: row.business_date,
+      openedAt: row.opened_at,
+      closedAt: row.closed_at,
+      openingFloatCents: Number(row.opening_balance_cents),
+      expectedCents: Number(row.expected_cash_cents),
+      countedCents: Number(row.counted_cash_cents),
+      varianceCents: Number(row.variance_cents),
+      cashPaymentsCents: Number(row.cash_payments_cents),
+      otherPaymentsCents: Number(row.other_payments_cents),
+      paymentsCount: Number(row.payments_count),
+      paidOutsCents: Number(row.paid_outs_cents),
+      paidOutsCount: Number(row.paid_outs_count),
+      closingNotes: row.closing_notes,
+    })),
   };
 }
 

@@ -5891,6 +5891,27 @@ export type Database = {
           paid_outs_cents: number
         }[]
       }
+      cashier_shift_history: {
+        Args: { p_limit?: number; p_offset?: number }
+        Returns: {
+          business_date: string
+          cash_payments_cents: number
+          cashier_name: string
+          closed_at: string
+          closing_notes: string
+          counted_cash_cents: number
+          expected_cash_cents: number
+          opened_at: string
+          opening_balance_cents: number
+          other_payments_cents: number
+          paid_outs_cents: number
+          paid_outs_count: number
+          payments_count: number
+          shift_id: string
+          total_count: number
+          variance_cents: number
+        }[]
+      }
       cashier_shift_paid_outs: {
         Args: { p_shift_id: string }
         Returns: {
