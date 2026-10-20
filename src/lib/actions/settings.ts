@@ -2365,6 +2365,81 @@ export async function setRatePlanCurrency(ratePlanId: string, currency: string):
   return { ok: true, data: null };
 }
 
+/* -- Connectivity -> Channel Manager: Channex (0139, 0142), platform team only -- */
+
+/** Saves the hotel's Channex connection. A blank key keeps the saved one; the key goes to Vault. */
+export async function saveChannexConnection(input: {
+  environment: "staging" | "production";
+  apiKey: string;
+  channexPropertyId: string;
+  isActive: boolean;
+}): Promise<ActionResult<null>> {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("save_channex_connection", {
+    p_environment: input.environment,
+    p_api_key: input.apiKey,
+    p_channex_property_id: input.channexPropertyId,
+    p_is_active: input.isActive,
+  });
+  if (error) return { ok: false, error: await localised(error.message) };
+  revalidatePath("/settings");
+  return { ok: true, data: null };
+}
+
+/** Calls Channex with the saved key (from Postgres) and lists the properties it can see. */
+export async function testChannexConnection(): Promise<
+  ActionResult<{ connected: boolean; message: string; properties: { id: string; title: string; currency: string | null }[] }>
+> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("test_channex_connection");
+  if (error) return { ok: false, error: await localised(error.message) };
+  const rows = data ?? [];
+  revalidatePath("/settings");
+  return {
+    ok: true,
+    data: {
+      connected: rows[0]?.ok ?? false,
+      message: await localised(rows[0]?.message ?? ""),
+      properties: rows
+        .filter((r) => r.channex_property_id)
+        .map((r) => ({ id: r.channex_property_id as string, title: r.title ?? "", currency: r.currency })),
+    },
+  };
+}
+
+/** Creates in Channex whatever is not there yet: the property, room types, rate plans. */
+export async function runChannexSetup(): Promise<ActionResult<{ created: number; failed: { label: string; detail: string }[] }>> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("channex_setup");
+  if (error) return { ok: false, error: await localised(error.message) };
+  const rows = data ?? [];
+  revalidatePath("/settings");
+  return {
+    ok: true,
+    data: {
+      created: rows.filter((r) => r.succeeded).length,
+      failed: rows.filter((r) => !r.succeeded).map((r) => ({ label: r.label ?? "", detail: r.detail ?? "" })),
+    },
+  };
+}
+
+/** Sends Channex the rates, availability and restrictions that changed, or all of them. */
+export async function pushChannexAri(full: boolean): Promise<ActionResult<{ sent: number; error: string | null }>> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("channex_push_ari", { p_full: full });
+  if (error) return { ok: false, error: await localised(error.message) };
+  const rows = data ?? [];
+  const failed = rows.find((r) => !r.succeeded);
+  revalidatePath("/settings");
+  return {
+    ok: true,
+    data: {
+      sent: rows.reduce((n, r) => n + (r.sent ?? 0), 0),
+      error: failed ? await localised(failed.detail ?? "") : null,
+    },
+  };
+}
+
 /* -- Other -> Reactions (0104) --------------------------------------------- */
 
 export async function saveReaction(input: {

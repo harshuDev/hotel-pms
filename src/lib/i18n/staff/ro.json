@@ -3451,5 +3451,42 @@
  "Only managers and administrators can see the shift history": "Doar managerii și administratorii pot vedea istoricul turelor",
  "Paid-outs": "Plăți din casă",
  "Shift history": "Istoricul turelor",
- "View": "Vezi"
+ "View": "Vezi",
+ "API Key:": "Cheie API:",
+ "Channex Property:": "Proprietate Channex:",
+ "Channex saved.": "Channex salvat.",
+ "Connected · {when}": "Conectat · {when}",
+ "Environment:": "Mediu:",
+ "Is Active:": "Activ:",
+ "Production": "Producție",
+ "Staging": "Staging",
+ "Test connection": "Testează conexiunea",
+ "{created} created, {failed} refused by Channex.": "{created} create, {failed} refuzate de Channex.",
+ "{n} date ranges sent to Channex.": {
+  "one": "{n} interval de date trimis către Channex.",
+  "few": "{n} intervale de date trimise către Channex.",
+  "other": "{n} de intervale de date trimise către Channex."
+ },
+ "{n} items created in Channex.": {
+  "one": "{n} element creat în Channex.",
+  "few": "{n} elemente create în Channex.",
+  "other": "{n} de elemente create în Channex."
+ },
+ "{sent} sent": "{sent} trimise",
+ "{sent} sent, {failed} failed": "{sent} trimise, {failed} eșuate",
+ "Channex is up to date.": "Channex este la zi.",
+ "Create a new one": "Creează unul nou",
+ "Create in Channex": "Creează în Channex",
+ "Create the hotel in Channex first": "Creați mai întâi hotelul în Channex",
+ "Created": "Creat",
+ "Not in Channex": "Nu este în Channex",
+ "Only the platform team can set up Channex": "Doar echipa platformei poate configura Channex",
+ "Push": "Trimitere",
+ "Push everything": "Trimite tot",
+ "Push rates and availability": "Trimite tarifele și disponibilitatea",
+ "Recent runs": "Rulări recente",
+ "Room types and rate plans": "Tipuri de cameră și planuri tarifare",
+ "Setup": "Configurare",
+ "The key sees no Channex properties yet.": "Cheia nu vede încă nicio proprietate Channex.",
+ "Working…": "Se procesează…"
 }

@@ -3355,5 +3355,38 @@
  "Only managers and administrators can see the shift history": "เฉพาะผู้จัดการและผู้ดูแลระบบเท่านั้นที่ดูประวัติกะได้",
  "Paid-outs": "จ่ายเงินออก",
  "Shift history": "ประวัติกะ",
- "View": "ดู"
+ "View": "ดู",
+ "API Key:": "คีย์ API:",
+ "Channex Property:": "ที่พัก Channex:",
+ "Channex saved.": "บันทึก Channex แล้ว",
+ "Connected · {when}": "เชื่อมต่อแล้ว · {when}",
+ "Environment:": "สภาพแวดล้อม:",
+ "Is Active:": "เปิดใช้งาน:",
+ "Production": "Production",
+ "Staging": "Staging",
+ "Test connection": "ทดสอบการเชื่อมต่อ",
+ "{created} created, {failed} refused by Channex.": "สร้าง {created} รายการ, Channex ปฏิเสธ {failed} รายการ",
+ "{n} date ranges sent to Channex.": {
+  "other": "ส่งช่วงวันที่ {n} ช่วงไปยัง Channex แล้ว"
+ },
+ "{n} items created in Channex.": {
+  "other": "สร้าง {n} รายการใน Channex แล้ว"
+ },
+ "{sent} sent": "ส่งแล้ว {sent}",
+ "{sent} sent, {failed} failed": "ส่งแล้ว {sent}, ล้มเหลว {failed}",
+ "Channex is up to date.": "Channex เป็นปัจจุบันแล้ว",
+ "Create a new one": "สร้างใหม่",
+ "Create in Channex": "สร้างใน Channex",
+ "Create the hotel in Channex first": "สร้างโรงแรมใน Channex ก่อน",
+ "Created": "สร้างแล้ว",
+ "Not in Channex": "ไม่อยู่ใน Channex",
+ "Only the platform team can set up Channex": "เฉพาะทีมแพลตฟอร์มเท่านั้นที่ตั้งค่า Channex ได้",
+ "Push": "ส่ง",
+ "Push everything": "ส่งทั้งหมด",
+ "Push rates and availability": "ส่งราคาและห้องว่าง",
+ "Recent runs": "การทำงานล่าสุด",
+ "Room types and rate plans": "ประเภทห้องและแผนราคา",
+ "Setup": "การตั้งค่า",
+ "The key sees no Channex properties yet.": "คีย์ยังไม่เห็นที่พักใน Channex",
+ "Working…": "กำลังดำเนินการ…"
 }

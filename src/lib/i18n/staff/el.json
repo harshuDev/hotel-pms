@@ -3403,5 +3403,40 @@
  "Only managers and administrators can see the shift history": "Μόνο οι διευθυντές και οι διαχειριστές μπορούν να δουν το ιστορικό βαρδιών",
  "Paid-outs": "Εκταμιεύσεις",
  "Shift history": "Ιστορικό βαρδιών",
- "View": "Προβολή"
+ "View": "Προβολή",
+ "API Key:": "Κλειδί API:",
+ "Channex Property:": "Κατάλυμα Channex:",
+ "Channex saved.": "Το Channex αποθηκεύτηκε.",
+ "Connected · {when}": "Συνδέθηκε · {when}",
+ "Environment:": "Περιβάλλον:",
+ "Is Active:": "Ενεργό:",
+ "Production": "Παραγωγή",
+ "Staging": "Staging",
+ "Test connection": "Δοκιμή σύνδεσης",
+ "{created} created, {failed} refused by Channex.": "{created} δημιουργήθηκαν, {failed} απορρίφθηκαν από το Channex.",
+ "{n} date ranges sent to Channex.": {
+  "one": "{n} εύρος ημερομηνιών στάλθηκε στο Channex.",
+  "other": "{n} εύρη ημερομηνιών στάλθηκαν στο Channex."
+ },
+ "{n} items created in Channex.": {
+  "one": "{n} στοιχείο δημιουργήθηκε στο Channex.",
+  "other": "{n} στοιχεία δημιουργήθηκαν στο Channex."
+ },
+ "{sent} sent": "{sent} στάλθηκαν",
+ "{sent} sent, {failed} failed": "{sent} στάλθηκαν, {failed} απέτυχαν",
+ "Channex is up to date.": "Το Channex είναι ενημερωμένο.",
+ "Create a new one": "Δημιουργία νέου",
+ "Create in Channex": "Δημιουργία στο Channex",
+ "Create the hotel in Channex first": "Δημιουργήστε πρώτα το ξενοδοχείο στο Channex",
+ "Created": "Δημιουργήθηκε",
+ "Not in Channex": "Όχι στο Channex",
+ "Only the platform team can set up Channex": "Μόνο η ομάδα της πλατφόρμας μπορεί να ρυθμίσει το Channex",
+ "Push": "Αποστολή",
+ "Push everything": "Αποστολή όλων",
+ "Push rates and availability": "Αποστολή τιμών και διαθεσιμότητας",
+ "Recent runs": "Πρόσφατες εκτελέσεις",
+ "Room types and rate plans": "Τύποι δωματίων και πλάνα τιμών",
+ "Setup": "Ρύθμιση",
+ "The key sees no Channex properties yet.": "Το κλειδί δεν βλέπει ακόμη καταλύματα Channex.",
+ "Working…": "Σε εξέλιξη…"
 }

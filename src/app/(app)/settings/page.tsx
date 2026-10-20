@@ -38,6 +38,9 @@ import {
   getWeekRates,
   getRatePlanCoverage,
   getChannelManagers,
+  getChannexConnection,
+  getChannexOverview,
+  getChannexSyncLog,
   getBookingEngineSettings,
   getBookingWidgets,
   getApiKeys,
@@ -71,6 +74,8 @@ export default async function SettingsPage({
   // `?rates=<season id>`, or `default` for the Default Season. Absent is closed.
   const ratesParam = tab === "seasons" ? sp.rates?.trim() : undefined;
   const ratesSeason = !ratesParam ? undefined : ratesParam === "default" ? null : ratesParam;
+  // Cached: the read further down costs nothing more.
+  const isPlatformTeam = await getIsPlatformMember();
 
   const [
     property,
@@ -109,6 +114,9 @@ export default async function SettingsPage({
     weekRates,
     rateCoverage,
     channelManagers,
+    channexConnection,
+    channexOverview,
+    channexSyncLog,
     bookingEngine,
     bookingWidgets,
     apiKeys,
@@ -152,6 +160,10 @@ export default async function SettingsPage({
     tab === "rate-plans" || tab === "seasons" ? getWeekRates() : Promise.resolve([]),
     tab === "rate-plans" || tab === "seasons" ? getRatePlanCoverage() : Promise.resolve([]),
     tab === "channel-manager" ? getChannelManagers() : Promise.resolve([]),
+    // Channex is the platform team's (0142): nobody else reads it.
+    tab === "channel-manager" && isPlatformTeam ? getChannexConnection() : Promise.resolve(null),
+    tab === "channel-manager" && isPlatformTeam ? getChannexOverview() : Promise.resolve([]),
+    tab === "channel-manager" && isPlatformTeam ? getChannexSyncLog() : Promise.resolve([]),
     tab === "booking-engine" ? getBookingEngineSettings() : Promise.resolve(null),
     tab === "booking-widget" ? getBookingWidgets() : Promise.resolve([]),
     tab === "api-key" || tab === "developer-keys" ? getApiKeys() : Promise.resolve(null),
@@ -237,6 +249,7 @@ export default async function SettingsPage({
         weekRates={weekRates}
         rateCoverage={rateCoverage}
         channelManagers={channelManagers}
+        channex={isPlatformTeam ? { connection: channexConnection, overview: channexOverview, log: channexSyncLog } : null}
         bookingEngine={bookingEngine}
         bookingWidgets={bookingWidgets}
         apiKeys={apiKeys}

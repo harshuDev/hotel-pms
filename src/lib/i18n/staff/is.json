@@ -3403,5 +3403,40 @@
  "Only managers and administrators can see the shift history": "Aðeins stjórnendur og kerfisstjórar geta séð vaktasöguna",
  "Paid-outs": "Útgreiðslur",
  "Shift history": "Vaktasaga",
- "View": "Skoða"
+ "View": "Skoða",
+ "API Key:": "API-lykill:",
+ "Channex Property:": "Gististaður í Channex:",
+ "Channex saved.": "Channex vistað.",
+ "Connected · {when}": "Tengt · {when}",
+ "Environment:": "Umhverfi:",
+ "Is Active:": "Virkt:",
+ "Production": "Production",
+ "Staging": "Staging",
+ "Test connection": "Prófa tengingu",
+ "{created} created, {failed} refused by Channex.": "{created} stofnað, Channex hafnaði {failed}.",
+ "{n} date ranges sent to Channex.": {
+  "one": "{n} dagsetningabil sent til Channex.",
+  "other": "{n} dagsetningabil send til Channex."
+ },
+ "{n} items created in Channex.": {
+  "one": "{n} atriði stofnað í Channex.",
+  "other": "{n} atriði stofnuð í Channex."
+ },
+ "{sent} sent": "{sent} send",
+ "{sent} sent, {failed} failed": "{sent} send, {failed} mistókust",
+ "Channex is up to date.": "Channex er uppfært.",
+ "Create a new one": "Stofna nýtt",
+ "Create in Channex": "Stofna í Channex",
+ "Create the hotel in Channex first": "Stofnaðu hótelið fyrst í Channex",
+ "Created": "Stofnað",
+ "Not in Channex": "Ekki í Channex",
+ "Only the platform team can set up Channex": "Aðeins teymi kerfisins getur sett upp Channex",
+ "Push": "Sending",
+ "Push everything": "Senda allt",
+ "Push rates and availability": "Senda verð og framboð",
+ "Recent runs": "Nýlegar keyrslur",
+ "Room types and rate plans": "Herbergjategundir og verðáætlanir",
+ "Setup": "Uppsetning",
+ "The key sees no Channex properties yet.": "Lykillinn sér enn engar Channex-eignir.",
+ "Working…": "Í vinnslu…"
 }

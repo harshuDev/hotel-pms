@@ -260,6 +260,9 @@
  "{clean} vacant dirty, {dueOut} due out": {
   "kind": "text"
  },
+ "{created} created, {failed} refused by Channex.": {
+  "kind": "text"
+ },
  "{currency} deleted.": {
   "kind": "text"
  },
@@ -346,6 +349,10 @@
   "kind": "plural",
   "one": "{n} customer exported to {file}."
  },
+ "{n} date ranges sent to Channex.": {
+  "kind": "plural",
+  "one": "{n} date range sent to Channex."
+ },
  "{n} days": {
   "kind": "plural",
   "one": "{n} day"
@@ -375,6 +382,10 @@
  "{n} guests are still checked in after their departure.": {
   "kind": "plural",
   "one": "{n} guest is still checked in after their departure."
+ },
+ "{n} items created in Channex.": {
+  "kind": "plural",
+  "one": "{n} item created in Channex."
  },
  "{n} methods": {
   "kind": "plural",
@@ -615,6 +626,12 @@
   "kind": "text"
  },
  "{roomsSold} of {sellableRooms} rooms": {
+  "kind": "text"
+ },
+ "{sent} sent": {
+  "kind": "text"
+ },
+ "{sent} sent, {failed} failed": {
   "kind": "text"
  },
  "{setting} in Inventory Settings turns it back on.": {
@@ -1522,6 +1539,9 @@
  "API key generated.": {
   "kind": "text"
  },
+ "API Key:": {
+  "kind": "text"
+ },
  "Appended to the existing notes; the guest never sees these": {
   "kind": "text"
  },
@@ -2366,8 +2386,17 @@
  "Channex API key": {
   "kind": "db"
  },
+ "Channex is up to date.": {
+  "kind": "text"
+ },
+ "Channex Property:": {
+  "kind": "text"
+ },
  "Channex refused the API key": {
   "kind": "db"
+ },
+ "Channex saved.": {
+  "kind": "text"
  },
  "ChannexPCI": {
   "kind": "text"
@@ -2885,6 +2914,9 @@
   "kind": "country",
   "code": "CD"
  },
+ "Connected · {when}": {
+  "kind": "text"
+ },
  "Connection Name": {
   "kind": "text"
  },
@@ -2993,6 +3025,9 @@
  "Create": {
   "kind": "text"
  },
+ "Create a new one": {
+  "kind": "text"
+ },
  "Create API Key": {
   "kind": "text"
  },
@@ -3003,6 +3038,9 @@
   "kind": "text"
  },
  "Create Customer": {
+  "kind": "text"
+ },
+ "Create in Channex": {
   "kind": "text"
  },
  "Create Invoice": {
@@ -3033,6 +3071,12 @@
   "kind": "text"
  },
  "Create property": {
+  "kind": "text"
+ },
+ "Create the hotel in Channex first": {
+  "kind": "db"
+ },
+ "Created": {
   "kind": "text"
  },
  "Croatia": {
@@ -3761,6 +3805,9 @@
   "kind": "db"
  },
  "Enter your password": {
+  "kind": "text"
+ },
+ "Environment:": {
   "kind": "text"
  },
  "Equatorial Guinea": {
@@ -4779,6 +4826,9 @@
   "code": "IE"
  },
  "Is Active": {
+  "kind": "text"
+ },
+ "Is Active:": {
   "kind": "text"
  },
  "Is Default": {
@@ -5995,6 +6045,9 @@
  "Not default": {
   "kind": "text"
  },
+ "Not in Channex": {
+  "kind": "text"
+ },
  "Not on the guest booking page": {
   "kind": "text"
  },
@@ -6480,6 +6533,9 @@
   "kind": "db"
  },
  "Only the platform team can move between hotels": {
+  "kind": "db"
+ },
+ "Only the platform team can set up Channex": {
   "kind": "db"
  },
  "Only these days": {
@@ -7075,6 +7131,9 @@
  "Priority is a whole number from 0 to 999.": {
   "kind": "text"
  },
+ "Production": {
+  "kind": "text"
+ },
  "Profile": {
   "kind": "text"
  },
@@ -7105,6 +7164,15 @@
  "Puerto Rico": {
   "kind": "country",
   "code": "PR"
+ },
+ "Push": {
+  "kind": "text"
+ },
+ "Push everything": {
+  "kind": "text"
+ },
+ "Push rates and availability": {
+  "kind": "text"
  },
  "Put in a room": {
   "kind": "text"
@@ -7243,6 +7311,9 @@
   "kind": "text"
  },
  "Received": {
+  "kind": "text"
+ },
+ "Recent runs": {
   "kind": "text"
  },
  "recharged to {rechargeBookingRef}": {
@@ -7696,6 +7767,9 @@
  "Room types": {
   "kind": "text"
  },
+ "Room types and rate plans": {
+  "kind": "text"
+ },
  "Room: {n}": {
   "kind": "text"
  },
@@ -8102,6 +8176,9 @@
  "Settlement": {
   "kind": "text"
  },
+ "Setup": {
+  "kind": "text"
+ },
  "Seychelles": {
   "kind": "country",
   "code": "SC"
@@ -8311,6 +8388,9 @@
   "kind": "text"
  },
  "Staff notes": {
+  "kind": "text"
+ },
+ "Staging": {
   "kind": "text"
  },
  "Standard price": {
@@ -8551,6 +8631,9 @@
   "kind": "text"
  },
  "Terms Text": {
+  "kind": "text"
+ },
+ "Test connection": {
   "kind": "text"
  },
  "Text": {
@@ -9077,6 +9160,9 @@
   "kind": "text"
  },
  "The house": {
+  "kind": "text"
+ },
+ "The key sees no Channex properties yet.": {
   "kind": "text"
  },
  "The last date must not be before the first": {
@@ -9873,6 +9959,9 @@
   "kind": "text"
  },
  "With the room charge": {
+  "kind": "text"
+ },
+ "Working…": {
   "kind": "text"
  },
  "Worth nothing": {

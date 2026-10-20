@@ -3404,5 +3404,40 @@
  "Only managers and administrators can see the shift history": "Seuls les responsables et les administrateurs peuvent voir l’historique des services",
  "Paid-outs": "Sorties de caisse",
  "Shift history": "Historique des services",
- "View": "Voir"
+ "View": "Voir",
+ "API Key:": "Clé API :",
+ "Channex Property:": "Établissement Channex :",
+ "Channex saved.": "Channex enregistré.",
+ "Connected · {when}": "Connecté · {when}",
+ "Environment:": "Environnement :",
+ "Is Active:": "Actif :",
+ "Production": "Production",
+ "Staging": "Staging",
+ "Test connection": "Tester la connexion",
+ "{created} created, {failed} refused by Channex.": "{created} créés, {failed} refusés par Channex.",
+ "{n} date ranges sent to Channex.": {
+  "one": "{n} plage de dates envoyée à Channex.",
+  "other": "{n} plages de dates envoyées à Channex."
+ },
+ "{n} items created in Channex.": {
+  "one": "{n} élément créé dans Channex.",
+  "other": "{n} éléments créés dans Channex."
+ },
+ "{sent} sent": "{sent} envoyés",
+ "{sent} sent, {failed} failed": "{sent} envoyés, {failed} en échec",
+ "Channex is up to date.": "Channex est à jour.",
+ "Create a new one": "En créer un nouveau",
+ "Create in Channex": "Créer dans Channex",
+ "Create the hotel in Channex first": "Créez d’abord l’hôtel dans Channex",
+ "Created": "Créé",
+ "Not in Channex": "Pas dans Channex",
+ "Only the platform team can set up Channex": "Seule l’équipe de la plateforme peut configurer Channex",
+ "Push": "Envoi",
+ "Push everything": "Tout envoyer",
+ "Push rates and availability": "Envoyer tarifs et disponibilités",
+ "Recent runs": "Exécutions récentes",
+ "Room types and rate plans": "Types de chambre et plans tarifaires",
+ "Setup": "Configuration",
+ "The key sees no Channex properties yet.": "La clé ne voit encore aucun établissement Channex.",
+ "Working…": "En cours…"
 }
