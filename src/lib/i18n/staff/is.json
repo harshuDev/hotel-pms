@@ -3392,5 +3392,16 @@
  "Channex API key": "API-lykill Channex",
  "Channex refused the API key": "Channex hafnaði API-lyklinum",
  "Pick Staging or Production": "Veldu Staging eða Production",
- "That is not a Channex property id": "Þetta er ekki auðkenni gististaðar í Channex"
+ "That is not a Channex property id": "Þetta er ekki auðkenni gististaðar í Channex",
+ "{amount} by other methods": "{amount} með öðrum greiðsluleiðum",
+ "Cash payments": "Greiðslur í reiðufé",
+ "Closing notes": "Lokaathugasemdir",
+ "Hide": "Fela",
+ "No closed shifts yet.": "Engar lokaðar vaktir enn.",
+ "No payments were taken on this shift.": "Engar greiðslur voru teknar á þessari vakt.",
+ "Nothing left the drawer on this shift.": "Ekkert fór úr skúffunni á þessari vakt.",
+ "Only managers and administrators can see the shift history": "Aðeins stjórnendur og kerfisstjórar geta séð vaktasöguna",
+ "Paid-outs": "Útgreiðslur",
+ "Shift history": "Vaktasaga",
+ "View": "Skoða"
 }

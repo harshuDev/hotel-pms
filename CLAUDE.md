@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0139` (0138 as 0138a-f) are
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0141` (0138 as 0138a-f) are
 applied to the hosted database.
 
 Working on real data: dashboard (house board, movements, pace, activity feed),
@@ -3773,6 +3773,23 @@ client: "Need to add Booking Channel in the Dashboard".
   optionally recharged to a guest folio), close the shift with a blind cash
   count, next receptionist opens a fresh one. Shift close is a blind count —
   never reveal the expected figure before the counted amount is entered.
+- **THE CASHIER SCREEN CARRIES A SHIFT HISTORY (0141)**, under the drawer:
+  every closed shift, newest close first, 20 a page in Postgres
+  (`cashier_shift_history()`, `ShiftHistory` in
+  `src/components/cashier/shift-history.tsx`) -- business date, cashier,
+  opened and closed on the hotel's clock, float, cash payments (other
+  methods under them), paid out, expected, counted and the variance, rose
+  when short and amber when over. "View" opens that shift's payments and
+  paid-outs under the row through `getShiftLines()`, the same two reads the
+  open shift uses; `?shift=` and `?history_page=` are URL state, and only a
+  shift on the page shown can open.
+  - **Managers and administrators only** -- `can_see_drawer_total()`, the
+    test that already hides the expected figure. A receptionist counts blind,
+    and other shifts' expected figures would undo that; the page does not
+    draw the section for them and the function refuses them by name.
+  - **security definer**, so a cashier's name still shows after their login
+    moved to another hotel (0134-0135, 0140). The property is still
+    `current_property_id()`. Closed shifts stay immutable; this only reads.
 - Property scale: assume up to ~1,800 rooms per property. Any UI that renders
   one element per room, or any query that returns every room, is a bug.
 - **Meeting rooms are a separate booking module, confirmed with the client.**

@@ -3440,5 +3440,16 @@
  "Channex API key": "Cheie API Channex",
  "Channex refused the API key": "Channex a refuzat cheia API",
  "Pick Staging or Production": "Alegeți Staging sau Producție",
- "That is not a Channex property id": "Acesta nu este un id de proprietate Channex"
+ "That is not a Channex property id": "Acesta nu este un id de proprietate Channex",
+ "{amount} by other methods": "{amount} prin alte metode",
+ "Cash payments": "Plăți în numerar",
+ "Closing notes": "Note de închidere",
+ "Hide": "Ascunde",
+ "No closed shifts yet.": "Nu există încă ture închise.",
+ "No payments were taken on this shift.": "Nu s-au încasat plăți în această tură.",
+ "Nothing left the drawer on this shift.": "Nimic nu a ieșit din casă în această tură.",
+ "Only managers and administrators can see the shift history": "Doar managerii și administratorii pot vedea istoricul turelor",
+ "Paid-outs": "Plăți din casă",
+ "Shift history": "Istoricul turelor",
+ "View": "Vezi"
 }

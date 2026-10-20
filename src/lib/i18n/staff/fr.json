@@ -3393,5 +3393,16 @@
  "Channex API key": "Clé API Channex",
  "Channex refused the API key": "Channex a refusé la clé API",
  "Pick Staging or Production": "Choisissez Staging ou Production",
- "That is not a Channex property id": "Ce n'est pas un identifiant d'établissement Channex"
+ "That is not a Channex property id": "Ce n'est pas un identifiant d'établissement Channex",
+ "{amount} by other methods": "{amount} par d’autres moyens",
+ "Cash payments": "Paiements en espèces",
+ "Closing notes": "Notes de clôture",
+ "Hide": "Masquer",
+ "No closed shifts yet.": "Aucun service clôturé pour l’instant.",
+ "No payments were taken on this shift.": "Aucun paiement n’a été encaissé pendant ce service.",
+ "Nothing left the drawer on this shift.": "Rien n’est sorti de la caisse pendant ce service.",
+ "Only managers and administrators can see the shift history": "Seuls les responsables et les administrateurs peuvent voir l’historique des services",
+ "Paid-outs": "Sorties de caisse",
+ "Shift history": "Historique des services",
+ "View": "Voir"
 }

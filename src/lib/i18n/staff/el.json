@@ -3392,5 +3392,16 @@
  "Channex API key": "Κλειδί API Channex",
  "Channex refused the API key": "Το Channex απέρριψε το κλειδί API",
  "Pick Staging or Production": "Επιλέξτε Staging ή Παραγωγή",
- "That is not a Channex property id": "Αυτό δεν είναι αναγνωριστικό καταλύματος Channex"
+ "That is not a Channex property id": "Αυτό δεν είναι αναγνωριστικό καταλύματος Channex",
+ "{amount} by other methods": "{amount} με άλλους τρόπους",
+ "Cash payments": "Πληρωμές σε μετρητά",
+ "Closing notes": "Σημειώσεις κλεισίματος",
+ "Hide": "Απόκρυψη",
+ "No closed shifts yet.": "Δεν υπάρχουν ακόμη κλειστές βάρδιες.",
+ "No payments were taken on this shift.": "Δεν έγιναν πληρωμές σε αυτή τη βάρδια.",
+ "Nothing left the drawer on this shift.": "Τίποτα δεν βγήκε από το ταμείο σε αυτή τη βάρδια.",
+ "Only managers and administrators can see the shift history": "Μόνο οι διευθυντές και οι διαχειριστές μπορούν να δουν το ιστορικό βαρδιών",
+ "Paid-outs": "Εκταμιεύσεις",
+ "Shift history": "Ιστορικό βαρδιών",
+ "View": "Προβολή"
 }

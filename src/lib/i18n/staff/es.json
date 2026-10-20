@@ -3393,5 +3393,16 @@
  "Channex API key": "Clave API de Channex",
  "Channex refused the API key": "Channex rechazó la clave API",
  "Pick Staging or Production": "Elija Staging o Producción",
- "That is not a Channex property id": "Eso no es un id de propiedad de Channex"
+ "That is not a Channex property id": "Eso no es un id de propiedad de Channex",
+ "{amount} by other methods": "{amount} con otros métodos",
+ "Cash payments": "Pagos en efectivo",
+ "Closing notes": "Notas de cierre",
+ "Hide": "Ocultar",
+ "No closed shifts yet.": "Aún no hay turnos cerrados.",
+ "No payments were taken on this shift.": "No se tomaron pagos en este turno.",
+ "Nothing left the drawer on this shift.": "En este turno no salió nada de la caja.",
+ "Only managers and administrators can see the shift history": "Solo los gerentes y administradores pueden ver el historial de turnos",
+ "Paid-outs": "Pagos de caja",
+ "Shift history": "Historial de turnos",
+ "View": "Ver"
 }

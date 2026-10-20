@@ -188,6 +188,26 @@ export interface Shift {
   paidOuts: PaidOut[];
 }
 
+/** A closed cashier shift, for the Cashier screen's Shift history (0141). */
+export interface ShiftHistoryRow {
+  id: string;
+  cashierName: string;
+  businessDate: string;
+  openedAt: string;
+  closedAt: string;
+  openingFloatCents: number;
+  expectedCents: number;
+  countedCents: number;
+  /** Counted less expected: negative is cash short, positive is over. */
+  varianceCents: number;
+  cashPaymentsCents: number;
+  otherPaymentsCents: number;
+  paymentsCount: number;
+  paidOutsCents: number;
+  paidOutsCount: number;
+  closingNotes: string | null;
+}
+
 /** Read model returned by the Phase 4 cashier summary view/RPC. */
 export interface CashierShiftSummary {
   shiftId: string;

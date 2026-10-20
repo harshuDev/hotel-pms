@@ -3344,5 +3344,16 @@
  "Channex API key": "Kunci API Channex",
  "Channex refused the API key": "Channex menolak kunci API",
  "Pick Staging or Production": "Pilih Staging atau Produksi",
- "That is not a Channex property id": "Itu bukan id properti Channex"
+ "That is not a Channex property id": "Itu bukan id properti Channex",
+ "{amount} by other methods": "{amount} dengan metode lain",
+ "Cash payments": "Pembayaran tunai",
+ "Closing notes": "Catatan penutupan",
+ "Hide": "Sembunyikan",
+ "No closed shifts yet.": "Belum ada shift yang ditutup.",
+ "No payments were taken on this shift.": "Tidak ada pembayaran yang diterima pada shift ini.",
+ "Nothing left the drawer on this shift.": "Tidak ada uang keluar dari laci kas pada shift ini.",
+ "Only managers and administrators can see the shift history": "Hanya manajer dan administrator yang dapat melihat riwayat shift",
+ "Paid-outs": "Pengeluaran kas",
+ "Shift history": "Riwayat shift",
+ "View": "Lihat"
 }

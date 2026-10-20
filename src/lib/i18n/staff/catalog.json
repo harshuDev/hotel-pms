@@ -212,6 +212,9 @@
  "{adults} adults, {children} children": {
   "kind": "text"
  },
+ "{amount} by other methods": {
+  "kind": "text"
+ },
  "{amount} Discount": {
   "kind": "text"
  },
@@ -2258,6 +2261,9 @@
  "Cash payment must use an open shift on its business date": {
   "kind": "db"
  },
+ "Cash payments": {
+  "kind": "text"
+ },
  "Cash payments require a cashier shift": {
   "kind": "db"
  },
@@ -2755,6 +2761,9 @@
   "kind": "text"
  },
  "Closed To Departure": {
+  "kind": "text"
+ },
+ "Closing notes": {
   "kind": "text"
  },
  "Closing…": {
@@ -4435,6 +4444,9 @@
  "Here you can choose what type of emails you want to receive": {
   "kind": "text"
  },
+ "Hide": {
+  "kind": "text"
+ },
  "Hide cancellation area from calendar": {
   "kind": "text"
  },
@@ -5652,6 +5664,9 @@
  "No clean {type} is free for these dates. Housekeeping needs to release one first.": {
   "kind": "text"
  },
+ "No closed shifts yet.": {
+  "kind": "text"
+ },
  "No colour": {
   "kind": "text"
  },
@@ -5740,6 +5755,9 @@
   "kind": "text"
  },
  "No payments in this range": {
+  "kind": "text"
+ },
+ "No payments were taken on this shift.": {
   "kind": "text"
  },
  "No payments yet. Take one with the button above.": {
@@ -6035,6 +6053,9 @@
   "kind": "text"
  },
  "Nothing is recorded for that date": {
+  "kind": "text"
+ },
+ "Nothing left the drawer on this shift.": {
   "kind": "text"
  },
  "Nothing matches “{term}”. Search covers booking references, guest names and room numbers.": {
@@ -6425,6 +6446,9 @@
  "Only managers and administrators can publish a rate": {
   "kind": "db"
  },
+ "Only managers and administrators can see the shift history": {
+  "kind": "db"
+ },
  "Only managers and administrators can set up a promotion": {
   "kind": "db"
  },
@@ -6609,6 +6633,9 @@
   "kind": "text"
  },
  "Paid to": {
+  "kind": "text"
+ },
+ "Paid-outs": {
   "kind": "text"
  },
  "Paid-outs this shift": {
@@ -8083,6 +8110,9 @@
   "kind": "text"
  },
  "Shift closed": {
+  "kind": "text"
+ },
+ "Shift history": {
   "kind": "text"
  },
  "Shifts still open": {
@@ -9690,6 +9720,9 @@
  "Viet Nam": {
   "kind": "country",
   "code": "VN"
+ },
+ "View": {
+  "kind": "text"
  },
  "View By": {
   "kind": "text"

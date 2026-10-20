@@ -3488,5 +3488,16 @@
  "Channex API key": "API-ključ Channex",
  "Channex refused the API key": "Channex je zavrnil API-ključ",
  "Pick Staging or Production": "Izberite Staging ali Produkcija",
- "That is not a Channex property id": "To ni ID nastanitve Channex"
+ "That is not a Channex property id": "To ni ID nastanitve Channex",
+ "{amount} by other methods": "{amount} z drugimi načini",
+ "Cash payments": "Gotovinska plačila",
+ "Closing notes": "Opombe ob zaprtju",
+ "Hide": "Skrij",
+ "No closed shifts yet.": "Zaprtih izmen še ni.",
+ "No payments were taken on this shift.": "V tej izmeni ni bilo prejetih plačil.",
+ "Nothing left the drawer on this shift.": "V tej izmeni ni nič zapustilo blagajne.",
+ "Only managers and administrators can see the shift history": "Zgodovino izmen lahko vidijo samo vodje in skrbniki",
+ "Paid-outs": "Izplačila",
+ "Shift history": "Zgodovina izmen",
+ "View": "Ogled"
 }
