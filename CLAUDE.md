@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0142` (0138 as 0138a-f, 0142 as 0142a-b) are
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0143` (0138 as 0138a-f, 0142 as 0142a-b) are
 applied to the hosted database.
 
 Working on real data: dashboard (house board, movements, pace, activity feed),
@@ -2804,8 +2804,8 @@ client: "Need to add Booking Channel in the Dashboard".
       room type's MAXIMUM occupancy, not its base; the push starts no
       earlier than the hotel's own today (Channex refuses past dates, and
       the business date lags until the audit). Requests are 5000 ranges --
-      the limit is 10 requests a minute per endpoint per property. **0143
-      is written, not yet applied to the hosted database.** Channex also
+      the limit is 10 requests a minute per endpoint per property. 0143 is
+      applied to the hosted database (2026-10-21). Channex also
       refuses a rate of 0; a night priced at zero will show as refused.
     - **Links and sent values carry the Channex property id**, so pointing a
       hotel at another Channex property starts clean with nothing deleted --
