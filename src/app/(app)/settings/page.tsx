@@ -39,7 +39,7 @@ import {
   getRatePlanCoverage,
   getChannelManagers,
   getChannexConnection,
-  getChannexOverview,
+  getChannexRooms,
   getChannexSyncLog,
   getChannexBookingRevisions,
   getBookingEngineSettings,
@@ -116,7 +116,7 @@ export default async function SettingsPage({
     rateCoverage,
     channelManagers,
     channexConnection,
-    channexOverview,
+    channexRooms,
     channexSyncLog,
     channexBookings,
     bookingEngine,
@@ -164,7 +164,7 @@ export default async function SettingsPage({
     tab === "channel-manager" ? getChannelManagers() : Promise.resolve([]),
     // Channex is the platform team's (0142): nobody else reads it.
     tab === "channel-manager" && isPlatformTeam ? getChannexConnection() : Promise.resolve(null),
-    tab === "channel-manager" && isPlatformTeam ? getChannexOverview() : Promise.resolve([]),
+    tab === "channel-manager" && isPlatformTeam ? getChannexRooms() : Promise.resolve([]),
     tab === "channel-manager" && isPlatformTeam ? getChannexSyncLog() : Promise.resolve([]),
     tab === "channel-manager" && isPlatformTeam ? getChannexBookingRevisions() : Promise.resolve([]),
     tab === "booking-engine" ? getBookingEngineSettings() : Promise.resolve(null),
@@ -252,7 +252,11 @@ export default async function SettingsPage({
         weekRates={weekRates}
         rateCoverage={rateCoverage}
         channelManagers={channelManagers}
-        channex={isPlatformTeam ? { connection: channexConnection, overview: channexOverview, log: channexSyncLog, bookings: channexBookings } : null}
+        channex={
+          isPlatformTeam
+            ? { connection: channexConnection, rooms: channexRooms, log: channexSyncLog, bookings: channexBookings }
+            : null
+        }
         bookingEngine={bookingEngine}
         bookingWidgets={bookingWidgets}
         apiKeys={apiKeys}

@@ -2077,6 +2077,8 @@ export type Database = {
           ok: boolean
           property_id: string
           sent: number
+          task_ids: string[]
+          warnings: number
         }
         Insert: {
           created_at?: string
@@ -2088,6 +2090,8 @@ export type Database = {
           ok: boolean
           property_id: string
           sent?: number
+          task_ids?: string[]
+          warnings?: number
         }
         Update: {
           created_at?: string
@@ -2099,6 +2103,8 @@ export type Database = {
           ok?: boolean
           property_id?: string
           sent?: number
+          task_ids?: string[]
+          warnings?: number
         }
         Relationships: [
           {
@@ -6355,6 +6361,7 @@ export type Database = {
           revisions: Json
         }[]
       }
+      channex_full_sync_all: { Args: never; Returns: number }
       channex_ota_channel: {
         Args: { p_ota_name: string; p_property: string }
         Returns: string
@@ -6402,6 +6409,31 @@ export type Database = {
       channex_rate_text: {
         Args: { p_cents: number; p_currency: string }
         Returns: string
+      }
+      channex_room_list: {
+        Args: never
+        Returns: {
+          available: number
+          channex_room_type_id: string
+          plans_priced: number
+          plans_sent: number
+          rate_cents: number
+          rate_currency: string
+          room_name: string
+          room_type_code: string
+          room_type_id: string
+          room_type_name: string
+          rooms: number
+        }[]
+      }
+      channex_send_room_types: {
+        Args: { p_room_type_ids: string[] }
+        Returns: {
+          detail: string
+          label: string
+          step: string
+          succeeded: boolean
+        }[]
       }
       channex_setup: {
         Args: never

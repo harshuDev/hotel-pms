@@ -254,6 +254,9 @@
  "{applied} taken, {failed} could not be saved.": {
   "kind": "text"
  },
+ "{available} of {rooms}": {
+  "kind": "text"
+ },
  "{channel} booking {reference}": {
   "kind": "text"
  },
@@ -264,9 +267,6 @@
   "kind": "text"
  },
  "{clean} vacant dirty, {dueOut} due out": {
-  "kind": "text"
- },
- "{created} created, {failed} refused by Channex.": {
   "kind": "text"
  },
  "{currency} deleted.": {
@@ -393,10 +393,6 @@
   "kind": "plural",
   "one": "{n} guest is still checked in after their departure."
  },
- "{n} items created in Channex.": {
-  "kind": "plural",
-  "one": "{n} item created in Channex."
- },
  "{n} methods": {
   "kind": "plural",
   "one": "{n} method"
@@ -453,6 +449,10 @@
  "{n} room types selected.": {
   "kind": "plural",
   "one": "{n} room type selected."
+ },
+ "{n} room types sent to Channex.": {
+  "kind": "plural",
+  "one": "{n} room type sent to Channex."
  },
  "{n} rooms": {
   "kind": "plural",
@@ -1517,6 +1517,9 @@
  "Another profile already uses the slug {0}": {
   "kind": "db"
  },
+ "Another push to Channex is running for this hotel. Try again in a minute.": {
+  "kind": "db"
+ },
  "Another sales channel already uses the abbreviation {0}": {
   "kind": "db"
  },
@@ -2405,6 +2408,9 @@
  "Channex API key": {
   "kind": "db"
  },
+ "Channex asked us to slow down. What was not sent goes on the next push.": {
+  "kind": "db"
+ },
  "Channex is up to date.": {
   "kind": "text"
  },
@@ -3062,9 +3068,6 @@
  "Create Customer": {
   "kind": "text"
  },
- "Create in Channex": {
-  "kind": "text"
- },
  "Create Invoice": {
   "kind": "text"
  },
@@ -3097,9 +3100,6 @@
  },
  "Create the hotel in Channex first": {
   "kind": "db"
- },
- "Created": {
-  "kind": "text"
  },
  "Croatia": {
   "kind": "country",
@@ -7744,6 +7744,9 @@
  "Room for {type}": {
   "kind": "text"
  },
+ "Room Name": {
+  "kind": "text"
+ },
  "Room night discount exceeds room rate": {
   "kind": "db"
  },
@@ -7811,9 +7814,6 @@
   "kind": "text"
  },
  "Room types": {
-  "kind": "text"
- },
- "Room types and rate plans": {
   "kind": "text"
  },
  "Room: {n}": {
@@ -8141,6 +8141,9 @@
  "Send to": {
   "kind": "text"
  },
+ "Send to Channex": {
+  "kind": "text"
+ },
  "Send to ten addresses at most": {
   "kind": "text"
  },
@@ -8152,6 +8155,9 @@
   "code": "SN"
  },
  "Sent": {
+  "kind": "text"
+ },
+ "Sent · {sent} of {priced} rate plans": {
   "kind": "text"
  },
  "Serbia": {
@@ -8983,6 +8989,9 @@
  "That room type is no longer on this property": {
   "kind": "db"
  },
+ "That room type is not on this hotel": {
+  "kind": "db"
+ },
  "That room type is not on this property": {
   "kind": "db"
  },
@@ -9520,8 +9529,14 @@
  "Through the drawer": {
   "kind": "text"
  },
+ "Tick all": {
+  "kind": "text"
+ },
  "Tick at least one rate to apply this to.": {
   "kind": "text"
+ },
+ "Tick at least one room type to send to Channex": {
+  "kind": "db"
  },
  "Tick Replace prices already on these nights to take a removed occupancy price off the nights already priced.": {
   "kind": "text"
@@ -9542,6 +9557,9 @@
   "kind": "text"
  },
  "Tick the room types on the left to apply this to.": {
+  "kind": "text"
+ },
+ "Tick the room types to send to Channex.": {
   "kind": "text"
  },
  "Tick two or more customers to merge them into one.": {

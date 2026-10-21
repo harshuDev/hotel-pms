@@ -3365,30 +3365,36 @@
  "Production": "Produksi",
  "Staging": "Staging",
  "Test connection": "Uji koneksi",
- "{created} created, {failed} refused by Channex.": "{created} dibuat, {failed} ditolak oleh Channex.",
  "{n} date ranges sent to Channex.": {
   "other": "{n} rentang tanggal dikirim ke Channex."
- },
- "{n} items created in Channex.": {
-  "other": "{n} item dibuat di Channex."
  },
  "{sent} sent": "{sent} terkirim",
  "{sent} sent, {failed} failed": "{sent} terkirim, {failed} gagal",
  "Channex is up to date.": "Channex sudah terbaru.",
  "Create a new one": "Buat yang baru",
- "Create in Channex": "Buat di Channex",
  "Create the hotel in Channex first": "Buat hotel di Channex terlebih dahulu",
- "Created": "Dibuat",
  "Not in Channex": "Tidak ada di Channex",
  "Only the platform team can set up Channex": "Hanya tim platform yang dapat menyiapkan Channex",
  "Push": "Kirim",
  "Push everything": "Kirim semua",
  "Push rates and availability": "Kirim tarif dan ketersediaan",
  "Recent runs": "Proses terbaru",
- "Room types and rate plans": "Tipe kamar dan paket tarif",
  "Setup": "Penyiapan",
  "The key sees no Channex properties yet.": "Kunci belum melihat properti Channex.",
  "Working…": "Sedang diproses…",
+ "{available} of {rooms}": "{available} dari {rooms}",
+ "Another push to Channex is running for this hotel. Try again in a minute.": "Pengiriman ke Channex sedang berjalan untuk hotel ini. Coba lagi dalam satu menit.",
+ "Channex asked us to slow down. What was not sent goes on the next push.": "Channex meminta kita memperlambat. Yang belum terkirim akan dikirim pada pengiriman berikutnya.",
+ "Room Name": "Nama kamar",
+ "Send to Channex": "Kirim ke Channex",
+ "Sent · {sent} of {priced} rate plans": "Terkirim · {sent} dari {priced} paket tarif",
+ "That room type is not on this hotel": "Tipe kamar itu bukan milik hotel ini",
+ "Tick all": "Centang semua",
+ "Tick at least one room type to send to Channex": "Centang setidaknya satu tipe kamar untuk dikirim ke Channex",
+ "Tick the room types to send to Channex.": "Centang tipe kamar yang akan dikirim ke Channex.",
+ "{n} room types sent to Channex.": {
+  "other": "{n} tipe kamar dikirim ke Channex."
+ },
  "{0} is oversold on {1}": "{0} kelebihan pesanan pada {1}",
  "{applied} taken, {failed} could not be saved.": "{applied} diterima, {failed} tidak dapat disimpan.",
  "{n} bookings taken from Channex.": {
