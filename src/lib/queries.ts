@@ -3451,6 +3451,50 @@ export async function getChannexSyncLog(): Promise<ChannexSyncEntry[]> {
   }));
 }
 
+/** A booking revision Channex sent this hotel (0144): what it was and what became of it. */
+export type ChannexBookingRevision = {
+  id: string;
+  otaName: string | null;
+  otaReservationCode: string | null;
+  status: "new" | "modified" | "cancelled" | null;
+  outcome: "applied" | "attention" | "failed";
+  message: string | null;
+  bookingId: string | null;
+  bookingReference: string | null;
+  attempts: number;
+  receivedAt: string;
+  ackedAt: string | null;
+};
+
+/** The last ten booking revisions from Channex, newest first. */
+export async function getChannexBookingRevisions(): Promise<ChannexBookingRevision[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("channex_booking_revisions")
+    .select(
+      "channex_revision_id, ota_name, ota_reservation_code, revision_status, outcome, message, booking_id, attempts, received_at, acked_at, bookings(reference)",
+    )
+    .order("received_at", { ascending: false })
+    .limit(10);
+  if (error) throw new Error(`Failed to load the Channex bookings: ${error.message}`);
+  return (data ?? []).map((row) => ({
+    id: row.channex_revision_id,
+    otaName: row.ota_name,
+    otaReservationCode: row.ota_reservation_code,
+    status:
+      row.revision_status === "new" || row.revision_status === "modified" || row.revision_status === "cancelled"
+        ? row.revision_status
+        : null,
+    outcome: row.outcome === "applied" || row.outcome === "attention" ? row.outcome : "failed",
+    message: row.message,
+    bookingId: row.booking_id,
+    bookingReference: row.bookings?.reference ?? null,
+    attempts: row.attempts,
+    receivedAt: row.received_at,
+    ackedAt: row.acked_at,
+  }));
+}
+
 /** Booking Engine Settings (0098): the profiles, and the privacy policy and terms. */
 export async function getBookingEngineSettings(): Promise<{
   texts: BookingEngineTexts;

@@ -3394,5 +3394,25 @@
  "Tick the room types to send to Channex.": "เลือกประเภทห้องที่จะส่งไปยัง Channex",
  "{n} room types sent to Channex.": {
   "other": "ส่งประเภทห้อง {n} ประเภทไปยัง Channex แล้ว"
- }
+ },
+ "{0} is oversold on {1}": "{0} ขายเกินในวันที่ {1}",
+ "{applied} taken, {failed} could not be saved.": "รับแล้ว {applied} รายการ บันทึกไม่ได้ {failed} รายการ",
+ "{n} bookings taken from Channex.": {
+  "other": "รับการจอง {n} รายการจาก Channex แล้ว"
+ },
+ "Booking {0} is {1}, so the change from {2} was not applied. Change it by hand.": "การจอง {0} อยู่ในสถานะ {1} จึงไม่ได้ใช้การเปลี่ยนแปลงจาก {2} โปรดเปลี่ยนด้วยตนเอง",
+ "Bookings from Channex": "การจองจาก Channex",
+ "Cancelled on {0}": "ยกเลิกบน {0}",
+ "Channex room type {0} is not linked to a room type here": "ประเภทห้อง Channex {0} ไม่ได้เชื่อมกับประเภทห้องใดที่นี่",
+ "Modified": "แก้ไขแล้ว",
+ "Needs attention": "ต้องตรวจสอบ",
+ "New": "ใหม่",
+ "No bookings waiting in Channex.": "ไม่มีการจองที่รออยู่ใน Channex",
+ "No exchange rate from {0} to {1}": "ไม่มีอัตราแลกเปลี่ยนจาก {0} เป็น {1}",
+ "Not saved": "ไม่ได้บันทึก",
+ "Nothing to cancel: that booking never reached this hotel": "ไม่มีอะไรให้ยกเลิก: การจองนั้นไม่เคยมาถึงโรงแรมนี้",
+ "Pull bookings now": "ดึงการจองตอนนี้",
+ "The Channex booking has no booking id": "การจอง Channex ไม่มีรหัสการจอง",
+ "The Channex booking has no rooms": "การจอง Channex ไม่มีห้อง",
+ "The Channex booking has no valid dates": "การจอง Channex ไม่มีวันที่ที่ถูกต้อง"
 }

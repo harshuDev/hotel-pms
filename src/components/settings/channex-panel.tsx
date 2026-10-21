@@ -4,17 +4,19 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useT } from "@/components/i18n";
 import { cn } from "@/components/ui";
+import Link from "next/link";
 import {
+  pullChannexBookings,
   pushChannexAri,
   saveChannexConnection,
   sendChannexRoomTypes,
   testChannexConnection,
 } from "@/lib/actions/settings";
 import { formatMoney } from "@/lib/money";
-import type { ChannexConnection, ChannexRoom, ChannexSyncEntry } from "@/lib/queries";
+import type { ChannexBookingRevision, ChannexConnection, ChannexRoom, ChannexSyncEntry } from "@/lib/queries";
 
 /*
- * Settings -> Channel Manager -> Channex (0139, 0142). The platform team's
+ * Settings -> Channel Manager -> Channex (0139, 0142, 0144, 0145). The platform team's
  * only: the page draws this for nobody else and every function behind it
  * refuses anybody else.
  *
@@ -31,6 +33,10 @@ import type { ChannexConnection, ChannexRoom, ChannexSyncEntry } from "@/lib/que
  * last push; Push everything resends 500 days, which Channex asks for at most
  * once a day. With Is Active ticked, changes go every minute and everything
  * once a night.
+ *
+ * Bookings come IN from Channex's booking revisions feed every minute (0144)
+ * while Is Active is ticked. "Pull bookings now" takes what is waiting at
+ * once; the next minute's run tells Channex they arrived.
  */
 
 type Run = (fn: () => Promise<{ ok: boolean; error?: string }>, done: string) => void;
@@ -58,6 +64,7 @@ export function ChannexPanel({
   connection,
   rooms,
   log,
+  bookings,
   timezone,
   pending,
   run,
@@ -65,6 +72,7 @@ export function ChannexPanel({
   connection: ChannexConnection | null;
   rooms: ChannexRoom[];
   log: ChannexSyncEntry[];
+  bookings: ChannexBookingRevision[];
   timezone: string;
   pending: boolean;
   run: Run;
@@ -156,6 +164,29 @@ export function ChannexPanel({
             ? { ok: true, text: tr("Channex is up to date.") }
             : { ok: true, text: tr.plural(result.data.sent, "{n} date range sent to Channex.", "{n} date ranges sent to Channex.") },
       );
+      router.refresh();
+    });
+  }
+
+  function pull() {
+    setOutcome(null);
+    startWork(async () => {
+      const result = await pullChannexBookings();
+      if (!result.ok) {
+        setOutcome({ ok: false, text: result.error });
+        return;
+      }
+      const { applied, failed } = result.data;
+      setOutcome({
+        ok: failed.length === 0,
+        text:
+          applied === 0 && failed.length === 0
+            ? tr("No bookings waiting in Channex.")
+            : failed.length === 0
+              ? tr.plural(applied, "{n} booking taken from Channex.", "{n} bookings taken from Channex.")
+              : tr("{applied} taken, {failed} could not be saved.", { applied, failed: failed.length }),
+        lines: failed.map((f) => `${f.label}: ${tr.message(f.detail)}`),
+      });
       router.refresh();
     });
   }
@@ -273,6 +304,9 @@ export function ChannexPanel({
                     <button type="button" className={secondary} disabled={busy} onClick={() => push(true)}>
                       {tr("Push everything")}
                     </button>
+                    <button type="button" className={secondary} disabled={busy} onClick={pull}>
+                      {tr("Pull bookings now")}
+                    </button>
                   </>
                 )}
               </div>
@@ -348,6 +382,8 @@ export function ChannexPanel({
               </table>
             </div>
 
+            {bookings.length > 0 && <BookingRows bookings={bookings} timezone={timezone} />}
+
             {log.length > 0 && (
               <div className="mt-6">
                 <h4 className="border-b border-line pb-2 text-[14px] font-semibold text-ink">{tr("Recent runs")}</h4>
@@ -376,5 +412,44 @@ export function ChannexPanel({
         )}
       </div>
     </section>
+  );
+}
+
+function BookingRows({ bookings, timezone }: { bookings: ChannexBookingRevision[]; timezone: string }) {
+  const tr = useT();
+  const statusLabel = (s: ChannexBookingRevision["status"]) =>
+    s === "new" ? tr("New") : s === "modified" ? tr("Modified") : s === "cancelled" ? tr("Cancelled") : "—";
+  return (
+    <div className="mt-6">
+      <h4 className="border-b border-line pb-2 text-[14px] font-semibold text-ink">{tr("Bookings from Channex")}</h4>
+      <ul className="mt-2 divide-y divide-line text-[13px]">
+        {bookings.map((b) => (
+          <li key={b.id} className="flex flex-wrap items-baseline gap-x-3 py-1.5">
+            <span className="tnum w-28 shrink-0 text-ink-muted">{tr.stamp(b.receivedAt, timezone)}</span>
+            <span className="w-40 shrink-0 truncate text-ink">
+              {b.otaName ?? "Channex"}
+              {b.otaReservationCode ? ` · ${b.otaReservationCode}` : ""}
+            </span>
+            <span className="w-20 shrink-0 text-ink-muted">{statusLabel(b.status)}</span>
+            {b.bookingId && b.bookingReference ? (
+              <Link href={`/bookings/${b.bookingId}`} className="tnum w-24 shrink-0 text-brass hover:underline">
+                {b.bookingReference}
+              </Link>
+            ) : (
+              <span className="w-24 shrink-0 text-ink-faint">—</span>
+            )}
+            <span
+              className={cn(
+                "shrink-0",
+                b.outcome === "applied" ? "text-emerald-700" : b.outcome === "attention" ? "text-warn-deep" : "text-rose-700",
+              )}
+            >
+              {b.outcome === "applied" ? tr("Saved") : b.outcome === "attention" ? tr("Needs attention") : tr("Not saved")}
+            </span>
+            {b.message && <span className="min-w-0 truncate text-ink-faint">{tr.message(b.message)}</span>}
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }

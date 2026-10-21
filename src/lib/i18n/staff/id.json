@@ -3394,5 +3394,25 @@
  "Tick the room types to send to Channex.": "Centang tipe kamar yang akan dikirim ke Channex.",
  "{n} room types sent to Channex.": {
   "other": "{n} tipe kamar dikirim ke Channex."
- }
+ },
+ "{0} is oversold on {1}": "{0} kelebihan pesanan pada {1}",
+ "{applied} taken, {failed} could not be saved.": "{applied} diterima, {failed} tidak dapat disimpan.",
+ "{n} bookings taken from Channex.": {
+  "other": "{n} reservasi diterima dari Channex."
+ },
+ "Booking {0} is {1}, so the change from {2} was not applied. Change it by hand.": "Reservasi {0} berstatus {1}, sehingga perubahan dari {2} tidak diterapkan. Ubah secara manual.",
+ "Bookings from Channex": "Reservasi dari Channex",
+ "Cancelled on {0}": "Dibatalkan di {0}",
+ "Channex room type {0} is not linked to a room type here": "Tipe kamar Channex {0} tidak terhubung ke tipe kamar di sini",
+ "Modified": "Diubah",
+ "Needs attention": "Perlu diperiksa",
+ "New": "Baru",
+ "No bookings waiting in Channex.": "Tidak ada reservasi yang menunggu di Channex.",
+ "No exchange rate from {0} to {1}": "Tidak ada kurs dari {0} ke {1}",
+ "Not saved": "Tidak tersimpan",
+ "Nothing to cancel: that booking never reached this hotel": "Tidak ada yang dibatalkan: reservasi itu tidak pernah sampai ke hotel ini",
+ "Pull bookings now": "Ambil reservasi sekarang",
+ "The Channex booking has no booking id": "Reservasi Channex tidak memiliki ID reservasi",
+ "The Channex booking has no rooms": "Reservasi Channex tidak memiliki kamar",
+ "The Channex booking has no valid dates": "Reservasi Channex tidak memiliki tanggal yang valid"
 }

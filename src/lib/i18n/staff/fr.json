@@ -3445,5 +3445,26 @@
  "{n} room types sent to Channex.": {
   "one": "{n} type de chambre envoyé à Channex.",
   "other": "{n} types de chambre envoyés à Channex."
- }
+ },
+ "{0} is oversold on {1}": "{0} est en surréservation le {1}",
+ "{applied} taken, {failed} could not be saved.": "{applied} reçues, {failed} n'ont pas pu être enregistrées.",
+ "{n} bookings taken from Channex.": {
+  "one": "{n} réservation reçue de Channex.",
+  "other": "{n} réservations reçues de Channex."
+ },
+ "Booking {0} is {1}, so the change from {2} was not applied. Change it by hand.": "La réservation {0} est {1}, la modification de {2} n'a donc pas été appliquée. Modifiez-la à la main.",
+ "Bookings from Channex": "Réservations de Channex",
+ "Cancelled on {0}": "Annulée sur {0}",
+ "Channex room type {0} is not linked to a room type here": "Le type de chambre Channex {0} n'est lié à aucun type de chambre ici",
+ "Modified": "Modifiée",
+ "Needs attention": "À vérifier",
+ "New": "Nouvelle",
+ "No bookings waiting in Channex.": "Aucune réservation en attente dans Channex.",
+ "No exchange rate from {0} to {1}": "Aucun taux de change de {0} vers {1}",
+ "Not saved": "Non enregistrée",
+ "Nothing to cancel: that booking never reached this hotel": "Rien à annuler : cette réservation n'est jamais arrivée dans cet hôtel",
+ "Pull bookings now": "Récupérer les réservations",
+ "The Channex booking has no booking id": "La réservation Channex n'a pas d'identifiant",
+ "The Channex booking has no rooms": "La réservation Channex n'a pas de chambres",
+ "The Channex booking has no valid dates": "La réservation Channex n'a pas de dates valides"
 }

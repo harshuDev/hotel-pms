@@ -6,7 +6,8 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0142` (0138 as 0138a-f, 0142 as 0142a-b) are
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0145` (0138 as 0138a-f, 0142 as 0142a-b, 0145 as
+`0143_channex_send_rooms` + 0145b) are
 applied to the hosted database.
 
 Working on real data: dashboard (house board, movements, pace, activity feed),
@@ -2756,7 +2757,7 @@ client: "Need to add Booking Channel in the Dashboard".
       parses them. **PROVISIONAL:** the Region list (EMEA, APAC, Americas) and
       the Days to sync choices beside 400 -- neither dropdown was seen open.
       Both are in `src/lib/channel-managers.ts` and the 0097 checks.
-  - **CHANNEX IS THE CHANNEL MANAGER BEING INTEGRATED (0139, 0142) -- THE
+  - **CHANNEX IS THE CHANNEL MANAGER BEING INTEGRATED (0139, 0142-0145) -- THE
     PLATFORM TEAM'S ONLY.** The client's own; it feeds Booking.com, Expedia
     and the rest. Decided with the client: only the team sets a hotel up, the
     PMS CREATES Channex's structure, and the PMS is the source of rates and
@@ -2772,51 +2773,102 @@ client: "Need to add Booking Channel in the Dashboard".
       all through `channex_call()` (granted to nobody), so the key never
       leaves the server and no route is needed. This session's own network
       policy blocks Channex; the database reaches it.
-    - **Create in Channex** (`channex_setup()`): the Channex property (unless
-      one was picked after Test connection), a Channex room type per room
-      type (title, enabled room count, max and base occupancy), and a Channex
-      rate plan per (rate plan, room type) pair priced from the business date
-      -- a Channex rate plan belongs to ONE room type -- in the PLAN'S OWN
-      CURRENCY (0138), per room, manual. Each link is kept in
-      `channex_room_type_map` / `channex_rate_plan_map`; running it again
-      creates only what is missing.
+    - **THE CARD LISTS EVERY ROOM TYPE WITH A TICK, AND "SEND TO CHANNEX"
+      SENDS ONLY THE TICKED ONES (0145)** -- the client's video: Room Type,
+      Room Name (the display name, what Channex and the guest see),
+      Availability (rooms left tonight of enabled rooms) and Rate (the main
+      plan's price tonight, in its currency), read by `channex_room_list()`.
+      Only what was sent appears on Channex's Inventory page.
+      - `channex_send_room_types(ids)`: the Channex property if there is none
+        (unless one was picked after Test connection); each ticked room type
+        CREATED, or when already there UPDATED (title, enabled room count,
+        occupancy -- sending again is how a room count change reaches
+        Channex); a Channex rate plan per active plan priced on it from the
+        business date -- a Channex rate plan belongs to ONE room type -- in
+        the PLAN'S OWN CURRENCY (0138), per room, manual, its one option at
+        the room type's MAXIMUM occupancy (Channex: "a per_room rate plan
+        takes one option for the maximum occupancy"); then their rates and
+        availability are pushed at once. Room types not ticked are not
+        touched. Links are kept in `channex_room_type_map` /
+        `channex_rate_plan_map`. `channex_setup()` now sends every room type
+        through it and nothing calls it.
     - **Push** (`channex_push_ari()`): availability per room type (rooms left
       to sell, the calendar's figure, never below zero) and, per linked plan,
       the night's rate as a decimal string (whole units for XOF/XAF) with
       min stay arrival/through (1 when unset), max stay (0 when unset), CTA,
-      CTD and stop sell. **A night with no rate goes as stop sell**; so does
-      a retired plan. 365 nights from the business date.
+      CTD and stop sell. **A night with no rate, or a rate of 0 (Channex
+      refuses one), goes as stop sell**; so does a retired plan.
+      - **500 nights, AS CHANNEX'S CERTIFICATION ASKS (0145)**, from the later
+        of the business date and the hotel's own today (Channex refuses a
+        past date; the business date lags until the audit).
       - **Only what changed is sent**: `channex_ari_changes()` compares with
         `channex_ari_sent` (the last value Channex accepted per id and night)
-        and joins consecutive equal nights into ranges, 500 a request. "Push
-        everything" resends all. Tested rolled back on Reservation Centric:
-        365 nights became 4 availability and 12 rate ranges, and nothing once
-        sent.
+        and joins consecutive equal nights into ranges -- up to 10,000 a
+        request, so a full sync is ONE availability call and ONE rates call,
+        as the certification wants. Tested rolled back on Reservation
+        Centric: 500 nights, 4 availability and 60 rate ranges.
+      - **A refused value is a WARNING ON A 200** (`meta.warnings`, 0143):
+        not recorded as sent, so the next push retries it, and the run says
+        what was refused. **A 429 stops the run**; the rest goes next time.
+      - **Channex's task ids are kept on each run** (`channex_sync_log.task_ids`)
+        and shown under it in "Recent runs" -- the certification submission
+        asks for the full sync's.
       - **Is Active = keep Channex up to date**: pg_cron `channex-ari-push`
-        runs `channex_push_all()` every 15 minutes for active connections;
-        one hotel's failure never stops the next. Every run is written to
-        `channex_sync_log`, shown as "Recent runs".
-    - **0143 CHECKED ALL OF THIS AGAINST docs.channex.io** (its GitBook MCP,
-      `https://docs.channex.io/~gitbook/mcp`, reachable from here). Three
-      fixes: a value Channex refuses comes back as a WARNING ON A 200
-      (`meta.warnings`) -- it is no longer recorded as sent, so the next
-      push retries it and the run says so; a per_room plan's option is the
-      room type's MAXIMUM occupancy, not its base; the push starts no
-      earlier than the hotel's own today (Channex refuses past dates, and
-      the business date lags until the audit). Requests are 5000 ranges --
-      the limit is 10 requests a minute per endpoint per property. **0143
-      is written, not yet applied to the hosted database.** Channex also
-      refuses a rate of 0; a night priced at zero will show as refused.
+        runs `channex_push_all()` EVERY MINUTE (the guide: batch changes every
+        30-60 seconds) and `channex-ari-full` runs `channex_full_sync_all()`
+        once a night at 02:17 UTC (a full sync at most once a day). The minute
+        job logs only a run that sent or failed something. One push per hotel
+        at a time (an advisory lock); 0144's `channex_try_push()` calls it
+        too.
+    - **docs.channex.io is reachable from here as an MCP server**
+      (`https://docs.channex.io/~gitbook/mcp`); 0143 and 0145 were checked
+      against it -- the PMS Integration Guide and PMS Certification Tests.
     - **Links and sent values carry the Channex property id**, so pointing a
       hotel at another Channex property starts clean with nothing deleted --
       the connector refuses DELETE in a migration, which also shaped this.
-    - **Not built yet**: bookings IN from the booking-revisions feed
-      (acknowledged only after the booking is saved, idempotent on the
-      revision id, converted to the hotel's currency); per-occupancy prices
-      (only the primary occupancy's rate goes); updating a Channex room
-      type's room count after it was created. **Nothing has been sent to
-      Channex yet**: no key is saved on any hotel. The request shapes follow
-      Channex's API and are first proven when the key is entered.
+    - **BOOKINGS COME IN FROM THE BOOKING REVISIONS FEED (0144)**, every
+      minute for active connections (pg_cron `channex-booking-pull`, the
+      PROCEDURE `channex_pull_bookings_all()`), or at once from "Pull
+      bookings now" on the card, which lists the last ten as "Bookings from
+      Channex" (Saved / Needs attention / Not saved, linked to the booking).
+      - **A revision is the whole booking as it now stands**, so new creates,
+        modified makes the booking match (dates, rooms by Channex's
+        booking_room_id, party, nightly prices, settlement), cancelled
+        cancels. A room Channex drops is cancelled on its own
+        (`canceled_separately`); a room the desk added is left alone.
+      - **THE THIRD WAY A BOOKING IS MADE**, beside `create_booking()` and
+        `create_public_booking()`, because both refuse what an OTA has
+        already sold: `channex_apply_revision_core()` takes it as sold --
+        confirmed, at the OTA's own nightly prices converted to the hotel's
+        currency (0138), the mapped plan's taxes (else the hotel's default)
+        split out by `tax_split_multi()`. Overselling is accepted and flagged
+        "Needs attention". Granted to nobody; the property is a parameter.
+      - **Acknowledged only after COMMIT**: the procedure commits each booking
+        and then acks it; a failed ack is retried next minute; the button
+        applies and never acks. A revision is applied once
+        (`channex_booking_revisions`, keyed on Channex's revision id) and a
+        Channex booking is one booking (`channex_bookings`).
+      - **Never changed by Channex**: a booking in house or departed -- the
+        revision is flagged and written to the booking's history for the
+        desk. **Not acked, retried**: a room type not linked here (Channex
+        emails after 30 minutes, which is the right alarm).
+      - Guest: matched by email, else created. Channel: the hotel's channel
+        whose name or code reads the same ("BookingCom" is Booking.com), else
+        a new OTA channel at no commission. `external_reference` is the OTA's
+        code and `external_payload` the revision. Availability is pushed back
+        after a run that changed anything.
+      - **Tax on exclusive-tax hotels** (El Nito): the OTA's nightly price is
+        the rate, exactly as pushed, and exclusive taxes go on top -- the
+        same as a direct booking at that rate. Tested rolled back: USD 90.00
+        became MXN 1,659.88 plus VAT 16% and City Tax 3%.
+      - **Not taken from the revision**: cards (Channex sends card data only
+        to PCI-certified partners on its secure endpoint), services and
+        extras (in the payload, not posted), the OTA commission (in the
+        payload; the channel report still uses the channel's commission).
+    - **Not built yet**: per-occupancy prices (only the primary occupancy's
+      rate goes). **Nothing has been sent to Channex yet**: no key is saved on
+      any hotel. The request shapes follow Channex's API and are first
+      proven when the key is entered.
   - **CONNECTIVITY -> SALES CHANNELS (0099) IS `channels`, the booking
     sources** -- it replaced the Booking Sources screen, not a second list
     beside it (`sales-channels-panel.tsx`). The reference's Active | All |
@@ -4160,10 +4212,12 @@ Assumed below. If an assumption is wrong the schema changes, so raise it rather
 than proceeding.
 
 1. **Multi-property.** Assumed yes; `property_id` on all tenant tables.
-2. **Channel manager.** Assumed OTA bookings are entered manually for now. If a
-   real channel manager is connected later, bookings become partly
-   externally-owned and need idempotency keys plus a `channel_sync_log`.
-   `external_reference` and `external_payload` exist to allow this.
+2. **Channel manager.** OTA bookings were entered by hand until Channex (0144):
+   a hotel connected to Channex now receives them from the feed, with the
+   revision id as the idempotency key and `channex_booking_revisions` as the
+   sync log. A hotel without Channex still enters them by hand.
+   `external_reference` and `external_payload` are filled for Channex
+   bookings.
 3. **Cashier float.** Assumed fixed float: each shift opens at a set amount and
    surplus cash is dropped to the safe. Not carry-forward.
 4. **Paid-out default.** Assumed recharged to the guest folio by default, with

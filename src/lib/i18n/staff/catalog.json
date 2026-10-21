@@ -125,6 +125,9 @@
  "{0} is on the platform team and cannot be added to a hotel": {
   "kind": "db"
  },
+ "{0} is oversold on {1}": {
+  "kind": "db"
+ },
  "{0} is priced in {1}, so that currency cannot be changed": {
   "kind": "db"
  },
@@ -248,6 +251,9 @@
  "{amount} through the drawer": {
   "kind": "text"
  },
+ "{applied} taken, {failed} could not be saved.": {
+  "kind": "text"
+ },
  "{available} of {rooms}": {
   "kind": "text"
  },
@@ -325,6 +331,10 @@
  "{n} bookings still owing": {
   "kind": "plural",
   "one": "{n} booking still owing"
+ },
+ "{n} bookings taken from Channex.": {
+  "kind": "plural",
+  "one": "{n} booking taken from Channex."
  },
  "{n} cashier shifts are still open on this date. The night audit refuses to close a day while one is, so the figures below can still move.": {
   "kind": "plural",
@@ -1905,6 +1915,9 @@
  "Booking {0} is {1}, so it cannot be checked out": {
   "kind": "db"
  },
+ "Booking {0} is {1}, so the change from {2} was not applied. Change it by hand.": {
+  "kind": "db"
+ },
  "Booking {0} is already cancelled": {
   "kind": "db"
  },
@@ -2059,6 +2072,9 @@
   "kind": "text"
  },
  "Bookings due to check out on the business date appear here until they do.": {
+  "kind": "text"
+ },
+ "Bookings from Channex": {
   "kind": "text"
  },
  "Bookings taken": {
@@ -2239,6 +2255,9 @@
  "Cancelled {0} on booking {1}": {
   "kind": "db"
  },
+ "Cancelled on {0}": {
+  "kind": "db"
+ },
  "Cannot be filed as they stand": {
   "kind": "text"
  },
@@ -2399,6 +2418,9 @@
   "kind": "text"
  },
  "Channex refused the API key": {
+  "kind": "db"
+ },
+ "Channex room type {0} is not linked to a room type here": {
   "kind": "db"
  },
  "Channex saved.": {
@@ -5393,6 +5415,9 @@
  "Mixed": {
   "kind": "db"
  },
+ "Modified": {
+  "kind": "text"
+ },
  "Moldova": {
   "kind": "country",
   "code": "MD"
@@ -5520,6 +5545,9 @@
   "kind": "country",
   "code": "NR"
  },
+ "Needs attention": {
+  "kind": "text"
+ },
  "Needs service": {
   "kind": "text"
  },
@@ -5548,6 +5576,9 @@
  "Netherlands": {
   "kind": "country",
   "code": "NL"
+ },
+ "New": {
+  "kind": "text"
  },
  "New booking": {
   "kind": "text"
@@ -5696,6 +5727,9 @@
  "No bookings match these filters": {
   "kind": "text"
  },
+ "No bookings waiting in Channex.": {
+  "kind": "text"
+ },
  "No bookings were taken in this range": {
   "kind": "text"
  },
@@ -5752,6 +5786,9 @@
  },
  "No email sent yet.": {
   "kind": "text"
+ },
+ "No exchange rate from {0} to {1}": {
+  "kind": "db"
  },
  "No extra matches that search.": {
   "kind": "text"
@@ -6057,6 +6094,9 @@
  "Not recorded": {
   "kind": "text"
  },
+ "Not saved": {
+  "kind": "text"
+ },
  "Not sellable": {
   "kind": "text"
  },
@@ -6128,6 +6168,9 @@
  },
  "Nothing sold in this range": {
   "kind": "text"
+ },
+ "Nothing to cancel: that booking never reached this hotel": {
+  "kind": "db"
  },
  "Nothing was cancelled for these arrival dates": {
   "kind": "text"
@@ -7164,6 +7207,9 @@
  "Puerto Rico": {
   "kind": "country",
   "code": "PR"
+ },
+ "Pull bookings now": {
+  "kind": "text"
  },
  "Push": {
   "kind": "text"
@@ -9047,6 +9093,15 @@
  },
  "The channel's own reference": {
   "kind": "text"
+ },
+ "The Channex booking has no booking id": {
+  "kind": "db"
+ },
+ "The Channex booking has no rooms": {
+  "kind": "db"
+ },
+ "The Channex booking has no valid dates": {
+  "kind": "db"
  },
  "The cheapest qualifying nights go to zero. Stay 3 pay 2 gives one free night in every three.": {
   "kind": "text"
