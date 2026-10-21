@@ -3382,29 +3382,37 @@ export async function getChannexConnection(): Promise<ChannexConnection | null> 
   };
 }
 
-/** A room type, or a (rate plan, room type) pair priced from the business date, and its Channex id once created (0142). */
-export type ChannexLink = {
-  kind: "room_type" | "rate_plan";
+/** A room type as the Channex card lists it (0143): what it is, what it sells tonight, and whether Channex has it. */
+export type ChannexRoom = {
   roomTypeId: string;
-  roomTypeName: string;
-  ratePlanId: string | null;
-  ratePlanName: string | null;
-  currency: string | null;
+  roomType: string;
+  code: string;
+  roomName: string;
+  rooms: number;
+  available: number | null;
+  rateCents: number | null;
+  rateCurrency: string | null;
+  plansPriced: number;
+  plansSent: number;
   channexId: string | null;
 };
 
-export async function getChannexOverview(): Promise<ChannexLink[]> {
+export async function getChannexRooms(): Promise<ChannexRoom[]> {
   const supabase = await createClient();
-  const { data, error } = await supabase.rpc("channex_overview");
-  if (error) throw new Error(`Failed to load the Channex links: ${error.message}`);
+  const { data, error } = await supabase.rpc("channex_room_list");
+  if (error) throw new Error(`Failed to load the Channex room types: ${error.message}`);
   return (data ?? []).map((row) => ({
-    kind: row.kind === "rate_plan" ? "rate_plan" : "room_type",
     roomTypeId: row.room_type_id,
-    roomTypeName: row.room_type_name,
-    ratePlanId: row.rate_plan_id,
-    ratePlanName: row.rate_plan_name,
-    currency: row.currency,
-    channexId: row.channex_id,
+    roomType: row.room_type_name,
+    code: row.room_type_code,
+    roomName: row.room_name,
+    rooms: Number(row.rooms),
+    available: row.available === null ? null : Number(row.available),
+    rateCents: row.rate_cents === null ? null : Number(row.rate_cents),
+    rateCurrency: row.rate_currency,
+    plansPriced: Number(row.plans_priced),
+    plansSent: Number(row.plans_sent),
+    channexId: row.channex_room_type_id,
   }));
 }
 
@@ -3415,6 +3423,9 @@ export type ChannexSyncEntry = {
   sent: number;
   failed: number;
   message: string | null;
+  /** Channex's task ids, which the certification submission asks for (0143). */
+  taskIds: string[];
+  warnings: number;
   createdAt: string;
 };
 
@@ -3423,7 +3434,7 @@ export async function getChannexSyncLog(): Promise<ChannexSyncEntry[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("channex_sync_log")
-    .select("id, kind, ok, sent, failed, message, created_at")
+    .select("id, kind, ok, sent, failed, message, task_ids, warnings, created_at")
     .order("created_at", { ascending: false })
     .limit(10);
   if (error) throw new Error(`Failed to load the Channex log: ${error.message}`);
@@ -3434,6 +3445,8 @@ export async function getChannexSyncLog(): Promise<ChannexSyncEntry[]> {
     sent: row.sent,
     failed: row.failed,
     message: row.message,
+    taskIds: row.task_ids ?? [],
+    warnings: row.warnings,
     createdAt: row.created_at,
   }));
 }

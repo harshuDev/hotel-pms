@@ -2407,18 +2407,30 @@ export async function testChannexConnection(): Promise<
   };
 }
 
-/** Creates in Channex whatever is not there yet: the property, room types, rate plans. */
-export async function runChannexSetup(): Promise<ActionResult<{ created: number; failed: { label: string; detail: string }[] }>> {
+/**
+ * Sends the ticked room types to Channex (0143): each is created there, or
+ * updated when it is already there, with a Channex rate plan per plan priced
+ * on it; then their rates and availability go at once.
+ */
+export async function sendChannexRoomTypes(roomTypeIds: string[]): Promise<
+  ActionResult<{ sent: number; failed: { label: string; detail: string }[]; pushError: string | null }>
+> {
   const supabase = await createClient();
-  const { data, error } = await supabase.rpc("channex_setup");
+  const { data, error } = await supabase.rpc("channex_send_room_types", { p_room_type_ids: roomTypeIds });
   if (error) return { ok: false, error: await localised(error.message) };
   const rows = data ?? [];
+  const pushFailed = rows.find((r) => r.step === "push" && !r.succeeded);
   revalidatePath("/settings");
   return {
     ok: true,
     data: {
-      created: rows.filter((r) => r.succeeded).length,
-      failed: rows.filter((r) => !r.succeeded).map((r) => ({ label: r.label ?? "", detail: r.detail ?? "" })),
+      sent: rows.filter((r) => r.step === "room_type" && r.succeeded).length,
+      failed: await Promise.all(
+        rows
+          .filter((r) => r.step !== "push" && !r.succeeded)
+          .map(async (r) => ({ label: r.label ?? "", detail: await localised(r.detail ?? "") })),
+      ),
+      pushError: pushFailed ? await localised(pushFailed.detail ?? "") : null,
     },
   };
 }

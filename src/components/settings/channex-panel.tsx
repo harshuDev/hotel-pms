@@ -6,11 +6,12 @@ import { useT } from "@/components/i18n";
 import { cn } from "@/components/ui";
 import {
   pushChannexAri,
-  runChannexSetup,
   saveChannexConnection,
+  sendChannexRoomTypes,
   testChannexConnection,
 } from "@/lib/actions/settings";
-import type { ChannexConnection, ChannexLink, ChannexSyncEntry } from "@/lib/queries";
+import { formatMoney } from "@/lib/money";
+import type { ChannexConnection, ChannexRoom, ChannexSyncEntry } from "@/lib/queries";
 
 /*
  * Settings -> Channel Manager -> Channex (0139, 0142). The platform team's
@@ -21,11 +22,15 @@ import type { ChannexConnection, ChannexLink, ChannexSyncEntry } from "@/lib/que
  * back, so the field is always empty; a saved one shows as a placeholder and
  * a blank field keeps it. Channex is called from Postgres, never from here.
  *
- * Create in Channex makes what is missing -- the property, a room type per
- * room type, a rate plan per (plan, room type) priced from the business
- * date -- and remembers each link. Push sends the rates, availability and
- * restrictions that changed since the last push; Push everything resends the
- * lot. With Is Active ticked, the push also runs every 15 minutes.
+ * The room list is the client's (0143): every room type with its name,
+ * rooms left tonight and the main rate's price tonight, each with a tick.
+ * "Send to Channex" sends only the ticked ones -- created in Channex, or
+ * updated when already there, with a Channex rate plan per plan priced on
+ * them -- and pushes their rates and availability at once, so only what was
+ * sent appears on Channex's Inventory page. Push sends what changed since the
+ * last push; Push everything resends 500 days, which Channex asks for at most
+ * once a day. With Is Active ticked, changes go every minute and everything
+ * once a night.
  */
 
 type Run = (fn: () => Promise<{ ok: boolean; error?: string }>, done: string) => void;
@@ -51,14 +56,14 @@ function Row({ label, htmlFor, children }: { label: string; htmlFor?: string; ch
 
 export function ChannexPanel({
   connection,
-  overview,
+  rooms,
   log,
   timezone,
   pending,
   run,
 }: {
   connection: ChannexConnection | null;
-  overview: ChannexLink[];
+  rooms: ChannexRoom[];
   log: ChannexSyncEntry[];
   timezone: string;
   pending: boolean;
@@ -74,6 +79,7 @@ export function ChannexPanel({
   const [testError, setTestError] = useState<string | null>(null);
   const [working, startWork] = useTransition();
   const [outcome, setOutcome] = useState<{ ok: boolean; text: string; lines?: string[] } | null>(null);
+  const [ticked, setTicked] = useState<Set<string>>(new Set());
 
   const hasKey = connection?.hasKey ?? false;
   const inChannex = Boolean(connection?.channexPropertyId);
@@ -101,23 +107,36 @@ export function ChannexPanel({
     });
   }
 
-  function setup() {
+  function toggle(id: string) {
+    setTicked((current) => {
+      const next = new Set(current);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  function send() {
     setOutcome(null);
+    if (ticked.size === 0) {
+      setOutcome({ ok: false, text: tr("Tick the room types to send to Channex.") });
+      return;
+    }
     startWork(async () => {
-      const result = await runChannexSetup();
+      const result = await sendChannexRoomTypes([...ticked]);
       if (!result.ok) {
         setOutcome({ ok: false, text: result.error });
         return;
       }
-      const { created, failed } = result.data;
+      const { sent, failed, pushError } = result.data;
+      const lines = failed.map((f) => `${f.label}: ${f.detail}`);
+      if (pushError) lines.push(pushError);
       setOutcome({
-        ok: failed.length === 0,
-        text:
-          failed.length === 0
-            ? tr.plural(created, "{n} item created in Channex.", "{n} items created in Channex.")
-            : tr("{created} created, {failed} refused by Channex.", { created, failed: failed.length }),
-        lines: failed.map((f) => `${f.label}: ${tr.message(f.detail)}`),
+        ok: failed.length === 0 && !pushError,
+        text: tr.plural(sent, "{n} room type sent to Channex.", "{n} room types sent to Channex."),
+        lines,
       });
+      if (failed.length === 0) setTicked(new Set());
       router.refresh();
     });
   }
@@ -148,9 +167,7 @@ export function ChannexPanel({
         ? { ok: true, text: tr("Connected · {when}", { when: tr.stamp(connection.lastTestedAt, timezone) }) }
         : { ok: false, text: `${tr.message(connection.lastTestMessage ?? "")} · ${tr.stamp(connection.lastTestedAt, timezone)}` };
 
-  const roomTypes = overview.filter((l) => l.kind === "room_type");
-  const ratePlans = overview.filter((l) => l.kind === "rate_plan");
-  const missing = overview.filter((l) => !l.channexId).length;
+  const allTicked = rooms.length > 0 && rooms.every((r) => ticked.has(r.roomTypeId));
 
   return (
     <section className={card}>
@@ -243,13 +260,11 @@ export function ChannexPanel({
         {hasKey && (
           <div className="mt-8">
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line pb-2">
-              <h4 className="text-[14px] font-semibold text-ink">{tr("Room types and rate plans")}</h4>
+              <h4 className="text-[14px] font-semibold text-ink">{tr("Room types")}</h4>
               <div className="flex flex-wrap gap-2">
-                {(missing > 0 || !inChannex) && (
-                  <button type="button" className={primary} disabled={busy} onClick={setup}>
-                    {tr("Create in Channex")}
-                  </button>
-                )}
+                <button type="button" className={primary} disabled={busy} onClick={send}>
+                  {working ? tr("Working…") : tr("Send to Channex")}
+                </button>
                 {inChannex && (
                   <>
                     <button type="button" className={secondary} disabled={busy} onClick={() => push(false)}>
@@ -277,18 +292,57 @@ export function ChannexPanel({
             )}
 
             <div className="mt-3 overflow-x-auto">
-              <table className="w-full min-w-[36rem] text-[13px]">
+              <table className="w-full min-w-[44rem] text-[13px]">
                 <thead>
                   <tr className="bg-shell text-left text-xxs uppercase tracking-wide text-ink-faint">
-                    <th className="px-3 py-2 font-medium">{tr("Room type")}</th>
-                    <th className="px-3 py-2 font-medium">{tr("Rate plan")}</th>
-                    <th className="px-3 py-2 font-medium">{tr("Currency")}</th>
+                    <th className="w-10 px-3 py-2">
+                      <input
+                        type="checkbox"
+                        className="h-4 w-4 accent-brass"
+                        aria-label={tr("Tick all")}
+                        checked={allTicked}
+                        onChange={() => setTicked(allTicked ? new Set() : new Set(rooms.map((r) => r.roomTypeId)))}
+                      />
+                    </th>
+                    <th className="px-3 py-2 font-medium">{tr("Room Type")}</th>
+                    <th className="px-3 py-2 font-medium">{tr("Room Name")}</th>
+                    <th className="px-3 py-2 text-right font-medium">{tr("Availability")}</th>
+                    <th className="px-3 py-2 text-right font-medium">{tr("Rate")}</th>
                     <th className="px-3 py-2 font-medium">Channex</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-line">
-                  {roomTypes.map((t) => (
-                    <LinkRows key={t.roomTypeId} type={t} plans={ratePlans.filter((p) => p.roomTypeId === t.roomTypeId)} />
+                  {rooms.map((r) => (
+                    <tr key={r.roomTypeId} className={cn(ticked.has(r.roomTypeId) && "bg-shell")}>
+                      <td className="px-3 py-2">
+                        <input
+                          type="checkbox"
+                          className="h-4 w-4 accent-brass"
+                          aria-label={r.roomName}
+                          checked={ticked.has(r.roomTypeId)}
+                          onChange={() => toggle(r.roomTypeId)}
+                        />
+                      </td>
+                      <td className="px-3 py-2 text-ink">
+                        {r.roomType} <span className="text-[10.5px] text-ink-faint">({r.code})</span>
+                      </td>
+                      <td className="px-3 py-2 font-medium text-ink">{r.roomName}</td>
+                      <td className="tnum px-3 py-2 text-right text-ink">
+                        {r.available === null ? "—" : tr("{available} of {rooms}", { available: r.available, rooms: r.rooms })}
+                      </td>
+                      <td className="tnum px-3 py-2 text-right text-ink">
+                        {r.rateCents === null || !r.rateCurrency ? "—" : formatMoney(r.rateCents, r.rateCurrency)}
+                      </td>
+                      <td className="px-3 py-2">
+                        {r.channexId ? (
+                          <span className="text-emerald-700" title={r.channexId}>
+                            {tr("Sent · {sent} of {priced} rate plans", { sent: r.plansSent, priced: r.plansPriced })}
+                          </span>
+                        ) : (
+                          <span className="text-ink-faint">{tr("Not in Channex")}</span>
+                        )}
+                      </td>
+                    </tr>
                   ))}
                 </tbody>
               </table>
@@ -308,6 +362,11 @@ export function ChannexPanel({
                           : tr("{sent} sent, {failed} failed", { sent: entry.sent, failed: entry.failed })}
                       </span>
                       {entry.message && <span className="min-w-0 truncate text-ink-faint">{tr.message(entry.message)}</span>}
+                      {entry.taskIds.length > 0 && (
+                        <span className="tnum w-full select-all break-all pl-[8.75rem] text-[11px] text-ink-faint">
+                          {entry.taskIds.join(", ")}
+                        </span>
+                      )}
                     </li>
                   ))}
                 </ul>
@@ -317,35 +376,5 @@ export function ChannexPanel({
         )}
       </div>
     </section>
-  );
-}
-
-function LinkRows({ type, plans }: { type: ChannexLink; plans: ChannexLink[] }) {
-  const tr = useT();
-  const mark = (id: string | null) =>
-    id ? (
-      <span className="text-emerald-700" title={id}>
-        {tr("Created")}
-      </span>
-    ) : (
-      <span className="text-ink-faint">{tr("Not in Channex")}</span>
-    );
-  return (
-    <>
-      <tr>
-        <td className="px-3 py-2 font-medium text-ink">{type.roomTypeName}</td>
-        <td className="px-3 py-2 text-ink-faint">—</td>
-        <td className="px-3 py-2" />
-        <td className="px-3 py-2">{mark(type.channexId)}</td>
-      </tr>
-      {plans.map((p) => (
-        <tr key={`${p.ratePlanId}-${p.roomTypeId}`}>
-          <td className="px-3 py-2" />
-          <td className="px-3 py-2 text-ink">{p.ratePlanName}</td>
-          <td className="tnum px-3 py-2 text-ink-muted">{p.currency}</td>
-          <td className="px-3 py-2">{mark(p.channexId)}</td>
-        </tr>
-      ))}
-    </>
   );
 }

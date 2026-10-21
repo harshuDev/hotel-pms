@@ -3413,30 +3413,36 @@
  "Production": "Produktion",
  "Staging": "Staging",
  "Test connection": "Verbindung testen",
- "{created} created, {failed} refused by Channex.": "{created} angelegt, {failed} von Channex abgelehnt.",
  "{n} date ranges sent to Channex.": {
   "one": "{n} Datumsbereich an Channex gesendet.",
   "other": "{n} Datumsbereiche an Channex gesendet."
- },
- "{n} items created in Channex.": {
-  "one": "{n} Element in Channex angelegt.",
-  "other": "{n} Elemente in Channex angelegt."
  },
  "{sent} sent": "{sent} gesendet",
  "{sent} sent, {failed} failed": "{sent} gesendet, {failed} fehlgeschlagen",
  "Channex is up to date.": "Channex ist auf dem neuesten Stand.",
  "Create a new one": "Neu anlegen",
- "Create in Channex": "In Channex anlegen",
  "Create the hotel in Channex first": "Legen Sie das Hotel zuerst in Channex an",
- "Created": "Angelegt",
  "Not in Channex": "Nicht in Channex",
  "Only the platform team can set up Channex": "Nur das Plattform-Team kann Channex einrichten",
  "Push": "Senden",
  "Push everything": "Alles senden",
  "Push rates and availability": "Raten und Verfügbarkeit senden",
  "Recent runs": "Letzte Läufe",
- "Room types and rate plans": "Zimmertypen und Ratenpläne",
  "Setup": "Einrichtung",
  "The key sees no Channex properties yet.": "Der Schlüssel sieht noch keine Channex-Unterkünfte.",
- "Working…": "Wird ausgeführt…"
+ "Working…": "Wird ausgeführt…",
+ "{available} of {rooms}": "{available} von {rooms}",
+ "Another push to Channex is running for this hotel. Try again in a minute.": "Für dieses Hotel läuft bereits eine Übertragung an Channex. Bitte in einer Minute erneut versuchen.",
+ "Channex asked us to slow down. What was not sent goes on the next push.": "Channex hat um eine Pause gebeten. Was nicht gesendet wurde, geht mit der nächsten Übertragung.",
+ "Room Name": "Zimmername",
+ "Send to Channex": "An Channex senden",
+ "Sent · {sent} of {priced} rate plans": "Gesendet · {sent} von {priced} Ratenplänen",
+ "That room type is not on this hotel": "Dieser Zimmertyp gehört nicht zu diesem Hotel",
+ "Tick all": "Alle auswählen",
+ "Tick at least one room type to send to Channex": "Wählen Sie mindestens einen Zimmertyp zum Senden an Channex aus",
+ "Tick the room types to send to Channex.": "Wählen Sie die Zimmertypen aus, die an Channex gesendet werden sollen.",
+ "{n} room types sent to Channex.": {
+  "one": "{n} Zimmertyp an Channex gesendet.",
+  "other": "{n} Zimmertypen an Channex gesendet."
+ }
 }

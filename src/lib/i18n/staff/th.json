@@ -3365,28 +3365,34 @@
  "Production": "Production",
  "Staging": "Staging",
  "Test connection": "ทดสอบการเชื่อมต่อ",
- "{created} created, {failed} refused by Channex.": "สร้าง {created} รายการ, Channex ปฏิเสธ {failed} รายการ",
  "{n} date ranges sent to Channex.": {
   "other": "ส่งช่วงวันที่ {n} ช่วงไปยัง Channex แล้ว"
- },
- "{n} items created in Channex.": {
-  "other": "สร้าง {n} รายการใน Channex แล้ว"
  },
  "{sent} sent": "ส่งแล้ว {sent}",
  "{sent} sent, {failed} failed": "ส่งแล้ว {sent}, ล้มเหลว {failed}",
  "Channex is up to date.": "Channex เป็นปัจจุบันแล้ว",
  "Create a new one": "สร้างใหม่",
- "Create in Channex": "สร้างใน Channex",
  "Create the hotel in Channex first": "สร้างโรงแรมใน Channex ก่อน",
- "Created": "สร้างแล้ว",
  "Not in Channex": "ไม่อยู่ใน Channex",
  "Only the platform team can set up Channex": "เฉพาะทีมแพลตฟอร์มเท่านั้นที่ตั้งค่า Channex ได้",
  "Push": "ส่ง",
  "Push everything": "ส่งทั้งหมด",
  "Push rates and availability": "ส่งราคาและห้องว่าง",
  "Recent runs": "การทำงานล่าสุด",
- "Room types and rate plans": "ประเภทห้องและแผนราคา",
  "Setup": "การตั้งค่า",
  "The key sees no Channex properties yet.": "คีย์ยังไม่เห็นที่พักใน Channex",
- "Working…": "กำลังดำเนินการ…"
+ "Working…": "กำลังดำเนินการ…",
+ "{available} of {rooms}": "{available} จาก {rooms}",
+ "Another push to Channex is running for this hotel. Try again in a minute.": "กำลังส่งข้อมูลไปยัง Channex สำหรับโรงแรมนี้อยู่แล้ว โปรดลองอีกครั้งในอีกหนึ่งนาที",
+ "Channex asked us to slow down. What was not sent goes on the next push.": "Channex ขอให้ชะลอการส่ง ส่วนที่ยังไม่ได้ส่งจะส่งในรอบถัดไป",
+ "Room Name": "ชื่อห้อง",
+ "Send to Channex": "ส่งไปยัง Channex",
+ "Sent · {sent} of {priced} rate plans": "ส่งแล้ว · {sent} จาก {priced} แผนราคา",
+ "That room type is not on this hotel": "ประเภทห้องนี้ไม่ได้อยู่ในโรงแรมนี้",
+ "Tick all": "เลือกทั้งหมด",
+ "Tick at least one room type to send to Channex": "เลือกประเภทห้องอย่างน้อยหนึ่งประเภทเพื่อส่งไปยัง Channex",
+ "Tick the room types to send to Channex.": "เลือกประเภทห้องที่จะส่งไปยัง Channex",
+ "{n} room types sent to Channex.": {
+  "other": "ส่งประเภทห้อง {n} ประเภทไปยัง Channex แล้ว"
+ }
 }
