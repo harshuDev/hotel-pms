@@ -2796,6 +2796,17 @@ client: "Need to add Booking Channel in the Dashboard".
         runs `channex_push_all()` every 15 minutes for active connections;
         one hotel's failure never stops the next. Every run is written to
         `channex_sync_log`, shown as "Recent runs".
+    - **0143 CHECKED ALL OF THIS AGAINST docs.channex.io** (its GitBook MCP,
+      `https://docs.channex.io/~gitbook/mcp`, reachable from here). Three
+      fixes: a value Channex refuses comes back as a WARNING ON A 200
+      (`meta.warnings`) -- it is no longer recorded as sent, so the next
+      push retries it and the run says so; a per_room plan's option is the
+      room type's MAXIMUM occupancy, not its base; the push starts no
+      earlier than the hotel's own today (Channex refuses past dates, and
+      the business date lags until the audit). Requests are 5000 ranges --
+      the limit is 10 requests a minute per endpoint per property. **0143
+      is written, not yet applied to the hosted database.** Channex also
+      refuses a rate of 0; a night priced at zero will show as refused.
     - **Links and sent values carry the Channex property id**, so pointing a
       hotel at another Channex property starts clean with nothing deleted --
       the connector refuses DELETE in a migration, which also shaped this.
