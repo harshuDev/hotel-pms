@@ -3438,5 +3438,26 @@
  "Room types and rate plans": "Τύποι δωματίων και πλάνα τιμών",
  "Setup": "Ρύθμιση",
  "The key sees no Channex properties yet.": "Το κλειδί δεν βλέπει ακόμη καταλύματα Channex.",
- "Working…": "Σε εξέλιξη…"
+ "Working…": "Σε εξέλιξη…",
+ "{0} is oversold on {1}": "Το {0} έχει υπερπώληση στις {1}",
+ "{applied} taken, {failed} could not be saved.": "{applied} παραλήφθηκαν, {failed} δεν αποθηκεύτηκαν.",
+ "{n} bookings taken from Channex.": {
+  "one": "{n} κράτηση παραλήφθηκε από το Channex.",
+  "other": "{n} κρατήσεις παραλήφθηκαν από το Channex."
+ },
+ "Booking {0} is {1}, so the change from {2} was not applied. Change it by hand.": "Η κράτηση {0} είναι {1}, οπότε η αλλαγή από {2} δεν εφαρμόστηκε. Αλλάξτε την χειροκίνητα.",
+ "Bookings from Channex": "Κρατήσεις από το Channex",
+ "Cancelled on {0}": "Ακυρώθηκε στο {0}",
+ "Channex room type {0} is not linked to a room type here": "Ο τύπος δωματίου Channex {0} δεν συνδέεται με τύπο δωματίου εδώ",
+ "Modified": "Τροποποιήθηκε",
+ "Needs attention": "Χρειάζεται έλεγχο",
+ "New": "Νέα",
+ "No bookings waiting in Channex.": "Δεν υπάρχουν κρατήσεις σε αναμονή στο Channex.",
+ "No exchange rate from {0} to {1}": "Δεν υπάρχει ισοτιμία από {0} σε {1}",
+ "Not saved": "Δεν αποθηκεύτηκε",
+ "Nothing to cancel: that booking never reached this hotel": "Τίποτα για ακύρωση: αυτή η κράτηση δεν έφτασε ποτέ σε αυτό το ξενοδοχείο",
+ "Pull bookings now": "Λήψη κρατήσεων τώρα",
+ "The Channex booking has no booking id": "Η κράτηση Channex δεν έχει αναγνωριστικό κράτησης",
+ "The Channex booking has no rooms": "Η κράτηση Channex δεν έχει δωμάτια",
+ "The Channex booking has no valid dates": "Η κράτηση Channex δεν έχει έγκυρες ημερομηνίες"
 }

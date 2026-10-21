@@ -3438,5 +3438,26 @@
  "Room types and rate plans": "Zimmertypen und Ratenpläne",
  "Setup": "Einrichtung",
  "The key sees no Channex properties yet.": "Der Schlüssel sieht noch keine Channex-Unterkünfte.",
- "Working…": "Wird ausgeführt…"
+ "Working…": "Wird ausgeführt…",
+ "{0} is oversold on {1}": "{0} ist am {1} überbucht",
+ "{applied} taken, {failed} could not be saved.": "{applied} übernommen, {failed} konnten nicht gespeichert werden.",
+ "{n} bookings taken from Channex.": {
+  "one": "{n} Buchung von Channex übernommen.",
+  "other": "{n} Buchungen von Channex übernommen."
+ },
+ "Booking {0} is {1}, so the change from {2} was not applied. Change it by hand.": "Buchung {0} ist {1}, daher wurde die Änderung von {2} nicht übernommen. Ändern Sie sie von Hand.",
+ "Bookings from Channex": "Buchungen von Channex",
+ "Cancelled on {0}": "Storniert auf {0}",
+ "Channex room type {0} is not linked to a room type here": "Der Channex-Zimmertyp {0} ist mit keinem Zimmertyp hier verknüpft",
+ "Modified": "Geändert",
+ "Needs attention": "Prüfen",
+ "New": "Neu",
+ "No bookings waiting in Channex.": "Keine Buchungen in Channex wartend.",
+ "No exchange rate from {0} to {1}": "Kein Wechselkurs von {0} nach {1}",
+ "Not saved": "Nicht gespeichert",
+ "Nothing to cancel: that booking never reached this hotel": "Nichts zu stornieren: Diese Buchung hat dieses Hotel nie erreicht",
+ "Pull bookings now": "Buchungen jetzt abrufen",
+ "The Channex booking has no booking id": "Die Channex-Buchung hat keine Buchungs-ID",
+ "The Channex booking has no rooms": "Die Channex-Buchung hat keine Zimmer",
+ "The Channex booking has no valid dates": "Die Channex-Buchung hat keine gültigen Daten"
 }

@@ -3438,5 +3438,26 @@
  "Room types and rate plans": "Herbergjategundir og verðáætlanir",
  "Setup": "Uppsetning",
  "The key sees no Channex properties yet.": "Lykillinn sér enn engar Channex-eignir.",
- "Working…": "Í vinnslu…"
+ "Working…": "Í vinnslu…",
+ "{0} is oversold on {1}": "{0} er yfirbókað {1}",
+ "{applied} taken, {failed} could not be saved.": "{applied} mótteknar, {failed} var ekki hægt að vista.",
+ "{n} bookings taken from Channex.": {
+  "one": "{n} bókun móttekin frá Channex.",
+  "other": "{n} bókanir mótteknar frá Channex."
+ },
+ "Booking {0} is {1}, so the change from {2} was not applied. Change it by hand.": "Bókun {0} er {1}, svo breytingin frá {2} var ekki gerð. Breyttu henni handvirkt.",
+ "Bookings from Channex": "Bókanir frá Channex",
+ "Cancelled on {0}": "Afbókað á {0}",
+ "Channex room type {0} is not linked to a room type here": "Channex-herbergjategund {0} er ekki tengd herbergjategund hér",
+ "Modified": "Breytt",
+ "Needs attention": "Þarf athygli",
+ "New": "Ný",
+ "No bookings waiting in Channex.": "Engar bókanir bíða í Channex.",
+ "No exchange rate from {0} to {1}": "Ekkert gengi frá {0} til {1}",
+ "Not saved": "Ekki vistað",
+ "Nothing to cancel: that booking never reached this hotel": "Ekkert að afbóka: sú bókun barst aldrei þessu hóteli",
+ "Pull bookings now": "Sækja bókanir núna",
+ "The Channex booking has no booking id": "Channex-bókunin hefur ekkert bókunarauðkenni",
+ "The Channex booking has no rooms": "Channex-bókunin hefur engin herbergi",
+ "The Channex booking has no valid dates": "Channex-bókunin hefur engar gildar dagsetningar"
 }

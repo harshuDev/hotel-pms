@@ -1753,6 +1753,181 @@ export type Database = {
           },
         ]
       }
+      channex_booking_revisions: {
+        Row: {
+          acked_at: string | null
+          applied_at: string | null
+          attempts: number
+          booking_id: string | null
+          channex_booking_id: string | null
+          channex_property_id: string
+          channex_revision_id: string
+          message: string | null
+          ota_name: string | null
+          ota_reservation_code: string | null
+          outcome: string
+          payload: Json
+          property_id: string
+          received_at: string
+          revision_status: string | null
+        }
+        Insert: {
+          acked_at?: string | null
+          applied_at?: string | null
+          attempts?: number
+          booking_id?: string | null
+          channex_booking_id?: string | null
+          channex_property_id: string
+          channex_revision_id: string
+          message?: string | null
+          ota_name?: string | null
+          ota_reservation_code?: string | null
+          outcome: string
+          payload: Json
+          property_id: string
+          received_at?: string
+          revision_status?: string | null
+        }
+        Update: {
+          acked_at?: string | null
+          applied_at?: string | null
+          attempts?: number
+          booking_id?: string | null
+          channex_booking_id?: string | null
+          channex_property_id?: string
+          channex_revision_id?: string
+          message?: string | null
+          ota_name?: string | null
+          ota_reservation_code?: string | null
+          outcome?: string
+          payload?: Json
+          property_id?: string
+          received_at?: string
+          revision_status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "channex_booking_revisions_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "booking_totals"
+            referencedColumns: ["booking_id"]
+          },
+          {
+            foreignKeyName: "channex_booking_revisions_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "channex_booking_revisions_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      channex_booking_rooms: {
+        Row: {
+          booking_id: string
+          booking_room_id: string
+          channex_room_key: string
+          property_id: string
+        }
+        Insert: {
+          booking_id: string
+          booking_room_id: string
+          channex_room_key: string
+          property_id: string
+        }
+        Update: {
+          booking_id?: string
+          booking_room_id?: string
+          channex_room_key?: string
+          property_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "channex_booking_rooms_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "booking_totals"
+            referencedColumns: ["booking_id"]
+          },
+          {
+            foreignKeyName: "channex_booking_rooms_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "channex_booking_rooms_booking_room_id_fkey"
+            columns: ["booking_room_id"]
+            isOneToOne: true
+            referencedRelation: "booking_rooms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "channex_booking_rooms_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      channex_bookings: {
+        Row: {
+          booking_id: string
+          channex_booking_id: string
+          channex_property_id: string
+          created_at: string
+          property_id: string
+          unique_id: string | null
+        }
+        Insert: {
+          booking_id: string
+          channex_booking_id: string
+          channex_property_id: string
+          created_at?: string
+          property_id: string
+          unique_id?: string | null
+        }
+        Update: {
+          booking_id?: string
+          channex_booking_id?: string
+          channex_property_id?: string
+          created_at?: string
+          property_id?: string
+          unique_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "channex_bookings_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: true
+            referencedRelation: "booking_totals"
+            referencedColumns: ["booking_id"]
+          },
+          {
+            foreignKeyName: "channex_bookings_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: true
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "channex_bookings_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       channex_connections: {
         Row: {
           api_key_secret_id: string | null
@@ -6120,6 +6295,27 @@ export type Database = {
           room_revenue_cents: number
         }[]
       }
+      channex_ack_revision: {
+        Args: { p_property: string; p_revision_id: string }
+        Returns: boolean
+      }
+      channex_apply_revision: {
+        Args: { p_property: string; p_revision: Json }
+        Returns: {
+          booking_id: string
+          message: string
+          outcome: string
+          revision_id: string
+        }[]
+      }
+      channex_apply_revision_core: {
+        Args: { p_attrs: Json; p_property: string }
+        Returns: {
+          booking_id: string
+          message: string
+          outcome: string
+        }[]
+      }
       channex_ari_changes: {
         Args: { p_full: boolean; p_property: string }
         Returns: {
@@ -6143,8 +6339,24 @@ export type Database = {
           status: number
         }[]
       }
+      channex_cents: { Args: { p_value: string }; Returns: number }
+      channex_customer: {
+        Args: { p_customer: Json; p_property: string }
+        Returns: string
+      }
       channex_error_text: {
         Args: { p_body: Json; p_status: number }
+        Returns: string
+      }
+      channex_fetch_feed: {
+        Args: { p_property: string }
+        Returns: {
+          error: string
+          revisions: Json
+        }[]
+      }
+      channex_ota_channel: {
+        Args: { p_ota_name: string; p_property: string }
         Returns: string
       }
       channex_overview: {
@@ -6157,6 +6369,15 @@ export type Database = {
           rate_plan_name: string
           room_type_id: string
           room_type_name: string
+        }[]
+      }
+      channex_pull_bookings: {
+        Args: never
+        Returns: {
+          booking_id: string
+          message: string
+          outcome: string
+          revision_id: string
         }[]
       }
       channex_push_all: { Args: never; Returns: number }
@@ -6191,6 +6412,7 @@ export type Database = {
           succeeded: boolean
         }[]
       }
+      channex_try_push: { Args: { p_property: string }; Returns: undefined }
       charge_extra: {
         Args: { p_booking_id: string; p_extra_id: string; p_quantity?: number }
         Returns: string

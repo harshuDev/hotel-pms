@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0143` (0138 as 0138a-f, 0142 as 0142a-b) are
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0144` (0138 as 0138a-f, 0142 as 0142a-b) are
 applied to the hosted database.
 
 Working on real data: dashboard (house board, movements, pace, activity feed),
@@ -2810,13 +2810,50 @@ client: "Need to add Booking Channel in the Dashboard".
     - **Links and sent values carry the Channex property id**, so pointing a
       hotel at another Channex property starts clean with nothing deleted --
       the connector refuses DELETE in a migration, which also shaped this.
-    - **Not built yet**: bookings IN from the booking-revisions feed
-      (acknowledged only after the booking is saved, idempotent on the
-      revision id, converted to the hotel's currency); per-occupancy prices
-      (only the primary occupancy's rate goes); updating a Channex room
-      type's room count after it was created. **Nothing has been sent to
-      Channex yet**: no key is saved on any hotel. The request shapes follow
-      Channex's API and are first proven when the key is entered.
+    - **BOOKINGS COME IN FROM THE BOOKING REVISIONS FEED (0144)**, every
+      minute for active connections (pg_cron `channex-booking-pull`, the
+      PROCEDURE `channex_pull_bookings_all()`), or at once from "Pull
+      bookings now" on the card, which lists the last ten as "Bookings from
+      Channex" (Saved / Needs attention / Not saved, linked to the booking).
+      - **A revision is the whole booking as it now stands**, so new creates,
+        modified makes the booking match (dates, rooms by Channex's
+        booking_room_id, party, nightly prices, settlement), cancelled
+        cancels. A room Channex drops is cancelled on its own
+        (`canceled_separately`); a room the desk added is left alone.
+      - **THE THIRD WAY A BOOKING IS MADE**, beside `create_booking()` and
+        `create_public_booking()`, because both refuse what an OTA has
+        already sold: `channex_apply_revision_core()` takes it as sold --
+        confirmed, at the OTA's own nightly prices converted to the hotel's
+        currency (0138), the mapped plan's taxes (else the hotel's default)
+        split out by `tax_split_multi()`. Overselling is accepted and flagged
+        "Needs attention". Granted to nobody; the property is a parameter.
+      - **Acknowledged only after COMMIT**: the procedure commits each booking
+        and then acks it; a failed ack is retried next minute; the button
+        applies and never acks. A revision is applied once
+        (`channex_booking_revisions`, keyed on Channex's revision id) and a
+        Channex booking is one booking (`channex_bookings`).
+      - **Never changed by Channex**: a booking in house or departed -- the
+        revision is flagged and written to the booking's history for the
+        desk. **Not acked, retried**: a room type not linked here (Channex
+        emails after 30 minutes, which is the right alarm).
+      - Guest: matched by email, else created. Channel: the hotel's channel
+        whose name or code reads the same ("BookingCom" is Booking.com), else
+        a new OTA channel at no commission. `external_reference` is the OTA's
+        code and `external_payload` the revision. Availability is pushed back
+        after a run that changed anything.
+      - **Tax on exclusive-tax hotels** (El Nito): the OTA's nightly price is
+        the rate, exactly as pushed, and exclusive taxes go on top -- the
+        same as a direct booking at that rate. Tested rolled back: USD 90.00
+        became MXN 1,659.88 plus VAT 16% and City Tax 3%.
+      - **Not taken from the revision**: cards (Channex sends card data only
+        to PCI-certified partners on its secure endpoint), services and
+        extras (in the payload, not posted), the OTA commission (in the
+        payload; the channel report still uses the channel's commission).
+    - **Not built yet**: per-occupancy prices (only the primary occupancy's
+      rate goes); updating a Channex room type's room count after it was
+      created. **Nothing has been sent to Channex yet**: no key is saved on
+      any hotel. The request shapes follow Channex's API and are first
+      proven when the key is entered.
   - **CONNECTIVITY -> SALES CHANNELS (0099) IS `channels`, the booking
     sources** -- it replaced the Booking Sources screen, not a second list
     beside it (`sales-channels-panel.tsx`). The reference's Active | All |
@@ -4160,10 +4197,12 @@ Assumed below. If an assumption is wrong the schema changes, so raise it rather
 than proceeding.
 
 1. **Multi-property.** Assumed yes; `property_id` on all tenant tables.
-2. **Channel manager.** Assumed OTA bookings are entered manually for now. If a
-   real channel manager is connected later, bookings become partly
-   externally-owned and need idempotency keys plus a `channel_sync_log`.
-   `external_reference` and `external_payload` exist to allow this.
+2. **Channel manager.** OTA bookings were entered by hand until Channex (0144):
+   a hotel connected to Channex now receives them from the feed, with the
+   revision id as the idempotency key and `channex_booking_revisions` as the
+   sync log. A hotel without Channex still enters them by hand.
+   `external_reference` and `external_payload` are filled for Channex
+   bookings.
 3. **Cashier float.** Assumed fixed float: each shift opens at a set amount and
    surplus cash is dropped to the safe. Not carry-forward.
 4. **Paid-out default.** Assumed recharged to the guest folio by default, with
