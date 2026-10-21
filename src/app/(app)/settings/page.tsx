@@ -41,6 +41,7 @@ import {
   getChannexConnection,
   getChannexOverview,
   getChannexSyncLog,
+  getChannexBookingRevisions,
   getBookingEngineSettings,
   getBookingWidgets,
   getApiKeys,
@@ -117,6 +118,7 @@ export default async function SettingsPage({
     channexConnection,
     channexOverview,
     channexSyncLog,
+    channexBookings,
     bookingEngine,
     bookingWidgets,
     apiKeys,
@@ -164,6 +166,7 @@ export default async function SettingsPage({
     tab === "channel-manager" && isPlatformTeam ? getChannexConnection() : Promise.resolve(null),
     tab === "channel-manager" && isPlatformTeam ? getChannexOverview() : Promise.resolve([]),
     tab === "channel-manager" && isPlatformTeam ? getChannexSyncLog() : Promise.resolve([]),
+    tab === "channel-manager" && isPlatformTeam ? getChannexBookingRevisions() : Promise.resolve([]),
     tab === "booking-engine" ? getBookingEngineSettings() : Promise.resolve(null),
     tab === "booking-widget" ? getBookingWidgets() : Promise.resolve([]),
     tab === "api-key" || tab === "developer-keys" ? getApiKeys() : Promise.resolve(null),
@@ -249,7 +252,7 @@ export default async function SettingsPage({
         weekRates={weekRates}
         rateCoverage={rateCoverage}
         channelManagers={channelManagers}
-        channex={isPlatformTeam ? { connection: channexConnection, overview: channexOverview, log: channexSyncLog } : null}
+        channex={isPlatformTeam ? { connection: channexConnection, overview: channexOverview, log: channexSyncLog, bookings: channexBookings } : null}
         bookingEngine={bookingEngine}
         bookingWidgets={bookingWidgets}
         apiKeys={apiKeys}

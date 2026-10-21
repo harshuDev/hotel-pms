@@ -2440,6 +2440,26 @@ export async function pushChannexAri(full: boolean): Promise<ActionResult<{ sent
   };
 }
 
+/** Takes the bookings waiting in Channex now (0144). Channex is told they arrived on the next minute's run. */
+export async function pullChannexBookings(): Promise<
+  ActionResult<{ applied: number; failed: { label: string; detail: string }[] }>
+> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("channex_pull_bookings");
+  if (error) return { ok: false, error: await localised(error.message) };
+  const rows = data ?? [];
+  revalidatePath("/settings");
+  return {
+    ok: true,
+    data: {
+      applied: rows.filter((r) => r.outcome === "applied" || r.outcome === "attention").length,
+      failed: rows
+        .filter((r) => r.outcome === "failed")
+        .map((r) => ({ label: r.revision_id ?? "", detail: r.message ?? "" })),
+    },
+  };
+}
+
 /* -- Other -> Reactions (0104) --------------------------------------------- */
 
 export async function saveReaction(input: {

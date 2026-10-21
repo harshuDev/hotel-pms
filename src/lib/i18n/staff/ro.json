@@ -3488,5 +3488,27 @@
  "Room types and rate plans": "Tipuri de cameră și planuri tarifare",
  "Setup": "Configurare",
  "The key sees no Channex properties yet.": "Cheia nu vede încă nicio proprietate Channex.",
- "Working…": "Se procesează…"
+ "Working…": "Se procesează…",
+ "{0} is oversold on {1}": "{0} este suprarezervat pe {1}",
+ "{applied} taken, {failed} could not be saved.": "{applied} preluate, {failed} nu au putut fi salvate.",
+ "{n} bookings taken from Channex.": {
+  "one": "{n} rezervare preluată din Channex.",
+  "few": "{n} rezervări preluate din Channex.",
+  "other": "{n} de rezervări preluate din Channex."
+ },
+ "Booking {0} is {1}, so the change from {2} was not applied. Change it by hand.": "Rezervarea {0} este {1}, așa că modificarea de la {2} nu a fost aplicată. Modificați-o manual.",
+ "Bookings from Channex": "Rezervări din Channex",
+ "Cancelled on {0}": "Anulată pe {0}",
+ "Channex room type {0} is not linked to a room type here": "Tipul de cameră Channex {0} nu este legat de niciun tip de cameră de aici",
+ "Modified": "Modificată",
+ "Needs attention": "Necesită atenție",
+ "New": "Nouă",
+ "No bookings waiting in Channex.": "Nicio rezervare în așteptare în Channex.",
+ "No exchange rate from {0} to {1}": "Niciun curs de schimb de la {0} la {1}",
+ "Not saved": "Nesalvată",
+ "Nothing to cancel: that booking never reached this hotel": "Nimic de anulat: rezervarea nu a ajuns niciodată la acest hotel",
+ "Pull bookings now": "Preia rezervările acum",
+ "The Channex booking has no booking id": "Rezervarea Channex nu are ID de rezervare",
+ "The Channex booking has no rooms": "Rezervarea Channex nu are camere",
+ "The Channex booking has no valid dates": "Rezervarea Channex nu are date valide"
 }

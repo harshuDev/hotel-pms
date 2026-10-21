@@ -3538,5 +3538,28 @@
  "Room types and rate plans": "Tipi sob in cenovni načrti",
  "Setup": "Nastavitev",
  "The key sees no Channex properties yet.": "Ključ še ne vidi nobene nastanitve v Channexu.",
- "Working…": "V teku…"
+ "Working…": "V teku…",
+ "{0} is oversold on {1}": "{0} je prezaseden dne {1}",
+ "{applied} taken, {failed} could not be saved.": "{applied} prevzetih, {failed} ni bilo mogoče shraniti.",
+ "{n} bookings taken from Channex.": {
+  "one": "{n} rezervacija prevzeta iz Channexa.",
+  "two": "{n} rezervaciji prevzeti iz Channexa.",
+  "few": "{n} rezervacije prevzete iz Channexa.",
+  "other": "{n} rezervacij prevzetih iz Channexa."
+ },
+ "Booking {0} is {1}, so the change from {2} was not applied. Change it by hand.": "Rezervacija {0} je {1}, zato sprememba iz {2} ni bila uveljavljena. Spremenite jo ročno.",
+ "Bookings from Channex": "Rezervacije iz Channexa",
+ "Cancelled on {0}": "Odpovedano na {0}",
+ "Channex room type {0} is not linked to a room type here": "Tip sobe Channex {0} ni povezan z nobenim tipom sobe tukaj",
+ "Modified": "Spremenjeno",
+ "Needs attention": "Potrebuje pregled",
+ "New": "Novo",
+ "No bookings waiting in Channex.": "V Channexu ni čakajočih rezervacij.",
+ "No exchange rate from {0} to {1}": "Ni menjalnega tečaja iz {0} v {1}",
+ "Not saved": "Ni shranjeno",
+ "Nothing to cancel: that booking never reached this hotel": "Ni česa odpovedati: ta rezervacija ni nikoli prišla v ta hotel",
+ "Pull bookings now": "Prevzemi rezervacije zdaj",
+ "The Channex booking has no booking id": "Rezervacija Channex nima ID-ja rezervacije",
+ "The Channex booking has no rooms": "Rezervacija Channex nima sob",
+ "The Channex booking has no valid dates": "Rezervacija Channex nima veljavnih datumov"
 }
