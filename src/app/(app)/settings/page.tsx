@@ -58,6 +58,10 @@ import { msg } from "@/lib/i18n/translate";
 
 export const generateMetadata = pageTitle(msg("Settings"));
 
+// Send to Channex waits on Channex for every room type and plan; its Postgres
+// functions get 55 seconds (0147), and so does the action calling them.
+export const maxDuration = 60;
+
 export default async function SettingsPage({
   searchParams,
 }: {
