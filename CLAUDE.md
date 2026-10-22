@@ -2775,6 +2775,12 @@ client: "Need to add Booking Channel in the Dashboard".
       - **Test connection tests the SAVED key**, so since 0146 it first saves
         a key that has been typed and not saved. Before, a new key typed and
         then tested was ignored and the old one tested again.
+      - **The key box is `autoComplete="new-password"`.** As a password field
+        with "off", the browser filled in the signed-in user's own password
+        -- most likely how an 8-character "key" was saved.
+      - **Channex Property is a list, never a text box**: "Create a new one",
+        the saved id, and the properties Test connection found. A typed name
+        ("Demo Property") was refused as not a property id.
     - **CHANNEX IS CALLED FROM POSTGRES** through the `http` extension (0138),
       all through `channex_call()` (granted to nobody), so the key never
       leaves the server and no route is needed. This session's own network
