@@ -3471,5 +3471,11 @@
   "one": "{n} Ratenplan an Channex gesendet.",
   "other": "{n} Ratenpläne an Channex gesendet."
  },
- "In Channex": "In Channex"
+ "In Channex": "In Channex",
+ "{n} rate plans removed from Channex.": {
+  "one": "{n} Ratenplan aus Channex entfernt.",
+  "other": "{n} Ratenpläne aus Channex entfernt."
+ },
+ "Closed in Channex": "In Channex geschlossen",
+ "{plan}: closed in Channex, because a channel is mapped to it.": "{plan}: in Channex geschlossen, weil ein Kanal darauf zugeordnet ist."
 }

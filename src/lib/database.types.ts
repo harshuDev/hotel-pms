@@ -1985,7 +1985,9 @@ export type Database = {
           created_at: string
           property_id: string
           rate_plan_id: string
+          removed: boolean
           room_type_id: string
+          withdrawn_at: string | null
         }
         Insert: {
           channex_property_id: string
@@ -1993,7 +1995,9 @@ export type Database = {
           created_at?: string
           property_id: string
           rate_plan_id: string
+          removed?: boolean
           room_type_id: string
+          withdrawn_at?: string | null
         }
         Update: {
           channex_property_id?: string
@@ -2001,7 +2005,9 @@ export type Database = {
           created_at?: string
           property_id?: string
           rate_plan_id?: string
+          removed?: boolean
           room_type_id?: string
+          withdrawn_at?: string | null
         }
         Relationships: [
           {
@@ -6430,6 +6436,18 @@ export type Database = {
         Args: never
         Returns: {
           channex_rate_plan_id: string
+          rate_cents: number
+          rate_currency: string
+          rate_plan_id: string
+          rate_plan_name: string
+          room_type_id: string
+        }[]
+      }
+      channex_room_plans: {
+        Args: never
+        Returns: {
+          channex_rate_plan_id: string
+          channex_state: string
           rate_cents: number
           rate_currency: string
           rate_plan_id: string

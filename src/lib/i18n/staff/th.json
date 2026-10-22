@@ -3419,5 +3419,10 @@
  "{n} rate plans sent to Channex.": {
   "other": "ส่งแผนราคา {n} แผนไปยัง Channex แล้ว"
  },
- "In Channex": "อยู่ใน Channex"
+ "In Channex": "อยู่ใน Channex",
+ "{n} rate plans removed from Channex.": {
+  "other": "นำแผนราคา {n} แผนออกจาก Channex แล้ว"
+ },
+ "Closed in Channex": "ปิดใน Channex",
+ "{plan}: closed in Channex, because a channel is mapped to it.": "{plan}: ปิดใน Channex เนื่องจากมีช่องทางจับคู่อยู่กับแผนนี้"
 }

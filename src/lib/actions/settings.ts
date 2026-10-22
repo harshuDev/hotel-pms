@@ -2416,10 +2416,17 @@ export async function sendChannexRoomTypes(
   roomTypeIds: string[],
   ratePlans: { roomTypeId: string; ratePlanId: string }[],
 ): Promise<
-  ActionResult<{ sent: number; plans: number; failed: { label: string; detail: string }[]; pushError: string | null }>
+  ActionResult<{
+    sent: number;
+    plans: number;
+    removed: number;
+    closed: string[];
+    failed: { label: string; detail: string }[];
+    pushError: string | null;
+  }>
 > {
   const supabase = await createClient();
-  // Only the ticked plans get a Channex rate plan (0148).
+  // Ticked plans go to Channex (0148); on a ticked room type, unticked ones come off it (0149).
   const { data, error } = await supabase.rpc("channex_send_selection", {
     p_room_type_ids: roomTypeIds,
     p_rate_plans: ratePlans.map((p) => ({ room_type_id: p.roomTypeId, rate_plan_id: p.ratePlanId })),
@@ -2433,6 +2440,8 @@ export async function sendChannexRoomTypes(
     data: {
       sent: rows.filter((r) => r.step === "room_type" && r.succeeded).length,
       plans: rows.filter((r) => r.step === "rate_plan" && r.succeeded).length,
+      removed: rows.filter((r) => r.step === "remove" && r.detail === "removed").length,
+      closed: rows.filter((r) => r.step === "remove" && r.detail === "closed").map((r) => r.label ?? ""),
       failed: await Promise.all(
         rows
           .filter((r) => r.step !== "push" && !r.succeeded)

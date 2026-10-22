@@ -3523,5 +3523,12 @@
   "few": "{n} planuri tarifare trimise către Channex.",
   "other": "{n} de planuri tarifare trimise către Channex."
  },
- "In Channex": "În Channex"
+ "In Channex": "În Channex",
+ "{n} rate plans removed from Channex.": {
+  "one": "{n} plan tarifar eliminat din Channex.",
+  "few": "{n} planuri tarifare eliminate din Channex.",
+  "other": "{n} de planuri tarifare eliminate din Channex."
+ },
+ "Closed in Channex": "Închis în Channex",
+ "{plan}: closed in Channex, because a channel is mapped to it.": "{plan}: închis în Channex, pentru că un canal este mapat pe el."
 }

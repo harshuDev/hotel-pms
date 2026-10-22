@@ -3395,7 +3395,7 @@ export type ChannexRoom = {
   plansPriced: number;
   plansSent: number;
   channexId: string | null;
-  /** Every active plan priced on the type from the business date: what Send can send (0148). */
+  /** Every active plan priced on the type from the business date, and any plan in Channex (0148-0149). */
   plans: ChannexRoomPlan[];
 };
 
@@ -3406,13 +3406,15 @@ export type ChannexRoomPlan = {
   rateCents: number | null;
   rateCurrency: string;
   channexId: string | null;
+  /** Open in Channex, closed there (unticked, but an OTA is mapped to it), or not there. */
+  state: "open" | "closed" | null;
 };
 
 export async function getChannexRooms(): Promise<ChannexRoom[]> {
   const supabase = await createClient();
   const [{ data, error }, plansRead] = await Promise.all([
     supabase.rpc("channex_room_list"),
-    supabase.rpc("channex_room_plan_list"),
+    supabase.rpc("channex_room_plans"),
   ]);
   if (error) throw new Error(`Failed to load the Channex room types: ${error.message}`);
   if (plansRead.error) throw new Error(`Failed to load the Channex rate plans: ${plansRead.error.message}`);
@@ -3425,6 +3427,7 @@ export async function getChannexRooms(): Promise<ChannexRoom[]> {
       rateCents: row.rate_cents === null ? null : Number(row.rate_cents),
       rateCurrency: row.rate_currency,
       channexId: row.channex_rate_plan_id,
+      state: row.channex_state === "open" || row.channex_state === "closed" ? row.channex_state : null,
     });
     plansByType.set(row.room_type_id, list);
   }

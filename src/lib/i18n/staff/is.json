@@ -3471,5 +3471,11 @@
   "one": "{n} verðáætlun send til Channex.",
   "other": "{n} verðáætlanir sendar til Channex."
  },
- "In Channex": "Í Channex"
+ "In Channex": "Í Channex",
+ "{n} rate plans removed from Channex.": {
+  "one": "{n} verðáætlun fjarlægð úr Channex.",
+  "other": "{n} verðáætlanir fjarlægðar úr Channex."
+ },
+ "Closed in Channex": "Lokað í Channex",
+ "{plan}: closed in Channex, because a channel is mapped to it.": "{plan}: lokað í Channex, því rás er tengd við hana."
 }

@@ -3471,5 +3471,11 @@
   "one": "{n} πλάνο τιμών στάλθηκε στο Channex.",
   "other": "{n} πλάνα τιμών στάλθηκαν στο Channex."
  },
- "In Channex": "Στο Channex"
+ "In Channex": "Στο Channex",
+ "{n} rate plans removed from Channex.": {
+  "one": "{n} πλάνο τιμών αφαιρέθηκε από το Channex.",
+  "other": "{n} πλάνα τιμών αφαιρέθηκαν από το Channex."
+ },
+ "Closed in Channex": "Κλειστό στο Channex",
+ "{plan}: closed in Channex, because a channel is mapped to it.": "{plan}: κλειστό στο Channex, επειδή ένα κανάλι είναι αντιστοιχισμένο σε αυτό."
 }

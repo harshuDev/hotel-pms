@@ -3472,5 +3472,11 @@
   "one": "{n} plan tarifaire envoyé à Channex.",
   "other": "{n} plans tarifaires envoyés à Channex."
  },
- "In Channex": "Dans Channex"
+ "In Channex": "Dans Channex",
+ "{n} rate plans removed from Channex.": {
+  "one": "{n} plan tarifaire retiré de Channex.",
+  "other": "{n} plans tarifaires retirés de Channex."
+ },
+ "Closed in Channex": "Fermé dans Channex",
+ "{plan}: closed in Channex, because a channel is mapped to it.": "{plan} : fermé dans Channex, car un canal y est associé."
 }
