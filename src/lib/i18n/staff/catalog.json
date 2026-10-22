@@ -430,6 +430,10 @@
   "kind": "plural",
   "one": "{n} plan"
  },
+ "{n} rate plans removed from Channex.": {
+  "kind": "plural",
+  "one": "{n} rate plan removed from Channex."
+ },
  "{n} rate plans sent to Channex.": {
   "kind": "plural",
   "one": "{n} rate plan sent to Channex."
@@ -619,6 +623,9 @@
   "kind": "text"
  },
  "{plan}, {type}, {n} adults, {date}": {
+  "kind": "text"
+ },
+ "{plan}: closed in Channex, because a channel is mapped to it.": {
   "kind": "text"
  },
  "{qty} × {what} charged.": {
@@ -2811,6 +2818,9 @@
  },
  "Closed cashier shifts are immutable": {
   "kind": "db"
+ },
+ "Closed in Channex": {
+  "kind": "text"
  },
  "Closed to arrival": {
   "kind": "text"

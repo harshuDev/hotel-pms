@@ -3575,5 +3575,13 @@
   "few": "{n} cenovni načrti poslani v Channex.",
   "other": "{n} cenovnih načrtov poslanih v Channex."
  },
- "In Channex": "V Channexu"
+ "In Channex": "V Channexu",
+ "{n} rate plans removed from Channex.": {
+  "one": "{n} cenovni načrt odstranjen iz Channexa.",
+  "two": "{n} cenovna načrta odstranjena iz Channexa.",
+  "few": "{n} cenovni načrti odstranjeni iz Channexa.",
+  "other": "{n} cenovnih načrtov odstranjenih iz Channexa."
+ },
+ "Closed in Channex": "Zaprto v Channexu",
+ "{plan}: closed in Channex, because a channel is mapped to it.": "{plan}: zaprto v Channexu, ker je nanj povezan kanal."
 }

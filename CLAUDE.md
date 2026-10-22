@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0148` (0138 as 0138a-f, 0142 as 0142a-b, 0145 as
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0149` (0138 as 0138a-f, 0142 as 0142a-b, 0149 as 0149a-b, 0145 as
 `0143_channex_send_rooms` + 0145b) are
 applied to the hosted database.
 
@@ -2806,16 +2806,31 @@ client: "Need to add Booking Channel in the Dashboard".
       Availability (rooms left tonight of enabled rooms) and Rate (the main
       plan's price tonight, in its currency), read by `channex_room_list()`.
       Only what was sent appears on Channex's Inventory page.
-      - **RATE PLANS ARE TICKED TOO (0148)**, at the client's request: under
-        each room type, every active plan priced on it from the business date
-        (`channex_room_plan_list()`), with tonight's price in the plan's own
-        currency and In Channex / Not in Channex. Ticking a room type ticks
-        its plans; ticking a plan ticks its room type. A plan already in
-        Channex has no tick -- Send creates, it never removes, so unticking
-        one would change nothing. `channex_send_selection(ids, plans)` is the
-        Send; `plans` is `[{room_type_id, rate_plan_id}]` and only those pairs
-        get a Channex rate plan, null being every priced plan, which is what
-        `channex_send_room_types(ids)` now passes.
+      - **RATE PLANS ARE TICKED TOO (0148), AND UNTICKING ONE TAKES IT OFF
+        CHANNEX (0149)**, at the client's request. Under each room type: every
+        active plan priced on it from the business date, and any plan in
+        Channex (`channex_room_plans()`), with tonight's price in the plan's
+        own currency and In Channex / Closed in Channex / Not in Channex.
+        - **A plan's tick starts as Channex has it** (ticked = open there).
+          Changing one ticks its room type, and only a TICKED room type is
+          touched by Send: there a ticked plan goes on (or opens), an
+          unticked one comes off. A room type with nothing in Channex ticks
+          all its plans when ticked; unticking a room type puts its ticks
+          back as Channex has them.
+        - **Channex refuses to remove a plan an OTA is mapped to (422)**
+          unless forced, and it is NEVER forced: the plan stays there CLOSED,
+          the push sending stop sell on every night, and the card says so.
+          Ticked again, it opens.
+        - **The link row is kept**: `channex_rate_plan_map.withdrawn_at`
+          (unticked) and `removed` (Channex no longer has it). The push skips
+          removed and stop-sells withdrawn; a removed plan ticked again gets a
+          new Channex plan on the same row. A booking from Channex can still
+          name an old plan.
+        - `channex_send_selection(ids, plans)` is the Send; `plans` is
+          `[{room_type_id, rate_plan_id}]`. Null is every priced plan and
+          removes nothing -- what `channex_send_room_types(ids)` passes.
+        - Tested live on Reservation Centric Hotel: SHEKHER on Comfort Double
+          unticked came off Channex (20 plans to 19), ticked again came back.
       - `channex_send_room_types(ids)`: the Channex property if there is none
         (unless one was picked after Test connection); each ticked room type
         CREATED, or when already there UPDATED (title, enabled room count,

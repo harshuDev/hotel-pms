@@ -27,12 +27,14 @@ import type { ChannexBookingRevision, ChannexConnection, ChannexRoom, ChannexSyn
  * The room list is the client's (0143): every room type with its name,
  * rooms left tonight and the main rate's price tonight, each with a tick.
  * "Send to Channex" sends only the ticked ones -- created in Channex, or
- * updated when already there -- with a Channex rate plan for each plan ticked
- * under them (0148; ticking a room type ticks its plans, ticking a plan ticks
- * its room type, and a plan already in Channex has no tick) -- and pushes their rates and availability at once, so only what was
- * sent appears on Channex's Inventory page. Push sends what changed since the
- * last push; Push everything resends 500 days, which Channex asks for at most
- * once a day. With Is Active ticked, changes go every minute and everything
+ * updated when already there -- and makes their plans match the ticks under
+ * them (0148-0149): a ticked plan goes on Channex, an unticked one in Channex
+ * comes off it, or is closed (stop sell) when Channex will not remove it
+ * because an OTA is mapped to it. A plan's tick starts as Channex has it;
+ * changing one ticks its room type. Then it pushes their rates and
+ * availability at once, so only what was sent appears on Channex's Inventory
+ * page. Push sends what changed since the last push; Push everything resends
+ * 500 days, which Channex asks for at most once a day. With Is Active ticked, changes go every minute and everything
  * once a night.
  *
  * Bookings come IN from Channex's booking revisions feed every minute (0144)
@@ -89,8 +91,9 @@ export function ChannexPanel({
   const [working, startWork] = useTransition();
   const [outcome, setOutcome] = useState<{ ok: boolean; text: string; lines?: string[] } | null>(null);
   const [ticked, setTicked] = useState<Set<string>>(new Set());
-  // Ticked rate plans, as "<room type id>|<rate plan id>": a plan goes with its room type.
-  const [tickedPlans, setTickedPlans] = useState<Set<string>>(new Set());
+  // Plan ticks changed on screen, keyed "<room type id>|<rate plan id>". A plan
+  // not changed is ticked exactly when it is open in Channex (0149).
+  const [planTicks, setPlanTicks] = useState<Map<string, boolean>>(new Map());
 
   const hasKey = connection?.hasKey ?? false;
   const inChannex = Boolean(connection?.channexPropertyId);
@@ -129,11 +132,24 @@ export function ChannexPanel({
   }
 
   const planKey = (roomTypeId: string, ratePlanId: string) => `${roomTypeId}|${ratePlanId}`;
-  // Only a plan not yet in Channex can be ticked: Send creates, it never removes.
-  const unsentPlanKeys = (room: ChannexRoom) =>
-    room.plans.filter((p) => !p.channexId).map((p) => planKey(room.roomTypeId, p.ratePlanId));
+  const planTicked = (room: ChannexRoom, plan: ChannexRoom["plans"][number]) =>
+    planTicks.get(planKey(room.roomTypeId, plan.ratePlanId)) ?? plan.state === "open";
 
-  // Ticking a room type ticks its plans; unticking it unticks them.
+  /*
+   * A room type is ticked to be sent. Its plans' ticks then say what Channex
+   * should hold: a ticked plan goes on (or opens), an unticked plan in Channex
+   * comes off. A room type with nothing in Channex yet ticks all its plans; an
+   * unticked room type goes back to how Channex has it, so nothing on it changes.
+   */
+  function setRoom(room: ChannexRoom, on: boolean, plans: Map<string, boolean>) {
+    const empty = room.plans.every((p) => p.state === null);
+    for (const plan of room.plans) {
+      const key = planKey(room.roomTypeId, plan.ratePlanId);
+      if (on && empty) plans.set(key, true);
+      if (!on) plans.delete(key);
+    }
+  }
+
   function toggle(room: ChannexRoom) {
     const on = !ticked.has(room.roomTypeId);
     setTicked((current) => {
@@ -142,32 +158,28 @@ export function ChannexPanel({
       else next.delete(room.roomTypeId);
       return next;
     });
-    setTickedPlans((current) => {
-      const next = new Set(current);
-      for (const key of unsentPlanKeys(room)) {
-        if (on) next.add(key);
-        else next.delete(key);
-      }
+    setPlanTicks((current) => {
+      const next = new Map(current);
+      setRoom(room, on, next);
       return next;
     });
   }
 
-  // Ticking a plan ticks its room type, which has to go with it.
-  function togglePlan(room: ChannexRoom, ratePlanId: string) {
-    const key = planKey(room.roomTypeId, ratePlanId);
-    const on = !tickedPlans.has(key);
-    setTickedPlans((current) => {
-      const next = new Set(current);
-      if (on) next.add(key);
-      else next.delete(key);
-      return next;
-    });
-    if (on) setTicked((current) => new Set(current).add(room.roomTypeId));
+  // Changing a plan ticks its room type: that is what makes the change go.
+  function togglePlan(room: ChannexRoom, plan: ChannexRoom["plans"][number]) {
+    const key = planKey(room.roomTypeId, plan.ratePlanId);
+    const on = !planTicked(room, plan);
+    setPlanTicks((current) => new Map(current).set(key, on));
+    setTicked((current) => new Set(current).add(room.roomTypeId));
   }
 
   function tickAll(on: boolean) {
     setTicked(on ? new Set(rooms.map((r) => r.roomTypeId)) : new Set());
-    setTickedPlans(on ? new Set(rooms.flatMap(unsentPlanKeys)) : new Set());
+    setPlanTicks((current) => {
+      const next = new Map(current);
+      for (const room of rooms) setRoom(room, on, next);
+      return next;
+    });
   }
 
   function send() {
@@ -177,23 +189,33 @@ export function ChannexPanel({
       return;
     }
     startWork(async () => {
-      const ratePlans = [...tickedPlans]
-        .map((key) => key.split("|"))
-        .filter(([roomTypeId]) => ticked.has(roomTypeId))
-        .map(([roomTypeId, ratePlanId]) => ({ roomTypeId, ratePlanId }));
+      const ratePlans = rooms
+        .filter((room) => ticked.has(room.roomTypeId))
+        .flatMap((room) =>
+          room.plans
+            .filter((plan) => planTicked(room, plan))
+            .map((plan) => ({ roomTypeId: room.roomTypeId, ratePlanId: plan.ratePlanId })),
+        );
       const result = await sendChannexRoomTypes([...ticked], ratePlans);
       if (!result.ok) {
         setOutcome({ ok: false, text: result.error });
         return;
       }
-      const { sent, plans, failed, pushError } = result.data;
+      const { sent, plans, removed, closed, failed, pushError } = result.data;
       const lines = failed.map((f) => `${f.label}: ${f.detail}`);
+      // Channex will not remove a plan an OTA is mapped to; it is closed instead.
+      for (const label of closed) {
+        lines.push(tr("{plan}: closed in Channex, because a channel is mapped to it.", { plan: label }));
+      }
       if (pushError) lines.push(pushError);
       setOutcome({
         ok: failed.length === 0 && !pushError,
         text: [
           tr.plural(sent, "{n} room type sent to Channex.", "{n} room types sent to Channex."),
           plans > 0 ? tr.plural(plans, "{n} rate plan sent to Channex.", "{n} rate plans sent to Channex.") : null,
+          removed > 0
+            ? tr.plural(removed, "{n} rate plan removed from Channex.", "{n} rate plans removed from Channex.")
+            : null,
         ]
           .filter(Boolean)
           .join(" "),
@@ -201,7 +223,7 @@ export function ChannexPanel({
       });
       if (failed.length === 0) {
         setTicked(new Set());
-        setTickedPlans(new Set());
+        setPlanTicks(new Map());
       }
       router.refresh();
     });
@@ -441,23 +463,22 @@ export function ChannexPanel({
                       {r.plans.map((plan) => {
                         const key = planKey(r.roomTypeId, plan.ratePlanId);
                         const id = `cx-plan-${key}`;
+                        const on = planTicked(r, plan);
+                        // Shaded while the tick says something Channex does not hold yet.
+                        const changed = on !== (plan.state === "open");
                         return (
-                          <tr key={key} className={cn("text-[12.5px]", tickedPlans.has(key) && "bg-shell")}>
+                          <tr key={key} className={cn("text-[12.5px]", changed && "bg-shell")}>
                             <td />
                             <td colSpan={2} className="px-3 py-1.5">
                               <div className="flex items-center gap-2 pl-5">
-                                {plan.channexId ? (
-                                  <span className="h-4 w-4" />
-                                ) : (
-                                  <input
-                                    id={id}
-                                    type="checkbox"
-                                    className="h-4 w-4 accent-brass"
-                                    checked={tickedPlans.has(key)}
-                                    onChange={() => togglePlan(r, plan.ratePlanId)}
-                                  />
-                                )}
-                                <label htmlFor={plan.channexId ? undefined : id} className="text-ink-muted">
+                                <input
+                                  id={id}
+                                  type="checkbox"
+                                  className="h-4 w-4 accent-brass"
+                                  checked={on}
+                                  onChange={() => togglePlan(r, plan)}
+                                />
+                                <label htmlFor={id} className="text-ink-muted">
                                   {plan.name}
                                 </label>
                               </div>
@@ -467,9 +488,13 @@ export function ChannexPanel({
                               {plan.rateCents === null ? "—" : formatMoney(plan.rateCents, plan.rateCurrency)}
                             </td>
                             <td className="px-3 py-1.5">
-                              {plan.channexId ? (
-                                <span className="text-emerald-700" title={plan.channexId}>
+                              {plan.state === "open" ? (
+                                <span className="text-emerald-700" title={plan.channexId ?? undefined}>
                                   {tr("In Channex")}
+                                </span>
+                              ) : plan.state === "closed" ? (
+                                <span className="text-warn-deep" title={plan.channexId ?? undefined}>
+                                  {tr("Closed in Channex")}
                                 </span>
                               ) : (
                                 <span className="text-ink-faint">{tr("Not in Channex")}</span>

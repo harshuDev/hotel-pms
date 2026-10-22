@@ -3419,5 +3419,10 @@
  "{n} rate plans sent to Channex.": {
   "other": "{n} paket tarif dikirim ke Channex."
  },
- "In Channex": "Ada di Channex"
+ "In Channex": "Ada di Channex",
+ "{n} rate plans removed from Channex.": {
+  "other": "{n} paket tarif dihapus dari Channex."
+ },
+ "Closed in Channex": "Ditutup di Channex",
+ "{plan}: closed in Channex, because a channel is mapped to it.": "{plan}: ditutup di Channex, karena ada kanal yang dipetakan ke paket ini."
 }
