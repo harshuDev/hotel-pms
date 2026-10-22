@@ -3567,5 +3567,6 @@
  "Pull bookings now": "Prevzemi rezervacije zdaj",
  "The Channex booking has no booking id": "Rezervacija Channex nima ID-ja rezervacije",
  "The Channex booking has no rooms": "Rezervacija Channex nima sob",
- "The Channex booking has no valid dates": "Rezervacija Channex nima veljavnih datumov"
+ "The Channex booking has no valid dates": "Rezervacija Channex nima veljavnih datumov",
+ "That is not a whole Channex API key. Copy the full key from Channex: Profile, then API Keys": "To ni celoten ključ API za Channex. Kopirajte celoten ključ iz Channexa: Profile, nato API Keys"
 }

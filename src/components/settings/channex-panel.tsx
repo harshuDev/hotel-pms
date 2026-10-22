@@ -104,6 +104,16 @@ export function ChannexPanel({
   function test() {
     setTestError(null);
     startWork(async () => {
+      // A key typed but not saved would otherwise be ignored: the test uses
+      // the saved key (0146).
+      if (apiKey.trim()) {
+        const saved = await saveChannexConnection({ environment, apiKey, channexPropertyId: propertyId, isActive });
+        if (!saved.ok) {
+          setTestError(saved.error ?? "");
+          return;
+        }
+        setApiKey("");
+      }
       const result = await testChannexConnection();
       if (!result.ok) {
         setTestError(result.error ?? "");

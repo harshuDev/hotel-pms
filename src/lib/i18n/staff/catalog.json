@@ -8854,6 +8854,9 @@
  "That is not a number of children": {
   "kind": "db"
  },
+ "That is not a whole Channex API key. Copy the full key from Channex: Profile, then API Keys": {
+  "kind": "db"
+ },
  "That is not an amount. Try 120 or 120.50.": {
   "kind": "text"
  },

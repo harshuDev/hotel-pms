@@ -3414,5 +3414,6 @@
  "Pull bookings now": "Ambil reservasi sekarang",
  "The Channex booking has no booking id": "Reservasi Channex tidak memiliki ID reservasi",
  "The Channex booking has no rooms": "Reservasi Channex tidak memiliki kamar",
- "The Channex booking has no valid dates": "Reservasi Channex tidak memiliki tanggal yang valid"
+ "The Channex booking has no valid dates": "Reservasi Channex tidak memiliki tanggal yang valid",
+ "That is not a whole Channex API key. Copy the full key from Channex: Profile, then API Keys": "Itu bukan kunci API Channex yang lengkap. Salin seluruh kunci dari Channex: Profile, lalu API Keys"
 }
