@@ -2412,11 +2412,18 @@ export async function testChannexConnection(): Promise<
  * updated when it is already there, with a Channex rate plan per plan priced
  * on it; then their rates and availability go at once.
  */
-export async function sendChannexRoomTypes(roomTypeIds: string[]): Promise<
-  ActionResult<{ sent: number; failed: { label: string; detail: string }[]; pushError: string | null }>
+export async function sendChannexRoomTypes(
+  roomTypeIds: string[],
+  ratePlans: { roomTypeId: string; ratePlanId: string }[],
+): Promise<
+  ActionResult<{ sent: number; plans: number; failed: { label: string; detail: string }[]; pushError: string | null }>
 > {
   const supabase = await createClient();
-  const { data, error } = await supabase.rpc("channex_send_room_types", { p_room_type_ids: roomTypeIds });
+  // Only the ticked plans get a Channex rate plan (0148).
+  const { data, error } = await supabase.rpc("channex_send_selection", {
+    p_room_type_ids: roomTypeIds,
+    p_rate_plans: ratePlans.map((p) => ({ room_type_id: p.roomTypeId, rate_plan_id: p.ratePlanId })),
+  });
   if (error) return { ok: false, error: await localised(error.message) };
   const rows = data ?? [];
   const pushFailed = rows.find((r) => r.step === "push" && !r.succeeded);
@@ -2425,6 +2432,7 @@ export async function sendChannexRoomTypes(roomTypeIds: string[]): Promise<
     ok: true,
     data: {
       sent: rows.filter((r) => r.step === "room_type" && r.succeeded).length,
+      plans: rows.filter((r) => r.step === "rate_plan" && r.succeeded).length,
       failed: await Promise.all(
         rows
           .filter((r) => r.step !== "push" && !r.succeeded)

@@ -430,6 +430,10 @@
   "kind": "plural",
   "one": "{n} plan"
  },
+ "{n} rate plans sent to Channex.": {
+  "kind": "plural",
+  "one": "{n} rate plan sent to Channex."
+ },
  "{n} rates selected.": {
   "kind": "plural",
   "one": "{n} rate selected."
@@ -4711,6 +4715,9 @@
   "kind": "text"
  },
  "In case of no-show or late cancellation the total cost will be charged.": {
+  "kind": "text"
+ },
+ "In Channex": {
   "kind": "text"
  },
  "In house": {

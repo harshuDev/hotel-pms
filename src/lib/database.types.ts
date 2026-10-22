@@ -6426,8 +6426,28 @@ export type Database = {
           rooms: number
         }[]
       }
+      channex_room_plan_list: {
+        Args: never
+        Returns: {
+          channex_rate_plan_id: string
+          rate_cents: number
+          rate_currency: string
+          rate_plan_id: string
+          rate_plan_name: string
+          room_type_id: string
+        }[]
+      }
       channex_send_room_types: {
         Args: { p_room_type_ids: string[] }
+        Returns: {
+          detail: string
+          label: string
+          step: string
+          succeeded: boolean
+        }[]
+      }
+      channex_send_selection: {
+        Args: { p_rate_plans: Json; p_room_type_ids: string[] }
         Returns: {
           detail: string
           label: string

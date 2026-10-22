@@ -3466,5 +3466,10 @@
  "The Channex booking has no booking id": "Η κράτηση Channex δεν έχει αναγνωριστικό κράτησης",
  "The Channex booking has no rooms": "Η κράτηση Channex δεν έχει δωμάτια",
  "The Channex booking has no valid dates": "Η κράτηση Channex δεν έχει έγκυρες ημερομηνίες",
- "That is not a whole Channex API key. Copy the full key from Channex: Profile, then API Keys": "Αυτό δεν είναι ολόκληρο κλειδί API του Channex. Αντιγράψτε όλο το κλειδί από το Channex: Profile και μετά API Keys"
+ "That is not a whole Channex API key. Copy the full key from Channex: Profile, then API Keys": "Αυτό δεν είναι ολόκληρο κλειδί API του Channex. Αντιγράψτε όλο το κλειδί από το Channex: Profile και μετά API Keys",
+ "{n} rate plans sent to Channex.": {
+  "one": "{n} πλάνο τιμών στάλθηκε στο Channex.",
+  "other": "{n} πλάνα τιμών στάλθηκαν στο Channex."
+ },
+ "In Channex": "Στο Channex"
 }
