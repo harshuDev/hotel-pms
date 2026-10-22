@@ -3517,5 +3517,11 @@
  "The Channex booking has no booking id": "Rezervarea Channex nu are ID de rezervare",
  "The Channex booking has no rooms": "Rezervarea Channex nu are camere",
  "The Channex booking has no valid dates": "Rezervarea Channex nu are date valide",
- "That is not a whole Channex API key. Copy the full key from Channex: Profile, then API Keys": "Aceasta nu este o cheie API Channex completă. Copiați toată cheia din Channex: Profile, apoi API Keys"
+ "That is not a whole Channex API key. Copy the full key from Channex: Profile, then API Keys": "Aceasta nu este o cheie API Channex completă. Copiați toată cheia din Channex: Profile, apoi API Keys",
+ "{n} rate plans sent to Channex.": {
+  "one": "{n} plan tarifar trimis către Channex.",
+  "few": "{n} planuri tarifare trimise către Channex.",
+  "other": "{n} de planuri tarifare trimise către Channex."
+ },
+ "In Channex": "În Channex"
 }

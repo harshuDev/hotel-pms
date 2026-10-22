@@ -3395,12 +3395,39 @@ export type ChannexRoom = {
   plansPriced: number;
   plansSent: number;
   channexId: string | null;
+  /** Every active plan priced on the type from the business date: what Send can send (0148). */
+  plans: ChannexRoomPlan[];
+};
+
+export type ChannexRoomPlan = {
+  ratePlanId: string;
+  name: string;
+  /** Tonight's price in the plan's own currency; null when tonight has none. */
+  rateCents: number | null;
+  rateCurrency: string;
+  channexId: string | null;
 };
 
 export async function getChannexRooms(): Promise<ChannexRoom[]> {
   const supabase = await createClient();
-  const { data, error } = await supabase.rpc("channex_room_list");
+  const [{ data, error }, plansRead] = await Promise.all([
+    supabase.rpc("channex_room_list"),
+    supabase.rpc("channex_room_plan_list"),
+  ]);
   if (error) throw new Error(`Failed to load the Channex room types: ${error.message}`);
+  if (plansRead.error) throw new Error(`Failed to load the Channex rate plans: ${plansRead.error.message}`);
+  const plansByType = new Map<string, ChannexRoomPlan[]>();
+  for (const row of plansRead.data ?? []) {
+    const list = plansByType.get(row.room_type_id) ?? [];
+    list.push({
+      ratePlanId: row.rate_plan_id,
+      name: row.rate_plan_name,
+      rateCents: row.rate_cents === null ? null : Number(row.rate_cents),
+      rateCurrency: row.rate_currency,
+      channexId: row.channex_rate_plan_id,
+    });
+    plansByType.set(row.room_type_id, list);
+  }
   return (data ?? []).map((row) => ({
     roomTypeId: row.room_type_id,
     roomType: row.room_type_name,
@@ -3413,6 +3440,7 @@ export async function getChannexRooms(): Promise<ChannexRoom[]> {
     plansPriced: Number(row.plans_priced),
     plansSent: Number(row.plans_sent),
     channexId: row.channex_room_type_id,
+    plans: plansByType.get(row.room_type_id) ?? [],
   }));
 }
 

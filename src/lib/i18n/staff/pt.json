@@ -3467,5 +3467,10 @@
  "The Channex booking has no booking id": "A reserva Channex não tem ID de reserva",
  "The Channex booking has no rooms": "A reserva Channex não tem quartos",
  "The Channex booking has no valid dates": "A reserva Channex não tem datas válidas",
- "That is not a whole Channex API key. Copy the full key from Channex: Profile, then API Keys": "Isso não é uma chave API completa do Channex. Copie a chave inteira no Channex: Profile e depois API Keys"
+ "That is not a whole Channex API key. Copy the full key from Channex: Profile, then API Keys": "Isso não é uma chave API completa do Channex. Copie a chave inteira no Channex: Profile e depois API Keys",
+ "{n} rate plans sent to Channex.": {
+  "one": "{n} plano tarifário enviado para o Channex.",
+  "other": "{n} planos tarifários enviados para o Channex."
+ },
+ "In Channex": "No Channex"
 }

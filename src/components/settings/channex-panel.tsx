@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { Fragment, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useT } from "@/components/i18n";
 import { cn } from "@/components/ui";
@@ -27,8 +27,9 @@ import type { ChannexBookingRevision, ChannexConnection, ChannexRoom, ChannexSyn
  * The room list is the client's (0143): every room type with its name,
  * rooms left tonight and the main rate's price tonight, each with a tick.
  * "Send to Channex" sends only the ticked ones -- created in Channex, or
- * updated when already there, with a Channex rate plan per plan priced on
- * them -- and pushes their rates and availability at once, so only what was
+ * updated when already there -- with a Channex rate plan for each plan ticked
+ * under them (0148; ticking a room type ticks its plans, ticking a plan ticks
+ * its room type, and a plan already in Channex has no tick) -- and pushes their rates and availability at once, so only what was
  * sent appears on Channex's Inventory page. Push sends what changed since the
  * last push; Push everything resends 500 days, which Channex asks for at most
  * once a day. With Is Active ticked, changes go every minute and everything
@@ -88,6 +89,8 @@ export function ChannexPanel({
   const [working, startWork] = useTransition();
   const [outcome, setOutcome] = useState<{ ok: boolean; text: string; lines?: string[] } | null>(null);
   const [ticked, setTicked] = useState<Set<string>>(new Set());
+  // Ticked rate plans, as "<room type id>|<rate plan id>": a plan goes with its room type.
+  const [tickedPlans, setTickedPlans] = useState<Set<string>>(new Set());
 
   const hasKey = connection?.hasKey ?? false;
   const inChannex = Boolean(connection?.channexPropertyId);
@@ -125,13 +128,46 @@ export function ChannexPanel({
     });
   }
 
-  function toggle(id: string) {
+  const planKey = (roomTypeId: string, ratePlanId: string) => `${roomTypeId}|${ratePlanId}`;
+  // Only a plan not yet in Channex can be ticked: Send creates, it never removes.
+  const unsentPlanKeys = (room: ChannexRoom) =>
+    room.plans.filter((p) => !p.channexId).map((p) => planKey(room.roomTypeId, p.ratePlanId));
+
+  // Ticking a room type ticks its plans; unticking it unticks them.
+  function toggle(room: ChannexRoom) {
+    const on = !ticked.has(room.roomTypeId);
     setTicked((current) => {
       const next = new Set(current);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
+      if (on) next.add(room.roomTypeId);
+      else next.delete(room.roomTypeId);
       return next;
     });
+    setTickedPlans((current) => {
+      const next = new Set(current);
+      for (const key of unsentPlanKeys(room)) {
+        if (on) next.add(key);
+        else next.delete(key);
+      }
+      return next;
+    });
+  }
+
+  // Ticking a plan ticks its room type, which has to go with it.
+  function togglePlan(room: ChannexRoom, ratePlanId: string) {
+    const key = planKey(room.roomTypeId, ratePlanId);
+    const on = !tickedPlans.has(key);
+    setTickedPlans((current) => {
+      const next = new Set(current);
+      if (on) next.add(key);
+      else next.delete(key);
+      return next;
+    });
+    if (on) setTicked((current) => new Set(current).add(room.roomTypeId));
+  }
+
+  function tickAll(on: boolean) {
+    setTicked(on ? new Set(rooms.map((r) => r.roomTypeId)) : new Set());
+    setTickedPlans(on ? new Set(rooms.flatMap(unsentPlanKeys)) : new Set());
   }
 
   function send() {
@@ -141,20 +177,32 @@ export function ChannexPanel({
       return;
     }
     startWork(async () => {
-      const result = await sendChannexRoomTypes([...ticked]);
+      const ratePlans = [...tickedPlans]
+        .map((key) => key.split("|"))
+        .filter(([roomTypeId]) => ticked.has(roomTypeId))
+        .map(([roomTypeId, ratePlanId]) => ({ roomTypeId, ratePlanId }));
+      const result = await sendChannexRoomTypes([...ticked], ratePlans);
       if (!result.ok) {
         setOutcome({ ok: false, text: result.error });
         return;
       }
-      const { sent, failed, pushError } = result.data;
+      const { sent, plans, failed, pushError } = result.data;
       const lines = failed.map((f) => `${f.label}: ${f.detail}`);
       if (pushError) lines.push(pushError);
       setOutcome({
         ok: failed.length === 0 && !pushError,
-        text: tr.plural(sent, "{n} room type sent to Channex.", "{n} room types sent to Channex."),
+        text: [
+          tr.plural(sent, "{n} room type sent to Channex.", "{n} room types sent to Channex."),
+          plans > 0 ? tr.plural(plans, "{n} rate plan sent to Channex.", "{n} rate plans sent to Channex.") : null,
+        ]
+          .filter(Boolean)
+          .join(" "),
         lines,
       });
-      if (failed.length === 0) setTicked(new Set());
+      if (failed.length === 0) {
+        setTicked(new Set());
+        setTickedPlans(new Set());
+      }
       router.refresh();
     });
   }
@@ -347,7 +395,7 @@ export function ChannexPanel({
                         className="h-4 w-4 accent-brass"
                         aria-label={tr("Tick all")}
                         checked={allTicked}
-                        onChange={() => setTicked(allTicked ? new Set() : new Set(rooms.map((r) => r.roomTypeId)))}
+                        onChange={() => tickAll(!allTicked)}
                       />
                     </th>
                     <th className="px-3 py-2 font-medium">{tr("Room Type")}</th>
@@ -359,36 +407,78 @@ export function ChannexPanel({
                 </thead>
                 <tbody className="divide-y divide-line">
                   {rooms.map((r) => (
-                    <tr key={r.roomTypeId} className={cn(ticked.has(r.roomTypeId) && "bg-shell")}>
-                      <td className="px-3 py-2">
-                        <input
-                          type="checkbox"
-                          className="h-4 w-4 accent-brass"
-                          aria-label={r.roomName}
-                          checked={ticked.has(r.roomTypeId)}
-                          onChange={() => toggle(r.roomTypeId)}
-                        />
-                      </td>
-                      <td className="px-3 py-2 text-ink">
-                        {r.roomType} <span className="text-[10.5px] text-ink-faint">({r.code})</span>
-                      </td>
-                      <td className="px-3 py-2 font-medium text-ink">{r.roomName}</td>
-                      <td className="tnum px-3 py-2 text-right text-ink">
-                        {r.available === null ? "—" : tr("{available} of {rooms}", { available: r.available, rooms: r.rooms })}
-                      </td>
-                      <td className="tnum px-3 py-2 text-right text-ink">
-                        {r.rateCents === null || !r.rateCurrency ? "—" : formatMoney(r.rateCents, r.rateCurrency)}
-                      </td>
-                      <td className="px-3 py-2">
-                        {r.channexId ? (
-                          <span className="text-emerald-700" title={r.channexId}>
-                            {tr("Sent · {sent} of {priced} rate plans", { sent: r.plansSent, priced: r.plansPriced })}
-                          </span>
-                        ) : (
-                          <span className="text-ink-faint">{tr("Not in Channex")}</span>
-                        )}
-                      </td>
-                    </tr>
+                    <Fragment key={r.roomTypeId}>
+                      <tr className={cn(ticked.has(r.roomTypeId) && "bg-shell")}>
+                        <td className="px-3 py-2">
+                          <input
+                            type="checkbox"
+                            className="h-4 w-4 accent-brass"
+                            aria-label={r.roomName}
+                            checked={ticked.has(r.roomTypeId)}
+                            onChange={() => toggle(r)}
+                          />
+                        </td>
+                        <td className="px-3 py-2 text-ink">
+                          {r.roomType} <span className="text-[10.5px] text-ink-faint">({r.code})</span>
+                        </td>
+                        <td className="px-3 py-2 font-medium text-ink">{r.roomName}</td>
+                        <td className="tnum px-3 py-2 text-right text-ink">
+                          {r.available === null ? "—" : tr("{available} of {rooms}", { available: r.available, rooms: r.rooms })}
+                        </td>
+                        <td className="tnum px-3 py-2 text-right text-ink">
+                          {r.rateCents === null || !r.rateCurrency ? "—" : formatMoney(r.rateCents, r.rateCurrency)}
+                        </td>
+                        <td className="px-3 py-2">
+                          {r.channexId ? (
+                            <span className="text-emerald-700" title={r.channexId}>
+                              {tr("Sent · {sent} of {priced} rate plans", { sent: r.plansSent, priced: r.plansPriced })}
+                            </span>
+                          ) : (
+                            <span className="text-ink-faint">{tr("Not in Channex")}</span>
+                          )}
+                        </td>
+                      </tr>
+                      {r.plans.map((plan) => {
+                        const key = planKey(r.roomTypeId, plan.ratePlanId);
+                        const id = `cx-plan-${key}`;
+                        return (
+                          <tr key={key} className={cn("text-[12.5px]", tickedPlans.has(key) && "bg-shell")}>
+                            <td />
+                            <td colSpan={2} className="px-3 py-1.5">
+                              <div className="flex items-center gap-2 pl-5">
+                                {plan.channexId ? (
+                                  <span className="h-4 w-4" />
+                                ) : (
+                                  <input
+                                    id={id}
+                                    type="checkbox"
+                                    className="h-4 w-4 accent-brass"
+                                    checked={tickedPlans.has(key)}
+                                    onChange={() => togglePlan(r, plan.ratePlanId)}
+                                  />
+                                )}
+                                <label htmlFor={plan.channexId ? undefined : id} className="text-ink-muted">
+                                  {plan.name}
+                                </label>
+                              </div>
+                            </td>
+                            <td />
+                            <td className="tnum px-3 py-1.5 text-right text-ink-muted">
+                              {plan.rateCents === null ? "—" : formatMoney(plan.rateCents, plan.rateCurrency)}
+                            </td>
+                            <td className="px-3 py-1.5">
+                              {plan.channexId ? (
+                                <span className="text-emerald-700" title={plan.channexId}>
+                                  {tr("In Channex")}
+                                </span>
+                              ) : (
+                                <span className="text-ink-faint">{tr("Not in Channex")}</span>
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </Fragment>
                   ))}
                 </tbody>
               </table>
