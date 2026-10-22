@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0146` (0138 as 0138a-f, 0142 as 0142a-b, 0145 as
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0147` (0138 as 0138a-f, 0142 as 0142a-b, 0145 as
 `0143_channex_send_rooms` + 0145b) are
 applied to the hosted database.
 
@@ -2781,6 +2781,21 @@ client: "Need to add Booking Channel in the Dashboard".
       - **Channex Property is a list, never a text box**: "Create a new one",
         the saved id, and the properties Test connection found. A typed name
         ("Demo Property") was refused as not a property id.
+    - **THE CHANNEX ACTIONS GET 55 SECONDS, NOT 8 (0147).** Every request from
+      the app runs under `authenticated`'s 8 second `statement_timeout`, and
+      Send makes a Channex call per room type and per plan. On 22 Oct the
+      first Send was cut off there ("HTTP request cancelled"): Postgres rolled
+      back its links, but the property, room types and rate plans Channex had
+      already made stayed, and the next Send made them all again -- a second
+      "RESERVATION CENTRIC HOTEL" on Channex staging. Send, Push, Pull
+      bookings and Test connection carry `set statement_timeout = '55s'`
+      (the REST API's ceiling is 60), and the Settings page `maxDuration` 60.
+      - **Send ADOPTS before it creates**: a Channex property with this
+        hotel's name that no other hotel is linked to, a room type of the same
+        title, a rate plan of the same title on the same room type -- each not
+        already linked. An interrupted Send, pressed again, picks up where it
+        stopped. A Channex HTTP call cannot be rolled back; anything that makes
+        one inside a transaction has to be safe to run twice.
     - **CHANNEX IS CALLED FROM POSTGRES** through the `http` extension (0138),
       all through `channex_call()` (granted to nobody), so the key never
       leaves the server and no route is needed. This session's own network
