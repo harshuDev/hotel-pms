@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0145` (0138 as 0138a-f, 0142 as 0142a-b, 0145 as
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0146` (0138 as 0138a-f, 0142 as 0142a-b, 0145 as
 `0143_channex_send_rooms` + 0145b) are
 applied to the hosted database.
 
@@ -2769,6 +2769,12 @@ client: "Need to add Booking Channel in the Dashboard".
       once sent a staging username and password in chat; they were not used
       or stored, and were to be changed. The key is write-only in Supabase
       Vault, as a channel manager's password (0097).
+      - **A key under 32 characters is refused on Save (0146)**, by name. A
+        real one is about 64. On 21 Oct an 8-character value was saved for
+        Reservation Centric and every call came back 401 Unauthorized.
+      - **Test connection tests the SAVED key**, so since 0146 it first saves
+        a key that has been typed and not saved. Before, a new key typed and
+        then tested was ignored and the old one tested again.
     - **CHANNEX IS CALLED FROM POSTGRES** through the `http` extension (0138),
       all through `channex_call()` (granted to nobody), so the key never
       leaves the server and no route is needed. This session's own network

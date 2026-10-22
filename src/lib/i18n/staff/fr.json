@@ -3466,5 +3466,6 @@
  "Pull bookings now": "Récupérer les réservations",
  "The Channex booking has no booking id": "La réservation Channex n'a pas d'identifiant",
  "The Channex booking has no rooms": "La réservation Channex n'a pas de chambres",
- "The Channex booking has no valid dates": "La réservation Channex n'a pas de dates valides"
+ "The Channex booking has no valid dates": "La réservation Channex n'a pas de dates valides",
+ "That is not a whole Channex API key. Copy the full key from Channex: Profile, then API Keys": "Ce n'est pas une clé API Channex complète. Copiez la clé entière depuis Channex : Profile, puis API Keys"
 }
