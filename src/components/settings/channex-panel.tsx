@@ -235,8 +235,14 @@ export function ChannexPanel({
           <Row label={tr("API Key:")} htmlFor="cx-key">
             <input
               id="cx-key"
+              name="channex-api-key"
               type="password"
-              autoComplete="off"
+              // "off" is ignored on a password field: the browser filled in the
+              // signed-in user's own password, and that was saved as the key.
+              autoComplete="new-password"
+              data-1p-ignore
+              data-lpignore="true"
+              spellCheck={false}
               value={apiKey}
               placeholder={hasKey ? tr("Saved") : ""}
               className={field}
@@ -244,24 +250,20 @@ export function ChannexPanel({
             />
           </Row>
           <Row label={tr("Channex Property:")} htmlFor="cx-property">
-            {found && found.length > 0 ? (
-              <select id="cx-property" value={propertyId} className={field} onChange={(e) => setPropertyId(e.target.value)}>
-                <option value="">{tr("Create a new one")}</option>
-                {found.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.title}
-                    {p.currency ? ` (${p.currency})` : ""}
-                  </option>
-                ))}
-              </select>
-            ) : (
-              <input
-                id="cx-property"
-                value={propertyId}
-                className={cn(field, "tnum")}
-                onChange={(e) => setPropertyId(e.target.value)}
-              />
-            )}
+            {/* A list, never a text box: Channex wants its property id, and a
+                typed name was refused. Test connection fills it. */}
+            <select id="cx-property" value={propertyId} className={field} onChange={(e) => setPropertyId(e.target.value)}>
+              <option value="">{tr("Create a new one")}</option>
+              {propertyId && !(found ?? []).some((p) => p.id === propertyId) && (
+                <option value={propertyId}>{propertyId}</option>
+              )}
+              {(found ?? []).map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.title}
+                  {p.currency ? ` (${p.currency})` : ""}
+                </option>
+              ))}
+            </select>
           </Row>
           <Row label={tr("Is Active:")}>
             <input
