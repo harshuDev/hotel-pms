@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0149` (0138 as 0138a-f, 0142 as 0142a-b, 0149 as 0149a-b, 0145 as
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0150` (0138 as 0138a-f, 0142 as 0142a-b, 0149 as 0149a-b, 0145 as
 `0143_channex_send_rooms` + 0145b) are
 applied to the hosted database.
 
@@ -2900,6 +2900,13 @@ client: "Need to add Booking Channel in the Dashboard".
         applies and never acks. A revision is applied once
         (`channex_booking_revisions`, keyed on Channex's revision id) and a
         Channex booking is one booking (`channex_bookings`).
+      - **No ack reached Channex until 0150.** `channex_call()` sent a NULL
+        content on a call with no body, which the `http` extension refuses
+        for a POST, and `channex_ack_revision()` swallows the error -- so
+        every revision was saved and none acknowledged. A POST, PUT or PATCH
+        with no body now sends `{}`. Found in certification test 11; tested
+        there: new, modified and cancelled were each saved and acked within
+        a minute.
       - **Never changed by Channex**: a booking in house or departed -- the
         revision is flagged and written to the booking's history for the
         desk. **Not acked, retried**: a room type not linked here (Channex
