@@ -1717,7 +1717,6 @@
  "Luxembourg": "ลักเซมเบิร์ก",
  "Macao": "เขตปกครองพิเศษมาเก๊าแห่งสาธารณรัฐประชาชนจีน",
  "Madagascar": "มาดากัสการ์",
- "Mail body": "เนื้อหาอีเมล",
  "Mail Body:": "เนื้อหาอีเมล:",
  "main": "หลัก",
  "Main": "หลัก",
@@ -2829,7 +2828,6 @@
  "Taxi": "แท็กซี่",
  "Telephone Number": "หมายเลขโทรศัพท์",
  "Template": "เทมเพลต",
- "Template body": "เนื้อหาเทมเพลต",
  "Template preview": "ตัวอย่างเทมเพลต",
  "Template saved.": "บันทึกเทมเพลตแล้ว",
  "Template subject": "หัวเรื่องเทมเพลต",
@@ -3424,5 +3422,20 @@
   "other": "นำแผนราคา {n} แผนออกจาก Channex แล้ว"
  },
  "Closed in Channex": "ปิดใน Channex",
- "{plan}: closed in Channex, because a channel is mapped to it.": "{plan}: ปิดใน Channex เนื่องจากมีช่องทางจับคู่อยู่กับแผนนี้"
+ "{plan}: closed in Channex, because a channel is mapped to it.": "{plan}: ปิดใน Channex เนื่องจากมีช่องทางจับคู่อยู่กับแผนนี้",
+ "At (hotel time)": "เวลา (เวลาของโรงแรม)",
+ "Choose between 0 and 30 days after departure": "เลือกระหว่าง 0 ถึง 30 วันหลังเช็คเอาท์",
+ "Choose between 0 and 30 days before arrival": "เลือกระหว่าง 0 ถึง 30 วันก่อนเข้าพัก",
+ "Choose the time the post-departure email goes": "เลือกเวลาส่งอีเมลหลังเช็คเอาท์",
+ "Choose the time the pre-arrival email goes": "เลือกเวลาส่งอีเมลก่อนเข้าพัก",
+ "Give the pre-arrival email a subject, or turn it off": "ตั้งหัวเรื่องให้อีเมลก่อนเข้าพัก หรือปิดไว้",
+ "On the day of arrival": "ในวันที่เข้าพัก",
+ "On the day of departure": "ในวันที่เช็คเอาท์",
+ "Your upcoming stay at {propertyName}": "การเข้าพักที่กำลังจะมาถึงของคุณที่ {propertyName}",
+ "{n} days after departure": {
+  "other": "{n} วันหลังเช็คเอาท์"
+ },
+ "{n} days before arrival": {
+  "other": "{n} วันก่อนเข้าพัก"
+ }
 }

@@ -9,6 +9,7 @@ import { sendBookingEmail } from "@/lib/actions/booking-email";
 import { RichEditor } from "@/components/bookings/rich-editor";
 import type { BookingEmail } from "@/lib/types";
 import type { EmailTemplate } from "@/lib/email-preferences";
+import { asEmailHtml } from "@/lib/email-html";
 
 /**
  * The Email tab, as the reference's (0131): "Send email to clients" -- Send
@@ -79,13 +80,9 @@ export function EmailTab({
       return;
     }
     if (t.subject) setSubject(t.subject);
-    // Email Setup's templates are plain text; each line becomes a line.
-    setHtml(
-      (t.body ?? "")
-        .split(/\n{2,}/)
-        .map((para) => `<p>${escapeHtml(para).replace(/\n/g, "<br>")}</p>`)
-        .join("") || blank,
-    );
+    // Email Setup's templates are HTML from its editor (0150), or plain text
+    // saved before it, which opens as paragraphs.
+    setHtml(asEmailHtml(t.body) || blank);
   }
 
   function submit() {

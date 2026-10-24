@@ -1762,7 +1762,6 @@
  "Luxembourg": "Λουξεμβούργο",
  "Macao": "Μακάο ΕΔΠ Κίνας",
  "Madagascar": "Μαδαγασκάρη",
- "Mail body": "Κείμενο email",
  "Mail Body:": "Κείμενο email:",
  "main": "κύρια",
  "Main": "Κύρια",
@@ -2877,7 +2876,6 @@
  "Taxi": "Ταξί",
  "Telephone Number": "Αριθμός τηλεφώνου",
  "Template": "Πρότυπο",
- "Template body": "Κείμενο προτύπου",
  "Template preview": "Προεπισκόπηση προτύπου",
  "Template saved.": "Το πρότυπο αποθηκεύτηκε.",
  "Template subject": "Θέμα προτύπου",
@@ -3477,5 +3475,22 @@
   "other": "{n} πλάνα τιμών αφαιρέθηκαν από το Channex."
  },
  "Closed in Channex": "Κλειστό στο Channex",
- "{plan}: closed in Channex, because a channel is mapped to it.": "{plan}: κλειστό στο Channex, επειδή ένα κανάλι είναι αντιστοιχισμένο σε αυτό."
+ "{plan}: closed in Channex, because a channel is mapped to it.": "{plan}: κλειστό στο Channex, επειδή ένα κανάλι είναι αντιστοιχισμένο σε αυτό.",
+ "At (hotel time)": "Στις (ώρα ξενοδοχείου)",
+ "Choose between 0 and 30 days after departure": "Επιλέξτε από 0 έως 30 ημέρες μετά την αναχώρηση",
+ "Choose between 0 and 30 days before arrival": "Επιλέξτε από 0 έως 30 ημέρες πριν από την άφιξη",
+ "Choose the time the post-departure email goes": "Επιλέξτε την ώρα αποστολής του email μετά την αναχώρηση",
+ "Choose the time the pre-arrival email goes": "Επιλέξτε την ώρα αποστολής του email πριν από την άφιξη",
+ "Give the pre-arrival email a subject, or turn it off": "Δώστε θέμα στο email πριν από την άφιξη ή απενεργοποιήστε το",
+ "On the day of arrival": "Την ημέρα της άφιξης",
+ "On the day of departure": "Την ημέρα της αναχώρησης",
+ "Your upcoming stay at {propertyName}": "Η επερχόμενη διαμονή σας στο {propertyName}",
+ "{n} days after departure": {
+  "one": "{n} ημέρα μετά την αναχώρηση",
+  "other": "{n} ημέρες μετά την αναχώρηση"
+ },
+ "{n} days before arrival": {
+  "one": "{n} ημέρα πριν από την άφιξη",
+  "other": "{n} ημέρες πριν από την άφιξη"
+ }
 }

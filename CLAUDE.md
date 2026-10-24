@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0149` (0138 as 0138a-f, 0142 as 0142a-b, 0149 as 0149a-b, 0145 as
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0150` (0138 as 0138a-f, 0142 as 0142a-b, 0149 as 0149a-b, 0145 as
 `0143_channex_send_rooms` + 0145b) are
 applied to the hosted database.
 
@@ -3185,10 +3185,33 @@ client: "Need to add Booking Channel in the Dashboard".
       screen's Email tab offers them when recording a message and fills the
       subject and body, which stay editable. `emailTemplates` is a REQUIRED
       prop on `BookingDetailView`, like `extrasCatalog`.
-    - **Bodies, footers and notes are plain text**, the same reason as the
-      registration card's terms: the reference's rich-text editor would mean
-      storing browser-typed HTML and sending it back out, with no sanitiser
-      in this codebase. "Open template editor" opens a plain-text dialog.
+    - **"OPEN TEMPLATE EDITOR" IS THE RICH EDITOR (0150). This reverses what
+      this file said**, that bodies, footers and notes were plain text. The
+      client, in a Loom: "the template editors need to be added". It opens
+      the booking Email tab's `RichEditor` in a dialog -- formatting, tables,
+      links, pictures, code view, DROP IN'S -- for the footer, check-in
+      notes, directions, the pre-arrival, post-departure and payment request
+      bodies, and the Email Templates' bodies.
+      - **What it writes is HTML, SANITISED ON THE SERVER BEFORE IT IS SAVED**
+        (`editorHtml()` in settings.ts, through `src/lib/email-sanitize.ts`,
+        the Email tab's own allow-list moved there). An editor holding only
+        empty paragraphs saves as nothing.
+      - **Text saved before 0150 is plain**, and `asEmailHtml()`
+        (`src/lib/email-html.ts`) reads either: plain text opens as
+        paragraphs, in the editor, in the Email tab's template picker and in
+        the sent footer. The confirmation PDF takes the check-in notes as
+        text (`emailHtmlToText()`).
+    - **PRE ARRIVAL AND POST DEPARTURE CARRY A SCHEDULE (0150)**, the client's
+      "choose ... one day before, two days before, three days before ... we
+      can put a time": ticking either reveals Send (on the day, or 1-30 days
+      before arrival / after departure) and At (hotel time).
+      `pre_arrival_days`, `pre_arrival_time`, `post_departure_days`,
+      `post_departure_time`; pre arrival also got its own subject and body.
+      Saved by `save_pre_arrival_email_setup()` and
+      `save_post_departure_email_setup()` -- new names, the overload trap;
+      the 0075 savers are called by nothing. **STILL NOT SENT**: nothing
+      reads the schedule yet. Sending it needs a scheduled job and a mail
+      service it can reach, which is to be decided.
   - **SYSTEM SETTINGS IS THREE SCREENS: Hotel Features (0076), Calendar
     Settings (0077) and Language Settings (0078)**, cloned from the
     reference, above Staff. Each is one row per property, read by everyone

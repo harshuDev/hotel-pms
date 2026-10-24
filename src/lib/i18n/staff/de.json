@@ -1762,7 +1762,6 @@
  "Luxembourg": "Luxemburg",
  "Macao": "Sonderverwaltungsregion Macau",
  "Madagascar": "Madagaskar",
- "Mail body": "E-Mail-Text",
  "Mail Body:": "E-Mail-Text:",
  "main": "Haupt",
  "Main": "Haupt",
@@ -2877,7 +2876,6 @@
  "Taxi": "Taxi",
  "Telephone Number": "Telefonnummer",
  "Template": "Vorlage",
- "Template body": "Vorlagentext",
  "Template preview": "Vorlagenvorschau",
  "Template saved.": "Vorlage gespeichert.",
  "Template subject": "Vorlagenbetreff",
@@ -3477,5 +3475,22 @@
   "other": "{n} Ratenpläne aus Channex entfernt."
  },
  "Closed in Channex": "In Channex geschlossen",
- "{plan}: closed in Channex, because a channel is mapped to it.": "{plan}: in Channex geschlossen, weil ein Kanal darauf zugeordnet ist."
+ "{plan}: closed in Channex, because a channel is mapped to it.": "{plan}: in Channex geschlossen, weil ein Kanal darauf zugeordnet ist.",
+ "At (hotel time)": "Um (Hotelzeit)",
+ "Choose between 0 and 30 days after departure": "Wählen Sie zwischen 0 und 30 Tagen nach der Abreise",
+ "Choose between 0 and 30 days before arrival": "Wählen Sie zwischen 0 und 30 Tagen vor der Anreise",
+ "Choose the time the post-departure email goes": "Wählen Sie die Uhrzeit, zu der die E-Mail nach Abreise versendet wird",
+ "Choose the time the pre-arrival email goes": "Wählen Sie die Uhrzeit, zu der die E-Mail vor Anreise versendet wird",
+ "Give the pre-arrival email a subject, or turn it off": "Geben Sie der E-Mail vor Anreise einen Betreff oder schalten Sie sie aus",
+ "On the day of arrival": "Am Anreisetag",
+ "On the day of departure": "Am Abreisetag",
+ "Your upcoming stay at {propertyName}": "Ihr bevorstehender Aufenthalt im {propertyName}",
+ "{n} days after departure": {
+  "one": "{n} Tag nach der Abreise",
+  "other": "{n} Tage nach der Abreise"
+ },
+ "{n} days before arrival": {
+  "one": "{n} Tag vor der Anreise",
+  "other": "{n} Tage vor der Anreise"
+ }
 }

@@ -1763,7 +1763,6 @@
  "Luxembourg": "Luxemburgo",
  "Macao": "Macau, RAE da China",
  "Madagascar": "Madagascar",
- "Mail body": "Corpo do email",
  "Mail Body:": "Corpo do email:",
  "main": "principal",
  "Main": "Principal",
@@ -2878,7 +2877,6 @@
  "Taxi": "Táxi",
  "Telephone Number": "Número de telefone",
  "Template": "Modelo",
- "Template body": "Corpo do modelo",
  "Template preview": "Pré-visualização do modelo",
  "Template saved.": "Modelo guardado.",
  "Template subject": "Assunto do modelo",
@@ -3478,5 +3476,22 @@
   "other": "{n} planos tarifários removidos do Channex."
  },
  "Closed in Channex": "Fechado no Channex",
- "{plan}: closed in Channex, because a channel is mapped to it.": "{plan}: fechado no Channex, porque um canal está mapeado para ele."
+ "{plan}: closed in Channex, because a channel is mapped to it.": "{plan}: fechado no Channex, porque um canal está mapeado para ele.",
+ "At (hotel time)": "Às (hora do hotel)",
+ "Choose between 0 and 30 days after departure": "Escolha entre 0 e 30 dias após a partida",
+ "Choose between 0 and 30 days before arrival": "Escolha entre 0 e 30 dias antes da chegada",
+ "Choose the time the post-departure email goes": "Escolha a hora de envio do email pós-partida",
+ "Choose the time the pre-arrival email goes": "Escolha a hora de envio do email pré-chegada",
+ "Give the pre-arrival email a subject, or turn it off": "Dê um assunto ao email pré-chegada, ou desative-o",
+ "On the day of arrival": "No dia da chegada",
+ "On the day of departure": "No dia da partida",
+ "Your upcoming stay at {propertyName}": "A sua próxima estadia em {propertyName}",
+ "{n} days after departure": {
+  "one": "{n} dia após a partida",
+  "other": "{n} dias após a partida"
+ },
+ "{n} days before arrival": {
+  "one": "{n} dia antes da chegada",
+  "other": "{n} dias antes da chegada"
+ }
 }

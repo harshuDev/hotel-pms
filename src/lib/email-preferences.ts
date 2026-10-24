@@ -97,7 +97,15 @@ export interface EmailSetup {
   showHotelLogo: boolean;
   includeFooter: boolean;
   preArrivalEnabled: boolean;
+  /** Days before arrival, 0-30, and the hotel's clock time it goes (0150). */
+  preArrivalDays: number;
+  preArrivalTime: string;
+  preArrivalSubject: string | null;
+  preArrivalBody: string | null;
   postDepartureEnabled: boolean;
+  /** Days after departure, 0-30, and the time (0150). */
+  postDepartureDays: number;
+  postDepartureTime: string;
   postDepartureSubject: string | null;
   postDepartureBody: string | null;
   paymentRequestSubject: string | null;

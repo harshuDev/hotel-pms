@@ -3793,7 +3793,7 @@ export async function getEmailSetup(): Promise<EmailSetup> {
   const { data, error } = await supabase
     .from("hotel_email_settings")
     .select(
-      "reply_to_emails, from_text, notification_emails, footer_template, checkin_notes, directions, single_property_address, multi_property_address, confirmation_message, confirmation_colors, show_hotel_logo, include_footer, pre_arrival_enabled, post_departure_enabled, post_departure_subject, post_departure_body, payment_request_subject, payment_request_body",
+      "reply_to_emails, from_text, notification_emails, footer_template, checkin_notes, directions, single_property_address, multi_property_address, confirmation_message, confirmation_colors, show_hotel_logo, include_footer, pre_arrival_enabled, pre_arrival_days, pre_arrival_time, pre_arrival_subject, pre_arrival_body, post_departure_enabled, post_departure_days, post_departure_time, post_departure_subject, post_departure_body, payment_request_subject, payment_request_body",
     )
     .maybeSingle();
   if (error) throw new Error(`Failed to load the email setup: ${error.message}`);
@@ -3825,7 +3825,13 @@ export async function getEmailSetup(): Promise<EmailSetup> {
     showHotelLogo: data?.show_hotel_logo ?? false,
     includeFooter: data?.include_footer ?? false,
     preArrivalEnabled: data?.pre_arrival_enabled ?? false,
+    preArrivalDays: data?.pre_arrival_days ?? 1,
+    preArrivalTime: (data?.pre_arrival_time ?? "10:00").slice(0, 5),
+    preArrivalSubject: data?.pre_arrival_subject ?? null,
+    preArrivalBody: data?.pre_arrival_body ?? null,
     postDepartureEnabled: data?.post_departure_enabled ?? false,
+    postDepartureDays: data?.post_departure_days ?? 1,
+    postDepartureTime: (data?.post_departure_time ?? "10:00").slice(0, 5),
     postDepartureSubject: data?.post_departure_subject ?? null,
     postDepartureBody: data?.post_departure_body ?? null,
     paymentRequestSubject: data?.payment_request_subject ?? null,
