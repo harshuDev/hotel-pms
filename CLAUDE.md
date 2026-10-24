@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0150` (0138 as 0138a-f, 0142 as 0142a-b, 0149 as 0149a-b, 0145 as
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0151` (0138 as 0138a-f, 0142 as 0142a-b, 0149 as 0149a-b, 0145 as
 `0143_channex_send_rooms` + 0145b) are
 applied to the hosted database.
 
@@ -2907,6 +2907,17 @@ client: "Need to add Booking Channel in the Dashboard".
         with no body now sends `{}`. Found in certification test 11; tested
         there: new, modified and cancelled were each saved and acked within
         a minute.
+      - **ONE FEED CALL PER CHANNEX ACCOUNT, NOT PER HOTEL (0151)** -- Channex
+        (Evan) asked: three staging hotels had made 540 feed calls in three
+        hours. The minute job groups active connections by environment and
+        the decrypted API key, calls the feed once per group with no property
+        filter, and gives each revision to the hotel whose
+        `channex_property_id` it names (production: one account, one call a
+        minute). A revision for a Channex property no hotel is linked to is
+        skipped and left unacked. `channex_http(environment, secret, ...)` is
+        the call underneath `channex_call()`. "Pull bookings now" still asks
+        for its own hotel. Tested: a booking made in Channex for LEADWISE,
+        which shares its key with STAGING, landed on LEADWISE and was acked.
       - **Never changed by Channex**: a booking in house or departed -- the
         revision is flagged and written to the booking's history for the
         desk. **Not acked, retried**: a room type not linked here (Channex
