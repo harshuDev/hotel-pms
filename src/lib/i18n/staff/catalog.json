@@ -367,6 +367,14 @@
   "kind": "plural",
   "one": "{n} day"
  },
+ "{n} days after departure": {
+  "kind": "plural",
+  "one": "{n} day after departure"
+ },
+ "{n} days before arrival": {
+  "kind": "plural",
+  "one": "{n} day before arrival"
+ },
  "{n} departures": {
   "kind": "plural",
   "one": "{n} departure"
@@ -1647,6 +1655,9 @@
  "Associated Customer": {
   "kind": "text"
  },
+ "At (hotel time)": {
+  "kind": "text"
+ },
  "At check-in": {
   "kind": "text"
  },
@@ -2628,6 +2639,12 @@
  "Choose at least one other sales channel to merge in": {
   "kind": "db"
  },
+ "Choose between 0 and 30 days after departure": {
+  "kind": "db"
+ },
+ "Choose between 0 and 30 days before arrival": {
+  "kind": "db"
+ },
  "Choose category": {
   "kind": "text"
  },
@@ -2735,6 +2752,12 @@
  },
  "Choose the start and the end.": {
   "kind": "text"
+ },
+ "Choose the time the post-departure email goes": {
+  "kind": "db"
+ },
+ "Choose the time the pre-arrival email goes": {
+  "kind": "db"
  },
  "Choose what each condition checks": {
   "kind": "db"
@@ -4353,6 +4376,9 @@
  "Give the post-departure email a subject, or turn it off": {
   "kind": "db"
  },
+ "Give the pre-arrival email a subject, or turn it off": {
+  "kind": "db"
+ },
  "Give the promotion a name.": {
   "kind": "text"
  },
@@ -5182,9 +5208,6 @@
  "Madagascar": {
   "kind": "country",
   "code": "MG"
- },
- "Mail body": {
-  "kind": "text"
  },
  "Mail Body:": {
   "kind": "text"
@@ -6284,6 +6307,12 @@
   "kind": "text"
  },
  "On the books, 28 ahead": {
+  "kind": "text"
+ },
+ "On the day of arrival": {
+  "kind": "text"
+ },
+ "On the day of departure": {
   "kind": "text"
  },
  "On the guest booking page": {
@@ -8675,9 +8704,6 @@
  "Template": {
   "kind": "text"
  },
- "Template body": {
-  "kind": "text"
- },
  "Template preview": {
   "kind": "text"
  },
@@ -10251,6 +10277,9 @@
   "kind": "text"
  },
  "Your Terms and Conditions:": {
+  "kind": "text"
+ },
+ "Your upcoming stay at {propertyName}": {
   "kind": "text"
  },
  "Zambia": {

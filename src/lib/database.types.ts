@@ -2801,9 +2801,15 @@ export type Database = {
           payment_request_body: string | null
           payment_request_subject: string | null
           post_departure_body: string | null
+          post_departure_days: number
           post_departure_enabled: boolean
           post_departure_subject: string | null
+          post_departure_time: string
+          pre_arrival_body: string | null
+          pre_arrival_days: number
           pre_arrival_enabled: boolean
+          pre_arrival_subject: string | null
+          pre_arrival_time: string
           preferences: Json
           property_id: string
           reply_to_emails: string[]
@@ -2825,9 +2831,15 @@ export type Database = {
           payment_request_body?: string | null
           payment_request_subject?: string | null
           post_departure_body?: string | null
+          post_departure_days?: number
           post_departure_enabled?: boolean
           post_departure_subject?: string | null
+          post_departure_time?: string
+          pre_arrival_body?: string | null
+          pre_arrival_days?: number
           pre_arrival_enabled?: boolean
+          pre_arrival_subject?: string | null
+          pre_arrival_time?: string
           preferences?: Json
           property_id: string
           reply_to_emails?: string[]
@@ -2849,9 +2861,15 @@ export type Database = {
           payment_request_body?: string | null
           payment_request_subject?: string | null
           post_departure_body?: string | null
+          post_departure_days?: number
           post_departure_enabled?: boolean
           post_departure_subject?: string | null
+          post_departure_time?: string
+          pre_arrival_body?: string | null
+          pre_arrival_days?: number
           pre_arrival_enabled?: boolean
+          pre_arrival_subject?: string | null
+          pre_arrival_time?: string
           preferences?: Json
           property_id?: string
           reply_to_emails?: string[]
@@ -8232,8 +8250,28 @@ export type Database = {
         Args: { p_body: string; p_enabled: boolean; p_subject: string }
         Returns: undefined
       }
+      save_post_departure_email_setup: {
+        Args: {
+          p_body: string
+          p_days: number
+          p_enabled: boolean
+          p_subject: string
+          p_time: string
+        }
+        Returns: undefined
+      }
       save_pre_arrival_email: {
         Args: { p_enabled: boolean }
+        Returns: undefined
+      }
+      save_pre_arrival_email_setup: {
+        Args: {
+          p_body: string
+          p_days: number
+          p_enabled: boolean
+          p_subject: string
+          p_time: string
+        }
         Returns: undefined
       }
       save_promotion: {

@@ -1,6 +1,5 @@
 "use server";
 
-import sanitizeHtml from "sanitize-html";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { getT } from "@/lib/i18n/server";
@@ -9,6 +8,7 @@ import { countryName } from "@/lib/countries";
 import { formatMoney } from "@/lib/money";
 import { mailConnected, sendMail } from "@/lib/mailer";
 import { fillDropIns, type DropInKey } from "@/lib/email-drop-ins";
+import { emailHtmlToText, emailSetupHtml, sanitizeEmailHtml } from "@/lib/email-sanitize";
 import { loadInvoice } from "@/lib/invoice-data";
 import { confirmationPdf, invoicePdf } from "@/lib/pdf/booking-documents";
 import {
@@ -44,43 +44,6 @@ type Result = { ok: true; data: { status: "sent" } } | { ok: false; error: strin
 
 const MAX_RECIPIENTS = 10;
 const EMAIL = /^[^\s@<>(),;:"]+@[^\s@<>(),;:"]+\.[^\s@<>(),;:"]+$/;
-
-const SANITIZE: sanitizeHtml.IOptions = {
-  allowedTags: [
-    ...sanitizeHtml.defaults.allowedTags,
-    "img", "span", "font", "u", "s", "strike", "h1", "h2", "h3", "h4", "h5", "h6",
-  ],
-  allowedAttributes: {
-    "*": ["style", "align", "width", "height", "colspan", "rowspan", "title", "color", "face", "size"],
-    a: ["href", "target"],
-    img: ["src", "alt"],
-  },
-  allowedSchemes: ["http", "https", "mailto", "tel"],
-  allowedSchemesByTag: { img: ["http", "https", "data"] },
-  allowProtocolRelative: false,
-};
-
-/** The plain-text part of the message, and what the log's `body` holds. */
-function toText(html: string): string {
-  return sanitizeHtml(
-    html
-      .replace(/<br\s*\/?>/gi, "\n")
-      .replace(/<\/(p|div|h[1-6]|li|tr)>/gi, "\n"),
-    { allowedTags: [], allowedAttributes: {} },
-  )
-    .replace(/&nbsp;/g, " ")
-    .replace(/&amp;/g, "&")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
-    .replace(/\n{3,}/g, "\n\n")
-    .trim();
-}
-
-function escapeHtml(s: string): string {
-  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-}
 
 export async function sendBookingEmail(input: {
   bookingId: string;
@@ -157,13 +120,17 @@ export async function sendBookingEmail(input: {
   };
 
   const subject = fillDropIns(input.subject, values, false).replace(/[\r\n]+/g, " ").trim().slice(0, 500);
-  let html = fillDropIns(sanitizeHtml(input.html, SANITIZE), values, true);
+  let html = fillDropIns(sanitizeEmailHtml(input.html), values, true);
+  // The footer is written in Email Setup's editor (0150), or is plain text
+  // saved before it; either way it is sanitised before its drop-ins are filled.
   if (setup.includeFooter && setup.footerTemplate) {
-    html += `<hr style="border:none;border-top:1px solid #d9e1ec;margin:24px 0 12px"><div style="color:#5b6b82;font-size:12px">${escapeHtml(
-      fillDropIns(setup.footerTemplate, values, false),
-    ).replace(/\n/g, "<br>")}</div>`;
+    html += `<hr style="border:none;border-top:1px solid #d9e1ec;margin:24px 0 12px"><div style="color:#5b6b82;font-size:12px">${fillDropIns(
+      emailSetupHtml(setup.footerTemplate),
+      values,
+      true,
+    )}</div>`;
   }
-  const text = toText(html);
+  const text = emailHtmlToText(html);
 
   // The attachments. A failure to make one stops the send: a message that
   // says "attached is your invoice" and arrives without it is worse than none.
@@ -190,7 +157,8 @@ export async function sendBookingEmail(input: {
             rooms,
             terms,
             message: setup.confirmationMessage,
-            checkinNotes: setup.checkinNotes,
+            // The PDF is text: a note written in the editor loses its formatting.
+            checkinNotes: setup.checkinNotes ? emailHtmlToText(emailSetupHtml(setup.checkinNotes)) : null,
             currency,
           },
           tr,

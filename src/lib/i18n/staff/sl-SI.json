@@ -1852,7 +1852,6 @@
  "Luxembourg": "Luksemburg",
  "Macao": "Posebno upravno območje Kitajske Makav",
  "Madagascar": "Madagaskar",
- "Mail body": "Besedilo e-pošte",
  "Mail Body:": "Besedilo e-pošte:",
  "main": "glavna",
  "Main": "Glavna",
@@ -2973,7 +2972,6 @@
  "Taxi": "Taksi",
  "Telephone Number": "Telefonska številka",
  "Template": "Predloga",
- "Template body": "Besedilo predloge",
  "Template preview": "Predogled predloge",
  "Template saved.": "Predloga je shranjena.",
  "Template subject": "Zadeva predloge",
@@ -3583,5 +3581,26 @@
   "other": "{n} cenovnih načrtov odstranjenih iz Channexa."
  },
  "Closed in Channex": "Zaprto v Channexu",
- "{plan}: closed in Channex, because a channel is mapped to it.": "{plan}: zaprto v Channexu, ker je nanj povezan kanal."
+ "{plan}: closed in Channex, because a channel is mapped to it.": "{plan}: zaprto v Channexu, ker je nanj povezan kanal.",
+ "At (hotel time)": "Ob (čas hotela)",
+ "Choose between 0 and 30 days after departure": "Izberite med 0 in 30 dnevi po odhodu",
+ "Choose between 0 and 30 days before arrival": "Izberite med 0 in 30 dnevi pred prihodom",
+ "Choose the time the post-departure email goes": "Izberite uro pošiljanja e-pošte po odhodu",
+ "Choose the time the pre-arrival email goes": "Izberite uro pošiljanja e-pošte pred prihodom",
+ "Give the pre-arrival email a subject, or turn it off": "E-pošti pred prihodom določite zadevo ali jo izklopite",
+ "On the day of arrival": "Na dan prihoda",
+ "On the day of departure": "Na dan odhoda",
+ "Your upcoming stay at {propertyName}": "Vaše prihajajoče bivanje v {propertyName}",
+ "{n} days after departure": {
+  "one": "{n} dan po odhodu",
+  "two": "{n} dneva po odhodu",
+  "few": "{n} dni po odhodu",
+  "other": "{n} dni po odhodu"
+ },
+ "{n} days before arrival": {
+  "one": "{n} dan pred prihodom",
+  "two": "{n} dneva pred prihodom",
+  "few": "{n} dni pred prihodom",
+  "other": "{n} dni pred prihodom"
+ }
 }

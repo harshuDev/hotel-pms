@@ -1717,7 +1717,6 @@
  "Luxembourg": "Luksemburg",
  "Macao": "Makau DAK Tiongkok",
  "Madagascar": "Madagaskar",
- "Mail body": "Isi email",
  "Mail Body:": "Isi Email:",
  "main": "utama",
  "Main": "Utama",
@@ -2829,7 +2828,6 @@
  "Taxi": "Taksi",
  "Telephone Number": "Nomor Telepon",
  "Template": "Templat",
- "Template body": "Isi templat",
  "Template preview": "Pratinjau templat",
  "Template saved.": "Templat disimpan.",
  "Template subject": "Subjek templat",
@@ -3424,5 +3422,20 @@
   "other": "{n} paket tarif dihapus dari Channex."
  },
  "Closed in Channex": "Ditutup di Channex",
- "{plan}: closed in Channex, because a channel is mapped to it.": "{plan}: ditutup di Channex, karena ada kanal yang dipetakan ke paket ini."
+ "{plan}: closed in Channex, because a channel is mapped to it.": "{plan}: ditutup di Channex, karena ada kanal yang dipetakan ke paket ini.",
+ "At (hotel time)": "Pukul (waktu hotel)",
+ "Choose between 0 and 30 days after departure": "Pilih antara 0 dan 30 hari setelah keberangkatan",
+ "Choose between 0 and 30 days before arrival": "Pilih antara 0 dan 30 hari sebelum kedatangan",
+ "Choose the time the post-departure email goes": "Pilih waktu email setelah keberangkatan dikirim",
+ "Choose the time the pre-arrival email goes": "Pilih waktu email sebelum kedatangan dikirim",
+ "Give the pre-arrival email a subject, or turn it off": "Beri subjek untuk email sebelum kedatangan, atau matikan",
+ "On the day of arrival": "Pada hari kedatangan",
+ "On the day of departure": "Pada hari keberangkatan",
+ "Your upcoming stay at {propertyName}": "Menginap Anda yang akan datang di {propertyName}",
+ "{n} days after departure": {
+  "other": "{n} hari setelah keberangkatan"
+ },
+ "{n} days before arrival": {
+  "other": "{n} hari sebelum kedatangan"
+ }
 }

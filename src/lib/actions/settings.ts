@@ -23,6 +23,7 @@ import type { FacilityIcon } from "@/lib/facilities";
 import type { GuestFieldKind } from "@/lib/guest-config";
 import type { CalendarSettings } from "@/lib/calendar-settings";
 import { HOTEL_ASSETS_BUCKET } from "@/lib/invoice-settings";
+import { emailHtmlToText, emailSetupHtml } from "@/lib/email-sanitize";
 import type {
   HousekeepingChoice,
   ChannelKind,
@@ -1158,6 +1159,17 @@ export async function saveSupportedLanguages(locales: string[]): Promise<ActionR
 
 /* -- Communications & Notifications -> Email Setup (0075) ----------------- */
 
+/*
+ * What Email Setup's template editors wrote (0150), sanitised before it is
+ * stored -- it is HTML typed in a browser and it goes out to guests. An editor
+ * left holding only empty paragraphs is saved as nothing, so "not set" stays
+ * "not set".
+ */
+function editorHtml(text: string): string {
+  const html = emailSetupHtml(text);
+  return emailHtmlToText(html) === "" && !/<img\b/i.test(html) ? "" : html;
+}
+
 function revalidateEmail() {
   revalidateSettings();
   // The booking screen's Email tab offers the templates.
@@ -1188,7 +1200,7 @@ export async function saveEmailGeneral(input: {
 
 export async function saveEmailFooter(footer: string): Promise<ActionResult<null>> {
   const supabase = await createClient();
-  const { error } = await supabase.rpc("save_email_footer", { p_footer: footer });
+  const { error } = await supabase.rpc("save_email_footer", { p_footer: editorHtml(footer) });
   return emailDone(error);
 }
 
@@ -1204,8 +1216,8 @@ export async function saveBookingConfirmationEmail(input: {
 }): Promise<ActionResult<null>> {
   const supabase = await createClient();
   const { error } = await supabase.rpc("save_booking_confirmation_email", {
-    p_checkin_notes: input.checkinNotes,
-    p_directions: input.directions,
+    p_checkin_notes: editorHtml(input.checkinNotes),
+    p_directions: editorHtml(input.directions),
     p_single_property_address: input.singlePropertyAddress,
     p_multi_property_address: input.multiPropertyAddress,
     p_confirmation_message: input.confirmationMessage,
@@ -1216,22 +1228,39 @@ export async function saveBookingConfirmationEmail(input: {
   return emailDone(error);
 }
 
-export async function savePreArrivalEmail(enabled: boolean): Promise<ActionResult<null>> {
+/** Pre and post emails with their schedule (0150): days before or after, and a time. */
+export async function savePreArrivalEmail(input: {
+  enabled: boolean;
+  days: number;
+  time: string;
+  subject: string;
+  body: string;
+}): Promise<ActionResult<null>> {
   const supabase = await createClient();
-  const { error } = await supabase.rpc("save_pre_arrival_email", { p_enabled: enabled });
+  const { error } = await supabase.rpc("save_pre_arrival_email_setup", {
+    p_enabled: input.enabled,
+    p_days: input.days,
+    p_time: input.time,
+    p_subject: input.subject,
+    p_body: editorHtml(input.body),
+  });
   return emailDone(error);
 }
 
 export async function savePostDepartureEmail(input: {
   enabled: boolean;
+  days: number;
+  time: string;
   subject: string;
   body: string;
 }): Promise<ActionResult<null>> {
   const supabase = await createClient();
-  const { error } = await supabase.rpc("save_post_departure_email", {
+  const { error } = await supabase.rpc("save_post_departure_email_setup", {
     p_enabled: input.enabled,
+    p_days: input.days,
+    p_time: input.time,
     p_subject: input.subject,
-    p_body: input.body,
+    p_body: editorHtml(input.body),
   });
   return emailDone(error);
 }
@@ -1243,7 +1272,7 @@ export async function savePaymentRequestEmail(input: {
   const supabase = await createClient();
   const { error } = await supabase.rpc("save_payment_request_email", {
     p_subject: input.subject,
-    p_body: input.body,
+    p_body: editorHtml(input.body),
   });
   return emailDone(error);
 }
@@ -1261,7 +1290,7 @@ export async function saveEmailTemplate(input: {
     p_id: nullableArg(input.id),
     p_title: input.title,
     p_subject: input.subject,
-    p_body: input.body,
+    p_body: editorHtml(input.body),
   });
   if (error) return { ok: false, error: await localised(error.message) };
   revalidateEmail();

@@ -1762,7 +1762,6 @@
  "Luxembourg": "Lúxemborg",
  "Macao": "sérstjórnarsvæðið Makaó",
  "Madagascar": "Madagaskar",
- "Mail body": "Meginmál tölvupósts",
  "Mail Body:": "Meginmál tölvupósts:",
  "main": "aðal",
  "Main": "Aðal",
@@ -2877,7 +2876,6 @@
  "Taxi": "Leigubíll",
  "Telephone Number": "Símanúmer",
  "Template": "Sniðmát",
- "Template body": "Meginmál sniðmáts",
  "Template preview": "Forskoðun sniðmáts",
  "Template saved.": "Sniðmát vistað.",
  "Template subject": "Efni sniðmáts",
@@ -3477,5 +3475,22 @@
   "other": "{n} verðáætlanir fjarlægðar úr Channex."
  },
  "Closed in Channex": "Lokað í Channex",
- "{plan}: closed in Channex, because a channel is mapped to it.": "{plan}: lokað í Channex, því rás er tengd við hana."
+ "{plan}: closed in Channex, because a channel is mapped to it.": "{plan}: lokað í Channex, því rás er tengd við hana.",
+ "At (hotel time)": "Klukkan (tími hótels)",
+ "Choose between 0 and 30 days after departure": "Veldu á milli 0 og 30 daga eftir brottför",
+ "Choose between 0 and 30 days before arrival": "Veldu á milli 0 og 30 daga fyrir komu",
+ "Choose the time the post-departure email goes": "Veldu hvenær tölvupósturinn eftir brottför fer",
+ "Choose the time the pre-arrival email goes": "Veldu hvenær tölvupósturinn fyrir komu fer",
+ "Give the pre-arrival email a subject, or turn it off": "Gefðu tölvupóstinum fyrir komu efni, eða slökktu á honum",
+ "On the day of arrival": "Á komudegi",
+ "On the day of departure": "Á brottfarardegi",
+ "Your upcoming stay at {propertyName}": "Væntanleg dvöl þín á {propertyName}",
+ "{n} days after departure": {
+  "one": "{n} degi eftir brottför",
+  "other": "{n} dögum eftir brottför"
+ },
+ "{n} days before arrival": {
+  "one": "{n} degi fyrir komu",
+  "other": "{n} dögum fyrir komu"
+ }
 }

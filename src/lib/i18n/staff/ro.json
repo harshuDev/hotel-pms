@@ -1807,7 +1807,6 @@
  "Luxembourg": "Luxemburg",
  "Macao": "R.A.S. Macao, China",
  "Madagascar": "Madagascar",
- "Mail body": "Corpul e-mailului",
  "Mail Body:": "Corpul e-mailului:",
  "main": "principal",
  "Main": "Principal",
@@ -2925,7 +2924,6 @@
  "Taxi": "Taxi",
  "Telephone Number": "Număr de telefon",
  "Template": "Șablon",
- "Template body": "Corpul șablonului",
  "Template preview": "Previzualizare șablon",
  "Template saved.": "Șablonul a fost salvat.",
  "Template subject": "Subiectul șablonului",
@@ -3530,5 +3528,24 @@
   "other": "{n} de planuri tarifare eliminate din Channex."
  },
  "Closed in Channex": "Închis în Channex",
- "{plan}: closed in Channex, because a channel is mapped to it.": "{plan}: închis în Channex, pentru că un canal este mapat pe el."
+ "{plan}: closed in Channex, because a channel is mapped to it.": "{plan}: închis în Channex, pentru că un canal este mapat pe el.",
+ "At (hotel time)": "La (ora hotelului)",
+ "Choose between 0 and 30 days after departure": "Alegeți între 0 și 30 de zile după plecare",
+ "Choose between 0 and 30 days before arrival": "Alegeți între 0 și 30 de zile înainte de sosire",
+ "Choose the time the post-departure email goes": "Alegeți ora la care pleacă e-mailul de după plecare",
+ "Choose the time the pre-arrival email goes": "Alegeți ora la care pleacă e-mailul de dinainte de sosire",
+ "Give the pre-arrival email a subject, or turn it off": "Dați un subiect e-mailului de dinainte de sosire sau dezactivați-l",
+ "On the day of arrival": "În ziua sosirii",
+ "On the day of departure": "În ziua plecării",
+ "Your upcoming stay at {propertyName}": "Sejurul dumneavoastră viitor la {propertyName}",
+ "{n} days after departure": {
+  "one": "{n} zi după plecare",
+  "few": "{n} zile după plecare",
+  "other": "{n} de zile după plecare"
+ },
+ "{n} days before arrival": {
+  "one": "{n} zi înainte de sosire",
+  "few": "{n} zile înainte de sosire",
+  "other": "{n} de zile înainte de sosire"
+ }
 }

@@ -3,6 +3,8 @@
 import { useT } from "@/components/i18n";
 import { Fragment, useState } from "react";
 import { cn } from "@/components/ui";
+import { RichEditor } from "@/components/bookings/rich-editor";
+import { asEmailHtml, emailPreview } from "@/lib/email-html";
 import {
   CONFIRMATION_COLORS,
   type ConfirmationColorId,
@@ -27,15 +29,19 @@ import {
  * Pre Arrival, Post Departure and Request Payment Email Setup, and Email
  * Templates.
  *
- * STORED, NOT YET SENT: there is no mail provider in this system. Email
- * Templates is the part with a reader today -- the booking screen's Email tab
- * offers them. See CLAUDE.md.
+ * STORED, NOT YET SENT BY ITSELF: the booking screen's Email tab sends by
+ * hand and reads the footer, the check-in notes and the templates from here;
+ * nothing sends the pre-arrival or post-departure email on its schedule yet.
+ * See CLAUDE.md.
  *
- * Their "Open template editor" is a rich-text editor; here it opens a plain
- * text editor, for the reason the registration card's terms are plain: HTML
- * typed in a browser and sent back out needs a sanitiser this codebase does
- * not have. The LOCALE picker, per-field translate buttons and the "?" tips
- * are not copied, as elsewhere in Settings.
+ * "Open template editor" opens the booking Email tab's rich editor (0150) --
+ * formatting, tables, links, pictures, code view and DROP IN'S -- as the
+ * client asked: "the template editors need to be added". What it writes is
+ * HTML, sanitised on the server before it is saved; text saved before the
+ * editor arrived opens as paragraphs. Pre arrival and post departure carry a
+ * schedule: days before arrival or after departure, and the hotel's time.
+ * The LOCALE picker, per-field translate buttons and the "?" tips are not
+ * copied, as elsewhere in Settings.
  */
 
 type Run = (fn: () => Promise<{ ok: boolean; error?: string }>, done: string) => void;
@@ -162,7 +168,7 @@ function EmailChips({
   );
 }
 
-/** "Open template editor": a dialog with one text area, Cancel and Done. */
+/** "Open template editor": the rich editor in a dialog, Cancel and Done. */
 function TemplateField({
   label,
   value,
@@ -177,25 +183,27 @@ function TemplateField({
   const tr = useT();
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState(value);
+  const preview = emailPreview(value);
   return (
     <div>
       {label && <p className="text-[13px] text-ink-muted">{label}</p>}
-      <div className="mt-1.5 flex items-center gap-3">
+      <div className="mt-1.5 flex min-w-0 items-center gap-3">
         <button
           type="button"
           onClick={() => {
-            setDraft(value);
+            // Plain text saved before the editor opens as paragraphs.
+            setDraft(asEmailHtml(value));
             setOpen(true);
           }}
           className={editorButton}
         >
           {tr("Open template editor")}
         </button>
-        {value && <span className="truncate text-[12px] text-ink-faint">{value.split("\n")[0]}</span>}
+        {preview && <span className="min-w-0 truncate text-[12px] text-ink-faint">{preview}</span>}
       </div>
       {open && (
         <div
-          className="fixed inset-0 z-50 flex items-start justify-center bg-ink/40 px-4 pt-[10vh]"
+          className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-ink/40 px-4 py-[6vh]"
           role="dialog"
           aria-modal="true"
           aria-label={label || tr("Template")}
@@ -203,7 +211,7 @@ function TemplateField({
             if (e.key === "Escape") setOpen(false);
           }}
         >
-          <div className="w-full max-w-2xl rounded-lg bg-white shadow-xl">
+          <div className="w-full max-w-4xl rounded-lg bg-white shadow-xl">
             <div className="flex items-center justify-between border-b border-line px-5 py-3">
               <h4 className="text-[15px] text-ink">{label || tr("Template")}</h4>
               <button
@@ -216,14 +224,16 @@ function TemplateField({
               </button>
             </div>
             <div className="p-5">
-              <textarea
-                autoFocus
-                rows={12}
-                value={draft}
-                disabled={!canEdit}
-                onChange={(e) => setDraft(e.target.value)}
-                className="w-full rounded-md border border-line px-3 py-2 text-[13.5px] text-ink focus:border-brass focus:outline-none focus:ring-1 focus:ring-brass"
-              />
+              {canEdit ? (
+                <RichEditor value={draft} onChange={setDraft} minHeight={280} />
+              ) : (
+                <iframe
+                  title={label || tr("Template")}
+                  sandbox=""
+                  srcDoc={draft}
+                  className="h-72 w-full rounded border border-line"
+                />
+              )}
             </div>
             <div className="flex justify-end gap-2 border-t border-line px-5 py-3">
               <button
@@ -249,6 +259,69 @@ function TemplateField({
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+const DAY_CHOICES = Array.from({ length: 31 }, (_, i) => i);
+
+/**
+ * When a scheduled email goes (0150): a number of days before arrival or
+ * after departure, and a time on the hotel's clock.
+ */
+function ScheduleRow({
+  id,
+  when,
+  days,
+  time,
+  onDays,
+  onTime,
+  disabled,
+}: {
+  id: string;
+  when: "before" | "after";
+  days: number;
+  time: string;
+  onDays: (n: number) => void;
+  onTime: (t: string) => void;
+  disabled: boolean;
+}) {
+  const tr = useT();
+  const label = (n: number) =>
+    when === "before"
+      ? n === 0
+        ? tr("On the day of arrival")
+        : tr.plural(n, "{n} day before arrival", "{n} days before arrival")
+      : n === 0
+        ? tr("On the day of departure")
+        : tr.plural(n, "{n} day after departure", "{n} days after departure");
+  return (
+    <div className="flex flex-wrap items-end gap-x-6 gap-y-3 rounded-md border border-line bg-shell/60 px-4 py-3">
+      <div>
+        <label htmlFor={`${id}-days`} className={tiny}>{tr("Send")}</label>
+        <select
+          id={`${id}-days`}
+          value={days}
+          disabled={disabled}
+          onChange={(e) => onDays(Number(e.target.value))}
+          className="mt-0.5 block rounded border border-line bg-white px-2 py-1.5 text-[13.5px] text-ink focus:border-brass focus:outline-none"
+        >
+          {DAY_CHOICES.map((n) => (
+            <option key={n} value={n}>{label(n)}</option>
+          ))}
+        </select>
+      </div>
+      <div>
+        <label htmlFor={`${id}-time`} className={tiny}>{tr("At (hotel time)")}</label>
+        <input
+          id={`${id}-time`}
+          type="time"
+          value={time}
+          disabled={disabled}
+          onChange={(e) => onTime(e.target.value)}
+          className="tnum mt-0.5 block rounded border border-line bg-white px-2 py-1.5 text-[13.5px] text-ink focus:border-brass focus:outline-none"
+        />
+      </div>
     </div>
   );
 }
@@ -308,7 +381,13 @@ export function EmailSetupPanel({
   const [includeFooter, setIncludeFooter] = useState(setup.includeFooter);
   // Pre arrival, post departure, payment request
   const [preArrival, setPreArrival] = useState(setup.preArrivalEnabled);
+  const [preDays, setPreDays] = useState(setup.preArrivalDays);
+  const [preTime, setPreTime] = useState(setup.preArrivalTime);
+  const [preSubject, setPreSubject] = useState(setup.preArrivalSubject ?? "");
+  const [preBody, setPreBody] = useState(setup.preArrivalBody ?? "");
   const [postEnabled, setPostEnabled] = useState(setup.postDepartureEnabled);
+  const [postDays, setPostDays] = useState(setup.postDepartureDays);
+  const [postTime, setPostTime] = useState(setup.postDepartureTime);
   const [postSubject, setPostSubject] = useState(setup.postDepartureSubject ?? "");
   const [postBody, setPostBody] = useState(setup.postDepartureBody ?? "");
   const [paySubject, setPaySubject] = useState(setup.paymentRequestSubject ?? "");
@@ -342,9 +421,7 @@ export function EmailSetupPanel({
                 onChange={(e) => setTpl({ ...tpl, subject: e.target.value })} className={underline} />
               <Counter value={tpl.subject} />
             </div>
-            <textarea aria-label={tr("Template body")} placeholder={tr("Mail body")} rows={6} value={tpl.body}
-              onChange={(e) => setTpl({ ...tpl, body: e.target.value })}
-              className="w-full rounded-md border border-line px-3 py-2 text-[13.5px] text-ink focus:border-brass focus:outline-none focus:ring-1 focus:ring-brass" />
+            <RichEditor value={tpl.body} onChange={(body) => setTpl({ ...tpl, body })} minHeight={180} />
             <div className="flex justify-end gap-2">
               <button type="button" onClick={() => setTpl(null)}
                 className="rounded-md border border-line px-4 py-2 text-[13px] text-ink-muted hover:bg-shell hover:text-ink">
@@ -504,13 +581,35 @@ export function EmailSetupPanel({
         title={tr("Pre Arrival Email Setup")}
         canEdit={canEdit}
         pending={pending}
-        onSave={() => run(() => savePreArrivalEmail(preArrival), tr("Pre arrival email saved."))}
+        onSave={() =>
+          run(
+            () =>
+              savePreArrivalEmail({ enabled: preArrival, days: preDays, time: preTime, subject: preSubject, body: preBody }),
+            tr("Pre arrival email saved."),
+          )
+        }
       >
-        <label className="flex w-fit items-center gap-2 text-[13px] text-ink">
-          <input type="checkbox" checked={preArrival} disabled={disabled}
-            onChange={(e) => setPreArrival(e.target.checked)} className="h-4 w-4 accent-brass" />
-          {tr("Send Email to customer before arrival")}
-        </label>
+        <div className="space-y-4">
+          <label className="flex w-fit items-center gap-2 text-[13px] text-ink">
+            <input type="checkbox" checked={preArrival} disabled={disabled}
+              onChange={(e) => setPreArrival(e.target.checked)} className="h-4 w-4 accent-brass" />
+            {tr("Send Email to customer before arrival")}
+          </label>
+          {preArrival && (
+            <>
+              <ScheduleRow id="pre" when="before" days={preDays} time={preTime}
+                onDays={setPreDays} onTime={setPreTime} disabled={disabled} />
+              <div>
+                <label htmlFor="pre-subject" className={tiny}>{tr("Email subject")}</label>
+                <input id="pre-subject" value={preSubject} disabled={disabled}
+                  placeholder={tr("Your upcoming stay at {propertyName}", { propertyName })}
+                  onChange={(e) => setPreSubject(e.target.value)} className={underline} />
+                <Counter value={preSubject} />
+              </div>
+              <TemplateField label={tr("Mail Body:")} value={preBody} onChange={setPreBody} canEdit={canEdit} />
+            </>
+          )}
+        </div>
       </Section>
 
       {/* Post Departure Email Setup --------------------------------------- */}
@@ -520,7 +619,14 @@ export function EmailSetupPanel({
         pending={pending}
         onSave={() =>
           run(
-            () => savePostDepartureEmail({ enabled: postEnabled, subject: postSubject, body: postBody }),
+            () =>
+              savePostDepartureEmail({
+                enabled: postEnabled,
+                days: postDays,
+                time: postTime,
+                subject: postSubject,
+                body: postBody,
+              }),
             tr("Post departure email saved."),
           )
         }
@@ -531,6 +637,10 @@ export function EmailSetupPanel({
               onChange={(e) => setPostEnabled(e.target.checked)} className="h-4 w-4 accent-brass" />
             {tr("Send Email to customer after departure")}
           </label>
+          {postEnabled && (
+            <ScheduleRow id="post" when="after" days={postDays} time={postTime}
+              onDays={setPostDays} onTime={setPostTime} disabled={disabled} />
+          )}
           <div>
             <label htmlFor="post-subject" className={tiny}>{tr("Email subject")}</label>
             <input id="post-subject" value={postSubject} disabled={disabled}
@@ -593,7 +703,7 @@ export function EmailSetupPanel({
                           type="button"
                           title={tr("Edit")}
                           aria-label={tr("Edit {name}", { name: t.title })}
-                          onClick={() => setTpl({ id: t.id, title: t.title, subject: t.subject ?? "", body: t.body ?? "" })}
+                          onClick={() => setTpl({ id: t.id, title: t.title, subject: t.subject ?? "", body: asEmailHtml(t.body) })}
                           className="grid h-7 w-7 place-items-center rounded text-brass hover:bg-shell"
                         >
                           <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2"
