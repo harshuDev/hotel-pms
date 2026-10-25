@@ -3493,5 +3493,7 @@
  "{n} days before arrival": {
   "one": "{n} jour avant l’arrivée",
   "other": "{n} jours avant l’arrivée"
- }
+ },
+ "{plan}: kept as it is in Channex, because a channel is mapped to it.": "{plan} : laissé tel quel dans Channex, car un canal y est associé.",
+ "In Channex · occupancies out of date": "Dans Channex · occupations à mettre à jour"
 }

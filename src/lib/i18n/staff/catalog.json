@@ -636,6 +636,9 @@
  "{plan}: closed in Channex, because a channel is mapped to it.": {
   "kind": "text"
  },
+ "{plan}: kept as it is in Channex, because a channel is mapped to it.": {
+  "kind": "text"
+ },
  "{qty} × {what} charged.": {
   "kind": "text"
  },
@@ -4754,6 +4757,9 @@
   "kind": "text"
  },
  "In Channex": {
+  "kind": "text"
+ },
+ "In Channex · occupancies out of date": {
   "kind": "text"
  },
  "In house": {

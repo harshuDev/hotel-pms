@@ -3602,5 +3602,7 @@
   "two": "{n} dneva pred prihodom",
   "few": "{n} dni pred prihodom",
   "other": "{n} dni pred prihodom"
- }
+ },
+ "{plan}: kept as it is in Channex, because a channel is mapped to it.": "{plan}: v Channexu ostane nespremenjeno, ker je nanj povezan kanal.",
+ "In Channex · occupancies out of date": "V Channexu · zasedenosti niso posodobljene"
 }
