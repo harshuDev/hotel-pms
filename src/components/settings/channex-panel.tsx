@@ -486,7 +486,7 @@ export function ChannexPanel({
                                   {plan.name}
                                 </label>
                               </div>
-                              {plan.occupancies.length > 1 && (
+                              {plan.occupancies.length > 0 && (
                                 <div className="tnum mt-0.5 flex flex-wrap gap-x-3 gap-y-0.5 pl-11 text-[11.5px]">
                                   {plan.occupancies.map((o) => (
                                     <span
