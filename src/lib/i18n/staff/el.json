@@ -3492,5 +3492,7 @@
  "{n} days before arrival": {
   "one": "{n} ημέρα πριν από την άφιξη",
   "other": "{n} ημέρες πριν από την άφιξη"
- }
+ },
+ "{plan}: kept as it is in Channex, because a channel is mapped to it.": "{plan}: έμεινε ως έχει στο Channex, επειδή ένα κανάλι είναι αντιστοιχισμένο σε αυτό.",
+ "In Channex · occupancies out of date": "Στο Channex · οι πληρότητες δεν είναι ενημερωμένες"
 }

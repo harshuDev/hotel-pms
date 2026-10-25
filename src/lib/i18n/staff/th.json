@@ -3437,5 +3437,7 @@
  },
  "{n} days before arrival": {
   "other": "{n} วันก่อนเข้าพัก"
- }
+ },
+ "{plan}: kept as it is in Channex, because a channel is mapped to it.": "{plan}: คงไว้ตามเดิมใน Channex เนื่องจากมีช่องทางจับคู่อยู่กับแผนนี้",
+ "In Channex · occupancies out of date": "อยู่ใน Channex · จำนวนผู้เข้าพักยังไม่อัปเดต"
 }

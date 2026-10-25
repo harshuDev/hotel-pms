@@ -1980,8 +1980,11 @@ export type Database = {
       }
       channex_rate_plan_map: {
         Row: {
+          channex_occupancies: number[] | null
+          channex_primary: number | null
           channex_property_id: string
           channex_rate_plan_id: string
+          channex_sell_mode: string | null
           created_at: string
           property_id: string
           rate_plan_id: string
@@ -1990,8 +1993,11 @@ export type Database = {
           withdrawn_at: string | null
         }
         Insert: {
+          channex_occupancies?: number[] | null
+          channex_primary?: number | null
           channex_property_id: string
           channex_rate_plan_id: string
+          channex_sell_mode?: string | null
           created_at?: string
           property_id: string
           rate_plan_id: string
@@ -2000,8 +2006,11 @@ export type Database = {
           withdrawn_at?: string | null
         }
         Update: {
+          channex_occupancies?: number[] | null
+          channex_primary?: number | null
           channex_property_id?: string
           channex_rate_plan_id?: string
+          channex_sell_mode?: string | null
           created_at?: string
           property_id?: string
           rate_plan_id?: string
@@ -6374,6 +6383,20 @@ export type Database = {
         Args: { p_customer: Json; p_property: string }
         Returns: string
       }
+      channex_desired_options: {
+        Args: {
+          p_property: string
+          p_rate_plan_id: string
+          p_room_type_id: string
+        }
+        Returns: {
+          hi: number
+          lo: number
+          occs: number[]
+          options: Json
+          primary_occ: number
+        }[]
+      }
       channex_error_text: {
         Args: { p_body: Json; p_status: number }
         Returns: string
@@ -6385,7 +6408,37 @@ export type Database = {
           revisions: Json
         }[]
       }
+      channex_fetch_feed_account: {
+        Args: { p_via_property: string }
+        Returns: {
+          error: string
+          revisions: Json
+        }[]
+      }
       channex_full_sync_all: { Args: never; Returns: number }
+      channex_http: {
+        Args: {
+          p_body?: Json
+          p_environment: string
+          p_method: string
+          p_path: string
+          p_secret_id: string
+        }
+        Returns: {
+          body: Json
+          status: number
+        }[]
+      }
+      channex_occupancy_prices: {
+        Args: { p_days: number; p_from: string; p_property: string }
+        Returns: {
+          adults: number
+          rate_cents: number
+          rate_plan_id: string
+          room_type_id: string
+          stay_date: string
+        }[]
+      }
       channex_ota_channel: {
         Args: { p_ota_name: string; p_property: string }
         Returns: string
@@ -6400,6 +6453,27 @@ export type Database = {
           rate_plan_name: string
           room_type_id: string
           room_type_name: string
+        }[]
+      }
+      channex_plan_is_current: {
+        Args: {
+          p_hi: number
+          p_lo: number
+          p_occs: number[]
+          p_primary: number
+          p_sell_mode: string
+          p_want_primary: number
+        }
+        Returns: boolean
+      }
+      channex_plan_occupancy: {
+        Args: { p_property: string }
+        Returns: {
+          hi: number
+          lo: number
+          primary_occ: number
+          rate_plan_id: string
+          room_type_id: string
         }[]
       }
       channex_pull_bookings: {
@@ -6458,6 +6532,18 @@ export type Database = {
           rate_currency: string
           rate_plan_id: string
           rate_plan_name: string
+          room_type_id: string
+        }[]
+      }
+      channex_room_plan_occupancies: {
+        Args: never
+        Returns: {
+          adults: number
+          in_channex: boolean
+          is_current: boolean
+          is_primary: boolean
+          rate_cents: number
+          rate_plan_id: string
           room_type_id: string
         }[]
       }

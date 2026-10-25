@@ -201,11 +201,15 @@ export function ChannexPanel({
         setOutcome({ ok: false, text: result.error });
         return;
       }
-      const { sent, plans, removed, closed, failed, pushError } = result.data;
+      const { sent, plans, removed, closed, kept, failed, pushError } = result.data;
       const lines = failed.map((f) => `${f.label}: ${f.detail}`);
       // Channex will not remove a plan an OTA is mapped to; it is closed instead.
       for (const label of closed) {
         lines.push(tr("{plan}: closed in Channex, because a channel is mapped to it.", { plan: label }));
+      }
+      // Channex cannot change a plan's occupancies; a mapped plan is not rebuilt (0151).
+      for (const label of kept) {
+        lines.push(tr("{plan}: kept as it is in Channex, because a channel is mapped to it.", { plan: label }));
       }
       if (pushError) lines.push(pushError);
       setOutcome({
@@ -482,13 +486,30 @@ export function ChannexPanel({
                                   {plan.name}
                                 </label>
                               </div>
+                              {plan.occupancies.length > 1 && (
+                                <div className="tnum mt-0.5 flex flex-wrap gap-x-3 gap-y-0.5 pl-11 text-[11.5px]">
+                                  {plan.occupancies.map((o) => (
+                                    <span
+                                      key={o.adults}
+                                      title={tr.plural(o.adults, "{n} adult", "{n} adults")}
+                                      className={o.isPrimary ? "font-semibold text-ink" : "text-ink-faint"}
+                                    >
+                                      {o.adults} · {o.rateCents === null ? "—" : formatMoney(o.rateCents, plan.rateCurrency)}
+                                    </span>
+                                  ))}
+                                </div>
+                              )}
                             </td>
                             <td />
                             <td className="tnum px-3 py-1.5 text-right text-ink-muted">
                               {plan.rateCents === null ? "—" : formatMoney(plan.rateCents, plan.rateCurrency)}
                             </td>
                             <td className="px-3 py-1.5">
-                              {plan.state === "open" ? (
+                              {plan.state === "open" && !plan.current ? (
+                                <span className="text-warn-deep" title={plan.channexId ?? undefined}>
+                                  {tr("In Channex · occupancies out of date")}
+                                </span>
+                              ) : plan.state === "open" ? (
                                 <span className="text-emerald-700" title={plan.channexId ?? undefined}>
                                   {tr("In Channex")}
                                 </span>

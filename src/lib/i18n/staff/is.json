@@ -3492,5 +3492,7 @@
  "{n} days before arrival": {
   "one": "{n} degi fyrir komu",
   "other": "{n} dögum fyrir komu"
- }
+ },
+ "{plan}: kept as it is in Channex, because a channel is mapped to it.": "{plan}: látið óbreytt í Channex, því rás er tengd við hana.",
+ "In Channex · occupancies out of date": "Í Channex · nýting ekki uppfærð"
 }

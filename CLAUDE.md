@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0150` (0138 as 0138a-f, 0142 as 0142a-b, 0149 as 0149a-b, 0145 as
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0151` (0138 as 0138a-f, 0142 as 0142a-b, 0149 as 0149a-b, 0151 as 0151a-b, 0145 as
 `0143_channex_send_rooms` + 0145b) are
 applied to the hosted database.
 
@@ -2837,19 +2837,64 @@ client: "Need to add Booking Channel in the Dashboard".
         occupancy -- sending again is how a room count change reaches
         Channex); a Channex rate plan per active plan priced on it from the
         business date -- a Channex rate plan belongs to ONE room type -- in
-        the PLAN'S OWN CURRENCY (0138), per room, manual, its one option at
-        the room type's MAXIMUM occupancy (Channex: "a per_room rate plan
-        takes one option for the maximum occupancy"); then their rates and
-        availability are pushed at once. Room types not ticked are not
+        the PLAN'S OWN CURRENCY (0138), manual, PER PERSON with an option per
+        number of adults (0151, below); then their rates and availability
+        are pushed at once. Room types not ticked are not
         touched. Links are kept in `channex_room_type_map` /
         `channex_rate_plan_map`. `channex_setup()` now sends every room type
         through it and nothing calls it.
+    - **A CHANNEX PLAN HAS A PRICE FOR EVERY NUMBER OF GUESTS (0151).** The
+      client, mapping Tierra Buena: "it's for four people, but it's taking
+      the price for one ... Booking we send one, the default price. But
+      Expedia has to send the price for one, two, three, four ... the default
+      is 6, but it's sending the price for 12." Every plan had been per_room
+      with ONE option at the room type's maximum, and was sent the BASE
+      occupancy's price under it.
+      - **A plan is `per_person`, one option per adults from 1 to the room
+        type's maximum** (narrowed by the plan's Min/Max Adults), and the
+        PRIMARY is the plan's default occupancy (0136, else the base) -- what
+        Booking.com reads; Expedia maps each occupancy.
+      - **Each option's price is what this PMS charges that party**:
+        `channex_occupancy_prices()` is `rate_plan_night_rate(..., adults, 0)`
+        without the currency conversion, done set-wise for a hotel (per call
+        it was 2.6 s a hotel; the minute push cannot afford that). Checked
+        equal to it on every hotel, pair and occupancy. **Change one, change
+        both.** A removed occupancy row (0124) pays the standard price, so on
+        Tierra Buena's Four Bedroom House 1-5 adults go at the 12-adult price
+        -- Min Adults on the plan is how a hotel stops selling them.
+      - **CHANNEX FIXES A PLAN'S OPTIONS WHEN IT IS MADE** (tried on staging):
+        "sell_mode can't be changed", "primary occupancy can't be changed",
+        and an update adding or removing an option answers 200 and changes
+        nothing. So Send REBUILDS a plan whose options differ -- every
+        per_room plan made before 0151 -- by deleting it and creating it
+        again under the same title, and ONLY when no channel is mapped to it:
+        Channex's channel list is read first, and Channex refuses to delete a
+        mapped plan anyway. **A mapped plan is never touched**: Send reports
+        it as kept, the card marks it "occupancies out of date", and the push
+        sends what its options say -- a per_room plan the price for its one
+        option's occupancy. Remapping it in Channex (to a plan Send makes) is
+        the hotel's call. **Platinum Hotel's 24 plans are mapped to
+        Booking.com, Expedia and Google**, so they stay per_room.
+      - `channex_rate_plan_map` records what Channex holds
+        (`channex_sell_mode`, `channex_occupancies`, `channex_primary`); null
+        is a pre-0151 plan, per_room at the maximum. The push reads it.
+      - The card shows each plan's price for every occupancy, the default in
+        bold, and the Rate column is the default occupancy's price
+        (`channex_room_plan_occupancies()`).
+      - Tested live on the STAGING hotel (Channex staging, no channels):
+        BAR-B&B on both room types rebuilt as per_person 1-2, primary 2,
+        both options priced.
     - **Push** (`channex_push_ari()`): availability per room type (rooms left
       to sell, the calendar's figure, never below zero) and, per linked plan,
-      the night's rate as a decimal string (whole units for XOF/XAF) with
-      min stay arrival/through (1 when unset), max stay (0 when unset), CTA,
-      CTD and stop sell. **A night with no rate, or a rate of 0 (Channex
-      refuses one), goes as stop sell**; so does a retired plan.
+      `rates: [{occupancy, rate}]` (a per_room plan: `rate`) as decimal
+      strings (whole units for XOF/XAF) with min stay arrival/through (1 when
+      unset), max stay (0 when unset), CTA, CTD and stop sell. **A night with
+      no price for the primary occupancy, or a price of 0 (Channex refuses
+      one), goes as stop sell**; so does a retired plan.
+      - **The prices are GROUPED by night, never joined to the 500 nights**:
+        joined, the planner chose a nested loop inside plpgsql (100 million
+        comparisons, 16 s for Platinum). The minute push is about 1.5 s for
+        every hotel together.
       - **500 nights, AS CHANNEX'S CERTIFICATION ASKS (0145)**, from the later
         of the business date and the hotel's own today (Channex refuses a
         past date; the business date lags until the audit).
@@ -2917,10 +2962,8 @@ client: "Need to add Booking Channel in the Dashboard".
         to PCI-certified partners on its secure endpoint), services and
         extras (in the payload, not posted), the OTA commission (in the
         payload; the channel report still uses the channel's commission).
-    - **Not built yet**: per-occupancy prices (only the primary occupancy's
-      rate goes). **Nothing has been sent to Channex yet**: no key is saved on
-      any hotel. The request shapes follow Channex's API and are first
-      proven when the key is entered.
+    - **Not built yet**: children (Channex room types are sent with no
+      children, so no `children_fee`).
   - **CONNECTIVITY -> SALES CHANNELS (0099) IS `channels`, the booking
     sources** -- it replaced the Booking Sources screen, not a second list
     beside it (`sales-channels-panel.tsx`). The reference's Active | All |

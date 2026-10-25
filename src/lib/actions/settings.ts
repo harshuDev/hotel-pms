@@ -2450,12 +2450,14 @@ export async function sendChannexRoomTypes(
     plans: number;
     removed: number;
     closed: string[];
+    kept: string[];
     failed: { label: string; detail: string }[];
     pushError: string | null;
   }>
 > {
   const supabase = await createClient();
   // Ticked plans go to Channex (0148); on a ticked room type, unticked ones come off it (0149).
+  // A plan whose occupancies are out of date is rebuilt, or kept when a channel is mapped to it (0151).
   const { data, error } = await supabase.rpc("channex_send_selection", {
     p_room_type_ids: roomTypeIds,
     p_rate_plans: ratePlans.map((p) => ({ room_type_id: p.roomTypeId, rate_plan_id: p.ratePlanId })),
@@ -2471,6 +2473,7 @@ export async function sendChannexRoomTypes(
       plans: rows.filter((r) => r.step === "rate_plan" && r.succeeded).length,
       removed: rows.filter((r) => r.step === "remove" && r.detail === "removed").length,
       closed: rows.filter((r) => r.step === "remove" && r.detail === "closed").map((r) => r.label ?? ""),
+      kept: rows.filter((r) => r.step === "kept").map((r) => r.label ?? ""),
       failed: await Promise.all(
         rows
           .filter((r) => r.step !== "push" && !r.succeeded)

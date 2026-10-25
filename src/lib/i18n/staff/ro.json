@@ -3547,5 +3547,7 @@
   "one": "{n} zi înainte de sosire",
   "few": "{n} zile înainte de sosire",
   "other": "{n} de zile înainte de sosire"
- }
+ },
+ "{plan}: kept as it is in Channex, because a channel is mapped to it.": "{plan}: lăsat neschimbat în Channex, pentru că un canal este mapat pe el.",
+ "In Channex · occupancies out of date": "În Channex · ocupări neactualizate"
 }

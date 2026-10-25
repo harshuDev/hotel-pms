@@ -3402,25 +3402,52 @@ export type ChannexRoom = {
 export type ChannexRoomPlan = {
   ratePlanId: string;
   name: string;
-  /** Tonight's price in the plan's own currency; null when tonight has none. */
+  /** Tonight's price for the plan's default occupancy, in the plan's own currency; null when tonight has none. */
   rateCents: number | null;
   rateCurrency: string;
   channexId: string | null;
   /** Open in Channex, closed there (unticked, but an OTA is mapped to it), or not there. */
   state: "open" | "closed" | null;
+  /** Tonight's price for each number of adults the plan sells (0151); the primary is the default occupancy. */
+  occupancies: ChannexOccupancy[];
+  /** Channex holds the occupancies Send would give it; false for a plan still to be rebuilt, or kept because a channel is mapped to it. */
+  current: boolean;
+};
+
+export type ChannexOccupancy = {
+  adults: number;
+  rateCents: number | null;
+  isPrimary: boolean;
+  inChannex: boolean;
 };
 
 export async function getChannexRooms(): Promise<ChannexRoom[]> {
   const supabase = await createClient();
-  const [{ data, error }, plansRead] = await Promise.all([
+  const [{ data, error }, plansRead, occupancyRead] = await Promise.all([
     supabase.rpc("channex_room_list"),
     supabase.rpc("channex_room_plans"),
+    supabase.rpc("channex_room_plan_occupancies"),
   ]);
   if (error) throw new Error(`Failed to load the Channex room types: ${error.message}`);
   if (plansRead.error) throw new Error(`Failed to load the Channex rate plans: ${plansRead.error.message}`);
+  if (occupancyRead.error) throw new Error(`Failed to load the Channex occupancies: ${occupancyRead.error.message}`);
+  const occupancies = new Map<string, { list: ChannexOccupancy[]; current: boolean }>();
+  for (const row of occupancyRead.data ?? []) {
+    const key = `${row.room_type_id}:${row.rate_plan_id}`;
+    const entry = occupancies.get(key) ?? { list: [], current: true };
+    entry.list.push({
+      adults: row.adults,
+      rateCents: row.rate_cents === null ? null : Number(row.rate_cents),
+      isPrimary: row.is_primary,
+      inChannex: row.in_channex,
+    });
+    entry.current = entry.current && row.is_current;
+    occupancies.set(key, entry);
+  }
   const plansByType = new Map<string, ChannexRoomPlan[]>();
   for (const row of plansRead.data ?? []) {
     const list = plansByType.get(row.room_type_id) ?? [];
+    const occ = occupancies.get(`${row.room_type_id}:${row.rate_plan_id}`);
     list.push({
       ratePlanId: row.rate_plan_id,
       name: row.rate_plan_name,
@@ -3428,6 +3455,8 @@ export async function getChannexRooms(): Promise<ChannexRoom[]> {
       rateCurrency: row.rate_currency,
       channexId: row.channex_rate_plan_id,
       state: row.channex_state === "open" || row.channex_state === "closed" ? row.channex_state : null,
+      occupancies: occ?.list ?? [],
+      current: occ?.current ?? true,
     });
     plansByType.set(row.room_type_id, list);
   }
