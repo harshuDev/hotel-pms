@@ -141,6 +141,48 @@ export async function applyInventory(
   return { ok: true, data: { nightsWritten: Number(data ?? 0) } };
 }
 
+/**
+ * One restriction on several rate plans at once -- Stop Sell, CTA, CTD, Min and
+ * Max Stay -- for the ticked room types. The client: picking one plan,
+ * applying, then the next "is time taking". One `applyInventory()` per plan,
+ * each its own transaction, as `applyRates()` does across plans; it stops at
+ * the first refusal and says which plan that was and how many went before it.
+ * Rates are not taken here: a typed amount is in one plan's currency.
+ */
+export async function applyInventoryToPlans(
+  edit: Omit<InventoryEdit, "ratePlanId"> & { ratePlanIds: string[] },
+): Promise<
+  ActionResult<{
+    nightsWritten: number;
+    done: number;
+    failed: { ratePlanId: string; error: string } | null;
+  }>
+> {
+  const spec = FIELDS[edit.field];
+  if (!spec || !spec.needsPlan || edit.field === "rate") {
+    return { ok: false, error: await localised("That is not something Inventory can set.") };
+  }
+  const ratePlanIds = [...new Set(edit.ratePlanIds)];
+  if (ratePlanIds.length === 0) {
+    return { ok: false, error: await localised("Tick the rate plans to apply this to.") };
+  }
+
+  let nightsWritten = 0;
+  let done = 0;
+  for (const ratePlanId of ratePlanIds) {
+    const result = await applyInventory({ ...edit, ratePlanId });
+    if (!result.ok) {
+      // Nothing written yet: the refusal is the whole answer.
+      if (done === 0) return result;
+      return { ok: true, data: { nightsWritten, done, failed: { ratePlanId, error: result.error } } };
+    }
+    nightsWritten += result.data.nightsWritten;
+    done += 1;
+  }
+
+  return { ok: true, data: { nightsWritten, done, failed: null } };
+}
+
 export async function createRatePlan(input: {
   code: string;
   name: string;

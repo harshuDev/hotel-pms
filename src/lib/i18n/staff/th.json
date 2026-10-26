@@ -3439,5 +3439,13 @@
   "other": "{n} วันก่อนเข้าพัก"
  },
  "{plan}: kept as it is in Channex, because a channel is mapped to it.": "{plan}: คงไว้ตามเดิมใน Channex เนื่องจากมีช่องทางจับคู่อยู่กับแผนนี้",
- "In Channex · occupancies out of date": "อยู่ใน Channex · จำนวนผู้เข้าพักยังไม่อัปเดต"
+ "In Channex · occupancies out of date": "อยู่ใน Channex · จำนวนผู้เข้าพักยังไม่อัปเดต",
+ "Tick the rate plans to apply this to.": "ติ๊กแผนราคาที่จะใช้สิ่งนี้",
+ "{n} rate plans selected.": {
+  "other": "เลือกแผนราคาแล้ว {n} แผน"
+ },
+ "{plan} was not changed: {error}": "{plan} ไม่ได้ถูกเปลี่ยน: {error}",
+ "{n} rate plans before it were changed.": {
+  "other": "แผนราคา {n} แผนก่อนหน้านั้นถูกเปลี่ยนแล้ว"
+ }
 }

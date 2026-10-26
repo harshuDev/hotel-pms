@@ -2,7 +2,7 @@
 
 import { useT } from "@/components/i18n";
 import { msg } from "@/lib/i18n/translate";
-import { useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { addDays, format, parseISO } from "date-fns";
@@ -10,6 +10,7 @@ import { cn } from "@/components/ui";
 import { formatMoney, formatMoneyInput, parseMoney } from "@/lib/money";
 import {
   applyInventory,
+  applyInventoryToPlans,
   createRatePlan,
   setRatePlanMeals,
   setRatePlanMealValue,
@@ -85,6 +86,14 @@ export function InventoryScreen({
   );
 
   const [selected, setSelected] = useState<string[]>([]);
+  // A restriction is set on every ticked plan at once; the plan on screen is
+  // ticked to start with, and again whenever the screen moves to another.
+  // Rates stay one plan at a time: a typed amount is in one plan's currency.
+  const multiPlan = spec.needsPlan && spec.kind !== "money";
+  const [planIds, setPlanIds] = useState<string[]>(planId ? [planId] : []);
+  useEffect(() => {
+    setPlanIds(planId ? [planId] : []);
+  }, [planId]);
   const [editFrom, setEditFrom] = useState(from);
   const [editTo, setEditTo] = useState(
     dates.length > 0 ? dates[dates.length - 1] : from,
@@ -166,6 +175,44 @@ export function InventoryScreen({
         return;
       }
       parsed = n;
+    }
+
+    if (multiPlan) {
+      startTransition(async () => {
+        const result = await applyInventoryToPlans({
+          field: fieldName,
+          ratePlanIds: planIds,
+          roomTypeIds: selected,
+          from: editFrom,
+          to: editTo,
+          daysOfWeek: dow,
+          value: parsed,
+        });
+        if (!result.ok) {
+          setMessage({ ok: false, text: result.error });
+          return;
+        }
+        const { nightsWritten, done, failed } = result.data;
+        if (failed) {
+          const name = plans.find((p) => p.id === failed.ratePlanId)?.name ?? "";
+          setMessage({
+            ok: false,
+            text: [
+              tr("{plan} was not changed: {error}", { plan: name, error: failed.error }),
+              tr.plural(done, "{n} rate plan before it was changed.", "{n} rate plans before it were changed."),
+            ].join(" "),
+          });
+        } else {
+          setMessage({
+            ok: true,
+            text: tr.plural(nightsWritten, "{field} set on {n} room-night.", "{field} set on {n} room-nights.", {
+              field: tr(spec.title),
+            }),
+          });
+        }
+        router.refresh();
+      });
+      return;
     }
 
     startTransition(async () => {
@@ -522,7 +569,21 @@ export function InventoryScreen({
                 <thead>
                   <tr>
                     <th className="sticky left-0 z-10 bg-white px-3 pb-2.5 text-left text-xxs font-semibold uppercase tracking-[0.1em] text-ink-faint">
-                      {tr("Room type")}
+                      <label className="flex items-center gap-2">
+                        {canEdit && (
+                          <input
+                            type="checkbox"
+                            aria-label={tr("Tick all")}
+                            checked={selected.length === types.length}
+                            onChange={() =>
+                              setSelected(
+                                selected.length === types.length ? [] : types.map((t) => t.roomTypeId),
+                              )
+                            }
+                          />
+                        )}
+                        {tr("Room type")}
+                      </label>
                     </th>
                     {dates.map((d) => {
                       const day = parseISO(d);
@@ -655,6 +716,41 @@ export function InventoryScreen({
                 )}
               </div>
             </div>
+            {multiPlan && (
+              <div className="sm:col-span-4">
+                <span className={label}>{tr("Rate plans")}</span>
+                <div className="flex flex-wrap gap-1.5">
+                  <label className="flex cursor-pointer items-center gap-1.5 rounded-md border border-line px-3 py-1.5 text-[13px] text-ink-muted hover:bg-shell">
+                    <input
+                      type="checkbox"
+                      checked={plans.length > 0 && planIds.length === plans.length}
+                      onChange={() =>
+                        setPlanIds(planIds.length === plans.length ? [] : plans.map((p) => p.id))
+                      }
+                    />
+                    {tr("All")}
+                  </label>
+                  {plans.map((p) => (
+                    <label
+                      key={p.id}
+                      className={cn(
+                        "flex cursor-pointer items-center gap-1.5 rounded-md border px-3 py-1.5 text-[13px]",
+                        planIds.includes(p.id)
+                          ? "border-chrome-800 bg-shell text-ink"
+                          : "border-line text-ink-muted hover:bg-shell",
+                      )}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={planIds.includes(p.id)}
+                        onChange={() => toggle(planIds, p.id, setPlanIds)}
+                      />
+                      {p.name}
+                    </label>
+                  ))}
+                </div>
+              </div>
+            )}
             <div>
               <label htmlFor="edit-value" className={label}>
                 {tr(spec.valueLabel)}
@@ -686,6 +782,14 @@ export function InventoryScreen({
                 {selected.length === 0
                   ? tr("Tick the room types on the left to apply this to.")
                   : tr.plural(selected.length, "{n} room type selected.", "{n} room types selected.")}
+                {multiPlan && (
+                  <>
+                    {" "}
+                    {planIds.length === 0
+                      ? tr("Tick the rate plans to apply this to.")
+                      : tr.plural(planIds.length, "{n} rate plan selected.", "{n} rate plans selected.")}
+                  </>
+                )}
               </p>
             </div>
           </div>
@@ -707,7 +811,7 @@ export function InventoryScreen({
             <button
               type="button"
               onClick={submit}
-              disabled={pending || selected.length === 0}
+              disabled={pending || selected.length === 0 || (multiPlan && planIds.length === 0)}
               className="rounded-md bg-chrome-800 px-6 py-2.5 text-[13px] font-medium text-white hover:bg-chrome-900 disabled:opacity-50"
             >
               {pending ? tr("Applying…") : tr("Apply")}

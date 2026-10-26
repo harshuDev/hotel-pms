@@ -3494,5 +3494,15 @@
   "other": "{n} ημέρες πριν από την άφιξη"
  },
  "{plan}: kept as it is in Channex, because a channel is mapped to it.": "{plan}: έμεινε ως έχει στο Channex, επειδή ένα κανάλι είναι αντιστοιχισμένο σε αυτό.",
- "In Channex · occupancies out of date": "Στο Channex · οι πληρότητες δεν είναι ενημερωμένες"
+ "In Channex · occupancies out of date": "Στο Channex · οι πληρότητες δεν είναι ενημερωμένες",
+ "Tick the rate plans to apply this to.": "Επιλέξτε τα πλάνα τιμών για να εφαρμοστεί.",
+ "{n} rate plans selected.": {
+  "one": "Επιλέχθηκε {n} πλάνο τιμών.",
+  "other": "Επιλέχθηκαν {n} πλάνα τιμών."
+ },
+ "{plan} was not changed: {error}": "Το {plan} δεν άλλαξε: {error}",
+ "{n} rate plans before it were changed.": {
+  "one": "{n} πλάνο τιμών πριν από αυτό άλλαξε.",
+  "other": "{n} πλάνα τιμών πριν από αυτό άλλαξαν."
+ }
 }

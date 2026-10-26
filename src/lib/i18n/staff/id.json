@@ -3439,5 +3439,13 @@
   "other": "{n} hari sebelum kedatangan"
  },
  "{plan}: kept as it is in Channex, because a channel is mapped to it.": "{plan}: dibiarkan apa adanya di Channex, karena ada kanal yang dipetakan ke paket ini.",
- "In Channex · occupancies out of date": "Ada di Channex · okupansi belum diperbarui"
+ "In Channex · occupancies out of date": "Ada di Channex · okupansi belum diperbarui",
+ "Tick the rate plans to apply this to.": "Centang paket tarif untuk menerapkan ini.",
+ "{n} rate plans selected.": {
+  "other": "{n} paket tarif dipilih."
+ },
+ "{plan} was not changed: {error}": "{plan} tidak diubah: {error}",
+ "{n} rate plans before it were changed.": {
+  "other": "{n} paket tarif sebelumnya sudah diubah."
+ }
 }

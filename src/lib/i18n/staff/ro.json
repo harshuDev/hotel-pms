@@ -3549,5 +3549,17 @@
   "other": "{n} de zile înainte de sosire"
  },
  "{plan}: kept as it is in Channex, because a channel is mapped to it.": "{plan}: lăsat neschimbat în Channex, pentru că un canal este mapat pe el.",
- "In Channex · occupancies out of date": "În Channex · ocupări neactualizate"
+ "In Channex · occupancies out of date": "În Channex · ocupări neactualizate",
+ "Tick the rate plans to apply this to.": "Bifați planurile tarifare cărora să li se aplice.",
+ "{n} rate plans selected.": {
+  "one": "{n} plan tarifar selectat.",
+  "few": "{n} planuri tarifare selectate.",
+  "other": "{n} de planuri tarifare selectate."
+ },
+ "{plan} was not changed: {error}": "{plan} nu a fost modificat: {error}",
+ "{n} rate plans before it were changed.": {
+  "one": "{n} plan tarifar dinainte a fost modificat.",
+  "few": "{n} planuri tarifare dinainte au fost modificate.",
+  "other": "{n} de planuri tarifare dinainte au fost modificate."
+ }
 }
