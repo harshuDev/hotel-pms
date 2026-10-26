@@ -9106,12 +9106,6 @@
  "That would remove your own access. Have another administrator do it.": {
   "kind": "db"
  },
- "The {n} adults price on {name} is back.": {
-  "kind": "text"
- },
- "The {n} adults price on {name} is removed. That party pays the standard price.": {
-  "kind": "text"
- },
  "The active date range ends before it starts": {
   "kind": "db"
  },

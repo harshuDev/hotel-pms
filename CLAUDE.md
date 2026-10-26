@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0152` (0138 as 0138a-f, 0142 as 0142a-b, 0149 as 0149a-b, 0151 as 0151a-b, 0145 as
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0153` (0138 as 0138a-f, 0142 as 0142a-b, 0149 as 0149a-b, 0151 as 0151a-b, 0145 as
 `0143_channex_send_rooms` + 0145b) are
 applied to the hosted database.
 
@@ -1518,12 +1518,32 @@ client: "Need to add Booking Channel in the Dashboard".
           a remove option for Guest basis". Its rows are worked out, not
           typed, so there is nothing to clear: × stores the party in
           `rate_plans.standard_occupancies` (room type id -> adults) through
-          `set_rate_plan_standard_occupancy()`, at once rather than on Save,
-          and "+ Occupancy" brings it back. `rate_plan_night_rate()` and
-          `rate_plan_occupancy_rate()` then price that party at the standard
-          price, ignoring any stored per-night occupancy price, so every
-          booking path follows. The plan form and the Inventory Rates grid
-          leave a removed row out. Removing the combination clears the list.
+          `set_rate_plan_standard_occupancy()`, and "+ Occupancy" brings it
+          back. `rate_plan_night_rate()` and `rate_plan_occupancy_rate()`
+          then price that party at the standard price, ignoring any stored
+          per-night occupancy price of its own, so every booking path
+          follows. The plan form leaves a removed row out; the Inventory
+          Rates grid shows it read-only at the price it pays. Removing the
+          combination clears the list.
+          - **× AND "+ OCCUPANCY" WAIT FOR SAVE CHANGES (0153).** They used
+            to store at once, with a banner saying so at the top, and Save
+            Changes then said "Nothing has changed." at the foot -- the
+            client read the two as contradicting each other. Now they are
+            pending like any other edit (`stdChanges`), Save Changes stores
+            them first and counts them, and Reset Changes drops them.
+          - **THE STANDARD PRICE IS THE DEFAULT OCCUPANCY'S (0153)**, not
+            Sleeps': `rate_plan_standard_adults()` is the plan's default
+            occupancy (0136, else its parent's) unless that party is itself
+            removed, else Sleeps, and a removed party is priced exactly as
+            that party -- its stored night price, else worked out. Before,
+            a removed party paid the Sleeps price even when the default was
+            below it: Shitaye's Four Bedroom Apartment charged 1-3 adults
+            640.00 and 4 adults 520.00. 3,064 of 48,046 prices over the next
+            month changed, every one a removed party and every one down; no
+            other price moved (tested rolled back). Where the default is
+            Sleeps nothing changed. The default party can no longer be
+            removed, and a party made the default comes off the removed
+            list.
         - **"Show derived and calculated rates" is per room type** and shows
           that type's derived plans AND its occupancy rows. It used to show
           derived plans only, so on a type with none it did nothing.
@@ -2859,9 +2879,10 @@ client: "Need to add Booking Channel in the Dashboard".
         without the currency conversion, done set-wise for a hotel (per call
         it was 2.6 s a hotel; the minute push cannot afford that). Checked
         equal to it on every hotel, pair and occupancy. **Change one, change
-        both.** A removed occupancy row (0124) pays the standard price, so on
-        Tierra Buena's Four Bedroom House 1-5 adults go at the 12-adult price
-        -- Min Adults on the plan is how a hotel stops selling them.
+        both.** A removed occupancy row (0124) pays the default occupancy's
+        price (0153), so on Tierra Buena's Four Bedroom House 1-5 adults go
+        at the 6-adult price -- Min Adults on the plan is how a hotel stops
+        selling them. Re-checked equal after 0153: 93,054 rows, none apart.
       - **CHANNEX FIXES A PLAN'S OPTIONS WHEN IT IS MADE** (tried on staging):
         "sell_mode can't be changed", "primary occupancy can't be changed",
         and an update adding or removing an option answers 200 and changes
