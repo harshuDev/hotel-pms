@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0151` (0138 as 0138a-f, 0142 as 0142a-b, 0149 as 0149a-b, 0151 as 0151a-b, 0145 as
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0152` (0138 as 0138a-f, 0142 as 0142a-b, 0149 as 0149a-b, 0151 as 0151a-b, 0145 as
 `0143_channex_send_rooms` + 0145b) are
 applied to the hosted database.
 
@@ -2880,7 +2880,22 @@ client: "Need to add Booking Channel in the Dashboard".
         is a pre-0151 plan, per_room at the maximum. The push reads it.
       - The card shows each plan's price for every occupancy, the default in
         bold, and the Rate column is the default occupancy's price
-        (`channex_room_plan_occupancies()`).
+        (`channex_plan_occupancy_choices()`, 0152; 0151's
+        `channex_room_plan_occupancies()` is read by nothing).
+      - **WHICH OCCUPANCIES GO IS TICKED PER PLAN (0152)**, the client's "a
+        check box in front of all the occupancy": once a room type is ticked
+        on the card, every number of guests under its plans takes a tick.
+        The pick is `channex_rate_plan_map.chosen_occupancies` (null = all),
+        sent in `p_rate_plans` as `occupancies` and kept for the next Send;
+        a plan sent with none ticked is refused before anything reaches
+        Channex. The PRIMARY is the default occupancy while it is ticked,
+        else the ticked one nearest to it, the higher on a tie --
+        `channex_pick_occupancies()`, mirrored by `primaryOf()` on the card.
+        A different pick on a plan in Channex is a rebuild, under the same
+        rule as above (never a mapped plan). Tested live on the STAGING
+        hotel: BAR-B&B on Superior Double sent with 2 only, sent again with
+        no pick (kept), then 1 and 2 -- each rebuild left one plan in
+        Channex.
       - Tested live on the STAGING hotel (Channex staging, no channels):
         BAR-B&B on both room types rebuilt as per_person 1-2, primary 2,
         both options priced.

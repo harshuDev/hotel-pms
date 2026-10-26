@@ -2443,7 +2443,7 @@ export async function testChannexConnection(): Promise<
  */
 export async function sendChannexRoomTypes(
   roomTypeIds: string[],
-  ratePlans: { roomTypeId: string; ratePlanId: string }[],
+  ratePlans: { roomTypeId: string; ratePlanId: string; occupancies: number[] }[],
 ): Promise<
   ActionResult<{
     sent: number;
@@ -2460,7 +2460,12 @@ export async function sendChannexRoomTypes(
   // A plan whose occupancies are out of date is rebuilt, or kept when a channel is mapped to it (0151).
   const { data, error } = await supabase.rpc("channex_send_selection", {
     p_room_type_ids: roomTypeIds,
-    p_rate_plans: ratePlans.map((p) => ({ room_type_id: p.roomTypeId, rate_plan_id: p.ratePlanId })),
+    // The numbers of guests ticked on each plan go too (0152).
+    p_rate_plans: ratePlans.map((p) => ({
+      room_type_id: p.roomTypeId,
+      rate_plan_id: p.ratePlanId,
+      occupancies: p.occupancies,
+    })),
   });
   if (error) return { ok: false, error: await localised(error.message) };
   const rows = data ?? [];

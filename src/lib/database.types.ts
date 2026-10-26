@@ -1985,6 +1985,7 @@ export type Database = {
           channex_property_id: string
           channex_rate_plan_id: string
           channex_sell_mode: string | null
+          chosen_occupancies: number[] | null
           created_at: string
           property_id: string
           rate_plan_id: string
@@ -1998,6 +1999,7 @@ export type Database = {
           channex_property_id: string
           channex_rate_plan_id: string
           channex_sell_mode?: string | null
+          chosen_occupancies?: number[] | null
           created_at?: string
           property_id: string
           rate_plan_id: string
@@ -2011,6 +2013,7 @@ export type Database = {
           channex_property_id?: string
           channex_rate_plan_id?: string
           channex_sell_mode?: string | null
+          chosen_occupancies?: number[] | null
           created_at?: string
           property_id?: string
           rate_plan_id?: string
@@ -6397,6 +6400,21 @@ export type Database = {
           primary_occ: number
         }[]
       }
+      channex_desired_options_for: {
+        Args: {
+          p_chosen: number[]
+          p_property: string
+          p_rate_plan_id: string
+          p_room_type_id: string
+        }
+        Returns: {
+          hi: number
+          lo: number
+          occs: number[]
+          options: Json
+          primary_occ: number
+        }[]
+      }
       channex_error_text: {
         Args: { p_body: Json; p_status: number }
         Returns: string
@@ -6455,6 +6473,26 @@ export type Database = {
           room_type_name: string
         }[]
       }
+      channex_payload_occupancies: {
+        Args: {
+          p_rate_plan_id: string
+          p_rate_plans: Json
+          p_room_type_id: string
+        }
+        Returns: number[]
+      }
+      channex_pick_occupancies: {
+        Args: {
+          p_chosen: number[]
+          p_default: number
+          p_hi: number
+          p_lo: number
+        }
+        Returns: {
+          occs: number[]
+          primary_occ: number
+        }[]
+      }
       channex_plan_is_current: {
         Args: {
           p_hi: number
@@ -6466,12 +6504,35 @@ export type Database = {
         }
         Returns: boolean
       }
+      channex_plan_matches: {
+        Args: {
+          p_occs: number[]
+          p_primary: number
+          p_sell_mode: string
+          p_want_occs: number[]
+          p_want_primary: number
+        }
+        Returns: boolean
+      }
       channex_plan_occupancy: {
         Args: { p_property: string }
         Returns: {
           hi: number
           lo: number
           primary_occ: number
+          rate_plan_id: string
+          room_type_id: string
+        }[]
+      }
+      channex_plan_occupancy_choices: {
+        Args: never
+        Returns: {
+          adults: number
+          chosen: boolean
+          in_channex: boolean
+          is_current: boolean
+          is_default: boolean
+          rate_cents: number
           rate_plan_id: string
           room_type_id: string
         }[]

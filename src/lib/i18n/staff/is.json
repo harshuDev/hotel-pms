@@ -3504,5 +3504,6 @@
  "{n} rate plans before it were changed.": {
   "one": "{n} verðáætlun á undan henni var breytt.",
   "other": "{n} verðáætlunum á undan henni var breytt."
- }
+ },
+ "Tick at least one number of guests on every rate plan you send to Channex": "Hakaðu við að minnsta kosti einn gestafjölda á hverri verðáætlun sem þú sendir til Channex"
 }

@@ -3504,5 +3504,6 @@
  "{n} rate plans before it were changed.": {
   "one": "{n} πλάνο τιμών πριν από αυτό άλλαξε.",
   "other": "{n} πλάνα τιμών πριν από αυτό άλλαξαν."
- }
+ },
+ "Tick at least one number of guests on every rate plan you send to Channex": "Επιλέξτε τουλάχιστον έναν αριθμό επισκεπτών σε κάθε πλάνο τιμών που στέλνετε στο Channex"
 }
