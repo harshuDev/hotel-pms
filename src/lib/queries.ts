@@ -3412,6 +3412,10 @@ export type ChannexRoomPlan = {
   occupancies: ChannexOccupancy[];
   /** Channex holds the occupancies Send would give it; false for a plan still to be rebuilt, or kept because a channel is mapped to it. */
   current: boolean;
+  /** As Room Rate Combinations draws a plan: the main rate's star, the guest page's eye, its cancellation policy. */
+  isDefault: boolean;
+  isPublic: boolean;
+  policyName: string | null;
 };
 
 export type ChannexOccupancy = {
@@ -3423,14 +3427,17 @@ export type ChannexOccupancy = {
 
 export async function getChannexRooms(): Promise<ChannexRoom[]> {
   const supabase = await createClient();
-  const [{ data, error }, plansRead, occupancyRead] = await Promise.all([
+  const [{ data, error }, plansRead, occupancyRead, termsRead] = await Promise.all([
     supabase.rpc("channex_room_list"),
     supabase.rpc("channex_room_plans"),
     supabase.rpc("channex_room_plan_occupancies"),
+    supabase.from("rate_plans").select("id, is_default, is_public, cancellation_policies(name)"),
   ]);
   if (error) throw new Error(`Failed to load the Channex room types: ${error.message}`);
   if (plansRead.error) throw new Error(`Failed to load the Channex rate plans: ${plansRead.error.message}`);
   if (occupancyRead.error) throw new Error(`Failed to load the Channex occupancies: ${occupancyRead.error.message}`);
+  if (termsRead.error) throw new Error(`Failed to load the rate plans: ${termsRead.error.message}`);
+  const terms = new Map((termsRead.data ?? []).map((row) => [row.id, row]));
   const occupancies = new Map<string, { list: ChannexOccupancy[]; current: boolean }>();
   for (const row of occupancyRead.data ?? []) {
     const key = `${row.room_type_id}:${row.rate_plan_id}`;
@@ -3457,6 +3464,9 @@ export async function getChannexRooms(): Promise<ChannexRoom[]> {
       state: row.channex_state === "open" || row.channex_state === "closed" ? row.channex_state : null,
       occupancies: occ?.list ?? [],
       current: occ?.current ?? true,
+      isDefault: terms.get(row.rate_plan_id)?.is_default ?? false,
+      isPublic: terms.get(row.rate_plan_id)?.is_public ?? false,
+      policyName: terms.get(row.rate_plan_id)?.cancellation_policies?.name ?? null,
     });
     plansByType.set(row.room_type_id, list);
   }

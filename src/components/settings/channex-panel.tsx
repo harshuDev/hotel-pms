@@ -14,6 +14,7 @@ import {
 } from "@/lib/actions/settings";
 import { formatMoney } from "@/lib/money";
 import type { ChannexBookingRevision, ChannexConnection, ChannexRoom, ChannexSyncEntry } from "@/lib/queries";
+import { ChildIcon, EyeIcon, PersonIcon, StarIcon } from "./plan-icons";
 
 /*
  * Settings -> Channel Manager -> Channex (0139, 0142, 0144, 0145). The platform team's
@@ -434,8 +435,9 @@ export function ChannexPanel({
                 <tbody className="divide-y divide-line">
                   {rooms.map((r) => (
                     <Fragment key={r.roomTypeId}>
-                      <tr className={cn(ticked.has(r.roomTypeId) && "bg-shell")}>
-                        <td className="px-3 py-2">
+                      {/* A room type is a band and its plans are drawn under it as Room Rate Combinations draws them. */}
+                      <tr className={cn("border-y border-line", ticked.has(r.roomTypeId) ? "bg-shell" : "bg-shell/70")}>
+                        <td className="px-3 py-3">
                           <input
                             type="checkbox"
                             className="h-4 w-4 accent-brass"
@@ -444,7 +446,7 @@ export function ChannexPanel({
                             onChange={() => toggle(r)}
                           />
                         </td>
-                        <td className="px-3 py-2 text-ink">
+                        <td className="px-3 py-3 text-[14px] text-ink">
                           {r.roomType} <span className="text-[10.5px] text-ink-faint">({r.code})</span>
                         </td>
                         <td className="px-3 py-2 font-medium text-ink">{r.roomName}</td>
@@ -470,41 +472,66 @@ export function ChannexPanel({
                         const on = planTicked(r, plan);
                         // Shaded while the tick says something Channex does not hold yet.
                         const changed = on !== (plan.state === "open");
+                        const adults = plan.occupancies.find((o) => o.isPrimary)?.adults;
                         return (
-                          <tr key={key} className={cn("text-[12.5px]", changed && "bg-shell")}>
+                          <tr key={key} className={cn("align-top", changed && "bg-shell")}>
                             <td />
-                            <td colSpan={2} className="px-3 py-1.5">
-                              <div className="flex items-center gap-2 pl-5">
+                            <td colSpan={2} className="px-3 py-3">
+                              <div className="flex items-start gap-3">
                                 <input
                                   id={id}
                                   type="checkbox"
-                                  className="h-4 w-4 accent-brass"
+                                  className="mt-1 h-4 w-4 accent-brass"
                                   checked={on}
                                   onChange={() => togglePlan(r, plan)}
                                 />
-                                <label htmlFor={id} className="text-ink-muted">
-                                  {plan.name}
-                                </label>
-                              </div>
-                              {plan.occupancies.length > 0 && (
-                                <div className="tnum mt-0.5 flex flex-wrap gap-x-3 gap-y-0.5 pl-11 text-[11.5px]">
-                                  {plan.occupancies.map((o) => (
-                                    <span
-                                      key={o.adults}
-                                      title={tr.plural(o.adults, "{n} adult", "{n} adults")}
-                                      className={o.isPrimary ? "font-semibold text-ink" : "text-ink-faint"}
-                                    >
-                                      {o.adults} · {o.rateCents === null ? "—" : formatMoney(o.rateCents, plan.rateCurrency)}
+                                <div>
+                                  <label htmlFor={id} className="text-[15px] font-semibold text-ink">
+                                    {plan.name}
+                                  </label>
+                                  <p className="mt-0.5 flex items-center gap-1.5 text-[12.5px] text-ink">
+                                    {adults !== undefined && (
+                                      <span className="flex items-center gap-0.5" title={tr.plural(adults, "{n} adult", "{n} adults")}>
+                                        <PersonIcon />
+                                        {adults}
+                                      </span>
+                                    )}
+                                    <span className="flex items-center gap-0.5" title={tr.plural(0, "{n} child", "{n} children")}>
+                                      <ChildIcon />0
                                     </span>
-                                  ))}
+                                    {plan.isDefault && (
+                                      <span title={tr("Main rate")}>
+                                        <StarIcon />
+                                      </span>
+                                    )}
+                                    <span title={plan.isPublic ? tr("On the guest booking page") : tr("Not on the guest booking page")}>
+                                      <EyeIcon off={!plan.isPublic} />
+                                    </span>
+                                  </p>
+                                  <p className="mt-0.5 text-[12.5px] text-ink-muted">
+                                    {plan.policyName ?? tr("Not set")}, {plan.rateCurrency}
+                                  </p>
+                                  {plan.occupancies.length > 0 && (
+                                    <div className="tnum mt-1 flex flex-wrap gap-x-3 gap-y-0.5 text-[11.5px]">
+                                      {plan.occupancies.map((o) => (
+                                        <span
+                                          key={o.adults}
+                                          title={tr.plural(o.adults, "{n} adult", "{n} adults")}
+                                          className={o.isPrimary ? "font-semibold text-ink" : "text-ink-faint"}
+                                        >
+                                          {o.adults} · {o.rateCents === null ? "—" : formatMoney(o.rateCents, plan.rateCurrency)}
+                                        </span>
+                                      ))}
+                                    </div>
+                                  )}
                                 </div>
-                              )}
+                              </div>
                             </td>
                             <td />
-                            <td className="tnum px-3 py-1.5 text-right text-ink-muted">
+                            <td className="tnum px-3 py-3 text-right text-ink">
                               {plan.rateCents === null ? "—" : formatMoney(plan.rateCents, plan.rateCurrency)}
                             </td>
-                            <td className="px-3 py-1.5">
+                            <td className="px-3 py-3 text-[12.5px]">
                               {plan.state === "open" && !plan.current ? (
                                 <span className="text-warn-deep" title={plan.channexId ?? undefined}>
                                   {tr("In Channex · occupancies out of date")}
