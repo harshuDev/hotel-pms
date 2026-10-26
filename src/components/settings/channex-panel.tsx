@@ -152,16 +152,12 @@ export function ChannexPanel({
     return [...occs].sort((a, b) => Math.abs(a - def) - Math.abs(b - def) || b - a)[0];
   }
 
-  // Ticking a number of guests ticks its plan and room type: that is what sends it.
+  // A number of guests takes a tick only under a ticked plan on a ticked room type.
   function toggleOcc(room: ChannexRoom, plan: ChannexRoom["plans"][number], adults: number) {
     const key = planKey(room.roomTypeId, plan.ratePlanId);
     const now = occsTicked(room, plan);
     const next = now.includes(adults) ? now.filter((a) => a !== adults) : [...now, adults].sort((a, b) => a - b);
     setOccTicks((current) => new Map(current).set(key, next));
-    if (next.length > 0 && !planTicked(room, plan)) {
-      setPlanTicks((current) => new Map(current).set(key, true));
-    }
-    setTicked((current) => new Set(current).add(room.roomTypeId));
   }
 
   /*
@@ -529,8 +525,11 @@ export function ChannexPanel({
                           occs.length !== saved.length ||
                           occs.some((a) => !saved.includes(a));
                         const adults = plan.occupancies.find((o) => o.isDefault)?.adults;
-                        // Each number of guests takes a tick once its room type is ticked (0152).
-                        const pickable = ticked.has(r.roomTypeId);
+                        // Each number of guests takes a tick once its room type AND
+                        // its plan are ticked (0152). An unticked plan sends nothing,
+                        // so its numbers of guests are shown faint and take no tick.
+                        const pickable = ticked.has(r.roomTypeId) && on;
+                        const withdrawn = ticked.has(r.roomTypeId) && !on;
                         return (
                           <tr key={key} className={cn("align-top", changed && "bg-shell")}>
                             <td />
@@ -573,8 +572,9 @@ export function ChannexPanel({
                                     <div className="tnum mt-1 flex flex-wrap gap-x-3 gap-y-1 text-[11.5px]">
                                       {plan.occupancies.map((o) => {
                                         const sent = occs.includes(o.adults);
-                                        const tone =
-                                          sent && o.adults === primary
+                                        const tone = withdrawn
+                                          ? "text-ink-faint"
+                                          : sent && o.adults === primary
                                             ? "font-semibold text-ink"
                                             : sent
                                               ? "text-ink-muted"
@@ -598,7 +598,7 @@ export function ChannexPanel({
                                           <span
                                             key={o.adults}
                                             title={tr.plural(o.adults, "{n} adult", "{n} adults")}
-                                            className={cn(tone, !sent && "line-through")}
+                                            className={cn(tone, !sent && !withdrawn && "line-through")}
                                           >
                                             {text}
                                           </span>

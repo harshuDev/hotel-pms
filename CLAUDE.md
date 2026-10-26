@@ -2905,7 +2905,10 @@ client: "Need to add Booking Channel in the Dashboard".
         `channex_room_plan_occupancies()` is read by nothing).
       - **WHICH OCCUPANCIES GO IS TICKED PER PLAN (0152)**, the client's "a
         check box in front of all the occupancy": once a room type is ticked
-        on the card, every number of guests under its plans takes a tick.
+        on the card, every number of guests under its TICKED plans takes a
+        tick; under an unticked plan, which sends nothing, they are shown
+        faint with no tick (the client read a ticked "1" under an unticked
+        plan as wrong, and it was).
         The pick is `channex_rate_plan_map.chosen_occupancies` (null = all),
         sent in `p_rate_plans` as `occupancies` and kept for the next Send;
         a plan sent with none ticked is refused before anything reaches
