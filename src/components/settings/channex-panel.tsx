@@ -95,6 +95,9 @@ export function ChannexPanel({
   // Plan ticks changed on screen, keyed "<room type id>|<rate plan id>". A plan
   // not changed is ticked exactly when it is open in Channex (0149).
   const [planTicks, setPlanTicks] = useState<Map<string, boolean>>(new Map());
+  // Numbers of guests ticked on screen, by plan key (0152). A plan not changed
+  // is ticked as saved: the pick last sent, else every occupancy.
+  const [occTicks, setOccTicks] = useState<Map<string, number[]>>(new Map());
 
   const hasKey = connection?.hasKey ?? false;
   const inChannex = Boolean(connection?.channexPropertyId);
@@ -135,6 +138,31 @@ export function ChannexPanel({
   const planKey = (roomTypeId: string, ratePlanId: string) => `${roomTypeId}|${ratePlanId}`;
   const planTicked = (room: ChannexRoom, plan: ChannexRoom["plans"][number]) =>
     planTicks.get(planKey(room.roomTypeId, plan.ratePlanId)) ?? plan.state === "open";
+  const savedOccs = (plan: ChannexRoom["plans"][number]) =>
+    plan.occupancies.filter((o) => o.chosen).map((o) => o.adults);
+  const occsTicked = (room: ChannexRoom, plan: ChannexRoom["plans"][number]) =>
+    occTicks.get(planKey(room.roomTypeId, plan.ratePlanId)) ?? savedOccs(plan);
+  /**
+   * The occupancy Channex reads first: the default while ticked, else the
+   * ticked one nearest to it, the higher on a tie -- channex_pick_occupancies().
+   */
+  function primaryOf(plan: ChannexRoom["plans"][number], occs: number[]) {
+    const def = plan.occupancies.find((o) => o.isDefault)?.adults;
+    if (def === undefined || occs.length === 0) return undefined;
+    return [...occs].sort((a, b) => Math.abs(a - def) - Math.abs(b - def) || b - a)[0];
+  }
+
+  // Ticking a number of guests ticks its plan and room type: that is what sends it.
+  function toggleOcc(room: ChannexRoom, plan: ChannexRoom["plans"][number], adults: number) {
+    const key = planKey(room.roomTypeId, plan.ratePlanId);
+    const now = occsTicked(room, plan);
+    const next = now.includes(adults) ? now.filter((a) => a !== adults) : [...now, adults].sort((a, b) => a - b);
+    setOccTicks((current) => new Map(current).set(key, next));
+    if (next.length > 0 && !planTicked(room, plan)) {
+      setPlanTicks((current) => new Map(current).set(key, true));
+    }
+    setTicked((current) => new Set(current).add(room.roomTypeId));
+  }
 
   /*
    * A room type is ticked to be sent. Its plans' ticks then say what Channex
@@ -164,6 +192,13 @@ export function ChannexPanel({
       setRoom(room, on, next);
       return next;
     });
+    if (!on) {
+      setOccTicks((current) => {
+        const next = new Map(current);
+        for (const plan of room.plans) next.delete(planKey(room.roomTypeId, plan.ratePlanId));
+        return next;
+      });
+    }
   }
 
   // Changing a plan ticks its room type: that is what makes the change go.
@@ -181,6 +216,7 @@ export function ChannexPanel({
       for (const room of rooms) setRoom(room, on, next);
       return next;
     });
+    if (!on) setOccTicks(new Map());
   }
 
   function send() {
@@ -189,15 +225,27 @@ export function ChannexPanel({
       setOutcome({ ok: false, text: tr("Tick the room types to send to Channex.") });
       return;
     }
+    const ratePlans = rooms
+      .filter((room) => ticked.has(room.roomTypeId))
+      .flatMap((room) =>
+        room.plans
+          .filter((plan) => planTicked(room, plan))
+          .map((plan) => ({
+            roomTypeId: room.roomTypeId,
+            ratePlanId: plan.ratePlanId,
+            occupancies: occsTicked(room, plan),
+            name: plan.name,
+          })),
+      );
+    if (ratePlans.some((p) => p.occupancies.length === 0)) {
+      setOutcome({ ok: false, text: tr("Tick at least one number of guests on every rate plan you send to Channex") });
+      return;
+    }
     startWork(async () => {
-      const ratePlans = rooms
-        .filter((room) => ticked.has(room.roomTypeId))
-        .flatMap((room) =>
-          room.plans
-            .filter((plan) => planTicked(room, plan))
-            .map((plan) => ({ roomTypeId: room.roomTypeId, ratePlanId: plan.ratePlanId })),
-        );
-      const result = await sendChannexRoomTypes([...ticked], ratePlans);
+      const result = await sendChannexRoomTypes(
+        [...ticked],
+        ratePlans.map(({ roomTypeId, ratePlanId, occupancies }) => ({ roomTypeId, ratePlanId, occupancies })),
+      );
       if (!result.ok) {
         setOutcome({ ok: false, text: result.error });
         return;
@@ -229,6 +277,7 @@ export function ChannexPanel({
       if (failed.length === 0) {
         setTicked(new Set());
         setPlanTicks(new Map());
+        setOccTicks(new Map());
       }
       router.refresh();
     });
@@ -471,8 +520,17 @@ export function ChannexPanel({
                         const id = `cx-plan-${key}`;
                         const on = planTicked(r, plan);
                         // Shaded while the tick says something Channex does not hold yet.
-                        const changed = on !== (plan.state === "open");
-                        const adults = plan.occupancies.find((o) => o.isPrimary)?.adults;
+                        const occs = occsTicked(r, plan);
+                        const primary = primaryOf(plan, occs);
+                        const saved = savedOccs(plan);
+                        // Shaded while the ticks say something not yet sent.
+                        const changed =
+                          on !== (plan.state === "open") ||
+                          occs.length !== saved.length ||
+                          occs.some((a) => !saved.includes(a));
+                        const adults = plan.occupancies.find((o) => o.isDefault)?.adults;
+                        // Each number of guests takes a tick once its room type is ticked (0152).
+                        const pickable = ticked.has(r.roomTypeId);
                         return (
                           <tr key={key} className={cn("align-top", changed && "bg-shell")}>
                             <td />
@@ -512,16 +570,40 @@ export function ChannexPanel({
                                     {plan.policyName ?? tr("Not set")}, {plan.rateCurrency}
                                   </p>
                                   {plan.occupancies.length > 0 && (
-                                    <div className="tnum mt-1 flex flex-wrap gap-x-3 gap-y-0.5 text-[11.5px]">
-                                      {plan.occupancies.map((o) => (
-                                        <span
-                                          key={o.adults}
-                                          title={tr.plural(o.adults, "{n} adult", "{n} adults")}
-                                          className={o.isPrimary ? "font-semibold text-ink" : "text-ink-faint"}
-                                        >
-                                          {o.adults} · {o.rateCents === null ? "—" : formatMoney(o.rateCents, plan.rateCurrency)}
-                                        </span>
-                                      ))}
+                                    <div className="tnum mt-1 flex flex-wrap gap-x-3 gap-y-1 text-[11.5px]">
+                                      {plan.occupancies.map((o) => {
+                                        const sent = occs.includes(o.adults);
+                                        const tone =
+                                          sent && o.adults === primary
+                                            ? "font-semibold text-ink"
+                                            : sent
+                                              ? "text-ink-muted"
+                                              : "text-ink-faint";
+                                        const text = `${o.adults} · ${o.rateCents === null ? "—" : formatMoney(o.rateCents, plan.rateCurrency)}`;
+                                        return pickable ? (
+                                          <label
+                                            key={o.adults}
+                                            title={tr.plural(o.adults, "{n} adult", "{n} adults")}
+                                            className={cn("flex cursor-pointer items-center gap-1", tone)}
+                                          >
+                                            <input
+                                              type="checkbox"
+                                              className="h-3.5 w-3.5 accent-brass"
+                                              checked={sent}
+                                              onChange={() => toggleOcc(r, plan, o.adults)}
+                                            />
+                                            {text}
+                                          </label>
+                                        ) : (
+                                          <span
+                                            key={o.adults}
+                                            title={tr.plural(o.adults, "{n} adult", "{n} adults")}
+                                            className={cn(tone, !sent && "line-through")}
+                                          >
+                                            {text}
+                                          </span>
+                                        );
+                                      })}
                                     </div>
                                   )}
                                 </div>

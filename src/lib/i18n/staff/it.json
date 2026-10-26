@@ -3505,5 +3505,6 @@
  "{n} rate plans before it were changed.": {
   "one": "{n} piano tariffario precedente è stato modificato.",
   "other": "{n} piani tariffari precedenti sono stati modificati."
- }
+ },
+ "Tick at least one number of guests on every rate plan you send to Channex": "Spunta almeno un numero di ospiti su ogni piano tariffario che invii a Channex"
 }

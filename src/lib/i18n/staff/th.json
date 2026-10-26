@@ -3447,5 +3447,6 @@
  "{plan} was not changed: {error}": "{plan} ไม่ได้ถูกเปลี่ยน: {error}",
  "{n} rate plans before it were changed.": {
   "other": "แผนราคา {n} แผนก่อนหน้านั้นถูกเปลี่ยนแล้ว"
- }
+ },
+ "Tick at least one number of guests on every rate plan you send to Channex": "ติ๊กจำนวนผู้เข้าพักอย่างน้อยหนึ่งค่าในทุกแผนราคาที่ส่งไปยัง Channex"
 }

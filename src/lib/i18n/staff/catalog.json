@@ -9595,6 +9595,9 @@
  "Tick all": {
   "kind": "text"
  },
+ "Tick at least one number of guests on every rate plan you send to Channex": {
+  "kind": "text"
+ },
  "Tick at least one rate to apply this to.": {
   "kind": "text"
  },

@@ -3421,7 +3421,10 @@ export type ChannexRoomPlan = {
 export type ChannexOccupancy = {
   adults: number;
   rateCents: number | null;
-  isPrimary: boolean;
+  /** The plan's default occupancy: the primary while it is ticked. */
+  isDefault: boolean;
+  /** Ticked to go to Channex: the saved pick (0152), else every occupancy. */
+  chosen: boolean;
   inChannex: boolean;
 };
 
@@ -3430,7 +3433,7 @@ export async function getChannexRooms(): Promise<ChannexRoom[]> {
   const [{ data, error }, plansRead, occupancyRead, termsRead] = await Promise.all([
     supabase.rpc("channex_room_list"),
     supabase.rpc("channex_room_plans"),
-    supabase.rpc("channex_room_plan_occupancies"),
+    supabase.rpc("channex_plan_occupancy_choices"),
     supabase.from("rate_plans").select("id, is_default, is_public, cancellation_policies(name)"),
   ]);
   if (error) throw new Error(`Failed to load the Channex room types: ${error.message}`);
@@ -3445,7 +3448,8 @@ export async function getChannexRooms(): Promise<ChannexRoom[]> {
     entry.list.push({
       adults: row.adults,
       rateCents: row.rate_cents === null ? null : Number(row.rate_cents),
-      isPrimary: row.is_primary,
+      isDefault: row.is_default,
+      chosen: row.chosen,
       inChannex: row.in_channex,
     });
     entry.current = entry.current && row.is_current;
