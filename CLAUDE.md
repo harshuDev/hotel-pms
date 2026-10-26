@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0153` (0138 as 0138a-f, 0142 as 0142a-b, 0149 as 0149a-b, 0151 as 0151a-b, 0145 as
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0154` (0138 as 0138a-f, 0142 as 0142a-b, 0149 as 0149a-b, 0151 as 0151a-b, 0145 as
 `0143_channex_send_rooms` + 0145b) are
 applied to the hosted database.
 
@@ -1522,8 +1522,9 @@ client: "Need to add Booking Channel in the Dashboard".
           back. `rate_plan_night_rate()` and `rate_plan_occupancy_rate()`
           then price that party at the standard price, ignoring any stored
           per-night occupancy price of its own, so every booking path
-          follows. The plan form leaves a removed row out; the Inventory
-          Rates grid shows it read-only at the price it pays. Removing the
+          follows. The plan form and the Inventory Rates grid leave a
+          removed row out -- 0153 showed it read-only in the grid, and the
+          client asked for it gone from Rates (All). Removing the
           combination clears the list.
           - **× AND "+ OCCUPANCY" WAIT FOR SAVE CHANGES (0153).** They used
             to store at once, with a banner saying so at the top, and Save
@@ -1544,6 +1545,14 @@ client: "Need to add Booking Channel in the Dashboard".
             Sleeps nothing changed. The default party can no longer be
             removed, and a party made the default comes off the removed
             list.
+          - **0154 FIXED 0153 THE SAME DAY**: it clamped the stored default
+            with `least(greatest(default, 1), max)`, and `greatest()`
+            IGNORES nulls, so a plan with NO default stored read as 1 adult
+            -- removing BAR-B&B's 1-adult row on Leadwise's Double Room
+            with Balcony was refused as "the standard price". No price was
+            wrong (every such pair already had 1 removed, which sends it
+            back to Sleeps; tested, 0 prices moved). **Never clamp a
+            nullable with `greatest()`/`least()` without a null case.**
         - **"Show derived and calculated rates" is per room type** and shows
           that type's derived plans AND its occupancy rows. It used to show
           derived plans only, so on a type with none it did nothing.
