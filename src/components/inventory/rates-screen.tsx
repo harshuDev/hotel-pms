@@ -246,17 +246,6 @@ export function RatesScreen({
     return plan?.occupancyPricing === "per_person" && (plan.standardOccupancies?.[typeId] ?? []).includes(a);
   }
 
-  /** The party a removed one is priced as (0153): the plan's default occupancy, else Sleeps. */
-  function standardAdults(planId: string, typeId: string): number {
-    const plan = planById.get(planId);
-    const type = typeById.get(typeId);
-    const b = type?.baseOccupancy ?? 1;
-    const def = plan?.defaultOccupancies?.[typeId];
-    if (!plan || !type || plan.occupancyPricing !== "per_person" || def === undefined) return b;
-    const d = Math.min(Math.max(def, 1), Math.max(type.maxOccupancy, 1));
-    return isRemoved(planId, typeId, d) ? b : d;
-  }
-
   /** What a party pays on a night with no price of its own (display only). */
   function fallback(planId: string, typeId: string, base: number | null, a: number): number | null {
     if (base === null) return null;
@@ -267,14 +256,6 @@ export function RatesScreen({
     const inc = plan.adultAdjustCents ?? 0;
     const dec = plan.adultDecreaseCents ?? inc;
     return Math.max(0, a >= b ? base + (a - b) * inc : base - (b - a) * dec);
-  }
-
-  /** What a removed party pays on a night: the standard party's price (rate_plan_night_rate()). */
-  function removedPrice(planId: string, typeId: string, date: string, base: number | null): number | null {
-    if (base === null) return null;
-    const s = standardAdults(planId, typeId);
-    const own = occAt.get(`${typeId}|${planId}|${date}|${s}`);
-    return own !== undefined ? own : fallback(planId, typeId, base, s);
   }
 
   function saveDay(
@@ -485,7 +466,10 @@ export function RatesScreen({
                       const plan = planById.get(p.ratePlanId);
                       const byOccupancy = !derived && plan && plan.occupancyPricing !== "single" && type;
                       const others = byOccupancy
-                        ? Array.from({ length: type.maxOccupancy }, (_, i) => i + 1).filter((a) => a !== base)
+                        ? Array.from({ length: type.maxOccupancy }, (_, i) => i + 1).filter(
+                            // A party removed in Room Rate Combinations has no row of its own.
+                            (a) => a !== base && !isRemoved(p.ratePlanId, t.roomTypeId, a),
+                          )
                         : [];
                       return (
                         <Fragment key={key}>
@@ -548,19 +532,14 @@ export function RatesScreen({
                                 {tr.plural(a, "{n} adult", "{n} adults")}
                               </td>
                               {dates.map((d) => {
+                                const own = occAt.get(`${t.roomTypeId}|${p.ratePlanId}|${d}|${a}`);
                                 const std = at.get(`${t.roomTypeId}|${p.ratePlanId}|${d}`)?.rateCents ?? null;
-                                // A removed party ignores any price of its own and pays
-                                // the standard party's, so it is shown and not typed in.
-                                const removed = isRemoved(p.ratePlanId, t.roomTypeId, a);
-                                const own = removed ? undefined : occAt.get(`${t.roomTypeId}|${p.ratePlanId}|${d}|${a}`);
-                                const fb = removed
-                                  ? removedPrice(p.ratePlanId, t.roomTypeId, d, std)
-                                  : fallback(p.ratePlanId, t.roomTypeId, std, a);
+                                const fb = fallback(p.ratePlanId, t.roomTypeId, std, a);
                                 const text = own === undefined ? "" : formatMoneyInput(own, curOf(p.ratePlanId));
                                 const past = d < businessDate;
                                 return (
                                   <td key={d} className="tnum border-t border-line/60 px-1 py-1 text-center">
-                                    {canEdit && !past && !removed ? (
+                                    {canEdit && !past ? (
                                       <PriceCell
                                         key={text}
                                         initial={text}
