@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { useT } from "@/components/i18n";
 import { cn } from "@/components/ui";
 import { useCurrency } from "@/components/currency";
@@ -195,6 +195,10 @@ export function RateCombinations({
   // Rows removed and not yet saved, same keys: the Default Season only clears
   // a removed party's nightly prices when it replaces (save_week_rates()).
   const [removedOcc, setRemovedOcc] = useState<string[]>([]);
+  // A per-person plan's rows removed or brought back, saved with Save Changes
+  // (0124's set_rate_plan_standard_occupancy()): "<plan>|<type>|<adults>" ->
+  // removed. Per plan, not per season, as the plan stores them.
+  const [stdChanges, setStdChanges] = useState<Record<string, boolean>>({});
   const [replaceRates, setReplaceRates] = useState(false);
   const [drafts, setDrafts] = useState<Record<string, Row>>({});
   const [added, setAdded] = useState<string[]>([]);
@@ -288,17 +292,37 @@ export function RateCombinations({
     );
   }
 
-  const removedOf = (p: RatePlan, t: RoomTypeSetting) => p.standardOccupancies[t.id] ?? [];
-
-  /** A per-person row is worked out, not typed, so removing it is stored at once (0124). */
-  function setPerPersonRow(p: RatePlan, t: RoomTypeSetting, a: number, removed: boolean) {
-    const name = `${p.name}, ${typeName(t)}`;
-    run(
-      () => setStandardOccupancy({ ratePlanId: p.id, roomTypeId: t.id, adults: a, removed }),
-      removed
-        ? tr("The {n} adults price on {name} is removed. That party pays the standard price.", { n: a, name })
-        : tr("The {n} adults price on {name} is back.", { n: a, name }),
+  const stdKey = (p: RatePlan, t: RoomTypeSetting, a: number) => `${p.id}|${t.id}|${a}`;
+  // A change the stored plans now hold is no longer pending.
+  useEffect(() => {
+    setStdChanges((all) => {
+      const next = Object.fromEntries(
+        Object.entries(all).filter(([key, removed]) => {
+          const [planId, typeId, a] = key.split("|");
+          const stored = (ratePlans.find((x) => x.id === planId)?.standardOccupancies[typeId] ?? []).includes(Number(a));
+          return stored !== removed;
+        }),
+      );
+      return Object.keys(next).length === Object.keys(all).length ? all : next;
+    });
+  }, [ratePlans]);
+  /** The parties removed on a per-person plan: stored, with this session's changes on top. */
+  const removedOf = (p: RatePlan, t: RoomTypeSetting) => {
+    const stored = p.standardOccupancies[t.id] ?? [];
+    return Array.from({ length: t.maxOccupancy }, (_, x) => x + 1).filter(
+      (a) => stdChanges[stdKey(p, t, a)] ?? stored.includes(a),
     );
+  };
+
+  /** A per-person row is worked out, not typed; removing it is kept until Save Changes. */
+  function setPerPersonRow(p: RatePlan, t: RoomTypeSetting, a: number, removed: boolean) {
+    const key = stdKey(p, t, a);
+    const stored = (p.standardOccupancies[t.id] ?? []).includes(a);
+    const next = { ...stdChanges };
+    if (removed === stored) delete next[key];
+    else next[key] = removed;
+    setStdChanges(next);
+    setProblem("");
   }
 
   function removeOcc(p: RatePlan, t: RoomTypeSetting, a: number) {
@@ -422,13 +446,28 @@ export function RateCombinations({
     setProblem("");
     const rows = collect();
     if (typeof rows === "string") return setProblem(rows);
-    if (rows.length === 0) return setProblem(tr("Nothing has changed."));
+    const std = Object.entries(stdChanges).map(([key, removed]) => {
+      const [ratePlanId, roomTypeId, adults] = key.split("|");
+      return { ratePlanId, roomTypeId, adults: Number(adults), removed };
+    });
+    if (rows.length === 0 && std.length === 0) return setProblem(tr("Nothing has changed."));
+    // One combination is one plan on one room type, however much changed on it.
+    const changed = new Set([
+      ...rows.map((r) => pairKey(r.plan.id, r.type.id)),
+      ...std.map((x) => pairKey(x.ratePlanId, x.roomTypeId)),
+    ]).size;
     if (season === null && !replaceRates && removedOcc.some((x) => x.startsWith(`${seasonKey}|`))) {
       return setProblem(
         tr("Tick Replace prices already on these nights to take a removed occupancy price off the nights already priced."),
       );
     }
     run(async () => {
+      // These stay pending until the refreshed plans hold them (the effect
+      // above), so a removed row does not flash back in between.
+      for (const x of std) {
+        const result = await setStandardOccupancy(x);
+        if (!result.ok) return result;
+      }
       for (const r of rows) {
         const result = await saveWeekRates({
           ratePlanId: r.plan.id,
@@ -448,7 +487,7 @@ export function RateCombinations({
         setRemovedOcc((all) => all.filter((x) => !x.startsWith(`${k(r.plan.id, r.type.id)}|`)));
       }
       return { ok: true };
-    }, tr.plural(rows.length, "{n} room rate combination saved.", "{n} room rate combinations saved."));
+    }, tr.plural(changed, "{n} room rate combination saved.", "{n} room rate combinations saved."));
   }
 
   const shownTypes = roomTypes.filter((t) => typeIds.includes(t.id));
@@ -456,7 +495,7 @@ export function RateCombinations({
     plans.filter((p) => planIds.includes(p.id) && inUse(p.id, t.id) && (!p.parentRatePlanId || derivedOn[t.id]));
   const policyName = (id: string | null) => cancellationPolicies.find((c) => c.id === id)?.name ?? tr("Not set");
   const anyRows = shownTypes.some((t) => plansFor(t).length > 0);
-  const dirty = Object.values(drafts).some((r) => r.dirty);
+  const dirty = Object.values(drafts).some((r) => r.dirty) || Object.keys(stdChanges).length > 0;
 
   return (
     <div className="space-y-4">
@@ -787,7 +826,7 @@ export function RateCombinations({
           )}
           <div className="flex gap-2">
             <button type="button" className="rounded border border-line bg-white px-4 py-2 text-[13.5px] text-ink hover:bg-shell"
-              onClick={() => { setDrafts({}); setAddedOcc([]); setRemovedOcc([]); setProblem(""); }}>
+              onClick={() => { setDrafts({}); setAddedOcc([]); setRemovedOcc([]); setStdChanges({}); setProblem(""); }}>
               {tr("Reset Changes")}
             </button>
             <button type="button" disabled={pending} onClick={saveAll}
