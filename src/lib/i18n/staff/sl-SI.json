@@ -3604,5 +3604,19 @@
   "other": "{n} dni pred prihodom"
  },
  "{plan}: kept as it is in Channex, because a channel is mapped to it.": "{plan}: v Channexu ostane nespremenjeno, ker je nanj povezan kanal.",
- "In Channex · occupancies out of date": "V Channexu · zasedenosti niso posodobljene"
+ "In Channex · occupancies out of date": "V Channexu · zasedenosti niso posodobljene",
+ "Tick the rate plans to apply this to.": "Označite cenovne načrte, za katere naj to velja.",
+ "{n} rate plans selected.": {
+  "one": "Izbran je {n} cenovni načrt.",
+  "two": "Izbrana sta {n} cenovna načrta.",
+  "few": "Izbrani so {n} cenovni načrti.",
+  "other": "Izbranih je {n} cenovnih načrtov."
+ },
+ "{plan} was not changed: {error}": "{plan} ni bil spremenjen: {error}",
+ "{n} rate plans before it were changed.": {
+  "one": "{n} cenovni načrt pred njim je bil spremenjen.",
+  "two": "{n} cenovna načrta pred njim sta bila spremenjena.",
+  "few": "{n} cenovni načrti pred njim so bili spremenjeni.",
+  "other": "{n} cenovnih načrtov pred njim je bilo spremenjenih."
+ }
 }

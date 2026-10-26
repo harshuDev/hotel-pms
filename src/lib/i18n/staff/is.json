@@ -3494,5 +3494,15 @@
   "other": "{n} dögum fyrir komu"
  },
  "{plan}: kept as it is in Channex, because a channel is mapped to it.": "{plan}: látið óbreytt í Channex, því rás er tengd við hana.",
- "In Channex · occupancies out of date": "Í Channex · nýting ekki uppfærð"
+ "In Channex · occupancies out of date": "Í Channex · nýting ekki uppfærð",
+ "Tick the rate plans to apply this to.": "Hakaðu við verðáætlanirnar sem þetta á við.",
+ "{n} rate plans selected.": {
+  "one": "{n} verðáætlun valin.",
+  "other": "{n} verðáætlanir valdar."
+ },
+ "{plan} was not changed: {error}": "{plan} var ekki breytt: {error}",
+ "{n} rate plans before it were changed.": {
+  "one": "{n} verðáætlun á undan henni var breytt.",
+  "other": "{n} verðáætlunum á undan henni var breytt."
+ }
 }

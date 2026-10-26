@@ -438,9 +438,17 @@
   "kind": "plural",
   "one": "{n} plan"
  },
+ "{n} rate plans before it were changed.": {
+  "kind": "plural",
+  "one": "{n} rate plan before it was changed."
+ },
  "{n} rate plans removed from Channex.": {
   "kind": "plural",
   "one": "{n} rate plan removed from Channex."
+ },
+ "{n} rate plans selected.": {
+  "kind": "plural",
+  "one": "{n} rate plan selected."
  },
  "{n} rate plans sent to Channex.": {
   "kind": "plural",
@@ -625,6 +633,9 @@
   "kind": "text"
  },
  "{plan} removed from {type}.": {
+  "kind": "text"
+ },
+ "{plan} was not changed: {error}": {
   "kind": "text"
  },
  "{plan}, {type}, {date}": {
@@ -9603,6 +9614,9 @@
   "kind": "text"
  },
  "Tick the lines to move first.": {
+  "kind": "text"
+ },
+ "Tick the rate plans to apply this to.": {
   "kind": "text"
  },
  "Tick the rates on the left to apply this to.": {

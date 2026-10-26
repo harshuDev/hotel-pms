@@ -3495,5 +3495,15 @@
   "other": "{n} giorni prima dell’arrivo"
  },
  "{plan}: kept as it is in Channex, because a channel is mapped to it.": "{plan}: lasciato com'è in Channex, perché un canale è associato a esso.",
- "In Channex · occupancies out of date": "In Channex · occupazioni non aggiornate"
+ "In Channex · occupancies out of date": "In Channex · occupazioni non aggiornate",
+ "Tick the rate plans to apply this to.": "Spunta i piani tariffari a cui applicarlo.",
+ "{n} rate plans selected.": {
+  "one": "{n} piano tariffario selezionato.",
+  "other": "{n} piani tariffari selezionati."
+ },
+ "{plan} was not changed: {error}": "{plan} non è stato modificato: {error}",
+ "{n} rate plans before it were changed.": {
+  "one": "{n} piano tariffario precedente è stato modificato.",
+  "other": "{n} piani tariffari precedenti sono stati modificati."
+ }
 }
