@@ -187,14 +187,22 @@ export async function restoreBookingRoom(input: {
 export async function restoreBooking(
   bookingId: string,
   allowOverbook = false,
-): Promise<ActionResult<null>> {
+): Promise<ActionResult<null> & { block?: "overbook" }> {
   const supabase = await createClient();
   const { error } = await supabase.rpc("restore_booking", {
     p_booking_id: bookingId,
     p_allow_overbook: allowOverbook,
   });
 
-  if (error) return { ok: false, error: await localised(error.message) };
+  // The refusal is told apart by its code, never its words: the words arrive
+  // in the reader's language, so matching English missed every other one.
+  if (error) {
+    return {
+      ok: false,
+      error: await localised(error.message),
+      block: error.code === "HP001" ? "overbook" : undefined,
+    };
+  }
 
   revalidateBooking(bookingId);
   // The board draws cancelled bars in their own band, so it moves too.

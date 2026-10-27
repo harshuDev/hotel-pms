@@ -630,6 +630,25 @@ export function BookingDetailView({
             {message.text}
           </p>
         )}
+        {/*
+          The restore refusal when the nights were sold after the
+          cancellation, with the override -- the same second ask taking an
+          overbooked booking makes. It was set and never drawn, so this
+          screen refused a restore with no way past it.
+        */}
+        {restoreBlocked && block === "overbook" && (
+          <div className="mt-2 flex justify-end">
+            <button
+              onClick={() =>
+                run(() => restoreBooking(detail.bookingId, true), tr("Booking restored."))
+              }
+              disabled={pending}
+              className="rounded-md bg-rose-600 px-4 py-2 text-[13px] font-medium text-white hover:bg-rose-700 disabled:opacity-50"
+            >
+              {tr("Restore it anyway")}
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Edit --------------------------------------------------------- */}
