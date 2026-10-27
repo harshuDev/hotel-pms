@@ -6447,6 +6447,15 @@ export type Database = {
           status: number
         }[]
       }
+      channex_keep_occupancies: {
+        Args: {
+          p_chosen: number[]
+          p_hi: number
+          p_lo: number
+          p_removed: number[]
+        }
+        Returns: number[]
+      }
       channex_list_all: {
         Args: { p_path: string; p_property: string }
         Returns: Json
@@ -6572,6 +6581,10 @@ export type Database = {
       channex_rate_text: {
         Args: { p_cents: number; p_currency: string }
         Returns: string
+      }
+      channex_removed_occupancies: {
+        Args: { p_rate_plan_id: string; p_room_type_id: string }
+        Returns: number[]
       }
       channex_room_list: {
         Args: never
