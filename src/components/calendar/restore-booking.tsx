@@ -39,7 +39,7 @@ export function RestoreBooking({ bookingId }: { bookingId: string }) {
       if (!result.ok) {
         // An oversell refusal is a question, not a dead end. Anything else is
         // an error and is shown as one.
-        if (result.error.includes("free for those dates")) setBlocked(result.error);
+        if (result.block === "overbook") setBlocked(result.error);
         else setError(result.error);
         return;
       }
