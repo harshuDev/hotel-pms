@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0156` (0138 as 0138a-f, 0142 as 0142a-b, 0149 as 0149a-b, 0150 as 0150 + 0150a, 0151 as 0151a-c, 0145 as
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0157` (0138 as 0138a-f, 0142 as 0142a-b, 0149 as 0149a-b, 0150 as 0150 + 0150a, 0151 as 0151a-c, 0145 as
 `0143_channex_send_rooms` + 0145b) are
 applied to the hosted database.
 
@@ -2959,6 +2959,23 @@ client: "Need to add Booking Channel in the Dashboard".
         hotel: BAR-B&B on Superior Double sent with 2 only, sent again with
         no pick (kept), then 1 and 2 -- each rebuild left one plan in
         Channex.
+      - **A NUMBER OF GUESTS REMOVED IN ROOM RATE COMBINATIONS IS NOT ON THE
+        CARD AND IS NOT SENT (0157).** The client: removed occupancy rates
+        "keep showing up". The card listed Min to Max Adults whatever 0124
+        had removed, ticked, and Send gave Channex an option for each -- the
+        team was unticking them by hand on Shitaye and Tierra Buena, and
+        Leadwise's Double Room with Balcony still sent its removed 1 adult.
+        `channex_removed_occupancies()` (the plan's list or its parent's,
+        `rate_plan_occupancy_is_standard()`'s rule) and
+        `channex_keep_occupancies()` take them off the pick in
+        `channex_desired_options_for()` (Send) and
+        `channex_plan_occupancy_choices()` (the card), which no longer draws
+        them. A Channex plan still holding one reads "occupancies out of
+        date" and the next Send rebuilds it -- never a mapped one. Tested
+        rolled back on all eight Channex hotels: only plans with a removed
+        party changed; Leadwise's Double Room with Balcony (BAR-B&B, BAR-Room
+        Only) went out of date, its Comfort Twin and Rose's BAR-B&B came
+        current.
       - Tested live on the STAGING hotel (Channex staging, no channels):
         BAR-B&B on both room types rebuilt as per_person 1-2, primary 2,
         both options priced.
