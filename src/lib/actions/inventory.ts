@@ -434,7 +434,7 @@ export async function applyRates(edit: {
 }
 
 /**
- * The plan's main row in Inventory -> Rates (0155): the price for its
+ * The plan's main row in Inventory -> Rates (0156): the price for its
  * DEFAULT occupancy. On a per-person plan whose default is not Sleeps,
  * `set_default_rates()` works every other party out from it, as the plan's
  * own form does; anywhere else it is `set_rates()` exactly.

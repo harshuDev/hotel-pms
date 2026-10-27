@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0155` (0138 as 0138a-f, 0142 as 0142a-b, 0149 as 0149a-b, 0151 as 0151a-b, 0145 as
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0156` (0138 as 0138a-f, 0142 as 0142a-b, 0149 as 0149a-b, 0150 as 0150 + 0150a, 0151 as 0151a-c, 0145 as
 `0143_channex_send_rooms` + 0145b) are
 applied to the hosted database.
 
@@ -1409,7 +1409,9 @@ client: "Need to add Booking Channel in the Dashboard".
     anyway; typing sets that night's own price for them
     (`set_occupancy_rates()`), clearing puts them back. The bulk panel takes
     an Occupancy too.
-  - **THE MAIN ROW IS THE PLAN'S DEFAULT OCCUPANCY (0155)**, not Sleeps. The
+  - **THE MAIN ROW IS THE PLAN'S DEFAULT OCCUPANCY (0156)**, not Sleeps. The
+    file is `0156_set_default_rates.sql`; the database recorded it as
+    `0155_set_default_rates`, applied before #160's 0155 was merged. The
     client, on Shitaye's Four Bedroom Apartment (Sleeps 8, default 4): "The
     default rate/occupancy should be 4Pax. Instead it's showing 8Pax ... now
     we cannot change the rate" -- the row read "8 adults", and typing the
@@ -2925,6 +2927,17 @@ client: "Need to add Booking Channel in the Dashboard".
       - `channex_rate_plan_map` records what Channex holds
         (`channex_sell_mode`, `channex_occupancies`, `channex_primary`); null
         is a pre-0151 plan, per_room at the maximum. The push reads it.
+      - **A PLAN DELETED IN CHANNEX IS NOTICED ON THE NEXT SEND (0155).**
+        Adjana Resort, 26 Oct: Juan deleted 34 plans in Channex and made them
+        again by hand. Send skipped a link whose plan was missing from
+        Channex's list and never marked it gone, so those villas' prices went
+        to plans that no longer existed and Send reported nothing wrong. Send
+        now reads EVERY page of Channex's lists (`channex_list_all()`, null
+        if any page fails -- it was one page of 100, and Adjana has 109
+        plans), marks `removed` every link Channex no longer has, and then
+        adopts the plan of the same title on the same room type or makes
+        one. A plan made by hand is adopted as Channex has it. **Do not
+        delete plans in Channex to "reset" them: press Send.**
       - The card shows each plan's price for every occupancy, the default in
         bold, and the Rate column is the default occupancy's price
         (`channex_plan_occupancy_choices()`, 0152; 0151's
@@ -3010,6 +3023,23 @@ client: "Need to add Booking Channel in the Dashboard".
         applies and never acks. A revision is applied once
         (`channex_booking_revisions`, keyed on Channex's revision id) and a
         Channex booking is one booking (`channex_bookings`).
+      - **No ack reached Channex until 0150a.** `channex_call()` sent a NULL
+        content on a call with no body, which the `http` extension refuses
+        for a POST, and `channex_ack_revision()` swallows the error -- so
+        every revision was saved and none acknowledged. A POST, PUT or PATCH
+        with no body now sends `{}`. Found in certification test 11.
+      - **ONE FEED CALL PER CHANNEX ACCOUNT, NOT PER HOTEL (0151c)** --
+        Channex (Evan) asked: three staging hotels made 540 feed calls in
+        three hours. The minute job groups active connections by environment
+        and the decrypted API key, calls the feed once per group with no
+        property filter, and gives each revision to the hotel whose
+        `channex_property_id` it names. A revision for a Channex property no
+        hotel is linked to is skipped and left unacked.
+        `channex_http(environment, secret, ...)` is the call under
+        `channex_call()`. "Pull bookings now" still asks for its own hotel.
+      - 0150a and 0151c were applied on 23-24 Oct, before 0150 and 0151a-b
+        took those numbers on main; the files were renamed when they reached
+        main and touch none of the same functions.
       - **Never changed by Channex**: a booking in house or departed -- the
         revision is flagged and written to the booking's history for the
         desk. **Not acked, retried**: a room type not linked here (Channex

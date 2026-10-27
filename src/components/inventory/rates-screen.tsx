@@ -23,7 +23,7 @@ import { useCurrency } from "@/components/currency";
  * when focus leaves it; the bulk panel stays for ranges.
  *
  * A plan that prices by occupancy draws a row per number of adults under
- * its main row. The main row is the plan's default occupancy (0155) -- the
+ * its main row. The main row is the plan's default occupancy (0156) -- the
  * room type's base occupancy unless a per-person plan names another -- and
  * typing there reprices every party from it, as the plan's form does. An
  * empty occupancy cell shows, faint, what that party pays anyway -- the
@@ -249,7 +249,7 @@ export function RatesScreen({
   }
 
   /**
-   * The party a plan's main row prices (0155): a per-person plan's default
+   * The party a plan's main row prices (0156): a per-person plan's default
    * occupancy (0136) unless it is removed, else Sleeps -- what
    * `set_default_rates()` reads, so the row and the save agree.
    */
@@ -485,7 +485,7 @@ export function RatesScreen({
                       const derived = !!derivedFrom[p.ratePlanId];
                       const plan = planById.get(p.ratePlanId);
                       const byOccupancy = !derived && plan && plan.occupancyPricing !== "single" && type;
-                      // The main row is the plan's default party (0155); Sleeps is
+                      // The main row is the plan's default party (0156); Sleeps is
                       // then one of the rows under it.
                       const def = defaultAdults(p.ratePlanId, t.roomTypeId);
                       const others = byOccupancy

@@ -1,4 +1,4 @@
--- 0155: Inventory -> Rates prices a per-person plan from its DEFAULT occupancy.
+-- 0156: Inventory -> Rates prices a per-person plan from its DEFAULT occupancy.
 --
 -- The Rates grid drew each plan's main row at the room type's Sleeps figure
 -- and wrote it to rate_cents. Since 0136 a per-person plan's default
