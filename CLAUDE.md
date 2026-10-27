@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0154` (0138 as 0138a-f, 0142 as 0142a-b, 0149 as 0149a-b, 0151 as 0151a-b, 0145 as
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0155` (0138 as 0138a-f, 0142 as 0142a-b, 0149 as 0149a-b, 0151 as 0151a-b, 0145 as
 `0143_channex_send_rooms` + 0145b) are
 applied to the hosted database.
 
@@ -1405,10 +1405,27 @@ client: "Need to add Booking Channel in the Dashboard".
     nights stay read-only, and ‹ Previous / Today / Next › with a date field
     page the 28 nights. The bulk panel stays for ranges.
   - **A plan that prices by occupancy draws a row per number of adults**
-    under its standard row (the room type's base occupancy). An empty cell
-    shows, faint, what that party pays anyway; typing sets that night's own
-    price for them (`set_occupancy_rates()`), clearing puts them back. The
-    bulk panel takes an Occupancy too.
+    under its main row. An empty cell shows, faint, what that party pays
+    anyway; typing sets that night's own price for them
+    (`set_occupancy_rates()`), clearing puts them back. The bulk panel takes
+    an Occupancy too.
+  - **THE MAIN ROW IS THE PLAN'S DEFAULT OCCUPANCY (0155)**, not Sleeps. The
+    client, on Shitaye's Four Bedroom Apartment (Sleeps 8, default 4): "The
+    default rate/occupancy should be 4Pax. Instead it's showing 8Pax ... now
+    we cannot change the rate" -- the row read "8 adults", and typing the
+    4-adult price changed that party alone while 5-8 kept their old prices.
+    The main row (and the bulk panel's "Standard price") now save through
+    `applyDefaultRates()` -> `set_default_rates()`, which on a per-person
+    plan whose default is not Sleeps writes what the plan's form writes: the
+    Sleeps price to `rate_cents` and every party not removed into
+    `rate_plan_occupancy_days`, each per person from the default; anywhere
+    else it is `set_rates()` exactly. It calls `set_rates()` and
+    `set_occupancy_rates()`, so their guards hold. The Sleeps row then sits
+    among the others and writes `rate_cents` alone. `defaultAdults()` in
+    `rates-screen.tsx` and the function read the default the same way
+    (`rate_plan_standard_adults()`'s rule, from the plan row -- that helper
+    is granted to nobody). Tested rolled back: NR-B&B 4 adults at 500.00
+    gave 530 / 560 / 590 / 620, the next night untouched.
   - **INVENTORY -> AVAILABILITY SHOWS ROOMS LEFT TO SELL (0136)**: sellable
     (allotment and close out applied) less sold -- the calendar's own figure,
     in its colours. It showed the allotment itself, "All" on every night

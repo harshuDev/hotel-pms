@@ -434,6 +434,56 @@ export async function applyRates(edit: {
 }
 
 /**
+ * The plan's main row in Inventory -> Rates (0155): the price for its
+ * DEFAULT occupancy. On a per-person plan whose default is not Sleeps,
+ * `set_default_rates()` works every other party out from it, as the plan's
+ * own form does; anywhere else it is `set_rates()` exactly.
+ */
+export async function applyDefaultRates(edit: {
+  pairs: { roomTypeId: string; ratePlanId: string }[];
+  from: string;
+  to: string;
+  daysOfWeek: number[];
+  /** Null clears the rate back to "not loaded", which is not zero. */
+  value: number | null;
+}): Promise<ActionResult<{ nightsWritten: number }>> {
+  if (edit.pairs.length === 0) {
+    return { ok: false, error: await localised("Tick at least one rate to apply this to.") };
+  }
+  if (edit.to < edit.from) {
+    return { ok: false, error: await localised("The last date must not be before the first.") };
+  }
+  if (edit.value !== null && (!Number.isSafeInteger(edit.value) || edit.value < 0)) {
+    return { ok: false, error: await localised("That is not an amount. Try 120 or 120.50.") };
+  }
+  const byPlan = new Map<string, string[]>();
+  for (const pair of edit.pairs) {
+    byPlan.set(pair.ratePlanId, [...(byPlan.get(pair.ratePlanId) ?? []), pair.roomTypeId]);
+  }
+  const mixed = await oneCurrency([...byPlan.keys()]);
+  if (mixed) return { ok: false, error: mixed };
+  const supabase = await createClient();
+  let nightsWritten = 0;
+  for (const [ratePlanId, roomTypeIds] of byPlan) {
+    const { data, error } = await supabase.rpc("set_default_rates", {
+      p_rate_plan_id: ratePlanId,
+      p_room_type_ids: [...new Set(roomTypeIds)],
+      p_from: edit.from,
+      p_to: edit.to,
+      p_days_of_week: edit.daysOfWeek.length > 0 ? edit.daysOfWeek : null,
+      p_rate_cents: edit.value,
+    });
+    // Stop on the first refusal, as applyRates() does.
+    if (error) return { ok: false, error: await localised(error.message) };
+    nightsWritten += Number(data ?? 0);
+  }
+  revalidatePath("/inventory", "layout");
+  revalidatePath("/calendar");
+  revalidatePath("/bookings/new");
+  return { ok: true, data: { nightsWritten } };
+}
+
+/**
  * A price for a number of adults on one plan, over a range of nights (0110),
  * for the selected room types. Null clears it, which puts that party back on
  * the standard price -- not "not sold", which only the standard price says.

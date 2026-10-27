@@ -6447,6 +6447,10 @@ export type Database = {
           status: number
         }[]
       }
+      channex_list_all: {
+        Args: { p_path: string; p_property: string }
+        Returns: Json
+      }
       channex_occupancy_prices: {
         Args: { p_days: number; p_from: string; p_property: string }
         Returns: {
@@ -7865,6 +7869,10 @@ export type Database = {
           room_nights: number
         }[]
       }
+      rate_plan_standard_adults: {
+        Args: { p_rate_plan_id: string; p_room_type_id: string }
+        Returns: number
+      }
       rate_plan_to_base: {
         Args: { p_cents: number; p_rate_plan_id: string }
         Returns: number
@@ -8691,6 +8699,17 @@ export type Database = {
       set_customer_exclude_from_email: {
         Args: { p_id: string; p_value: boolean }
         Returns: undefined
+      }
+      set_default_rates: {
+        Args: {
+          p_days_of_week?: number[]
+          p_from: string
+          p_rate_cents?: number
+          p_rate_plan_id: string
+          p_room_type_ids: string[]
+          p_to: string
+        }
+        Returns: number
       }
       set_folio_customer: {
         Args: { p_customer_id: string; p_folio_id: string }
