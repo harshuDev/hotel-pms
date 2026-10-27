@@ -8,7 +8,7 @@ import { addDays, format, parseISO } from "date-fns";
 import { cn } from "@/components/ui";
 import { formatEquivalent, formatMoney, formatMoneyInput, parseMoney } from "@/lib/money";
 import { convertBetween, type DisplayCurrency } from "@/lib/finance-profiles";
-import { applyOccupancyRates, applyRates } from "@/lib/actions/inventory";
+import { applyDefaultRates, applyOccupancyRates, applyRates } from "@/lib/actions/inventory";
 import type { OccupancyGridCell, RatePlan, RatesGridCell, RoomTypeOccupancy } from "@/lib/types";
 import { useCurrency } from "@/components/currency";
 
@@ -23,10 +23,12 @@ import { useCurrency } from "@/components/currency";
  * when focus leaves it; the bulk panel stays for ranges.
  *
  * A plan that prices by occupancy draws a row per number of adults under
- * its standard row (which is the room type's base occupancy). An empty
- * occupancy cell shows, faint, what that party pays anyway -- the standard
- * price, or the automatic calculation -- and typing sets that night's own
- * price for them.
+ * its main row. The main row is the plan's default occupancy (0156) -- the
+ * room type's base occupancy unless a per-person plan names another -- and
+ * typing there reprices every party from it, as the plan's form does. An
+ * empty occupancy cell shows, faint, what that party pays anyway -- the
+ * standard price, or the automatic calculation -- and typing sets that
+ * night's own price for them.
  *
  * WHY THIS IS NOT A TENTH COPY OF THE INVENTORY GRID. The rule against that
  * covers the nine screens that are each one field across room types. This is
@@ -246,6 +248,21 @@ export function RatesScreen({
     return plan?.occupancyPricing === "per_person" && (plan.standardOccupancies?.[typeId] ?? []).includes(a);
   }
 
+  /**
+   * The party a plan's main row prices (0156): a per-person plan's default
+   * occupancy (0136) unless it is removed, else Sleeps -- what
+   * `set_default_rates()` reads, so the row and the save agree.
+   */
+  function defaultAdults(planId: string, typeId: string): number {
+    const plan = planById.get(planId);
+    const type = typeById.get(typeId);
+    const b = type?.baseOccupancy ?? 1;
+    const stored = plan?.defaultOccupancies?.[typeId];
+    if (!plan || !type || plan.occupancyPricing !== "per_person" || plan.parentRatePlanId || stored == null) return b;
+    const d = Math.min(Math.max(stored, 1), Math.max(type.maxOccupancy, 1));
+    return isRemoved(planId, typeId, d) ? b : d;
+  }
+
   /** What a party pays on a night with no price of its own (display only). */
   function fallback(planId: string, typeId: string, base: number | null, a: number): number | null {
     if (base === null) return null;
@@ -259,7 +276,8 @@ export function RatesScreen({
   }
 
   function saveDay(
-    what: { roomTypeId: string; ratePlanId: string; date: string; adults: number | null },
+    /** Adults null is the main row (the default party); `sleeps` the Sleeps row under it. */
+    what: { roomTypeId: string; ratePlanId: string; date: string; adults: number | null; sleeps?: boolean },
     text: string,
   ) {
     const cents = parse(text);
@@ -271,10 +289,12 @@ export function RatesScreen({
       const pairs = [{ roomTypeId: what.roomTypeId, ratePlanId: what.ratePlanId }];
       const result =
         what.adults === null
-          ? await applyRates({ pairs, from: what.date, to: what.date, daysOfWeek: [], value: cents })
-          : await applyOccupancyRates({
-              pairs, from: what.date, to: what.date, daysOfWeek: [], adults: what.adults, value: cents,
-            });
+          ? await applyDefaultRates({ pairs, from: what.date, to: what.date, daysOfWeek: [], value: cents })
+          : what.sleeps
+            ? await applyRates({ pairs, from: what.date, to: what.date, daysOfWeek: [], value: cents })
+            : await applyOccupancyRates({
+                pairs, from: what.date, to: what.date, daysOfWeek: [], adults: what.adults, value: cents,
+              });
       if (!result.ok) {
         setMessage({ ok: false, text: result.error });
         router.refresh();
@@ -331,7 +351,7 @@ export function RatesScreen({
     startTransition(async () => {
       const result =
         adults === null
-          ? await applyRates({ pairs, from: editFrom, to: editTo, daysOfWeek: dow, value: cents })
+          ? await applyDefaultRates({ pairs, from: editFrom, to: editTo, daysOfWeek: dow, value: cents })
           : await applyOccupancyRates({ pairs, from: editFrom, to: editTo, daysOfWeek: dow, adults, value: cents });
       if (!result.ok) {
         setMessage({ ok: false, text: result.error });
@@ -465,10 +485,13 @@ export function RatesScreen({
                       const derived = !!derivedFrom[p.ratePlanId];
                       const plan = planById.get(p.ratePlanId);
                       const byOccupancy = !derived && plan && plan.occupancyPricing !== "single" && type;
+                      // The main row is the plan's default party (0156); Sleeps is
+                      // then one of the rows under it.
+                      const def = defaultAdults(p.ratePlanId, t.roomTypeId);
                       const others = byOccupancy
                         ? Array.from({ length: type.maxOccupancy }, (_, i) => i + 1).filter(
                             // A party removed in Room Rate Combinations has no row of its own.
-                            (a) => a !== base && !isRemoved(p.ratePlanId, t.roomTypeId, a),
+                            (a) => a !== def && !isRemoved(p.ratePlanId, t.roomTypeId, a),
                           )
                         : [];
                       return (
@@ -489,7 +512,7 @@ export function RatesScreen({
                                 <span className="text-ink">{p.ratePlanName}</span>
                                 {byOccupancy && (
                                   <span className="text-xxs text-ink-faint">
-                                    {tr.plural(base, "{n} adult", "{n} adults")}
+                                    {tr.plural(def, "{n} adult", "{n} adults")}
                                   </span>
                                 )}
                                 {derived && (
@@ -501,7 +524,12 @@ export function RatesScreen({
                               </label>
                             </td>
                             {dates.map((d) => {
-                              const rate = at.get(`${t.roomTypeId}|${p.ratePlanId}|${d}`)?.rateCents ?? null;
+                              const std = at.get(`${t.roomTypeId}|${p.ratePlanId}|${d}`)?.rateCents ?? null;
+                              const rate =
+                                def === base || std === null
+                                  ? std
+                                  : (occAt.get(`${t.roomTypeId}|${p.ratePlanId}|${d}|${def}`) ??
+                                    fallback(p.ratePlanId, t.roomTypeId, std, def));
                               const text = rate === null ? "" : formatMoneyInput(rate, curOf(p.ratePlanId));
                               const past = d < businessDate;
                               return (
@@ -532,9 +560,14 @@ export function RatesScreen({
                                 {tr.plural(a, "{n} adult", "{n} adults")}
                               </td>
                               {dates.map((d) => {
-                                const own = occAt.get(`${t.roomTypeId}|${p.ratePlanId}|${d}|${a}`);
                                 const std = at.get(`${t.roomTypeId}|${p.ratePlanId}|${d}`)?.rateCents ?? null;
-                                const fb = fallback(p.ratePlanId, t.roomTypeId, std, a);
+                                // Under a default that is not Sleeps, the Sleeps row is the
+                                // standard price itself.
+                                const sleeps = a === base;
+                                const own = sleeps
+                                  ? (std ?? undefined)
+                                  : occAt.get(`${t.roomTypeId}|${p.ratePlanId}|${d}|${a}`);
+                                const fb = sleeps ? null : fallback(p.ratePlanId, t.roomTypeId, std, a);
                                 const text = own === undefined ? "" : formatMoneyInput(own, curOf(p.ratePlanId));
                                 const past = d < businessDate;
                                 return (
@@ -548,7 +581,7 @@ export function RatesScreen({
                                         ariaLabel={tr("{plan}, {type}, {n} adults, {date}", {
                                           plan: p.ratePlanName, type: t.roomTypeName, n: a, date: tr.date(d, "d MMM"),
                                         })}
-                                        onSave={(v) => saveDay({ roomTypeId: t.roomTypeId, ratePlanId: p.ratePlanId, date: d, adults: a }, v)}
+                                        onSave={(v) => saveDay({ roomTypeId: t.roomTypeId, ratePlanId: p.ratePlanId, date: d, adults: a, sleeps }, v)}
                                         equivalent={equivalentFor(p.ratePlanId)}
                                       />
                                     ) : (
