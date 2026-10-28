@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0158` (0138 as 0138a-f, 0142 as 0142a-b, 0149 as 0149a-b, 0150 as 0150 + 0150a, 0151 as 0151a-c, 0145 as
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0159` (0138 as 0138a-f, 0142 as 0142a-b, 0149 as 0149a-b, 0150 as 0150 + 0150a, 0151 as 0151a-c, 0145 as
 `0143_channex_send_rooms` + 0145b) are
 applied to the hosted database.
 
@@ -379,6 +379,14 @@ in a day. Two causes, both seen in the logs on 8 Oct:
   `fetchWithRetry()` retries a 401 PGRST301/303 once for any method (nothing
   ran), and a network error or 502/503/504 once for GET/HEAD only -- a POST
   may have run, and an RPC that posts money must never run twice.
+- **A READ ON SETTINGS MUST NOT DO WORK PER ROW (0159).** Digest
+  3094255094, 45 times from 9 to 28 Oct, all on /settings:
+  `rate_plan_coverage()` looked the open business date up in a subquery
+  correlated on every row of `rate_plan_days` -- 35,409 lookups through
+  `business_dates`' RLS for Adjana, 1-3 s alone and past the 8 s
+  `statement_timeout` beside Settings' other reads, which is the whole page.
+  It now reads the property and the date once (30 ms). Work out a constant
+  once in a CTE; never correlate it per row.
 
 **A READ THAT CAN PASS 1,000 ROWS GOES THROUGH `readAll()`**
 (`src/lib/supabase/read-all.ts`). The API returns at most 1,000 rows a request
