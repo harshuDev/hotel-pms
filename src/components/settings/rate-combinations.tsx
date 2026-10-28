@@ -30,8 +30,9 @@ import { ChildIcon, EyeIcon, PersonIcon, StarIcon } from "./plan-icons";
  * round: the form is one plan across room types, this is every pairing at
  * once. Two views of one table, not a second price list. Saving writes the
  * week onto the nights exactly as the form does: a season's own dates always
- * take its prices; the Default Season fills empty nights unless "Replace
- * prices already on these nights" is ticked.
+ * take its prices; the Default Season does too while "Replace prices
+ * already on these nights" is ticked, which it starts as (0158), and fills
+ * only empty nights when it is unticked.
  *
  * A PAIRING IS SHOWN WHEN IT IS IN USE -- priced from the business date or
  * given a week in any season -- or when "Add New Room Rate Combination" adds
@@ -199,7 +200,10 @@ export function RateCombinations({
   // (0124's set_rate_plan_standard_occupancy()): "<plan>|<type>|<adults>" ->
   // removed. Per plan, not per season, as the plan stores them.
   const [stdChanges, setStdChanges] = useState<Record<string, boolean>>({});
-  const [replaceRates, setReplaceRates] = useState(false);
+  // Ticked to start (0158): a Default Season saved fill-only left Adjana's
+  // 12 Oct placeholder prices on 17,504 nights and the client read the save
+  // as not working. Untick it to keep prices set night by night.
+  const [replaceRates, setReplaceRates] = useState(true);
   const [drafts, setDrafts] = useState<Record<string, Row>>({});
   const [added, setAdded] = useState<string[]>([]);
   const [adding, setAdding] = useState<{ typeId: string; planId: string } | null>(null);

@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0157` (0138 as 0138a-f, 0142 as 0142a-b, 0149 as 0149a-b, 0150 as 0150 + 0150a, 0151 as 0151a-c, 0145 as
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0158` (0138 as 0138a-f, 0142 as 0142a-b, 0149 as 0149a-b, 0150 as 0150 + 0150a, 0151 as 0151a-c, 0145 as
 `0143_channex_send_rooms` + 0145b) are
 applied to the hosted database.
 
@@ -1607,9 +1607,16 @@ client: "Need to add Booking Channel in the Dashboard".
         writes it onto the nights. **A SEASON REPLACES THE PRICE ON ITS OWN
         DATES (0110)** -- that is what a season is for, and fill-only made it
         change nothing on a property already priced: "Season does not work".
-        **The Default Season still only fills empty nights** unless "Replace
-        prices already on these nights" is ticked, so re-saving the year never
-        wipes a night priced by hand. **Restrictions only ever fill**: a
+        **THE DEFAULT SEASON REPLACES TOO, AS OF 0158: "Replace prices
+        already on these nights" STARTS TICKED** (plan form and Room Rate
+        Combinations); unticked, it only fills empty nights, which keeps
+        nights priced by hand. It started unticked, and Adjana Resort saved
+        its Default Season on 28 Oct with 17,504 nights still on a 12 Oct
+        bulk load -- Abritel/AirBnB at a placeholder 50.00 EUR, sent to
+        Channex and sold by Booking.com. 0158 put the saved week on exactly
+        the nights still holding the 12 Oct load (outside any season, from
+        the business date, 365 nights), leaving nights changed since alone;
+        209 Villa 14 nights set to 50.00 EUR again on 26 Oct were left. **Restrictions only ever fill**: a
         min or max stay only where none is set, CTA/CTD/SS only switched ON.
       - **Dates added to a season later get its prices** (0110):
         `add_season_range()` re-applies the season's saved week. Before,
