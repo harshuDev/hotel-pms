@@ -187,7 +187,8 @@ export const PlanRates = forwardRef<
 ) {
   const tr = useT();
   const [season, setSeason] = useState<string | null>(initialSeasonId);
-  const [replaceRates, setReplaceRates] = useState(false);
+  // Ticked to start, as in Room Rate Combinations (0158).
+  const [replaceRates, setReplaceRates] = useState(true);
   // Affected room types: those already priced on this plan, else all.
   const [typeIds, setTypeIds] = useState<string[]>(() => {
     const priced = roomTypes.filter((t) => coverage.some((c) => c.ratePlanId === plan.id && c.roomTypeId === t.id));
