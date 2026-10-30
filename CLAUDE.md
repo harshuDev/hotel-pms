@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0162` (0138 as 0138a-f, 0142 as 0142a-b, 0149 as 0149a-b, 0150 as 0150 + 0150a, 0151 as 0151a-c, 0145 as
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0163` (0138 as 0138a-f, 0142 as 0142a-b, 0149 as 0149a-b, 0150 as 0150 + 0150a, 0151 as 0151a-c, 0145 as
 `0143_channex_send_rooms` + 0145b) are
 applied to the hosted database.
 
@@ -1645,7 +1645,15 @@ client: "Need to add Booking Channel in the Dashboard".
         Channex and sold by Booking.com. 0158 put the saved week on exactly
         the nights still holding the 12 Oct load (outside any season, from
         the business date, 365 nights), leaving nights changed since alone;
-        209 Villa 14 nights set to 50.00 EUR again on 26 Oct were left. **Restrictions only ever fill**: a
+        209 Villa 14 nights set to 50.00 EUR again on 26 Oct were left. **0163
+        (30 Oct) put the Default Season week on EVERY Adjana night outside a
+        season or event that differed from it**, 549 nights: 31 Oct-14 Nov
+        on ~15 villas carried the HIGH-SEASON price (+20%, set 26 Oct), so
+        the OTAs sold the season two weeks early ("the high season ... is
+        only from November 15th to January 15th"); VILLA 119 on 13 Nov,
+        Abritel/AirBnB (EUR), held 158,745.00 -- an F CFA figure typed into
+        the euro plan; and a few Oct 2027 nights had no price. Season nights
+        were untouched (tested rolled back). **Restrictions only ever fill**: a
         min or max stay only where none is set, CTA/CTD/SS only switched ON.
       - **Dates added to a season later get its prices** (0110):
         `add_season_range()` re-applies the season's saved week. Before,
