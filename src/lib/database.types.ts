@@ -8805,6 +8805,15 @@ export type Database = {
         }
         Returns: number
       }
+      set_rate_lines: {
+        Args: {
+          p_days_of_week: number[]
+          p_from: string
+          p_lines: Json
+          p_to: string
+        }
+        Returns: number
+      }
       set_rate_plan_cancellation_policy: {
         Args: { p_cancellation_policy_id?: string; p_rate_plan_id: string }
         Returns: undefined

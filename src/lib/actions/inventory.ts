@@ -5,7 +5,7 @@ import { getT } from "@/lib/i18n/server";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import type { ActionResult } from "@/lib/actions/cashier";
-import type { RpcName } from "@/lib/supabase/database";
+import { nullableArg, type RpcName } from "@/lib/supabase/database";
 import type { InventoryField, MealType } from "@/lib/types";
 import type { MealPlan } from "@/lib/meal-plans";
 import type { RatePlanExtra } from "@/lib/rate-plan-extras";
@@ -481,6 +481,71 @@ export async function applyDefaultRates(edit: {
   revalidatePath("/calendar");
   revalidatePath("/bookings/new");
   return { ok: true, data: { nightsWritten } };
+}
+
+/** One ticked rate in "Set a price on many days" (0161), at its own price. */
+export type RateLine = {
+  roomTypeId: string;
+  ratePlanId: string;
+  /**
+   * Which of the grid's rows it prices: "default" the plan's main row (the
+   * default party), "standard" the Sleeps row under a default that is not
+   * Sleeps, "occupancy" any other number of adults.
+   */
+  kind: "default" | "standard" | "occupancy";
+  adults: number | null;
+  /** Integer minor units of the PLAN's currency (0138). */
+  value: number;
+};
+
+/**
+ * Several rates over one range of nights, each at its own price and party
+ * (0161). `set_rate_lines()` writes every line in one transaction through the
+ * same setter the grid's row uses, so a refusal on any line changes nothing.
+ * On a refusal `line` is the index of the line Postgres refused.
+ */
+export async function applyRateLines(edit: {
+  from: string;
+  to: string;
+  daysOfWeek: number[];
+  lines: RateLine[];
+}): Promise<ActionResult<{ nightsWritten: number }> & { line?: number }> {
+  if (edit.lines.length === 0) {
+    return { ok: false, error: await localised("Tick at least one rate to apply this to.") };
+  }
+  if (edit.to < edit.from) {
+    return { ok: false, error: await localised("The last date must not be before the first.") };
+  }
+  const bad = edit.lines.findIndex((l) => !Number.isSafeInteger(l.value) || l.value < 0);
+  if (bad >= 0) {
+    return { ok: false, error: await localised("That is not an amount. Try 120 or 120.50."), line: bad };
+  }
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("set_rate_lines", {
+    p_from: edit.from,
+    p_to: edit.to,
+    // Null is every day of the week.
+    p_days_of_week: nullableArg(edit.daysOfWeek.length > 0 ? edit.daysOfWeek : null),
+    p_lines: edit.lines.map((l) => ({
+      room_type_id: l.roomTypeId,
+      rate_plan_id: l.ratePlanId,
+      kind: l.kind,
+      adults: l.adults,
+      rate_cents: l.value,
+    })),
+  });
+  if (error) {
+    const at = Number(error.details);
+    return {
+      ok: false,
+      error: await localised(error.message),
+      line: Number.isInteger(at) && at >= 1 && at <= edit.lines.length ? at - 1 : undefined,
+    };
+  }
+  revalidatePath("/inventory", "layout");
+  revalidatePath("/calendar");
+  revalidatePath("/bookings/new");
+  return { ok: true, data: { nightsWritten: Number(data ?? 0) } };
 }
 
 /**

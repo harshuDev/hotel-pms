@@ -381,7 +381,6 @@
  "+ Occupancy": "+ Zasedenost",
  "1 Example Street, Example City": "Primerna ulica 1, Primerno mesto",
  "1 Point after dot": "1 decimalno mesto",
- "120.00, or blank to clear": "120.00, ali prazno za brisanje",
  "2 Points after dot": "2 decimalni mesti",
  "A {0} booking cannot be given a room": "Rezervacija v stanju {0} ne more dobiti sobe",
  "A {n} night deposit is required at the time of booking.": {
@@ -1064,12 +1063,6 @@
  "Clear": "Počisti",
  "Clear filter": "Počisti filter",
  "Clear the state or floor filter to see the whole house.": "Počistite filter stanja ali nadstropja, da vidite celotno nastanitev.",
- "Cleared {n} nights.": {
-  "one": "Počiščena {n} noč.",
-  "two": "Počiščeni {n} noči.",
-  "few": "Počiščene {n} noči.",
-  "other": "Počiščenih {n} noči."
- },
  "Client ID": "ID odjemalca",
  "Client secret": "Skrivnost odjemalca",
  "Close": "Zapri",
@@ -2813,12 +2806,6 @@
  "Senegal": "Senegal",
  "Sent": "Poslano",
  "Serbia": "Srbija",
- "Set {amount} on {n} nights.": {
-  "one": "{amount} nastavljeno na {n} noč.",
-  "two": "{amount} nastavljeno na {n} noči.",
-  "few": "{amount} nastavljeno na {n} noči.",
-  "other": "{amount} nastavljeno na {n} noči."
- },
  "Set a new password": "Nastavite novo geslo",
  "Set a price on many days": "Nastavi ceno za več dni",
  "Set as hotel timezone": "Nastavi kot časovni pas hotela",
@@ -3479,7 +3466,6 @@
  "Only managers and administrators can change rates": "Cene lahko spreminjajo samo vodje in skrbniki",
  "There is no exchange rate for {0} yet. Set a fixed rate for it in Settings -> Currencies.": "Za {0} še ni menjalnega tečaja. Nastavite fiksni tečaj v Nastavitve -> Valute.",
  "There is no live rate for {0} yet, and {1} is priced in it. Keep the fixed rate for now.": "Za {0} še ni tečaja v živo, {1} pa ima cene v tej valuti. Zaenkrat obdržite fiksni tečaj.",
- "These rate plans are priced in {currencies}. Set the rates of one currency at a time.": "Ti cenovni načrti imajo cene v {currencies}. Cene nastavite za eno valuto naenkrat.",
  "Add the Channex API key first": "Najprej dodajte API-ključ Channex",
  "Channex API key": "API-ključ Channex",
  "Channex refused the API key": "Channex je zavrnil API-ključ",
@@ -3626,5 +3612,16 @@
  },
  "Filter": "Filtriraj",
  "Filter the shift history by business date or by the date it closed": "Zgodovino izmen filtrirajte po poslovnem datumu ali po datumu zaprtja",
- "No shifts closed in these dates.": "V tem obdobju ni bila zaprta nobena izmena."
+ "No shifts closed in these dates.": "V tem obdobju ni bila zaprta nobena izmena.",
+ "A rate line is missing its room type, rate plan or occupancy.": "Vrstici cene manjka tip sobe, cenovni načrt ali zasedenost.",
+ "Apply at most 500 rates at a time.": "Hkrati uporabite največ 500 cen.",
+ "Occupancy for {plan}, {type}": "Zasedenost za {plan}, {type}",
+ "Prices set on {n} nights.": {
+  "one": "Cene so nastavljene za {n} noč.",
+  "two": "Cene so nastavljene za {n} noči.",
+  "few": "Cene so nastavljene za {n} noči.",
+  "other": "Cene so nastavljene za {n} noči."
+ },
+ "Rate a night for {plan}, {type}": "Cena za noč za {plan}, {type}",
+ "Type a price for at least one ticked rate.": "Vnesite ceno za vsaj eno označeno ceno."
 }

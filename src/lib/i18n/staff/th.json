@@ -282,7 +282,6 @@
  "+ Occupancy": "+ จำนวนผู้เข้าพัก",
  "1 Example Street, Example City": "1 ถนนตัวอย่าง เมืองตัวอย่าง",
  "1 Point after dot": "ทศนิยม 1 ตำแหน่ง",
- "120.00, or blank to clear": "120.00 หรือเว้นว่างเพื่อล้าง",
  "2 Points after dot": "ทศนิยม 2 ตำแหน่ง",
  "A {0} booking cannot be given a room": "การจองสถานะ {0} ไม่สามารถจัดห้องได้",
  "A {n} night deposit is required at the time of booking.": {
@@ -944,9 +943,6 @@
  "Clear": "ล้าง",
  "Clear filter": "ล้างตัวกรอง",
  "Clear the state or floor filter to see the whole house.": "ล้างตัวกรองสถานะหรือชั้นเพื่อดูทั้งที่พัก",
- "Cleared {n} nights.": {
-  "other": "ล้างแล้ว {n} คืน"
- },
  "Client ID": "Client ID",
  "Client secret": "Client secret",
  "Close": "ปิด",
@@ -2672,9 +2668,6 @@
  "Senegal": "เซเนกัล",
  "Sent": "ส่งแล้ว",
  "Serbia": "เซอร์เบีย",
- "Set {amount} on {n} nights.": {
-  "other": "ตั้ง {amount} ใน {n} คืนแล้ว"
- },
  "Set a new password": "ตั้งรหัสผ่านใหม่",
  "Set a price on many days": "ตั้งราคาหลายวัน",
  "Set as hotel timezone": "ตั้งเป็นเขตเวลาของโรงแรม",
@@ -3335,7 +3328,6 @@
  "Only managers and administrators can change rates": "เฉพาะผู้จัดการและผู้ดูแลระบบเท่านั้นที่เปลี่ยนเรตได้",
  "There is no exchange rate for {0} yet. Set a fixed rate for it in Settings -> Currencies.": "ยังไม่มีอัตราแลกเปลี่ยนสำหรับ {0} ตั้งอัตราคงที่ที่ การตั้งค่า -> สกุลเงิน",
  "There is no live rate for {0} yet, and {1} is priced in it. Keep the fixed rate for now.": "ยังไม่มีอัตราแลกเปลี่ยนสดสำหรับ {0} และ {1} ตั้งราคาเป็นสกุลเงินนี้ ใช้อัตราคงที่ไปก่อน",
- "These rate plans are priced in {currencies}. Set the rates of one currency at a time.": "แผนราคาเหล่านี้ตั้งราคาเป็น {currencies} ตั้งเรตทีละสกุลเงิน",
  "Add the Channex API key first": "เพิ่มคีย์ API ของ Channex ก่อน",
  "Channex API key": "คีย์ API ของ Channex",
  "Channex refused the API key": "Channex ปฏิเสธคีย์ API",
@@ -3452,5 +3444,13 @@
  },
  "Filter": "กรอง",
  "Filter the shift history by business date or by the date it closed": "กรองประวัติกะตามวันทำการหรือตามวันที่ปิดกะ",
- "No shifts closed in these dates.": "ไม่มีกะที่ปิดในช่วงวันที่นี้"
+ "No shifts closed in these dates.": "ไม่มีกะที่ปิดในช่วงวันที่นี้",
+ "A rate line is missing its room type, rate plan or occupancy.": "บรรทัดราคาขาดประเภทห้อง แผนราคา หรือจำนวนผู้เข้าพัก",
+ "Apply at most 500 rates at a time.": "ใช้ได้ครั้งละไม่เกิน 500 ราคา",
+ "Occupancy for {plan}, {type}": "จำนวนผู้เข้าพักสำหรับ {plan}, {type}",
+ "Prices set on {n} nights.": {
+  "other": "ตั้งราคาแล้ว {n} คืน"
+ },
+ "Rate a night for {plan}, {type}": "ราคาต่อคืนสำหรับ {plan}, {type}",
+ "Type a price for at least one ticked rate.": "พิมพ์ราคาสำหรับอย่างน้อยหนึ่งราคาที่ติ๊กไว้"
 }

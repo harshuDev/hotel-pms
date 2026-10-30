@@ -762,9 +762,6 @@
  "1 Point after dot": {
   "kind": "text"
  },
- "120.00, or blank to clear": {
-  "kind": "text"
- },
  "2 Points after dot": {
   "kind": "text"
  },
@@ -983,6 +980,9 @@
   "kind": "db"
  },
  "A promotion needs a name": {
+  "kind": "db"
+ },
+ "A rate line is missing its room type, rate plan or occupancy.": {
   "kind": "db"
  },
  "A rate plan cannot be derived from itself": {
@@ -1600,6 +1600,9 @@
  },
  "Apply": {
   "kind": "text"
+ },
+ "Apply at most 500 rates at a time.": {
+  "kind": "db"
  },
  "Apply discount": {
   "kind": "text"
@@ -2816,10 +2819,6 @@
  },
  "Clear the state or floor filter to see the whole house.": {
   "kind": "text"
- },
- "Cleared {n} nights.": {
-  "kind": "plural",
-  "one": "Cleared {n} night."
  },
  "Client ID": {
   "kind": "text"
@@ -6269,6 +6268,9 @@
  "Occupancy": {
   "kind": "text"
  },
+ "Occupancy for {plan}, {type}": {
+  "kind": "text"
+ },
  "Occupancy must be at least one, and the maximum at least the base": {
   "kind": "db"
  },
@@ -7235,6 +7237,10 @@
  "Price of {name}": {
   "kind": "text"
  },
+ "Prices set on {n} nights.": {
+  "kind": "plural",
+  "one": "Prices set on {n} night."
+ },
  "Primary color": {
   "kind": "text"
  },
@@ -7331,6 +7337,9 @@
   "kind": "text"
  },
  "Rate a night": {
+  "kind": "text"
+ },
+ "Rate a night for {plan}, {type}": {
   "kind": "text"
  },
  "Rate categories": {
@@ -8239,10 +8248,6 @@
  "Serbia": {
   "kind": "country",
   "code": "RS"
- },
- "Set {amount} on {n} nights.": {
-  "kind": "plural",
-  "one": "Set {amount} on {n} night."
  },
  "Set a new password": {
   "kind": "text"
@@ -9527,9 +9532,6 @@
  "There is no open business date to close": {
   "kind": "db"
  },
- "These rate plans are priced in {currencies}. Set the rates of one currency at a time.": {
-  "kind": "text"
- },
  "These rooms already exist: {0}": {
   "kind": "db"
  },
@@ -9766,6 +9768,9 @@
   "code": "TV"
  },
  "Type": {
+  "kind": "text"
+ },
+ "Type a price for at least one ticked rate.": {
   "kind": "text"
  },
  "Type at least two characters.": {

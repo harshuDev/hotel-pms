@@ -282,7 +282,6 @@
  "+ Occupancy": "+ Okupansi",
  "1 Example Street, Example City": "Jalan Contoh 1, Kota Contoh",
  "1 Point after dot": "1 angka di belakang koma",
- "120.00, or blank to clear": "120.00, atau kosong untuk menghapus",
  "2 Points after dot": "2 angka di belakang koma",
  "A {0} booking cannot be given a room": "Reservasi {0} tidak bisa diberi kamar",
  "A {n} night deposit is required at the time of booking.": {
@@ -944,9 +943,6 @@
  "Clear": "Hapus",
  "Clear filter": "Hapus filter",
  "Clear the state or floor filter to see the whole house.": "Hapus filter status atau lantai untuk melihat seluruh properti.",
- "Cleared {n} nights.": {
-  "other": "{n} malam dikosongkan."
- },
  "Client ID": "Client ID",
  "Client secret": "Client secret",
  "Close": "Tutup",
@@ -2672,9 +2668,6 @@
  "Senegal": "Senegal",
  "Sent": "Terkirim",
  "Serbia": "Serbia",
- "Set {amount} on {n} nights.": {
-  "other": "{amount} ditetapkan untuk {n} malam."
- },
  "Set a new password": "Tetapkan kata sandi baru",
  "Set a price on many days": "Atur harga untuk banyak hari",
  "Set as hotel timezone": "Tetapkan sebagai zona waktu hotel",
@@ -3335,7 +3328,6 @@
  "Only managers and administrators can change rates": "Hanya manajer dan administrator yang dapat mengubah tarif",
  "There is no exchange rate for {0} yet. Set a fixed rate for it in Settings -> Currencies.": "Belum ada kurs untuk {0}. Tetapkan kurs tetap di Pengaturan -> Mata Uang.",
  "There is no live rate for {0} yet, and {1} is priced in it. Keep the fixed rate for now.": "Belum ada kurs langsung untuk {0}, dan {1} diberi harga dalam mata uang itu. Pertahankan kurs tetap untuk sementara.",
- "These rate plans are priced in {currencies}. Set the rates of one currency at a time.": "Paket tarif ini diberi harga dalam {currencies}. Atur tarif satu mata uang sekaligus.",
  "Add the Channex API key first": "Tambahkan kunci API Channex terlebih dahulu",
  "Channex API key": "Kunci API Channex",
  "Channex refused the API key": "Channex menolak kunci API",
@@ -3452,5 +3444,13 @@
  },
  "Filter": "Filter",
  "Filter the shift history by business date or by the date it closed": "Saring riwayat shift menurut tanggal operasional atau tanggal penutupan",
- "No shifts closed in these dates.": "Tidak ada shift yang ditutup pada tanggal ini."
+ "No shifts closed in these dates.": "Tidak ada shift yang ditutup pada tanggal ini.",
+ "A rate line is missing its room type, rate plan or occupancy.": "Baris tarif tidak memiliki tipe kamar, paket tarif, atau tingkat hunian.",
+ "Apply at most 500 rates at a time.": "Terapkan paling banyak 500 tarif sekaligus.",
+ "Occupancy for {plan}, {type}": "Tingkat hunian untuk {plan}, {type}",
+ "Prices set on {n} nights.": {
+  "other": "Harga ditetapkan pada {n} malam."
+ },
+ "Rate a night for {plan}, {type}": "Tarif per malam untuk {plan}, {type}",
+ "Type a price for at least one ticked rate.": "Ketik harga untuk setidaknya satu tarif yang dicentang."
 }
