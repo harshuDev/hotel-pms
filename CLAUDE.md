@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0163` (0138 as 0138a-f, 0142 as 0142a-b, 0149 as 0149a-b, 0150 as 0150 + 0150a, 0151 as 0151a-c, 0145 as
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0164` (0138 as 0138a-f, 0142 as 0142a-b, 0149 as 0149a-b, 0150 as 0150 + 0150a, 0151 as 0151a-c, 0145 as
 `0143_channex_send_rooms` + 0145b) are
 applied to the hosted database.
 
@@ -3049,8 +3049,21 @@ client: "Need to add Booking Channel in the Dashboard".
       - **Channex's task ids are kept on each run** (`channex_sync_log.task_ids`)
         and shown under it in "Recent runs" -- the certification submission
         asks for the full sync's.
+      - **THE PUSH RUNS EVERY FIVE MINUTES AS OF 0164, NOT EVERY MINUTE.** 30
+        Oct: Supabase reported the project unhealthy. The minute push had
+        grown to ~20 s a run (ten hotels, Adjana 96 plans x 500 nights) --
+        about 85% of all database time since September -- and from 21:13
+        every run hit the 2 minute `statement_timeout` and was cancelled,
+        so nothing reached Channex, the booking pull could not start ("job
+        startup timeout") and app reads timed out. A query that normally
+        takes milliseconds took 22 s: the Micro compute (shared CPU, a disk
+        IO budget that throttles to baseline once spent) was saturated.
+        0164 calls `channex_ari_changes()` once per hotel instead of once per
+        kind (it computed both and kept half) and moves the schedule to
+        `*/5`. **Still to do**: push only hotels whose inputs changed since
+        their last successful push, and a bigger compute size.
       - **Is Active = keep Channex up to date**: pg_cron `channex-ari-push`
-        runs `channex_push_all()` EVERY MINUTE (the guide: batch changes every
+        runs `channex_push_all()` EVERY MINUTE (every five since 0164) (the guide: batch changes every
         30-60 seconds) and `channex-ari-full` runs `channex_full_sync_all()`
         once a night at 02:17 UTC (a full sync at most once a day). The minute
         job logs only a run that sent or failed something. One push per hotel
