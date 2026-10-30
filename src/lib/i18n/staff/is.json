@@ -315,7 +315,6 @@
  "+ Occupancy": "+ Fjöldi gesta",
  "1 Example Street, Example City": "Dæmigata 1, Dæmibær",
  "1 Point after dot": "1 aukastafur",
- "120.00, or blank to clear": "120.00, eða autt til að hreinsa",
  "2 Points after dot": "2 aukastafir",
  "A {0} booking cannot be given a room": "Bókun með stöðuna {0} getur ekki fengið herbergi",
  "A {n} night deposit is required at the time of booking.": {
@@ -984,10 +983,6 @@
  "Clear": "Hreinsa",
  "Clear filter": "Hreinsa síu",
  "Clear the state or floor filter to see the whole house.": "Hreinsaðu stöðu- eða hæðarsíuna til að sjá allt húsið.",
- "Cleared {n} nights.": {
-  "one": "{n} nótt hreinsuð.",
-  "other": "{n} nætur hreinsaðar."
- },
  "Client ID": "Auðkenni biðlara",
  "Client secret": "Leyndarmál biðlara",
  "Close": "Loka",
@@ -2719,10 +2714,6 @@
  "Senegal": "Senegal",
  "Sent": "Sent",
  "Serbia": "Serbía",
- "Set {amount} on {n} nights.": {
-  "one": "{amount} sett á {n} nótt.",
-  "other": "{amount} sett á {n} nætur."
- },
  "Set a new password": "Veldu nýtt lykilorð",
  "Set a price on many days": "Stilla verð á marga daga",
  "Set as hotel timezone": "Setja sem tímabelti hótelsins",
@@ -3383,7 +3374,6 @@
  "Only managers and administrators can change rates": "Aðeins stjórnendur og kerfisstjórar geta breytt verðum",
  "There is no exchange rate for {0} yet. Set a fixed rate for it in Settings -> Currencies.": "Ekkert gengi er enn til fyrir {0}. Settu fast gengi í Stillingar -> Gjaldmiðlar.",
  "There is no live rate for {0} yet, and {1} is priced in it. Keep the fixed rate for now.": "Ekkert lifandi gengi er enn til fyrir {0} og {1} er verðlagt í honum. Haltu föstu gengi í bili.",
- "These rate plans are priced in {currencies}. Set the rates of one currency at a time.": "Þessar verðáætlanir eru verðlagðar í {currencies}. Settu verð eins gjaldmiðils í einu.",
  "Add the Channex API key first": "Bættu fyrst við API-lykli Channex",
  "Channex API key": "API-lykill Channex",
  "Channex refused the API key": "Channex hafnaði API-lyklinum",
@@ -3510,5 +3500,21 @@
  },
  "Filter": "Sía",
  "Filter the shift history by business date or by the date it closed": "Síaðu vaktasöguna eftir rekstrardegi eða lokadegi",
- "No shifts closed in these dates.": "Engum vöktum var lokað á þessum dögum."
+ "No shifts closed in these dates.": "Engum vöktum var lokað á þessum dögum.",
+ "A rate line is missing its room type, rate plan or occupancy.": "Í verðlínu vantar herbergistegund, verðáætlun eða nýtingu.",
+ "Apply at most 500 rates at a time.": "Notaðu í mesta lagi 500 verð í einu.",
+ "Occupancy for {plan}, {type}": "Nýting fyrir {plan}, {type}",
+ "Prices set on {n} nights.": {
+  "one": "Verð sett á {n} nótt.",
+  "other": "Verð sett á {n} nætur."
+ },
+ "Rate a night for {plan}, {type}": "Verð á nótt fyrir {plan}, {type}",
+ "Type a price for at least one ticked rate.": "Sláðu inn verð fyrir að minnsta kosti eitt valið verð.",
+ "Back to the standard price": "Aftur á staðalverð",
+ "Not sold on these nights": "Ekki selt þessar nætur",
+ "Set a price": "Setja verð",
+ "Cleared {n} nights.": {
+  "one": "{n} nótt hreinsuð.",
+  "other": "{n} nætur hreinsaðar."
+ }
 }

@@ -8,7 +8,7 @@ import { addDays, format, parseISO } from "date-fns";
 import { cn } from "@/components/ui";
 import { formatEquivalent, formatMoney, formatMoneyInput, parseMoney } from "@/lib/money";
 import { convertBetween, type DisplayCurrency } from "@/lib/finance-profiles";
-import { applyDefaultRates, applyOccupancyRates, applyRates } from "@/lib/actions/inventory";
+import { applyDefaultRates, applyOccupancyRates, applyRateLines, applyRates, type RateLine } from "@/lib/actions/inventory";
 import type { OccupancyGridCell, RatePlan, RatesGridCell, RoomTypeOccupancy } from "@/lib/types";
 import { useCurrency } from "@/components/currency";
 
@@ -33,6 +33,17 @@ import { useCurrency } from "@/components/currency";
  * WHY THIS IS NOT A TENTH COPY OF THE INVENTORY GRID. The rule against that
  * covers the nine screens that are each one field across room types. This is
  * one field across plan and type.
+ *
+ * "SET A PRICE ON MANY DAYS" PRICES EACH TICKED RATE ON ITS OWN (0161). The
+ * client: "when I select multiple room type ... all the selected room types
+ * get updated but on their own prices". It took one price and one occupancy
+ * for every ticked rate; now the dates and weekdays are shared and each
+ * ticked rate is a line with its own occupancy -- the parties the grid draws
+ * for it -- and its own price, in its plan's currency. A blank line is
+ * skipped; "Clear" on a line clears its nights instead (0162), as clearing
+ * the cell would. `set_rate_lines()` writes them all in one transaction through
+ * the setter the grid's row would use, so a refusal changes nothing and
+ * names its line.
  *
  * A BLANK STANDARD CELL IS "NOT LOADED", NOT FREE. `create_booking()`
  * refuses a stay against a night with no rate, so clearing a price is how a
@@ -160,8 +171,10 @@ export function RatesScreen({
   const [editFrom, setEditFrom] = useState(from);
   const [editTo, setEditTo] = useState(dates[dates.length - 1] ?? from);
   const [dow, setDow] = useState<number[]>([]);
-  const [value, setValue] = useState("");
-  const [adults, setAdults] = useState<number | null>(null);
+  /** Each ticked rate's own party and price in the bulk panel (0161), by pair key. */
+  const [lineDraft, setLineDraft] = useState<Record<string, { adults: number; value: string; clear: boolean }>>({});
+  /** The line Postgres or the parser refused, drawn in rose. */
+  const [badLine, setBadLine] = useState<string | null>(null);
   const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
   const [pending, startTransition] = useTransition();
 
@@ -228,8 +241,6 @@ export function RatesScreen({
     () => new Map(occupancy.map((o) => [`${o.roomTypeId}|${o.ratePlanId}|${o.date}|${o.adults}`, o.rateCents])),
     [occupancy],
   );
-
-  const maxAdults = Math.max(1, ...roomTypes.map((t) => t.maxOccupancy));
 
   function parse(text: string): number | null | "bad" {
     const trimmed = text.trim();
@@ -326,45 +337,124 @@ export function RatesScreen({
     );
   }
 
+  /**
+   * The parties a ticked rate can be priced for in the bulk panel -- exactly
+   * the rows the grid draws for it: the main row (its default party), then
+   * every other number of adults up to what the room type sleeps, leaving out
+   * a party removed in Room Rate Combinations. A plan with one price for all
+   * occupancies, or a room type not on the screen, has the main row only.
+   */
+  function partiesFor(ratePlanId: string, roomTypeId: string): { adults: number; kind: RateLine["kind"] }[] {
+    const plan = planById.get(ratePlanId);
+    const type = typeById.get(roomTypeId);
+    const def = defaultAdults(ratePlanId, roomTypeId);
+    const main = { adults: def, kind: "default" as const };
+    if (!plan || !type || plan.occupancyPricing === "single") return [main];
+    const rest = Array.from({ length: type.maxOccupancy }, (_, i) => i + 1)
+      .filter((a) => a !== def && !isRemoved(ratePlanId, roomTypeId, a))
+      .map((a) => ({
+        adults: a,
+        // Under a default that is not Sleeps, the Sleeps row is the standard
+        // price itself, as on the grid.
+        kind: a === type.baseOccupancy ? ("standard" as const) : ("occupancy" as const),
+      }));
+    return [main, ...rest];
+  }
+
+  // The ticked rates in the grid's own order, each with its own party and price.
+  const bulkLines = groups.flatMap((t) =>
+    [...t.plans.values()]
+      .filter((p) => selected.includes(pairKey(t.roomTypeId, p.ratePlanId)))
+      .map((p) => {
+        const key = pairKey(t.roomTypeId, p.ratePlanId);
+        const parties = partiesFor(p.ratePlanId, t.roomTypeId);
+        const draft = lineDraft[key];
+        const chosen = parties.find((x) => x.adults === draft?.adults) ?? parties[0];
+        return {
+          key,
+          roomTypeId: t.roomTypeId,
+          ratePlanId: p.ratePlanId,
+          roomTypeName: t.roomTypeName,
+          ratePlanName: p.ratePlanName,
+          parties,
+          chosen,
+          value: draft?.value ?? "",
+          clear: draft?.clear ?? false,
+        };
+      }),
+  );
+
+  function setLine(
+    key: string,
+    patch: Partial<{ adults: number; value: string; clear: boolean }>,
+    fallbackAdults: number,
+  ) {
+    setBadLine(null);
+    setLineDraft((d) => ({
+      ...d,
+      [key]: {
+        adults: d[key]?.adults ?? fallbackAdults,
+        value: d[key]?.value ?? "",
+        clear: d[key]?.clear ?? false,
+        ...patch,
+      },
+    }));
+  }
+
   function apply() {
-    const pairs = selected.map((k) => {
-      const [roomTypeId, ratePlanId] = k.split("|");
-      return { roomTypeId, ratePlanId };
-    });
-    const cents = parse(value);
-    if (cents === "bad") {
-      setMessage({ ok: false, text: tr("That is not an amount. Try 120 or 120.50.") });
-      return;
-    }
-    // One amount means one currency (0138).
-    const currencies = [...new Set(pairs.map((x) => curOf(x.ratePlanId)))];
-    if (currencies.length > 1) {
-      setMessage({
-        ok: false,
-        text: tr("These rate plans are priced in {currencies}. Set the rates of one currency at a time.", {
-          currencies: currencies.join(", "),
-        }),
+    setBadLine(null);
+    // A line left blank is skipped; a line set to Clear clears its nights
+    // (0162); every other line must be an amount.
+    const lines: (RateLine & { key: string })[] = [];
+    for (const l of bulkLines) {
+      if (l.clear) {
+        lines.push({
+          key: l.key,
+          roomTypeId: l.roomTypeId,
+          ratePlanId: l.ratePlanId,
+          kind: l.chosen.kind,
+          adults: l.chosen.kind === "occupancy" ? l.chosen.adults : null,
+          value: null,
+        });
+        continue;
+      }
+      if (l.value.trim() === "") continue;
+      const cents = parse(l.value);
+      if (cents === "bad" || cents === null) {
+        setBadLine(l.key);
+        setMessage({ ok: false, text: tr("That is not an amount. Try 120 or 120.50.") });
+        return;
+      }
+      lines.push({
+        key: l.key,
+        roomTypeId: l.roomTypeId,
+        ratePlanId: l.ratePlanId,
+        kind: l.chosen.kind,
+        adults: l.chosen.kind === "occupancy" ? l.chosen.adults : null,
+        value: cents,
       });
+    }
+    if (lines.length === 0) {
+      setMessage({ ok: false, text: tr("Type a price for at least one ticked rate.") });
       return;
     }
-    const amountCurrency = currencies[0] ?? currency;
     startTransition(async () => {
-      const result =
-        adults === null
-          ? await applyDefaultRates({ pairs, from: editFrom, to: editTo, daysOfWeek: dow, value: cents })
-          : await applyOccupancyRates({ pairs, from: editFrom, to: editTo, daysOfWeek: dow, adults, value: cents });
+      const result = await applyRateLines({
+        from: editFrom,
+        to: editTo,
+        daysOfWeek: dow,
+        lines: lines.map(({ key: _key, ...line }) => line),
+      });
       if (!result.ok) {
+        if (result.line !== undefined) setBadLine(lines[result.line]?.key ?? null);
         setMessage({ ok: false, text: result.error });
         return;
       }
       setMessage({
         ok: true,
-        text:
-          cents === null
-            ? tr.plural(result.data.nightsWritten, "Cleared {n} night.", "Cleared {n} nights.")
-            : tr.plural(result.data.nightsWritten, "Set {amount} on {n} night.", "Set {amount} on {n} nights.", {
-                amount: formatMoney(cents, amountCurrency),
-              }),
+        text: lines.every((x) => x.value === null)
+          ? tr.plural(result.data.nightsWritten, "Cleared {n} night.", "Cleared {n} nights.")
+          : tr.plural(result.data.nightsWritten, "Prices set on {n} night.", "Prices set on {n} nights."),
       });
       router.refresh();
     });
@@ -610,7 +700,7 @@ export function RatesScreen({
           <h2 className="mb-3 font-display text-[15px] tracking-tightest text-ink">
             {tr("Set a price on many days")}
           </h2>
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             <div>
               <label className={label} htmlFor="r-from">{tr("From")}</label>
               <input id="r-from" type="date" value={editFrom} onChange={(e) => setEditFrom(e.target.value)} className={field} />
@@ -618,22 +708,6 @@ export function RatesScreen({
             <div>
               <label className={label} htmlFor="r-to">{tr("To")}</label>
               <input id="r-to" type="date" value={editTo} onChange={(e) => setEditTo(e.target.value)} className={field} />
-            </div>
-            <div>
-              <label className={label} htmlFor="r-adults">{tr("Occupancy")}</label>
-              <select id="r-adults" value={adults ?? ""} className={field}
-                onChange={(e) => setAdults(e.target.value === "" ? null : Number(e.target.value))}>
-                <option value="">{tr("Standard price")}</option>
-                {Array.from({ length: maxAdults }, (_, i) => i + 1).map((a) => (
-                  <option key={a} value={a}>{tr.plural(a, "{n} adult", "{n} adults")}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className={label} htmlFor="r-value">{tr("Rate a night")}</label>
-              <input id="r-value" type="text" inputMode="decimal" value={value}
-                placeholder={tr("120.00, or blank to clear")}
-                onChange={(e) => setValue(e.target.value)} className={cn(field, "tnum")} />
             </div>
             <div>
               <span className={label}>{tr("Only these days")}</span>
@@ -660,6 +734,91 @@ export function RatesScreen({
               </div>
             </div>
           </div>
+
+          {bulkLines.length > 0 && (
+            <div className="mt-4 overflow-x-auto">
+              <table className="w-full min-w-[34rem] text-[13px]">
+                <thead>
+                  <tr className="border-b border-line text-left">
+                    <th className={cn(label, "py-1.5 pr-3 font-semibold")}>{tr("Rate")}</th>
+                    <th className={cn(label, "w-44 py-1.5 pr-3 font-semibold")}>{tr("Occupancy")}</th>
+                    <th className={cn(label, "w-64 py-1.5 font-semibold")}>{tr("Rate a night")}</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-line">
+                  {bulkLines.map((l) => {
+                    const cur = curOf(l.ratePlanId);
+                    const bad = badLine === l.key;
+                    return (
+                      <tr key={l.key} className={cn(bad && "bg-rose-50")}>
+                        <td className="py-1.5 pr-3">
+                          <span className="font-medium text-ink">{l.roomTypeName}</span>
+                          <span className="text-ink-muted"> · {l.ratePlanName}</span>
+                        </td>
+                        <td className="py-1.5 pr-3">
+                          {l.parties.length > 1 ? (
+                            <select
+                              value={l.chosen.adults}
+                              aria-label={tr("Occupancy for {plan}, {type}", { plan: l.ratePlanName, type: l.roomTypeName })}
+                              onChange={(e) => setLine(l.key, { adults: Number(e.target.value) }, l.chosen.adults)}
+                              className={field}
+                            >
+                              {l.parties.map((x) => (
+                                <option key={x.adults} value={x.adults}>
+                                  {tr.plural(x.adults, "{n} adult", "{n} adults")}
+                                </option>
+                              ))}
+                            </select>
+                          ) : (
+                            <span className="text-ink-muted">{tr("Standard price")}</span>
+                          )}
+                        </td>
+                        <td className="py-1.5">
+                          <div className="flex items-center gap-2">
+                            {l.clear ? (
+                              // Clearing the standard price takes the plan off sale on
+                              // those nights; clearing a party's own price puts it back
+                              // on the standard price -- what clearing the cell does.
+                              <span className="min-w-0 flex-1 rounded-md border border-rose-200 bg-rose-50 px-3 py-1.5 text-[12.5px] text-rose-700">
+                                {l.chosen.kind === "occupancy"
+                                  ? tr("Back to the standard price")
+                                  : tr("Not sold on these nights")}
+                              </span>
+                            ) : (
+                              <input
+                                type="text"
+                                inputMode="decimal"
+                                value={l.value}
+                                placeholder="120.00"
+                                aria-label={tr("Rate a night for {plan}, {type}", { plan: l.ratePlanName, type: l.roomTypeName })}
+                                aria-invalid={bad || undefined}
+                                onChange={(e) => setLine(l.key, { value: e.target.value }, l.chosen.adults)}
+                                className={cn(field, "tnum", bad && "border-rose-400")}
+                              />
+                            )}
+                            {!l.clear && cur !== currency && <span className="text-xxs text-ink-faint">{cur}</span>}
+                            <button
+                              type="button"
+                              aria-pressed={l.clear}
+                              onClick={() => setLine(l.key, { clear: !l.clear }, l.chosen.adults)}
+                              className={cn(
+                                "shrink-0 rounded-md border px-2.5 py-1.5 text-[12px]",
+                                l.clear
+                                  ? "border-line text-ink-muted hover:bg-shell hover:text-ink"
+                                  : "border-line text-rose-600 hover:bg-rose-50",
+                              )}
+                            >
+                              {l.clear ? tr("Set a price") : tr("Clear")}
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
 
           <div className="mt-4 flex flex-wrap items-center gap-3">
             <button

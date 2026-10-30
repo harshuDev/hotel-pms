@@ -315,7 +315,6 @@
  "+ Occupancy": "+ Πληρότητα",
  "1 Example Street, Example City": "Οδός Παραδείγματος 1, Πόλη Παραδείγματος",
  "1 Point after dot": "1 δεκαδικό ψηφίο",
- "120.00, or blank to clear": "120.00, ή κενό για διαγραφή",
  "2 Points after dot": "2 δεκαδικά ψηφία",
  "A {0} booking cannot be given a room": "Μια κράτηση σε κατάσταση {0} δεν μπορεί να πάρει δωμάτιο",
  "A {n} night deposit is required at the time of booking.": {
@@ -984,10 +983,6 @@
  "Clear": "Εκκαθάριση",
  "Clear filter": "Εκκαθάριση φίλτρου",
  "Clear the state or floor filter to see the whole house.": "Καταργήστε το φίλτρο κατάστασης ή ορόφου για να δείτε όλο το κατάλυμα.",
- "Cleared {n} nights.": {
-  "one": "Διαγράφηκε {n} διανυκτέρευση.",
-  "other": "Διαγράφηκαν {n} διανυκτερεύσεις."
- },
  "Client ID": "Client ID",
  "Client secret": "Client secret",
  "Close": "Κλείσιμο",
@@ -2719,10 +2714,6 @@
  "Senegal": "Σενεγάλη",
  "Sent": "Στάλθηκε",
  "Serbia": "Σερβία",
- "Set {amount} on {n} nights.": {
-  "one": "{amount} ορίστηκε σε {n} νύχτα.",
-  "other": "{amount} ορίστηκε σε {n} νύχτες."
- },
  "Set a new password": "Ορισμός νέου κωδικού πρόσβασης",
  "Set a price on many days": "Ορισμός τιμής για πολλές ημέρες",
  "Set as hotel timezone": "Ορισμός ως ζώνη ώρας του ξενοδοχείου",
@@ -3383,7 +3374,6 @@
  "Only managers and administrators can change rates": "Μόνο διευθυντές και διαχειριστές μπορούν να αλλάξουν τιμές",
  "There is no exchange rate for {0} yet. Set a fixed rate for it in Settings -> Currencies.": "Δεν υπάρχει ακόμη ισοτιμία για το {0}. Ορίστε σταθερή ισοτιμία στις Ρυθμίσεις -> Νομίσματα.",
  "There is no live rate for {0} yet, and {1} is priced in it. Keep the fixed rate for now.": "Δεν υπάρχει ακόμη τρέχουσα ισοτιμία για το {0} και το {1} τιμολογείται σε αυτό. Κρατήστε προς το παρόν τη σταθερή ισοτιμία.",
- "These rate plans are priced in {currencies}. Set the rates of one currency at a time.": "Αυτά τα τιμολογιακά πλάνα τιμολογούνται σε {currencies}. Ορίστε τις τιμές για ένα νόμισμα κάθε φορά.",
  "Add the Channex API key first": "Προσθέστε πρώτα το κλειδί API του Channex",
  "Channex API key": "Κλειδί API Channex",
  "Channex refused the API key": "Το Channex απέρριψε το κλειδί API",
@@ -3510,5 +3500,21 @@
  },
  "Filter": "Φιλτράρισμα",
  "Filter the shift history by business date or by the date it closed": "Φιλτράρετε το ιστορικό βαρδιών κατά επιχειρησιακή ημερομηνία ή κατά την ημερομηνία κλεισίματος",
- "No shifts closed in these dates.": "Δεν έκλεισαν βάρδιες σε αυτές τις ημερομηνίες."
+ "No shifts closed in these dates.": "Δεν έκλεισαν βάρδιες σε αυτές τις ημερομηνίες.",
+ "A rate line is missing its room type, rate plan or occupancy.": "Σε μια γραμμή τιμής λείπει ο τύπος δωματίου, το πρόγραμμα τιμών ή η πληρότητα.",
+ "Apply at most 500 rates at a time.": "Εφαρμόστε το πολύ 500 τιμές τη φορά.",
+ "Occupancy for {plan}, {type}": "Πληρότητα για {plan}, {type}",
+ "Prices set on {n} nights.": {
+  "one": "Ορίστηκαν τιμές για {n} διανυκτέρευση.",
+  "other": "Ορίστηκαν τιμές για {n} διανυκτερεύσεις."
+ },
+ "Rate a night for {plan}, {type}": "Τιμή ανά νύχτα για {plan}, {type}",
+ "Type a price for at least one ticked rate.": "Πληκτρολογήστε τιμή για τουλάχιστον μία επιλεγμένη τιμή.",
+ "Back to the standard price": "Επιστροφή στην τυπική τιμή",
+ "Not sold on these nights": "Δεν πωλείται αυτές τις νύχτες",
+ "Set a price": "Ορισμός τιμής",
+ "Cleared {n} nights.": {
+  "one": "Διαγράφηκε {n} διανυκτέρευση.",
+  "other": "Διαγράφηκαν {n} διανυκτερεύσεις."
+ }
 }

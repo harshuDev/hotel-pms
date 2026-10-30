@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0160` (0138 as 0138a-f, 0142 as 0142a-b, 0149 as 0149a-b, 0150 as 0150 + 0150a, 0151 as 0151a-c, 0145 as
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0162` (0138 as 0138a-f, 0142 as 0142a-b, 0149 as 0149a-b, 0150 as 0150 + 0150a, 0151 as 0151a-c, 0145 as
 `0143_channex_send_rooms` + 0145b) are
 applied to the hosted database.
 
@@ -1412,6 +1412,27 @@ client: "Need to add Booking Channel in the Dashboard".
     Enter or when focus leaves it (`set_rates()` over a one-day range), past
     nights stay read-only, and ‹ Previous / Today / Next › with a date field
     page the 28 nights. The bulk panel stays for ranges.
+  - **THE BULK PANEL PRICES EACH TICKED RATE ON ITS OWN (0161).** The
+    client: "when I select multiple room type ... all the selected room
+    types get updated but on their own prices". "Set a price on many days"
+    used to take ONE price and ONE occupancy for every ticked rate. Now From,
+    To and the weekdays are shared, and each ticked rate is a line -- room
+    type and plan, an Occupancy offering exactly the rows the grid draws for
+    it (its default party first, removed parties left out; "Standard price"
+    on a one-price plan) and its own price in its plan's currency, so the
+    old "one currency at a time" refusal is gone. A blank line is skipped.
+    **"Clear" on a line clears its nights instead (0162)**, sending null to
+    its setter exactly as clearing the cell does: the main or Sleeps row
+    goes back to "not loaded" (the line reads "Not sold on these nights"),
+    a party's own price back to the standard price ("Back to the standard
+    price"). Tested rolled back: identical to the setters with null. `applyRateLines()` ->
+    `set_rate_lines(from, to, days, lines jsonb)`, security invoker, sends
+    each line to the setter its grid row uses (`set_default_rates()`,
+    `set_rates()` for the Sleeps row under another default,
+    `set_occupancy_rates()`) in ONE transaction; a refusal comes back with
+    the line's position in DETAIL and that line goes rose. Tested rolled
+    back on KOKO: identical prices for every party on every night to
+    calling the setters one by one, and a bad line changed nothing.
   - **A plan that prices by occupancy draws a row per number of adults**
     under its main row. An empty cell shows, faint, what that party pays
     anyway; typing sets that night's own price for them

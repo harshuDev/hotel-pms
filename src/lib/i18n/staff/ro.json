@@ -348,7 +348,6 @@
  "+ Occupancy": "+ Ocupare",
  "1 Example Street, Example City": "Strada Exemplu 1, Orașul Exemplu",
  "1 Point after dot": "1 zecimală",
- "120.00, or blank to clear": "120.00, sau gol pentru a șterge",
  "2 Points after dot": "2 zecimale",
  "A {0} booking cannot be given a room": "O rezervare {0} nu poate primi o cameră",
  "A {n} night deposit is required at the time of booking.": {
@@ -1024,11 +1023,6 @@
  "Clear": "Golește",
  "Clear filter": "Șterge filtrul",
  "Clear the state or floor filter to see the whole house.": "Ștergeți filtrul de stare sau de etaj pentru a vedea toată proprietatea.",
- "Cleared {n} nights.": {
-  "one": "{n} noapte golită.",
-  "few": "{n} nopți golite.",
-  "other": "{n} de nopți golite."
- },
  "Client ID": "ID client",
  "Client secret": "Secret client",
  "Close": "Închide",
@@ -2766,11 +2760,6 @@
  "Senegal": "Senegal",
  "Sent": "Trimis",
  "Serbia": "Serbia",
- "Set {amount} on {n} nights.": {
-  "one": "{amount} setat pe {n} noapte.",
-  "few": "{amount} setat pe {n} nopți.",
-  "other": "{amount} setat pe {n} de nopți."
- },
  "Set a new password": "Setați o parolă nouă",
  "Set a price on many days": "Setați un preț pe mai multe zile",
  "Set as hotel timezone": "Setează ca fus orar al hotelului",
@@ -3431,7 +3420,6 @@
  "Only managers and administrators can change rates": "Doar managerii și administratorii pot modifica tarifele",
  "There is no exchange rate for {0} yet. Set a fixed rate for it in Settings -> Currencies.": "Încă nu există un curs de schimb pentru {0}. Setați un curs fix în Setări -> Monede.",
  "There is no live rate for {0} yet, and {1} is priced in it. Keep the fixed rate for now.": "Încă nu există un curs live pentru {0}, iar {1} are prețuri în această monedă. Păstrați deocamdată cursul fix.",
- "These rate plans are priced in {currencies}. Set the rates of one currency at a time.": "Aceste planuri tarifare au prețuri în {currencies}. Setați tarifele pentru o singură monedă odată.",
  "Add the Channex API key first": "Adăugați mai întâi cheia API Channex",
  "Channex API key": "Cheie API Channex",
  "Channex refused the API key": "Channex a refuzat cheia API",
@@ -3568,5 +3556,23 @@
  },
  "Filter": "Filtrează",
  "Filter the shift history by business date or by the date it closed": "Filtrați istoricul turelor după data operațională sau după data închiderii",
- "No shifts closed in these dates.": "Nicio tură nu a fost închisă în aceste date."
+ "No shifts closed in these dates.": "Nicio tură nu a fost închisă în aceste date.",
+ "A rate line is missing its room type, rate plan or occupancy.": "Unei linii de tarif îi lipsește tipul de cameră, planul tarifar sau gradul de ocupare.",
+ "Apply at most 500 rates at a time.": "Aplicați cel mult 500 de tarife odată.",
+ "Occupancy for {plan}, {type}": "Grad de ocupare pentru {plan}, {type}",
+ "Prices set on {n} nights.": {
+  "one": "Prețuri stabilite pentru {n} noapte.",
+  "few": "Prețuri stabilite pentru {n} nopți.",
+  "other": "Prețuri stabilite pentru {n} de nopți."
+ },
+ "Rate a night for {plan}, {type}": "Preț pe noapte pentru {plan}, {type}",
+ "Type a price for at least one ticked rate.": "Introduceți un preț pentru cel puțin un tarif bifat.",
+ "Back to the standard price": "Revine la prețul standard",
+ "Not sold on these nights": "Nu se vinde în aceste nopți",
+ "Set a price": "Stabiliți un preț",
+ "Cleared {n} nights.": {
+  "one": "{n} noapte golită.",
+  "few": "{n} nopți golite.",
+  "other": "{n} de nopți golite."
+ }
 }

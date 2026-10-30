@@ -315,7 +315,6 @@
  "+ Occupancy": "+ Occupation",
  "1 Example Street, Example City": "1 rue Exemple, Ville Exemple",
  "1 Point after dot": "1 décimale",
- "120.00, or blank to clear": "120.00, ou vide pour effacer",
  "2 Points after dot": "2 décimales",
  "A {0} booking cannot be given a room": "Une réservation {0} ne peut pas recevoir de chambre",
  "A {n} night deposit is required at the time of booking.": {
@@ -984,10 +983,6 @@
  "Clear": "Effacer",
  "Clear filter": "Effacer le filtre",
  "Clear the state or floor filter to see the whole house.": "Effacez le filtre d’état ou d’étage pour voir tout l’établissement.",
- "Cleared {n} nights.": {
-  "one": "{n} nuit effacée.",
-  "other": "{n} nuits effacées."
- },
  "Client ID": "ID client",
  "Client secret": "Secret client",
  "Close": "Fermer",
@@ -2720,10 +2715,6 @@
  "Senegal": "Sénégal",
  "Sent": "Envoyé",
  "Serbia": "Serbie",
- "Set {amount} on {n} nights.": {
-  "one": "{amount} appliqué sur {n} nuit.",
-  "other": "{amount} appliqué sur {n} nuits."
- },
  "Set a new password": "Définir un nouveau mot de passe",
  "Set a price on many days": "Fixer un prix sur plusieurs jours",
  "Set as hotel timezone": "Définir comme fuseau horaire de l’hôtel",
@@ -3384,7 +3375,6 @@
  "Only managers and administrators can change rates": "Seuls les responsables et les administrateurs peuvent modifier les tarifs",
  "There is no exchange rate for {0} yet. Set a fixed rate for it in Settings -> Currencies.": "Il n'y a pas encore de taux de change pour {0}. Fixez un taux fixe dans Paramètres -> Devises.",
  "There is no live rate for {0} yet, and {1} is priced in it. Keep the fixed rate for now.": "Il n'y a pas encore de taux en direct pour {0}, et {1} est tarifé dans cette devise. Gardez le taux fixe pour l'instant.",
- "These rate plans are priced in {currencies}. Set the rates of one currency at a time.": "Ces plans tarifaires sont tarifés en {currencies}. Définissez les tarifs d'une seule devise à la fois.",
  "Add the Channex API key first": "Ajoutez d'abord la clé API Channex",
  "Channex API key": "Clé API Channex",
  "Channex refused the API key": "Channex a refusé la clé API",
@@ -3511,5 +3501,21 @@
  },
  "Filter": "Filtrer",
  "Filter the shift history by business date or by the date it closed": "Filtrez l’historique des services par date d’exploitation ou par date de clôture",
- "No shifts closed in these dates.": "Aucun service clôturé à ces dates."
+ "No shifts closed in these dates.": "Aucun service clôturé à ces dates.",
+ "A rate line is missing its room type, rate plan or occupancy.": "Il manque à une ligne de tarif le type de chambre, le plan tarifaire ou l’occupation.",
+ "Apply at most 500 rates at a time.": "Appliquez au plus 500 tarifs à la fois.",
+ "Occupancy for {plan}, {type}": "Occupation pour {plan}, {type}",
+ "Prices set on {n} nights.": {
+  "one": "Prix fixés sur {n} nuit.",
+  "other": "Prix fixés sur {n} nuits."
+ },
+ "Rate a night for {plan}, {type}": "Tarif d’une nuit pour {plan}, {type}",
+ "Type a price for at least one ticked rate.": "Saisissez un prix pour au moins un tarif coché.",
+ "Back to the standard price": "Retour au prix standard",
+ "Not sold on these nights": "Pas en vente ces nuits-là",
+ "Set a price": "Fixer un prix",
+ "Cleared {n} nights.": {
+  "one": "{n} nuit effacée.",
+  "other": "{n} nuits effacées."
+ }
 }
