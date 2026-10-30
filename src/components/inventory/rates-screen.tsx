@@ -40,7 +40,8 @@ import { useCurrency } from "@/components/currency";
  * for every ticked rate; now the dates and weekdays are shared and each
  * ticked rate is a line with its own occupancy -- the parties the grid draws
  * for it -- and its own price, in its plan's currency. A blank line is
- * skipped. `set_rate_lines()` writes them all in one transaction through
+ * skipped; "Clear" on a line clears its nights instead (0162), as clearing
+ * the cell would. `set_rate_lines()` writes them all in one transaction through
  * the setter the grid's row would use, so a refusal changes nothing and
  * names its line.
  *
@@ -171,7 +172,7 @@ export function RatesScreen({
   const [editTo, setEditTo] = useState(dates[dates.length - 1] ?? from);
   const [dow, setDow] = useState<number[]>([]);
   /** Each ticked rate's own party and price in the bulk panel (0161), by pair key. */
-  const [lineDraft, setLineDraft] = useState<Record<string, { adults: number; value: string }>>({});
+  const [lineDraft, setLineDraft] = useState<Record<string, { adults: number; value: string; clear: boolean }>>({});
   /** The line Postgres or the parser refused, drawn in rose. */
   const [badLine, setBadLine] = useState<string | null>(null);
   const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
@@ -378,23 +379,45 @@ export function RatesScreen({
           parties,
           chosen,
           value: draft?.value ?? "",
+          clear: draft?.clear ?? false,
         };
       }),
   );
 
-  function setLine(key: string, patch: Partial<{ adults: number; value: string }>, fallbackAdults: number) {
+  function setLine(
+    key: string,
+    patch: Partial<{ adults: number; value: string; clear: boolean }>,
+    fallbackAdults: number,
+  ) {
     setBadLine(null);
     setLineDraft((d) => ({
       ...d,
-      [key]: { adults: d[key]?.adults ?? fallbackAdults, value: d[key]?.value ?? "", ...patch },
+      [key]: {
+        adults: d[key]?.adults ?? fallbackAdults,
+        value: d[key]?.value ?? "",
+        clear: d[key]?.clear ?? false,
+        ...patch,
+      },
     }));
   }
 
   function apply() {
     setBadLine(null);
-    // A line left blank is skipped; every other line must be an amount.
+    // A line left blank is skipped; a line set to Clear clears its nights
+    // (0162); every other line must be an amount.
     const lines: (RateLine & { key: string })[] = [];
     for (const l of bulkLines) {
+      if (l.clear) {
+        lines.push({
+          key: l.key,
+          roomTypeId: l.roomTypeId,
+          ratePlanId: l.ratePlanId,
+          kind: l.chosen.kind,
+          adults: l.chosen.kind === "occupancy" ? l.chosen.adults : null,
+          value: null,
+        });
+        continue;
+      }
       if (l.value.trim() === "") continue;
       const cents = parse(l.value);
       if (cents === "bad" || cents === null) {
@@ -429,7 +452,9 @@ export function RatesScreen({
       }
       setMessage({
         ok: true,
-        text: tr.plural(result.data.nightsWritten, "Prices set on {n} night.", "Prices set on {n} nights."),
+        text: lines.every((x) => x.value === null)
+          ? tr.plural(result.data.nightsWritten, "Cleared {n} night.", "Cleared {n} nights.")
+          : tr.plural(result.data.nightsWritten, "Prices set on {n} night.", "Prices set on {n} nights."),
       });
       router.refresh();
     });
@@ -717,7 +742,7 @@ export function RatesScreen({
                   <tr className="border-b border-line text-left">
                     <th className={cn(label, "py-1.5 pr-3 font-semibold")}>{tr("Rate")}</th>
                     <th className={cn(label, "w-44 py-1.5 pr-3 font-semibold")}>{tr("Occupancy")}</th>
-                    <th className={cn(label, "w-44 py-1.5 font-semibold")}>{tr("Rate a night")}</th>
+                    <th className={cn(label, "w-64 py-1.5 font-semibold")}>{tr("Rate a night")}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-line">
@@ -750,17 +775,41 @@ export function RatesScreen({
                         </td>
                         <td className="py-1.5">
                           <div className="flex items-center gap-2">
-                            <input
-                              type="text"
-                              inputMode="decimal"
-                              value={l.value}
-                              placeholder="120.00"
-                              aria-label={tr("Rate a night for {plan}, {type}", { plan: l.ratePlanName, type: l.roomTypeName })}
-                              aria-invalid={bad || undefined}
-                              onChange={(e) => setLine(l.key, { value: e.target.value }, l.chosen.adults)}
-                              className={cn(field, "tnum", bad && "border-rose-400")}
-                            />
-                            {cur !== currency && <span className="text-xxs text-ink-faint">{cur}</span>}
+                            {l.clear ? (
+                              // Clearing the standard price takes the plan off sale on
+                              // those nights; clearing a party's own price puts it back
+                              // on the standard price -- what clearing the cell does.
+                              <span className="min-w-0 flex-1 rounded-md border border-rose-200 bg-rose-50 px-3 py-1.5 text-[12.5px] text-rose-700">
+                                {l.chosen.kind === "occupancy"
+                                  ? tr("Back to the standard price")
+                                  : tr("Not sold on these nights")}
+                              </span>
+                            ) : (
+                              <input
+                                type="text"
+                                inputMode="decimal"
+                                value={l.value}
+                                placeholder="120.00"
+                                aria-label={tr("Rate a night for {plan}, {type}", { plan: l.ratePlanName, type: l.roomTypeName })}
+                                aria-invalid={bad || undefined}
+                                onChange={(e) => setLine(l.key, { value: e.target.value }, l.chosen.adults)}
+                                className={cn(field, "tnum", bad && "border-rose-400")}
+                              />
+                            )}
+                            {!l.clear && cur !== currency && <span className="text-xxs text-ink-faint">{cur}</span>}
+                            <button
+                              type="button"
+                              aria-pressed={l.clear}
+                              onClick={() => setLine(l.key, { clear: !l.clear }, l.chosen.adults)}
+                              className={cn(
+                                "shrink-0 rounded-md border px-2.5 py-1.5 text-[12px]",
+                                l.clear
+                                  ? "border-line text-ink-muted hover:bg-shell hover:text-ink"
+                                  : "border-line text-rose-600 hover:bg-rose-50",
+                              )}
+                            >
+                              {l.clear ? tr("Set a price") : tr("Clear")}
+                            </button>
                           </div>
                         </td>
                       </tr>

@@ -3452,5 +3452,11 @@
   "other": "Harga ditetapkan pada {n} malam."
  },
  "Rate a night for {plan}, {type}": "Tarif per malam untuk {plan}, {type}",
- "Type a price for at least one ticked rate.": "Ketik harga untuk setidaknya satu tarif yang dicentang."
+ "Type a price for at least one ticked rate.": "Ketik harga untuk setidaknya satu tarif yang dicentang.",
+ "Back to the standard price": "Kembali ke harga standar",
+ "Not sold on these nights": "Tidak dijual pada malam ini",
+ "Set a price": "Tetapkan harga",
+ "Cleared {n} nights.": {
+  "other": "{n} malam dikosongkan."
+ }
 }

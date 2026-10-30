@@ -3566,5 +3566,13 @@
   "other": "Prețuri stabilite pentru {n} de nopți."
  },
  "Rate a night for {plan}, {type}": "Preț pe noapte pentru {plan}, {type}",
- "Type a price for at least one ticked rate.": "Introduceți un preț pentru cel puțin un tarif bifat."
+ "Type a price for at least one ticked rate.": "Introduceți un preț pentru cel puțin un tarif bifat.",
+ "Back to the standard price": "Revine la prețul standard",
+ "Not sold on these nights": "Nu se vinde în aceste nopți",
+ "Set a price": "Stabiliți un preț",
+ "Cleared {n} nights.": {
+  "one": "{n} noapte golită.",
+  "few": "{n} nopți golite.",
+  "other": "{n} de nopți golite."
+ }
 }

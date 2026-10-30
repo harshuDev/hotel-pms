@@ -1769,6 +1769,9 @@
  "Back to the dashboard": {
   "kind": "text"
  },
+ "Back to the standard price": {
+  "kind": "text"
+ },
  "Background color": {
   "kind": "text"
  },
@@ -2819,6 +2822,10 @@
  },
  "Clear the state or floor filter to see the whole house.": {
   "kind": "text"
+ },
+ "Cleared {n} nights.": {
+  "kind": "plural",
+  "one": "Cleared {n} night."
  },
  "Client ID": {
   "kind": "text"
@@ -6172,6 +6179,9 @@
  "Not set": {
   "kind": "text"
  },
+ "Not sold on these nights": {
+  "kind": "text"
+ },
  "Not yet closed": {
   "kind": "text"
  },
@@ -8250,6 +8260,9 @@
   "code": "RS"
  },
  "Set a new password": {
+  "kind": "text"
+ },
+ "Set a price": {
   "kind": "text"
  },
  "Set a price on many days": {

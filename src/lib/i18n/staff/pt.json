@@ -3510,5 +3510,12 @@
   "other": "Preços definidos em {n} noites."
  },
  "Rate a night for {plan}, {type}": "Preço por noite para {plan}, {type}",
- "Type a price for at least one ticked rate.": "Escreva um preço para pelo menos uma tarifa assinalada."
+ "Type a price for at least one ticked rate.": "Escreva um preço para pelo menos uma tarifa assinalada.",
+ "Back to the standard price": "Volta ao preço padrão",
+ "Not sold on these nights": "Não vendido nestas noites",
+ "Set a price": "Definir um preço",
+ "Cleared {n} nights.": {
+  "one": "{n} noite limpa.",
+  "other": "{n} noites limpas."
+ }
 }

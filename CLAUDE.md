@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0161` (0138 as 0138a-f, 0142 as 0142a-b, 0149 as 0149a-b, 0150 as 0150 + 0150a, 0151 as 0151a-c, 0145 as
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0162` (0138 as 0138a-f, 0142 as 0142a-b, 0149 as 0149a-b, 0150 as 0150 + 0150a, 0151 as 0151a-c, 0145 as
 `0143_channex_send_rooms` + 0145b) are
 applied to the hosted database.
 
@@ -1420,9 +1420,12 @@ client: "Need to add Booking Channel in the Dashboard".
     type and plan, an Occupancy offering exactly the rows the grid draws for
     it (its default party first, removed parties left out; "Standard price"
     on a one-price plan) and its own price in its plan's currency, so the
-    old "one currency at a time" refusal is gone. A blank line is skipped,
-    which means **a range can no longer be cleared from the panel** -- a
-    night still clears from its cell. `applyRateLines()` ->
+    old "one currency at a time" refusal is gone. A blank line is skipped.
+    **"Clear" on a line clears its nights instead (0162)**, sending null to
+    its setter exactly as clearing the cell does: the main or Sleeps row
+    goes back to "not loaded" (the line reads "Not sold on these nights"),
+    a party's own price back to the standard price ("Back to the standard
+    price"). Tested rolled back: identical to the setters with null. `applyRateLines()` ->
     `set_rate_lines(from, to, days, lines jsonb)`, security invoker, sends
     each line to the setter its grid row uses (`set_default_rates()`,
     `set_rates()` for the Sleeps row under another default,

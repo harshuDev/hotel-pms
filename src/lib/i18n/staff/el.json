@@ -3509,5 +3509,12 @@
   "other": "Ορίστηκαν τιμές για {n} διανυκτερεύσεις."
  },
  "Rate a night for {plan}, {type}": "Τιμή ανά νύχτα για {plan}, {type}",
- "Type a price for at least one ticked rate.": "Πληκτρολογήστε τιμή για τουλάχιστον μία επιλεγμένη τιμή."
+ "Type a price for at least one ticked rate.": "Πληκτρολογήστε τιμή για τουλάχιστον μία επιλεγμένη τιμή.",
+ "Back to the standard price": "Επιστροφή στην τυπική τιμή",
+ "Not sold on these nights": "Δεν πωλείται αυτές τις νύχτες",
+ "Set a price": "Ορισμός τιμής",
+ "Cleared {n} nights.": {
+  "one": "Διαγράφηκε {n} διανυκτέρευση.",
+  "other": "Διαγράφηκαν {n} διανυκτερεύσεις."
+ }
 }

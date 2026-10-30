@@ -3623,5 +3623,14 @@
   "other": "Cene so nastavljene za {n} noči."
  },
  "Rate a night for {plan}, {type}": "Cena za noč za {plan}, {type}",
- "Type a price for at least one ticked rate.": "Vnesite ceno za vsaj eno označeno ceno."
+ "Type a price for at least one ticked rate.": "Vnesite ceno za vsaj eno označeno ceno.",
+ "Back to the standard price": "Nazaj na standardno ceno",
+ "Not sold on these nights": "Te noči se ne prodaja",
+ "Set a price": "Nastavi ceno",
+ "Cleared {n} nights.": {
+  "one": "Počiščena {n} noč.",
+  "two": "Počiščeni {n} noči.",
+  "few": "Počiščene {n} noči.",
+  "other": "Počiščenih {n} noči."
+ }
 }

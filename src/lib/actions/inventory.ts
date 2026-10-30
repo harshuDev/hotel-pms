@@ -494,8 +494,12 @@ export type RateLine = {
    */
   kind: "default" | "standard" | "occupancy";
   adults: number | null;
-  /** Integer minor units of the PLAN's currency (0138). */
-  value: number;
+  /**
+   * Integer minor units of the PLAN's currency (0138). Null clears the line's
+   * nights (0162), as clearing its cell does: a standard price goes back to
+   * "not loaded", a party's own price back to the standard price.
+   */
+  value: number | null;
 };
 
 /**
@@ -516,7 +520,9 @@ export async function applyRateLines(edit: {
   if (edit.to < edit.from) {
     return { ok: false, error: await localised("The last date must not be before the first.") };
   }
-  const bad = edit.lines.findIndex((l) => !Number.isSafeInteger(l.value) || l.value < 0);
+  const bad = edit.lines.findIndex(
+    (l) => l.value !== null && (!Number.isSafeInteger(l.value) || l.value < 0),
+  );
   if (bad >= 0) {
     return { ok: false, error: await localised("That is not an amount. Try 120 or 120.50."), line: bad };
   }
@@ -532,6 +538,7 @@ export async function applyRateLines(edit: {
       kind: l.kind,
       adults: l.adults,
       rate_cents: l.value,
+      clear: l.value === null,
     })),
   });
   if (error) {

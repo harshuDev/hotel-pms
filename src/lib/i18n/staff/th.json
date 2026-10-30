@@ -3452,5 +3452,11 @@
   "other": "ตั้งราคาแล้ว {n} คืน"
  },
  "Rate a night for {plan}, {type}": "ราคาต่อคืนสำหรับ {plan}, {type}",
- "Type a price for at least one ticked rate.": "พิมพ์ราคาสำหรับอย่างน้อยหนึ่งราคาที่ติ๊กไว้"
+ "Type a price for at least one ticked rate.": "พิมพ์ราคาสำหรับอย่างน้อยหนึ่งราคาที่ติ๊กไว้",
+ "Back to the standard price": "กลับไปใช้ราคามาตรฐาน",
+ "Not sold on these nights": "ไม่เปิดขายในคืนเหล่านี้",
+ "Set a price": "ตั้งราคา",
+ "Cleared {n} nights.": {
+  "other": "ล้างแล้ว {n} คืน"
+ }
 }
