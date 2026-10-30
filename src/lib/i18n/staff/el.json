@@ -3503,5 +3503,12 @@
   "one": "{n} πλάνο τιμών πριν από αυτό άλλαξε.",
   "other": "{n} πλάνα τιμών πριν από αυτό άλλαξαν."
  },
- "Tick at least one number of guests on every rate plan you send to Channex": "Επιλέξτε τουλάχιστον έναν αριθμό επισκεπτών σε κάθε πλάνο τιμών που στέλνετε στο Channex"
+ "Tick at least one number of guests on every rate plan you send to Channex": "Επιλέξτε τουλάχιστον έναν αριθμό επισκεπτών σε κάθε πλάνο τιμών που στέλνετε στο Channex",
+ "{n} shifts": {
+  "one": "{n} βάρδια",
+  "other": "{n} βάρδιες"
+ },
+ "Filter": "Φιλτράρισμα",
+ "Filter the shift history by business date or by the date it closed": "Φιλτράρετε το ιστορικό βαρδιών κατά επιχειρησιακή ημερομηνία ή κατά την ημερομηνία κλεισίματος",
+ "No shifts closed in these dates.": "Δεν έκλεισαν βάρδιες σε αυτές τις ημερομηνίες."
 }

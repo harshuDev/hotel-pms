@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Card, cn } from "@/components/ui";
 import { getT } from "@/lib/i18n/server";
 import { formatMoney } from "@/lib/money";
+import type { ShiftHistoryFilter } from "@/lib/queries";
 import type { PaidOut, ShiftHistoryRow, ShiftPayment } from "@/lib/types";
 
 /*
@@ -11,6 +12,12 @@ import type { PaidOut, ShiftHistoryRow, ShiftPayment } from "@/lib/types";
  * and the variance. "View" opens the shift's payments and paid-outs under its
  * row; the open row and the page are URL state (`?shift=`, `?history_page=`),
  * so a reload keeps them and the back button closes the row.
+ *
+ * The filter (0160) narrows the list to a range of dates, on the business date
+ * or on the day the drawer was counted, on the hotel's clock -- the two differ
+ * for most shifts. It is a plain GET form (`?history_from=&history_to=&
+ * history_by=`), like a report's range, and every link here carries it, so
+ * paging and opening a row keep the filter.
  *
  * Managers and administrators only: the page does not draw this for anyone
  * else, and cashier_shift_history() refuses them anyway. A receptionist counts
@@ -23,8 +30,11 @@ function varianceTone(cents: number) {
   return "text-ink";
 }
 
-function pageHref(page: number, shift?: string) {
+function pageHref(filter: ShiftHistoryFilter, page: number, shift?: string) {
   const q = new URLSearchParams();
+  if (filter.from) q.set("history_from", filter.from);
+  if (filter.to) q.set("history_to", filter.to);
+  if (filter.by === "closed") q.set("history_by", "closed");
   if (page > 1) q.set("history_page", String(page));
   if (shift) q.set("shift", shift);
   const s = q.toString();
@@ -35,6 +45,7 @@ export async function ShiftHistory({
   rows,
   total,
   page,
+  filter,
   perPage,
   openShiftId,
   detail,
@@ -44,6 +55,7 @@ export async function ShiftHistory({
   rows: ShiftHistoryRow[];
   total: number;
   page: number;
+  filter: ShiftHistoryFilter;
   perPage: number;
   openShiftId: string | null;
   detail: { payments: ShiftPayment[]; paidOuts: PaidOut[] } | null;
@@ -52,13 +64,71 @@ export async function ShiftHistory({
 }) {
   const tr = await getT();
   const lastPage = Math.max(1, Math.ceil(total / perPage));
+  const filtered = Boolean(filter.from || filter.to);
+  const label = "mb-1 block text-xxs font-semibold uppercase tracking-[0.1em] text-ink-faint";
+  const field = "tnum rounded-md border border-line bg-white px-3 py-1.5 text-[13px] text-ink";
 
   return (
     <div id="shift-history" className="scroll-mt-28">
       <Card title={tr("Shift history")}>
+        <form
+          action="/cashier#shift-history"
+          className="flex flex-wrap items-end gap-2 border-b border-line px-5 pb-3"
+        >
+          <div>
+            <label htmlFor="history-by" className={label}>
+              {tr("Date")}
+            </label>
+            <select id="history-by" name="history_by" defaultValue={filter.by} className={field}>
+              <option value="business">{tr("Business date")}</option>
+              <option value="closed">{tr("Closed")}</option>
+            </select>
+          </div>
+          <div>
+            <label htmlFor="history-from" className={label}>
+              {tr("From")}
+            </label>
+            <input
+              id="history-from"
+              type="date"
+              name="history_from"
+              defaultValue={filter.from ?? ""}
+              className={field}
+            />
+          </div>
+          <div>
+            <label htmlFor="history-to" className={label}>
+              {tr("To")}
+            </label>
+            <input
+              id="history-to"
+              type="date"
+              name="history_to"
+              defaultValue={filter.to ?? ""}
+              className={field}
+            />
+          </div>
+          <button className="rounded-md bg-chrome-800 px-5 py-2 text-[13px] font-medium text-white hover:bg-chrome-900">
+            {tr("Filter")}
+          </button>
+          {filtered && (
+            <Link
+              href="/cashier#shift-history"
+              scroll={false}
+              className="rounded-md border border-line px-3 py-2 text-[13px] text-ink-muted hover:bg-shell hover:text-ink"
+            >
+              {tr("Clear")}
+            </Link>
+          )}
+          {filtered && (
+            <p className="ml-auto self-center text-xs text-ink-faint">
+              {tr.plural(total, "{n} shift", "{n} shifts")}
+            </p>
+          )}
+        </form>
         {rows.length === 0 ? (
           <p className="px-4 py-6 text-center text-[13px] text-ink-muted">
-            {tr("No closed shifts yet.")}
+            {filtered ? tr("No shifts closed in these dates.") : tr("No closed shifts yet.")}
           </p>
         ) : (
           <div className="overflow-x-auto">
@@ -112,7 +182,7 @@ export async function ShiftHistory({
                       </td>
                       <td className="px-4 py-2.5 text-right">
                         <Link
-                          href={pageHref(page, open ? undefined : r.id)}
+                          href={pageHref(filter, page, open ? undefined : r.id)}
                           scroll={false}
                           className="rounded-md border border-line px-2.5 py-1 text-xxs font-medium text-ink-muted hover:bg-white hover:text-ink"
                         >
@@ -147,7 +217,7 @@ export async function ShiftHistory({
           <div className="flex gap-2">
             {page > 1 && (
               <Link
-                href={pageHref(page - 1)}
+                href={pageHref(filter, page - 1)}
                 scroll={false}
                 className="rounded-md border border-line px-3 py-1.5 text-ink-muted hover:bg-shell hover:text-ink"
               >
@@ -156,7 +226,7 @@ export async function ShiftHistory({
             )}
             {page < lastPage && (
               <Link
-                href={pageHref(page + 1)}
+                href={pageHref(filter, page + 1)}
                 scroll={false}
                 className="rounded-md border border-line px-3 py-1.5 text-ink-muted hover:bg-shell hover:text-ink"
               >

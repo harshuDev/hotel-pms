@@ -6,7 +6,7 @@ channel-connected bookings, and a cashier shift/drawer feature.
 ## Where this project currently stands
 
 The front end is **built and deployed**, and every read and write in it goes to
-Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0159` (0138 as 0138a-f, 0142 as 0142a-b, 0149 as 0149a-b, 0150 as 0150 + 0150a, 0151 as 0151a-c, 0145 as
+Supabase. `src/lib/mock/` is deleted. Migrations `0001` through `0160` (0138 as 0138a-f, 0142 as 0142a-b, 0149 as 0149a-b, 0150 as 0150 + 0150a, 0151 as 0151a-c, 0145 as
 `0143_channex_send_rooms` + 0145b) are
 applied to the hosted database.
 
@@ -4127,6 +4127,18 @@ client: "Need to add Booking Channel in the Dashboard".
   - **security definer**, so a cashier's name still shows after their login
     moved to another hotel (0134-0135, 0140). The property is still
     `current_property_id()`. Closed shifts stay immutable; this only reads.
+  - **IT FILTERS BY DATE (0160)**, the client's "find out on what date he
+    closed the previous shifts": Date (Business date or Closed), From, To and
+    Filter above the table, Clear once a range is set, and the number of
+    shifts it found. `cashier_shift_history_between(from, to, by, ...)` --
+    a new name for the overload reason; `cashier_shift_history()` is read by
+    nothing now. Either end optional, both inclusive. **The two dates are
+    not the same**: 18 of the 28 closed shifts on the hosted database closed
+    on a later day than their business date, so "Closed" reads the close
+    stamp on the HOTEL's clock (`properties.timezone`). `?history_from=`,
+    `?history_to=` and `?history_by=closed` are URL state that paging and
+    View carry; a bad date is dropped and a backwards range swapped, as a
+    report's.
 - Property scale: assume up to ~1,800 rooms per property. Any UI that renders
   one element per room, or any query that returns every room, is a bug.
 - **Meeting rooms are a separate booking module, confirmed with the client.**

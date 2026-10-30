@@ -3617,5 +3617,14 @@
   "few": "{n} cenovni načrti pred njim so bili spremenjeni.",
   "other": "{n} cenovnih načrtov pred njim je bilo spremenjenih."
  },
- "Tick at least one number of guests on every rate plan you send to Channex": "Pri vsakem cenovnem načrtu, ki ga pošljete v Channex, označite vsaj eno število gostov"
+ "Tick at least one number of guests on every rate plan you send to Channex": "Pri vsakem cenovnem načrtu, ki ga pošljete v Channex, označite vsaj eno število gostov",
+ "{n} shifts": {
+  "one": "{n} izmena",
+  "two": "{n} izmeni",
+  "few": "{n} izmene",
+  "other": "{n} izmen"
+ },
+ "Filter": "Filtriraj",
+ "Filter the shift history by business date or by the date it closed": "Zgodovino izmen filtrirajte po poslovnem datumu ali po datumu zaprtja",
+ "No shifts closed in these dates.": "V tem obdobju ni bila zaprta nobena izmena."
 }

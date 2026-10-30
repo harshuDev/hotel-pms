@@ -486,6 +486,10 @@
   "kind": "plural",
   "one": "{n} row"
  },
+ "{n} shifts": {
+  "kind": "plural",
+  "one": "{n} shift"
+ },
  "{n} stays": {
   "kind": "plural",
   "one": "{n} stay"
@@ -4068,11 +4072,17 @@
   "kind": "country",
   "code": "FJ"
  },
+ "Filter": {
+  "kind": "text"
+ },
  "Filter by cancellation policy": {
   "kind": "text"
  },
  "Filter by type": {
   "kind": "text"
+ },
+ "Filter the shift history by business date or by the date it closed": {
+  "kind": "db"
  },
  "Filters": {
   "kind": "text"
@@ -5956,6 +5966,9 @@
   "kind": "text"
  },
  "No rooms on this booking yet. Add one.": {
+  "kind": "text"
+ },
+ "No shifts closed in these dates.": {
   "kind": "text"
  },
  "No show": {

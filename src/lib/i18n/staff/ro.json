@@ -3560,5 +3560,13 @@
   "few": "{n} planuri tarifare dinainte au fost modificate.",
   "other": "{n} de planuri tarifare dinainte au fost modificate."
  },
- "Tick at least one number of guests on every rate plan you send to Channex": "Bifați cel puțin un număr de oaspeți la fiecare plan tarifar pe care îl trimiteți către Channex"
+ "Tick at least one number of guests on every rate plan you send to Channex": "Bifați cel puțin un număr de oaspeți la fiecare plan tarifar pe care îl trimiteți către Channex",
+ "{n} shifts": {
+  "one": "{n} tură",
+  "few": "{n} ture",
+  "other": "{n} de ture"
+ },
+ "Filter": "Filtrează",
+ "Filter the shift history by business date or by the date it closed": "Filtrați istoricul turelor după data operațională sau după data închiderii",
+ "No shifts closed in these dates.": "Nicio tură nu a fost închisă în aceste date."
 }

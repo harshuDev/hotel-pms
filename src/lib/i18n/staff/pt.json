@@ -3504,5 +3504,12 @@
   "one": "{n} plano tarifário anterior foi alterado.",
   "other": "{n} planos tarifários anteriores foram alterados."
  },
- "Tick at least one number of guests on every rate plan you send to Channex": "Assinale pelo menos um número de hóspedes em cada plano tarifário que enviar para o Channex"
+ "Tick at least one number of guests on every rate plan you send to Channex": "Assinale pelo menos um número de hóspedes em cada plano tarifário que enviar para o Channex",
+ "{n} shifts": {
+  "one": "{n} turno",
+  "other": "{n} turnos"
+ },
+ "Filter": "Filtrar",
+ "Filter the shift history by business date or by the date it closed": "Filtre o histórico de turnos pela data operacional ou pela data de fecho",
+ "No shifts closed in these dates.": "Nenhum turno foi fechado nestas datas."
 }

@@ -3503,5 +3503,12 @@
   "one": "{n} Ratenplan davor wurde geändert.",
   "other": "{n} Ratenpläne davor wurden geändert."
  },
- "Tick at least one number of guests on every rate plan you send to Channex": "Wählen Sie bei jedem Ratenplan, den Sie an Channex senden, mindestens eine Personenzahl aus"
+ "Tick at least one number of guests on every rate plan you send to Channex": "Wählen Sie bei jedem Ratenplan, den Sie an Channex senden, mindestens eine Personenzahl aus",
+ "{n} shifts": {
+  "one": "{n} Schicht",
+  "other": "{n} Schichten"
+ },
+ "Filter": "Filtern",
+ "Filter the shift history by business date or by the date it closed": "Den Schichtverlauf nach Geschäftstag oder nach dem Abschlussdatum filtern",
+ "No shifts closed in these dates.": "In diesem Zeitraum wurden keine Schichten abgeschlossen."
 }
