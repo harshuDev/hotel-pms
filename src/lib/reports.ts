@@ -10,7 +10,8 @@ export interface DateRange {
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 
-function readDate(value: string | undefined): string | null {
+/** A query-string date, or null when it is missing or not a real day. */
+export function readDate(value: string | undefined): string | null {
   if (!value || !ISO_DATE.test(value)) return null;
   return isValid(parseISO(value)) ? value : null;
 }

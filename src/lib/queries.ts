@@ -787,17 +787,33 @@ export async function getShiftLines(
 export const SHIFT_HISTORY_PER_PAGE = 20;
 
 /**
- * Closed cashier shifts, newest close first, paged in Postgres (0141).
- * Managers and administrators only -- the caller checks getCanSeeDrawerTotal()
- * first, and cashier_shift_history() refuses anybody else regardless.
+ * Which closed shifts the history lists (0160): a range of dates, either end
+ * optional and both inclusive, on the business date or on the day the drawer
+ * was counted, on the hotel's clock.
+ */
+export type ShiftHistoryFilter = {
+  from: string | null;
+  to: string | null;
+  by: "business" | "closed";
+};
+
+/**
+ * Closed cashier shifts, newest close first, paged in Postgres (0141),
+ * narrowed by date (0160). Managers and administrators only -- the caller
+ * checks getCanSeeDrawerTotal() first, and cashier_shift_history_between()
+ * refuses anybody else regardless.
  */
 export async function getShiftHistory(
   page: number,
+  filter: ShiftHistoryFilter,
 ): Promise<{ rows: ShiftHistoryRow[]; total: number }> {
   const supabase = await createClient();
   const tr = await getT();
 
-  const { data, error } = await supabase.rpc("cashier_shift_history", {
+  const { data, error } = await supabase.rpc("cashier_shift_history_between", {
+    p_from: filter.from,
+    p_to: filter.to,
+    p_by: filter.by,
     p_limit: SHIFT_HISTORY_PER_PAGE,
     p_offset: (Math.max(page, 1) - 1) * SHIFT_HISTORY_PER_PAGE,
   });

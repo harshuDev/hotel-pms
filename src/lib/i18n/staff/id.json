@@ -3446,5 +3446,11 @@
  "{n} rate plans before it were changed.": {
   "other": "{n} paket tarif sebelumnya sudah diubah."
  },
- "Tick at least one number of guests on every rate plan you send to Channex": "Centang setidaknya satu jumlah tamu pada setiap paket tarif yang Anda kirim ke Channex"
+ "Tick at least one number of guests on every rate plan you send to Channex": "Centang setidaknya satu jumlah tamu pada setiap paket tarif yang Anda kirim ke Channex",
+ "{n} shifts": {
+  "other": "{n} shift"
+ },
+ "Filter": "Filter",
+ "Filter the shift history by business date or by the date it closed": "Saring riwayat shift menurut tanggal operasional atau tanggal penutupan",
+ "No shifts closed in these dates.": "Tidak ada shift yang ditutup pada tanggal ini."
 }

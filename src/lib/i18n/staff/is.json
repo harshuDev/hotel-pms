@@ -3503,5 +3503,12 @@
   "one": "{n} verðáætlun á undan henni var breytt.",
   "other": "{n} verðáætlunum á undan henni var breytt."
  },
- "Tick at least one number of guests on every rate plan you send to Channex": "Hakaðu við að minnsta kosti einn gestafjölda á hverri verðáætlun sem þú sendir til Channex"
+ "Tick at least one number of guests on every rate plan you send to Channex": "Hakaðu við að minnsta kosti einn gestafjölda á hverri verðáætlun sem þú sendir til Channex",
+ "{n} shifts": {
+  "one": "{n} vakt",
+  "other": "{n} vaktir"
+ },
+ "Filter": "Sía",
+ "Filter the shift history by business date or by the date it closed": "Síaðu vaktasöguna eftir rekstrardegi eða lokadegi",
+ "No shifts closed in these dates.": "Engum vöktum var lokað á þessum dögum."
 }

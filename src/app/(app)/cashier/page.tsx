@@ -12,7 +12,9 @@ import {
   getShiftLines,
   getSuggestedOpeningFloat,
   SHIFT_HISTORY_PER_PAGE,
+  type ShiftHistoryFilter,
 } from "@/lib/queries";
+import { readDate } from "@/lib/reports";
 import { pageTitle } from "@/lib/i18n/server";
 import { msg } from "@/lib/i18n/translate";
 
@@ -23,7 +25,13 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 export default async function CashierPage({
   searchParams,
 }: {
-  searchParams: Promise<{ history_page?: string; shift?: string }>;
+  searchParams: Promise<{
+    history_page?: string;
+    shift?: string;
+    history_from?: string;
+    history_to?: string;
+    history_by?: string;
+  }>;
 }) {
   const sp = await searchParams;
   const [shift, methods, payable, businessDate, suggestedFloat, canSeeExpected] =
@@ -42,8 +50,17 @@ export default async function CashierPage({
   if (canSeeExpected) {
     const page =
       sp.history_page && /^\d+$/.test(sp.history_page) ? Math.max(Number(sp.history_page), 1) : 1;
+    // The date filter (0160). A malformed date is dropped rather than sent to
+    // Postgres, and a backwards range is swapped, as a report's is.
+    const from = readDate(sp.history_from);
+    const to = readDate(sp.history_to);
+    const filter: ShiftHistoryFilter = {
+      from: from && to && from > to ? to : from,
+      to: from && to && from > to ? from : to,
+      by: sp.history_by === "closed" ? "closed" : "business",
+    };
     const [{ rows, total }, property, currency] = await Promise.all([
-      getShiftHistory(page),
+      getShiftHistory(page, filter),
       getProperty(),
       getPropertyCurrency(),
     ]);
@@ -56,6 +73,7 @@ export default async function CashierPage({
         rows={rows}
         total={total}
         page={page}
+        filter={filter}
         perPage={SHIFT_HISTORY_PER_PAGE}
         openShiftId={openShiftId}
         detail={detail}
